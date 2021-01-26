@@ -16,4 +16,5 @@ import java.util.List;
 public class UserVO {
     private Long id;
     private String email;
+
 }
