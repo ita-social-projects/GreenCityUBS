@@ -23,10 +23,4 @@ public class Bag {
 
     @Column(nullable = false)
     private Integer price;
-
-    public Bag(String name, Integer capacity, Integer price) {
-        this.name = name;
-        this.capacity = capacity;
-        this.price = price;
-    }
 }

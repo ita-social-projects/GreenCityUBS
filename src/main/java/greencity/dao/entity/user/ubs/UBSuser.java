@@ -42,21 +42,4 @@ public class UBSuser {
 
     @Column(nullable = false, length = 50)
     private String email;
-
-
-
-
-
-
-    @Override
-    public String toString() {
-        return "UBSuser{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", userAddress=" + userAddress +
-                '}';
-    }
 }
