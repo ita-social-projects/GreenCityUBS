@@ -77,7 +77,7 @@ public class UBSServiceImpl implements UBSService {
      */
     @Override
     @Transactional
-    public void processOrder(OrderResponseDto dto, Long userId) {
+    public void saveFullOrderToDB(OrderResponseDto dto, Long userId) {
         User currentUser = userRepository.findById(userId).get();
 
         Long ubsUserId = dto.getPersonalData().getId();

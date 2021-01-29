@@ -15,6 +15,7 @@ import lombok.*;
 @Setter
 @Builder
 @Table(name = "orders")
+@EqualsAndHashCode
 @ToString(exclude = {"id", "user", "ubs_user"})
 public class Order {
     @Id
