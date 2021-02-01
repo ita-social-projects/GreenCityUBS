@@ -41,7 +41,6 @@ class UBSServiceImplTest {
     @InjectMocks
     UBSServiceImpl ubsService;
 
-
     @Test
     void getFirstPageData() {
         Long userId = 13L;
@@ -61,7 +60,8 @@ class UBSServiceImplTest {
     void getSecondPageData() {
         PersonalDataDto expected = ModelUtils.getOrderResponceDto().getPersonalData();
 
-        when(ubsUserRepository.getAllByUserId(anyLong())).thenReturn(Collections.singletonList(ModelUtils.getUBSuser()));
+        when(ubsUserRepository.getAllByUserId(anyLong()))
+            .thenReturn(Collections.singletonList(ModelUtils.getUBSuser()));
         when(modelMapper.map(ModelUtils.getUBSuser(), PersonalDataDto.class)).thenReturn(expected);
 
         assertEquals(expected, ubsService.getSecondPageData(13L).get(0));
