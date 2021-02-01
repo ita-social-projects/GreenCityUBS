@@ -39,5 +39,5 @@ public interface UBSService {
      * @param dto    {@link OrderResponseDto} user entered data;
      * @param userId current {@link User}'s id;
      */
-    void processOrder(OrderResponseDto dto, Long userId);
+    void saveFullOrderToDB(OrderResponseDto dto, Long userId);
 }

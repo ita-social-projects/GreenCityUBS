@@ -96,20 +96,20 @@ public class OrderController {
      *
      * @param userId {@link UserVO} id.
      * @param dto    {@link OrderResponseDto} order data.
-     * @return {@link String}.
+     * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
      */
     @ApiOperation(value = "Process user order")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UserPointsAndAllBagsDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<Object> processOrder(
+    public ResponseEntity<HttpStatus> processOrder(
         @ApiIgnore @CurrentUserId Long userId,
         @Valid @RequestBody OrderResponseDto dto) {
-        ubsService.processOrder(dto, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("CREATED");
+        ubsService.saveFullOrderToDB(dto, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
