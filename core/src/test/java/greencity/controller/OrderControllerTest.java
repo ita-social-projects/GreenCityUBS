@@ -27,8 +27,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-
-
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class OrderControllerTest {
@@ -51,17 +49,16 @@ class OrderControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(orderController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient)).build();
+                new UserArgumentResolver(restClient))
+            .build();
     }
-
 
     @Test
     void getCurrentUserPoints() throws Exception {
         when(restClient.findIdByEmail(anyString())).thenReturn(13L);
 
         mockMvc.perform(get(ubsLink + "/first")
-            .principal(principal)
-        )
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(restClient).findIdByEmail("test@gmail.com");
@@ -81,8 +78,7 @@ class OrderControllerTest {
         when(restClient.findIdByEmail(anyString())).thenReturn(13L);
 
         mockMvc.perform(get(ubsLink + "/second")
-            .principal(principal)
-        )
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(restClient).findIdByEmail("test@gmail.com");
@@ -98,9 +94,9 @@ class OrderControllerTest {
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/processOrder")
-        .content(orderResponceDtoJSON)
-        .principal(principal)
-        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
         verify(ubsService).saveFullOrderToDB(anyObject(), eq(13L));
         verify(restClient).findIdByEmail("test@gmail.com");

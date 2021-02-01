@@ -44,7 +44,7 @@ class RestClientTest {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         when(httpServletRequest.getHeader(AUTHORIZATION)).thenReturn(accessToken);
         when(restTemplate.exchange(greenCityUserServerAddress +
-                "/user/findIdByEmail" + "?email=" + "taras@gmail.com", HttpMethod.GET,
+            "/user/findIdByEmail" + "?email=" + "taras@gmail.com", HttpMethod.GET,
             entity, Long.class)).thenReturn(ResponseEntity.ok(13L));
 
         assertEquals(13L, restClient.findIdByEmail("taras@gmail.com"));
@@ -85,6 +85,5 @@ class RestClientTest {
             + "/updateUserLastActivityTime/"
             + strDate, HttpMethod.PUT, entity, Object.class);
     }
-
 
 }

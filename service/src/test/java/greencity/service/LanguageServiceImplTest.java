@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-
 @ExtendWith(MockitoExtension.class)
 class LanguageServiceImplTest {
     @Mock
@@ -35,7 +34,6 @@ class LanguageServiceImplTest {
     private LanguageServiceImpl languageService;
 
     private Language language = ModelUtils.getLanguage();
-
 
     @Test
     void extractExistingLanguageCodeFromRequest() {
@@ -72,6 +70,5 @@ class LanguageServiceImplTest {
             .assertThrows(LanguageNotFoundException.class,
                 () -> languageService.findByCode("ua"));
     }
-
 
 }
