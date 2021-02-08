@@ -15,7 +15,7 @@ public class Certificate {
     @Id
     private String code;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private CertificateStatus certificateStatus;
 

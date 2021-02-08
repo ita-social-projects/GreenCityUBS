@@ -46,7 +46,7 @@ class UBSServiceImplTest {
         Long userId = 13L;
         User user = new User();
         user.setCurrentPoints(254);
-        List<Bag> bags = Collections.singletonList(new Bag(1, "name", 100, 250));
+        List<Bag> bags = Collections.singletonList(new Bag(120, 1, "name", 250));
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(bagRepository.findAll()).thenReturn(bags);

@@ -9,12 +9,13 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"order"})
+@EqualsAndHashCode(exclude = {"orders"})
 @Getter
 @Setter
 @Builder
 @Table(name = "ubs_user")
 @Entity
+@ToString(exclude = {"orders"})
 public class UBSuser {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")

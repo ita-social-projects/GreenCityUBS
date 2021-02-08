@@ -37,7 +37,7 @@ public class OrderController {
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Get current user points and all list of bags")
+    @ApiOperation(value = "Get current user points and all bags list.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -57,7 +57,7 @@ public class OrderController {
      * @return {@link CertificateDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Check if certificate is active")
+    @ApiOperation(value = "Check if certificate is available.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CertificateDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -78,9 +78,9 @@ public class OrderController {
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Get user's order data")
+    @ApiOperation(value = "Get user's order data.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = List.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PersonalDataDto[].class),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
@@ -99,7 +99,7 @@ public class OrderController {
      * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Process user order")
+    @ApiOperation(value = "Process user order.")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -111,5 +111,24 @@ public class OrderController {
         @Valid @RequestBody OrderResponseDto dto) {
         ubsService.saveFullOrderToDB(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Method groups undelivered orders.
+     *
+     * @param radius {@link Double} preferred searching radius.
+     * @return list of {@link CoordinatesDto}.
+     * @author Oleh Bilonizhka
+     */
+    @ApiOperation(value = "Group undelivered orders.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CoordinatesDto[][].class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/grouped-coords/{radius}")
+    public ResponseEntity<List<List<CoordinatesDto>>> processOrder(@PathVariable Double radius) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsService.clusterization(radius));
     }
 }
