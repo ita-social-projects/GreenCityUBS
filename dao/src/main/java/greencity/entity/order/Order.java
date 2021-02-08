@@ -1,5 +1,7 @@
 package greencity.entity.order;
 
+import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderStatus;
 import java.time.LocalDateTime;
 import java.util.Map;
 import javax.persistence.*;
@@ -52,4 +54,8 @@ public class Order {
     @JoinColumn(name = "certificate_code")
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Certificate certificate;
+
+    @Column(nullable = false, name = "order_status")
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
 }
