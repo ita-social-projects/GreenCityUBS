@@ -29,10 +29,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link CertificateNotFoundException}.
      *
-     * @param ex    Exception which should be intercepted.
+     * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message
-     *      of exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
      */
     @ExceptionHandler(CertificateNotFoundException.class)
     public final ResponseEntity<Object> handleCertificateNotFound(CertificateNotFoundException ex, WebRequest request) {
@@ -44,10 +44,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link InvalidDistanceException}.
      *
-     * @param ex    Exception which should be intercepted.
+     * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message
-     *      of exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
      */
     @ExceptionHandler(InvalidDistanceException.class)
     public final ResponseEntity<Object> handleInvalidDistance(InvalidDistanceException ex, WebRequest request) {
@@ -59,14 +59,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link ActiveOrdersNotFoundException}.
      *
-     * @param ex    Exception which should be intercepted.
+     * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message
-     *      of exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
      */
     @ExceptionHandler(ActiveOrdersNotFoundException.class)
     public final ResponseEntity<Object> handleNoUndeliveredOrders(ActiveOrdersNotFoundException ex,
-                                                                  WebRequest request) {
+        WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
@@ -83,8 +83,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-                                                                  HttpHeaders headers, HttpStatus status,
-                                                                  WebRequest request) {
+        HttpHeaders headers, HttpStatus status,
+        WebRequest request) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
@@ -92,8 +92,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers, HttpStatus status,
-                                                                  WebRequest request) {
+        HttpHeaders headers, HttpStatus status,
+        WebRequest request) {
         List<ValidationExceptionDto> collect =
             ex.getBindingResult().getFieldErrors().stream()
                 .map(ValidationExceptionDto::new)

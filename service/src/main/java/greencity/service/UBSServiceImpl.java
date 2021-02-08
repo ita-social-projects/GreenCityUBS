@@ -147,12 +147,10 @@ public class UBSServiceImpl implements UBSService {
                 centerCoord = getNewCentralCoordinate(closeRelatives);
             }
 
-            allClusters.add(closeRelatives.stream().map(c ->
-                    CoordinatesDto.builder()
-                        .latitude(c.getLatitude())
-                        .longitude(c.getLongitude())
-                        .build()
-                ).collect(Collectors.toList()));
+            allClusters.add(closeRelatives.stream().map(c -> CoordinatesDto.builder()
+                .latitude(c.getLatitude())
+                .longitude(c.getLongitude())
+                .build()).collect(Collectors.toList()));
             for (Coordinates checked : closeRelatives) {
                 allCoords.remove(checked);
             }
@@ -164,14 +162,16 @@ public class UBSServiceImpl implements UBSService {
     /**
      * Method defines and returns all coordinates in certain radius.
      *
-     * @param distance - preferred distance for clusterization.
-     * @param allCoords - list of {@link Coordinates} which shows all unclustered coordinates.
+     * @param distance       - preferred distance for clusterization.
+     * @param allCoords      - list of {@link Coordinates} which shows all
+     *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in distant
+     *         relatives.
      * @author Oleh Bilonizhka
      */
     private List<Coordinates> getCoordinateCloseRelatives(double distance,
-                                                          List<Coordinates> allCoords, Coordinates currentlyCoord) {
+        List<Coordinates> allCoords, Coordinates currentlyCoord) {
         List<Coordinates> coordinateWithCloseRelativesList = new ArrayList<>();
 
         for (int i = 0; i < allCoords.size(); i++) {
