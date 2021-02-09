@@ -122,13 +122,13 @@ public class OrderController {
      */
     @ApiOperation(value = "Group undelivered orders.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CoordinatesDto[][].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedCoordinatesDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/grouped-coords/{radius}")
-    public ResponseEntity<List<List<CoordinatesDto>>> processOrder(@PathVariable Double radius) {
+    public ResponseEntity<List<GroupedCoordinatesDto>> processOrder(@PathVariable Double radius) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsService.clusterization(radius));
     }
 }

@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.dto.CertificateDto;
 import greencity.dto.CoordinatesDto;
+import greencity.dto.GroupedCoordinatesDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
 import greencity.dto.UserPointsAndAllBagsDto;
@@ -124,7 +125,7 @@ public class UBSServiceImpl implements UBSService {
     /**
      * {@inheritDoc}
      */
-    public List<List<CoordinatesDto>> clusterization(double distance) {
+    public List<GroupedCoordinatesDto> clusterization(double distance) {
         if (distance <= 0 || distance > 20) {
             throw new InvalidDistanceException("The distance should be > 0 and <= 20");
         }
@@ -132,10 +133,11 @@ public class UBSServiceImpl implements UBSService {
         if (allCoords.isEmpty()) {
             throw new ActiveOrdersNotFoundException("There are no any undelivered orders found.");
         }
-        List<List<CoordinatesDto>> allClusters = new ArrayList<>();
         Random rand = new Random();
+        List<GroupedCoordinatesDto> allClusters = new ArrayList<>();
 
         while (allCoords.size() > 0) {
+            GroupedCoordinatesDto cluster = new GroupedCoordinatesDto();
             Coordinates currentlyCoord = allCoords.get(rand.nextInt(allCoords.size()));
             List<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
                 allCoords, currentlyCoord);
@@ -147,10 +149,18 @@ public class UBSServiceImpl implements UBSService {
                 centerCoord = getNewCentralCoordinate(closeRelatives);
             }
 
-            allClusters.add(closeRelatives.stream().map(c -> CoordinatesDto.builder()
+            int amountOfLitresInCluster = 0;
+            cluster.setGroupOfCoordinates(closeRelatives.stream().map(c -> CoordinatesDto.builder()
                 .latitude(c.getLatitude())
                 .longitude(c.getLongitude())
                 .build()).collect(Collectors.toList()));
+            for (CoordinatesDto temp : cluster.getGroupOfCoordinates().stream().collect(Collectors.toSet())) {
+                amountOfLitresInCluster += addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
+            }
+            cluster.setAmountOfLitres(amountOfLitresInCluster);
+
+            allClusters.add(cluster);
+
             for (Coordinates checked : closeRelatives) {
                 allCoords.remove(checked);
             }

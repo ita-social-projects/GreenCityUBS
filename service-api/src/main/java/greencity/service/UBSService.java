@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.dto.CertificateDto;
 import greencity.dto.CoordinatesDto;
+import greencity.dto.GroupedCoordinatesDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
 import greencity.dto.UserPointsAndAllBagsDto;
@@ -10,13 +11,13 @@ import java.util.List;
 
 public interface UBSService {
     /**
-     * Method to group coordinates into clusters.
+     * Method to group coordinates into clusters including summary litres.
      *
      * @param distance - preferred distance for clusterization.
      * @return List of {@link CoordinatesDto} lists.
      * @author Oleh Bilonizhka
      */
-    List<List<CoordinatesDto>> clusterization(double distance);
+    List<GroupedCoordinatesDto> clusterization(double distance);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
