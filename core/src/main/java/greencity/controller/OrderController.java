@@ -130,7 +130,7 @@ public class OrderController {
     })
     @GetMapping("/grouped-coords")
     public ResponseEntity<Set<GroupedCoordinatesDto>> processOrder(@RequestParam Double radius,
-                                          @RequestParam(required = false, defaultValue = "3000") Integer litres) {
+        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsService.clusterization(radius, litres));
     }
 }

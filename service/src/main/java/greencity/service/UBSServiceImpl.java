@@ -39,7 +39,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.TreeMultimap;
 
-
 /**
  * Implementation of {@link UBSService}.
  */
@@ -153,7 +152,6 @@ public class UBSServiceImpl implements UBSService {
                 allCoords, currentlyCoord);
             Coordinates centerCoord = getNewCentralCoordinate(closeRelatives);
 
-
             while (!centerCoord.equals(currentlyCoord)) {
                 currentlyCoord = centerCoord;
                 closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
@@ -165,19 +163,18 @@ public class UBSServiceImpl implements UBSService {
             Coordinates finalCenterCoord = centerCoord;
             TreeMultimap<Integer, Coordinates> sortedByLitres = TreeMultimap.create(
                 Integer::compareTo, (o1, o2) -> {
-                    Double o1Int =  distanceBetweenEarthCoordinates(o1.getLatitude(), o1.getLongitude(),
+                    Double o1Int = distanceBetweenEarthCoordinates(o1.getLatitude(), o1.getLongitude(),
                         finalCenterCoord.getLatitude(), finalCenterCoord.getLongitude()) * 1000;
 
-                    Double o2Int =  distanceBetweenEarthCoordinates(o2.getLatitude(), o2.getLongitude(),
+                    Double o2Int = distanceBetweenEarthCoordinates(o2.getLatitude(), o2.getLongitude(),
                         finalCenterCoord.getLatitude(), finalCenterCoord.getLongitude()) * 1000;
 
                     return o2Int.compareTo(o1Int);
-                }
-            );
+                });
 
             for (Coordinates current : closeRelatives) {
-                int currentCoordinatesCapacity
-                    = addressRepository.capacity(current.getLatitude(), current.getLongitude());
+                int currentCoordinatesCapacity =
+                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
                 sortedByLitres.put(currentCoordinatesCapacity, current);
                 amountOfLitresInCluster += currentCoordinatesCapacity;
             }
@@ -203,7 +200,6 @@ public class UBSServiceImpl implements UBSService {
             }
         }
 
-
         return allClusters;
     }
 
@@ -214,11 +210,12 @@ public class UBSServiceImpl implements UBSService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in distant
+     *         relatives.
      * @author Oleh Bilonizhka
      */
     private List<Coordinates> getCoordinateCloseRelatives(double distance,
-                                                          Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         List<Coordinates> coordinateWithCloseRelativesList = new ArrayList<>();
 
         for (Coordinates checked : allCoords) {

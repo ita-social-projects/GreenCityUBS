@@ -15,7 +15,7 @@ import lombok.ToString;
 @Builder
 @EqualsAndHashCode
 @ToString
-public class CoordinatesDto  {
+public class CoordinatesDto {
     private double latitude;
     private double longitude;
 }
