@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -13,7 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class CoordinatesDto {
+@ToString
+public class CoordinatesDto  {
     private double latitude;
     private double longitude;
 }

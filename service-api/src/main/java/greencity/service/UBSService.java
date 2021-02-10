@@ -8,6 +8,7 @@ import greencity.dto.PersonalDataDto;
 import greencity.dto.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import java.util.List;
+import java.util.Set;
 
 public interface UBSService {
     /**
@@ -17,7 +18,7 @@ public interface UBSService {
      * @return List of {@link CoordinatesDto} lists.
      * @author Oleh Bilonizhka
      */
-    List<GroupedCoordinatesDto> clusterization(double distance);
+    Set<GroupedCoordinatesDto> clusterization(double distance, int litres);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
