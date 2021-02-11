@@ -113,24 +113,4 @@ public class OrderController {
         ubsService.saveFullOrderToDB(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
-    /**
-     * Method groups undelivered orders.
-     *
-     * @param radius {@link Double} preferred searching radius.
-     * @return list of {@link CoordinatesDto}.
-     * @author Oleh Bilonizhka
-     */
-    @ApiOperation(value = "Group undelivered orders.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedCoordinatesDto[].class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/grouped-coords")
-    public ResponseEntity<Set<GroupedCoordinatesDto>> processOrder(@RequestParam Double radius,
-        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsService.clusterization(radius, litres));
-    }
 }

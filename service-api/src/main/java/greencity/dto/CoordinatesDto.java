@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -16,6 +17,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public class CoordinatesDto {
+    @NotBlank
     private double latitude;
+    @NotBlank
     private double longitude;
 }

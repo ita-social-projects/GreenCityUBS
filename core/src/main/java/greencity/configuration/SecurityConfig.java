@@ -75,12 +75,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .authorizeRequests()
             .antMatchers(HttpMethod.GET,
+                UBS_LINK + "/management/**")
+            .hasAnyRole("ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/**")
-            .hasAnyRole("USER", "ADMIN", "MODERATOR")
-            .anyRequest().hasAnyRole("ADMIN");
+            .hasAnyRole("USER", "ADMIN", "MODERATOR");
     }
 
     /**
