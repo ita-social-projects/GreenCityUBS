@@ -7,6 +7,7 @@ import greencity.service.UBSService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class OrderController {
     }
 
     /**
-     * Method returns all available bags and bonus points of current
+     * Method returns all available bags and bonus points of current user.
      * {@link greencity.dto.UserVO}.
      *
      * @param userId {@link UserVO} id.
@@ -92,7 +93,7 @@ public class OrderController {
     }
 
     /**
-     * Methods saves all entered by user data to database.
+     * Method saves all entered by user data to database.
      *
      * @param userId {@link UserVO} id.
      * @param dto    {@link OrderResponseDto} order data.
@@ -111,24 +112,5 @@ public class OrderController {
         @Valid @RequestBody OrderResponseDto dto) {
         ubsService.saveFullOrderToDB(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    /**
-     * Method groups undelivered orders.
-     *
-     * @param radius {@link Double} preferred searching radius.
-     * @return list of {@link CoordinatesDto}.
-     * @author Oleh Bilonizhka
-     */
-    @ApiOperation(value = "Group undelivered orders.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CoordinatesDto[][].class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/grouped-coords/{radius}")
-    public ResponseEntity<List<List<CoordinatesDto>>> processOrder(@PathVariable Double radius) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsService.clusterization(radius));
     }
 }

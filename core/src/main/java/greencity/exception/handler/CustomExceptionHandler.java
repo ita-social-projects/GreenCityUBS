@@ -2,7 +2,7 @@ package greencity.exception.handler;
 
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.InvalidDistanceException;
+import greencity.exceptions.IncorrectValueException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +42,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception {@link InvalidDistanceException}.
+     * Method interceptor exception {@link IncorrectValueException}.
      *
      * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler(InvalidDistanceException.class)
-    public final ResponseEntity<Object> handleInvalidDistance(InvalidDistanceException ex, WebRequest request) {
+    @ExceptionHandler(IncorrectValueException.class)
+    public final ResponseEntity<Object> handleInvalidDistance(IncorrectValueException ex, WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);

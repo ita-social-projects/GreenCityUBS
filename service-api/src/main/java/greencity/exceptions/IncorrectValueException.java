@@ -6,11 +6,11 @@ package greencity.exceptions;
  *
  * @author Oleh Bilonizhka
  */
-public class InvalidDistanceException extends RuntimeException {
+public class IncorrectValueException extends RuntimeException {
     /**
      * Constructor.
      */
-    public InvalidDistanceException(String message) {
+    public IncorrectValueException(String message) {
         super(message);
     }
 }
