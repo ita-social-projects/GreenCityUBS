@@ -279,11 +279,11 @@ public class UBSServiceImpl implements UBSService {
      * @param litres   - preferred search radius.
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
-        if (distance <= 0 || distance >= 20) {
+        if (distance < 0 || distance >= 20) {
             throw new IncorrectValueException("The distance should be between 0 and 20 km.");
         }
-        if (litres < 3000 || litres > 10000) {
-            throw new IncorrectValueException("The amount of litres should be between 3.000 and 10.000 litres.");
+        if (litres < 0 || litres > 10000) {
+            throw new IncorrectValueException("The amount of litres should be between 0 and 10.000 litres.");
         }
     }
 
