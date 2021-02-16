@@ -7,7 +7,7 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.OrderResponseDto;
-import greencity.service.UBSService;
+import greencity.service.ubs.UBSClientService;
 import java.security.Principal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    UBSService ubsService;
+    UBSClientService ubsClientService;
 
     @Mock
     RestClient restClient;
@@ -62,7 +62,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findIdByEmail("test@gmail.com");
-        verify(ubsService).getFirstPageData(eq(13L));
+        verify(ubsClientService).getFirstPageData(eq(13L));
     }
 
     @Test
@@ -70,7 +70,7 @@ class OrderControllerTest {
         mockMvc.perform(get(ubsLink + "/first/certificate/{code}", "qwefds"))
             .andExpect(status().isOk());
 
-        verify(ubsService).checkCertificate(eq("qwefds"));
+        verify(ubsClientService).checkCertificate(eq("qwefds"));
     }
 
     @Test
@@ -82,7 +82,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findIdByEmail("test@gmail.com");
-        verify(ubsService).getSecondPageData(eq(13L));
+        verify(ubsClientService).getSecondPageData(eq(13L));
     }
 
     @Test
@@ -98,7 +98,7 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-        verify(ubsService).saveFullOrderToDB(anyObject(), eq(13L));
+        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq(13L));
         verify(restClient).findIdByEmail("test@gmail.com");
 
     }

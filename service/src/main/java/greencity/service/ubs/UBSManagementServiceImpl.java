@@ -1,29 +1,12 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import com.google.common.collect.TreeMultimap;
-import greencity.dto.CertificateDto;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedCoordinatesDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PersonalDataDto;
-import greencity.dto.UserPointsAndAllBagsDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.user.User;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,108 +14,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-/**
- * Implementation of {@link UBSService}.
- */
 @Service
 @AllArgsConstructor
-public class UBSServiceImpl implements UBSService {
-    private final UserRepository userRepository;
-    private final BagRepository bagRepository;
-    private final UBSuserRepository ubsUserRepository;
-    private final ModelMapper modelMapper;
-    private final CertificateRepository certificateRepository;
+public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public UserPointsAndAllBagsDto getFirstPageData(Long userId) {
-        return new UserPointsAndAllBagsDto((List<Bag>) bagRepository.findAll(),
-            userRepository.findById(userId).get().getCurrentPoints());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public List<PersonalDataDto> getSecondPageData(Long userId) {
-        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-        if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().email(userRepository.findById(userId).get().getEmail()).build());
-        }
-
-        return allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public CertificateDto checkCertificate(String code) {
-        Certificate certificate = certificateRepository.findById(code).orElse(null);
-
-        if (certificate == null) {
-            throw new CertificateNotFoundException("There is no such а certificate.");
-        } else {
-            return new CertificateDto(certificate.getCertificateStatus().toString());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void saveFullOrderToDB(OrderResponseDto dto, Long userId) {
-        User currentUser = userRepository.findById(userId).get();
-
-        UBSuser ubsUser = modelMapper.map(dto.getPersonalData(), UBSuser.class);
-        ubsUser.setUser(currentUser);
-
-        if (ubsUser.getId() == null || !ubsUser.equals(ubsUserRepository.findById(ubsUser.getId()).get())) {
-            ubsUser.setId(null);
-            ubsUserRepository.save(ubsUser);
-            currentUser.getUbsUsers().add(ubsUser);
-        } else {
-            ubsUser = ubsUserRepository.findById(ubsUser.getId()).get();
-        }
-
-        Order order = modelMapper.map(dto, Order.class);
-        order.setOrderStatus(OrderStatus.NEW);
-        order.setUbsUser(ubsUser);
-        order.setUser(currentUser);
-
-        currentUser.getOrders().add(order);
-        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
-        currentUser.getChangeOfPoints().put(LocalDateTime.now(), -dto.getPointsToUse());
-
-        Certificate certificate = order.getCertificate();
-        if (certificate != null) {
-            certificate.setCertificateStatus(CertificateStatus.USED);
-        }
-
-        userRepository.save(currentUser);
-    }
+    private final ModelMapper modelMapper;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Set<GroupedCoordinatesDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                           int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
         Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
-        Set<Coordinates> temporarySpecified = specified.stream().map(c -> Coordinates.builder()
-            .latitude(c.getLatitude())
-            .longitude(c.getLongitude()).build()).collect(Collectors.toSet());
+        Set<Coordinates> temporarySpecified = specified.stream()
+            .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
         for (Coordinates temp : temporarySpecified) {
             if (!allCoords.contains(temp)) {
                 throw new IncorrectValueException("There are no order with coordinates: " + temp.getLatitude()
@@ -174,10 +75,7 @@ public class UBSServiceImpl implements UBSService {
                 if ((fill + capacity) <= amountOfLitresToFill) {
                     fill += capacity;
                     allCoordsCapacity += capacity;
-                    specified.add(CoordinatesDto.builder()
-                        .latitude(temp.getLatitude())
-                        .longitude(temp.getLongitude())
-                        .build());
+                    specified.add(modelMapper.map(temp, CoordinatesDto.class));
                 }
             } else {
                 break;
@@ -200,7 +98,6 @@ public class UBSServiceImpl implements UBSService {
     public Set<GroupedCoordinatesDto> getClusteredCoords(double distance, int litres) {
         checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
         Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
-
         Set<GroupedCoordinatesDto> allClusters = new HashSet<>();
 
         while (allCoords.size() > 0) {
@@ -234,10 +131,8 @@ public class UBSServiceImpl implements UBSService {
             }
 
             GroupedCoordinatesDto cluster = new GroupedCoordinatesDto();
-            cluster.setGroupOfCoordinates(closeRelatives.stream().map(c -> CoordinatesDto.builder()
-                .latitude(c.getLatitude())
-                .longitude(c.getLongitude())
-                .build()).collect(Collectors.toSet()));
+            cluster.setGroupOfCoordinates(closeRelatives.stream().map(c ->
+                modelMapper.map(c, CoordinatesDto.class)).collect(Collectors.toSet()));
             cluster.setAmountOfLitres(amountOfLitresInCluster);
             allClusters.add(cluster);
 
@@ -262,10 +157,8 @@ public class UBSServiceImpl implements UBSService {
                 addressRepository.capacity(current.getLatitude(), current.getLongitude());
             allOrdersWithLitres.add(GroupedCoordinatesDto.builder()
                 .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfCoordinates(Collections.singleton(CoordinatesDto.builder()
-                    .latitude(current.getLatitude())
-                    .longitude(current.getLongitude())
-                    .build()))
+                .groupOfCoordinates(Collections.singleton(
+                    modelMapper.map(current, CoordinatesDto.class)))
                 .build());
         }
 
@@ -327,12 +220,11 @@ public class UBSServiceImpl implements UBSService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant
-     *         relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in distant relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {

@@ -1,7 +1,7 @@
 package greencity.entity.order;
 
-import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import javax.persistence.*;
@@ -58,4 +58,12 @@ public class Order {
     @Column(nullable = false, name = "order_status")
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
+    private String receivingStation;
+
+    private String note;
+
+    private LocalDateTime deliverFrom;
+
+    private LocalDateTime deliverTo;
 }

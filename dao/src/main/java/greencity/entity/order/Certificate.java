@@ -21,4 +21,6 @@ public class Certificate {
 
     @OneToOne(mappedBy = "certificate")
     private Order order;
+
+    private Integer points;
 }

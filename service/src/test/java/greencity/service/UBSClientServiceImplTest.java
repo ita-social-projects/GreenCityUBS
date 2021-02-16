@@ -14,6 +14,7 @@ import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
+import greencity.service.ubs.UBSClientServiceImpl;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
-class UBSServiceImplTest {
+class UBSClientServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -39,7 +40,7 @@ class UBSServiceImplTest {
     @Mock
     private CertificateRepository certificateRepository;
     @InjectMocks
-    UBSServiceImpl ubsService;
+    UBSClientServiceImpl ubsService;
 
     @Test
     void getFirstPageData() {

@@ -40,4 +40,6 @@ public class User {
     @MapKeyColumn(name = "date")
     @Column(name = "amount")
     private Map<LocalDateTime, Integer> changeOfPoints;
+
+    private Integer violations;
 }
