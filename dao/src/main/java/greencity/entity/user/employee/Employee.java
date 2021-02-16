@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.order.Order;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,4 +41,11 @@ public class Employee {
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
+
+    @ManyToMany
+    @JoinTable(
+        name = "order_employee",
+        joinColumns = {@JoinColumn(name = "employee_id")},
+        inverseJoinColumns = {@JoinColumn(name = "order_id")})
+    private Set<Order> attachedOrders;
 }
