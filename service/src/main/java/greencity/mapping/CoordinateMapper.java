@@ -22,6 +22,6 @@ public class CoordinateMapper extends AbstractConverter<CoordinatesDto, Coordina
         return Coordinates.builder()
             .latitude(coordinatesDto.getLatitude())
             .longitude(coordinatesDto.getLongitude())
-                .build();
+            .build();
     }
 }

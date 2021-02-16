@@ -29,7 +29,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public Set<GroupedCoordinatesDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-                                                                           int litres, double additionalDistance) {
+        int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
         Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
         Set<Coordinates> temporarySpecified = specified.stream()
@@ -131,8 +131,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
 
             GroupedCoordinatesDto cluster = new GroupedCoordinatesDto();
-            cluster.setGroupOfCoordinates(closeRelatives.stream().map(c ->
-                modelMapper.map(c, CoordinatesDto.class)).collect(Collectors.toSet()));
+            cluster.setGroupOfCoordinates(
+                closeRelatives.stream().map(c -> modelMapper.map(c, CoordinatesDto.class)).collect(Collectors.toSet()));
             cluster.setAmountOfLitres(amountOfLitresInCluster);
             allClusters.add(cluster);
 
@@ -220,11 +220,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in distant
+     *         relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {

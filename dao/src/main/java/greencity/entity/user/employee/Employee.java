@@ -37,8 +37,7 @@ public class Employee {
     @ManyToMany
     @JoinTable(
         name = "employee_position",
-        joinColumns = { @JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "position_id")}
-    )
+        joinColumns = {@JoinColumn(name = "employee_id")},
+        inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
 }

@@ -16,7 +16,7 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     Set<GroupedCoordinatesDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-                                                                    int litres, double additionalDistance);
+        int litres, double additionalDistance);
 
     /**
      * Method to group coordinates into clusters including summary litres.

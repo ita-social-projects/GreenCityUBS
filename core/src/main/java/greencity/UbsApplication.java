@@ -14,6 +14,11 @@ public class UbsApplication {
         SpringApplication.run(UbsApplication.class, args);
     }
 
+    /**
+     * Bean to return RestTemplate.
+     *
+     * @return {@link RestTemplate}.
+     */
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
