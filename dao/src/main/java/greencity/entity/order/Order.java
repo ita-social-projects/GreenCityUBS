@@ -1,9 +1,11 @@
 package greencity.entity.order;
 
-import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.user.employee.Employee;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.*;
 
 import greencity.entity.user.User;
@@ -58,4 +60,15 @@ public class Order {
     @Column(nullable = false, name = "order_status")
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
+    private String receivingStation;
+
+    private String note;
+
+    private LocalDateTime deliverFrom;
+
+    private LocalDateTime deliverTo;
+
+    @ManyToMany(mappedBy = "attachedOrders")
+    private Set<Employee> attachedEmployees;
 }

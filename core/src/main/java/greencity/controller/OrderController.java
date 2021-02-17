@@ -3,11 +3,10 @@ package greencity.controller;
 import greencity.annotations.CurrentUserId;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.service.UBSService;
+import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +19,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/ubs")
 public class OrderController {
-    private final UBSService ubsService;
+    private final UBSClientService ubsClientService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSService ubsService) {
-        this.ubsService = ubsService;
+    public OrderController(UBSClientService ubsClientService) {
+        this.ubsClientService = ubsClientService;
     }
 
     /**
@@ -48,7 +47,7 @@ public class OrderController {
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
         @ApiIgnore @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsService.getFirstPageData(userId));
+            .body(ubsClientService.getFirstPageData(userId));
     }
 
     /**
@@ -69,7 +68,7 @@ public class OrderController {
     public ResponseEntity<CertificateDto> checkIfCertificateAvailable(
         @PathVariable String code) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsService.checkCertificate(code));
+            .body(ubsClientService.checkCertificate(code));
     }
 
     /**
@@ -89,7 +88,7 @@ public class OrderController {
     public ResponseEntity<List<PersonalDataDto>> getUBSusers(
         @ApiIgnore @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsService.getSecondPageData(userId));
+            .body(ubsClientService.getSecondPageData(userId));
     }
 
     /**
@@ -110,7 +109,7 @@ public class OrderController {
     public ResponseEntity<HttpStatus> processOrder(
         @ApiIgnore @CurrentUserId Long userId,
         @Valid @RequestBody OrderResponseDto dto) {
-        ubsService.saveFullOrderToDB(dto, userId);
+        ubsClientService.saveFullOrderToDB(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
