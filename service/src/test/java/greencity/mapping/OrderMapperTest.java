@@ -5,7 +5,10 @@ import greencity.dto.OrderResponseDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.repository.CertificateRepository;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,24 +24,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class OrderMapperTest {
     @InjectMocks
     private OrderMapper orderMapper;
-    @Mock
-    private CertificateRepository certificateRepository;
 
     @Test
     void convert() {
         OrderResponseDto orderResponseDto = ModelUtils.getOrderResponceDto();
         Map<Integer, Integer> orderedBags = new HashMap<>();
         orderedBags.put(3, 999);
-        Certificate certificate = new Certificate();
         Order expected = Order.builder()
-            .additionalOrder("232-534-634")
+            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .amountOfBagsOrdered(orderedBags)
             .comment("comment")
-            .certificate(certificate)
+            .certificates(Collections.emptySet())
             .pointsToUse(700)
             .build();
-
-        when(certificateRepository.findById(anyString())).thenReturn(Optional.of(certificate));
 
         Order actual = orderMapper.convert(orderResponseDto);
         actual.setOrderDate(null);

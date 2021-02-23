@@ -68,7 +68,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (certificate == null) {
             throw new CertificateNotFoundException("There is no such а certificate.");
         } else {
-            return new CertificateDto(certificate.getCertificateStatus().toString());
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints());
         }
     }
 
@@ -96,14 +96,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setUbsUser(ubsUser);
         order.setUser(currentUser);
 
+        if (order.getCertificates().size() > 0) {
+            order.getCertificates().forEach(c -> {
+                c.setCertificateStatus(CertificateStatus.USED);
+                c.setOrder(order);
+            });
+        }
+
         currentUser.getOrders().add(order);
         currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
         currentUser.getChangeOfPoints().put(order.getOrderDate(), -dto.getPointsToUse());
-
-        Certificate certificate = order.getCertificate();
-        if (certificate != null) {
-            certificate.setCertificateStatus(CertificateStatus.USED);
-        }
 
         userRepository.save(currentUser);
     }

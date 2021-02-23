@@ -1,8 +1,11 @@
 package greencity.mapping;
 
 import greencity.dto.OrderResponseDto;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.repository.CertificateRepository;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
@@ -33,13 +36,19 @@ public class OrderMapper extends AbstractConverter<OrderResponseDto, Order> {
             map.put(bag.getId(), bag.getAmount());
         });
 
+        Set<Certificate> orderCertificates = new HashSet<>();
+
+        dto.getCerfiticates().forEach(c -> {
+            orderCertificates.add(certificateRepository.findById(c).get());
+        });
+
         return Order.builder()
             .orderDate(LocalDateTime.now())
             .amountOfBagsOrdered(map)
             .pointsToUse(dto.getPointsToUse())
             .comment(dto.getOrderComment())
-            .additionalOrder(dto.getAdditionalOrder())
-            .certificate(certificateRepository.findById(dto.getCerfiticate()).orElse(null))
+            .certificates(orderCertificates)
+            .additionalOrders(dto.getAdditionalOrders())
             .build();
     }
 }

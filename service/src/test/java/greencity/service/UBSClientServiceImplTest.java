@@ -10,6 +10,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.CertificateNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.UBSuserRepository;
@@ -18,6 +19,8 @@ import greencity.service.ubs.UBSClientServiceImpl;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -91,26 +94,32 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificateWithNoAvailable() {
-        assertEquals("", ubsService.checkCertificate("randomstring").getCertificateStatus());
+        Assertions.assertThrows(CertificateNotFoundException.class, () -> {
+            ubsService.checkCertificate("randomstring").getCertificateStatus();
+        });
     }
 
     @Test
     void processOrder() {
         OrderResponseDto dto = ModelUtils.getOrderResponceDto();
-        dto.getPersonalData().setId(4L);
         User user = new User();
         user.setOrders(new ArrayList<>());
         user.setChangeOfPoints(new HashMap<>());
         user.setCurrentPoints(300);
+        user.setUbsUsers(new HashSet<>());
+        UBSuser ubSuser = new UBSuser();
+        ubSuser.setId(10L);
+        Order order = new Order();
+        order.setCertificates(new HashSet<>());
 
         when(userRepository.findById(13L)).thenReturn(Optional.of(user));
-        when(ubsUserRepository.findById(4L)).thenReturn(Optional.of(new UBSuser()));
-        when(modelMapper.map(dto, Order.class)).thenReturn(new Order());
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(ubsUserRepository.findById(10L)).thenReturn(Optional.of(new UBSuser()));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
 
         ubsService.saveFullOrderToDB(dto, 13L);
 
         verify(userRepository, times(1)).findById(13L);
-        verify(ubsUserRepository, times(1)).findById(4L);
         verify(modelMapper, times(1)).map(dto, Order.class);
         verify(userRepository, times(1)).save(any(User.class));
     }

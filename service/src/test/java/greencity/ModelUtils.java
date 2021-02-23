@@ -6,7 +6,9 @@ import greencity.dto.PersonalDataDto;
 import greencity.entity.lang.Language;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 public class ModelUtils {
 
@@ -16,11 +18,12 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponceDto() {
         return OrderResponseDto.builder()
-            .additionalOrder("232-534-634")
+            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
-            .cerfiticate("")
+            .cerfiticates(Collections.emptySet())
             .pointsToUse(700)
+            .sumToPay(300)
             .personalData(PersonalDataDto.builder()
                 .firstName("oleh")
                 .lastName("ivanov")

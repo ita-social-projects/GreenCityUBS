@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import java.util.Set;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -20,11 +21,12 @@ public class OrderResponseDto implements Serializable {
     @NotNull
     private Integer pointsToUse;
 
-    @Length(max = 6)
-    private String cerfiticate;
+    @NotNull
+    private Integer sumToPay;
 
-    @Length(max = 11)
-    private String additionalOrder;
+    private Set<String> cerfiticates;
+
+    private Set<String> additionalOrders;
 
     @Length(max = 170)
     private String orderComment;

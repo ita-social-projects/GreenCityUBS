@@ -9,4 +9,5 @@ import lombok.*;
 @Builder
 public class CertificateDto {
     private String certificateStatus;
+    private Integer certificatePoints;
 }

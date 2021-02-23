@@ -1,16 +1,35 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import java.time.LocalDate;
+import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.*;
-
-import greencity.entity.user.User;
-import greencity.entity.user.ubs.UBSuser;
-import lombok.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Cascade;
 
 @Entity
 @NoArgsConstructor
@@ -44,18 +63,15 @@ public class Order {
     @Column(name = "amount")
     private Map<Integer, Integer> amountOfBagsOrdered;
 
-    @Column(name = "additional_order")
-    private String additionalOrder;
-
     @Column
     private String comment;
 
     @Column(columnDefinition = "int default 0")
     private Integer pointsToUse;
 
-    @JoinColumn(name = "certificate_code")
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Certificate certificate;
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status")
     @Enumerated(EnumType.STRING)
@@ -71,4 +87,10 @@ public class Order {
 
     @ManyToMany(mappedBy = "attachedOrders")
     private Set<Employee> attachedEmployees;
+
+    @ElementCollection
+    @CollectionTable(name = "order_additional", joinColumns = @JoinColumn(name = "orders_id"))
+    @Column(name = "additional_order")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private Set<String> additionalOrders;
 }
