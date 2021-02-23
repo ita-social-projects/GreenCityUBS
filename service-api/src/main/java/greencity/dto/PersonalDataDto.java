@@ -33,6 +33,7 @@ public class PersonalDataDto implements Serializable {
     @NotBlank
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-').]{1,30}")
     private String firstName;
+    @Length(max = 5)
     private String houseCorpus;
     @NotBlank
     @Length(min = 1, max = 4)

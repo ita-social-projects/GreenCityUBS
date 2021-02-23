@@ -19,14 +19,7 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
      */
     @Override
     protected PersonalDataDto convert(UBSuser ubsUser) {
-        double latitude = (ubsUser.getUserAddress().getCoordinates() == null)
-            ? 0
-            : ubsUser.getUserAddress().getCoordinates().getLatitude();
-        double longitude = (ubsUser.getUserAddress().getCoordinates() == null)
-            ? 0
-            : ubsUser.getUserAddress().getCoordinates().getLongitude();
-
-        return PersonalDataDto.builder()
+        PersonalDataDto personalDataDto = PersonalDataDto.builder()
             .id(ubsUser.getId())
             .firstName(ubsUser.getFirstName())
             .lastName(ubsUser.getLastName())
@@ -35,12 +28,17 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
             .city(ubsUser.getUserAddress().getCity())
             .street(ubsUser.getUserAddress().getStreet())
             .district(ubsUser.getUserAddress().getDistrict())
-            .latitude(latitude)
-            .longitude(longitude)
             .houseNumber(ubsUser.getUserAddress().getHouseNumber())
             .houseCorpus(ubsUser.getUserAddress().getHouseCorpus())
             .entranceNumber(ubsUser.getUserAddress().getEntranceNumber())
             .addressComment(ubsUser.getUserAddress().getComment())
             .build();
+
+        if (ubsUser.getUserAddress().getCoordinates() != null) {
+            personalDataDto.setLatitude(ubsUser.getUserAddress().getCoordinates().getLatitude());
+            personalDataDto.setLongitude(ubsUser.getUserAddress().getCoordinates().getLongitude());
+        }
+
+        return personalDataDto;
     }
 }

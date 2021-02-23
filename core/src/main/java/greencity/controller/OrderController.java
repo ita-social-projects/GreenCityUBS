@@ -43,7 +43,7 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/first")
+    @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
         @ApiIgnore @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -64,7 +64,7 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/first/certificate/{code}")
+    @GetMapping("/certificate/{code}")
     public ResponseEntity<CertificateDto> checkIfCertificateAvailable(
         @PathVariable String code) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -78,13 +78,13 @@ public class OrderController {
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Get user's order data.")
+    @ApiOperation(value = "Get user's personal data.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PersonalDataDto[].class),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/second")
+    @GetMapping("/personal-data")
     public ResponseEntity<List<PersonalDataDto>> getUBSusers(
         @ApiIgnore @CurrentUserId Long userId) {
         return ResponseEntity.status(HttpStatus.OK)

@@ -57,7 +57,7 @@ class OrderControllerTest {
     void getCurrentUserPoints() throws Exception {
         when(restClient.findIdByEmail(anyString())).thenReturn(13L);
 
-        mockMvc.perform(get(ubsLink + "/first")
+        mockMvc.perform(get(ubsLink + "/order-details")
             .principal(principal))
             .andExpect(status().isOk());
 
@@ -67,7 +67,7 @@ class OrderControllerTest {
 
     @Test
     void checkIfCertificateAvailable() throws Exception {
-        mockMvc.perform(get(ubsLink + "/first/certificate/{code}", "qwefds"))
+        mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
             .andExpect(status().isOk());
 
         verify(ubsClientService).checkCertificate(eq("qwefds"));
@@ -77,7 +77,7 @@ class OrderControllerTest {
     void getUBSusers() throws Exception {
         when(restClient.findIdByEmail(anyString())).thenReturn(13L);
 
-        mockMvc.perform(get(ubsLink + "/second")
+        mockMvc.perform(get(ubsLink + "/personal-data")
             .principal(principal))
             .andExpect(status().isOk());
 
@@ -92,6 +92,8 @@ class OrderControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        System.out.println(orderResponceDtoJSON);
 
         mockMvc.perform(post(ubsLink + "/processOrder")
             .content(orderResponceDtoJSON)
