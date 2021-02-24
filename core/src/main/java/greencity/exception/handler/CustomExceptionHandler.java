@@ -1,12 +1,13 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -70,6 +71,62 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Method interceptor exception {@link ConstraintViolationException}.
+     *
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> constraintViolationException(ConstraintViolationException ex, WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception
+     * {@link greencity.exceptions.CertificateExpiredException}.
+     *
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(CertificateExpiredException.class)
+    public ResponseEntity<Object> handleCertificateExpiredException(CertificateExpiredException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception
+     * {@link greencity.exceptions.CertificateIsUsedException}.
+     *
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(CertificateIsUsedException.class)
+    public final ResponseEntity<Object> handleCertificateIsUsedException(CertificateIsUsedException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link BagNotFoundException}.
+     *
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(BagNotFoundException.class)
+    public final ResponseEntity<Object> handleBagNotFoundException(BagNotFoundException ex, WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
     }
 
     /**

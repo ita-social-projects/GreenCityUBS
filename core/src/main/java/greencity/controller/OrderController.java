@@ -2,14 +2,17 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserId;
 import greencity.constants.HttpStatuses;
+import greencity.constants.ValidationConstant;
 import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -18,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ubs")
+@Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
 
@@ -66,7 +70,8 @@ public class OrderController {
     })
     @GetMapping("/certificate/{code}")
     public ResponseEntity<CertificateDto> checkIfCertificateAvailable(
-        @PathVariable String code) {
+        @PathVariable @Pattern(regexp = ValidationConstant.SERTIFICATE_CODE_REGEXP,
+            message = ValidationConstant.SERTIFICATE_CODE_REGEXP_MESSAGE) String code) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.checkCertificate(code));
     }

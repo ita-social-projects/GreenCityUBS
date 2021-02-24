@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
@@ -11,11 +12,14 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.CertificateExpiredException;
+import greencity.exceptions.CertificateIsUsedException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -102,9 +106,21 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Certificate certificate = order.getCertificate();
         if (certificate != null) {
+            this.validateCertificate(certificate);
             certificate.setCertificateStatus(CertificateStatus.USED);
         }
 
         userRepository.save(currentUser);
+    }
+
+    private void validateCertificate(Certificate certificate) {
+        if (certificate.getCertificateStatus() == CertificateStatus.USED) {
+            throw new CertificateIsUsedException(ErrorMessage.CERTIFICATE_IS_USED + certificate.getCode());
+        } else {
+            LocalDate future = certificate.getDate().plusYears(1);
+            if (future.isBefore(LocalDate.now())) {
+                throw new CertificateExpiredException(ErrorMessage.CERTIFICATE_EXPIRED + certificate.getCode());
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import javax.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -20,7 +21,7 @@ public class OrderResponseDto implements Serializable {
     @NotNull
     private Integer pointsToUse;
 
-    @Length(max = 6)
+    @Pattern(regexp = "(\\d{4}-\\d{4})|(^$)", message = "This sertifacate code is not valid")
     private String cerfiticate;
 
     @Length(max = 11)
