@@ -116,6 +116,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(ubsUserRepository.findById(10L)).thenReturn(Optional.of(new UBSuser()));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(new Bag()));
 
         ubsService.saveFullOrderToDB(dto, 13L);
 

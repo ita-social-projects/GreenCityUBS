@@ -12,6 +12,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.BagNotFoundException;
 import greencity.exceptions.CertificateExpiredException;
 import greencity.exceptions.CertificateIsUsedException;
 import greencity.exceptions.CertificateNotFoundException;
@@ -71,13 +72,10 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public CertificateDto checkCertificate(String code) {
-        Certificate certificate = certificateRepository.findById(code).orElse(null);
+        Certificate certificate = certificateRepository.findById(code)
+            .orElseThrow(() -> new CertificateNotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
-        if (certificate == null) {
-            throw new CertificateNotFoundException("There is no such а certificate.");
-        } else {
-            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints());
-        }
+        return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints());
     }
 
     /**
@@ -87,21 +85,27 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public void saveFullOrderToDB(OrderResponseDto dto, Long userId) {
         User currentUser = userRepository.findById(userId).get();
+        Order order = modelMapper.map(dto, Order.class);
 
         Map<Integer, Integer> map = new HashMap<>();
         dto.getBags().forEach(bag -> {
+            bagRepository.findById(bag.getId()).orElseThrow(()
+                -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + bag.getId()));
             map.put(bag.getId(), bag.getAmount());
         });
 
         Set<Certificate> orderCertificates = new HashSet<>();
-
         dto.getCerfiticates().forEach(c -> {
-            orderCertificates.add(certificateRepository.findById(c).get());
+            Certificate temp = certificateRepository.findById(c)
+                .orElseThrow(() -> new CertificateNotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE + c));
+            validateCertificate(temp);
+            temp.setCertificateStatus(CertificateStatus.USED);
+            temp.setOrder(order);
+            orderCertificates.add(temp);
         });
 
         UBSuser ubsUser = modelMapper.map(dto.getPersonalData(), UBSuser.class);
         ubsUser.setUser(currentUser);
-
         if (ubsUser.getId() == null || !ubsUser.equals(ubsUserRepository.findById(ubsUser.getId()).get())) {
             ubsUser.setId(null);
             ubsUserRepository.save(ubsUser);
@@ -110,29 +114,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             ubsUser = ubsUserRepository.findById(ubsUser.getId()).get();
         }
 
-        Order order = modelMapper.map(dto, Order.class);
         order.setOrderStatus(OrderStatus.NEW);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(map);
         order.setUbsUser(ubsUser);
         order.setUser(currentUser);
 
-        if (order.getCertificates().size() > 0) {
-            order.getCertificates().forEach(c -> {
-                c.setCertificateStatus(CertificateStatus.USED);
-                c.setOrder(order);
-            });
-        }
-
         currentUser.getOrders().add(order);
         currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
         currentUser.getChangeOfPoints().put(order.getOrderDate(), -dto.getPointsToUse());
-
-//        Certificate certificate = order.getCertificates();
-//        if (certificate != null) {
-//            this.validateCertificate(certificate);
-//            certificate.setCertificateStatus(CertificateStatus.USED);
-//        }
 
         userRepository.save(currentUser);
     }
