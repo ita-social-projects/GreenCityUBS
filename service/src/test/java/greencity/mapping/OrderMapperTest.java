@@ -28,15 +28,14 @@ class OrderMapperTest {
     @Test
     void convert() {
         OrderResponseDto orderResponseDto = ModelUtils.getOrderResponceDto();
-        Map<Integer, Integer> orderedBags = new HashMap<>();
-        orderedBags.put(3, 999);
+
         Order expected = Order.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
-            .amountOfBagsOrdered(orderedBags)
             .comment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .build();
+        expected.setCertificates(null);
 
         Order actual = orderMapper.convert(orderResponseDto);
         actual.setOrderDate(null);

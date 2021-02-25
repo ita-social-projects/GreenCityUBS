@@ -16,7 +16,11 @@ import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -28,7 +32,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @AllArgsConstructor
-public class UBSClientServiceImpl implements UBSClientService {
+public class UBSClientServiceImpl implements UBSClientService  {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
@@ -80,6 +84,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void saveFullOrderToDB(OrderResponseDto dto, Long userId) {
         User currentUser = userRepository.findById(userId).get();
 
+        Map<Integer, Integer> map = new HashMap<>();
+        dto.getBags().forEach(bag -> {
+            map.put(bag.getId(), bag.getAmount());
+        });
+
+        Set<Certificate> orderCertificates = new HashSet<>();
+
+        dto.getCerfiticates().forEach(c -> {
+            orderCertificates.add(certificateRepository.findById(c).get());
+        });
+
         UBSuser ubsUser = modelMapper.map(dto.getPersonalData(), UBSuser.class);
         ubsUser.setUser(currentUser);
 
@@ -93,6 +108,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Order order = modelMapper.map(dto, Order.class);
         order.setOrderStatus(OrderStatus.NEW);
+        order.setCertificates(orderCertificates);
+        order.setAmountOfBagsOrdered(map);
         order.setUbsUser(ubsUser);
         order.setUser(currentUser);
 
