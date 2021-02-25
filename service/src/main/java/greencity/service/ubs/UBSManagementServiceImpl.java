@@ -2,18 +2,18 @@ package greencity.service.ubs;
 
 import com.google.common.collect.TreeMultimap;
 import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedCoordinatesDto;
+import greencity.dto.GroupedOrderDto;
+import greencity.dto.OrderDto;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.order.Order;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
+
+import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -22,16 +22,18 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
+    private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<GroupedCoordinatesDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
+    public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
         int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
-        Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
+
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
         Set<Coordinates> temporarySpecified = specified.stream()
             .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
         for (Coordinates temp : temporarySpecified) {
@@ -81,25 +83,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 break;
             }
         }
-
-        Set<GroupedCoordinatesDto> clusterWithSpecifiedCoords = new HashSet<>();
-        clusterWithSpecifiedCoords.add(GroupedCoordinatesDto.builder()
-            .groupOfCoordinates(specified)
-            .amountOfLitres(allCoordsCapacity)
-            .build());
-
-        return clusterWithSpecifiedCoords;
+        List<GroupedOrderDto> allClusters = new ArrayList<>();
+        Set<Coordinates> closeRelatives = specified.stream()
+            .map(coordinatesDto -> modelMapper.map(coordinatesDto, Coordinates.class)).collect(Collectors.toSet());
+        getUndeliveredOrdersByGroupedCoordinates(closeRelatives, allCoordsCapacity, allClusters);
+        return allClusters;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<GroupedCoordinatesDto> getClusteredCoords(double distance, int litres) {
+    public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
         checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
-        Set<GroupedCoordinatesDto> allClusters = new HashSet<>();
-
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+        List<GroupedOrderDto> allClusters = new ArrayList<>();
         while (allCoords.size() > 0) {
             Coordinates currentlyCoord = allCoords.stream().findAny().get();
 
@@ -129,12 +127,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 amountOfLitresInCluster -= smallestAmountOfLitres;
                 sortedByLitres.remove(smallestAmountOfLitres, theMostDistantOrder);
             }
-
-            GroupedCoordinatesDto cluster = new GroupedCoordinatesDto();
-            cluster.setGroupOfCoordinates(
-                closeRelatives.stream().map(c -> modelMapper.map(c, CoordinatesDto.class)).collect(Collectors.toSet()));
-            cluster.setAmountOfLitres(amountOfLitresInCluster);
-            allClusters.add(cluster);
+            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
+                amountOfLitresInCluster, allClusters);
 
             for (Coordinates checked : closeRelatives) {
                 allCoords.remove(checked);
@@ -148,17 +142,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Set<GroupedCoordinatesDto> getAllUndeliveredCoords() {
-        Set<Coordinates> allCoords = getAllUndeliveredOrdersCoords();
-        Set<GroupedCoordinatesDto> allOrdersWithLitres = new HashSet<>();
+    public List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters() {
+        List<Order> allOrders = getAllUndeliveredOrders();
+        List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
 
-        for (Coordinates current : allCoords) {
+        for (Order order : allOrders) {
             int currentCoordinatesCapacity =
-                addressRepository.capacity(current.getLatitude(), current.getLongitude());
-            allOrdersWithLitres.add(GroupedCoordinatesDto.builder()
+                addressRepository.capacity(order.getUbsUser().getUserAddress().getCoordinates().getLatitude(),
+                    order.getUbsUser().getUserAddress().getCoordinates().getLongitude());
+            allOrdersWithLitres.add(GroupedOrderDto.builder()
                 .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfCoordinates(Collections.singleton(
-                    modelMapper.map(current, CoordinatesDto.class)))
+                .groupOfOrders(List.of(
+                    modelMapper.map(order, OrderDto.class)))
                 .build());
         }
 
@@ -181,12 +176,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method finds coordinates of undelivered orders.
+     * Method finds undelivered orders.
      *
-     * @return
+     * @return List of {@link Order}
      */
-    private Set<Coordinates> getAllUndeliveredOrdersCoords() {
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+    private List<Order> getAllUndeliveredOrders() {
+        List<Order> allCoords = orderRepository.undeliveredAddresses();
         if (allCoords.isEmpty()) {
             throw new ActiveOrdersNotFoundException("There are no any undelivered orders found.");
         }
@@ -290,5 +285,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             + Math.sin(radiansLongitude / 2) * Math.sin(radiansLongitude / 2) * Math.cos(lat1) * Math.cos(lat2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return earthRadiusKm * c;
+    }
+
+    private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
+        List<GroupedOrderDto> allClusters) {
+        List<Order> orderslist = new ArrayList<>();
+        for (Coordinates coordinates : closeRelatives) {
+            List<Order> orders =
+                orderRepository.undeliveredOrdersGroupThem(coordinates.getLatitude(), coordinates.getLongitude());
+            orderslist.addAll(orders);
+        }
+        GroupedOrderDto cluster = new GroupedOrderDto();
+        cluster.setGroupOfOrders(
+            orderslist.stream().map(order -> modelMapper.map(order, OrderDto.class)).collect(Collectors.toList()));
+        cluster.setAmountOfLitres(amountOfLitresInCluster);
+        allClusters.add(cluster);
     }
 }

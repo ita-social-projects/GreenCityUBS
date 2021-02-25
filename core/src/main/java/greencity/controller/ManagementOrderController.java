@@ -2,14 +2,16 @@ package greencity.controller;
 
 import greencity.constants.HttpStatuses;
 import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedCoordinatesDto;
+import greencity.dto.GroupedOrderDto;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
-import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,13 +43,13 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get all undelivered orders.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedCoordinatesDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/all-undelivered")
-    public ResponseEntity<Set<GroupedCoordinatesDto>> allUndeliveredCoords() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllUndeliveredCoords());
+    public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords() {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllUndeliveredOrdersWithLiters());
     }
 
     /**
@@ -59,13 +61,13 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get grouped undelivered orders.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedCoordinatesDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/group-undelivered")
-    public ResponseEntity<Set<GroupedCoordinatesDto>> groupCoords(@RequestParam Double radius,
+    public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
         @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
@@ -76,13 +78,13 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get grouped orders along with specified.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedCoordinatesDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("group-undelivered-with-specified")
-    public ResponseEntity<Set<GroupedCoordinatesDto>> groupCoordsWithSpecifiedOnes(
+    public ResponseEntity<List<GroupedOrderDto>> groupCoordsWithSpecifiedOnes(
         @Valid @RequestBody Set<CoordinatesDto> specified,
         @RequestParam(required = false, defaultValue = "3000") Integer litres,
         @RequestParam(required = false, defaultValue = "0") Double additionalDistance) {
