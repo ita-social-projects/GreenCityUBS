@@ -83,7 +83,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("group-undelivered-with-specified")
+    @PostMapping("/group-undelivered-with-specified")
     public ResponseEntity<List<GroupedOrderDto>> groupCoordsWithSpecifiedOnes(
         @Valid @RequestBody Set<CoordinatesDto> specified,
         @RequestParam(required = false, defaultValue = "3000") Integer litres,
