@@ -2,6 +2,7 @@ package greencity.mapping;
 
 import greencity.ModelUtils;
 import greencity.dto.PersonalDataDto;
+import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.UBSuser;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ class PersonalDataDtoMapperTest {
     void convert() {
         UBSuser ubSuser = ModelUtils.getUBSuser();
         PersonalDataDto expected = ModelUtils.getOrderResponceDto().getPersonalData();
+        ubSuser.getUserAddress().setCoordinates(Coordinates.builder().longitude(0).latitude(0).build());
         ubSuser.setId(13L);
         ubSuser.getUserAddress().setId(null);
 

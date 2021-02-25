@@ -36,7 +36,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Method finds undelivered orders.
+     * Controller finds undelivered orders.
      *
      * @return list of {@link CoordinatesDto}.
      * @author Oleh Bilonizhka
@@ -53,7 +53,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Method groups undelivered orders.
+     * Controller groups undelivered orders.
      *
      * @param radius {@link Double} preferred searching radius.
      * @return list of {@link CoordinatesDto}.
@@ -74,7 +74,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Method groups orders along with specified.
+     * Controller groups orders along with specified.
      */
     @ApiOperation(value = "Get grouped orders along with specified.")
     @ApiResponses(value = {

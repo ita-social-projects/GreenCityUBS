@@ -4,7 +4,9 @@ import greencity.dto.BagDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 public class ModelUtils {
     public static Principal getPrincipal() {
@@ -13,11 +15,12 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponceDto() {
         return OrderResponseDto.builder()
-            .additionalOrder("232-534-634")
+            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
-            .cerfiticate("dstttt")
+            .cerfiticates(Collections.emptySet())
             .pointsToUse(700)
+            .sumToPay(300)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")

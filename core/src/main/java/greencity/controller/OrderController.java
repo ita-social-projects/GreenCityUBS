@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     /**
-     * Method returns all available bags and bonus points of current user.
+     * Controller returns all available bags and bonus points of current user.
      * {@link greencity.dto.UserVO}.
      *
      * @param userId {@link UserVO} id.
@@ -55,7 +55,7 @@ public class OrderController {
     }
 
     /**
-     * Method returns entered certificate status if not absent.
+     * Controller returns entered certificate status if not absent.
      *
      * @param code {@link String} code of certificate.
      * @return {@link CertificateDto}.
@@ -77,7 +77,7 @@ public class OrderController {
     }
 
     /**
-     * Method returns list of saved {@link UserVO} data.
+     * Controller returns list of saved {@link UserVO} data.
      *
      * @param userId {@link UserVO} id.
      * @return list of {@link PersonalDataDto}.
@@ -97,7 +97,7 @@ public class OrderController {
     }
 
     /**
-     * Method saves all entered by user data to database.
+     * Controller saves all entered by user data to database.
      *
      * @param userId {@link UserVO} id.
      * @param dto    {@link OrderResponseDto} order data.

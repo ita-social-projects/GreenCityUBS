@@ -21,7 +21,8 @@ public class Certificate {
     @Enumerated(EnumType.STRING)
     private CertificateStatus certificateStatus;
 
-    @OneToOne(mappedBy = "certificate")
+    @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;
 
     private Integer points;
