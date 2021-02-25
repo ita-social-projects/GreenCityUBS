@@ -1,6 +1,8 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.CertificateStatus;
+import java.time.LocalDate;
+import java.util.Date;
 import javax.persistence.*;
 import lombok.*;
 
@@ -24,4 +26,7 @@ public class Certificate {
     private Order order;
 
     private Integer points;
+
+    @Column(name = "certificate_date")
+    private LocalDate date;
 }

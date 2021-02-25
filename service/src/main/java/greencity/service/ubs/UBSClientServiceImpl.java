@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
@@ -11,6 +12,8 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.CertificateExpiredException;
+import greencity.exceptions.CertificateIsUsedException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -18,6 +21,7 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +36,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @AllArgsConstructor
-public class UBSClientServiceImpl implements UBSClientService  {
+public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
@@ -124,6 +128,23 @@ public class UBSClientServiceImpl implements UBSClientService  {
         currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
         currentUser.getChangeOfPoints().put(order.getOrderDate(), -dto.getPointsToUse());
 
+//        Certificate certificate = order.getCertificates();
+//        if (certificate != null) {
+//            this.validateCertificate(certificate);
+//            certificate.setCertificateStatus(CertificateStatus.USED);
+//        }
+
         userRepository.save(currentUser);
+    }
+
+    private void validateCertificate(Certificate certificate) {
+        if (certificate.getCertificateStatus() == CertificateStatus.USED) {
+            throw new CertificateIsUsedException(ErrorMessage.CERTIFICATE_IS_USED + certificate.getCode());
+        } else {
+            LocalDate future = certificate.getDate().plusYears(1);
+            if (future.isBefore(LocalDate.now())) {
+                throw new CertificateExpiredException(ErrorMessage.CERTIFICATE_EXPIRED + certificate.getCode());
+            }
+        }
     }
 }
