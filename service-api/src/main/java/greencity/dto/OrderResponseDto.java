@@ -26,8 +26,7 @@ public class OrderResponseDto implements Serializable {
     private Integer sumToPay;
 
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
-        message = "This sertifacate code is not valid")
-        String> cerfiticates;
+        message = "This sertifacate code is not valid") String> cerfiticates;
 
     private Set<@Length(max = 11) String> additionalOrders;
 

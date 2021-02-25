@@ -89,8 +89,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Map<Integer, Integer> map = new HashMap<>();
         dto.getBags().forEach(bag -> {
-            bagRepository.findById(bag.getId()).orElseThrow(()
-                -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + bag.getId()));
+            bagRepository.findById(bag.getId())
+                .orElseThrow(() -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + bag.getId()));
             map.put(bag.getId(), bag.getAmount());
         });
 
