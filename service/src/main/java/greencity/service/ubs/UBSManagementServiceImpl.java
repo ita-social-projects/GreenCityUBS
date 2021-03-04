@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import com.google.common.collect.TreeMultimap;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
 import greencity.dto.OrderDto;
@@ -29,24 +28,104 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
+    public List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters() {
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+        List<Order> allOrders = getAllUndeliveredOrders();
+        List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
+
+        for (Coordinates temp : allCoords) {
+            int currentCoordinatesCapacity =
+                addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
+
+            List<Order> currentCoordinatesOrders = allOrders.stream().filter(
+                o -> o.getUbsUser().getUserAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
+
+            List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
+                .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
+            allOrdersWithLitres.add(GroupedOrderDto.builder()
+                .amountOfLitres(currentCoordinatesCapacity)
+                .groupOfOrders(currentCoordinatesOrdersDto)
+                .build());
+        }
+
+        return allOrdersWithLitres;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
+        checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+        List<GroupedOrderDto> allClusters = new ArrayList<>();
+
+        while (allCoords.size() > 0) {
+            Coordinates currentlyCoord = allCoords.stream().findAny().get();
+
+            Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
+                allCoords, currentlyCoord);
+            Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
+
+            while (!centralCoord.equals(currentlyCoord)) {
+                currentlyCoord = centralCoord;
+                closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
+                centralCoord = getNewCentralCoordinate(closeRelatives);
+            }
+
+            int amountOfLitresInCluster = 0;
+            for (Coordinates current : closeRelatives) {
+                int currentCoordinatesCapacity =
+                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
+                amountOfLitresInCluster += currentCoordinatesCapacity;
+            }
+
+            if (amountOfLitresInCluster > litres) {
+                List<Coordinates> closeRelativerSorted = new ArrayList<>(closeRelatives);
+                Collections.sort(closeRelativerSorted, getComparatorByDistanceFromCenter(centralCoord));
+                int indexOfCoordToBeDeleted = -1;
+                while (amountOfLitresInCluster > litres) {
+                    Coordinates coordToBeDeleted = closeRelativerSorted.get(++indexOfCoordToBeDeleted);
+                    amountOfLitresInCluster -= addressRepository
+                        .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
+                    closeRelatives.remove(coordToBeDeleted);
+                }
+            }
+
+            for (Coordinates checked : closeRelatives) {
+                allCoords.remove(checked);
+            }
+
+            // mapping coordinates to orderDto
+            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
+                amountOfLitresInCluster, allClusters);
+        }
+
+        return allClusters;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
         int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        Set<Coordinates> temporarySpecified = specified.stream()
+        Set<Coordinates> result = specified.stream()
             .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
-        for (Coordinates temp : temporarySpecified) {
+        for (Coordinates temp : result) {
             if (!allCoords.contains(temp)) {
                 throw new IncorrectValueException("There are no order with coordinates: " + temp.getLatitude()
                     + ", " + temp.getLongitude());
             }
         }
 
-        Coordinates centralCoord = getNewCentralCoordinate(temporarySpecified);
+        Coordinates centralCoord = getNewCentralCoordinate(result);
         int specifiedCoordsCapacity = 0;
         double newRadius = 0;
-        for (Coordinates temp : temporarySpecified) {
+        for (Coordinates temp : result) {
             double distanceFromCentralCoord = distanceBetweenEarthCoordinates(temp.getLatitude(), temp.getLongitude(),
                 centralCoord.getLatitude(), centralCoord.getLongitude());
             if (distanceFromCentralCoord > newRadius) {
@@ -64,100 +143,33 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 coordinatesInsideRadiusWithoutSpecifiedCoords.add(temp);
             }
         }
-        coordinatesInsideRadiusWithoutSpecifiedCoords.removeAll(temporarySpecified);
+        coordinatesInsideRadiusWithoutSpecifiedCoords.removeAll(result);
+
         Collections.sort(coordinatesInsideRadiusWithoutSpecifiedCoords,
             getComparatorByDistanceFromCenter(centralCoord));
-
         int amountOfLitresToFill = litres - specifiedCoordsCapacity;
         double fill = 0;
         int allCoordsCapacity = specifiedCoordsCapacity;
-        for (Coordinates temp : coordinatesInsideRadiusWithoutSpecifiedCoords) {
+        for (int i = coordinatesInsideRadiusWithoutSpecifiedCoords.size() - 1; i > -1; i--) {
+            Coordinates temp = coordinatesInsideRadiusWithoutSpecifiedCoords.get(i);
             int capacity = addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
             if (fill < amountOfLitresToFill) {
                 if ((fill + capacity) <= amountOfLitresToFill) {
                     fill += capacity;
                     allCoordsCapacity += capacity;
-                    specified.add(modelMapper.map(temp, CoordinatesDto.class));
+                    result.add(temp);
                 }
             } else {
                 break;
             }
         }
-        List<GroupedOrderDto> allClusters = new ArrayList<>();
-        Set<Coordinates> closeRelatives = specified.stream()
-            .map(coordinatesDto -> modelMapper.map(coordinatesDto, Coordinates.class)).collect(Collectors.toSet());
-        getUndeliveredOrdersByGroupedCoordinates(closeRelatives, allCoordsCapacity, allClusters);
-        return allClusters;
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
-        checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        List<GroupedOrderDto> allClusters = new ArrayList<>();
-        while (allCoords.size() > 0) {
-            Coordinates currentlyCoord = allCoords.stream().findAny().get();
+        // mapping coordinates to orderDto
+        List<GroupedOrderDto> groupedOrderDtos = new ArrayList<>();
+        getUndeliveredOrdersByGroupedCoordinates(result,
+            allCoordsCapacity, groupedOrderDtos);
 
-            Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
-                allCoords, currentlyCoord);
-            Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
-
-            while (!centralCoord.equals(currentlyCoord)) {
-                currentlyCoord = centralCoord;
-                closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
-                centralCoord = getNewCentralCoordinate(closeRelatives);
-            }
-
-            TreeMultimap<Integer, Coordinates> sortedByLitres = TreeMultimap.create(
-                Integer::compareTo, getComparatorByDistanceFromCenter(centralCoord));
-            int amountOfLitresInCluster = 0;
-            for (Coordinates current : closeRelatives) {
-                int currentCoordinatesCapacity =
-                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
-                sortedByLitres.put(currentCoordinatesCapacity, current);
-                amountOfLitresInCluster += currentCoordinatesCapacity;
-            }
-            while (amountOfLitresInCluster > litres) {
-                Integer smallestAmountOfLitres = sortedByLitres.keySet().first();
-                Coordinates theMostDistantOrder = sortedByLitres.get(sortedByLitres.keySet().first()).first();
-                closeRelatives.remove(theMostDistantOrder);
-                amountOfLitresInCluster -= smallestAmountOfLitres;
-                sortedByLitres.remove(smallestAmountOfLitres, theMostDistantOrder);
-            }
-            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
-                amountOfLitresInCluster, allClusters);
-
-            for (Coordinates checked : closeRelatives) {
-                allCoords.remove(checked);
-            }
-        }
-
-        return allClusters;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters() {
-        List<Order> allOrders = getAllUndeliveredOrders();
-        List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
-
-        for (Order order : allOrders) {
-            int currentCoordinatesCapacity =
-                addressRepository.capacity(order.getUbsUser().getUserAddress().getCoordinates().getLatitude(),
-                    order.getUbsUser().getUserAddress().getCoordinates().getLongitude());
-            allOrdersWithLitres.add(GroupedOrderDto.builder()
-                .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfOrders(List.of(
-                    modelMapper.map(order, OrderDto.class)))
-                .build());
-        }
-
-        return allOrdersWithLitres;
+        return groupedOrderDtos;
     }
 
     /**
@@ -167,7 +179,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param litres   - preferred search radius.
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
-        if (distance < 0 || distance >= 20) {
+        if (distance < 0 || distance > 20) {
             throw new IncorrectValueException("The distance should be between 0 and 20 km.");
         }
         if (litres < 0 || litres > 10000) {
