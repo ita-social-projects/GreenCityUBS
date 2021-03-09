@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import java.time.LocalDate;
 import lombok.*;
 
 @Getter
@@ -10,4 +11,5 @@ import lombok.*;
 public class CertificateDto {
     private String certificateStatus;
     private Integer certificatePoints;
+    private LocalDate certificateDate;
 }
