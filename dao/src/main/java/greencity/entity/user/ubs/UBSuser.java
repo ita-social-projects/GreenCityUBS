@@ -32,10 +32,10 @@ public class UBSuser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 12, nullable = false)
+    @Column(length = 30, nullable = false)
     private String firstName;
 
-    @Column(length = 18, nullable = false)
+    @Column(length = 30, nullable = false)
     private String lastName;
 
     @Column(length = 9, nullable = false)

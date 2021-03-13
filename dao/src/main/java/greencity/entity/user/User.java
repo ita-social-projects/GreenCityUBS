@@ -22,9 +22,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
-    private String email;
-
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private Set<UBSuser> ubsUsers;
 
@@ -41,5 +38,9 @@ public class User {
     @Column(name = "amount")
     private Map<LocalDateTime, Integer> changeOfPoints;
 
+    @Column(columnDefinition = "int default 0")
     private Integer violations;
+
+    @Column(nullable = false, columnDefinition = "varchar(60)")
+    private String uuid;
 }

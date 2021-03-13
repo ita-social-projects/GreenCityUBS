@@ -11,20 +11,20 @@ public interface UBSClientService {
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param userId current {@link User}'s id.
+     * @param uuid current {@link User}'s uuid.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    UserPointsAndAllBagsDto getFirstPageData(Long userId);
+    UserPointsAndAllBagsDto getFirstPageData(String uuid);
 
     /**
      * Methods returns all saved user data.
      *
-     * @param userId current {@link User}'s id.
+     * @param uuid current {@link User}'s uuid.
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
-    List<PersonalDataDto> getSecondPageData(Long userId);
+    List<PersonalDataDto> getSecondPageData(String uuid);
 
     /**
      * Methods return status of entered certificate, empty string if absent.
@@ -38,9 +38,9 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      *
-     * @param dto    {@link OrderResponseDto} user entered data;
-     * @param userId current {@link User}'s id;
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
      * @author Oleh Bilonizhka
      */
-    void saveFullOrderToDB(OrderResponseDto dto, Long userId);
+    void saveFullOrderToDB(OrderResponseDto dto, String uuid);
 }

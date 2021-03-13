@@ -86,14 +86,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 int indexOfCoordToBeDeleted = -1;
                 while (amountOfLitresInCluster > litres) {
                     Coordinates coordToBeDeleted = closeRelativerSorted.get(++indexOfCoordToBeDeleted);
-                    amountOfLitresInCluster -= addressRepository
+                    int anountOfLitresInCurrentOrder = addressRepository
                         .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
+                    if (anountOfLitresInCurrentOrder > litres) {
+                        allCoords.remove(coordToBeDeleted);
+                    }
+                    amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
                     closeRelatives.remove(coordToBeDeleted);
                 }
             }
 
-            for (Coordinates checked : closeRelatives) {
-                allCoords.remove(checked);
+            for (Coordinates grouped : closeRelatives) {
+                allCoords.remove(grouped);
             }
 
             // mapping coordinates to orderDto

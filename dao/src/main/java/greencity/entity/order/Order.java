@@ -73,10 +73,11 @@ public class Order {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<Certificate> certificates;
 
-    @Column(nullable = false, name = "order_status")
+    @Column(nullable = false, name = "order_status", length = 15)
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
+    @Column(length = 50)
     private String receivingStation;
 
     private String note;

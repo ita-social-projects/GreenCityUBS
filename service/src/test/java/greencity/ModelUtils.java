@@ -3,7 +3,7 @@ package greencity;
 import greencity.dto.BagDto;
 import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
-import greencity.entity.lang.Language;
+
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.util.Arrays;
@@ -12,18 +12,13 @@ import java.util.HashSet;
 
 public class ModelUtils {
 
-    public static Language getLanguage() {
-        return new Language(1L, "en");
-    }
-
     public static OrderResponseDto getOrderResponceDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
-            .cerfiticates(Collections.emptySet())
+            .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .sumToPay(300)
             .personalData(PersonalDataDto.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
