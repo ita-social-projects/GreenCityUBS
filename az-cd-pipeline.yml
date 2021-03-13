@@ -8,7 +8,6 @@ trigger:
     
 pr: none
     
-
 variables:
   agentOS: ubuntu-latest
   
