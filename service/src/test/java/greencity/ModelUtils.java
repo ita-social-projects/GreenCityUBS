@@ -12,8 +12,6 @@ import java.util.HashSet;
 
 public class ModelUtils {
 
-
-
     public static OrderResponseDto getOrderResponceDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))

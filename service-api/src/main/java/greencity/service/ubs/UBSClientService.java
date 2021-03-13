@@ -38,7 +38,7 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      *
-     * @param dto    {@link OrderResponseDto} user entered data;
+     * @param dto  {@link OrderResponseDto} user entered data;
      * @param uuid current {@link User}'s uuid;
      * @author Oleh Bilonizhka
      */

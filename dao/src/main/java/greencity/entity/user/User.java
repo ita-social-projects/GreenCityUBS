@@ -43,10 +43,4 @@ public class User {
 
     @Column(nullable = false, columnDefinition = "varchar(60)")
     private String uuid;
-
-    public User(Integer currentPoints, Integer violations, String uuid) {
-        this.currentPoints = currentPoints;
-        this.violations = violations;
-        this.uuid = uuid;
-    }
 }

@@ -100,7 +100,7 @@ public class OrderController {
      * Controller saves all entered by user data to database.
      *
      * @param userUuid {@link UserVO} id.
-     * @param dto    {@link OrderResponseDto} order data.
+     * @param dto      {@link OrderResponseDto} order data.
      * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
      */

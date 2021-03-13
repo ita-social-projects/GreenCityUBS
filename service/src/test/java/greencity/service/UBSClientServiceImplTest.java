@@ -83,7 +83,7 @@ class UBSClientServiceImplTest {
         user.setId(13L);
 
         when(restClient.getDataForUbsTableRecordCreation()).thenReturn(UbsTableCreationDto.builder()
-                    .uuid("35467585763t4sfgchjfuyetf").build());
+            .uuid("35467585763t4sfgchjfuyetf").build());
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(ubsUserRepository.getAllByUserId(13L)).thenReturn(Collections.emptyList());
 
