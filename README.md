@@ -163,7 +163,7 @@ $ bower install
 
 - You can just grab their GitHub profile image URL
 - You should probably resize their picture using `?s=200` at the end of the image URL.
-
+sdsgfdhjdytsrsfgb
 ---
 
 ## FAQ
