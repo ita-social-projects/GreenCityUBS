@@ -12,9 +12,11 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "date"})
 @Table(name = "certificate")
 public class Certificate {
     @Id
+    @Column(length = 9)
     private String code;
 
     @Column(name = "status", nullable = false)

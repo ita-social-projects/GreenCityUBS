@@ -58,6 +58,21 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Method interceptor exception {@link TooManyCertificatesEntered}.
+     *
+     * @param ex      Exception which should be intercepted.
+     * @param request contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(TooManyCertificatesEntered.class)
+    public final ResponseEntity<Object> handleInvalidDistance(TooManyCertificatesEntered ex, WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
      * Method interceptor exception {@link ActiveOrdersNotFoundException}.
      *
      * @param ex      Exception which should be intercepted.

@@ -55,14 +55,14 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPoints() throws Exception {
-        when(restClient.findIdByEmail(anyString())).thenReturn(13L);
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/order-details")
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(restClient).findIdByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData(eq(13L));
+        verify(restClient).findUuidByEmail("test@gmail.com");
+        verify(ubsClientService).getFirstPageData(eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -75,19 +75,19 @@ class OrderControllerTest {
 
     @Test
     void getUBSusers() throws Exception {
-        when(restClient.findIdByEmail(anyString())).thenReturn(13L);
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/personal-data")
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(restClient).findIdByEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData(eq(13L));
+        verify(restClient).findUuidByEmail("test@gmail.com");
+        verify(ubsClientService).getSecondPageData(eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
     void processOrder() throws Exception {
-        when(restClient.findIdByEmail(anyString())).thenReturn(13L);
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         OrderResponseDto dto = ModelUtils.getOrderResponceDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -100,8 +100,8 @@ class OrderControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq(13L));
-        verify(restClient).findIdByEmail("test@gmail.com");
+        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(restClient).findUuidByEmail("test@gmail.com");
 
     }
 }

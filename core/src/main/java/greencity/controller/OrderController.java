@@ -1,6 +1,6 @@
 package greencity.controller;
 
-import greencity.annotations.CurrentUserId;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
@@ -37,7 +37,7 @@ public class OrderController {
      * Controller returns all available bags and bonus points of current user.
      * {@link greencity.dto.UserVO}.
      *
-     * @param userId {@link UserVO} id.
+     * @param userUuid {@link UserVO} id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
@@ -49,9 +49,9 @@ public class OrderController {
     })
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
-        @ApiIgnore @CurrentUserId Long userId) {
+        @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userId));
+            .body(ubsClientService.getFirstPageData(userUuid));
     }
 
     /**
@@ -79,7 +79,7 @@ public class OrderController {
     /**
      * Controller returns list of saved {@link UserVO} data.
      *
-     * @param userId {@link UserVO} id.
+     * @param userUuid {@link UserVO} id.
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
@@ -91,15 +91,15 @@ public class OrderController {
     })
     @GetMapping("/personal-data")
     public ResponseEntity<List<PersonalDataDto>> getUBSusers(
-        @ApiIgnore @CurrentUserId Long userId) {
+        @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getSecondPageData(userId));
+            .body(ubsClientService.getSecondPageData(userUuid));
     }
 
     /**
      * Controller saves all entered by user data to database.
      *
-     * @param userId {@link UserVO} id.
+     * @param userUuid {@link UserVO} id.
      * @param dto    {@link OrderResponseDto} order data.
      * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
@@ -112,9 +112,9 @@ public class OrderController {
     })
     @PostMapping("/processOrder")
     public ResponseEntity<HttpStatus> processOrder(
-        @ApiIgnore @CurrentUserId Long userId,
+        @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
-        ubsClientService.saveFullOrderToDB(dto, userId);
+        ubsClientService.saveFullOrderToDB(dto, userUuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

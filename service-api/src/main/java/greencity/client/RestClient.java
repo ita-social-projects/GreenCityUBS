@@ -1,5 +1,6 @@
 package greencity.client;
 
+import greencity.dto.UbsTableCreationDto;
 import greencity.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,32 @@ public class RestClient {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
             + "/user/findIdByEmail" + "?email=" + email, HttpMethod.GET, entity, Long.class)
+            .getBody();
+    }
+
+    /**
+     * Method finds uuid for ubs record creation.
+     *
+     * @return {@link UbsTableCreationDto} containing uuid.
+     * @author Oleh Bilonizhka
+     */
+    public UbsTableCreationDto getDataForUbsTableRecordCreation() {
+        HttpEntity<String> entity = new HttpEntity<>(setHeader());
+        UbsTableCreationDto dto = restTemplate.exchange(greenCityUserServerAddress
+            + "/user/createUbsRecord", HttpMethod.GET, entity, UbsTableCreationDto.class).getBody();
+        assert dto != null;
+        return dto;
+    }
+
+    /**
+     * Method finds user uuid by email.
+     *
+     * @param email of {@link User}.
+     */
+    public String findUuidByEmail(String email) {
+        HttpEntity<String> entity = new HttpEntity<>(setHeader());
+        return restTemplate.exchange(greenCityUserServerAddress
+            + "/user/findUuidByEmail" + "?email=" + email, HttpMethod.GET, entity, String.class)
             .getBody();
     }
 

@@ -1,6 +1,7 @@
 package greencity.dto;
 
 import java.util.Set;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
@@ -20,15 +21,15 @@ public class OrderResponseDto implements Serializable {
     @Valid
     private List<BagDto> bags;
     @NotNull
-    private Integer pointsToUse;
 
     @NotNull
-    private Integer sumToPay;
+    @Min(0)
+    private Integer pointsToUse;
 
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
-        message = "This sertifacate code is not valid") String> cerfiticates;
+        message = "This certificate code is not valid") String> certificates;
 
-    private Set<@Length(max = 11) String> additionalOrders;
+    private Set<@Length(max = 10) String> additionalOrders;
 
     @Length(max = 170)
     private String orderComment;

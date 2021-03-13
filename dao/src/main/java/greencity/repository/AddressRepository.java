@@ -1,9 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.lang.Language;
 import greencity.entity.user.ubs.Address;
-import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

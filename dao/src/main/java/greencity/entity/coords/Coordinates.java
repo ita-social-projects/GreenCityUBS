@@ -1,5 +1,6 @@
 package greencity.entity.coords;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,8 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class Coordinates {
+    @Column(nullable = true)
     private double latitude;
+    @Column(nullable = true)
     private double longitude;
 }

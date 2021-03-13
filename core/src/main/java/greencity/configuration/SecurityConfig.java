@@ -74,6 +74,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities."))
             .and()
             .authorizeRequests()
+            .antMatchers(HttpMethod.POST,
+                UBS_LINK + "/create-ubs-record")
+            .permitAll()
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/management/**")
             .hasAnyRole("ADMIN", "MODERATOR")

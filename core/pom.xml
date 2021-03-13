@@ -14,9 +14,22 @@
     <properties>
         <swagger.version>2.9.2</swagger.version>
         <jjwt.version>0.9.1</jjwt.version>
+        <liquibase.version>3.8.4</liquibase.version>
     </properties>
 
     <dependencies>
+        <!-- liquibase -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-maven-plugin</artifactId>
+            <version>${liquibase.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- other modules -->
         <dependency>
