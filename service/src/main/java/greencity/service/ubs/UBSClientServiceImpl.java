@@ -56,8 +56,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
-        if (!uuid.equals("null")) {
-            currentUserPoints = userRepository.findByUuid(uuid).getCurrentPoints();
+        User user = userRepository.findByUuid(uuid);
+        if (user != null) {
+            currentUserPoints = user.getCurrentPoints();
         }
 
         return new UserPointsAndAllBagsDto((List<Bag>) bagRepository.findAll(),
@@ -70,17 +71,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public List<PersonalDataDto> getSecondPageData(String uuid) {
-        if (uuid.equals("null")) {
+        if (userRepository.findByUuid(uuid) == null) {
             UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
             uuid = dto.getUuid();
             createRecordInUBStable(uuid);
         }
         Long userId = userRepository.findByUuid(uuid).getId();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
+
         if (allByUserId.isEmpty()) {
             return List.of(PersonalDataDto.builder().build());
         }
-
         return allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
     }
 
