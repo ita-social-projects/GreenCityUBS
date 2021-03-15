@@ -118,6 +118,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             map.put(temp.getId(), temp.getAmount());
         }
 
+        if (sumToPay < 500) {
+            throw new IncorrectValueException("Payment sum is too small to perform the order. "
+                + "Minimal order sum is 500UAH.");
+        }
+
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
         if (dto.getCertificates() != null) {
