@@ -93,8 +93,6 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
 
-        System.out.println(orderResponceDtoJSON);
-
         mockMvc.perform(post(ubsLink + "/processOrder")
             .content(orderResponceDtoJSON)
             .principal(principal)
