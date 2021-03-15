@@ -15,12 +15,11 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponceDto() {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
+            .additionalOrders(new HashSet<>(Arrays.asList("232534634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
-            .cerfiticates(Collections.emptySet())
+            .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .sumToPay(300)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")

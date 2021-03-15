@@ -78,22 +78,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getSecondPageDataForNewBuyer() {
-        User user = new User();
-        user.setId(13L);
-
-        when(restClient.getDataForUbsTableRecordCreation()).thenReturn(UbsTableCreationDto.builder()
-            .uuid("35467585763t4sfgchjfuyetf").build());
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(ubsUserRepository.getAllByUserId(13L)).thenReturn(Collections.emptyList());
-
-        List<PersonalDataDto> expected = List.of(PersonalDataDto.builder().build());
-        List<PersonalDataDto> actual = ubsService.getSecondPageData("null");
-
-        assertTrue(expected.get(0).equals(actual.get(0)));
-    }
-
-    @Test
     void checkCertificate() {
         when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
             .code("certificate")
