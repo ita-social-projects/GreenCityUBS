@@ -8,4 +8,5 @@
     <include file="db/changelog/logs/ch-addNotNullConstraint-tocerf-date-Bilonizhka.xml"/>
     <include file="db/changelog/logs/ch-changeFirstAndLastNames-capacity-Bilonizhka.xml"/>
     <include file="db/changelog/logs/ch-fixing-ubs-bugs.xml"/>
+    <include file="db/changelog/logs/ch-new-certificate-columns-Bilonizhka.xml"/>
 </databaseChangeLog>

@@ -12,7 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "date"})
+@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "creationDate", "expirationDate" })
 @Table(name = "certificate")
 public class Certificate {
     @Id
@@ -29,6 +29,9 @@ public class Certificate {
 
     private Integer points;
 
-    @Column(name = "certificate_date")
-    private LocalDate date;
+    @Column
+    private LocalDate expirationDate;
+
+    @Column
+    private LocalDate creationDate;
 }
