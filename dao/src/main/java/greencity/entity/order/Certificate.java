@@ -12,7 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "creationDate", "expirationDate" })
+@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "creationDate", "expirationDate"})
 @Table(name = "certificate")
 public class Certificate {
     @Id

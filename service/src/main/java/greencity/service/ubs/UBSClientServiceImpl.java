@@ -120,8 +120,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getPersonalData().getId() != null) {
             ubsUserFromDatabaseById =
                 ubsUserRepository.findById(dto.getPersonalData().getId())
-            .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                + dto.getPersonalData().getId()));
+                    .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
+                        + dto.getPersonalData().getId()));
         }
 
         UBSuser userToBeSaved = modelMapper.map(dto.getPersonalData(), UBSuser.class);
@@ -149,8 +149,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         userRepository.save(currentUser);
     }
 
-    public void formCertificatesToBeSaved(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                          Order order, int sumToPay) {
+    private void formCertificatesToBeSaved(OrderResponseDto dto, Set<Certificate> orderCertificates,
+        Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
@@ -163,7 +163,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 validateCertificate(certificate);
                 certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setOrder(order);
-                certificateRepository.save(certificate);
                 orderCertificates.add(certificate);
 
                 certPoints += certificate.getPoints();
@@ -178,7 +177,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    public int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
+    private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
         int sumToPay = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
