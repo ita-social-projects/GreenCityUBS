@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
-import greencity.constant.ErrorMessage;
 import greencity.dto.BagDto;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
@@ -36,6 +35,8 @@ import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import static greencity.constant.ErrorMessage.*;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -91,10 +92,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public CertificateDto checkCertificate(String code) {
         Certificate certificate = certificateRepository.findById(code)
-            .orElseThrow(() -> new CertificateNotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE + code));
+            .orElseThrow(() -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
         return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-            certificate.getDate());
+            certificate.getExpirationDate());
     }
 
     /**
@@ -105,68 +106,38 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
-            throw new IncorrectValueException("User doesn't have enough bonus points. The amount of user's points "
-                + currentUser.getCurrentPoints() + ". Entered value " + dto.getPointsToUse() + ".");
+            throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
         }
 
         Map<Integer, Integer> map = new HashMap<>();
-        double sumToPay = 0d;
-        for (BagDto temp : dto.getBags()) {
-            Bag bag = bagRepository.findById(temp.getId())
-                .orElseThrow(() -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + temp.getId()));
-            sumToPay += bag.getPrice() * temp.getAmount();
-            map.put(temp.getId(), temp.getAmount());
-        }
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(map, dto.getBags());
 
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
-        if (dto.getCertificates() != null) {
-            boolean tooManyCertificates = false;
-            int certPoints = 0;
-            for (String temp : dto.getCertificates()) {
-                if (tooManyCertificates) {
-                    throw new TooManyCertificatesEntered("Too many certificates was entered.");
-                }
-                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
-                    () -> new CertificateNotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE + temp));
-                validateCertificate(certificate);
-                certificate.setCertificateStatus(CertificateStatus.USED);
-                certificate.setOrder(order);
-                orderCertificates.add(certificate);
-
-                certPoints += certificate.getPoints();
-                if (certPoints > sumToPay) {
-                    tooManyCertificates = true;
-                    if (dto.getPointsToUse() > 0) {
-                        throw new IncorrectValueException("Bonus points shouldn't be used if sum to pay is "
-                            + "covered by certificates.");
-                    }
-                    dto.setPointsToUse((int) (sumToPay - certPoints));
-                }
-            }
-        }
+        formCertificatesToBeSaved(dto, orderCertificates, order, sumToPay);
 
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getPersonalData().getId() != null) {
-            ubsUserFromDatabaseById = ubsUserRepository.findById(dto.getPersonalData().getId()).orElseThrow(
-                () -> new IncorrectValueException("The set of user data with id " + dto.getPersonalData().getId()
-                    + " does not exist."));
+            ubsUserFromDatabaseById =
+                ubsUserRepository.findById(dto.getPersonalData().getId())
+                    .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
+                        + dto.getPersonalData().getId()));
         }
 
-        UBSuser enteredUbsUser = modelMapper.map(dto.getPersonalData(), UBSuser.class);
-        enteredUbsUser.setUser(currentUser);
-        if (enteredUbsUser.getId() == null || !enteredUbsUser.equals(ubsUserFromDatabaseById)) {
-            enteredUbsUser.setId(null);
-            ubsUserRepository.save(enteredUbsUser);
-            currentUser.getUbsUsers().add(enteredUbsUser);
+        UBSuser userToBeSaved = modelMapper.map(dto.getPersonalData(), UBSuser.class);
+        userToBeSaved.setUser(currentUser);
+        if (userToBeSaved.getId() == null || !userToBeSaved.equals(ubsUserFromDatabaseById)) {
+            userToBeSaved.setId(null);
+            ubsUserRepository.save(userToBeSaved);
+            currentUser.getUbsUsers().add(userToBeSaved);
         } else {
-            enteredUbsUser = ubsUserFromDatabaseById;
+            userToBeSaved = ubsUserFromDatabaseById;
         }
 
-        order.setOrderStatus(OrderStatus.NEW);
+        order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(map);
-        order.setUbsUser(enteredUbsUser);
+        order.setUbsUser(userToBeSaved);
         order.setUser(currentUser);
 
         currentUser.getOrders().add(order);
@@ -178,13 +149,56 @@ public class UBSClientServiceImpl implements UBSClientService {
         userRepository.save(currentUser);
     }
 
+    private void formCertificatesToBeSaved(OrderResponseDto dto, Set<Certificate> orderCertificates,
+        Order order, int sumToPay) {
+        if (dto.getCertificates() != null) {
+            boolean tooManyCertificates = false;
+            int certPoints = 0;
+            for (String temp : dto.getCertificates()) {
+                if (tooManyCertificates) {
+                    throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
+                }
+                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
+                    () -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
+                validateCertificate(certificate);
+                certificate.setCertificateStatus(CertificateStatus.USED);
+                certificate.setOrder(order);
+                orderCertificates.add(certificate);
+
+                certPoints += certificate.getPoints();
+                if (certPoints > sumToPay) {
+                    tooManyCertificates = true;
+                    if (dto.getPointsToUse() > 0) {
+                        throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
+                    }
+                    dto.setPointsToUse(sumToPay - certPoints);
+                }
+            }
+        }
+    }
+
+    private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
+        int sumToPay = 0;
+        for (BagDto temp : bags) {
+            Bag bag = bagRepository.findById(temp.getId())
+                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
+            sumToPay += bag.getPrice() * temp.getAmount();
+            map.put(temp.getId(), temp.getAmount());
+        }
+        if (sumToPay < 500) {
+            throw new IncorrectValueException(MINIMAL_SUM_VIOLATION);
+        }
+
+        return sumToPay;
+    }
+
     private void validateCertificate(Certificate certificate) {
         if (certificate.getCertificateStatus() != CertificateStatus.ACTIVE) {
-            throw new CertificateIsUsedException(ErrorMessage.CERTIFICATE_IS_USED + certificate.getCode());
+            throw new CertificateIsUsedException(CERTIFICATE_IS_USED + certificate.getCode());
         } else {
-            LocalDate future = certificate.getDate().plusYears(1);
+            LocalDate future = certificate.getExpirationDate().plusYears(1);
             if (future.isBefore(LocalDate.now())) {
-                throw new CertificateExpiredException(ErrorMessage.CERTIFICATE_EXPIRED + certificate.getCode());
+                throw new CertificateExpiredException(CERTIFICATE_EXPIRED + certificate.getCode());
             }
         }
     }

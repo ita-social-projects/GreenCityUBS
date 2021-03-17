@@ -16,6 +16,6 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
      * @return a list of {@link UBSuser} assigned to
      *         {@link greencity.entity.user.User}.
      */
-    @Query("SELECT u FROM UBSuser u LEFT JOIN FETCH u.userAddress address WHERE u.user.id = :userId")
+    @Query("SELECT u FROM UBSuser u JOIN FETCH u.userAddress address WHERE u.user.id = :userId")
     List<UBSuser> getAllByUserId(Long userId);
 }
