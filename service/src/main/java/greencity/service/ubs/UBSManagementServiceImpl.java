@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import static greencity.constant.ErrorMessage.*;
+
 @Service
 @AllArgsConstructor
 public class UBSManagementServiceImpl implements UBSManagementService {
@@ -32,14 +34,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
         List<Order> allOrders = getAllUndeliveredOrders();
         List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
-
         for (Coordinates temp : allCoords) {
             int currentCoordinatesCapacity =
                 addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-
             List<Order> currentCoordinatesOrders = allOrders.stream().filter(
                 o -> o.getUbsUser().getUserAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
-
             List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
                 .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
             allOrdersWithLitres.add(GroupedOrderDto.builder()
@@ -81,11 +80,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
 
             if (amountOfLitresInCluster > litres) {
-                List<Coordinates> closeRelativerSorted = new ArrayList<>(closeRelatives);
-                Collections.sort(closeRelativerSorted, getComparatorByDistanceFromCenter(centralCoord));
+                List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
+                Collections.sort(closeRelativesSorted, getComparatorByDistanceFromCenter(centralCoord));
                 int indexOfCoordToBeDeleted = -1;
                 while (amountOfLitresInCluster > litres) {
-                    Coordinates coordToBeDeleted = closeRelativerSorted.get(++indexOfCoordToBeDeleted);
+                    Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                     int anountOfLitresInCurrentOrder = addressRepository
                         .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
                     if (anountOfLitresInCurrentOrder > litres) {
@@ -121,7 +120,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
         for (Coordinates temp : result) {
             if (!allCoords.contains(temp)) {
-                throw new IncorrectValueException("There are no order with coordinates: " + temp.getLatitude()
+                throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
                     + ", " + temp.getLongitude());
             }
         }
@@ -184,10 +183,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
         if (distance < 0 || distance > 20) {
-            throw new IncorrectValueException("The distance should be between 0 and 20 km.");
+            throw new IncorrectValueException(INAVALID_DISTANCE_AMOUNT);
         }
         if (litres < 0 || litres > 10000) {
-            throw new IncorrectValueException("The amount of litres should be between 0 and 10.000 litres.");
+            throw new IncorrectValueException(INAVALID_LITRES_AMOUNT);
         }
     }
 
@@ -199,7 +198,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private List<Order> getAllUndeliveredOrders() {
         List<Order> allCoords = orderRepository.undeliveredAddresses();
         if (allCoords.isEmpty()) {
-            throw new ActiveOrdersNotFoundException("There are no any undelivered orders found.");
+            throw new ActiveOrdersNotFoundException(UNDELIVERED_ORDERS_NOT_FOUND);
         }
         return allCoords;
     }
