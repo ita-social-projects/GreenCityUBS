@@ -58,7 +58,7 @@ Though there are four GitHub projects ([GreenCity](https://github.com/ita-social
 6. `Enviroment variables`:
 
 
-![env-vars](./user_enviroment_variables.png)
+![env-vars](user_enviroment_variables.png)
 
 7. `Run`
 
