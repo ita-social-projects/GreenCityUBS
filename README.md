@@ -33,12 +33,39 @@ Though there are four GitHub projects ([GreenCity](https://github.com/ita-social
 
 ### 4.2. How to run
 
-1. You should create environmental variables that are defined in `application-dev.properties`.
+1. You should open in IntelliJ IDEA File -> `New Project` -> `Project From Version Control`
+   -> `Repository URL` -> `URL` (https://github.com/ita-social-projects/GreenCityUBS.git) -> `Clone`.
 
-2. You should create database `greencity`.
+
+2. Open `Terminal` write `git checkout -b dev` (this create new local branch "dev").
 
 
-All these variables you can set in Intellij Idea. For instance:
+3. After this `git pull origin dev` (for update last version from branch dev)
+
+
+4. Create new database in Postgres (`greencityubs`).
+
+
+5. `Add Configuration` -> `+` -> `Application`.
+
+
+* `Name` : `UbsApplication`.
+
+* `Use classpath of modules`:`core`
+* `JRE` : `11`.
+
+
+6. `Enviroment variables`:
+
+
+![env-vars](./docs-photos/user_enviroment_variables.png)
+
+7. `Run`
+
+
+8. If you did everything correctly, you should be able to access swagger by this URL: http://localhost:8050/swagger-ui.html#/
+
+Also all these variables you can set in Intellij Idea. For instance:
 
 ```properties
 spring.datasource.url=${DATASOURCE_URL}
@@ -60,9 +87,8 @@ spring.social.facebook.app-secret=${FACEBOOK_APP_SECRET}
 greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 ```
 
-![env-vars](./docs-photos/env-example.png)
 
-3. If you did everything correctly, you should be able to access swagger by this URL: http://localhost:8050/swagger-ui.html#/
+
 
 ### 4.3. How to work with swagger UI in our project
 
@@ -72,7 +98,9 @@ greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 
 2. Use the following link to open Swagger UI: http://localhost:8060/swagger-ui.html#/
 
-3. Use POST method with `/ownSecurity/signUp` to create an account. If you set a valid email credentials, you should receive an email with verification link. Verify the registration by following that link. We highly recommend to use gmail, it's free of charge and easy to get going: [how to allow email sending from gmail](https://support.google.com/accounts/answer/6010255?authuser=2&p=less-secure-apps&hl=en&authuser=2&visit_id=637098532320915318-4087823934&rd=1),  [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication). Alternatively you can drop a record in `verify_email` table on your local database.
+3. Use POST method with `/ownSecurity/signUp` to create an account.
+   If you set a valid email credentials, you should receive an email with verification link. Verify the registration by following that link. We highly recommend to use gmail, it's free of charge and easy to get going: [how to allow email sending from gmail](https://support.google.com/accounts/answer/6010255?authuser=2&p=less-secure-apps&hl=en&authuser=2&visit_id=637098532320915318-4087823934&rd=1),  [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication).
+   Alternatively you can drop a record in `verify_email` table on your local database. First you should update user role : `UPDATE users SET role = 1 WHERE id = your_user_id;`. After this `DELETE FROM verify_emails WHERE user_id = your_user_id;`
 
 4. Use POST method with `/ownSecurity/signIn` to sign in. After entering the credentials you should receive access and refresh tokens.
 
