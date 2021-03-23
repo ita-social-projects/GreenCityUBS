@@ -56,7 +56,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
         checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
         while (allCoords.size() > 0) {
@@ -87,9 +87,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                     int anountOfLitresInCurrentOrder = addressRepository
                         .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
-                    if (anountOfLitresInCurrentOrder > litres) {
-                        allCoords.remove(coordToBeDeleted);
-                    }
                     amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
                     closeRelatives.remove(coordToBeDeleted);
                 }

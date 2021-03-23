@@ -20,20 +20,35 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     Set<Coordinates> undeliveredOrdersCoords();
 
     /**
+     * Method returns {@link Coordinates} of undelivered orders which not exceed
+     * given capacity limit.
+     *
+     * @return list of {@link Coordinates}.
+     */
+    @Query("select a.coordinates "
+        + "from UBSuser u "
+        + "join Address a on a = u.userAddress "
+        + "join Order o on u = o.ubsUser "
+        + "join o.amountOfBagsOrdered bags "
+        + "join Bag b on key(bags) = b.id "
+        + "where o.orderStatus = 'PAID' "
+        + "and a.coordinates is not null "
+        + "group by a.coordinates "
+        + "having sum(bags*b.capacity) <= :maxCapacity")
+    Set<Coordinates> undeliveredOrdersCoordsWithCapacityLimit(long maxCapacity);
+
+    /**
      * Method returns amount of litres to be delivered in 1 or same address orders.
      *
      * @return {@link Integer}.
      */
-    @Query(nativeQuery = true, value = "select sum(amount*capacity) "
-        + "from address "
-        + "join ubs_user "
-        + "on address.id = ubs_user.address_id "
-        + "join orders "
-        + "on ubs_user.id = orders.ubs_user_id "
-        + "join order_bag_mapping "
-        + "on orders.id = order_bag_mapping.order_id "
-        + "join bag "
-        + "on order_bag_mapping.bag_id = bag.id "
-        + "where latitude = :latitude and longitude = :longitude and order_status = 'NEW';")
+    @Query("select sum(bags * b.capacity) "
+        + "from UBSuser u "
+        + "join Address a on a = u.userAddress "
+        + "join Order o on u = o.ubsUser "
+        + "join o.amountOfBagsOrdered bags "
+        + "join Bag b on key(bags) = b.id "
+        + "where o.orderStatus = 'PAID' "
+        + "and a.coordinates.latitude  = :latitude and a.coordinates.longitude = :longitude ")
     int capacity(double latitude, double longitude);
 }
