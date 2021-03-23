@@ -5,9 +5,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 
 public class ModelUtils {
 
@@ -107,6 +105,234 @@ public class ModelUtils {
             .latitude(49.83)
             .longitude(23.88)
             .build();
+    }
+
+    public static Set<Coordinates> getCoordinatesSet() {
+        Set<Coordinates> set = new HashSet<>();
+        set.add(Coordinates.builder()
+            .latitude(49.894)
+            .longitude(24.107)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.771)
+            .longitude(23.909)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.801)
+            .longitude(24.164)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.854)
+            .longitude(24.069)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.796)
+            .longitude(24.931)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.812)
+            .longitude(24.035)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.871)
+            .longitude(24.029)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.666)
+            .longitude(24.013)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.795)
+            .longitude(24.052)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.856)
+            .longitude(24.049)
+            .build());
+        set.add(Coordinates.builder()
+            .latitude(49.862)
+            .longitude(24.039)
+            .build());
+        return set;
+    }
+
+    public static List<Order> getOrdersToGroupThem() {
+        List<Order> orders = new ArrayList<>();
+        long id = 0L;
+        long userId = 10L;
+        for (Coordinates coordinates : getCoordinatesSet()) {
+            orders.add(Order.builder()
+                .id(++id)
+                .ubsUser(UBSuser.builder()
+                    .id(++userId)
+                    .userAddress(Address.builder()
+                        .coordinates(coordinates)
+                        .build())
+                    .build())
+                .build());
+        }
+        return orders;
+    }
+
+    public static List<GroupedOrderDto> getGroupedOrders() {
+        List<GroupedOrderDto> list = new ArrayList<>();
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(75)
+            .groupOfOrders(List.of(OrderDto.builder()
+                    .latitude(49.854)
+                    .longitude(24.069)
+                    .build(),
+                OrderDto.builder()
+                    .latitude(49.856)
+                    .longitude(24.049)
+                    .build(),
+                OrderDto.builder()
+                    .latitude(49.862)
+                    .longitude(24.039)
+                    .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
+        return list;
+    }
+
+    public static List<GroupedOrderDto> getGroupedOrdersFor60LitresLimit() {
+        List<GroupedOrderDto> list = new ArrayList<>();
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(50)
+            .groupOfOrders(List.of(
+                OrderDto.builder()
+                    .latitude(49.856)
+                    .longitude(24.049)
+                    .build(),
+                OrderDto.builder()
+                    .latitude(49.862)
+                    .longitude(24.039)
+                    .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.854)
+                .longitude(24.069)
+                .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
+        return list;
     }
 
 }

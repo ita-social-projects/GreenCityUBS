@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.*;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
 import greencity.dto.OrderDto;
@@ -8,16 +9,12 @@ import greencity.entity.order.Order;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
-
+import greencity.repository.OrderRepository;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -56,7 +53,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
         checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
+        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
         while (allCoords.size() > 0) {
@@ -87,9 +84,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                     int anountOfLitresInCurrentOrder = addressRepository
                         .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
-                    if (anountOfLitresInCurrentOrder > litres) {
-                        allCoords.remove(coordToBeDeleted);
-                    }
                     amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
                     closeRelatives.remove(coordToBeDeleted);
                 }
@@ -112,7 +106,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -231,11 +225,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
      * @return list of {@link Coordinates} - start coordinates with it's in distant
-     *         relatives.
+     * relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -303,7 +297,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
+                                                          List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =

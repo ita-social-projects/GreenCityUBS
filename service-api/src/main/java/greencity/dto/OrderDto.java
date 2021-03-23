@@ -8,6 +8,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class OrderDto {
     private String firstName;
     private String lastName;
