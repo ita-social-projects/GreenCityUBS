@@ -20,8 +20,8 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     Set<Coordinates> undeliveredOrdersCoords();
 
     /**
-     * Method returns {@link Coordinates} of undelivered orders
-     * which not exceed given capacity limit.
+     * Method returns {@link Coordinates} of undelivered orders which not exceed
+     * given capacity limit.
      *
      * @return list of {@link Coordinates}.
      */
@@ -36,7 +36,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
         + "group by a.coordinates "
         + "having sum(bags*b.capacity) <= :maxCapacity")
     Set<Coordinates> undeliveredOrdersCoordsWithCapacityLimit(long maxCapacity);
-
 
     /**
      * Method returns amount of litres to be delivered in 1 or same address orders.
