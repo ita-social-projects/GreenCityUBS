@@ -44,6 +44,7 @@ public class OrderController {
     @ApiOperation(value = "Get current user points and all bags list.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
@@ -65,6 +66,7 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CertificateDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
@@ -86,6 +88,7 @@ public class OrderController {
     @ApiOperation(value = "Get user's personal data.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PersonalDataDto[].class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
@@ -108,13 +111,33 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<HttpStatus> processOrder(
+    public ResponseEntity<PaymentRequestDto> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
-        ubsClientService.saveFullOrderToDB(dto, userUuid);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsClientService.saveFullOrderToDB(dto, userUuid));
+    }
+
+    /**
+     * Controller checks if received data is valid and stores payment info if is.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Receive payment.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/receivePayment")
+    public ResponseEntity receivePayment(
+        @Valid PaymentResponseDto dto
+    ) {
+        ubsClientService.validatePayment(dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

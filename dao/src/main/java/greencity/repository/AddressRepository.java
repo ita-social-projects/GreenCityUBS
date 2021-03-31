@@ -16,7 +16,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select a.coordinates from Address a inner join UBSuser u on a = u.userAddress "
         + "inner join Order o on u = o.ubsUser "
-        + "where o.orderStatus = 'NEW' and a.coordinates is not null")
+        + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     Set<Coordinates> undeliveredOrdersCoords();
 
     /**
@@ -34,6 +34,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
         + "on orders.id = order_bag_mapping.order_id "
         + "join bag "
         + "on order_bag_mapping.bag_id = bag.id "
-        + "where latitude = :latitude and longitude = :longitude and order_status = 'NEW';")
+        + "where latitude = :latitude and longitude = :longitude and order_status = 'PAID';")
     int capacity(double latitude, double longitude);
 }

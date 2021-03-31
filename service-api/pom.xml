@@ -72,6 +72,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- sha-1 encryption -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+
+
     </dependencies>
 
 
