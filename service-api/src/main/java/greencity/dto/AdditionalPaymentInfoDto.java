@@ -14,7 +14,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class AdditionalPaymentInfoDto {
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     private String bank_name;
     private String bank_country;
     private String bank_response_code;

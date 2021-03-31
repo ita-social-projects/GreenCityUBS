@@ -135,8 +135,7 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity receivePayment(
-        @Valid PaymentResponseDto dto
-    ) {
+        @Valid PaymentResponseDto dto) {
         ubsClientService.validatePayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

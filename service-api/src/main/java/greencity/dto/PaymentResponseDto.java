@@ -15,7 +15,7 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @ToString
 public class PaymentResponseDto {
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     @Length(max = 1024)
     private String order_id;
     @Length(max = 12)

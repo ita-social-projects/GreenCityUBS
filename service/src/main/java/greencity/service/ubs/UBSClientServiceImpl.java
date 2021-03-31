@@ -57,7 +57,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final RestClient restClient;
-    //needed to be encoded
+    // needed to be encoded
     private final String password = "test";
     private final String merchantId = "1396424";
 
@@ -71,11 +71,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
-                    .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
+            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         Payment orderPayment = order.getPayment();
         if (orderPayment.getCurrency() != dto.getCurrency()
-            || orderPayment.getAmount() != Long.valueOf(dto.getAmount())
-        ) {
+            || orderPayment.getAmount() != Long.valueOf(dto.getAmount())) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
@@ -176,8 +175,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-                                     Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
-                                     User currentUser, int sumToPay) {
+        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+        User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
@@ -229,7 +228,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                              Order order, int sumToPay) {
+        Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
