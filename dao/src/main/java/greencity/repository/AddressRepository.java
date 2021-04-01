@@ -16,7 +16,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select a.coordinates from Address a inner join UBSuser u on a = u.userAddress "
         + "inner join Order o on u = o.ubsUser "
-        + "where o.orderStatus = 'NEW' and a.coordinates is not null")
+        + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     Set<Coordinates> undeliveredOrdersCoords();
 
     /**

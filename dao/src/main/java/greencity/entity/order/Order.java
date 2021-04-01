@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -95,4 +96,9 @@ public class Order {
     @Column(name = "additional_order")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<String> additionalOrders;
+
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }

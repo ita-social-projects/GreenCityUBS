@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;

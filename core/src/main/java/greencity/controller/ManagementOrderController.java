@@ -45,6 +45,7 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/all-undelivered")
@@ -63,6 +64,7 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
@@ -80,6 +82,7 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
