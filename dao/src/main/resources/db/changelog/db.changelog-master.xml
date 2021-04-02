@@ -10,4 +10,6 @@
     <include file="db/changelog/logs/ch-fixing-ubs-bugs.xml"/>
     <include file="db/changelog/logs/ch-new-certificate-columns-Bilonizhka.xml"/>
     <include file="db/changelog/logs/ch-addUniqueConstraint-toUuid-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-add-column-telegram-chat-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-bot-Pikhotskyi.xml"/>
 </databaseChangeLog>
