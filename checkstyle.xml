@@ -46,6 +46,8 @@
         <property name="eachLine" value="true"/>
     </module>
 
+
+
     <module name="RegexpMultiline">
         <property name="message" value="Blank line at start of block should be removed"/>
         <property name="format" value="(?&lt;=\{\s{0,99}$)^$"/>
@@ -161,6 +163,9 @@
             <message key="name.invalidPattern"
                      value="Member name ''{0}'' must match pattern ''{1}''."/>
         </module>
+
+        <module name="SuppressionCommentFilter"/>
+
         <module name="ParameterName">
             <property name="format" value="^[a-z]([a-z0-9][a-zA-Z0-9]*)?$"/>
             <message key="name.invalidPattern"

@@ -1,12 +1,17 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.*;
-import java.io.IOException;
+import greencity.exceptions.ActiveOrdersNotFoundException;
+import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.CertificateExpiredException;
+import greencity.exceptions.CertificateIsUsedException;
+import greencity.exceptions.CertificateNotFoundException;
+import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.PaymentValidationException;
+import greencity.exceptions.TooManyCertificatesEntered;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,8 +70,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler(TooManyCertificatesEntered.class)
-    public final ResponseEntity<Object> handleInvalidDistance(TooManyCertificatesEntered ex, WebRequest request) {
+    @ExceptionHandler({TooManyCertificatesEntered.class, PaymentValidationException.class})
+    public final ResponseEntity<Object> handleInvalidDistance(RuntimeException ex, WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);

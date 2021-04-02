@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +22,7 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         + "on address.id = ubs_user.address_id "
         + "inner join orders "
         + "on orders.ubs_user_id = ubs_user.id "
-        + "where orders.order_status = 'NEW'"
+        + "where orders.order_status = 'PAID'"
         + "and address.latitude = :latitude "
         + "and address.longitude = :longitude")
     List<Order> undeliveredOrdersGroupThem(@Param(value = "latitude") double latitude,
@@ -34,6 +35,6 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
      */
     @Query("select o from Address a inner join UBSuser u on a = u.userAddress "
         + "inner join Order o on u = o.ubsUser "
-        + "where o.orderStatus = 'NEW' and a.coordinates is not null")
+        + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     List<Order> undeliveredAddresses();
 }

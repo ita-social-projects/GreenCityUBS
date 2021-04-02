@@ -73,7 +73,7 @@ public class RestClient {
      */
     public void updateUserLastActivityTime(Long userId, Date userLastActivityTime) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
         String strDate = dateFormat.format(userLastActivityTime);
         restTemplate.exchange(greenCityUserServerAddress + "/user/"
             + userId + "/updateUserLastActivityTime/" + strDate,
