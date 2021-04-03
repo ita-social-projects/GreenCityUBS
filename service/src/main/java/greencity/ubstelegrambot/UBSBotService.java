@@ -51,15 +51,6 @@ public class UBSBotService {
         }
     }
 
-    /**
-     * test.
-     */
-    public void test() {
-        User user = userRepository.findByUuid("100");
-        SendMessage sendMessage = new SendMessage(user.getTelegramBot().getChatId().toString(), "test");
-        sendMessageToUser(sendMessage);
-    }
-
     private void sendMessageToUser(SendMessage sendMessage) {
         try {
             ubsTelegramBot.execute(sendMessage);

@@ -29,13 +29,4 @@ public class SenderScheduledMessages {
     public void sendMessageWhenGarbageTruckArrives() {
         ubsBotService.sendMessageWhenGarbageTruckArrives();
     }
-
-    /**
-     * The method every day at 09:00 am send a message to users that have not paid
-     * of orders within three days.
-     */
-    @Scheduled(cron = "0/30 * * * * *", zone = "Europe/Kiev")
-    public void test() {
-        ubsBotService.test();
-    }
 }
