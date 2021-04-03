@@ -4,6 +4,8 @@ import greencity.client.RestClient;
 import greencity.dto.BagDto;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
+import greencity.dto.PaymentRequestDto;
+import greencity.dto.PaymentResponseDto;
 import greencity.dto.PersonalDataDto;
 import greencity.dto.UbsTableCreationDto;
 import greencity.dto.UserPointsAndAllBagsDto;
@@ -12,6 +14,7 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BagNotFoundException;
@@ -19,11 +22,14 @@ import greencity.exceptions.CertificateExpiredException;
 import greencity.exceptions.CertificateIsUsedException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.PaymentValidationException;
 import greencity.exceptions.TooManyCertificatesEntered;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
+import greencity.util.EncryptionUtil;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.time.LocalDate;
@@ -49,7 +55,36 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UBSuserRepository ubsUserRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
+    private final OrderRepository orderRepository;
     private final RestClient restClient;
+    // needed to be encoded
+    private final String password = "test";
+    private final String merchantId = "1396424";
+
+    @Override
+    @Transactional
+    public void validatePayment(PaymentResponseDto dto) {
+        if (dto.getResponse_status().equals("failure")) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, password)) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
+            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
+        Payment orderPayment = order.getPayment();
+        if (orderPayment.getCurrency() != dto.getCurrency()
+            || orderPayment.getAmount() != Long.valueOf(dto.getAmount())) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        if (dto.getOrder_status().equals("approved")) {
+            order.setOrderStatus(OrderStatus.PAID);
+        }
+        orderPayment = modelMapper.map(dto, Payment.class);
+        order.setPayment(orderPayment);
+
+        orderRepository.save(order);
+    }
 
     /**
      * {@inheritDoc}
@@ -103,53 +138,96 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public void saveFullOrderToDB(OrderResponseDto dto, String uuid) {
+    public PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
             throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
         }
 
-        Map<Integer, Integer> map = new HashMap<>();
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(map, dto.getBags());
+        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+        if (sumToPay < dto.getPointsToUse()) {
+            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
+        } else {
+            sumToPay -= dto.getPointsToUse();
+        }
 
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
-        formCertificatesToBeSaved(dto, orderCertificates, order, sumToPay);
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser ubsUserFromDatabaseById = null;
-        if (dto.getPersonalData().getId() != null) {
-            ubsUserFromDatabaseById =
-                ubsUserRepository.findById(dto.getPersonalData().getId())
-                    .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                        + dto.getPersonalData().getId()));
-        }
+        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
-        UBSuser userToBeSaved = modelMapper.map(dto.getPersonalData(), UBSuser.class);
-        userToBeSaved.setUser(currentUser);
-        if (userToBeSaved.getId() == null || !userToBeSaved.equals(ubsUserFromDatabaseById)) {
-            userToBeSaved.setId(null);
-            ubsUserRepository.save(userToBeSaved);
-            currentUser.getUbsUsers().add(userToBeSaved);
-        } else {
-            userToBeSaved = ubsUserFromDatabaseById;
-        }
+        order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
-        order.setOrderStatus(OrderStatus.FORMED);
-        order.setCertificates(orderCertificates);
-        order.setAmountOfBagsOrdered(map);
-        order.setUbsUser(userToBeSaved);
-        order.setUser(currentUser);
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
+        return formPaymentRequest(order.getId(), sumToPay);
+    }
+
+    private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
         currentUser.getOrders().add(order);
-        if (dto.getPointsToUse() != 0) {
-            currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
-            currentUser.getChangeOfPoints().put(order.getOrderDate(), -dto.getPointsToUse());
+        if (pointsToUse != 0) {
+            currentUser.setCurrentPoints(currentUser.getCurrentPoints() - pointsToUse);
+            currentUser.getChangeOfPoints().put(order.getOrderDate(), -pointsToUse);
         }
-
         userRepository.save(currentUser);
     }
 
-    private void formCertificatesToBeSaved(OrderResponseDto dto, Set<Certificate> orderCertificates,
+    private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
+        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+        User currentUser, int sumToPay) {
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setCertificates(orderCertificates);
+        order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
+        order.setUbsUser(userData);
+        order.setUser(currentUser);
+
+        Payment payment = Payment.builder()
+            .amount((long) (sumToPay * 100))
+            .orderStatus("created")
+            .currency("UAH")
+            .order(order).build();
+        order.setPayment(payment);
+        orderRepository.save(order);
+
+        return order;
+    }
+
+    private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
+        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+            .orderId(orderId.toString())
+            .orderDescription("ubs courier")
+            .currency("UAH")
+            .amount(sumToPay * 100).build();
+
+        paymentRequestDto.setSignature(EncryptionUtil.formRequestSignature(paymentRequestDto, password, merchantId));
+
+        return paymentRequestDto;
+    }
+
+    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, User currentUser) {
+        UBSuser ubsUserFromDatabaseById = null;
+        if (dto.getId() != null) {
+            ubsUserFromDatabaseById =
+                ubsUserRepository.findById(dto.getId())
+                    .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
+                        + dto.getId()));
+        }
+
+        UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
+        mappedFromDtoUser.setUser(currentUser);
+        if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
+            mappedFromDtoUser.setId(null);
+            ubsUserRepository.save(mappedFromDtoUser);
+            currentUser.getUbsUsers().add(mappedFromDtoUser);
+            return mappedFromDtoUser;
+        } else {
+            return ubsUserFromDatabaseById;
+        }
+    }
+
+    private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
@@ -164,17 +242,20 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
+                sumToPay -= certificate.getPoints();
 
                 certPoints += certificate.getPoints();
-                if (certPoints > sumToPay) {
+                if (certPoints >= sumToPay) {
+                    sumToPay = 0;
                     tooManyCertificates = true;
                     if (dto.getPointsToUse() > 0) {
                         throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
                     }
-                    dto.setPointsToUse(sumToPay - certPoints);
                 }
             }
         }
+
+        return sumToPay;
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {

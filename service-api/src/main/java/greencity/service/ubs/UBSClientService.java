@@ -2,12 +2,21 @@ package greencity.service.ubs;
 
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
+import greencity.dto.PaymentRequestDto;
+import greencity.dto.PaymentResponseDto;
 import greencity.dto.PersonalDataDto;
 import greencity.dto.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import java.util.List;
 
 public interface UBSClientService {
+    /**
+     * Method validates received payment response.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     */
+    void validatePayment(PaymentResponseDto dto);
+
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
@@ -40,7 +49,8 @@ public interface UBSClientService {
      *
      * @param dto  {@link OrderResponseDto} user entered data;
      * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    void saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid);
 }
