@@ -117,7 +117,12 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <!-- telegrambot -->
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-spring-boot-starter</artifactId>
+            <version>4.9.2</version>
+        </dependency>
     </dependencies>
 
     <build>

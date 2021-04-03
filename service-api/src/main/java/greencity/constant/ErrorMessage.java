@@ -18,6 +18,9 @@ public class ErrorMessage {
     public static String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static String MINIMAL_SUM_VIOLATION = "The minimal order sum should be 500 UAH.";
     public static String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
+    public static String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
+        "The user already has connected to telegram bot.";
+    public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
 
     /**
      * Constructor.
