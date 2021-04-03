@@ -16,6 +16,9 @@ public class ErrorMessage {
     public static String INAVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
     public static String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static String MINIMAL_SUM_VIOLATION = "The minimal order sum should be 500 UAH.";
+    public static String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
+        "The user already has connected to telegram bot.";
+    public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
 
     /**
      * Constructor.

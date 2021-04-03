@@ -28,9 +28,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Fetch;
 
 @Entity
 @NoArgsConstructor
@@ -40,7 +38,6 @@ import org.hibernate.annotations.Fetch;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode
-@ToString(exclude = {"id", "user", "ubs_user"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

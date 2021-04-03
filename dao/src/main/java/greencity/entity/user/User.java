@@ -1,6 +1,7 @@
 package greencity.entity.user;
 
 import greencity.entity.order.Order;
+import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.ubs.UBSuser;
 import lombok.*;
 
@@ -43,4 +44,7 @@ public class User {
 
     @Column(nullable = false, columnDefinition = "varchar(60)")
     private String uuid;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "telegram_bot_id", referencedColumnName = "id")
+    private TelegramBot telegramBot;
 }

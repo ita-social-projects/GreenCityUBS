@@ -1,8 +1,10 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
+
 import java.util.List;
 
+import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +38,14 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'NEW' and a.coordinates is not null")
     List<Order> undeliveredAddresses();
+
+    /**
+     * Finds list of Orders which the route and date garbage collection is defined.
+     *
+     * @return a {@link List} of {@link Order}.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM orders o INNER JOIN  ubs_user u ON o.ubs_user_id = u.id "
+            + "WHERE o.order_status LIKE 'ON_THE_ROUTE'")
+    List<Order> getAllUsersInWhichTheRouteIsDefined();
 }
