@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-
 /**
  * The method returns all certificates with sorting in desc order.
  *
