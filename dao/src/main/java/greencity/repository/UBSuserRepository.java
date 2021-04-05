@@ -4,6 +4,7 @@ import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,15 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
      */
     @Query("SELECT u FROM UBSuser u JOIN FETCH u.userAddress address WHERE u.user.id = :userId")
     List<UBSuser> getAllByUserId(Long userId);
+
+    /**
+     * Finds list of UBSuser who have not paid of the order within three days.
+     *
+     * @param localDate - date when the user made an order.
+     * @return a {@link List} of {@link UBSuser} - which need to send a message.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM ubs_user u INNER JOIN orders o ON u.id = o.ubs_user_id "
+            + "WHERE CAST(o.order_date AS DATE) = :localDate AND o.order_status LIKE 'FORMED'")
+    List<UBSuser> getAllUBSusersWhoHaveNotPaid(LocalDate localDate);
 }
