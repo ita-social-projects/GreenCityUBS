@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 @Table(name = "ubs_user")
 @Entity
-@ToString(exclude = {"orders"})
 public class UBSuser {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")

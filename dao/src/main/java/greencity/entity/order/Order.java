@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,9 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Fetch;
 
 @Entity
 @NoArgsConstructor
@@ -40,7 +39,6 @@ import org.hibernate.annotations.Fetch;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode
-@ToString(exclude = {"id", "user", "ubs_user"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -95,4 +93,9 @@ public class Order {
     @Column(name = "additional_order")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<String> additionalOrders;
+
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }
