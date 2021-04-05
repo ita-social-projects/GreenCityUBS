@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.dto.CertificateDtoForSearching;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
-
 import greencity.dto.PageableDto;
 import java.util.List;
 import java.util.Set;

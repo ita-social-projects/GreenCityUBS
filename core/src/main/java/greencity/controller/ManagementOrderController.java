@@ -83,8 +83,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
-                                                             @RequestParam(required = false, defaultValue = "3000")
-                                                                 Integer litres) {
+        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
     }
