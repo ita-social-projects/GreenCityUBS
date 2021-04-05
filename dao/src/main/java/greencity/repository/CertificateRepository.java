@@ -17,13 +17,6 @@ import org.springframework.stereotype.Repository;
  */
 public interface CertificateRepository extends CrudRepository<Certificate, String> {
     /**
-     * The query for searching all certificates with sorting in desc order.
-     *
-     * @return list of {@link Certificate}.
-     * @author Nazar Struk
-     */
-    @Query(value = "SELECT c from Certificate c order by c.creationDate DESC")
-    Page<Certificate> getAll(Pageable page);
      * Method update status to expired for all {@link Certificate} in which
      * expiration date is off.
      */
@@ -32,4 +25,13 @@ public interface CertificateRepository extends CrudRepository<Certificate, Strin
         + "where expirationDate < current_date and "
         + "certificateStatus in ('ACTIVE', 'NEW')")
     void updateCertificateStatusToExpired();
+
+    /**
+     * The query for searching all certificates with sorting in desc order.
+     *
+     * @return list of {@link Certificate}.
+     * @author Nazar Struk
+     */
+    @Query(value = "SELECT c from Certificate c order by c.creationDate DESC")
+    Page<Certificate> getAll(Pageable page);
 }
