@@ -1,20 +1,22 @@
 package greencity.service.ubs;
 
-import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.OrderDto;
+import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
 
+import greencity.repository.CertificateRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import static greencity.constant.ErrorMessage.*;
@@ -25,6 +27,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
+    private final CertificateRepository certificateRepository;
 
     /**
      * {@inheritDoc}
@@ -312,5 +315,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderslist.stream().map(order -> modelMapper.map(order, OrderDto.class)).collect(Collectors.toList()));
         cluster.setAmountOfLitres(amountOfLitresInCluster);
         allClusters.add(cluster);
+    }
+
+    @Override
+    public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page) {
+        Page<Certificate> certificates = certificateRepository.getAll(page);
+        return getAllCertificatesTranslationDto(certificates);
+    }
+
+    private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
+        List<CertificateDtoForSearching> certificateForSearchingDTOS = pages
+            .stream()
+            .map(
+                certificatesTranslations -> modelMapper.map(certificatesTranslations, CertificateDtoForSearching.class))
+            .collect(Collectors.toList());
+        return new PageableDto<>(
+            certificateForSearchingDTOS,
+            pages.getTotalElements(),
+            pages.getPageable().getPageNumber(),
+            pages.getTotalPages());
     }
 }

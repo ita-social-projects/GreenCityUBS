@@ -1,10 +1,12 @@
 package greencity.service.ubs;
 
+import greencity.dto.CertificateDtoForSearching;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
-
+import greencity.dto.PageableDto;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Pageable;
 
 public interface UBSManagementService {
     /**
@@ -37,4 +39,12 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters();
+
+    /**
+     * Method returns all certificates.
+     *
+     * @return List of {@link greencity.entity.order.Certificate} lists.
+     * @author Nazar Struk
+     */
+    PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page);
 }

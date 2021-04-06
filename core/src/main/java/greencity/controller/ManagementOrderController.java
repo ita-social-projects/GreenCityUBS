@@ -1,26 +1,22 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
+import greencity.dto.CertificateDtoForSearching;
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
+import greencity.dto.PageableDto;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
+import io.swagger.annotations.*;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -33,6 +29,25 @@ public class ManagementOrderController {
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService) {
         this.ubsManagementService = ubsManagementService;
+    }
+
+    /**
+     * Controller getting all certificates with sorting possibility.
+     *
+     * @return list of all certificates.
+     * @author Nazar Struk
+     */
+    @ApiOperation(value = "Get all certificates")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getAllCertificates")
+    @ApiPageable
+    public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
+        @ApiIgnore Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllCertificates(pageable));
     }
 
     /**
