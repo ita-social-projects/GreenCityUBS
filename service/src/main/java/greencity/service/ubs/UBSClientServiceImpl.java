@@ -1,6 +1,17 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.MINIMAL_SUM_VIOLATION;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.SUM_IS_COVERED_BY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import greencity.dto.BagDto;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
@@ -13,6 +24,7 @@ import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
@@ -30,9 +42,9 @@ import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.util.EncryptionUtil;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,8 +53,6 @@ import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import static greencity.constant.ErrorMessage.*;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -169,14 +179,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         currentUser.getOrders().add(order);
         if (pointsToUse != 0) {
             currentUser.setCurrentPoints(currentUser.getCurrentPoints() - pointsToUse);
-            currentUser.getChangeOfPoints().put(order.getOrderDate(), -pointsToUse);
+            currentUser.getChangeOfPointsList().add(ChangeOfPoints.builder()
+                .amount(-pointsToUse)
+                .date(order.getOrderDate())
+                .user(currentUser)
+                .order(order)
+                .build());
         }
         userRepository.save(currentUser);
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
-        User currentUser, int sumToPay) {
+                                   Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+                                   User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
@@ -228,7 +243,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-        Order order, int sumToPay) {
+                                                              Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
