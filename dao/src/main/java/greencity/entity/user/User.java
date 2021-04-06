@@ -44,7 +44,7 @@ public class User {
     @Column(columnDefinition = "int default 0")
     private Integer currentPoints;
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
     @Column(columnDefinition = "int default 0")
