@@ -24,7 +24,6 @@ import lombok.Setter;
 @Builder
 @Table(name = "change_of_points")
 public class ChangeOfPoints {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,8 +41,4 @@ public class ChangeOfPoints {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
-
-
-
-
 }

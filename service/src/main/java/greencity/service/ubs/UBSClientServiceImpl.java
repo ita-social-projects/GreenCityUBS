@@ -190,8 +190,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-                                   Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
-                                   User currentUser, int sumToPay) {
+        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+        User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
@@ -243,7 +243,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                              Order order, int sumToPay) {
+        Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
