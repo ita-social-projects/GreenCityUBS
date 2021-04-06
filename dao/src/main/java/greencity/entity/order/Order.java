@@ -5,6 +5,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.CollectionTable;
@@ -54,6 +55,9 @@ public class Order {
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
+
+    @OneToMany(mappedBy = "order")
+    private List<ChangeOfPoints> changeOfPointsList;
 
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",
