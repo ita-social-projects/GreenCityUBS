@@ -1,9 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDtoForSearching;
-import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.PageableDto;
+import greencity.dto.*;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -47,4 +44,11 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page);
+
+    /**
+     * Method add a certificates.
+     *
+     * @author Nazar Struk
+     */
+    void addCertificate(CertificateDtoForAdding add);
 }

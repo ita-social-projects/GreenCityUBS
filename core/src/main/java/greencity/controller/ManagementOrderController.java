@@ -2,15 +2,13 @@ package greencity.controller;
 
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
-import greencity.dto.CertificateDtoForSearching;
-import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.PageableDto;
+import greencity.dto.*;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.*;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,13 +20,15 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/ubs/management")
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
+    private final ModelMapper mapper;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
         this.ubsManagementService = ubsManagementService;
+        this.mapper = mapper;
     }
 
     /**
@@ -48,6 +48,28 @@ public class ManagementOrderController {
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
         @ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllCertificates(pageable));
+    }
+
+    /**
+     * Controller getting all certificates with sorting possibility.
+     *
+     * @return httpStatus.
+     * @author Nazar Struk
+     */
+
+    @ApiOperation("Add Certificate")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping("/addCertificate")
+    public ResponseEntity<HttpStatus> addCertificate(
+        @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
+        ubsManagementService.addCertificate(certificateDtoForAdding);
+        return new ResponseEntity(HttpStatus.CREATED);
     }
 
     /**
