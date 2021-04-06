@@ -13,4 +13,5 @@
     <include file="db/changelog/logs/ch-addPaymentTable-Bilonizhka.xml"/>
     <include file="db/changelog/logs/ch-add-column-telegram-chat-id-Pikhotskyi.xml"/>
     <include file="db/changelog/logs/ch-add-table-telegram-bot-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-drop-tgfc-unique-constraint-Bilonizhka.xml"/>
 </databaseChangeLog>
