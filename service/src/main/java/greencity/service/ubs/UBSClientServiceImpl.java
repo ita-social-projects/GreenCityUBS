@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+
 import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
@@ -12,6 +13,7 @@ import static greencity.constant.ErrorMessage.SUM_IS_COVERED_BY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+
 import greencity.dto.BagDto;
 import greencity.dto.CertificateDto;
 import greencity.dto.OrderResponseDto;
@@ -190,8 +192,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
-        User currentUser, int sumToPay) {
+                                   Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+                                   User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
@@ -243,7 +245,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-        Order order, int sumToPay) {
+                                                              Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
