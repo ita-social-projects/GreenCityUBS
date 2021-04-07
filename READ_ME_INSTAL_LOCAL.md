@@ -59,13 +59,16 @@ Though there are four GitHub projects ([GreenCity](https://github.com/ita-social
 
 
 ![env-vars](user_enviroment_variables.png)
+Add also this fields inti User environment variables, ask in GreenCity group,
+propertires to this fields.
+![env-vars](telegram_1.png)
 
-7. `Run`
+7. `Run UbsApplication`
 
 
 8. If you did everything correctly, you should be able to access swagger by this URL: http://localhost:8050/swagger-ui.html#/
 
-
+9. You can insert data into your database for this you should run file insert.sql 
 
 
 Also all these variables you can set in Intellij Idea. For instance:
