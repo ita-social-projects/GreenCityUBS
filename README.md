@@ -108,7 +108,7 @@ $ bower install
 - For all the possible languages that support syntax highlithing on GitHub (which is basically all of them), refer <a href="https://github.com/github/linguist/blob/master/lib/linguist/languages.yml" target="_blank">here</a>.
 
 ### How to run local
-
+<a href="https://github.com/ita-social-projects/GreenCityUBS/blob/dev/READ_ME_INSTAL_LOCAL.md" target="_blank">For install click on READ_ME_INSTAL_LOCAL.md.</a>
 ### How to run Docker
 
 ---
