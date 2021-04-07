@@ -49,7 +49,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .groupOfOrders(currentCoordinatesOrdersDto)
                 .build());
         }
-
         return allOrdersWithLitres;
     }
 
@@ -230,8 +229,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant
-     *         relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in
+     *         distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
@@ -321,6 +320,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page) {
         Page<Certificate> certificates = certificateRepository.getAll(page);
         return getAllCertificatesTranslationDto(certificates);
+    }
+
+    @Override
+    public void addCertificate(CertificateDtoForAdding add) {
+        Certificate certificate = modelMapper.map(add, Certificate.class);
+        certificateRepository.save(certificate);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
