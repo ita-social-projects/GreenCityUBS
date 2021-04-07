@@ -9,6 +9,8 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
+@EqualsAndHashCode
 public class CertificateDtoForAdding {
     @NotBlank
     @Pattern(regexp = "(\\d{4}-\\d{4})|(^$)", message = "This certificate code is not valid")
