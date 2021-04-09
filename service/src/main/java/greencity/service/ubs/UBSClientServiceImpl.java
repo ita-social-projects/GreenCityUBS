@@ -5,6 +5,7 @@ import greencity.client.RestClient;
 import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 import static greencity.constant.ErrorMessage.MINIMAL_SUM_VIOLATION;
@@ -33,6 +34,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BagNotFoundException;
 import greencity.exceptions.CertificateExpiredException;
+import greencity.exceptions.CertificateIsNotActivated;
 import greencity.exceptions.CertificateIsUsedException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.IncorrectValueException;
@@ -290,11 +292,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void validateCertificate(Certificate certificate) {
-        if (certificate.getCertificateStatus() != CertificateStatus.ACTIVE) {
+        if (certificate.getCertificateStatus() == CertificateStatus.NEW) {
+            throw new CertificateIsNotActivated(CERTIFICATE_IS_NOT_ACTIVATED + certificate.getCode());
+        } else if (certificate.getCertificateStatus() == CertificateStatus.USED) {
             throw new CertificateIsUsedException(CERTIFICATE_IS_USED + certificate.getCode());
         } else {
-            LocalDate future = certificate.getExpirationDate().plusYears(1);
-            if (future.isBefore(LocalDate.now())) {
+            if (LocalDate.now().isAfter(certificate.getExpirationDate())) {
                 throw new CertificateExpiredException(CERTIFICATE_EXPIRED + certificate.getCode());
             }
         }
