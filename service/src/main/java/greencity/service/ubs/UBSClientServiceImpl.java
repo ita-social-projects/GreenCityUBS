@@ -304,6 +304,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void createRecordInUBStable(String uuid) {
-        userRepository.save(User.builder().currentPoints(0).uuid(uuid).build());
+        userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
 }
