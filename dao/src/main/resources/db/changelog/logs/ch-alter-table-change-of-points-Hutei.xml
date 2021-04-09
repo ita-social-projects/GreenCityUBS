@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="hutei-2" author="Hutei">
+        <renameTable newTableName="change_of_points"
+                     oldTableName="change_of_points_mapping"/>
+    </changeSet>
+
+    <changeSet id="Hutei-3" author="Hutei">
+        <dropPrimaryKey tableName="change_of_points"/>
+    </changeSet>
+
+    <changeSet id="Hutei-4" author="Hutei">
+        <addColumn tableName="change_of_points">
+            <column name="id"  autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="change_of_points">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="order_id"
+                                 baseTableName="change_of_points"
+                                 constraintName="fk5s2hfa0bsddsipw5kdyd5bhfx"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="orders"/>
+    </changeSet>
+</databaseChangeLog>

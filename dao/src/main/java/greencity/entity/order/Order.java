@@ -5,14 +5,17 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,6 +57,9 @@ public class Order {
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    private List<ChangeOfPoints> changeOfPointsList;
 
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",

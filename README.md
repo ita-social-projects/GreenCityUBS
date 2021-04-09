@@ -1,77 +1,78 @@
 <a href="https://career.softserveinc.com/en-us/technology/course/start_your_career_as_java_developer/"><img src="https://github.com/ita-social-projects/GreenCity/blob/master/docs-photos/GreenCity%20Logo.png" title="SoftServe IT Academy. GreenCity project" alt="SoftServe IT Academy. GreenCity project"></a>
 
-***INSERT GRAPHIC HERE (include hyperlink in image)***
+# GreenCityUBS   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ita-social-projects/GreenCityUBS/blob/master/LICENSE)  [![Github Issues](https://img.shields.io/github/issues/ita-social-projects/GreenCityUBS?style=flat-square)](https://github.com/ita-social-projects/GreenCity/issues) [![Pending Pull-Requests](https://img.shields.io/github/issues-pr/ita-social-projects/GreenCityUBS?style=flat-square)](https://github.com/ita-social-projects/GreenCityUser/pulls)
 
-# Repository Title Goes Here
 
-> Subtitle or Short Description Goes Here
 
-> ideally one sentence
+## 1. About the project
 
-> include terms/tags that can be searched
+The main aim of “GreenCity” project is to teach people in a playful and challenging way to have an eco-friendly lifestyle. A user can view on the map places that have some eco-initiatives or suggest discounts for being environmentally aware (for instance, coffee shops that give a discount if a customer comes with their own cup). А user can start doing an environment-friendly habit and track their progress with a habit tracker. "GreenCityUBS" is a microservice which contains garbage collection service.
 
-**Badges will go here**
+## 2. Where to find front-end part of the project
 
-- build status
-- coverage
-- issues (waffle.io maybe)
-- devDependencies
-- npm package
-- slack
-- downloads
-- gitter chat
-- license
-- etc.
+Here is the front-end part of our project: https://github.com/ita-social-projects/GreenCityClient.
 
-[![Build Status](https://img.shields.io/travis/ita-social-projects/GreenCity/master?style=flat-square)](https://travis-ci.org/github/ita-social-projects/GreenCity)
-[![Coverage Status](https://img.shields.io/gitlab/coverage/ita-social-projects/GreenCity/master?style=flat-square)](https://coveralls.io)
-[![Github Issues](https://img.shields.io/github/issues/ita-social-projects/GreenCity?style=flat-square)](https://github.com/ita-social-projects/GreenCity/issues)
-[![Pending Pull-Requests](https://img.shields.io/github/issues-pr/ita-social-projects/GreenCity?style=flat-square)](https://github.com/ita-social-projects/GreenCity/pulls)
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
+`dev` branch of the back-end corresponds to `dev` branch on the front-end. The same thing with `master` branches.
 
-- For more on these wonderful  badges, refer to <a href="https://shields.io/" target="_blank">shields.io</a>.
+## 3. How to contribute
 
----
+You're encouraged to contribute to our project if you've found any issues or missing functionality that you would want to see. Here you can see [the list of issues](https://github.com/ita-social-projects/GreenCity/issues) and here you can create [a new issue](https://github.com/ita-social-projects/GreenCity/issues/new).
 
-## Table of Contents (Optional)
+Before sending any pull request, please discuss requirements/changes to be implemented using an existing issue or by creating a new one. All pull requests should be done into `dev` branch.
 
-> If your `README` has a lot of info, section headers might be nice.
+Though there are four GitHub projects ([GreenCity](https://github.com/ita-social-projects/GreenCity), [GreenCityUser](https://github.com/ita-social-projects/GreenCityUser) and [GreenCityUBS](https://github.com/ita-social-projects/GreenCityUBS) for back-end part and [GreenCityClient](https://github.com/ita-social-projects/GreenCityClient) for front-end part) all of the issues are listed in the first one - [GreenCity](https://github.com/ita-social-projects/GreenCity).
 
-- [Installation](#installation)
-  - [Required to install](#Required-to-install)
-  - [Environment](#Environment)
-  - [Clone](#Clone)
-  - [Setup](#Setup)
-  - [How to run local](#How-to-run-local)
-  - [How to run Docker](#How-to-run-Docker)
-- [Usage](#Usage)
-  - [How to work with swagger UI](#How-to-work-with-swagger-UI)
-  - [How to run tests](#How-to-run-tests)
-  - [How to Checkstyle](#How-to-Checkstyle)
-- [Documentation](#Documentation))
-- [Contributing](#contributing)
-  - [git flow](#git-flow)
-  - [issue flow](#git-flow)
-- [FAQ](#faq)
-- [Support](#support)
-- [License](#license)
+**NOTE: make sure that your code passes checkstyle. Otherwise your pull request will be declined**. See paragraph [Setup Checkstyle](#5-setup-checkstyle).
 
----
+## 4. Start the project locally
 
-## Installation
+### 4.1. Required to install
 
-- All the `code` required to get started
-- Images of what it should look like
+* Java 11
+* PostgreSQL 9.5 or higher
 
-### Required to install
-* Python (3.6.3)
-* PostgreSQL (9.5.9)
-* Django (1.11.6)
-* NodeJS (6.11.4)
-* Redis (3.0.6)
+### 4.2. How to run
 
-### Environment
-environmental variables
+1. You should open in IntelliJ IDEA File -> `New Project` -> `Project From Version Control`
+   -> `Repository URL` -> `URL` (https://github.com/ita-social-projects/GreenCityUBS.git) -> `Clone`.
+
+
+2. Open `Terminal` write `git checkout -b dev` (this create new local branch "dev").
+
+
+3. After this `git pull origin dev` (for update last version from branch dev)
+
+
+4. Create new database in Postgres (`greencityubs`).
+
+
+5. `Add Configuration` -> `+` -> `Application`.
+
+
+* `Name` : `UbsApplication`.
+
+* `Use classpath of modules`:`core`
+* `JRE` : `11`.
+
+
+6. `Enviroment variables`:
+
+
+![env-vars](user_enviroment_variables.png)
+Add also this fields inti User environment variables, ask in GreenCity group,
+propertires to this fields.
+![env-vars](telegram_1.png)
+
+7. `Run UbsApplication`
+
+
+8. If you did everything correctly, you should be able to access swagger by this URL: http://localhost:8050/swagger-ui.html#/
+
+9. You can insert data into your database for this you should run file insert.sql 
+
+
+Also all these variables you can set in Intellij Idea. For instance:
+
 ```properties
 spring.datasource.url=${DATASOURCE_URL}
 spring.datasource.username=${DATASOURCE_USER}
@@ -81,111 +82,49 @@ spring.mail.password=${EMAIL_PASSWORD}
 cloud.name=${CLOUD_NAME}
 api.key=${API_KEY}
 api.secret=${API_SECRET}
+google.clientId=${GOOGLE_CLIENT_ID}
+spring.rabbitmq.host=${RABBITMQ_HOST}
+spring.rabbitmq.password=${RABBITMQ_PASSWORD}
+spring.rabbitmq.username=${RABBITMQ_USERNAME}
+bucketName=${BUCKET_NAME}
+staticUrl=${STATIC_URL}
+spring.social.facebook.app-id=${FACEBOOK_APP_ID}
+spring.social.facebook.app-secret=${FACEBOOK_APP_SECRET}
+greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 ```
 
-### Clone
 
-- Clone this repo to your local machine using `https://github.com/ita-social-projects/SOMEREPO`
+3. If you did everything correctly, you should be able to access swagger by this URL: http://localhost:8050/swagger-ui.html#/
 
-### Setup
+### 4.3. How to work with swagger UI in our project
 
-- If you want more syntax highlighting, format your code like this:
+1. Run GreenCityUBS project (look up paragraph [How to run](#42-how-to-run)).
 
-> update and install this package first
+2. Run GreenCityUser project (look up paragraph [How to run](https://github.com/ita-social-projects/GreenCityUser#42-how-to-run)).
 
-```shell
-$ brew update
-$ brew install SOMEREPOproductions
-```
+2. Use the following link to open Swagger UI: http://localhost:8060/swagger-ui.html#/
 
-> now install npm and bower packages
+3. Use POST method with `/ownSecurity/signUp` to create an account. If you set a valid email credentials, you should receive an email with verification link. Verify the registration by following that link. We highly recommend to use gmail, it's free of charge and easy to get going: [how to allow email sending from gmail](https://support.google.com/accounts/answer/6010255?authuser=2&p=less-secure-apps&hl=en&authuser=2&visit_id=637098532320915318-4087823934&rd=1),  [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication). Alternatively you can drop a record in `verify_email` table on your local database.
+   First you should update user role : `UPDATE users SET role = 1 WHERE id = your_user_id;`. After this `DELETE FROM verify_emails WHERE user_id = your_user_id;`
 
-```shell
-$ npm install
-$ bower install
-```
+4. Use POST method with `/ownSecurity/signIn` to sign in. After entering the credentials you should receive access and refresh tokens.
 
-- For all the possible languages that support syntax highlithing on GitHub (which is basically all of them), refer <a href="https://github.com/github/linguist/blob/master/lib/linguist/languages.yml" target="_blank">here</a>.
+5. Copy the given access token and put it into GreenCityUBS(http://localhost:8050/swagger-ui.html#/) Authentication Header. Press **Authorize** button.
 
-### How to run local
+   ![Authentication-button-swagger](./authentication-swagger.png)
 
-### How to run Docker
+   Insert the given token into input field. The scheme should be like this `Bearer <given_token>`. Press **Authorize** button.
 
----
+   ![Bearer-examle](./auth-bearer.png)
 
-## Usage
-### How to work with swagger UI
-### How to run tests
-### How to Checkstyle
+6. Now you can use swagger UI to test REST API. Some controllers require *ADMIN* role. By default, new registered users have role *USER*. To overcome this you need to update record that corresponds to your user in the local database. For example, `UPDATE users SET role = 1 WHERE id = <your_user_id>`.
 
----
+### 4.4. Connect with front-end
 
-## Documentation
+There is no special configurations required. Just clone [GreenCityClient](https://github.com/ita-social-projects/GreenCityClient) and run it. If you want to sign in with Google account, it's mandatory to set `google.clientId`. Read more about how to obtain [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication), it's free.
 
----
+## 5. Setup Checkstyle
 
-## Contributing
+Here you can read more about [how to set up checkstyle](https://github.com/ita-social-projects/GreenCity/wiki/Setup-CheckStyle-to-your-IDE);
 
-### Git flow
-> To get started...
-#### Step 1
-
-- **Option 1**
-    - 🍴 Fork this repo!
-
-- **Option 2**
-    - 👯 Clone this repo to your local machine using `https://github.com/ita-social-projects/SOMEREPO.git`
-
-#### Step 2
-
-- **HACK AWAY!** 🔨🔨🔨
-
-#### Step 3
-
-- 🔃 Create a new pull request using <a href="https://github.com/ita-social-projects/SOMEREPO/compare/" target="_blank">github.com/ita-social-projects/SOMEREPO</a>.
-
-### Issue flow
-
----
-
-## Team
-
-> Or Contributors/People
-
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam) 
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)
-[![@lhalam](https://avatars3.githubusercontent.com/u/3837059?s=100&v=4)](https://github.com/lhalam)  
-
-- You can just grab their GitHub profile image URL
-- You should probably resize their picture using `?s=200` at the end of the image URL.
-
----
-
-## FAQ
-
-- **How do I do *specifically* so and so?**
-    - No problem! Just do this.
-
----
-
-## Support
-
-Reach out to me at one of the following places!
-
-- Website at <a href="http://Website.com" target="_blank">`Website.com`</a>
-- Facebook at <a href="https://www.facebook.com/LiubomyrHalamaha/" target="_blank">`Liubomyr Halamaha`</a>
-- Insert more social links here.
-
----
-
-## License
-
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
-
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
-- Copyright 2020 © <a href="https://softserve.academy/" target="_blank"> SoftServe IT Academy</a>.
+Here you can read more about [SonarLint](https://plugins.jetbrains.com/plugin/7973-sonarlint);

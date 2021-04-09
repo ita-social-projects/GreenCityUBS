@@ -5,6 +5,7 @@ public class ErrorMessage {
     public static String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
     public static String CERTIFICATE_IS_USED = "The certificate has been used before or is not activated."
         + " Certificate code: ";
+    public static String CERTIFICATE_IS_NOT_ACTIVATED = "The certificate is not activated yet:";
     public static String BAG_NOT_FOUND = "Bag does not exist by id: ";
     public static String USER_DONT_HAVE_ENOUGH_POINTS = "User doesn't have enough bonus points.";
     public static String AMOUNT_OF_POINTS_BIGGER_THAN_SUM = "Amount of bonus points to use is bigger than order sum.";
