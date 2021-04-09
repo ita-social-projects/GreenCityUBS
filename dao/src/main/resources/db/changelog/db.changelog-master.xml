@@ -15,4 +15,5 @@
     <include file="db/changelog/logs/ch-add-table-telegram-bot-Pikhotskyi.xml"/>
     <include file="db/changelog/logs/ch-alter-table-change-of-points-Hutei.xml"/>
     <include file="db/changelog/logs/ch-drop-tgfc-unique-constraint-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-add-violatin-description-mapping-Hutei.xml"/>
 </databaseChangeLog>
