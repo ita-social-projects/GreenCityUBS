@@ -2,16 +2,12 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.client.RestClient;
-import greencity.dto.OrderResponseDto;
 import greencity.dto.PersonalDataDto;
-import greencity.dto.UbsTableCreationDto;
 import greencity.dto.UserPointsAndAllBagsDto;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -60,7 +56,7 @@ class UBSClientServiceImplTest {
 
         UserPointsAndAllBagsDto expected = ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
 
-        assertTrue(254 == expected.getPoints() && bags == expected.getAllBags());
+        assertTrue(254 == expected.getPoints() && bags == expected.getBags());
     }
 
     @Test
