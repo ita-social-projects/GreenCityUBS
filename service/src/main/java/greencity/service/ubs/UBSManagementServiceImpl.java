@@ -1,14 +1,19 @@
 package greencity.service.ubs;
 
+import greencity.client.RestClient;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.UnexistingUuidExeption;
 import greencity.repository.AddressRepository;
 
 import greencity.repository.CertificateRepository;
+import greencity.repository.UserRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +33,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
+    private final RestClient restClient;
+    private final UserRepository userRepository;
 
     /**
      * {@inheritDoc}
@@ -111,7 +118,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -230,11 +237,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
      * @return list of {@link Coordinates} - start coordinates with it's in
-     *         distant @relatives.
+     * distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -302,7 +309,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
+                                                          List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -339,5 +346,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             pages.getTotalElements(),
             pages.getPageable().getPageNumber(),
             pages.getTotalPages());
+    }
+
+    @Override
+    public void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto) {
+        String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
+        User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
+            USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
     }
 }

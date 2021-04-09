@@ -1,13 +1,6 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.CertificateExpiredException;
-import greencity.exceptions.CertificateIsUsedException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.PaymentValidationException;
-import greencity.exceptions.TooManyCertificatesEntered;
+import greencity.exceptions.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +31,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(CertificateNotFoundException.class)
     public final ResponseEntity<Object> handleCertificateNotFound(CertificateNotFoundException ex, WebRequest request) {
@@ -53,7 +46,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(IncorrectValueException.class)
     public final ResponseEntity<Object> handleInvalidDistance(IncorrectValueException ex, WebRequest request) {
@@ -68,7 +61,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler({TooManyCertificatesEntered.class, PaymentValidationException.class})
     public final ResponseEntity<Object> handleInvalidDistance(RuntimeException ex, WebRequest request) {
@@ -83,11 +76,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(ActiveOrdersNotFoundException.class)
     public final ResponseEntity<Object> handleNoUndeliveredOrders(ActiveOrdersNotFoundException ex,
-        WebRequest request) {
+                                                                  WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
@@ -97,7 +90,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * Method interceptor exception {@link ConstraintViolationException}.
      *
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> constraintViolationException(ConstraintViolationException ex, WebRequest webRequest) {
@@ -111,11 +104,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * {@link greencity.exceptions.CertificateExpiredException}.
      *
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(CertificateExpiredException.class)
     public ResponseEntity<Object> handleCertificateExpiredException(CertificateExpiredException ex,
-        WebRequest webRequest) {
+                                                                    WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
@@ -126,11 +119,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * {@link greencity.exceptions.CertificateIsUsedException}.
      *
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(CertificateIsUsedException.class)
     public final ResponseEntity<Object> handleCertificateIsUsedException(CertificateIsUsedException ex,
-        WebRequest webRequest) {
+                                                                         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
@@ -140,7 +133,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * Method interceptor exception {@link BagNotFoundException}.
      *
      * @return ResponseEntity which contain http status and body with message of
-     *         exception.
+     * exception.
      */
     @ExceptionHandler(BagNotFoundException.class)
     public final ResponseEntity<Object> handleBagNotFoundException(BagNotFoundException ex, WebRequest webRequest) {
@@ -160,8 +153,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-        HttpHeaders headers, HttpStatus status,
-        WebRequest request) {
+                                                                  HttpHeaders headers, HttpStatus status,
+                                                                  WebRequest request) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
@@ -169,8 +162,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-        HttpHeaders headers, HttpStatus status,
-        WebRequest request) {
+                                                                  HttpHeaders headers, HttpStatus status,
+                                                                  WebRequest request) {
         List<ValidationExceptionDto> collect =
             ex.getBindingResult().getFieldErrors().stream()
                 .map(ValidationExceptionDto::new)
@@ -181,5 +174,19 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
         return new HashMap<>(errorAttributes.getErrorAttributes(webRequest, true));
+    }
+
+    /**
+     * Method interceptor exception {@link UnexistingUuidExeption}.
+     *
+     * @param ex      Exception which should be intercepted.
+     * @param request contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of exception.
+     */
+    @ExceptionHandler(UnexistingUuidExeption.class)
+    public final ResponseEntity<Object> handleUuidNotFound(UnexistingUuidExeption ex, WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 }

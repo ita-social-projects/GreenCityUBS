@@ -21,6 +21,7 @@ public class ErrorMessage {
     public static String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
         "The user already has connected to telegram bot.";
     public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
+    public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does mot exist.";
 
     /**
      * Constructor.
