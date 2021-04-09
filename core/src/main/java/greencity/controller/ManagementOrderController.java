@@ -131,4 +131,24 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
     }
+
+    /**
+     * Controller adding points to user by Email.
+     *
+     * @return httpStatus.
+     * @author Nazar Struk
+     */
+    @ApiOperation("Add Points to User")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PatchMapping(value = "/addPointsToUser")
+    public ResponseEntity<HttpStatus> addPointsToUser(
+        @Valid @RequestBody AddingPointsToUserDto addingPointsToUserDto) {
+        ubsManagementService.addPointsToUser(addingPointsToUserDto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -19,7 +19,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * Method returns user by user uuid.
      *
      * @param uuid {@link String} - id to connect 2 db.
-     * @return {@link Optional<User>} - current user.
+     * @return optional of {@link User} - current user.
      */
     Optional<User> findUserByUuid(String uuid);
 }
