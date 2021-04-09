@@ -301,14 +301,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 throw new CertificateExpiredException(CERTIFICATE_EXPIRED + certificate.getCode());
             }
         }
-//        if (certificate.getCertificateStatus() != CertificateStatus.ACTIVE) {
-//            throw new CertificateIsUsedException(CERTIFICATE_IS_USED + certificate.getCode());
-//        } else {
-//            LocalDate future = certificate.getExpirationDate().plusYears(1);
-//            if (future.isBefore(LocalDate.now())) {
-//                throw new CertificateExpiredException(CERTIFICATE_EXPIRED + certificate.getCode());
-//            }
-//        }
     }
 
     private void createRecordInUBStable(String uuid) {

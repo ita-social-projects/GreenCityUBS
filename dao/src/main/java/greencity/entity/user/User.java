@@ -56,7 +56,8 @@ public class User {
         joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")})
     @MapKeyColumn(name = "order_id")
     @Column(name = "description")
-    private Map<Long,String> violationsDescription;
+    private Map<Long, String> violationsDescription;
+
     @Column
     private Integer violations;
 
