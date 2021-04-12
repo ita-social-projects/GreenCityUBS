@@ -9,6 +9,7 @@ import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
 
 import greencity.repository.CertificateRepository;
+import greencity.repository.UserRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -326,6 +327,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void addCertificate(CertificateDtoForAdding add) {
         Certificate certificate = modelMapper.map(add, Certificate.class);
         certificateRepository.save(certificate);
+    }
+
+    @Override
+    public ViolationsInfoDto getAllUserViolations(String email) {
+
+
+        return null;
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
