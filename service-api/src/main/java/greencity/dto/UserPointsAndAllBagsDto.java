@@ -15,6 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserPointsAndAllBagsDto implements Serializable {
-    private List<Bag> allBags;
+    private List<Bag> bags;
     private int points;
 }
