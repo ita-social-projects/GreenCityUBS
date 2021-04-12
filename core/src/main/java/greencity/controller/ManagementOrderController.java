@@ -157,7 +157,8 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions..
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions..
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
