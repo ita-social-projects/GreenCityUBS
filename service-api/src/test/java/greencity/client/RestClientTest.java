@@ -65,25 +65,4 @@ class RestClientTest {
 
         assertEquals(Optional.of(userVO), restClient.findNotDeactivatedByEmail(email));
     }
-
-    @Test
-    void updateUserLastActivityTime() {
-        Date date1 = new Date();
-        String accessToken = "accessToken";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(AUTHORIZATION, accessToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
-        String strDate = dateFormat.format(date1);
-        when(httpServletRequest.getHeader(AUTHORIZATION)).thenReturn(accessToken);
-        when(restTemplate.exchange(greenCityUserServerAddress + "/user/" + 13L
-            + "/updateUserLastActivityTime/"
-            + strDate, HttpMethod.PUT, entity, Object.class)).thenReturn(ResponseEntity.ok(Object));
-
-        restClient.updateUserLastActivityTime(13L, date1);
-        verify(restTemplate).exchange(greenCityUserServerAddress + "/user/" + 13L
-            + "/updateUserLastActivityTime/"
-            + strDate, HttpMethod.PUT, entity, Object.class);
-    }
-
 }
