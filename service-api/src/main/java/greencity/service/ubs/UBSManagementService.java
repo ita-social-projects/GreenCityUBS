@@ -51,4 +51,11 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addCertificate(CertificateDtoForAdding add);
+
+    /**
+     * Method add some points to UserUBS by email.
+     *
+     * @author Nazar Struk
+     */
+    void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto);
 }
