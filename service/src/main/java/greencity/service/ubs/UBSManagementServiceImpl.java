@@ -1,15 +1,21 @@
 package greencity.service.ubs;
 
+import greencity.client.RestClient;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.UnexistingUuidExeption;
+import greencity.mapping.ViolationsInfoDtoMapper;
 import greencity.repository.AddressRepository;
 
 import greencity.repository.CertificateRepository;
 import greencity.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +35,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
+    private final RestClient restClient;
+    private final UserRepository userRepository;
 
     /**
      * {@inheritDoc}
@@ -331,9 +339,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ViolationsInfoDto getAllUserViolations(String email) {
-
-
-        return null;
+        String uuidId = restClient.findUuidByEmail(email);
+        User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
+            USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        return modelMapper.map(user, ViolationsInfoDto.class);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -347,5 +356,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             pages.getTotalElements(),
             pages.getPageable().getPageNumber(),
             pages.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto) {
+        String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
+        User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
+            USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(addingPointsToUserDto.getAdditionalPoints())
+            .date(LocalDateTime.now())
+            .user(ourUser)
+            .build();
+        ourUser.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(ourUser);
     }
 }

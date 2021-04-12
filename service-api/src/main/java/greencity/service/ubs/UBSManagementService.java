@@ -17,7 +17,7 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-                                                               int litres, double additionalDistance);
+        int litres, double additionalDistance);
 
     /**
      * Method to group orders into clusters including summary litres.
@@ -51,6 +51,13 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addCertificate(CertificateDtoForAdding add);
+
+    /**
+     * Method add some points to UserUBS by email.
+     *
+     * @author Nazar Struk
+     */
+    void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto);
 
     /**
      * Method returns all users violations.
