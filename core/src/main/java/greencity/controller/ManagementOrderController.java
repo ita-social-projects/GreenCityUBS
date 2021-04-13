@@ -8,6 +8,8 @@ import io.swagger.annotations.*;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.ws.rs.PathParam;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -150,5 +152,25 @@ public class ManagementOrderController {
         @Valid @RequestBody AddingPointsToUserDto addingPointsToUserDto) {
         ubsManagementService.addPointsToUser(addingPointsToUserDto);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller for getting User violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions..
+     * @author Nazar Struk
+     */
+    @ApiOperation("Get User violations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getUsersViolations")
+    public ResponseEntity<ViolationsInfoDto> getUserViolations(@Valid @Email @RequestParam String email) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllUserViolations(email));
     }
 }

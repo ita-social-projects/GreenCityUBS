@@ -58,4 +58,13 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto);
+
+    /**
+     * Method returns all users violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
+     * @author Nazar Struk
+     */
+    ViolationsInfoDto getAllUserViolations(String email);
 }

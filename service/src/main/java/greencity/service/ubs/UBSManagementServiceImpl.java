@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
@@ -11,6 +10,7 @@ import greencity.entity.user.User;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.exceptions.UnexistingUuidExeption;
+import greencity.mapping.ViolationsInfoDtoMapper;
 import greencity.repository.AddressRepository;
 
 import greencity.repository.CertificateRepository;
@@ -238,8 +238,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in distant
-     *         relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in
+     *         distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
@@ -335,6 +335,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void addCertificate(CertificateDtoForAdding add) {
         Certificate certificate = modelMapper.map(add, Certificate.class);
         certificateRepository.save(certificate);
+    }
+
+    @Override
+    public ViolationsInfoDto getAllUserViolations(String email) {
+        String uuidId = restClient.findUuidByEmail(email);
+        User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
+            USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        return modelMapper.map(user, ViolationsInfoDto.class);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
