@@ -65,22 +65,6 @@ public class RestClient {
     }
 
     /**
-     * Updates last activity time for a given user.
-     *
-     * @param userId               - {@link User}'s id
-     * @param userLastActivityTime - new {@link User}'s last activity time
-     * @author Orest Mamchuk
-     */
-    public void updateUserLastActivityTime(Long userId, Date userLastActivityTime) {
-        HttpEntity<String> entity = new HttpEntity<>(setHeader());
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
-        String strDate = dateFormat.format(userLastActivityTime);
-        restTemplate.exchange(greenCityUserServerAddress + "/user/"
-            + userId + "/updateUserLastActivityTime/" + strDate,
-            HttpMethod.PUT, entity, Object.class);
-    }
-
-    /**
      * Method makes headers for RestTemplate.
      *
      * @return {@link HttpEntity}

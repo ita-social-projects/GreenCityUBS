@@ -1,13 +1,6 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.CertificateExpiredException;
-import greencity.exceptions.CertificateIsUsedException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.PaymentValidationException;
-import greencity.exceptions.TooManyCertificatesEntered;
+import greencity.exceptions.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,5 +174,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
         return new HashMap<>(errorAttributes.getErrorAttributes(webRequest, true));
+    }
+
+    /**
+     * Method interceptor exception {@link UnexistingUuidExeption}.
+     *
+     * @param ex      Exception which should be intercepted.
+     * @param request contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(UnexistingUuidExeption.class)
+    public final ResponseEntity<Object> handleUuidNotFound(UnexistingUuidExeption ex, WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 }

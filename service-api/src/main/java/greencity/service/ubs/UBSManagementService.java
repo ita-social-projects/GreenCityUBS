@@ -51,4 +51,20 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addCertificate(CertificateDtoForAdding add);
+
+    /**
+     * Method add some points to UserUBS by email.
+     *
+     * @author Nazar Struk
+     */
+    void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto);
+
+    /**
+     * Method returns all users violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
+     * @author Nazar Struk
+     */
+    ViolationsInfoDto getAllUserViolations(String email);
 }
