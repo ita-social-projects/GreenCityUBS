@@ -1,6 +1,6 @@
 <a href="https://career.softserveinc.com/en-us/technology/course/start_your_career_as_java_developer/"><img src="https://github.com/ita-social-projects/GreenCity/blob/master/docs-photos/GreenCity%20Logo.png" title="SoftServe IT Academy. GreenCity project" alt="SoftServe IT Academy. GreenCity project"></a>
 
-# GreenCityUBS   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ita-social-projects/GreenCityUser/blob/dev/LICENSE)  [![Github Issues](https://img.shields.io/github/issues/ita-social-projects/GreenCity?style=flat-square)](https://github.com/ita-social-projects/GreenCity/issues) [![Pending Pull-Requests](https://img.shields.io/github/issues-pr/ita-social-projects/GreenCityUser?style=flat-square)](https://github.com/ita-social-projects/GreenCityUser/pulls)
+# GreenCityUBS   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ita-social-projects/GreenCityUBS/blob/master/LICENSE)  [![Github Issues](https://img.shields.io/github/issues/ita-social-projects/GreenCityUBS?style=flat-square)](https://github.com/ita-social-projects/GreenCity/issues) [![Pending Pull-Requests](https://img.shields.io/github/issues-pr/ita-social-projects/GreenCityUBS?style=flat-square)](https://github.com/ita-social-projects/GreenCityUser/pulls)
 
 
 
