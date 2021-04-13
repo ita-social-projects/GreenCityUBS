@@ -1,3 +1,8 @@
+INSERT INTO languages(id,code)
+VALUES (1,'ua'),
+       (2,'en'),
+       (3,'ru');
+
 INSERT INTO users(id,current_points, uuid, violations, telegram_bot_id)
 VALUES (1,1000,'uuid1',0,null),
        (2,1000,'uuid2',0,null),
@@ -49,8 +54,19 @@ VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01'),
        ('1242-1242','EXPIRED','2021-05-03',900,5,'2021-04-03'),
        ('1243-1243','EXPIRED','2021-05-04',100,7,'2021-04-04');
 
-INSERT INTO bag (id,capacity,name,price)
- VALUES (1,100,'Бавовняна сумка',400),
-        (2,100,'Березентова сумка',600),
-        (3,100,'Сумка з бамбукової тканини',400)
+INSERT INTO bag (id,capacity,price)
+ VALUES (1,100,400),
+        (2,100,600),
+        (3,100,400);
+
+INSERT INTO bag_translations(id,name, bag_id, language_id)
+VALUES (1,'Бавовняна сумка',1,1),
+       (2,'Березентова сумка',2,1),
+       (3,'Сумка з бамбукової тканини',3,1),
+       (4,'Cotton bag',1,2),
+       (5,'Tarpaulin bag',2,2),
+       (6,'Bamboo fabric bag',3,2),
+       (7,'Хлопчатобумажная сумка',1,3),
+       (8,'Березентова сумка',2,3),
+       (9,'Сумка из бамбуковой ткани',3,3);
 
