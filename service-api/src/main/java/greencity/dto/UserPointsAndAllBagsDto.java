@@ -2,10 +2,8 @@ package greencity.dto;
 
 import greencity.entity.order.Bag;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import greencity.entity.order.BagTranslation;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,7 +12,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class UserPointsAndAllBagsDto implements Serializable {
-    private List<Bag> bags;
+    private List<BagTranslationDto> bagTranslationDtoList;
+
     private int points;
 }
