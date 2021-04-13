@@ -1,6 +1,8 @@
 package greencity.controller;
 
+import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
+import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
@@ -8,6 +10,7 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Locale;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +41,7 @@ public class OrderController {
      * {@link greencity.dto.UserVO}.
      *
      * @param userUuid {@link UserVO} id.
+     * @param locale   needed language code.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
@@ -48,11 +52,13 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @ApiLocale
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid));
+            .body(ubsClientService.getFirstPageData(userUuid, locale.getLanguage()));
     }
 
     /**
