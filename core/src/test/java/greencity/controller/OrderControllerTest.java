@@ -62,7 +62,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf","en");
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", "en");
     }
 
     @Test
