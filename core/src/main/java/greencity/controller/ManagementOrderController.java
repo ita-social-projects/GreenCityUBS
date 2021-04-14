@@ -158,7 +158,7 @@ public class ManagementOrderController {
      * Controller for getting User violations.
      *
      * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions..
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
@@ -172,5 +172,26 @@ public class ManagementOrderController {
     public ResponseEntity<ViolationsInfoDto> getUserViolations(@Valid @Email @RequestParam String email) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllUserViolations(email));
+    }
+
+    /**
+     * Controller for adding User violation.
+     *
+     * @return {@link AddingViolationsToUserDto} count of Users violations with
+     *         order id descriptions.
+     * @author Nazar Struk
+     */
+    @ApiOperation("Add Violation to User")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping(value = "/addViolationToUser")
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
+        ubsManagementService.addUserViolation(add);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

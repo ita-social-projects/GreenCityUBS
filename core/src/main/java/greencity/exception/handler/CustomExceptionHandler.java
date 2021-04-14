@@ -184,8 +184,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler(UnexistingUuidExeption.class)
-    public final ResponseEntity<Object> handleUuidNotFound(UnexistingUuidExeption ex, WebRequest request) {
+    @ExceptionHandler({UnexistingUuidExeption.class, UnexistingOrderException.class})
+    public final ResponseEntity<Object> handleUuidNotFound(RuntimeException ex, WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
