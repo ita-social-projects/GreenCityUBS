@@ -13,6 +13,7 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @ToString
+@EqualsAndHashCode
 public class AddingViolationsToUserDto {
     @NotNull
     @Min(1)

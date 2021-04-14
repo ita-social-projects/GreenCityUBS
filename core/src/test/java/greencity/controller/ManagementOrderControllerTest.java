@@ -2,6 +2,7 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static greencity.ModelUtils.getPrincipal;
+import greencity.dto.AddingViolationsToUserDto;
 import greencity.dto.CertificateDtoForAdding;
 import greencity.service.ubs.UBSManagementService;
 import static org.mockito.Mockito.times;
@@ -52,6 +53,12 @@ class ManagementOrderControllerTest {
         " \"points\": 100\n"
         + "}";
 
+    public static final String contentForAddViolationToUserControllerTest = "{\n"
+            + "\"orderID\": 1,\n" +
+            "\"violationDescription\": \"TestTest\" "
+            + "}";
+
+
     private Principal principal = getPrincipal();
 
     @BeforeEach
@@ -87,4 +94,16 @@ class ManagementOrderControllerTest {
         verify(ubsManagementService, times(1)).addCertificate(certificateDtoForAdding);
     }
 
+    @Test
+    void addUsersViolations() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink+"/addViolationToUser")
+        .content(contentForAddViolationToUserControllerTest)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isCreated());
+        AddingViolationsToUserDto addingViolationsToUserDto = AddingViolationsToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("TestTest")
+            .build();
+        verify(ubsManagementService, times(1)).addUserViolation(addingViolationsToUserDto);
+    }
 }

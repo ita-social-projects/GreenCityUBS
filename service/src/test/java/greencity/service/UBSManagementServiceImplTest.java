@@ -5,12 +5,16 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSManagementServiceImpl;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,6 +49,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -127,5 +134,27 @@ public class UBSManagementServiceImplTest {
         when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
+    }
+
+    @Test
+    void addUsersViolation () {
+        User user = User.builder()
+            .id(1L)
+            .violationsDescription(new HashMap<>())
+            .violations(0)
+            .build();
+        Order order = Order.builder()
+            .id(1L)
+            .user(user)
+            .build();
+        AddingViolationsToUserDto addingViolationsToUserDto = AddingViolationsToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("TestTest")
+            .build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.save(user)).thenReturn(user);
+        ubsManagementService.addUserViolation(addingViolationsToUserDto);
+        verify(orderRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(user);
     }
 }
