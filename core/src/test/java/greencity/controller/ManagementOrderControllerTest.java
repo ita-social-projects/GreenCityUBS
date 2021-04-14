@@ -54,10 +54,9 @@ class ManagementOrderControllerTest {
         + "}";
 
     public static final String contentForAddViolationToUserControllerTest = "{\n"
-            + "\"orderID\": 1,\n" +
-            "\"violationDescription\": \"TestTest\" "
-            + "}";
-
+        + "\"orderID\": 1,\n" +
+        "\"violationDescription\": \"TestTest\" "
+        + "}";
 
     private Principal principal = getPrincipal();
 
@@ -95,9 +94,9 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void addUsersViolations() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink+"/addViolationToUser")
-        .content(contentForAddViolationToUserControllerTest)
+    void addUsersViolations() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/addViolationToUser")
+            .content(contentForAddViolationToUserControllerTest)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isCreated());
         AddingViolationsToUserDto addingViolationsToUserDto = AddingViolationsToUserDto.builder()

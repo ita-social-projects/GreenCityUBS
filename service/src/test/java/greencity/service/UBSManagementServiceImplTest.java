@@ -137,7 +137,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    void addUsersViolation () {
+    void addUsersViolation() {
         User user = User.builder()
             .id(1L)
             .violationsDescription(new HashMap<>())
