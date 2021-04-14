@@ -15,21 +15,10 @@ import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 
-import greencity.dto.BagDto;
-import greencity.dto.CertificateDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentRequestDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PersonalDataDto;
-import greencity.dto.UbsTableCreationDto;
-import greencity.dto.UserPointsAndAllBagsDto;
+import greencity.dto.*;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BagNotFoundException;
@@ -40,11 +29,7 @@ import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.exceptions.PaymentValidationException;
 import greencity.exceptions.TooManyCertificatesEntered;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -67,6 +52,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
+    private final BagTranslationRepository bagTranslationRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -103,15 +89,29 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid, String language) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         if (user != null) {
             currentUserPoints = user.getCurrentPoints();
         }
 
-        return new UserPointsAndAllBagsDto((List<Bag>) bagRepository.findAll(),
-            currentUserPoints);
+        List<BagTranslationDto> btdList = bagTranslationRepository.findAllByLanguage(language)
+            .stream()
+            .map(this::buildBagTranslationDto)
+            .collect(Collectors.toList());
+
+        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
+    }
+
+    private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
+        return BagTranslationDto.builder()
+            .id(bt.getBag().getId())
+            .capacity(bt.getBag().getCapacity())
+            .price(bt.getBag().getPrice())
+            .name(bt.getName())
+            .code(bt.getLanguage().getCode())
+            .build();
     }
 
     /**

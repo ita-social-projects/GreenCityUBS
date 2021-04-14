@@ -46,20 +46,6 @@ class UBSClientServiceImplTest {
     UBSClientServiceImpl ubsService;
 
     @Test
-    void getFirstPageData() {
-        User user = new User();
-        user.setCurrentPoints(254);
-        List<Bag> bags = Collections.singletonList(new Bag(120, 1, "name", 250));
-
-        when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(bagRepository.findAll()).thenReturn(bags);
-
-        UserPointsAndAllBagsDto expected = ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
-
-        assertTrue(254 == expected.getPoints() && bags == expected.getBags());
-    }
-
-    @Test
     void getSecondPageData() {
         PersonalDataDto expected = ModelUtils.getOrderResponceDto().getPersonalData();
         User user = new User();

@@ -52,7 +52,7 @@ public class OrderController {
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid));
+            .body(ubsClientService.getFirstPageData(userUuid, "en"));
     }
 
     /**
