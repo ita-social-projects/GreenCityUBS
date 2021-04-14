@@ -9,6 +9,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
+import greencity.exceptions.UnexistingOrderException;
 import greencity.exceptions.UnexistingUuidExeption;
 import greencity.mapping.ViolationsInfoDtoMapper;
 import greencity.repository.AddressRepository;
@@ -343,6 +344,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
+    }
+
+    @Override
+    public void addUserViolation(AddingViolationsToUserDto add) {
+        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
+            ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        User ourUser = order.getUser();
+        ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
+        ourUser.setViolations(ourUser.getViolations() + 1);
+        userRepository.save(ourUser);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {

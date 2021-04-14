@@ -67,4 +67,13 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
+
+    /**
+     * Method for adding violation for user.
+     *
+     * @param add {@link AddingViolationsToUserDto} transfer order_id + violation
+     *            description.
+     * @author Nazar Struk
+     */
+    void addUserViolation(AddingViolationsToUserDto add);
 }
