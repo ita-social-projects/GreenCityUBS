@@ -2,9 +2,12 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CertificateStatus;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import java.time.LocalDate;
 import java.util.*;
 
 public class ModelUtils {
@@ -335,4 +338,25 @@ public class ModelUtils {
         return list;
     }
 
+    public static CertificateDtoForSearching getCertificateDtoForSearching() {
+        return CertificateDtoForSearching.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(10)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .orderId(1L)
+            .build();
+    }
+
+    public static Certificate getCertificate() {
+        return Certificate.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(10)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .order(null)
+            .build();
+    }
 }

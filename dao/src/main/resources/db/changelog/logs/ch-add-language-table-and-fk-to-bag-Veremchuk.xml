@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    
+    <changeSet id="Veremchuk1" author="Veremchuk_Zahar">
+        
+        <createTable tableName="bag_translations">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bag_id" type="Integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="languages">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="code" type="VARCHAR(35)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <dropColumn  columnName="name"
+                     tableName="bag">
+        </dropColumn>
+
+        <addForeignKeyConstraint baseColumnNames="bag_id"
+                                 baseTableName="bag_translations"
+                                 constraintName="fk_bag_translations_to_bag"
+                                 referencedColumnNames="id"
+                                 referencedTableName="bag"/>
+
+        <addForeignKeyConstraint baseColumnNames="language_id"
+                                 baseTableName="bag_translations"
+                                 constraintName="fk_bag_translations_to_languages"
+                                 referencedColumnNames="id"
+                                 referencedTableName="languages"/>
+
+        <addUniqueConstraint columnNames="bag_id,language_id" constraintName="UK_bag_id_and_languages_id" tableName="bag_translations"/>
+    </changeSet>
+</databaseChangeLog>

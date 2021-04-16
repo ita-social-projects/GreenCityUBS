@@ -1,13 +1,15 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.OrderDto;
+import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.repository.AddressRepository;
+import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSManagementServiceImpl;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,10 +22,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.anyDouble;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class UBSManagementServiceImplTest {
@@ -34,6 +39,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     OrderRepository orderRepository;
+
+    @Mock
+    CertificateRepository certificateRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -94,4 +102,30 @@ public class UBSManagementServiceImplTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    void addCertificateTest() {
+        CertificateDtoForAdding certificateDtoForAdding = new CertificateDtoForAdding("1111-1234", 5, 100);
+        Certificate certificate = new Certificate();
+        when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
+        ubsManagementService.addCertificate(certificateDtoForAdding);
+        verify(certificateRepository, times(1)).save(certificate);
+    }
+
+    @Test
+    void getAllCertificates() {
+        Pageable pageable = PageRequest.of(0, 5);
+        CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
+        List<Certificate> certificates =
+            Collections.singletonList(ModelUtils.getCertificate());
+        List<CertificateDtoForSearching> certificateDtoForSearchings =
+            Collections.singletonList(certificateDtoForSearching);
+        PageableDto<CertificateDtoForSearching> certificateDtoForSearchingPageableDto =
+            new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
+        Page<Certificate> certificates1 = new PageImpl<>(certificates, pageable, certificates.size());
+        when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
+            .thenReturn(certificateDtoForSearching);
+        when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
+        PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
+        assertEquals(certificateDtoForSearchingPageableDto, actual);
+    }
 }

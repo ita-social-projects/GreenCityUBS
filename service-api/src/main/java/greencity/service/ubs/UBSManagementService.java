@@ -1,9 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDtoForSearching;
-import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.PageableDto;
+import greencity.dto.*;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -47,4 +44,36 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page);
+
+    /**
+     * Method add a certificates.
+     *
+     * @author Nazar Struk
+     */
+    void addCertificate(CertificateDtoForAdding add);
+
+    /**
+     * Method add some points to UserUBS by email.
+     *
+     * @author Nazar Struk
+     */
+    void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto);
+
+    /**
+     * Method returns all users violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
+     * @author Nazar Struk
+     */
+    ViolationsInfoDto getAllUserViolations(String email);
+
+    /**
+     * Method for adding violation for user.
+     *
+     * @param add {@link AddingViolationsToUserDto} transfer order_id + violation
+     *            description.
+     * @author Nazar Struk
+     */
+    void addUserViolation(AddingViolationsToUserDto add);
 }

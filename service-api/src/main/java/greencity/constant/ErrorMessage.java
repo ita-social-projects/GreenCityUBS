@@ -5,6 +5,7 @@ public class ErrorMessage {
     public static String CERTIFICATE_EXPIRED = "Certificate expired by this code: ";
     public static String CERTIFICATE_IS_USED = "The certificate has been used before or is not activated."
         + " Certificate code: ";
+    public static String CERTIFICATE_IS_NOT_ACTIVATED = "The certificate is not activated yet:";
     public static String BAG_NOT_FOUND = "Bag does not exist by id: ";
     public static String USER_DONT_HAVE_ENOUGH_POINTS = "User doesn't have enough bonus points.";
     public static String AMOUNT_OF_POINTS_BIGGER_THAN_SUM = "Amount of bonus points to use is bigger than order sum.";
@@ -23,6 +24,8 @@ public class ErrorMessage {
     public static String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
         "The user already has connected to Viber bot.";
     public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
+    public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does mot exist.";
+    public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does mot exist.";
 
     /**
      * Constructor.
