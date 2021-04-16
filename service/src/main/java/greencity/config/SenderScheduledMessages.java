@@ -2,7 +2,7 @@ package greencity.config;
 
 import greencity.entity.order.Certificate;
 import greencity.repository.CertificateRepository;
-import greencity.ubstelegrambot.UBSBotService;
+import greencity.service.ubs.ServiceForSendingNotificationsToUsers;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @EnableScheduling
 @AllArgsConstructor
 public class SenderScheduledMessages {
-    private final UBSBotService ubsBotService;
     private final CertificateRepository certificateRepository;
+    private final ServiceForSendingNotificationsToUsers notificationsToUsers;
 
     /**
      * The method every day at 09:00 am send a message to users that have not paid
@@ -22,7 +22,7 @@ public class SenderScheduledMessages {
      */
     @Scheduled(cron = "0 0 9 * * ?", zone = "Europe/Kiev")
     public void sendMessageWhenOrderNonPayment() {
-        ubsBotService.sendMessageWhenOrderNonPayment();
+        notificationsToUsers.sendMessageWhenOrderNonPayment();
     }
 
     /**
@@ -31,7 +31,7 @@ public class SenderScheduledMessages {
      */
     @Scheduled(cron = "0 0 8 * * ?", zone = "Europe/Kiev")
     public void sendMessageWhenGarbageTruckArrives() {
-        ubsBotService.sendMessageWhenGarbageTruckArrives();
+        notificationsToUsers.sendMessageWhenGarbageTruckArrives();
     }
 
     /**
