@@ -1,4 +1,4 @@
-pr:
+trigger:
   branches:
     include:
     - dev, master
@@ -6,6 +6,7 @@ pr:
     exclude:
     - README.md
     
+pr: none
     
     
 variables:
