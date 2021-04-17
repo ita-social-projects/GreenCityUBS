@@ -1,11 +1,11 @@
-pr:
+trigger::
   branches:
     include:
     - dev, master
   paths:
     exclude:
     - README.md
-    
+pr:none    
     
     
 variables:
