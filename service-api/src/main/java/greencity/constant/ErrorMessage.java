@@ -20,10 +20,13 @@ public class ErrorMessage {
     public static String MINIMAL_SUM_VIOLATION = "The minimal order sum should be 500 UAH.";
     public static String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
     public static String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
-        "The user already has connected to telegram bot.";
+        "The user already has connected to Telegram bot.";
+    public static String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
+        "The user already has connected to Viber bot.";
     public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
     public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does mot exist.";
     public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does mot exist.";
+    public static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
 
     /**
      * Constructor.
