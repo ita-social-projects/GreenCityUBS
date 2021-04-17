@@ -45,8 +45,8 @@ public class RestClient {
     public Long findIdByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-                + "/user/findIdByEmail" + "?email=" + email, HttpMethod.GET, entity, Long.class)
-                .getBody();
+            + "/user/findIdByEmail" + "?email=" + email, HttpMethod.GET, entity, Long.class)
+            .getBody();
     }
 
     /**
@@ -58,7 +58,7 @@ public class RestClient {
     public UbsTableCreationDto getDataForUbsTableRecordCreation() {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         UbsTableCreationDto dto = restTemplate.exchange(greenCityUserServerAddress
-                + "/user/createUbsRecord", HttpMethod.GET, entity, UbsTableCreationDto.class).getBody();
+            + "/user/createUbsRecord", HttpMethod.GET, entity, UbsTableCreationDto.class).getBody();
         assert dto != null;
         return dto;
     }
@@ -71,8 +71,8 @@ public class RestClient {
     public String findUuidByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-                + "/user/findUuidByEmail" + "?email=" + email, HttpMethod.GET, entity, String.class)
-                .getBody();
+            + "/user/findUuidByEmail" + "?email=" + email, HttpMethod.GET, entity, String.class)
+            .getBody();
     }
 
     /**
@@ -87,8 +87,8 @@ public class RestClient {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
         String strDate = dateFormat.format(userLastActivityTime);
         restTemplate.exchange(greenCityUserServerAddress + "/user/"
-                        + userId + "/updateUserLastActivityTime/" + strDate,
-                HttpMethod.PUT, entity, Object.class);
+            + userId + "/updateUserLastActivityTime/" + strDate,
+            HttpMethod.PUT, entity, Object.class);
     }
 
     /**
@@ -116,10 +116,10 @@ public class RestClient {
     }
 
     /**
-     * The method sets the URL of the Viber bot to which Viber requests will be sent.
+     * The method sets the URL of the Viber bot to which Viber requests will be
+     * sent.
      *
-     * @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return {@link String} - which contains the status of success or failure.
      */
     public ResponseEntity<String> getAccountInfo() {
         String jsonString = new JSONObject().toString();
@@ -130,39 +130,39 @@ public class RestClient {
     /**
      * The method removes Viber bot url.
      *
-     * @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return {@link String} - which contains the status of success or failure.
      */
     public ResponseEntity<String> removeWebHook() {
         String jsonString = new JSONObject()
-                .put("url", "").toString();
+            .put("url", "").toString();
         HttpEntity<String> entity = new HttpEntity<>(jsonString, setHeadersForViberBot());
         return restTemplate.exchange(RestTemplateLinks.SET_WEBHOOK, HttpMethod.POST, entity, String.class);
     }
 
     /**
-     * The method sets the URL of the Viber bot to which Viber requests will be sent.
+     * The method sets the URL of the Viber bot to which Viber requests will be
+     * sent.
      *
-     * @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return {@link String} - which contains the status of success or failure.
      */
     public ResponseEntity<String> setWebhook() {
         String jsonString = new JSONObject()
-                .put("url", viberBotUrl)
-                .put("event_types", new EventTypes[]{EventTypes.delivered, EventTypes.seen,
-                        EventTypes.failed, EventTypes.subscribed, EventTypes.unsubscribed, EventTypes.conversation_started})
-                .toString();
+            .put("url", viberBotUrl)
+            .put("event_types", new EventTypes[] {EventTypes.delivered, EventTypes.seen,
+                EventTypes.failed, EventTypes.subscribed, EventTypes.unsubscribed, EventTypes.conversation_started})
+            .toString();
 
         HttpEntity<String> entity = new HttpEntity<>(jsonString, setHeadersForViberBot());
         return restTemplate.exchange(RestTemplateLinks.SET_WEBHOOK, HttpMethod.POST, entity, String.class);
     }
 
     /**
-     * The method sends a welcome message to user and is performed pre-registration of user.
+     * The method sends a welcome message to user and is performed pre-registration
+     * of user.
      *
      * @param sendMessageToUserDto {@link SendMessageToUserDto}
-     * @return @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return @return {@link String} - which contains the status of success or
+     *         failure.
      */
     public ResponseEntity<String> sendWelcomeMessage(SendMessageToUserDto sendMessageToUserDto) {
         HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
@@ -173,8 +173,8 @@ public class RestClient {
      * The method sends a message to user and is performed registration of user.
      *
      * @param sendMessageToUserDto {@link SendMessageToUserDto}
-     * @return @return @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return @return @return {@link String} - which contains the status of success
+     *         or failure.
      */
     public ResponseEntity<String> sentMessage(SendMessageToUserDto sendMessageToUserDto) {
         HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
@@ -191,9 +191,9 @@ public class RestClient {
     public Optional<UserVO> findNotDeactivatedByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         UserVO body = restTemplate.exchange(greenCityUserServerAddress
-                + "user/findNotDeactivatedByEmail" + "?email="
-                + email, HttpMethod.GET, entity, UserVO.class)
-                .getBody();
+            + "user/findNotDeactivatedByEmail" + "?email="
+            + email, HttpMethod.GET, entity, UserVO.class)
+            .getBody();
         assert body != null;
         return Optional.of(body);
     }

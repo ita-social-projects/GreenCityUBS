@@ -32,7 +32,7 @@ public class ViberBot {
     private String chatId;
     @Column(name = "notify")
     private Boolean isNotify;
-    @OneToOne(mappedBy = "viberBot")
-    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @OneToOne()
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

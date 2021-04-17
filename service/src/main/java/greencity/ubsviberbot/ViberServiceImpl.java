@@ -9,6 +9,8 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
 import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.UnexistingUuidExeption;
 import greencity.exceptions.ViberBotAlreadyConnected;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
@@ -16,7 +18,6 @@ import greencity.service.ubs.ViberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 
 @Service
 @RequiredArgsConstructor
@@ -54,26 +55,27 @@ public class ViberServiceImpl implements ViberService {
      */
     @Override
     public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String context) {
-        User user = userRepository.findByUuid(context);
-        System.out.println(user.getViberBot());
+        User user = userRepository.findUserByUuid(context)
+            .orElseThrow(() -> new UnexistingUuidExeption(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (user.getViberBot() == null) {
             viberBotRepository.save(ViberBot.builder()
-                    .chatId(receiverId)
-                    .isNotify(false)
-                    .user(user)
-                    .build());
-            ViberBot viberBot = viberBotRepository.findByChatId(receiverId);
+                .chatId(receiverId)
+                .isNotify(false)
+                .user(user)
+                .build());
+            ViberBot viberBot = viberBotRepository.findByChatId(receiverId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
             user.setViberBot(viberBot);
             userRepository.save(user);
         } else {
             throw new ViberBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT);
         }
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                .receiver(receiverId)
-                .type(MessageType.text)
-                .text("Привіт!\nЦе UbsBot!\n" +
-                        "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
-                .build();
+            .receiver(receiverId)
+            .type(MessageType.text)
+            .text("Привіт!\nЦе UbsBot!\n"
+                + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
+            .build();
         restClient.sendWelcomeMessage(sendMessageToUserDto);
     }
 
@@ -82,22 +84,24 @@ public class ViberServiceImpl implements ViberService {
      */
     @Override
     public void sendMessageAndRegisterViberBotForUser(String receiverId) {
-        ViberBot viberBot = viberBotRepository.findByChatId(receiverId);
+        ViberBot viberBot = viberBotRepository
+            .findByChatId(receiverId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
         if (viberBot.getChatId().equals(receiverId) && viberBot.getIsNotify().equals(false)) {
             viberBot.setIsNotify(true);
             viberBotRepository.save(viberBot);
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                    .receiver(receiverId)
-                    .type(MessageType.text)
-                    .text("Вітаємо!\nВи підписались на UbsBot")
-                    .build();
+                .receiver(receiverId)
+                .type(MessageType.text)
+                .text("Вітаємо!\nВи підписались на UbsBot")
+                .build();
             sendMessageToUser(sendMessageToUserDto);
         } else {
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                    .receiver(receiverId)
-                    .type(MessageType.text)
-                    .text("Упс!\nВи вже підписані на UbsBot")
-                    .build();
+                .receiver(receiverId)
+                .type(MessageType.text)
+                .text("Упс!\nВи вже підписані на UbsBot")
+                .build();
             sendMessageToUser(sendMessageToUserDto);
         }
     }
@@ -108,10 +112,10 @@ public class ViberServiceImpl implements ViberService {
      */
     public void sendMessageWhenOrderNonPayment(UBSuser ubsUser) {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                .receiver(ubsUser.getUser().getViberBot().getChatId())
-                .type(MessageType.text)
-                .text("Вас є неоплачені замовлення")
-                .build();
+            .receiver(ubsUser.getUser().getViberBot().getChatId())
+            .type(MessageType.text)
+            .text("Вас є неоплачені замовлення")
+            .build();
         sendMessageToUser(sendMessageToUserDto);
     }
 
@@ -121,11 +125,11 @@ public class ViberServiceImpl implements ViberService {
      */
     public void sendMessageWhenGarbageTruckArrives(Order order) {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                .receiver(order.getUser().getViberBot().getChatId())
-                .type(MessageType.text)
-                .text("Машина по забору сміття прибуде до вас з "
-                        + order.getDeliverFrom() + " до " + order.getDeliverTo())
-                .build();
+            .receiver(order.getUser().getViberBot().getChatId())
+            .type(MessageType.text)
+            .text("Машина по забору сміття прибуде до вас з "
+                + order.getDeliverFrom() + " до " + order.getDeliverTo())
+            .build();
         sendMessageToUser(sendMessageToUserDto);
     }
 

@@ -70,6 +70,6 @@ public class User {
     @JoinColumn(name = "telegram_bot_id", referencedColumnName = "id")
     private TelegramBot telegramBot;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private ViberBot viberBot;
 }

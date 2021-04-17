@@ -17,10 +17,10 @@ public class ViberController {
     private final ViberService viberService;
 
     /**
-     * The method sets the URL of the Viber bot to which Viber requests will be sent.
+     * The method sets the URL of the Viber bot to which Viber requests will be
+     * sent.
      *
-     * @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return {@link String} - which contains the status of success or failure.
      */
     @GetMapping(value = "/setwebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> setWebHook() {
@@ -30,8 +30,7 @@ public class ViberController {
     /**
      * The method removes Viber bot url.
      *
-     * @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return {@link String} - which contains the status of success or failure.
      */
     @GetMapping(value = "/removewebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> removeWebHook() {
@@ -40,14 +39,15 @@ public class ViberController {
 
     /**
      * The method receives all requests from Viber.
+     * 
      * @param callbackDto - contains all the necessary data.
      */
     @PostMapping(value = "/bot", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public void callBack(@RequestBody CallbackDto callbackDto) {
         if (EventTypes.conversation_started.toString().equals(callbackDto.getEvent())) {
-            viberService.sendWelcomeMessageAndPreRegisterViberBotForUser
-                    (callbackDto.getUser().getId(), callbackDto.getContext());
+            viberService.sendWelcomeMessageAndPreRegisterViberBotForUser(callbackDto.getUser().getId(),
+                callbackDto.getContext());
         }
         if (EventTypes.message.toString().equals(callbackDto.getEvent())) {
             viberService.sendMessageAndRegisterViberBotForUser(callbackDto.getSender().getId());
@@ -57,12 +57,11 @@ public class ViberController {
     /**
      * The method allows to see info about Viber bot.
      *
-     * @return @return {@link ResponseEntity<String>} -
-     * which contains the status of success or failure.
+     * @return @return {@link String} - which contains the status of success or
+     *         failure.
      */
     @GetMapping(value = "/accountinfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> getAccountInfo() {
         return viberService.getAccountInfo();
     }
-
 }

@@ -42,14 +42,14 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
         User user = userRepository.findByUuid(uuId);
         if (user.getTelegramBot() == null && message.getText().startsWith("/start")) {
             telegramBotRepository.save(TelegramBot.builder()
-                    .chatId(message.getChatId())
-                    .user(user)
-                    .build());
+                .chatId(message.getChatId())
+                .user(user)
+                .build());
             TelegramBot telegramBot = telegramBotRepository.findByChatId(message.getChatId());
             user.setTelegramBot(telegramBot);
             userRepository.save(user);
-            SendMessage sendMessage = new SendMessage(message.getChatId().toString()
-                    , "Вітаємо!\nВи підписались на UbsBot");
+            SendMessage sendMessage =
+                new SendMessage(message.getChatId().toString(), "Вітаємо!\nВи підписались на UbsBot");
             try {
                 execute(sendMessage);
             } catch (Exception e) {

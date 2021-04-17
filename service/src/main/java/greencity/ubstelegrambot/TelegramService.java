@@ -10,9 +10,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Service
 @RequiredArgsConstructor
-public class TelegramService{
+public class TelegramService {
     private final UBSTelegramBot ubsTelegramBot;
-
 
     /**
      * The method send a message to users when they non-payment of the order within
@@ -20,7 +19,7 @@ public class TelegramService{
      */
     public void sendMessageWhenOrderNonPayment(UBSuser ubsUser) {
         SendMessage sendMessage = new SendMessage(
-                ubsUser.getUser().getTelegramBot().getChatId().toString(), "Вас є неоплачені замовлення");
+            ubsUser.getUser().getTelegramBot().getChatId().toString(), "Вас є неоплачені замовлення");
         sendMessageToUser(sendMessage);
     }
 
@@ -30,9 +29,9 @@ public class TelegramService{
      */
     public void sendMessageWhenGarbageTruckArrives(Order order) {
         SendMessage sendMessage = new SendMessage(
-                order.getUser().getTelegramBot().getChatId().toString(),
-                "Машина по забору сміття прибуде до вас з "
-                        + order.getDeliverFrom() + " до " + order.getDeliverTo());
+            order.getUser().getTelegramBot().getChatId().toString(),
+            "Машина по забору сміття прибуде до вас з "
+                + order.getDeliverFrom() + " до " + order.getDeliverTo());
         sendMessageToUser(sendMessage);
     }
 

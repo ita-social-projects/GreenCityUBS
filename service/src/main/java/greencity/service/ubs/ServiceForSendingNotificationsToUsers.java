@@ -13,8 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * The class allows sending notifications to users on Viber and Telegram
- * using the appropriate bots.
+ * The class allows sending notifications to users on Viber and Telegram using
+ * the appropriate bots.
  */
 @Service
 @RequiredArgsConstructor
@@ -23,9 +23,10 @@ public class ServiceForSendingNotificationsToUsers {
     private final OrderRepository orderRepository;
     private final TelegramService telegramService;
     private final ViberServiceImpl viberService;
+
     /**
-     * The method sends a message to users on Viber and Telegram when a garbage truck arrives to pick up
-     * their garbage.
+     * The method sends a message to users on Viber and Telegram when a garbage
+     * truck arrives to pick up their garbage.
      */
     public void sendMessageWhenGarbageTruckArrives() {
         List<Order> orders = orderRepository.getAllUsersInWhichTheRouteIsDefined();
@@ -36,14 +37,14 @@ public class ServiceForSendingNotificationsToUsers {
     }
 
     /**
-     * The method send a message to users on Viber and Telegram when they non-payment of the order within
-     * three days.
+     * The method send a message to users on Viber and Telegram when they
+     * non-payment of the order within three days.
      */
     public void sendMessageWhenOrderNonPayment() {
         List<UBSuser> ubSusers = ubSuserRepository.getAllUBSusersWhoHaveNotPaid(LocalDate.now().minusDays(3));
         for (UBSuser ubSuser : ubSusers) {
-           telegramService.sendMessageWhenOrderNonPayment(ubSuser);
-           viberService.sendMessageWhenOrderNonPayment(ubSuser);
+            telegramService.sendMessageWhenOrderNonPayment(ubSuser);
+            viberService.sendMessageWhenOrderNonPayment(ubSuser);
         }
     }
 }

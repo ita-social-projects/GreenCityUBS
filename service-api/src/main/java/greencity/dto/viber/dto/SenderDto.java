@@ -15,6 +15,4 @@ public class SenderDto {
     private String avatar;
     private String country;
     private String language;
-
-
 }
