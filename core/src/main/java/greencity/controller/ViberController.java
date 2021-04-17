@@ -55,7 +55,7 @@ public class ViberController {
     }
 
     /**
-     * The method allows to see info about Viber bot.
+     * The method allows to see info about Viberr bot.
      *
      * @return @return {@link String} - which contains the status of success or
      *         failure.
