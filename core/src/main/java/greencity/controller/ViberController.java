@@ -17,7 +17,7 @@ public class ViberController {
     private final ViberService viberService;
 
     /**
-     * The method sets the URL of the Viberr bot to which Viber requests will be
+     * The method sets the URL of the Viberrr bot to which Viber requests will be
      * sent.
      *
      * @return {@link String} - which contains the status of success or failure.
