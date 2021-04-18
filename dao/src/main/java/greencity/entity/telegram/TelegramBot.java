@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -28,6 +29,7 @@ public class TelegramBot {
     private Long id;
     @Column(name = "chat_id")
     private Long chatId;
-    @OneToOne(mappedBy = "telegramBot")
+    @OneToOne()
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

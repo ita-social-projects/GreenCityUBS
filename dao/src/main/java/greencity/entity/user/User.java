@@ -66,8 +66,7 @@ public class User {
     @Column(nullable = false, columnDefinition = "varchar(60)")
     private String uuid;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "telegram_bot_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private TelegramBot telegramBot;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
