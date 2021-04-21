@@ -3,13 +3,13 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.service.ubs.AllValuesFromTableService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.*;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
-import javax.ws.rs.PathParam;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +23,17 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final ModelMapper mapper;
+    private final AllValuesFromTableService allValuesFromTableService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
+                                     AllValuesFromTableService allValuesFromTableService) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
+        this.allValuesFromTableService = allValuesFromTableService;
     }
 
     /**
@@ -193,5 +196,24 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
         ubsManagementService.addUserViolation(add);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    /**
+     * Controller for getting User violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
+     * @author Nazar Struk
+     */
+    @ApiOperation("Get all info from Table order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getAllFields")
+    public ResponseEntity<List<GetAllFieldsMainDto>> getAllFieldsFromOrderTableInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(allValuesFromTableService.findAllValues());
     }
 }
