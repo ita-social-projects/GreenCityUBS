@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Pikhotskyi-5" author="Pikhotskyi">
+        <dropForeignKeyConstraint baseTableName="users" constraintName="fk_users_telegram_bot_telegram_bot_id"/>
+    </changeSet>
+    <changeSet id="Pikhotskyi-6" author="Pikhotskyi">
+        <dropColumn tableName="users" columnName="telegram_bot_id"/>
+    </changeSet>
+</databaseChangeLog>

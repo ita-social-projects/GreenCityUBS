@@ -18,4 +18,6 @@
     <include file="db/changelog/logs/ch-add-violatin-description-mapping-Hutei.xml"/>
     <include file="db/changelog/logs/ch-add-language-table-and-fk-to-bag-Veremchuk.xml"/>
     <include file="db/changelog/logs/ch-add-table-viber-bot-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-telegram-bot-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-column-user-id-and-notify-to-telegram-bot-id-Pikhotskyi.xml"/>
 </databaseChangeLog>
