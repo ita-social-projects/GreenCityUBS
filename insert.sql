@@ -3,17 +3,17 @@ VALUES (1,'ua'),
        (2,'en'),
        (3,'ru');
 
-INSERT INTO users(id,current_points, uuid, violations, telegram_bot_id)
-VALUES (1,1000,'uuid1',0,null),
-       (2,1000,'uuid2',0,null),
-       (3,1000,'uuid3',0,null),
-       (4,1000,'uuid4',0,null),
-       (5,1000,'uuid5',0,null),
-       (6,1000,'uuid6',0,null),
-       (7,1000,'uuid7',0,null),
-       (8,1000,'uuid8',0,null),
-       (9,1000,'uuid9',0,null),
-       (10,1000,'uuid10',0,null);
+INSERT INTO users(id,current_points, uuid, violations)
+VALUES (1,1000,'uuid1',0),
+       (2,1000,'uuid2',0),
+       (3,1000,'uuid3',0),
+       (4,1000,'uuid4',0),
+       (5,1000,'uuid5',0),
+       (6,1000,'uuid6',0),
+       (7,1000,'uuid7',0),
+       (8,1000,'uuid8',0),
+       (9,1000,'uuid9',0),
+       (10,1000,'uuid10',0);
 
 INSERT INTO ubs_user(id,email,first_name,last_name,phone_number,users_id,address_id)
 VALUES (1,'first.mike@gmail.com','Mike','Miopes','095634873',1,null),
@@ -41,7 +41,7 @@ VALUES  (1,'order comment',null,null,null,'2021-03-13 10:03:38.289346','FORMED',
         (10,'order comment',null,null,null,'2021-03-22 19:00:00.000000','FORMED',0,null,8,8,null);
 
 INSERT INTO certificate (code,status,expiration_date,points,order_id,creation_date)
-VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01'),
+VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01');
        ('1235-1235','ACTIVE','2021-05-02',200,1,'2021-04-02'),
        ('1236-1236','ACTIVE','2021-05-03',300,3,'2021-04-03'),
        ('1237-1237','ACTIVE','2021-05-04',400,4,'2021-04-04'),
