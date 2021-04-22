@@ -20,6 +20,7 @@ import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BagNotFoundException;
 import greencity.exceptions.CertificateExpiredException;
@@ -32,11 +33,7 @@ import greencity.exceptions.TooManyCertificatesEntered;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -56,6 +53,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
+    private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final String password = "test";
     private final String merchantId = "1396424";
@@ -100,7 +98,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
@@ -178,6 +175,54 @@ public class UBSClientServiceImpl implements UBSClientService {
         return formPaymentRequest(order.getId(), sumToPay);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid){
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        Long id = userRepository.findByUuid(uuid).getId();
+        List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
+            .stream()
+            .sorted(Comparator.comparing(Address::getId))
+            .map(u -> modelMapper.map(u, AddressDto.class))
+            .collect(Collectors.toList());
+        return new OrderWithAddressesResponseDto(addressDtoList);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest ,String uuid) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        Long id = userRepository.findByUuid(uuid).getId();
+        Address address = modelMapper.map(dtoRequest,Address.class);
+        if (address.getUbsUser() == null) {
+            address.setUbsUser(ubsUserRepository.findById(id).orElse(null));
+        }
+        address.setUser(userRepository.findByUuid(uuid));
+        addressRepo.save(address);
+        return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
+        addressRepo.deleteById(addressId);
+        return findAllAddressesForCurrentOrder(uuid) ;
+    }
+
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
         currentUser.getOrders().add(order);
         if (pointsToUse != 0) {
@@ -232,7 +277,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
                         + dto.getId()));
         }
-
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {

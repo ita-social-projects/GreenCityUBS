@@ -1,11 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentRequestDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PersonalDataDto;
-import greencity.dto.UserPointsAndAllBagsDto;
+import greencity.dto.*;
 import greencity.entity.user.User;
 import java.util.List;
 
@@ -53,4 +48,10 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid);
+
+    OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid);
+
+    OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest,String uuid);
+
+    OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId,String uuid);
 }
