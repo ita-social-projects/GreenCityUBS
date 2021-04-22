@@ -21,6 +21,8 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import greencity.entity.viber.ViberBot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,7 +65,10 @@ public class User {
 
     @Column(nullable = false, columnDefinition = "varchar(60)")
     private String uuid;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "telegram_bot_id", referencedColumnName = "id")
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private TelegramBot telegramBot;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private ViberBot viberBot;
 }

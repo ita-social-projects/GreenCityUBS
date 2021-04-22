@@ -1,7 +1,7 @@
 package greencity.exceptions;
 
 /**
- * Exception show that the user already has connected to telegram bot.
+ * Exception show that the user already has connected to Telegram bot.
  *
  * @author Pikhotskyi Vladyslav
  */
