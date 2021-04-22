@@ -1,8 +1,7 @@
 package greencity;
 
-import greencity.dto.BagDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PersonalDataDto;
+import greencity.dto.*;
+import greencity.entity.coords.Coordinates;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +33,35 @@ public class ModelUtils {
                 .street("Levaya")
                 .houseCorpus(null)
                 .build())
+            .build();
+    }
+
+    public static OrderAddressDtoRequest getOrderAddressDtoRequest(){
+        return OrderAddressDtoRequest.builder()
+            .id(0L)
+            .comment("Near Supermarket ATB")
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+    public static AddressDto addressDto(){
+        return AddressDto.builder()
+            .id(1L)
+            .comment("Near Supermarket ATB")
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
             .build();
     }
 }
