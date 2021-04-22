@@ -3,6 +3,7 @@ package greencity.entity.user;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramBot;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ public class User {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Order> orders;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Address> addresses;
 
     @Column(columnDefinition = "int default 0")
     private Integer currentPoints;
