@@ -30,7 +30,7 @@ public class ManagementOrderController {
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-                                     AllValuesFromTableService allValuesFromTableService) {
+        AllValuesFromTableService allValuesFromTableService) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
         this.allValuesFromTableService = allValuesFromTableService;

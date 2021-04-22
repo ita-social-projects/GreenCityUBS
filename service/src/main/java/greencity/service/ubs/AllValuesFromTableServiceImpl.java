@@ -5,20 +5,11 @@ import greencity.dto.GetAllFieldsMainDto;
 import greencity.dto.UbsCustomersDto;
 import greencity.entity.allfieldsordertable.GetAllValuesFromTable;
 
-import greencity.entity.order.BagTranslation;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityResult;
 import lombok.AllArgsConstructor;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -79,7 +70,7 @@ public class AllValuesFromTableServiceImpl implements AllValuesFromTableService 
                 .violationsAmount((Integer) map.get("violations"))
                 .district((String) map.get("district"))
                 .address((String) map.get("address"))
-                .recipientName((String)map.get("recipiantname"))
+                .recipientName((String) map.get("recipiantname"))
                 .commentToAddressForClient((String) map.get("comment_to_address_for_client"))
                 .garbageBags120Amount((Integer) map.get("garbage_bags_120_amount"))
                 .boBags120Amount((Integer) map.get("bo_bags_120_amount"))
