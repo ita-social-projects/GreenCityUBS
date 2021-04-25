@@ -43,5 +43,4 @@ public class OrderAddressDtoRequest {
     private Coordinates coordinates;
 
     private Boolean actual;
-
 }
