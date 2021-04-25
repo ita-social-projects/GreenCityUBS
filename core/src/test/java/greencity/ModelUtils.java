@@ -12,7 +12,7 @@ public class ModelUtils {
         return () -> "test@gmail.com";
     }
 
-    public static OrderResponseDto getOrderResponceDto() {
+    public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232534634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -24,19 +24,13 @@ public class ModelUtils {
                 .lastName("Antonov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .district("frankivskiy")
-                .addressComment("near mall")
-                .city("Lviv")
-                .houseNumber("4R")
-                .entranceNumber("5")
                 .phoneNumber("067894522")
-                .street("Levaya")
-                .houseCorpus(null)
                 .build())
+            .addressId(1L)
             .build();
     }
 
-    public static OrderAddressDtoRequest getOrderAddressDtoRequest(){
+    public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
             .comment("Near Supermarket ATB")
@@ -50,7 +44,8 @@ public class ModelUtils {
             .actual(false)
             .build();
     }
-    public static AddressDto addressDto(){
+
+    public static AddressDto addressDto() {
         return AddressDto.builder()
             .id(1L)
             .comment("Near Supermarket ATB")

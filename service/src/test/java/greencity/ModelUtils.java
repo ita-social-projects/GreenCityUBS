@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ModelUtils {
 
-    public static OrderResponseDto getOrderResponceDto() {
+    public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -24,14 +24,7 @@ public class ModelUtils {
                 .lastName("ivanov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .district("frankivskiy")
-                .addressComment("near mall")
-                .city("Lviv")
-                .houseNumber("4R")
-                .entranceNumber("5")
                 .phoneNumber("067894522")
-                .street("Levaya")
-                .houseCorpus(null)
                 .build())
             .build();
     }
@@ -43,16 +36,6 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
-            .userAddress(Address.builder()
-                .id(1L)
-                .city("Lviv")
-                .street("Levaya")
-                .district("frankivskiy")
-                .entranceNumber("5")
-                .comment("near mall")
-                .houseCorpus(null)
-                .houseNumber("4R")
-                .build())
             .build();
     }
 
