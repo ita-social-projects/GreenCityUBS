@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -38,7 +37,6 @@ class OrderControllerTest {
 
     @Mock
     UBSClientService ubsClientService;
-
 
     @Mock
     RestClient restClient;
@@ -91,7 +89,7 @@ class OrderControllerTest {
     @Test
     void processOrder() throws Exception {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        OrderResponseDto dto = ModelUtils.getOrderResponceDto();
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
@@ -107,19 +105,19 @@ class OrderControllerTest {
     }
 
     @Test
-    void getAllAddressesForCurrentUser()throws Exception{
+    void getAllAddressesForCurrentUser() throws Exception {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
-        mockMvc.perform(get(ubsLink+"/findAll-order-address")
+        mockMvc.perform(get(ubsLink + "/findAll-order-address")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-       verify(ubsClientService).findAllAddressesForCurrentOrder(anyString());
+        verify(ubsClientService).findAllAddressesForCurrentOrder(anyString());
     }
 
     @Test
-    void  saveAddressForOrder() throws Exception{
+    void saveAddressForOrder() throws Exception {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         OrderAddressDtoRequest dto = ModelUtils.getOrderAddressDtoRequest();
@@ -127,16 +125,16 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink+"/save-order-address")
+        mockMvc.perform(post(ubsLink + "/save-order-address")
             .content(orderAddressDtoRequest)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-        verify(ubsClientService).saveCurrentAddressForOrder(anyObject(),eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).saveCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test
-    void deleteOrderAddress()throws Exception{
+    void deleteOrderAddress() throws Exception {
 
         this.mockMvc.perform(delete(ubsLink + "/{id}", 1L))
             .andExpect(status().isNotFound());
