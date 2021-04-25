@@ -41,7 +41,7 @@ VALUES  (1,'order comment',null,null,null,'2021-03-13 10:03:38.289346','FORMED',
         (10,'order comment',null,null,null,'2021-03-22 19:00:00.000000','FORMED',0,null,8,8,null);
 
 INSERT INTO certificate (code,status,expiration_date,points,order_id,creation_date)
-VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01');
+VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01'),
        ('1235-1235','ACTIVE','2021-05-02',200,1,'2021-04-02'),
        ('1236-1236','ACTIVE','2021-05-03',300,3,'2021-04-03'),
        ('1237-1237','ACTIVE','2021-05-04',400,4,'2021-04-04'),

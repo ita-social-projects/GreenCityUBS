@@ -25,19 +25,7 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
             .lastName(ubsUser.getLastName())
             .phoneNumber(ubsUser.getPhoneNumber())
             .email(ubsUser.getEmail())
-            .city(ubsUser.getUserAddress().getCity())
-            .street(ubsUser.getUserAddress().getStreet())
-            .district(ubsUser.getUserAddress().getDistrict())
-            .houseNumber(ubsUser.getUserAddress().getHouseNumber())
-            .houseCorpus(ubsUser.getUserAddress().getHouseCorpus())
-            .entranceNumber(ubsUser.getUserAddress().getEntranceNumber())
-            .addressComment(ubsUser.getUserAddress().getComment())
             .build();
-
-        if (ubsUser.getUserAddress().getCoordinates() != null) {
-            personalDataDto.setLatitude(ubsUser.getUserAddress().getCoordinates().getLatitude());
-            personalDataDto.setLongitude(ubsUser.getUserAddress().getCoordinates().getLongitude());
-        }
 
         return personalDataDto;
     }

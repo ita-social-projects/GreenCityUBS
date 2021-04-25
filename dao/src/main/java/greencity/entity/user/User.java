@@ -24,11 +24,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import greencity.entity.viber.ViberBot;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,6 +32,8 @@ import lombok.Setter;
 @Setter
 @Builder
 @Table(name = "users")
+@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList",
+    "violationsDescription", "telegramBot", "viberBot"})
 @Entity
 public class User {
     @Id
