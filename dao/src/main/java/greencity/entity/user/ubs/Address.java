@@ -9,12 +9,12 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUser", "id"})
+@EqualsAndHashCode(exclude = {"ubsUser", "user"})
 @Getter
 @Setter
 @Builder
 @Table(name = "address")
-@ToString(exclude = {"ubsUser", "id"})
+@ToString(exclude = {"ubsUser", "user"})
 public class Address {
     @OneToOne(mappedBy = "userAddress")
     private UBSuser ubsUser;
@@ -47,7 +47,7 @@ public class Address {
     @Column
     private String comment;
 
-    @Column(columnDefinition = "boolean default false",nullable = false)
+    @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
 
     @Embedded
