@@ -23,12 +23,13 @@ public class AllValuesFromTableServiceImpl implements AllValuesFromTableService 
         + "users.violations,"
         + "address.district,concat_WS(', ',address.city,address.street,address.house_number,"
         + "address.house_corpus,address.entrance_number) as address,\n"
-        + "users.uuid as recipiantName,ubs_user.phone_number as phone_Number_Recipient"
-        + " ,ubs_user.email as email_Recipient,\n"
         + "address.comment as comment_To_Address_For_Client,\n"
-        + "(select amount from order_bag_mapping where  bag_id = 1)as garbage_Bags_120_Amount,\n"
-        + "(select amount from order_bag_mapping where  bag_id = 2)as bo_Bags_120_Amount,\n"
-        + "(select amount from order_bag_mapping where  bag_id = 3)as bo_Bags_20_Amount,\n"
+        + "(select amount from order_bag_mapping where  bag_id = 1 "
+        + "and order_bag_mapping.order_id = orders.id) as garbage_Bags_120_Amount,\n"
+        + "(select amount from order_bag_mapping where  bag_id = 2 "
+        + "and order_bag_mapping.order_id = orders.id)as bo_Bags_120_Amount,\n"
+        + "(select amount from order_bag_mapping where  bag_id = 3 "
+        + "and order_bag_mapping.order_id = orders.id)as bo_Bags_20_Amount,\n"
         + "payment.amount as total_Order_Sum,\n"
         + "certificate.code,certificate.points,(payment.amount-certificate.points)as amount_Due,\n"
         + "orders.comment as comment_For_Order_By_Client,\n"
@@ -81,16 +82,12 @@ public class AllValuesFromTableServiceImpl implements AllValuesFromTableService 
                 .amountDue((Long) map.get("amount_due"))
                 .commentForOrderByClient((String) map.get("comment_for_order_by_client"))
                 .payment((String) map.get("payment_system"))
-                .dateOfExport(map.get("date_of_export").toString())
+                .dateOfExport((String) map.get("date_of_export"))
                 .timeOfExport(map.get("time_of_export").toString())
                 .idOrderFromShop((Long) map.get("id_order_from_shop"))
                 .receivingStation((String) map.get("receiving_station"))
                 .commentsForOrder((String) map.get("comments_for_order"))
                 .build();
-            UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(ourTable.getRecipientName()).orElse(null);
-            ourTable.setRecipientName(ubsCustomersDto.getName());
-            ourTable.setEmailRecipient(ubsCustomersDto.getEmail());
-            ourTable.setPhoneNumberRecipient(ubsCustomersDto.getPhoneNumber());
             for (Map<String, Object> objectMap : employees) {
                 Long positionId = (Long) objectMap.get("position_id");
                 if (positionId == 1) {
