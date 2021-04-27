@@ -23,6 +23,9 @@ public class AllValuesFromTableServiceImpl implements AllValuesFromTableService 
         + "users.violations,"
         + "address.district,concat_WS(', ',address.city,address.street,address.house_number,"
         + "address.house_corpus,address.entrance_number) as address,\n"
+        + "users.recipient_name,"
+        + "users.recipient_email,"
+        + "users.recipient_phone,"
         + "address.comment as comment_To_Address_For_Client,\n"
         + "(select amount from order_bag_mapping where  bag_id = 1 "
         + "and order_bag_mapping.order_id = orders.id) as garbage_Bags_120_Amount,\n"
@@ -71,7 +74,9 @@ public class AllValuesFromTableServiceImpl implements AllValuesFromTableService 
                 .violationsAmount((Integer) map.get("violations"))
                 .district((String) map.get("district"))
                 .address((String) map.get("address"))
-                .recipientName((String) map.get("recipiantname"))
+                .recipientName((String) map.get("recipient_name"))
+                .emailRecipient((String) map.get("recipient_email"))
+                .phoneNumberRecipient((String) map.get("recipient_phone"))
                 .commentToAddressForClient((String) map.get("comment_to_address_for_client"))
                 .garbageBags120Amount((Integer) map.get("garbage_bags_120_amount"))
                 .boBags120Amount((Integer) map.get("bo_bags_120_amount"))
