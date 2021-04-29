@@ -3,9 +3,7 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.PersonalDataDto;
-import greencity.dto.UserPointsAndAllBagsDto;
 import greencity.entity.enums.CertificateStatus;
-import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
 import greencity.exceptions.CertificateNotFoundException;
@@ -16,7 +14,6 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientServiceImpl;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,7 +44,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void getSecondPageData() {
-        PersonalDataDto expected = ModelUtils.getOrderResponceDto().getPersonalData();
+        PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
         User user = new User();
         user.setId(13L);
 

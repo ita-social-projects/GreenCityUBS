@@ -1,8 +1,6 @@
 package greencity.mapping;
 
 import greencity.dto.PersonalDataDto;
-import greencity.entity.coords.Coordinates;
-import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
@@ -27,24 +25,7 @@ public class UBSuserMapper extends AbstractConverter<PersonalDataDto, UBSuser> {
             .lastName(personalDataDto.getLastName())
             .email(personalDataDto.getEmail())
             .phoneNumber(personalDataDto.getPhoneNumber())
-            .userAddress(Address.builder()
-                .city(personalDataDto.getCity())
-                .street(personalDataDto.getStreet())
-                .district(personalDataDto.getDistrict())
-                .houseNumber(personalDataDto.getHouseNumber())
-                .houseCorpus(personalDataDto.getHouseCorpus())
-                .coordinates(Coordinates.builder()
-                    .latitude(personalDataDto.getLatitude())
-                    .longitude(personalDataDto.getLongitude())
-                    .build())
-                .entranceNumber(personalDataDto.getEntranceNumber())
-                .comment(personalDataDto.getAddressComment())
-                .build())
             .build();
-
-        if (personalDataDto.getLatitude() == 0 || personalDataDto.getLongitude() == 0) {
-            ubsUser.getUserAddress().setCoordinates(null);
-        }
 
         return ubsUser;
     }

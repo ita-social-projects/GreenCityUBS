@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
+import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -51,4 +52,12 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
         + "where o.orderStatus = 'PAID' "
         + "and a.coordinates.latitude  = :latitude and a.coordinates.longitude = :longitude ")
     int capacity(double latitude, double longitude);
+
+    /**
+     * Method returns list of {@link Address}addresses for current user.
+     *
+     * @return list of {@link Address}.
+     */
+    @Query("select a from Address a where a.user.id = :userId")
+    List<Address> findAllByUserId(Long userId);
 }

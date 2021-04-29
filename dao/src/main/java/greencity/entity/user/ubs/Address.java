@@ -1,6 +1,7 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,15 +9,18 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUser", "id"})
+@EqualsAndHashCode(exclude = {"ubsUser", "user"})
 @Getter
 @Setter
 @Builder
 @Table(name = "address")
-@ToString(exclude = {"ubsUser", "id"})
+@ToString(exclude = {"ubsUser", "user"})
 public class Address {
     @OneToOne(mappedBy = "userAddress")
     private UBSuser ubsUser;
+
+    @ManyToOne
+    private User user;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +46,9 @@ public class Address {
 
     @Column
     private String comment;
+
+    @Column(columnDefinition = "boolean default false", nullable = false)
+    private Boolean actual;
 
     @Embedded
     private Coordinates coordinates;

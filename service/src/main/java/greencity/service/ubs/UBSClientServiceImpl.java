@@ -15,28 +15,19 @@ import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.CertificateExpiredException;
-import greencity.exceptions.CertificateIsNotActivated;
-import greencity.exceptions.CertificateIsUsedException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.PaymentValidationException;
-import greencity.exceptions.TooManyCertificatesEntered;
+import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -56,6 +47,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
+    private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final String password = "test";
     private final String merchantId = "1396424";
@@ -100,7 +92,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
@@ -156,7 +147,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
             throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
         }
-
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
         if (sumToPay < dto.getPointsToUse()) {
@@ -164,18 +154,85 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             sumToPay -= dto.getPointsToUse();
         }
-
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
         UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
+        Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
+            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
+
+        if (!address.getUser().equals(currentUser)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
+        }
+
+        userData.setUserAddress(address);
+
         order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
         return formPaymentRequest(order.getId(), sumToPay);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        Long id = userRepository.findByUuid(uuid).getId();
+        List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
+            .stream()
+            .sorted(Comparator.comparing(Address::getId))
+            .map(u -> modelMapper.map(u, AddressDto.class))
+            .collect(Collectors.toList());
+        return new OrderWithAddressesResponseDto(addressDtoList);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+
+        Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+
+        if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {
+            address = modelMapper.map(dtoRequest, Address.class);
+            address.setId(null);
+            address.setUser(userRepository.findByUuid(uuid));
+        } else {
+            address = modelMapper.map(dtoRequest, Address.class);
+            address.setUser(userRepository.findByUuid(uuid));
+        }
+        addressRepo.save(address);
+        return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
+        Address address = addressRepo.findById(addressId).orElseThrow(
+            () -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+        if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
+        }
+        addressRepo.deleteById(addressId);
+        return findAllAddressesForCurrentOrder(uuid);
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
@@ -232,7 +289,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
                         + dto.getId()));
         }
-
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
