@@ -20,5 +20,6 @@
     <include file="db/changelog/logs/ch-add-table-viber-bot-Pikhotskyi.xml"/>
     <include file="db/changelog/logs/ch-drop-column-telegram-bot-id-Pikhotskyi.xml"/>
     <include file="db/changelog/logs/ch-add-column-user-id-and-notify-to-telegram-bot-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-recipient-values-Struk.xml"/>
     <include file="db/changelog/logs/сh-add-column-active-to-address-Veremchuk.xml"/>
 </databaseChangeLog>

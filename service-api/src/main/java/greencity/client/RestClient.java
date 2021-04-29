@@ -1,5 +1,6 @@
 package greencity.client;
 
+import greencity.dto.UbsCustomersDto;
 import greencity.constant.RestTemplateLinks;
 import greencity.dto.UbsTableCreationDto;
 import greencity.dto.viber.dto.SendMessageToUserDto;
@@ -194,6 +195,21 @@ public class RestClient {
             + "user/findNotDeactivatedByEmail" + "?email="
             + email, HttpMethod.GET, entity, UserVO.class)
             .getBody();
+        assert body != null;
+        return Optional.of(body);
+    }
+
+    /**
+     * Method that allow you to find User by uuid {@link UbsCustomersDto}.
+     *
+     * @param uuid - {@link UbsCustomersDto}'s uuid
+     * @return {@link UbsCustomersDto}
+     * @author Nazar Struk
+     */
+    public Optional<UbsCustomersDto> findUserByUUid(String uuid) {
+        HttpEntity<String> entity = new HttpEntity<>(setHeader());
+        UbsCustomersDto body = restTemplate.exchange(greenCityUserServerAddress + "user/findByUuId"
+            + "?uuid=" + uuid, HttpMethod.GET, entity, UbsCustomersDto.class).getBody();
         assert body != null;
         return Optional.of(body);
     }
