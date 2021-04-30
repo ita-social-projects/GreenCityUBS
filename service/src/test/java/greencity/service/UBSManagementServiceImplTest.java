@@ -55,14 +55,14 @@ public class UBSManagementServiceImplTest {
 
         for (Coordinates coordinate : ModelUtils.getCoordinatesSet()) {
             List<Order> orders = ModelUtils.getOrdersToGroupThem().stream()
-                .filter(e -> e.getUbsUser().getUserAddress().getCoordinates().equals(coordinate)).collect(
+                .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
                     Collectors.toList());
             when(orderRepository.undeliveredOrdersGroupThem(coordinate.getLatitude(), coordinate.getLongitude()))
                 .thenReturn(orders);
             for (Order order : orders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(OrderDto.builder()
-                    .latitude(order.getUbsUser().getUserAddress().getCoordinates().getLatitude())
-                    .longitude(order.getUbsUser().getUserAddress().getCoordinates().getLongitude())
+                    .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                    .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
                     .build());
             }
         }

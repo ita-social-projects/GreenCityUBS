@@ -168,7 +168,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
         }
 
-        userData.setUserAddress(address);
+        userData.setAddress(address);
 
         order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
