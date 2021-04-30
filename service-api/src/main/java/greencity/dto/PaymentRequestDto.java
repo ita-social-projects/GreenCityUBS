@@ -15,6 +15,7 @@ import lombok.ToString;
 @ToString
 public class PaymentRequestDto {
     private String orderId;
+    private Integer merchantId;
     private String orderDescription;
     private String currency;
     private Integer amount;

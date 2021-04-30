@@ -214,6 +214,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+            .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId.toString())
             .orderDescription("ubs courier")
             .currency("UAH")
