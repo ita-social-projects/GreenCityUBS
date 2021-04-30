@@ -17,9 +17,6 @@ import javax.persistence.*;
 @Table(name = "address")
 @ToString(exclude = {"ubsUsers", "user"})
 public class Address {
-//    @OneToOne(mappedBy = "userAddress")
-//    private UBSuser ubsUser;
-
     @OneToMany(mappedBy = "address")
     private List<UBSuser> ubsUsers;
 
