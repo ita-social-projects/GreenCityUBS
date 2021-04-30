@@ -51,7 +51,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             int currentCoordinatesCapacity =
                 addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
             List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getUserAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
             List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
                 .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
             allOrdersWithLitres.add(GroupedOrderDto.builder()

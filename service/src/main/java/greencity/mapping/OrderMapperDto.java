@@ -17,13 +17,13 @@ public class OrderMapperDto extends AbstractConverter<Order, OrderDto> {
         return OrderDto.builder()
             .firstName(order.getUbsUser().getFirstName())
             .lastName(order.getUbsUser().getLastName())
-            .address(order.getUbsUser().getUserAddress().getDistrict() + " "
-                + order.getUbsUser().getUserAddress().getStreet() + " "
-                + order.getUbsUser().getUserAddress().getHouseNumber())
-            .addressComment(order.getUbsUser().getUserAddress().getComment())
+            .address(order.getUbsUser().getAddress().getDistrict() + " "
+                + order.getUbsUser().getAddress().getStreet() + " "
+                + order.getUbsUser().getAddress().getHouseNumber())
+            .addressComment(order.getUbsUser().getAddress().getComment())
             .phoneNumber(order.getUbsUser().getPhoneNumber())
-            .latitude(order.getUbsUser().getUserAddress().getCoordinates().getLatitude())
-            .longitude(order.getUbsUser().getUserAddress().getCoordinates().getLongitude())
+            .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+            .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
             .build();
     }
 }

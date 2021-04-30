@@ -2,6 +2,7 @@ package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
+import java.util.List;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,15 +10,15 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUser", "user"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "user"})
 @Getter
 @Setter
 @Builder
 @Table(name = "address")
-@ToString(exclude = {"ubsUser", "user"})
+@ToString(exclude = {"ubsUsers", "user"})
 public class Address {
-    @OneToOne(mappedBy = "userAddress")
-    private UBSuser ubsUser;
+    @OneToMany(mappedBy = "address")
+    private List<UBSuser> ubsUsers;
 
     @ManyToOne
     private User user;

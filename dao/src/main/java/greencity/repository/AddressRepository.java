@@ -15,7 +15,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *
      * @return list of {@link Coordinates}.
      */
-    @Query("select a.coordinates from Address a inner join UBSuser u on a = u.userAddress "
+    @Query("select a.coordinates from Address a inner join UBSuser u on a.id = u.address.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     Set<Coordinates> undeliveredOrdersCoords();
@@ -28,7 +28,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select a.coordinates "
         + "from UBSuser u "
-        + "join Address a on a = u.userAddress "
+        + "join Address a on a.id = u.address.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
         + "join Bag b on key(bags) = b.id "
@@ -45,7 +45,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select sum(bags * b.capacity) "
         + "from UBSuser u "
-        + "join Address a on a = u.userAddress "
+        + "join Address a on a.id = u.address.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
         + "join Bag b on key(bags) = b.id "

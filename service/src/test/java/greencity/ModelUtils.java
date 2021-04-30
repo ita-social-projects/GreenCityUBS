@@ -5,6 +5,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDate;
@@ -47,7 +48,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .userAddress(Address.builder()
+                .address(Address.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -60,6 +61,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
+                    .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -151,7 +153,7 @@ public class ModelUtils {
                 .id(++id)
                 .ubsUser(UBSuser.builder()
                     .id(++userId)
-                    .userAddress(Address.builder()
+                    .address(Address.builder()
                         .coordinates(coordinates)
                         .build())
                     .build())
