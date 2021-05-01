@@ -8,6 +8,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -32,4 +33,7 @@ public class PersonalDataDto implements Serializable {
     @NotBlank
     @Pattern(regexp = "[0-9]{9}")
     private String phoneNumber;
+
+    @Length(max = 200)
+    private String addressComment;
 }
