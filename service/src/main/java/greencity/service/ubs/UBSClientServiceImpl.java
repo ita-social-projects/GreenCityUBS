@@ -169,6 +169,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         userData.setAddress(address);
+        if (userData.getAddress().getComment() == null) {
+            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
+        }
 
         order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
