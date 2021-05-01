@@ -21,7 +21,6 @@ public class AddressDto implements Serializable {
     @NotBlank
     @Length(max = 12)
     private String city;
-    @NotBlank
     @Length(max = 200)
     private String comment;
     @NotBlank

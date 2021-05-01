@@ -20,7 +20,6 @@ public class OrderAddressDtoRequest {
     @Length(max = 12)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
     private String city;
-    @NotBlank
     @Length(max = 200)
     private String comment;
     @NotBlank
