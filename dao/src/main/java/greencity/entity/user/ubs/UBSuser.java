@@ -23,7 +23,7 @@ public class UBSuser {
     @JoinColumn(name = "users_id")
     private User user;
 
-    @OneToMany(mappedBy = "ubsUser")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL,mappedBy = "ubsUser")
     private List<Order> orders;
 
     @Id
