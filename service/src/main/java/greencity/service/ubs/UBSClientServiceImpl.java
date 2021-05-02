@@ -234,6 +234,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
         }
+         List<UBSuser> ubSusers =address.getUbsUsers();
+        ubSusers.forEach((u)-> u.setAddress(null));
+        ubSusers.forEach(ubsUserRepository::save);
         addressRepo.deleteById(addressId);
         return findAllAddressesForCurrentOrder(uuid);
     }
