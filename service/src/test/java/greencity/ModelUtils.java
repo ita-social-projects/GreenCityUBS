@@ -37,6 +37,21 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
+            .address(Address.builder()
+                .id(1L)
+                .user(null)
+                .houseNumber("1a")
+                .actual(true)
+                .entranceNumber("str")
+                .district("3a")
+                .houseCorpus("2a")
+                .city("Kiev")
+                .street("Gorodotska")
+                .coordinates(Coordinates.builder()
+                    .longitude(2.2)
+                    .latitude(3.2)
+                    .build())
+                .comment(null).build())
             .build();
     }
 
