@@ -33,7 +33,6 @@ public class ModelUtils {
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
-            .comment("Near Supermarket ATB")
             .entranceNumber("7a")
             .houseCorpus("2")
             .houseNumber("7")
@@ -48,7 +47,6 @@ public class ModelUtils {
     public static AddressDto addressDto() {
         return AddressDto.builder()
             .id(1L)
-            .comment("Near Supermarket ATB")
             .entranceNumber("7a")
             .houseCorpus("2")
             .houseNumber("7")
