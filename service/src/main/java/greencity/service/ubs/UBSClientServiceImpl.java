@@ -246,6 +246,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         ubsUsers.forEach((u) -> u.setAddress(null));
         ubsUsers.forEach(ubsUserRepository::save);
         addressRepo.deleteById(addressId);
+        List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
+        long count = addresses.stream().count();
+        Address lastAddress = addresses.stream().skip(count-1).findFirst().get();
+        lastAddress.setActual(true);
+        addressRepo.save(lastAddress);
         return findAllAddressesForCurrentOrder(uuid);
     }
 
