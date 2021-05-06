@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.service.ubs.AllValuesFromTableService;
@@ -195,6 +196,7 @@ public class ManagementOrderController {
     @PostMapping(value = "/addViolationToUser")
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
         ubsManagementService.addUserViolation(add);
+        ubsManagementService.sendNotificationAboutViolation(add);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
