@@ -76,4 +76,12 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addUserViolation(AddingViolationsToUserDto add);
+
+    /**
+     * Method for send email with description to user.
+     * 
+     * @param dto {@link AddingViolationsToUserDto } order id with description.
+     * @author Veremchuk Zakhar.
+     */
+    void sendNotificationAboutViolation(AddingViolationsToUserDto dto);
 }
