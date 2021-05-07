@@ -209,16 +209,24 @@ public class UBSClientServiceImpl implements UBSClientService {
             uuid = dto.getUuid();
             createRecordInUBStable(uuid);
         }
-
+        List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
+        if (addresses != null) {
+            addresses.forEach(u -> {
+                u.setActual(false);
+                addressRepo.save(u);
+            });
+        }
         Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
 
         if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {
             address = modelMapper.map(dtoRequest, Address.class);
             address.setId(null);
             address.setUser(userRepository.findByUuid(uuid));
+            address.setActual(true);
         } else {
             address = modelMapper.map(dtoRequest, Address.class);
             address.setUser(userRepository.findByUuid(uuid));
+            address.setActual(true);
         }
         addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);

@@ -359,4 +359,20 @@ public class ModelUtils {
             .order(null)
             .build();
     }
+
+    public static UserViolationMailDto getUserViolationMailDto() {
+        return UserViolationMailDto.builder()
+            .email("string@gmail.com")
+            .name("string")
+            .language("en")
+            .violationDescription("String Description")
+            .build();
+    }
+
+    public static AddingViolationsToUserDto getAddingViolationsToUserDto(){
+        return AddingViolationsToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("String string string")
+            .build();
+    }
 }

@@ -395,7 +395,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto) {
+    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto,String language) {
         Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
         UserViolationMailDto mailDto;
         if (order != null) {
@@ -403,6 +403,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .name(order.getUser().getRecipientName())
                 .email(order.getUser().getRecipientEmail())
                 .violationDescription(dto.getViolationDescription())
+                .language(language)
                 .build();
             restClient.sendViolationOnMail(mailDto);
         }
