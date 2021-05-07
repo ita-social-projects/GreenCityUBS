@@ -369,7 +369,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddingViolationsToUserDto getAddingViolationsToUserDto(){
+    public static AddingViolationsToUserDto getAddingViolationsToUserDto() {
         return AddingViolationsToUserDto.builder()
             .orderID(1L)
             .violationDescription("String string string")

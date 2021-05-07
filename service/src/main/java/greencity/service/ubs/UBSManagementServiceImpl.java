@@ -395,7 +395,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto,String language) {
+    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
         Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
         UserViolationMailDto mailDto;
         if (order != null) {

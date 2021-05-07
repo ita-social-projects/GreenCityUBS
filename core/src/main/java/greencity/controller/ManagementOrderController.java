@@ -198,9 +198,9 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser")
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
-                                                        @ApiIgnore @ValidLanguage Locale locale){
+        @ApiIgnore @ValidLanguage Locale locale) {
         ubsManagementService.addUserViolation(add);
-        ubsManagementService.sendNotificationAboutViolation(add,locale.getLanguage());
+        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

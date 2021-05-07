@@ -83,5 +83,5 @@ public interface UBSManagementService {
      * @param dto {@link AddingViolationsToUserDto } order id with description.
      * @author Veremchuk Zakhar.
      */
-    void sendNotificationAboutViolation(AddingViolationsToUserDto dto,String language);
+    void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 }
