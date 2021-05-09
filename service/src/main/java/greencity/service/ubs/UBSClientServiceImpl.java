@@ -159,13 +159,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        UBSuser userData;
+        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
         if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
-            throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
 
         if (!address.getUser().equals(currentUser)) {
@@ -173,7 +175,9 @@ public class UBSClientServiceImpl implements UBSClientService {
                 ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
         }
         address.setAddressStatus(AddressStatus.IN_ORDER);
+
         userData.setAddress(address);
+
         if (userData.getAddress().getComment() == null) {
             userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
         }
@@ -226,20 +230,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address;
         Address forOrderAfterUpdate;
 
-        if (dtoRequest.getId() != 0 ) {
-
+        if (dtoRequest.getId() != 0) {
             address = addressRepo.findById(dtoRequest.getId()).orElse(null);
             forOrderAfterUpdate = modelMapper.map(dtoRequest, Address.class);
 
-            if (address.getAddressStatus().equals(AddressStatus.DELETED)){
+            if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
                 address = null;
             }
-
-        }else {
+        } else {
             address = null;
             forOrderAfterUpdate = null;
         }
-
 
         if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {
             address = modelMapper.map(dtoRequest, Address.class);
@@ -249,7 +250,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setAddressStatus(AddressStatus.NEW);
         } else {
             if (address.getAddressStatus().equals(AddressStatus.IN_ORDER)) {
-
                 forOrderAfterUpdate.setId(null);
                 forOrderAfterUpdate.setActual(true);
                 forOrderAfterUpdate.setUser(address.getUser());
@@ -349,7 +349,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                              Order order, int sumToPay) {
+        Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;

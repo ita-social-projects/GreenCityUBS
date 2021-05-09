@@ -52,7 +52,7 @@ public class Address {
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
 
-    @Column(name = "status",nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private AddressStatus addressStatus;
 
