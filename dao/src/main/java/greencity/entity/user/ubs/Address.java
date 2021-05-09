@@ -51,6 +51,9 @@ public class Address {
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
 
+    @Column(nullable = false)
+    private String status;
+
     @Embedded
     private Coordinates coordinates;
 }
