@@ -17,6 +17,7 @@ import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.*;
@@ -158,17 +159,25 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        UBSuser userData;
+        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
+
+        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
 
         if (!address.getUser().equals(currentUser)) {
             throw new NotFoundOrderAddressException(
                 ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
         }
+        address.setAddressStatus(AddressStatus.IN_ORDER);
 
         userData.setAddress(address);
+
         if (userData.getAddress().getComment() == null) {
             userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
         }
@@ -194,6 +203,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
+            .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
+            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -216,17 +227,41 @@ public class UBSClientServiceImpl implements UBSClientService {
                 addressRepo.save(u);
             });
         }
-        Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+        Address address;
+        Address forOrderAfterUpdate;
+
+        if (dtoRequest.getId() != 0) {
+            address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+            forOrderAfterUpdate = modelMapper.map(dtoRequest, Address.class);
+
+            if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+                address = null;
+            }
+        } else {
+            address = null;
+            forOrderAfterUpdate = null;
+        }
 
         if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {
             address = modelMapper.map(dtoRequest, Address.class);
             address.setId(null);
             address.setUser(userRepository.findByUuid(uuid));
             address.setActual(true);
+            address.setAddressStatus(AddressStatus.NEW);
         } else {
+            if (address.getAddressStatus().equals(AddressStatus.IN_ORDER)) {
+                forOrderAfterUpdate.setId(null);
+                forOrderAfterUpdate.setActual(true);
+                forOrderAfterUpdate.setUser(address.getUser());
+                forOrderAfterUpdate.setAddressStatus(address.getAddressStatus());
+                forOrderAfterUpdate.setComment(address.getComment());
+
+                address.getUbsUsers().forEach(u -> u.setAddress(addressRepo.save(forOrderAfterUpdate)));
+            }
             address = modelMapper.map(dtoRequest, Address.class);
             address.setUser(userRepository.findByUuid(uuid));
             address.setActual(true);
+            address.setAddressStatus(AddressStatus.NEW);
         }
         addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);
@@ -242,10 +277,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
         }
-        List<UBSuser> ubsUsers = address.getUbsUsers();
-        ubsUsers.forEach((u) -> u.setAddress(null));
-        ubsUsers.forEach(ubsUserRepository::save);
-        addressRepo.deleteById(addressId);
+        address.setAddressStatus(AddressStatus.DELETED);
+        addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);
     }
 

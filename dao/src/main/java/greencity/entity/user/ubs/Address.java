@@ -1,6 +1,7 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.AddressStatus;
 import greencity.entity.user.User;
 import java.util.List;
 import lombok.*;
@@ -50,6 +51,10 @@ public class Address {
 
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AddressStatus addressStatus;
 
     @Embedded
     private Coordinates coordinates;
