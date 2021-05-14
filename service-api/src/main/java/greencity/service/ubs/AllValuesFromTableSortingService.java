@@ -7,5 +7,5 @@ public interface AllValuesFromTableSortingService {
     /**
      * {@inheritDoc}
      */
-    List<GetAllFieldsMainDto> getAllSortingValues(String columnName);
+    List<GetAllFieldsMainDto> getAllSortingValues(String columnName, String sortingType);
 }

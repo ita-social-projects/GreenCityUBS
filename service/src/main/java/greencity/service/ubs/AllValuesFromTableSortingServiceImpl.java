@@ -19,7 +19,7 @@ public class AllValuesFromTableSortingServiceImpl implements AllValuesFromTableS
     /**
      * {@inheritDoc}
      */
-    public List<GetAllFieldsMainDto> getAllSortingValues(String column) {
+    public List<GetAllFieldsMainDto> getAllSortingValues(String column, String sortingType) {
         final String query = "select orders.id as orderId, orders.order_status , orders.order_date,\n"
             + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
             + "ubs_user.phone_number ,ubs_user.email,"
@@ -46,11 +46,12 @@ public class AllValuesFromTableSortingServiceImpl implements AllValuesFromTableS
             + "orders.receiving_station,\n"
             + "orders.note as comments_for_order\n"
             + "from orders\n"
-            + "left join ubs_user on orders.ubs_user_id = ubs_user.id\n"
+            + " left join ubs_user on orders.ubs_user_id = ubs_user.id\n"
             + "left join users on orders.users_id = users.id\n"
             + "left join address on ubs_user.address_id = address.id\n"
             + "left join payment on orders.payment_id = payment.id\n"
-            + "left join certificate on orders.id = certificate.order_id";
+            + "left join certificate on orders.id = certificate.order_id"
+            + " order by " + column + " " + sortingType;
 
         String emplQuery = "select concat_ws(' ', first_name, "
             + "last_name) as name,position_id from employees\n"
