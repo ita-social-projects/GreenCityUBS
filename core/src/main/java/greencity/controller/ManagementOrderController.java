@@ -32,8 +32,8 @@ public class ManagementOrderController {
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-                                     AllValuesFromTableService allValuesFromTableService,
-                                     AllValuesFromTableSortingService allValuesFromTableSortingService) {
+        AllValuesFromTableService allValuesFromTableService,
+        AllValuesFromTableSortingService allValuesFromTableSortingService) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
         this.allValuesFromTableService = allValuesFromTableService;
@@ -116,8 +116,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
-                                                             @RequestParam(required = false, defaultValue = "3000")
-                                                                 Integer litres) {
+        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
     }
@@ -165,7 +164,8 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
@@ -184,7 +184,8 @@ public class ManagementOrderController {
     /**
      * Controller for adding User violation.
      *
-     * @return {@link AddingViolationsToUserDto} count of Users violations with order id descriptions.
+     * @return {@link AddingViolationsToUserDto} count of Users violations with
+     *         order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Add Violation to User")
@@ -204,7 +205,8 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
@@ -220,9 +222,9 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for getting User violations.
+     * Controller for sorting values in order-table.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link GetAllFieldsMainDto}.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
