@@ -86,7 +86,7 @@ public class AllValuesFromTableSortingServiceImpl implements AllValuesFromTableS
                 .amountDue((Long) map.get("amount_due"))
                 .commentForOrderByClient((String) map.get("comment_for_order_by_client"))
                 .payment((String) map.get("payment_system"))
-                .dateOfExport((String) map.get("date_of_export"))
+                .dateOfExport(map.get("date_of_export").toString())
                 .timeOfExport((String) map.get("time_of_export"))
                 .idOrderFromShop((Long) map.get("id_order_from_shop"))
                 .receivingStation((String) map.get("receiving_station"))
