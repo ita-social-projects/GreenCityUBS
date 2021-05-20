@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 
 import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
@@ -49,6 +50,8 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
+    private static final String PUBLIC_KEY = "hasn't been created yet";
+    private static final String PRIVATE_KEY = "hasn't been created yet";
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
@@ -57,8 +60,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final RestClient restClient;
-    private final String password = "test";
-    private final String merchantId = "1396424";
+    private final String password = "Z1zUsOISjnD9oQClsFcy4hrFylf3bsNb";
+    private final String merchantId = "1472193";
 
     @Override
     @Transactional
@@ -148,10 +151,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
+     * 
+     * @return
      */
     @Override
     @Transactional
-    public PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid) {
+    public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
             throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
@@ -175,7 +180,26 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
-        return formPaymentRequest(order.getId(), sumToPay);
+        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
+        return restClient.getDataFromFondy(paymentRequestDto);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String formLiqPayPage(PaymentRequestDto requestDto) {
+        Map params = new HashMap();
+        params.put("amount", requestDto.getAmount() / 100);
+        params.put("currency", requestDto.getCurrency());
+        params.put("description", requestDto.getOrderDescription());
+        params.put("order_id", requestDto.getOrderId());
+        params.put("sandbox", "1");
+
+        LiqPay liqpay = new LiqPay(PUBLIC_KEY, PRIVATE_KEY);
+        String html = liqpay.cnb_form(params);
+
+        return html;
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {

@@ -1,8 +1,7 @@
 package greencity.client;
 
-import greencity.dto.UbsCustomersDto;
+import greencity.dto.*;
 import greencity.constant.RestTemplateLinks;
-import greencity.dto.UbsTableCreationDto;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.EventTypes;
 import greencity.entity.user.User;
@@ -16,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import greencity.dto.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
@@ -36,6 +34,29 @@ public class RestClient {
     @Value("${ubs.viber.bot.url}")
     private String viberBotUrl;
     private final HttpServletRequest httpServletRequest;
+
+    /**
+     * Method return intermediate response from fondy (redirect on payment page).
+     *
+     * @param dto of {@link User}
+     * @author Volodymyr Hutei
+     */
+    public String getDataFromFondy(PaymentRequestDto dto) {
+        JSONObject request = new JSONObject();
+        request.put("amount", dto.getAmount());
+        request.put("currency", dto.getCurrency());
+        request.put("order_desc", dto.getOrderDescription());
+        request.put("order_id", dto.getOrderId());
+        request.put("merchant_id", dto.getMerchantId());
+        request.put("signature", dto.getSignature());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+
+        return restTemplate.exchange(RestTemplateLinks.FONDY_LINK, HttpMethod.POST, entity,
+            String.class).getBody();
+    }
 
     /**
      * Method find user id by email.

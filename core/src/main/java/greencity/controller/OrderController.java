@@ -109,17 +109,13 @@ public class OrderController {
      */
     @ApiOperation(value = "Process user order.")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<PaymentRequestDto> processOrder(
+    public ResponseEntity<String> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveFullOrderToDB(dto, userUuid));
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
     /**
@@ -138,5 +134,23 @@ public class OrderController {
         @Valid PaymentResponseDto dto) {
         ubsClientService.validatePayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller returns html page for ligPay
+     *
+     * @param dto {@link PaymentRequestDto} payment data.
+     * @return {@link String}.
+     * @author Hutei Volodymyr
+     */
+    @ApiOperation(value = "Getting page for payment.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PostMapping("/formLiqPayPage")
+    public String formPage(@RequestBody PaymentRequestDto dto) {
+        return ubsClientService.formLiqPayPage(dto);
     }
 }

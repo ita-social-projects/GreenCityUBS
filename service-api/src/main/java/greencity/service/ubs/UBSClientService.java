@@ -1,12 +1,8 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentRequestDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PersonalDataDto;
-import greencity.dto.UserPointsAndAllBagsDto;
+import greencity.dto.*;
 import greencity.entity.user.User;
+
 import java.util.List;
 
 public interface UBSClientService {
@@ -52,5 +48,14 @@ public interface UBSClientService {
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    String saveFullOrderToDB(OrderResponseDto dto, String uuid);
+
+    /**
+     * Methods form payment page for LiqPay system.
+     *
+     * @param requestDto {@link PaymentRequestDto} request order data;
+     * @return {@link String} html payment page.
+     * @author Volodymyr Hutei
+     */
+    String formLiqPayPage(PaymentRequestDto requestDto);
 }
