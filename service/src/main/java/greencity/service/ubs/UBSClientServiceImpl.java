@@ -60,8 +60,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final RestClient restClient;
-    private final String password = "Z1zUsOISjnD9oQClsFcy4hrFylf3bsNb";
-    private final String merchantId = "1472193";
+    private final String password = "test";
+    private final String merchantId = "1396424";
 
     @Override
     @Transactional
@@ -75,8 +75,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         Payment orderPayment = order.getPayment();
-        if (orderPayment.getCurrency() != dto.getCurrency()
-            || orderPayment.getAmount() != Long.valueOf(dto.getAmount())) {
+        if (!orderPayment.getCurrency().equals(dto.getCurrency())
+            || !orderPayment.getAmount().equals(Long.valueOf(dto.getAmount()))) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
