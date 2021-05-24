@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+import static greencity.constant.ErrorMessage.*;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
@@ -11,23 +12,15 @@ import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.exceptions.UnexistingUuidExeption;
-import greencity.mapping.ViolationsInfoDtoMapper;
-import greencity.repository.AddressRepository;
-
-import greencity.repository.CertificateRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import greencity.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -38,6 +31,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
+    private final AllValuesFromTableRepo allValuesFromTableRepo;
 
     /**
      * {@inheritDoc}
@@ -121,7 +115,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -239,12 +233,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in
-     *         distant @relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's in distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -312,7 +305,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
+                                                          List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -385,5 +378,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(ourUser);
+    }
+
+    @Override
+    public List<AllFieldsFromTableDto> getAllValuesFromTAble() {
+        List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
+        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
+        for (Map<String, Object> map : ourResult) {
+            AllFieldsFromTableDto allFieldsFromTableDto = modelMapper.map(map, AllFieldsFromTableDto.class);
+            List<Map<String, Object>> employees = allValuesFromTableRepo
+                .findAllEmpl(allFieldsFromTableDto.getOrderId());
+            for (Map<String, Object> objectMap : employees) {
+                Long positionId = (Long) objectMap.get("position_id");
+                if (positionId == 1) {
+                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                } else if (positionId == 2) {
+                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                } else if (positionId == 3) {
+                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                } else if (positionId == 4) {
+                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                }
+            }
+            ourDtos.add(allFieldsFromTableDto);
+        }
+        return ourDtos;
     }
 }

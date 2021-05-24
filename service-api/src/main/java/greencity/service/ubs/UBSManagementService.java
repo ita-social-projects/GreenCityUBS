@@ -76,4 +76,11 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addUserViolation(AddingViolationsToUserDto add);
+
+    /**
+     * Method for adding violation for user.
+     * 
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllValuesFromTAble();
 }
