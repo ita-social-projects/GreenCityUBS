@@ -4,17 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 
 import static greencity.ModelUtils.getPrincipal;
+
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.OrderAddressDtoRequest;
 import greencity.dto.OrderResponseDto;
 import greencity.service.ubs.UBSClientService;
+
 import java.security.Principal;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import static org.mockito.ArgumentMatchers.*;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,9 +55,9 @@ class OrderControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(orderController)
-            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient))
-            .build();
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
+                        new UserArgumentResolver(restClient))
+                .build();
     }
 
     @Test
@@ -59,8 +65,8 @@ class OrderControllerTest {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/order-details")
-            .principal(principal))
-            .andExpect(status().isOk());
+                .principal(principal))
+                .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
         verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", "en");
@@ -69,7 +75,7 @@ class OrderControllerTest {
     @Test
     void checkIfCertificateAvailable() throws Exception {
         mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         verify(ubsClientService).checkCertificate(eq("qwefds"));
     }
@@ -79,8 +85,8 @@ class OrderControllerTest {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/personal-data")
-            .principal(principal))
-            .andExpect(status().isOk());
+                .principal(principal))
+                .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
         verify(ubsClientService).getSecondPageData(eq("35467585763t4sfgchjfuyetf"));
@@ -95,10 +101,10 @@ class OrderControllerTest {
         String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/processOrder")
-            .content(orderResponceDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+                .content(orderResponceDtoJSON)
+                .principal(principal)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"));
         verify(restClient).findUuidByEmail("test@gmail.com");
@@ -110,9 +116,9 @@ class OrderControllerTest {
         when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
         mockMvc.perform(get(ubsLink + "/findAll-order-address")
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+                .principal(principal)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         verify(ubsClientService).findAllAddressesForCurrentOrder(anyString());
     }
@@ -127,9 +133,9 @@ class OrderControllerTest {
         String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/save-order-address")
-            .content(orderAddressDtoRequest)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+                .content(orderAddressDtoRequest)
+                .principal(principal)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
         verify(ubsClientService).saveCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
     }
@@ -138,7 +144,7 @@ class OrderControllerTest {
     void deleteOrderAddress() throws Exception {
 
         this.mockMvc.perform(delete(ubsLink + "/{id}", 1L))
-            .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
 }
