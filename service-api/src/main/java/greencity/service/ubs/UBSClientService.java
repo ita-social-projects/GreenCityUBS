@@ -49,4 +49,34 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     String saveFullOrderToDB(OrderResponseDto dto, String uuid);
+
+    /**
+     * Methods return list of all user addresses.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link OrderWithAddressesResponseDto} that contains address list
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid);
+
+    /**
+     * Method that save address for current user.
+     *
+     * @param dtoRequest {@link OrderAddressDtoRequest} information about address;
+     * @param uuid       current {@link User}'s uuid;
+     * @return {@link OrderAddressDtoRequest} contains all information needed for
+     *         save address;
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid);
+
+    /**
+     * Method that delete user address.
+     *
+     * @param addressId of {@link Long} address id;
+     * @param uuid      current {@link User}'s uuid;
+     * @return {@link OrderWithAddressesResponseDto} that contains address list;
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
 }

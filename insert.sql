@@ -3,17 +3,17 @@ VALUES (1,'ua'),
        (2,'en'),
        (3,'ru');
 
-INSERT INTO users(id,current_points, uuid, violations, telegram_bot_id)
-VALUES (1,1000,'uuid1',0,null),
-       (2,1000,'uuid2',0,null),
-       (3,1000,'uuid3',0,null),
-       (4,1000,'uuid4',0,null),
-       (5,1000,'uuid5',0,null),
-       (6,1000,'uuid6',0,null),
-       (7,1000,'uuid7',0,null),
-       (8,1000,'uuid8',0,null),
-       (9,1000,'uuid9',0,null),
-       (10,1000,'uuid10',0,null);
+INSERT INTO users(id,current_points, uuid, violations)
+VALUES (1,1000,'uuid1',0),
+       (2,1000,'uuid2',0),
+       (3,1000,'uuid3',0),
+       (4,1000,'uuid4',0),
+       (5,1000,'uuid5',0),
+       (6,1000,'uuid6',0),
+       (7,1000,'uuid7',0),
+       (8,1000,'uuid8',0),
+       (9,1000,'uuid9',0),
+       (10,1000,'uuid10',0);
 
 INSERT INTO ubs_user(id,email,first_name,last_name,phone_number,users_id,address_id)
 VALUES (1,'first.mike@gmail.com','Mike','Miopes','095634873',1,null),

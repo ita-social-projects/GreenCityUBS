@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
@@ -11,7 +12,6 @@ import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.exceptions.UnexistingUuidExeption;
-import greencity.mapping.ViolationsInfoDtoMapper;
 import greencity.repository.AddressRepository;
 
 import greencity.repository.CertificateRepository;
@@ -21,7 +21,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import greencity.repository.OrderRepository;
+import javassist.NotFoundException;
+import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +41,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
+    private final HttpServletRequest httpServletRequest;
 
     /**
      * {@inheritDoc}
@@ -51,7 +55,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             int currentCoordinatesCapacity =
                 addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
             List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getUserAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
             List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
                 .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
             allOrdersWithLitres.add(GroupedOrderDto.builder()
@@ -385,5 +389,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(ourUser);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
+        Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
+        UserViolationMailDto mailDto;
+        if (order != null) {
+            mailDto = UserViolationMailDto.builder()
+                .name(order.getUser().getRecipientName())
+                .email(order.getUser().getRecipientEmail())
+                .violationDescription(dto.getViolationDescription())
+                .language(language)
+                .build();
+            restClient.sendViolationOnMail(mailDto);
+        }
     }
 }

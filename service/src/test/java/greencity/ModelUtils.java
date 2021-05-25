@@ -5,6 +5,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ import java.util.*;
 
 public class ModelUtils {
 
-    public static OrderResponseDto getOrderResponceDto() {
+    public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -24,14 +25,7 @@ public class ModelUtils {
                 .lastName("ivanov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .district("frankivskiy")
-                .addressComment("near mall")
-                .city("Lviv")
-                .houseNumber("4R")
-                .entranceNumber("5")
                 .phoneNumber("067894522")
-                .street("Levaya")
-                .houseCorpus(null)
                 .build())
             .build();
     }
@@ -43,16 +37,21 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
-            .userAddress(Address.builder()
+            .address(Address.builder()
                 .id(1L)
-                .city("Lviv")
-                .street("Levaya")
-                .district("frankivskiy")
-                .entranceNumber("5")
-                .comment("near mall")
-                .houseCorpus(null)
-                .houseNumber("4R")
-                .build())
+                .user(null)
+                .houseNumber("1a")
+                .actual(true)
+                .entranceNumber("str")
+                .district("3a")
+                .houseCorpus("2a")
+                .city("Kiev")
+                .street("Gorodotska")
+                .coordinates(Coordinates.builder()
+                    .longitude(2.2)
+                    .latitude(3.2)
+                    .build())
+                .comment(null).build())
             .build();
     }
 
@@ -64,7 +63,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .userAddress(Address.builder()
+                .address(Address.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -77,6 +76,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
+                    .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -168,7 +168,7 @@ public class ModelUtils {
                 .id(++id)
                 .ubsUser(UBSuser.builder()
                     .id(++userId)
-                    .userAddress(Address.builder()
+                    .address(Address.builder()
                         .coordinates(coordinates)
                         .build())
                     .build())
@@ -357,6 +357,22 @@ public class ModelUtils {
             .expirationDate(LocalDate.now().plusMonths(1))
             .creationDate(LocalDate.now())
             .order(null)
+            .build();
+    }
+
+    public static UserViolationMailDto getUserViolationMailDto() {
+        return UserViolationMailDto.builder()
+            .email("string@gmail.com")
+            .name("string")
+            .language("en")
+            .violationDescription("String Description")
+            .build();
+    }
+
+    public static AddingViolationsToUserDto getAddingViolationsToUserDto() {
+        return AddingViolationsToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("String string string")
             .build();
     }
 }

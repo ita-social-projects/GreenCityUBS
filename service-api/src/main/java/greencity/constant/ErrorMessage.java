@@ -16,6 +16,7 @@ public class ErrorMessage {
     public static String INAVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
     public static String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
     public static String INAVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
+    public static String NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER = "Not found address with such id: ";
     public static String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static String MINIMAL_SUM_VIOLATION = "The minimal order sum should be 500 UAH.";
     public static String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";

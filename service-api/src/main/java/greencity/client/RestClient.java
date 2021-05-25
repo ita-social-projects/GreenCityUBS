@@ -2,6 +2,8 @@ package greencity.client;
 
 import greencity.dto.*;
 import greencity.constant.RestTemplateLinks;
+import greencity.dto.UbsTableCreationDto;
+import greencity.dto.UserViolationMailDto;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.EventTypes;
 import greencity.entity.user.User;
@@ -233,5 +235,19 @@ public class RestClient {
             + "?uuid=" + uuid, HttpMethod.GET, entity, UbsCustomersDto.class).getBody();
         assert body != null;
         return Optional.of(body);
+    }
+
+    /**
+     * Method that send request to greenCityUser part for sending email.
+     *
+     * @param message {@link UserViolationMailDto} contain information about
+     *                violation.
+     * @author Veremchuk Zakhar.
+     */
+    public void sendViolationOnMail(UserViolationMailDto message) {
+        HttpHeaders httpHeaders = new HttpHeaders(setHeader());
+        HttpEntity<UserViolationMailDto> entity = new HttpEntity<>(message, httpHeaders);
+        restTemplate.exchange(greenCityUserServerAddress + "/email/sendUserViolation",
+            HttpMethod.POST, entity, Object.class).getBody();
     }
 }
