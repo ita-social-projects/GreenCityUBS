@@ -89,4 +89,12 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
+
+    /**
+     * Method for send email with description to user.
+     *
+     * @param dto {@link AddingViolationsToUserDto } order id with description.
+     * @author Veremchuk Zakhar.
+     */
+    void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 }

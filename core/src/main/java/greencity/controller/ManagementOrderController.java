@@ -1,6 +1,8 @@
 package greencity.controller;
 
+import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageable;
+import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.service.ubs.AllValuesFromTableService;
@@ -8,6 +10,7 @@ import greencity.service.ubs.AllValuesFromTableSortingService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.*;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -195,10 +198,13 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser")
-    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
+        @ApiIgnore @ValidLanguage Locale locale) {
         ubsManagementService.addUserViolation(add);
+        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

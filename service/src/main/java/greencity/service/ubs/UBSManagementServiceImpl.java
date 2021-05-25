@@ -17,9 +17,9 @@ import greencity.repository.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,6 +35,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final UserRepository userRepository;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
+    private final HttpServletRequest httpServletRequest;
 
     /**
      * {@inheritDoc}
@@ -48,7 +49,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             int currentCoordinatesCapacity =
                 addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
             List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getUserAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
             List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
                 .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
             allOrdersWithLitres.add(GroupedOrderDto.builder()
@@ -431,5 +432,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             ourDtos.add(allFieldsFromTableDto);
         }
         return ourDtos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
+        Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
+        UserViolationMailDto mailDto;
+        if (order != null) {
+            mailDto = UserViolationMailDto.builder()
+                .name(order.getUser().getRecipientName())
+                .email(order.getUser().getRecipientEmail())
+                .violationDescription(dto.getViolationDescription())
+                .language(language)
+                .build();
+            restClient.sendViolationOnMail(mailDto);
+        }
     }
 }

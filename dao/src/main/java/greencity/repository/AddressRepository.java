@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
+import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,7 +15,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *
      * @return list of {@link Coordinates}.
      */
-    @Query("select a.coordinates from Address a inner join UBSuser u on a = u.userAddress "
+    @Query("select a.coordinates from Address a inner join UBSuser u on a.id = u.address.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     Set<Coordinates> undeliveredOrdersCoords();
@@ -27,7 +28,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select a.coordinates "
         + "from UBSuser u "
-        + "join Address a on a = u.userAddress "
+        + "join Address a on a.id = u.address.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
         + "join Bag b on key(bags) = b.id "
@@ -44,11 +45,19 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select sum(bags * b.capacity) "
         + "from UBSuser u "
-        + "join Address a on a = u.userAddress "
+        + "join Address a on a.id = u.address.id "
         + "join Order o on u = o.ubsUser "
         + "join o.amountOfBagsOrdered bags "
         + "join Bag b on key(bags) = b.id "
         + "where o.orderStatus = 'PAID' "
         + "and a.coordinates.latitude  = :latitude and a.coordinates.longitude = :longitude ")
     int capacity(double latitude, double longitude);
+
+    /**
+     * Method returns list of {@link Address}addresses for current user.
+     *
+     * @return list of {@link Address}.
+     */
+    @Query("select a from Address a where a.user.id = :userId")
+    List<Address> findAllByUserId(Long userId);
 }

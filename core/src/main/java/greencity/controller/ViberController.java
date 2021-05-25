@@ -38,7 +38,7 @@ public class ViberController {
     }
 
     /**
-     * The method receives all requests from Viberr.
+     * The method receives all requestss from Viberr.
      * 
      * @param callbackDto - contains all the necessary data.
      */
