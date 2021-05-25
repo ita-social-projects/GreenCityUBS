@@ -62,8 +62,7 @@ public interface UBSManagementService {
     /**
      * Method returns all users violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
@@ -93,6 +92,7 @@ public interface UBSManagementService {
 
     /**
      * Method for send email with description to user.
+     *
      * @param dto {@link AddingViolationsToUserDto } order id with description.
      * @author Veremchuk Zakhar.
      */
