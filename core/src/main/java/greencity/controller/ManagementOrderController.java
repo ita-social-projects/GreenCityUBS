@@ -1,6 +1,8 @@
 package greencity.controller;
 
+import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageable;
+import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.service.ubs.AllValuesFromTableService;
@@ -8,6 +10,7 @@ import greencity.service.ubs.AllValuesFromTableSortingService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.*;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -33,8 +36,8 @@ public class ManagementOrderController {
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-                                     AllValuesFromTableService allValuesFromTableService,
-                                     AllValuesFromTableSortingService allValuesFromTableSortingService) {
+        AllValuesFromTableService allValuesFromTableService,
+        AllValuesFromTableSortingService allValuesFromTableSortingService) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
         this.allValuesFromTableService = allValuesFromTableService;
@@ -117,8 +120,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
-                                                             @RequestParam(required = false, defaultValue = "3000")
-                                                                 Integer litres) {
+        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
     }
@@ -166,7 +168,8 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
@@ -185,7 +188,8 @@ public class ManagementOrderController {
     /**
      * Controller for adding User violation.
      *
-     * @return {@link AddingViolationsToUserDto} count of Users violations with order id descriptions.
+     * @return {@link AddingViolationsToUserDto} count of Users violations with
+     *         order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Add Violation to User")
@@ -195,17 +199,21 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser")
-    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
+        @ApiIgnore @ValidLanguage Locale locale) {
         ubsManagementService.addUserViolation(add);
+        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
@@ -243,7 +251,8 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
@@ -256,8 +265,7 @@ public class ManagementOrderController {
     @GetMapping("/getAllFields2")
     public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
         @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType
-    ) {
+        @RequestParam(value = "sortingType", required = false) String sortingType) {
         if (columnName == null || sortingType == null) {
             return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
         } else {

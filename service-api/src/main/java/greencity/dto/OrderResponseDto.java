@@ -26,6 +26,9 @@ public class OrderResponseDto implements Serializable {
     @Min(0)
     private Integer pointsToUse;
 
+    @NotNull
+    private Long addressId;
+
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
         message = "This certificate code is not valid") String> certificates;
 

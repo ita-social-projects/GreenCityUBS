@@ -17,9 +17,8 @@ class UBSuserMapperTest {
     @Test
     void convert() {
         UBSuser expected = ModelUtils.getUBSuser();
-        PersonalDataDto dto = ModelUtils.getOrderResponceDto().getPersonalData();
+        PersonalDataDto dto = ModelUtils.getOrderResponseDto().getPersonalData();
         dto.setId(1L);
-        expected.getUserAddress().setId(null);
 
         assertEquals(expected, ubsUserMapper.convert(dto));
     }

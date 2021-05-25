@@ -35,7 +35,7 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query("select o from Address a inner join UBSuser u on a = u.userAddress "
+    @Query("select o from Address a inner join UBSuser u on a.id = u.address.id "
         + "inner join Order o on u = o.ubsUser "
         + "where o.orderStatus = 'PAID' and a.coordinates is not null")
     List<Order> undeliveredAddresses();
