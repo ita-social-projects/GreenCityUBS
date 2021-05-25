@@ -8,7 +8,7 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AllValuesFromTableMapper extends AbstractConverter<Map<String,Object>, AllFieldsFromTableDto> {
+public class AllValuesFromTableMapper extends AbstractConverter<Map<String, Object>, AllFieldsFromTableDto> {
     @Override
     protected AllFieldsFromTableDto convert(Map<String, Object> map) {
         return AllFieldsFromTableDto.builder()
