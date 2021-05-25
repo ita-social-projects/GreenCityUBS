@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 
 import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
@@ -39,19 +38,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
  * Implementation of {@link UBSClientService}.
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
-    private static final String PUBLIC_KEY = "hasn't been created yet";
-    private static final String PRIVATE_KEY = "hasn't been created yet";
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
@@ -60,8 +60,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final RestClient restClient;
-    private final String password = "test";
-    private final String merchantId = "1396424";
+    @Value("${fondy.payment.key}")
+    private String fondyPaymentKey;
+    @Value("${merchant.id}")
+    private String merchantId;
 
     @Override
     @Transactional
@@ -69,7 +71,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getResponse_status().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, password)) {
+        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
@@ -151,7 +153,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return
      */
     @Override
@@ -182,24 +184,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
         return restClient.getDataFromFondy(paymentRequestDto);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String formLiqPayPage(PaymentRequestDto requestDto) {
-        Map params = new HashMap();
-        params.put("amount", requestDto.getAmount() / 100);
-        params.put("currency", requestDto.getCurrency());
-        params.put("description", requestDto.getOrderDescription());
-        params.put("order_id", requestDto.getOrderId());
-        params.put("sandbox", "1");
-
-        LiqPay liqpay = new LiqPay(PUBLIC_KEY, PRIVATE_KEY);
-        String html = liqpay.cnb_form(params);
-
-        return html;
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
@@ -244,7 +228,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .currency("UAH")
             .amount(sumToPay * 100).build();
 
-        paymentRequestDto.setSignature(EncryptionUtil.formRequestSignature(paymentRequestDto, password, merchantId));
+        paymentRequestDto.setSignature(EncryptionUtil
+            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
 
         return paymentRequestDto;
     }

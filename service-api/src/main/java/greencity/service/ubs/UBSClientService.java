@@ -49,13 +49,4 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     String saveFullOrderToDB(OrderResponseDto dto, String uuid);
-
-    /**
-     * Methods form payment page for LiqPay system.
-     *
-     * @param requestDto {@link PaymentRequestDto} request order data;
-     * @return {@link String} html payment page.
-     * @author Volodymyr Hutei
-     */
-    String formLiqPayPage(PaymentRequestDto requestDto);
 }
