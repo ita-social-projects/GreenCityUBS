@@ -9,11 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class AllValuesFromTable {
-    @JsonProperty("orderid")
     private Long orderId;
-    @JsonProperty("order_status")
     private String orderStatus;
-    @JsonProperty("order_date")
     private String orderDate;
     private String clientName;
     private String phoneNumber;

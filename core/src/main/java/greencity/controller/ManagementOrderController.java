@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import org.jvnet.hk2.annotations.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -32,8 +33,8 @@ public class ManagementOrderController {
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-        AllValuesFromTableService allValuesFromTableService,
-        AllValuesFromTableSortingService allValuesFromTableSortingService) {
+                                     AllValuesFromTableService allValuesFromTableService,
+                                     AllValuesFromTableSortingService allValuesFromTableSortingService) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
         this.allValuesFromTableService = allValuesFromTableService;
@@ -116,7 +117,8 @@ public class ManagementOrderController {
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
-        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
+                                                             @RequestParam(required = false, defaultValue = "3000")
+                                                                 Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
     }
@@ -164,8 +166,7 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
@@ -184,8 +185,7 @@ public class ManagementOrderController {
     /**
      * Controller for adding User violation.
      *
-     * @return {@link AddingViolationsToUserDto} count of Users violations with
-     *         order id descriptions.
+     * @return {@link AddingViolationsToUserDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Add Violation to User")
@@ -205,8 +205,7 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
@@ -244,8 +243,7 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Get all info from Table order")
@@ -256,7 +254,15 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getAllFields2")
-    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTAble());
+    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
+        @RequestParam(value = "columnName", required = false) String columnName,
+        @RequestParam(value = "sortingType", required = false) String sortingType
+    ) {
+        if (columnName == null || sortingType == null) {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
+        }
     }
 }

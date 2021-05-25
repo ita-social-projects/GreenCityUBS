@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import static greencity.constant.ErrorMessage.*;
 import greencity.dto.*;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final RestClient restClient;
     private final UserRepository userRepository;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
+    private final ObjectMapper objectMapper;
 
     /**
      * {@inheritDoc}
@@ -381,11 +384,36 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllValuesFromTAble() {
+    public List<AllFieldsFromTableDto> getAllValuesFromTable() {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
         for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = modelMapper.map(map, AllFieldsFromTableDto.class);
+            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+            List<Map<String, Object>> employees = allValuesFromTableRepo
+                .findAllEmpl(allFieldsFromTableDto.getOrderId());
+            for (Map<String, Object> objectMap : employees) {
+                Long positionId = (Long) objectMap.get("position_id");
+                if (positionId == 1) {
+                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                } else if (positionId == 2) {
+                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                } else if (positionId == 3) {
+                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                } else if (positionId == 4) {
+                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                }
+            }
+            ourDtos.add(allFieldsFromTableDto);
+        }
+        return ourDtos;
+    }
+
+    @Override
+    public List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType) {
+        List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
+        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
+        for (Map<String, Object> map : ourResult) {
+            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
             List<Map<String, Object>> employees = allValuesFromTableRepo
                 .findAllEmpl(allFieldsFromTableDto.getOrderId());
             for (Map<String, Object> objectMap : employees) {

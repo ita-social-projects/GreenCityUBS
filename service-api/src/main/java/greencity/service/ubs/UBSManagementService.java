@@ -17,7 +17,7 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance);
+                                                               int litres, double additionalDistance);
 
     /**
      * Method to group orders into clusters including summary litres.
@@ -62,8 +62,7 @@ public interface UBSManagementService {
     /**
      * Method returns all users violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
@@ -78,9 +77,16 @@ public interface UBSManagementService {
     void addUserViolation(AddingViolationsToUserDto add);
 
     /**
-     * Method for adding violation for user.
-     * 
+     * Method for getting all values from table .
+     *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllValuesFromTAble();
+    List<AllFieldsFromTableDto> getAllValuesFromTable();
+
+    /**
+     * Method for getting all sorted values from table .
+     *
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
 }
