@@ -98,7 +98,7 @@ class OrderControllerTest {
             .content(orderResponceDtoJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"));
         verify(restClient).findUuidByEmail("test@gmail.com");
