@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <include file="db/changelog/logs/liquibase-outputChangeLog.xml"/>
+    <include file="db/changelog/logs/ch-addNotNullConstraint-tocerf-date-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-changeFirstAndLastNames-capacity-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-fixing-ubs-bugs.xml"/>
+    <include file="db/changelog/logs/ch-new-certificate-columns-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-addUniqueConstraint-toUuid-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-addPaymentTable-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-add-column-telegram-chat-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-table-telegram-bot-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-alter-table-change-of-points-Hutei.xml"/>
+    <include file="db/changelog/logs/ch-drop-tgfc-unique-constraint-Bilonizhka.xml"/>
+    <include file="db/changelog/logs/ch-add-violatin-description-mapping-Hutei.xml"/>
+    <include file="db/changelog/logs/ch-add-language-table-and-fk-to-bag-Veremchuk.xml"/>
+    <include file="db/changelog/logs/ch-add-table-viber-bot-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-telegram-bot-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-column-user-id-and-notify-to-telegram-bot-id-Pikhotskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-recipient-values-Struk.xml"/>
+    <include file="db/changelog/logs/сh-add-column-active-to-address-Veremchuk.xml"/>
+    <include file="db/changelog/logs/сh-fk_ubs_users_and_addreses-Veremchuk.xml"/>
+    <include file="db/changelog/logs/сh-add-new-column-status-to-address-Veremchuk.xml"/>
+</databaseChangeLog>
