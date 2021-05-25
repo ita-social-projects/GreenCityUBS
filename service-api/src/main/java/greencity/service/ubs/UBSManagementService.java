@@ -93,7 +93,6 @@ public interface UBSManagementService {
 
     /**
      * Method for send email with description to user.
-     *
      * @param dto {@link AddingViolationsToUserDto } order id with description.
      * @author Veremchuk Zakhar.
      */
