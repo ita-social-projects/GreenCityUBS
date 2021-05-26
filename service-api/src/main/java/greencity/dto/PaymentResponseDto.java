@@ -18,9 +18,7 @@ public class PaymentResponseDto {
     // CHECKSTYLE:OFF
     @Length(max = 1024)
     private String order_id;
-    @Length(max = 12)
     private Integer merchant_id;
-    @Length(max = 12)
     private Integer amount;
     @Length(max = 3)
     private String currency;
@@ -38,7 +36,6 @@ public class PaymentResponseDto {
     private String sender_account;
     @Length(max = 19)
     private String masked_card;
-    @Length(max = 6)
     private Integer card_bin;
     @Length(max = 50)
     private String card_type;
@@ -46,13 +43,10 @@ public class PaymentResponseDto {
     private String rrn;
     @Length(max = 6)
     private String approval_code;
-    @Length(max = 4)
     private Integer response_code;
     @Length(max = 1024)
     private String response_description;
-    @Length(max = 12)
     private Integer reversal_amount;
-    @Length(max = 12)
     private Integer settlement_amount;
     @Length(max = 3)
     private String settlement_currency;
@@ -60,17 +54,13 @@ public class PaymentResponseDto {
     private String order_time;
     @Length(max = 10)
     private String settlement_date;
-    @Length(max = 2)
     private Integer eci;
-    @Length(max = 12)
     private Integer fee;
     @Length(max = 50)
     private String payment_system;
     @Length(max = 254)
     private String sender_email;
-    @Length(max = 19)
     private Integer payment_id;
-    @Length(max = 12)
     private Integer actual_amount;
     @Length(max = 3)
     private String actual_currency;
