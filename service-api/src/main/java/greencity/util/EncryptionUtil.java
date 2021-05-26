@@ -37,22 +37,24 @@ public class EncryptionUtil {
         StringBuilder stringBuilder = new StringBuilder(password);
         checkInteger(dto.getActual_amount(), stringBuilder);
         checkString(dto.getActual_currency(), stringBuilder);
-        checkString(dto.getAdditional_info().getBank_name(), stringBuilder);
-        checkString(dto.getAdditional_info().getBank_country(), stringBuilder);
-        checkString(dto.getAdditional_info().getBank_response_code(), stringBuilder);
-        checkString(dto.getAdditional_info().getCard_product(), stringBuilder);
-        checkString(dto.getAdditional_info().getCard_category(), stringBuilder);
-        checkDouble(dto.getAdditional_info().getSettlement_fee(), stringBuilder);
-        checkString(dto.getAdditional_info().getCapture_status(), stringBuilder);
-        checkDouble(dto.getAdditional_info().getClient_fee(), stringBuilder);
-        checkString(dto.getAdditional_info().getIpaddress_v4(), stringBuilder);
-        checkDouble(dto.getAdditional_info().getCapture_amount(), stringBuilder);
-        checkString(dto.getAdditional_info().getCard_type(), stringBuilder);
-        checkString(dto.getAdditional_info().getReservation_data(), stringBuilder);
-        checkString(dto.getAdditional_info().getBank_response_description(), stringBuilder);
-        checkInteger(dto.getAdditional_info().getTransaction_id(), stringBuilder);
-        checkString(dto.getAdditional_info().getTimeend(), stringBuilder);
-        checkString(dto.getAdditional_info().getCard_number(), stringBuilder);
+        if (dto.getAdditional_info() != null) {
+            checkString(dto.getAdditional_info().getBank_name(), stringBuilder);
+            checkString(dto.getAdditional_info().getBank_country(), stringBuilder);
+            checkString(dto.getAdditional_info().getBank_response_code(), stringBuilder);
+            checkString(dto.getAdditional_info().getCard_product(), stringBuilder);
+            checkString(dto.getAdditional_info().getCard_category(), stringBuilder);
+            checkDouble(dto.getAdditional_info().getSettlement_fee(), stringBuilder);
+            checkString(dto.getAdditional_info().getCapture_status(), stringBuilder);
+            checkDouble(dto.getAdditional_info().getClient_fee(), stringBuilder);
+            checkString(dto.getAdditional_info().getIpaddress_v4(), stringBuilder);
+            checkDouble(dto.getAdditional_info().getCapture_amount(), stringBuilder);
+            checkString(dto.getAdditional_info().getCard_type(), stringBuilder);
+            checkString(dto.getAdditional_info().getReservation_data(), stringBuilder);
+            checkString(dto.getAdditional_info().getBank_response_description(), stringBuilder);
+            checkInteger(dto.getAdditional_info().getTransaction_id(), stringBuilder);
+            checkString(dto.getAdditional_info().getTimeend(), stringBuilder);
+            checkString(dto.getAdditional_info().getCard_number(), stringBuilder);
+        }
         checkInteger(dto.getAmount(), stringBuilder);
         checkString(dto.getApproval_code(), stringBuilder);
         checkInteger(dto.getCard_bin(), stringBuilder);
@@ -74,17 +76,16 @@ public class EncryptionUtil {
         checkInteger(dto.getResponse_code(), stringBuilder);
         checkString(dto.getResponse_description(), stringBuilder);
         checkString(dto.getResponse_status(), stringBuilder);
-        checkInteger(dto.getReversal_amount(), stringBuilder);
+        checkIntegerInclude0(dto.getReversal_amount(), stringBuilder);
         checkString(dto.getRrn(), stringBuilder);
         checkString(dto.getSender_account(), stringBuilder);
         checkString(dto.getSender_cell_phone(), stringBuilder);
         checkString(dto.getSender_email(), stringBuilder);
-        checkInteger(dto.getSettlement_amount(), stringBuilder);
+        checkIntegerInclude0(dto.getSettlement_amount(), stringBuilder);
         checkString(dto.getSettlement_currency(), stringBuilder);
         checkString(dto.getSettlement_date(), stringBuilder);
         checkString(dto.getTran_type(), stringBuilder);
         checkString(dto.getVerification_status(), stringBuilder);
-
         return DigestUtils.sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 
@@ -102,6 +103,12 @@ public class EncryptionUtil {
 
     private static void checkDouble(Double number, StringBuilder stringBuilder) {
         if (number != null && number != 0d) {
+            stringBuilder.append("|" + number);
+        }
+    }
+
+    private static void checkIntegerInclude0(Integer number, StringBuilder stringBuilder) {
+        if (number != null) {
             stringBuilder.append("|" + number);
         }
     }
