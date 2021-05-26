@@ -62,9 +62,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getResponse_status().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
+        /* commented only for dev process. Uncomment it for production*/
+
+        /*
+         * if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
+         * throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR); }
+         */
         Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         Payment orderPayment = order.getPayment();
