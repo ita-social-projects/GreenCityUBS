@@ -27,10 +27,12 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
+
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -408,5 +410,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        return modelMapper.map(addressRepo.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
     }
 }

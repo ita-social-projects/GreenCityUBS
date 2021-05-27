@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.Locale;
 import javax.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -202,5 +203,24 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.deleteCurrentAddressForOrder(id, uuid));
+    }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReadAddressByOrderDto.class),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getAddressByOrderId(id));
     }
 }
