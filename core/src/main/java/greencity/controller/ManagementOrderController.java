@@ -246,4 +246,30 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(allValuesFromTableSortingService.getAllSortingValues(columnName, sortingType));
     }
+
+    /**
+     * Controller for getting User violations.
+     *
+     * @return {@link ViolationsInfoDto} count of Users violations with order id
+     *         descriptions.
+     * @author Nazar Struk
+     */
+    @ApiOperation("Get all info from Table order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getAllFields2")
+    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
+        @RequestParam(value = "columnName", required = false) String columnName,
+        @RequestParam(value = "sortingType", required = false) String sortingType) {
+        if (columnName == null || sortingType == null) {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
+        }
+    }
 }

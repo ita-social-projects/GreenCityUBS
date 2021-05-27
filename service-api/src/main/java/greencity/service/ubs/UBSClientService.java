@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.user.User;
+
 import java.util.List;
 
 public interface UBSClientService {
@@ -47,7 +48,7 @@ public interface UBSClientService {
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    String saveFullOrderToDB(OrderResponseDto dto, String uuid);
 
     /**
      * Methods return list of all user addresses.

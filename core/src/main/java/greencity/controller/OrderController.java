@@ -114,18 +114,15 @@ public class OrderController {
      */
     @ApiOperation(value = "Process user order.")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<PaymentRequestDto> processOrder(
+    public ResponseEntity<String> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveFullOrderToDB(dto, userUuid));
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
     /**
@@ -141,7 +138,7 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity receivePayment(
-        @Valid PaymentResponseDto dto) {
+        @RequestBody @Valid PaymentResponseDto dto) {
         ubsClientService.validatePayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

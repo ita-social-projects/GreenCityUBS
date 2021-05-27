@@ -31,15 +31,16 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
  * Implementation of {@link UBSClientService}.
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
@@ -50,8 +51,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
-    private final String password = "test";
-    private final String merchantId = "1396424";
+    @Value("${fondy.payment.key}")
+    private String fondyPaymentKey;
+    @Value("${merchant.id}")
+    private String merchantId;
 
     @Override
     @Transactional
@@ -59,14 +62,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getResponse_status().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, password)) {
+        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         Payment orderPayment = order.getPayment();
-        if (orderPayment.getCurrency() != dto.getCurrency()
-            || orderPayment.getAmount() != Long.valueOf(dto.getAmount())) {
+        if (!orderPayment.getCurrency().equals(dto.getCurrency())
+            || !orderPayment.getAmount().equals(Long.valueOf(dto.getAmount()))) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
@@ -140,10 +143,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
     @Transactional
-    public PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid) {
+    public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
             throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
@@ -186,7 +191,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
-        return formPaymentRequest(order.getId(), sumToPay);
+        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
+        return restClient.getDataFromFondy(paymentRequestDto);
     }
 
     /**
@@ -318,12 +324,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+            .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId.toString())
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100).build();
 
-        paymentRequestDto.setSignature(EncryptionUtil.formRequestSignature(paymentRequestDto, password, merchantId));
+        paymentRequestDto.setSignature(EncryptionUtil
+            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
 
         return paymentRequestDto;
     }
