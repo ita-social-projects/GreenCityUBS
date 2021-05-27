@@ -7,11 +7,10 @@ import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
 import greencity.exceptions.CertificateNotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.exceptions.NotFoundOrderAddressException;
+import greencity.repository.*;
 import greencity.service.ubs.UBSClientServiceImpl;
+
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,6 +38,10 @@ class UBSClientServiceImplTest {
     private CertificateRepository certificateRepository;
     @Mock
     private RestClient restClient;
+    @Mock
+    private AddressRepository addressRepository;
+    @Mock
+    private OrderRepository orderRepository;
     @InjectMocks
     UBSClientServiceImpl ubsService;
 
@@ -73,4 +76,10 @@ class UBSClientServiceImplTest {
         });
     }
 
+    @Test
+    void checkOrderNotFound() {
+        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
+            ubsService.getAddressByOrderId(10000000l);
+        });
+    }
 }

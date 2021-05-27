@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -60,4 +61,15 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query("select a from Address a where a.user.id = :userId")
     List<Address> findAllByUserId(Long userId);
+
+    /**
+     * Method return of {@link Address}addresses for current order.
+     *
+     * @return {@link Address}.
+     */
+    @Query(value = "SELECT * FROM orders as o "
+        + "JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
+        + "JOIN address as addr ON addr.user_id = ubs.id "
+        + "WHERE o.id = :orderid", nativeQuery = true)
+    Address getAddressByOrderId(@Param("orderid") Long orderId);
 }
