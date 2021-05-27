@@ -28,6 +28,7 @@ public class ErrorMessage {
     public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does mot exist.";
     public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does mot exist.";
     public static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
+    public static String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
 
     /**
      * Constructor.
