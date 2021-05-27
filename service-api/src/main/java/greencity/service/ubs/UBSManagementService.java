@@ -84,4 +84,18 @@ public interface UBSManagementService {
      * @author Veremchuk Zakhar.
      */
     void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
+
+    /**
+     * Method for getting all values from table .
+     *
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllValuesFromTable();
+
+    /**
+     * Method for getting all sorted values from table .
+     *
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
 }

@@ -4,17 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 
 import static greencity.ModelUtils.getPrincipal;
+
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.OrderAddressDtoRequest;
 import greencity.dto.OrderResponseDto;
 import greencity.service.ubs.UBSClientService;
+
 import java.security.Principal;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import static org.mockito.ArgumentMatchers.*;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,7 +103,8 @@ class OrderControllerTest {
         mockMvc.perform(post(ubsLink + "/processOrder")
             .content(orderResponceDtoJSON)
             .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"));
         verify(restClient).findUuidByEmail("test@gmail.com");
