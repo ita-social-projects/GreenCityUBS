@@ -34,6 +34,9 @@ public class EncryptionUtil {
      * @return {@link Boolean} - whether the data is valid.
      */
     public static boolean checkIfResponseSignatureIsValid(PaymentResponseDto dto, String password) {
+        if (dto.getFee() == null) {
+            dto.setFee(0);
+        }
         StringBuilder stringBuilder = new StringBuilder(password);
         checkInteger(dto.getActual_amount(), stringBuilder);
         checkString(dto.getActual_currency(), stringBuilder);
