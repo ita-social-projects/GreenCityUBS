@@ -1,0 +1,128 @@
+trigger:
+  branches:
+    include:
+    - dev, master
+  paths:
+    exclude:
+    - README.md
+    
+pr: none
+    
+    
+variables:
+  agentOS: ubuntu-latest
+  
+  azKeyVault: key-vault-greencity
+  jsonSecret: google-credentials
+  jsonFile: google-creds.json
+  jsonLocation: /site/wwwroot
+  
+  artifactName: drop
+  userRepoName: core
+  onbootJarName: app.jar
+  
+  azureSub: GreenCity
+  resourceGroup: GreenCity
+  userServiceName: greencity-ubs
+
+stages:
+- stage: Build
+  jobs: 
+  - job: Build
+    pool:
+      vmImage: $(agentOS)
+    steps:
+    - task: AzureCLI@2
+      displayName: Get GOOGLE_APPLICATION_CREDENTIALS from Azure Key Vault
+      inputs:
+        azureSubscription: '$(azureSub)'
+        scriptType: 'bash'
+        scriptLocation: inlineScript
+        inlineScript: |
+          az keyvault secret download --name $(jsonSecret) --vault-name $(azKeyVault) --file $(jsonFile)
+          
+    - task: AzureKeyVault@1
+      displayName: Get FTP credentials from Azure Key Vault
+      inputs:
+        azureSubscription: '$(azureSub)'
+        KeyVaultName: '$(azKeyVault)'
+        SecretsFilter: 'ftpHost, ftpUser, ftpPass'
+        
+    - task: FtpUpload@2
+      displayName: Upload json to app service via FTP
+      inputs:
+        credentialsOption: 'inputs'
+        serverUrl: '$(ftpHost)'
+        username: '$(ftpUser)'
+        password: '$(ftpPass)'
+        filePatterns: '$(jsonFile)'
+        remoteDirectory: '$(jsonLocation)'
+
+    - task: AzureAppServiceSettings@1
+      displayName: Set GOOGLE_APPLICATION_CREDENTIALS config in Azure Portal
+      inputs:
+        azureSubscription: '$(azureSub)'
+        appName: '$(userServiceName)'
+        resourceGroupName: '$(resourceGroup)'
+        appSettings: |
+          [
+            {
+              "name": "GOOGLE_APPLICATION_CREDENTIALS",
+              "value": "/home$(jsonLocation)/$(jsonFile)", 
+              "slotSetting": false
+            }
+          ]
+     
+    - task: Maven@3
+      displayName: Maven package
+      inputs:
+        mavenPomFile: 'pom.xml'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        options: '-Dmaven.test.skip=true'
+        
+    - script: mv $(userRepoName)/target/*.jar $(userRepoName)/target/$(onbootJarName)
+      displayName: Rename user jar to app
+
+    - task: CopyFiles@2
+      displayName: Copy Files
+      inputs:
+        SourceFolder: '$(system.defaultworkingdirectory)'
+        Contents: '**/target/*.jar'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+        artifactName: '$(artifactName)'
+
+- stage: Deploy
+  jobs:
+    - deployment: DeployUbs
+      displayName: Deploy UBS app service
+      pool:
+        vmImage: $(agentOS)
+      environment: 'prod'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: none
+            
+            - task: DownloadBuildArtifacts@0
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: '$(artifactName)'
+                downloadPath: '$(System.ArtifactsDirectory)'
+                
+            - task: AzureRmWebAppDeployment@4
+              inputs:
+                azureSubscription: '$(azureSub)'
+                appType: 'webAppLinux'
+                WebAppName: '$(userServiceName)'
+                deployToSlotOrASE: true
+                ResourceGroupName: '$(resourceGroup)'
+                packageForLinux: '$(System.ArtifactsDirectory)/$(artifactName)/$(userRepoName)/target/$(onbootJarName)'

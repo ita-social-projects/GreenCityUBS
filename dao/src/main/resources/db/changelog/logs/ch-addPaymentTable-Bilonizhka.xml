@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Bilonizhka10" author="Oleh Bilonizhka">
+        <createTable tableName="payment">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="payment_pkey"/>
+            </column>
+            <column name="amount" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="response_status" type="VARCHAR(50)"/>
+            <column name="sender_cell_phone" type="VARCHAR(16)"/>
+            <column name="sender_account" type="VARCHAR(50)"/>
+            <column name="masked_card" type="VARCHAR(19)"/>
+            <column name="card_type" type="VARCHAR(50)"/>
+            <column name="response_code" type="INT"/>
+            <column name="response_description" type="VARCHAR(1024)"/>
+            <column name="order_time" type="VARCHAR(19)"/>
+            <column name="settlement_date" type="VARCHAR(10)"/>
+            <column name="fee" type="BIGINT"/>
+            <column name="payment_system" type="VARCHAR(50)"/>
+            <column name="sender_email" type="VARCHAR(254)"/>
+            <column name="payment_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="Bilonizhka11" author="Oleh Bilonizhka">
+        <addColumn tableName="orders">
+            <column name="payment_id" type="BIGINT"></column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="orders" baseColumnNames="payment_id" constraintName="payment_id_in_orderTable_FC_constraint" referencedTableName="payment"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+
+
+</databaseChangeLog>
