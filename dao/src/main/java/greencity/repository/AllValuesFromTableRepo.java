@@ -1,6 +1,7 @@
 package greencity.repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -48,21 +49,22 @@ public class AllValuesFromTableRepo {
         + "where order_id =";
 
     /**
-     * Method returns of undelivered orders.
+     * Method for finding elements from Order Table without employee.
      */
     public List<Map<String, Object>> findAll() {
         return jdbcTemplate.queryForList(QUERY);
     }
 
     /**
-     * Method returns of u.
+     * Method for finding all employee.
      */
     public List<Map<String, Object>> findAllEmpl(Long orderId) {
         return jdbcTemplate.queryForList(EMPLOYEEQUERY + orderId);
     }
 
     /**
-     * Method returns of undelivered orders.
+     * Method for finding elements from Order Table without employee with the
+     * sorting possibility.
      */
     public List<Map<String, Object>> findAllWithSorting(String column, String sortingType) {
         return jdbcTemplate.queryForList(QUERY + " order by " + column + " " + sortingType);
