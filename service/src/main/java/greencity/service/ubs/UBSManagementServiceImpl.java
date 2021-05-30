@@ -15,7 +15,9 @@ import greencity.exceptions.UnexistingOrderException;
 import greencity.exceptions.UnexistingUuidExeption;
 import greencity.repository.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -243,7 +245,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in
+     * @return list of {@link Coordinates} - start coordinates with it's
      *         distant @relatives.
      * @author Oleh Bilonizhka
      */
@@ -415,6 +417,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
         for (Map<String, Object> map : ourResult) {
             AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
+                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+            }
             List<Map<String, Object>> employees = allValuesFromTableRepo
                 .findAllEmpl(allFieldsFromTableDto.getOrderId());
             for (Map<String, Object> objectMap : employees) {
@@ -440,6 +446,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
         for (Map<String, Object> map : ourResult) {
             AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
+                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+            }
             List<Map<String, Object>> employees = allValuesFromTableRepo
                 .findAllEmpl(allFieldsFromTableDto.getOrderId());
             for (Map<String, Object> objectMap : employees) {
