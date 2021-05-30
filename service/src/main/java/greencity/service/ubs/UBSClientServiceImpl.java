@@ -290,6 +290,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
         currentUser.getOrders().add(order);
         if (pointsToUse != 0) {
@@ -429,5 +433,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
         return modelMapper.map(addressRepo.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<OrderClientDto> getAllOrdersDoneByUser(String uuid) {
+        return orderRepository.getAllOrdersOfUser(uuid).stream()
+                .sorted(Comparator.comparing(Order::getOrderDate))
+                .map(order -> modelMapper.map(order, OrderClientDto.class))
+                .collect(Collectors.toList());
     }
 }

@@ -88,4 +88,13 @@ public interface UBSClientService {
      * @author Mahdziak Orest
      */
     ReadAddressByOrderDto getAddressByOrderId(Long orderId);
+
+    /**
+     * Methods return list of all orders done by user.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link List<OrderClientDto>} that contains client's orders;
+     * @author Danylko Mykola
+     */
+    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
 }
