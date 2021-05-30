@@ -181,7 +181,8 @@ public class ManagementOrderController {
     /**
      * Controller for adding User violation.
      *
-     * @return {@link AddingViolationsToUserDto} count of Users violations with order id descriptions.
+     * @return {@link AddingViolationsToUserDto} count of Users violations with
+     *         order id descriptions.
      * @author Nazar Struk
      */
     @ApiOperation("Add Violation to User")
