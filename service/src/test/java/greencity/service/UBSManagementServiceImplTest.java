@@ -5,6 +5,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -127,5 +130,12 @@ public class UBSManagementServiceImplTest {
         when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
+    }
+
+    @Test
+    void checkOrderNotFound() {
+        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
+            ubsManagementService.getAddressByOrderId(10000000l);
+        });
     }
 }

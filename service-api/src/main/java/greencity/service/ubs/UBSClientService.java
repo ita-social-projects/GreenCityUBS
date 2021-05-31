@@ -79,13 +79,4 @@ public interface UBSClientService {
      * @author Veremchuk Zakhar
      */
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
-
-    /**
-     * Method that read user address by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ReadAddressByOrderDto} that contains one address;
-     * @author Mahdziak Orest
-     */
-    ReadAddressByOrderDto getAddressByOrderId(Long orderId);
 }
