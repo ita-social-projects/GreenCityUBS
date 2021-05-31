@@ -272,4 +272,43 @@ public class ManagementOrderController {
                 .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
         }
     }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReadAddressByOrderDto.class),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAddressByOrderId(id));
+    }
+
+    /**
+     * Controller for update order address.
+     *
+     * @return {@link OrderAddressDtoResponse}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Update order address")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderAddressDtoResponse.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/update-address")
+    public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
+        @Valid @RequestBody OrderAddressDtoUpdate dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.updateAddress(dto));
+    }
 }
