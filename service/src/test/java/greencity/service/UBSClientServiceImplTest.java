@@ -75,11 +75,4 @@ class UBSClientServiceImplTest {
             ubsService.checkCertificate("randomstring").getCertificateStatus();
         });
     }
-
-    @Test
-    void checkOrderNotFound() {
-        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
-            ubsService.getAddressByOrderId(10000000l);
-        });
-    }
 }

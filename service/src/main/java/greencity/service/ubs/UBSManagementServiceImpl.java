@@ -2,17 +2,15 @@ package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
-import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.UnexistingOrderException;
-import greencity.exceptions.UnexistingUuidExeption;
+import greencity.entity.user.ubs.Address;
+import greencity.exceptions.*;
 import greencity.repository.*;
 
 import java.time.LocalDate;
@@ -20,11 +18,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import javassist.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
+
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -467,5 +463,37 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             ourDtos.add(allFieldsFromTableDto);
         }
         return ourDtos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate) {
+        Address address = orderRepository.findById(dtoUpdate.getId())
+            .orElseThrow(() -> new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()))
+            .getUbsUser().getAddress();
+        addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
+        return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+    }
+
+    private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {
+        address.setHouseNumber(dto.getHouseNumber());
+        address.setEntranceNumber(dto.getEntranceNumber());
+        address.setDistrict(dto.getDistrict());
+        address.setStreet(dto.getStreet());
+        address.setHouseCorpus(dto.getHouseCorpus());
+        return address;
     }
 }

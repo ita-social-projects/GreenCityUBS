@@ -419,15 +419,4 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
-    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
-        return modelMapper.map(addressRepo.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
-    }
 }
