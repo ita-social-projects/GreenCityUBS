@@ -29,11 +29,15 @@ import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,6 +57,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
+    @PersistenceContext
+    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
@@ -441,8 +447,45 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<OrderClientDto> getAllOrdersDoneByUser(String uuid) {
         return orderRepository.getAllOrdersOfUser(uuid).stream()
-                .sorted(Comparator.comparing(Order::getOrderDate))
-                .map(order -> modelMapper.map(order, OrderClientDto.class))
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparing(Order::getOrderDate))
+            .map(order -> modelMapper.map(order, OrderClientDto.class))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderClientDto cancelFormedOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (order.getOrderStatus() == OrderStatus.FORMED) {
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            order = orderRepository.save(order);
+        }
+        return modelMapper.map(order, OrderClientDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public OrderClientDto makeOrderAgain(Long orderId) {
+        Order order = entityManager.find(Order.class, orderId);
+        if (order == null) {
+            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || order.getOrderStatus() == OrderStatus.CONFIRMED
+            || order.getOrderStatus() == OrderStatus.DONE) {
+            entityManager.detach(order);
+            order.setPayment(null);
+            order.setId(null);
+            order.setOrderDate(LocalDateTime.now());
+            order.setOrderStatus(OrderStatus.FORMED);
+            entityManager.persist(order);
+        }
+        return modelMapper.map(order, OrderClientDto.class);
     }
 }

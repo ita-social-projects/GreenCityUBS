@@ -14,10 +14,15 @@ public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDt
      */
     @Override
     protected OrderClientDto convert(Order order) {
-        return OrderClientDto.builder()
-                .id(order.getId())
-                .orderStatus(order.getOrderStatus())
-                .amount(order.getPayment().getAmount())
-                .build();
+        OrderClientDto build = OrderClientDto.builder()
+            .id(order.getId())
+            .orderStatus(order.getOrderStatus())
+            .build();
+        if (order.getPayment() == null) {
+            build.setAmount(null);
+        } else {
+            build.setAmount(order.getPayment().getAmount());
+        }
+        return build;
     }
 }

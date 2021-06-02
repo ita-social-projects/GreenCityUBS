@@ -53,9 +53,9 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
      *
      * @return a {@link List} of {@link Order}
      */
-    @Query(nativeQuery = true, value = "SELECT * FROM orders " +
-            "INNER JOIN ubs_user ON orders.ubs_user_id = ubs_user.id " +
-            "INNER JOIN users ON ubs_user.users_id = users.id " +
-            "WHERE users.uuid = :uuid")
+    @Query(nativeQuery = true, value = "SELECT * FROM orders "
+        + "INNER JOIN ubs_user ON orders.ubs_user_id = ubs_user.id "
+        + "INNER JOIN users ON ubs_user.users_id = users.id "
+        + "WHERE users.uuid = :uuid")
     List<Order> getAllOrdersOfUser(@Param(value = "uuid") String uuid);
 }

@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.user.User;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -90,11 +91,30 @@ public interface UBSClientService {
     ReadAddressByOrderDto getAddressByOrderId(Long orderId);
 
     /**
-     * Methods return list of all orders done by user.
+     * Method returns list of all orders done by user.
      *
      * @param uuid current {@link User}'s uuid;
-     * @return {@link List<OrderClientDto>} that contains client's orders;
+     * @return {@link OrderClientDto} that contains client's orders.
      * @author Danylko Mykola
      */
     List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
+
+    /**
+     * Method cancels order with status FORMED.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    OrderClientDto cancelFormedOrder(Long orderId);
+
+    /**
+     * Method creates the same order again if order's status is ON_THE_ROUTE,
+     * CONFIRMED or DONE.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    OrderClientDto makeOrderAgain(Long orderId);
 }
