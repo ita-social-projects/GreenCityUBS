@@ -29,6 +29,7 @@ public class ErrorMessage {
     public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist.";
     public static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
+    public static String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
 
     /**
      * Constructor.

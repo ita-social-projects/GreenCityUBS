@@ -1,30 +1,26 @@
 package greencity.service.ubs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
-import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.UnexistingOrderException;
-import greencity.exceptions.UnexistingUuidExeption;
-import greencity.repository.AddressRepository;
+import greencity.entity.user.ubs.Address;
+import greencity.exceptions.*;
+import greencity.repository.*;
 
-import greencity.repository.CertificateRepository;
-import greencity.repository.UserRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import greencity.repository.OrderRepository;
-import javassist.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
+
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +38,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final RestClient restClient;
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
+    private final AllValuesFromTableRepo allValuesFromTableRepo;
+    private final ObjectMapper objectMapper;
 
     /**
      * {@inheritDoc}
@@ -243,7 +241,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in
+     * @return list of {@link Coordinates} - start coordinates with it's
      *         distant @relatives.
      * @author Oleh Bilonizhka
      */
@@ -407,5 +405,95 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build();
             restClient.sendViolationOnMail(mailDto);
         }
+    }
+
+    @Override
+    public List<AllFieldsFromTableDto> getAllValuesFromTable() {
+        List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
+        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
+        for (Map<String, Object> map : ourResult) {
+            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
+                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+            }
+            List<Map<String, Object>> employees = allValuesFromTableRepo
+                .findAllEmpl(allFieldsFromTableDto.getOrderId());
+            for (Map<String, Object> objectMap : employees) {
+                Long positionId = (Long) objectMap.get("position_id");
+                if (positionId == 1) {
+                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                } else if (positionId == 2) {
+                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                } else if (positionId == 3) {
+                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                } else if (positionId == 4) {
+                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                }
+            }
+            ourDtos.add(allFieldsFromTableDto);
+        }
+        return ourDtos;
+    }
+
+    @Override
+    public List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType) {
+        List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
+        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
+        for (Map<String, Object> map : ourResult) {
+            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
+                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+            }
+            List<Map<String, Object>> employees = allValuesFromTableRepo
+                .findAllEmpl(allFieldsFromTableDto.getOrderId());
+            for (Map<String, Object> objectMap : employees) {
+                Long positionId = (Long) objectMap.get("position_id");
+                if (positionId == 1) {
+                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                } else if (positionId == 2) {
+                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                } else if (positionId == 3) {
+                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                } else if (positionId == 4) {
+                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                }
+            }
+            ourDtos.add(allFieldsFromTableDto);
+        }
+        return ourDtos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate) {
+        Address address = orderRepository.findById(dtoUpdate.getId())
+            .orElseThrow(() -> new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()))
+            .getUbsUser().getAddress();
+        addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
+        return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+    }
+
+    private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {
+        address.setHouseNumber(dto.getHouseNumber());
+        address.setEntranceNumber(dto.getEntranceNumber());
+        address.setDistrict(dto.getDistrict());
+        address.setStreet(dto.getStreet());
+        address.setHouseCorpus(dto.getHouseCorpus());
+        return address;
     }
 }
