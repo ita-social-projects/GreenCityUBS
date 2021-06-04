@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -194,7 +197,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
         PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-        return restClient.getDataFromFondy(paymentRequestDto);
+        String html = restClient.getDataFromFondy(paymentRequestDto);
+
+        Document doc = Jsoup.parse(html);
+
+        Elements links = doc.select("a[href]");
+        System.out.println(links.attr("href"));
+        return links.attr("href");
     }
 
     /**
