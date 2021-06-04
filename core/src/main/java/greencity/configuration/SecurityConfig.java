@@ -83,6 +83,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR")
+                .antMatchers(HttpMethod.PATCH,
+                        UBS_LINK + "/**")
+                .hasAnyRole("USER", "ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR");

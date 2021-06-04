@@ -28,14 +28,19 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +59,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
+    @PersistenceContext
+    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
@@ -295,6 +302,64 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setAddressStatus(AddressStatus.DELETED);
         addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<OrderClientDto> getAllOrdersDoneByUser(String uuid) {
+        return orderRepository.getAllOrdersOfUser(uuid).stream()
+            .sorted(Comparator.comparing(Order::getOrderDate))
+            .map(order -> modelMapper.map(order, OrderClientDto.class))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderClientDto cancelFormedOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (order.getOrderStatus() == OrderStatus.FORMED) {
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            order = orderRepository.save(order);
+            return modelMapper.map(order, OrderClientDto.class);
+        } else {
+            throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public List<OrderBagDto> makeOrderAgain(Long orderId) {
+        Order order = entityManager.find(Order.class, orderId);
+        if (order == null) {
+            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || order.getOrderStatus() == OrderStatus.CONFIRMED
+            || order.getOrderStatus() == OrderStatus.DONE) {
+            Hibernate.initialize(order.getAmountOfBagsOrdered());
+            final Map<Integer, Integer> amountOfBagsClone =
+                new HashMap<>(order.getAmountOfBagsOrdered());
+            entityManager.detach(order);
+            order.setPayment(null);
+            order.setId(null);
+            order.setAmountOfBagsOrdered(amountOfBagsClone);
+            order.setOrderDate(LocalDateTime.now());
+            order.setOrderStatus(OrderStatus.FORMED);
+            entityManager.persist(order);
+            return modelMapper.map(order,
+                new TypeToken<List<OrderBagDto>>() {
+                }.getType());
+        } else {
+            throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
+        }
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {

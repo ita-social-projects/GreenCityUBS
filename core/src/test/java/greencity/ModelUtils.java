@@ -2,6 +2,8 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderStatus;
+
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +12,9 @@ import java.util.HashSet;
 public class ModelUtils {
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
+    }
+    public static Principal getUuid() {
+        return () -> "35467585763t4sfgchjfuyetf";
     }
 
     public static OrderResponseDto getOrderResponseDto() {
@@ -56,5 +61,13 @@ public class ModelUtils {
             .city("Lviv")
             .actual(false)
             .build();
+    }
+
+    public static OrderClientDto getOrderClientDto() {
+        return OrderClientDto.builder()
+                .id(1L)
+                .orderStatus(OrderStatus.FORMED)
+                .amount(450L)
+                .build();
     }
 }

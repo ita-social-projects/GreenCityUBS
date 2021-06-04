@@ -206,4 +206,36 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
     }
+
+    /**
+     * Method interceptor exception {@link OrderNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({OrderNotFoundException.class})
+    public final ResponseEntity<Object> handleOrderNotFoundException(OrderNotFoundException ex,
+                                                                WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link BadOrderStatusRequestException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({BadOrderStatusRequestException.class})
+    public final ResponseEntity<Object> handleBadOrderStatusRequestException(BadOrderStatusRequestException ex,
+                                                                     WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
 }

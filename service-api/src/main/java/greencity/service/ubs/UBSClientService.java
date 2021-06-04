@@ -79,4 +79,32 @@ public interface UBSClientService {
      * @author Veremchuk Zakhar
      */
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
+
+    /**
+     * Method returns list of all orders done by user.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link OrderClientDto} that contains client's orders.
+     * @author Danylko Mykola
+     */
+    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
+
+    /**
+     * Method cancels order with status FORMED.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    OrderClientDto cancelFormedOrder(Long orderId);
+
+    /**
+     * Method creates the same order again if order's status is ON_THE_ROUTE,
+     * CONFIRMED or DONE.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    List<OrderBagDto> makeOrderAgain(Long orderId);
 }

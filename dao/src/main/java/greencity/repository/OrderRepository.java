@@ -1,11 +1,10 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 
 import java.util.List;
 
-import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.user.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -49,4 +48,15 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         value = "SELECT * FROM orders o INNER JOIN  ubs_user u ON o.ubs_user_id = u.id "
             + "WHERE o.order_status LIKE 'ON_THE_ROUTE'")
     List<Order> getAllUsersInWhichTheRouteIsDefined();
+
+    /**
+     * Method return {@link List} of {@link Order} done by {@link User}.
+     *
+     * @return a {@link List} of {@link Order}
+     */
+    @Query(nativeQuery = true, value = "SELECT * FROM orders "
+            + "INNER JOIN ubs_user ON orders.ubs_user_id = ubs_user.id "
+            + "INNER JOIN users ON ubs_user.users_id = users.id "
+            + "WHERE users.uuid = :uuid")
+    List<Order> getAllOrdersOfUser(@Param(value = "uuid") String uuid);
 }
