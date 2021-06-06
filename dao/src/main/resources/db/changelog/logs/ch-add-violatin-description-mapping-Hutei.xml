@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Hutei-113" author="Hutei">
+        <createTable tableName="violations_description_mapping">
+            <column name="user_id" type="BIGINT"/>
+            <column name="description" type="varchar(255)"></column>
+            <column name="order_id" type="BIGINT" />
+        </createTable>
+    </changeSet>
+    <changeSet id="Hutei-115" author="Hutei">
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="violations_description_mapping"
+                                 constraintName="fk5d5vfa0bsddsipw5kdyd5bhfx"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="Hutei-117" author="Hutei">
+        <addForeignKeyConstraint baseColumnNames="order_id"
+                                 baseTableName="violations_description_mapping"
+                                 constraintName="fk5d5vb0bsddsipw5kdyd5bhfx"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="orders"/>
+    </changeSet>
+</databaseChangeLog>

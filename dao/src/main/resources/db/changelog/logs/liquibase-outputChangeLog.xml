@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="User (generated)" id="1614595847330-1">
+        <createSequence sequenceName="address_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-2">
+        <createSequence sequenceName="bag_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-3">
+        <createSequence sequenceName="employees_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-4">
+        <createSequence sequenceName="orders_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-5">
+        <createSequence sequenceName="positions_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-6">
+        <createSequence sequenceName="ubs_user_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-7">
+        <createSequence sequenceName="users_id_seq"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-8">
+        <createTable tableName="address">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="address_pkey"/>
+            </column>
+            <column defaultValue="'Kyiv'::character varying" name="city" type="VARCHAR(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="VARCHAR(200)"/>
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+            <column name="district" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entrance_number" type="VARCHAR(4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="house_corpus" type="VARCHAR(5)"/>
+            <column name="house_number" type="VARCHAR(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-9">
+        <createTable tableName="bag">
+            <column autoIncrement="true" name="id" type="SERIAL">
+                <constraints primaryKey="true" primaryKeyName="bag_pkey"/>
+            </column>
+            <column name="capacity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-10">
+        <createTable tableName="certificate">
+            <column name="code" type="VARCHAR(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate_date" type="date"/>
+            <column name="points" type="INT"/>
+            <column name="order_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-11">
+        <createTable tableName="change_of_points_mapping">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="INT"/>
+            <column name="date" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-12">
+        <createTable tableName="employee_position">
+            <column name="employee_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-13">
+        <createTable tableName="employees">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="employees_pkey"/>
+            </column>
+            <column name="first_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-14">
+        <createTable tableName="order_additional">
+            <column name="orders_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_order" type="VARCHAR(15)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-15">
+        <createTable tableName="order_bag_mapping">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="INT"/>
+            <column name="bag_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-16">
+        <createTable tableName="order_employee">
+            <column name="employee_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-17">
+        <createTable tableName="orders">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="orders_pkey"/>
+            </column>
+            <column name="comment" type="VARCHAR(255)"/>
+            <column name="deliver_from" type="datetime(6)"/>
+            <column name="deliver_to" type="datetime(6)"/>
+            <column name="note" type="VARCHAR(255)"/>
+            <column name="order_date" type="datetime(6)"/>
+            <column name="order_status" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="points_to_use" type="INT"/>
+            <column name="receiving_station" type="VARCHAR(50)"/>
+            <column name="ubs_user_id" type="BIGINT"/>
+            <column name="users_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-18">
+        <createTable tableName="positions">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="positions_pkey"/>
+            </column>
+            <column name="position" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-19">
+        <createTable tableName="ubs_user">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="ubs_user_pkey"/>
+            </column>
+            <column name="email" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(18)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="users_id" type="BIGINT"/>
+            <column name="address_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-20">
+        <createTable tableName="users">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="users_pkey"/>
+            </column>
+            <column defaultValueNumeric="0" name="current_points" type="INT"/>
+            <column name="uuid" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="violations" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-21">
+        <addPrimaryKey columnNames="code" constraintName="certificate_pkey" tableName="certificate"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-22">
+        <addPrimaryKey columnNames="user_id, date" constraintName="change_of_points_mapping_pkey" tableName="change_of_points_mapping"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-23">
+        <addPrimaryKey columnNames="employee_id, position_id" constraintName="employee_position_pkey" tableName="employee_position"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-24">
+        <addPrimaryKey columnNames="order_id, bag_id" constraintName="order_bag_mapping_pkey" tableName="order_bag_mapping"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-25">
+        <addPrimaryKey columnNames="employee_id, order_id" constraintName="order_employee_pkey" tableName="order_employee"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-26">
+        <addForeignKeyConstraint baseColumnNames="ubs_user_id" baseTableName="orders" constraintName="fk1evtdroba5rlynltqtprpcaay" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="ubs_user"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-27">
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="employee_position" constraintName="fk7428n493hjv04v7bru3hh7xg3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-28">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="change_of_points_mapping" constraintName="fk77v8r6rgf8obsgkrp9rtriacu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-29">
+        <addForeignKeyConstraint baseColumnNames="employee_id" baseTableName="order_employee" constraintName="fk7jinp3n7favpnqb91b9kapko7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="employees"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-30">
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="order_employee" constraintName="fkapmw40gj4j33hcfbt6gqyb87f" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-31">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="ubs_user" constraintName="fkc5cw0lrmhx6mbwqnklkyudhse" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="address"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-32">
+        <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="orders" constraintName="fke6k45xxoin4fylnwg2jkehwjf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-33">
+        <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="ubs_user" constraintName="fkfce5nygk074yf9qm7ofjo7em2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-34">
+        <addForeignKeyConstraint baseColumnNames="position_id" baseTableName="employee_position" constraintName="fkp3gtviaykhgjo8u63oluspkok" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="positions"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-35">
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="certificate" constraintName="fkpk7mwwg8e6a5owtr4bmxpum7b" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-36">
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="order_bag_mapping" constraintName="fkpkamv5em3c345mcyo3b6gr50a" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1614595847330-37">
+        <addForeignKeyConstraint baseColumnNames="orders_id" baseTableName="order_additional" constraintName="fkpry0lrfjcpcpjo0wl6w6spscy" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders"/>
+    </changeSet>
+</databaseChangeLog>
