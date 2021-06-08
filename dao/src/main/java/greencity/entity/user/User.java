@@ -5,26 +5,13 @@ import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.entity.viber.ViberBot;
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import greencity.entity.viber.ViberBot;
-import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -54,6 +41,9 @@ public class User {
 
     @Column(name = "recipient_name")
     private String recipientName;
+
+    @Column
+    private String recipientSurname;
 
     @Column(name = "recipient_email")
     private String recipientEmail;
