@@ -57,4 +57,13 @@ public class ModelUtils {
             .actual(false)
             .build();
     }
+
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
 }

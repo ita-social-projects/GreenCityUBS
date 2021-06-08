@@ -1,20 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
-
-import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.MINIMAL_SUM_VIOLATION;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.SUM_IS_COVERED_BY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
@@ -27,16 +13,17 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static greencity.constant.ErrorMessage.*;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -429,5 +416,35 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
         return modelMapper.map(addressRepo.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        User user = userRepository.findByUuid(uuid);
+        setUserDate(user, userProfileDto);
+        AddressDto addressDto = userProfileDto.getAddressDto();
+        Address address = modelMapper.map(addressDto, Address.class);
+        address.setUser(user);
+        Address savedAddress = addressRepo.save(address);
+        User savedUser = userRepository.save(user);
+        AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
+        UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
+        mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        return mappedUserProfileDto;
+    }
+
+    private User setUserDate(User user, UserProfileDto userProfileDto) {
+        user.setRecipientName(userProfileDto.getRecipientName());
+        user.setRecipientPhone(userProfileDto.getRecipientPhone());
+        user.setRecipientEmail(userProfileDto.getRecipientEmail());
+        return user;
     }
 }

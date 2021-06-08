@@ -55,6 +55,9 @@ public class User {
     @Column(name = "recipient_name")
     private String recipientName;
 
+    @Column(name = "recipient_surname")
+    private String recipientSurname;
+
     @Column(name = "recipient_email")
     private String recipientEmail;
 
