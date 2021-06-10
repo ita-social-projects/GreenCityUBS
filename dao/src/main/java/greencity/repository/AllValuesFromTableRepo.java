@@ -1,8 +1,15 @@
 package greencity.repository;
 
+import greencity.filters.SearchCriteria;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.Convert;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -51,8 +58,22 @@ public class AllValuesFromTableRepo {
     /**
      * Method for finding elements from Order Table without employee.
      */
-    public List<Map<String, Object>> findAll() {
-        return jdbcTemplate.queryForList(QUERY);
+    public List<Map<String, Object>> findAlL(SearchCriteria searchCriteria) {
+        if (searchCriteria.getViolationsAmount() == null | searchCriteria.getOrderDate() == null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + "and district like  '%" + searchCriteria.getDistrict() + "%'");
+        } else {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + " and violations = " + searchCriteria.getViolationsAmount()
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "and order_date :: date = '" + searchCriteria.getOrderDate() + "'");
+        }
     }
 
     /**

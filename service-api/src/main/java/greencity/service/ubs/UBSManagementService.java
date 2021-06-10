@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.filters.SearchCriteria;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -90,7 +91,7 @@ public interface UBSManagementService {
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllValuesFromTable();
+    List<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria);
 
     /**
      * Method for getting all sorted values from table .

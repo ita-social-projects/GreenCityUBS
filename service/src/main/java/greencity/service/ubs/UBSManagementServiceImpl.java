@@ -11,6 +11,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
+import greencity.filters.SearchCriteria;
 import greencity.repository.*;
 
 import java.time.LocalDate;
@@ -408,9 +409,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllValuesFromTable() {
+    public List<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
+        if (searchCriteria.getPayment() == null) {
+            searchCriteria.setPayment("");
+        }
+        if (searchCriteria.getOrderStatus() == null) {
+            searchCriteria.setOrderStatus("");
+        }
+        if (searchCriteria.getReceivingStation() == null) {
+            searchCriteria.setReceivingStation("");
+        }
+        if (searchCriteria.getDistrict() == null) {
+            searchCriteria.setDistrict("");
+        }
+        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAlL(searchCriteria);
         for (Map<String, Object> map : ourResult) {
             AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
             if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {

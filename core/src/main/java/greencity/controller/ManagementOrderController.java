@@ -5,6 +5,7 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -215,11 +216,13 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getAllFieldsFromOrderTable")
-    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
+    public ResponseEntity<List<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
         @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType) {
+        @RequestParam(value = "sortingType", required = false) String sortingType,
+        SearchCriteria searchCriteria) {
         if (columnName == null || sortingType == null) {
-            return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getAllValuesFromTable(searchCriteria));
         } else {
             return ResponseEntity.status(HttpStatus.OK)
                 .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
