@@ -3,6 +3,7 @@ package greencity.entity.user;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramBot;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import greencity.entity.viber.ViberBot;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,6 +32,8 @@ import lombok.Setter;
 @Setter
 @Builder
 @Table(name = "users")
+@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList",
+    "violationsDescription", "telegramBot", "viberBot"})
 @Entity
 public class User {
     @Id
@@ -47,8 +46,20 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Order> orders;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Address> addresses;
+
     @Column(columnDefinition = "int default 0")
     private Integer currentPoints;
+
+    @Column(name = "recipient_name")
+    private String recipientName;
+
+    @Column(name = "recipient_email")
+    private String recipientEmail;
+
+    @Column(name = "recipient_phone")
+    private String recipientPhone;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;

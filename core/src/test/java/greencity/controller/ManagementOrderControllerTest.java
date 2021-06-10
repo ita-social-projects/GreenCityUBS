@@ -7,11 +7,15 @@ import greencity.dto.CertificateDtoForAdding;
 import greencity.service.ubs.UBSManagementService;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.service.ubs.UBSClientService;
 import java.security.Principal;
+import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +60,12 @@ class ManagementOrderControllerTest {
     public static final String contentForAddViolationToUserControllerTest = "{\n"
         + "\"orderID\": 1,\n" +
         "\"violationDescription\": \"TestTest\" "
+    public static final String contentForUpdatingController = "{\n"
+        + " \"district\": \"test\",\n"
+        + " \"street\": \"test\",\n"
+        + " \"houseCorpus\": \"4\",\n"
+        + " \"entranceNumber\": \"2\",\n"
+        + " \"houseNumber\": \"1\"\n"
         + "}";
 
     private Principal principal = getPrincipal();
@@ -94,6 +104,7 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+
     void addUsersViolations() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/addViolationToUser")
             .content(contentForAddViolationToUserControllerTest)
@@ -104,5 +115,16 @@ class ManagementOrderControllerTest {
             .violationDescription("TestTest")
             .build();
         verify(ubsManagementService, times(1)).addUserViolation(addingViolationsToUserDto);
+    void getAddressByOrder() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/read-address-order" + "/{id}", 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateAddress() throws Exception {
+        this.mockMvc.perform(put(ubsLink + "/update-address")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(contentForUpdatingController))
+            .andExpect(status().isCreated());
     }
 }

@@ -9,22 +9,21 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orders"})
+@EqualsAndHashCode(exclude = {"orders", "address"})
 @Getter
 @Setter
 @Builder
 @Table(name = "ubs_user")
 @Entity
 public class UBSuser {
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id")
-    private Address userAddress;
+    @ManyToOne
+    private Address address;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
     private User user;
 
-    @OneToMany(mappedBy = "ubsUser")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "ubsUser")
     private List<Order> orders;
 
     @Id

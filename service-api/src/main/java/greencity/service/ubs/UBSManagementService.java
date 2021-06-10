@@ -76,4 +76,44 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     void addUserViolation(AddingViolationsToUserDto add);
+
+    /**
+     * Method for send email with description to user.
+     *
+     * @param dto {@link AddingViolationsToUserDto } order id with description.
+     * @author Veremchuk Zakhar.
+     */
+    void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
+
+    /**
+     * Method for getting all values from table .
+     *
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllValuesFromTable();
+
+    /**
+     * Method for getting all sorted values from table .
+     *
+     * @author Nazar Struk
+     */
+    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
+
+    /**
+     * Method that read user address by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ReadAddressByOrderDto} that contains one address;
+     * @author Mahdziak Orest
+     */
+    ReadAddressByOrderDto getAddressByOrderId(Long orderId);
+
+    /**
+     * Method that update address.
+     *
+     * @param dtoUpdate of {@link OrderAddressDtoUpdate} order id;
+     * @return {@link OrderAddressDtoResponse} that contains address;
+     * @author Mahdziak Orest
+     */
+    OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
 }

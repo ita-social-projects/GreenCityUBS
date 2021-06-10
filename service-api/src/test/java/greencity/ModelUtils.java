@@ -1,7 +1,7 @@
 package greencity;
 
 import greencity.dto.UserVO;
-import java.time.LocalDateTime;
+import greencity.dto.UserViolationMailDto;
 
 public class ModelUtils {
 
@@ -9,6 +9,14 @@ public class ModelUtils {
         return UserVO.builder()
             .id(13L)
             .email("email").build();
+    }
+
+    public static UserViolationMailDto getUserViolationMailDto() {
+        return UserViolationMailDto.builder()
+            .name("String")
+            .email("string@gmail.com")
+            .violationDescription("Description")
+            .build();
     }
 
 }

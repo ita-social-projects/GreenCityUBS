@@ -1,8 +1,8 @@
 package greencity;
 
-import greencity.dto.BagDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PersonalDataDto;
+import greencity.dto.*;
+import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderStatus;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +13,11 @@ public class ModelUtils {
         return () -> "test@gmail.com";
     }
 
-    public static OrderResponseDto getOrderResponceDto() {
+    public static Principal getUuid() {
+        return () -> "35467585763t4sfgchjfuyetf";
+    }
+
+    public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232534634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -25,15 +29,45 @@ public class ModelUtils {
                 .lastName("Antonov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .district("frankivskiy")
-                .addressComment("near mall")
-                .city("Lviv")
-                .houseNumber("4R")
-                .entranceNumber("5")
                 .phoneNumber("067894522")
-                .street("Levaya")
-                .houseCorpus(null)
                 .build())
+            .addressId(1L)
+            .build();
+    }
+
+    public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
+        return OrderAddressDtoRequest.builder()
+            .id(0L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+
+    public static AddressDto addressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+
+    public static OrderClientDto getOrderClientDto() {
+        return OrderClientDto.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .amount(450L)
             .build();
     }
 }

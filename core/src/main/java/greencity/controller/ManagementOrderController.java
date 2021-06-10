@@ -1,12 +1,16 @@
 package greencity.controller;
 
+import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageable;
+import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.service.ubs.AllValuesFromTableService;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -23,17 +27,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final ModelMapper mapper;
-    private final AllValuesFromTableService allValuesFromTableService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-        AllValuesFromTableService allValuesFromTableService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
-        this.allValuesFromTableService = allValuesFromTableService;
     }
 
     /**
@@ -191,29 +192,76 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser")
-    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add) {
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
+        @ApiIgnore @ValidLanguage Locale locale) {
         ubsManagementService.addUserViolation(add);
+        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
      * @author Nazar Struk
      */
-    @ApiOperation("Get all info from Table order")
+    @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/getAllFields")
-    public ResponseEntity<List<GetAllFieldsMainDto>> getAllFieldsFromOrderTableInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(allValuesFromTableService.findAllValues());
+    @GetMapping("/getAllFieldsFromOrderTable")
+    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
+        @RequestParam(value = "columnName", required = false) String columnName,
+        @RequestParam(value = "sortingType", required = false) String sortingType) {
+        if (columnName == null || sortingType == null) {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
+        }
+    }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReadAddressByOrderDto.class),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAddressByOrderId(id));
+    }
+
+    /**
+     * Controller for update order address.
+     *
+     * @return {@link OrderAddressDtoResponse}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Update order address")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderAddressDtoResponse.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/update-address")
+    public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
+        @Valid @RequestBody OrderAddressDtoUpdate dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.updateAddress(dto));
     }
 }

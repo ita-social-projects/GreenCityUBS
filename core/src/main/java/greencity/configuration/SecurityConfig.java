@@ -83,6 +83,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.PATCH,
+                UBS_LINK + "/**")
+            .hasAnyRole("USER", "ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR");
@@ -95,6 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(WebSecurity web) {
+        web.ignoring().antMatchers("/ubs/receivePayment");
         web.ignoring().antMatchers("/v2/api-docs/**");
         web.ignoring().antMatchers("/swagger.json");
         web.ignoring().antMatchers("/swagger-ui.html");

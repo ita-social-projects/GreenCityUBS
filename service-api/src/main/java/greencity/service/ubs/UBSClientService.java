@@ -1,12 +1,8 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentRequestDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PersonalDataDto;
-import greencity.dto.UserPointsAndAllBagsDto;
+import greencity.dto.*;
 import greencity.entity.user.User;
+
 import java.util.List;
 
 public interface UBSClientService {
@@ -52,5 +48,63 @@ public interface UBSClientService {
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    PaymentRequestDto saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    String saveFullOrderToDB(OrderResponseDto dto, String uuid);
+
+    /**
+     * Methods return list of all user addresses.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link OrderWithAddressesResponseDto} that contains address list
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid);
+
+    /**
+     * Method that save address for current user.
+     *
+     * @param dtoRequest {@link OrderAddressDtoRequest} information about address;
+     * @param uuid       current {@link User}'s uuid;
+     * @return {@link OrderAddressDtoRequest} contains all information needed for
+     *         save address;
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid);
+
+    /**
+     * Method that delete user address.
+     *
+     * @param addressId of {@link Long} address id;
+     * @param uuid      current {@link User}'s uuid;
+     * @return {@link OrderWithAddressesResponseDto} that contains address list;
+     * @author Veremchuk Zakhar
+     */
+    OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
+
+    /**
+     * Method returns list of all orders done by user.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link OrderClientDto} that contains client's orders.
+     * @author Danylko Mykola
+     */
+    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
+
+    /**
+     * Method cancels order with status FORMED.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    OrderClientDto cancelFormedOrder(Long orderId);
+
+    /**
+     * Method creates the same order again if order's status is ON_THE_ROUTE,
+     * CONFIRMED or DONE.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    List<OrderBagDto> makeOrderAgain(Long orderId);
 }

@@ -6,6 +6,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,14 +65,14 @@ public class UBSManagementServiceImplTest {
 
         for (Coordinates coordinate : ModelUtils.getCoordinatesSet()) {
             List<Order> orders = ModelUtils.getOrdersToGroupThem().stream()
-                .filter(e -> e.getUbsUser().getUserAddress().getCoordinates().equals(coordinate)).collect(
+                .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
                     Collectors.toList());
             when(orderRepository.undeliveredOrdersGroupThem(coordinate.getLatitude(), coordinate.getLongitude()))
                 .thenReturn(orders);
             for (Order order : orders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(OrderDto.builder()
-                    .latitude(order.getUbsUser().getUserAddress().getCoordinates().getLatitude())
-                    .longitude(order.getUbsUser().getUserAddress().getCoordinates().getLongitude())
+                    .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                    .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
                     .build());
             }
         }
@@ -156,5 +159,11 @@ public class UBSManagementServiceImplTest {
         ubsManagementService.addUserViolation(addingViolationsToUserDto);
         verify(orderRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).save(user);
+    }
+}
+    void checkOrderNotFound() {
+        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
+            ubsManagementService.getAddressByOrderId(10000000l);
+        });
     }
 }
