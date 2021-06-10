@@ -1,8 +1,5 @@
 package greencity.filters;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.*;
 
 @Builder

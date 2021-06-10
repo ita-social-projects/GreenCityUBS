@@ -1,15 +1,9 @@
 package greencity.repository;
 
 import greencity.filters.SearchCriteria;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Convert;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
