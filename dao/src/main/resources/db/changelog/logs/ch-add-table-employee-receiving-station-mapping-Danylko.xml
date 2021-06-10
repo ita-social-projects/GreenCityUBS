@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Danylko-4" author="Danylko Mykola">
+        <createTable tableName="employee_receiving_station_mapping">
+            <column name="employee_id" type="BIGINT" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiving_station_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column> 
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="employee_id"
+                                 constraintName="fk_employee_receiving_station_employee_id"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="fk_employee_receiving_station_receiving_station_id"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

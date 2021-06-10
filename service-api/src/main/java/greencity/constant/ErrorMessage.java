@@ -30,6 +30,9 @@ public class ErrorMessage {
     public static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
     public static String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
+    public static String FILE_NOT_SAVED = "File hasn't been saved";
+    public static String MULTIPART_FILE_BAD_REQUEST = "Incorrect input image string: ";
+    public static String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
 
     /**
      * Constructor.

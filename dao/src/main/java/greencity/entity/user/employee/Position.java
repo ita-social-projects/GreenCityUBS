@@ -29,9 +29,8 @@ public class Position {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private EmployeePosition position;
+    private String position;
 
     @ManyToMany(mappedBy = "employeePosition")
     private Set<Employee> employees;

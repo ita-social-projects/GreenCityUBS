@@ -4,5 +4,6 @@ public enum EmployeePosition {
     MANAGER,
     LOGIST,
     COURIER,
-    NAVIGATOR
+    NAVIGATOR,
+    DRIVER
 }

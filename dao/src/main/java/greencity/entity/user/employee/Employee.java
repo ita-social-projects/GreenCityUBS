@@ -11,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +37,15 @@ public class Employee {
     @Column(length = 30, nullable = false)
     private String lastName;
 
+    @Column(length = 30, nullable = false, unique = true)
+    private String phoneNumber;
+
+    @Column(length = 170, unique = true)
+    private String email;
+
+    @Column
+    private String imagePath;
+
     @ManyToMany
     @JoinTable(
         name = "employee_position",
@@ -48,4 +59,11 @@ public class Employee {
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "order_id")})
     private Set<Order> attachedOrders;
+
+    @ManyToMany
+    @JoinTable(
+            name = "employee_receiving_station_mapping",
+            joinColumns = {@JoinColumn(name = "employee_id")},
+            inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
+    private Set<ReceivingStation> receivingStation;
 }
