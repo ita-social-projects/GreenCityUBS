@@ -3,12 +3,15 @@ package greencity;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
+import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class ModelUtils {
@@ -373,6 +376,34 @@ public class ModelUtils {
         return AddingViolationsToUserDto.builder()
             .orderID(1L)
             .violationDescription("String string string")
+            .build();
+    }
+
+    public static OrderClientDto getOrderClientDto() {
+        return OrderClientDto.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.DONE)
+            .amount(350L)
+            .build();
+    }
+
+    public static Order getOrderDoneByUser() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.DONE)
+            .payment(Payment.builder()
+                .id(1L)
+                .amount(350L)
+                .build())
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .build();
+    }
+
+    public static OrderBagDto getOrderBagDto() {
+        return OrderBagDto.builder()
+            .id(1)
+            .amount(3)
             .build();
     }
 }
