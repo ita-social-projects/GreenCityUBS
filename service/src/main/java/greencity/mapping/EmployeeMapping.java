@@ -1,6 +1,8 @@
 package greencity.mapping;
 
 import greencity.dto.EmployeeDto;
+import greencity.dto.PositionDto;
+import greencity.dto.ReceivingStationDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -31,11 +33,17 @@ public class EmployeeMapping extends AbstractConverter<Employee, EmployeeDto> {
                 .phoneNumber(employee.getPhoneNumber())
                 .email(employee.getEmail())
                 .image(employee.getImagePath())
-              /*  .employeePositions(employee.getEmployeePosition()
-                        .stream().map(Position::getPosition)
-                        .collect(Collectors.toList()))*/
-                .receivingStations(employee.getReceivingStation()
-                        .stream().map(ReceivingStation::getReceivingStation)
+                .employeePositions(employee.getEmployeePosition().stream()
+                        .map(p -> PositionDto.builder()
+                                .id(p.getId())
+                                .position(p.getPosition())
+                                .build())
+                        .collect(Collectors.toList()))
+                .receivingStations(employee.getReceivingStation().stream()
+                        .map(r -> ReceivingStationDto.builder()
+                                .id(r.getId())
+                                .receivingStation(r.getReceivingStation())
+                                .build())
                         .collect(Collectors.toList()))
                 .build();
     }

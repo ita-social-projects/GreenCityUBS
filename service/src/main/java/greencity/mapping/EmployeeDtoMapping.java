@@ -21,10 +21,12 @@ public class EmployeeDtoMapping extends AbstractConverter<EmployeeDto, Employee>
     @Override
     protected Employee convert(EmployeeDto employeeDto) {
         return Employee.builder()
+                .id(employeeDto.getId())
                 .firstName(employeeDto.getFirstName())
                 .lastName(employeeDto.getLastName())
                 .phoneNumber(employeeDto.getPhoneNumber())
                 .email(employeeDto.getEmail())
+                .imagePath(employeeDto.getImage())
                 .build();
     }
 }

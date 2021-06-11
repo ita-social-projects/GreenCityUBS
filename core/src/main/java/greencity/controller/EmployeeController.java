@@ -29,11 +29,12 @@ import java.io.File;
 @RequestMapping("/admin/ubs-employee")
 public class EmployeeController {
 
-    private UBSEmployeeService employeeService;
+    private final UBSEmployeeService employeeService;
 
     /**
      * Constructor with parameters.
      */
+    @Autowired
     public EmployeeController(UBSEmployeeService employeeService) {
         this.employeeService = employeeService;
     }
@@ -53,7 +54,7 @@ public class EmployeeController {
     })
     @PostMapping(value = "/save-employee", consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeDto> saveEmployee(
-            @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE, required = true)
+            @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE, required = true) @Valid
             @RequestPart AddEmployeeDto addEmployeeDto, @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(addEmployeeDto, image));
     }

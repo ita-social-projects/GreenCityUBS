@@ -1,18 +1,16 @@
 package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.AddEmployeeDto;
-import greencity.dto.EmployeeDto;
-import greencity.dto.PageableAdvancedDto;
+import greencity.dto.*;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.EmployeeConstraintException;
 import greencity.exceptions.EmployeeNotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,28 +28,23 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     private final FileService fileService;
     private final ModelMapper modelMapper;
     private final PositionRepository positionRepository;
-   // @Value("${DEFAULT_IMAGE_URL}")
+    @Value("${DEFAULT_IMAGE_URL}")
+    private String defaultImagePath;
 
     @Override
     public EmployeeDto save(AddEmployeeDto dto, MultipartFile image) {
         Employee employee = modelMapper.map(dto, Employee.class);
-        employee.setReceivingStation(stationRepository.findAllByReceivingStation(dto.getReceivingStations()));
-        employee.setEmployeePosition(positionRepository.findAllByPosition(dto.getEmployeePositions()));
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
-            Logger log = LoggerFactory.getLogger(UBSEmployeeServiceImpl.class);
-            log.info(employee.getImagePath()+ "         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" );
-            }
-        else {
-            //employee.setImagePath();
         }
-        return modelMapper.map(employeeRepository.save(employee),
-                EmployeeDto.class);
+        else {
+            employee.setImagePath(defaultImagePath);
+        }
+        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
     }
 
     @Override
     public PageableAdvancedDto<EmployeeDto> findAll(Pageable pageable) {
-        Page<EmployeeDto> page;
         return buildPageableAdvancedDto(employeeRepository.findAll(pageable));
     }
 

@@ -10,12 +10,4 @@ public interface FileService {
      * @return public image url.
      **/
     String upload(MultipartFile multipartFile);
-
-    /**
-     * Convert string to MultipartFile.
-     *
-     * @return MultipartFile.
-     **/
-    MultipartFile convertToMultipartImage(String image);
-
 }

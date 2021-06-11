@@ -1,8 +1,11 @@
 package greencity.dto;
 
-import greencity.entity.enums.EmployeePosition;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -26,7 +29,7 @@ public class AddEmployeeDto {
     @Email
     private String email;
     @NotEmpty
-    private List<EmployeePosition> employeePositions;
+    private List<PositionDto> employeePositions;
     @NotEmpty
-    private List<String> receivingStations;
+    private List<ReceivingStationDto> receivingStations;
 }

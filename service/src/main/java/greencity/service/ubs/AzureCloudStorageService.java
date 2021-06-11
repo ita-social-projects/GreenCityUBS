@@ -22,7 +22,6 @@ import java.util.UUID;
 public class AzureCloudStorageService implements FileService {
     private final String connectionString;
     private final String containerName;
-    private final ModelMapper modelMapper;
 
     /**
      * Constructor with parameters.
@@ -32,7 +31,6 @@ public class AzureCloudStorageService implements FileService {
                                     ModelMapper modelMapper) {
         this.connectionString = propertyResolver.getProperty("azure.connection.string");
         this.containerName = propertyResolver.getProperty("azure.container.name");
-        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -52,16 +50,5 @@ public class AzureCloudStorageService implements FileService {
         BlobServiceClient serviceClient = new BlobServiceClientBuilder()
                 .connectionString(connectionString).buildClient();
         return serviceClient.getBlobContainerClient(containerName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public MultipartFile convertToMultipartImage(String image) {
-        try {
-            return modelMapper.map(image, MultipartFile.class);
-        } catch (Exception e) {
-            throw new BadFileRequestException(ErrorMessage.MULTIPART_FILE_BAD_REQUEST + image);
-        }
     }
 }

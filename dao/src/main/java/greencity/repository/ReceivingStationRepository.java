@@ -10,5 +10,4 @@ import java.util.Set;
 @Repository
 public interface ReceivingStationRepository extends JpaRepository<ReceivingStation, Long> {
 
-    Set<ReceivingStation> findAllByReceivingStation(List<String> receivingStation);
 }
