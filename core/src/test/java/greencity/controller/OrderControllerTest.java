@@ -10,6 +10,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.OrderAddressDtoRequest;
 import greencity.dto.OrderResponseDto;
+import greencity.dto.UserInfoDto;
 import greencity.service.ubs.UBSClientService;
 
 import java.security.Principal;
@@ -145,6 +146,29 @@ class OrderControllerTest {
 
         this.mockMvc.perform(delete(ubsLink + "/{id}", 1L))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getOrderDetailsByOrderId() throws Exception {
+        UserInfoDto userInfoDto = UserInfoDto.builder()
+            .customerName("customer name")
+            .customerPhoneNumber("1234")
+            .customerEmail("test@gmail.com")
+            .recipientName("recipient name")
+            .customerPhoneNumber("321")
+            .customerEmail("customer@gmail.com")
+            .violationCount(2)
+            .build();
+        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L)).thenReturn(userInfoDto);
+        mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getUserAndUserUbsAndViolationsInfoByOrderId(1L);
+    }
+
+    @Test
+    void updatesRecipientsInfo() {
+
     }
 
 }

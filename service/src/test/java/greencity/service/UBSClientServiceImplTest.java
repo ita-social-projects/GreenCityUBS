@@ -7,6 +7,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.OrderBagDto;
 import greencity.dto.OrderClientDto;
 import greencity.dto.PersonalDataDto;
+import greencity.dto.UserInfoDto;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
@@ -168,5 +169,15 @@ class UBSClientServiceImplTest {
             () -> ubsService.makeOrderAgain(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
+    }
+
+    @Test
+    void getsUserAndUserUbsAndViolationsInfoByOrderId() {
+        // TODO: implement
+    }
+
+    @Test
+    void updatesRecipientsInfo() {
+        // TODO: implement
     }
 }
