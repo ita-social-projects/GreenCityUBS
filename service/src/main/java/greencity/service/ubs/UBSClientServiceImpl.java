@@ -377,10 +377,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
-        Order order = orderRepository.findById(orderId).get();
-        if (order == null) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isEmpty()) {
             throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
+        Order order = optionalOrder.get();
         return UserInfoDto.builder()
             .customerName(order.getUser().getRecipientName())
             .customerPhoneNumber(order.getUser().getRecipientPhone())
@@ -403,10 +404,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
         UBSuser ubsUser = orderRepository.findById(dtoUpdate.getId())
             .orElseThrow(
-                () -> new NotFoundOrderAddressException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId()))
+                () -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId()))
             .getUbsUser();
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
-        UBSuser user = ubsUserRepository.findById(ubsUser.getId()).get();
+
+        Optional<UBSuser> optionalUBSuser = ubsUserRepository.findById(ubsUser.getId());
+        if (optionalUBSuser.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        UBSuser user = optionalUBSuser.get();
         return UbsCustomersDto.builder()
             .name(user.getFirstName() + " " + user.getLastName())
             .email(user.getEmail())
