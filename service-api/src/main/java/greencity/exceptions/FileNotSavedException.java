@@ -6,6 +6,7 @@ public class FileNotSavedException extends RuntimeException {
      */
     public FileNotSavedException() {
     }
+
     /**
      * Constructor with message.
      *

@@ -45,25 +45,25 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * Method checks if {@link String} phoneNumber exist except current employee.
      *
      * @param phoneNumber {@link String}
-     * @param id {@link Long}
+     * @param id          {@link Long}
      * @return {@link Employee}
      * @author Mykola Danylko
      */
     @Query(nativeQuery = true, value = "SELECT * FROM employees "
-            + "WHERE phone_number = :phoneNumber "
-            + "AND id <> :id")
+        + "WHERE phone_number = :phoneNumber "
+        + "AND id <> :id")
     Employee checkIfPhoneNumberUnique(String phoneNumber, Long id);
 
     /**
      * Method checks if {@link String} email exist except current employee.
      *
      * @param email {@link String}
-     * @param id {@link Long}
+     * @param id    {@link Long}
      * @return {@link Employee}
      * @author Mykola Danylko
      */
     @Query(nativeQuery = true, value = "SELECT * FROM employees "
-            + "WHERE email = :email "
-            + "AND id <> :id")
+        + "WHERE email = :email "
+        + "AND id <> :id")
     Employee checkIfEmailUnique(String email, Long id);
 }

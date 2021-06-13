@@ -11,20 +11,16 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumber, String> {
-
     @Override
     public void initialize(ValidPhoneNumber constraintAnnotation) {
         // Initializes the validator in preparation for #isValid calls
     }
 
-    /** Method checks if phone number valid in UA region.
-     * Example of valid phone number:
-     * +380XXXXXXXXX;
-     * 380XXXXXXXXX;
-     * 0XXXXXXXXX;
-     * XXXXXXXXX.
+    /**
+     * Method checks if phone number valid in UA region. Example of valid phone
+     * numbers: +380XXXXXXXXX; 380XXXXXXXXX; 0XXXXXXXXX; XXXXXXXXX.
      *
-     * @param value {@link String} phone number.
+     * @param value   {@link String} phone number.
      * @param context {@link ConstraintValidatorContext}
      * @return {@link Boolean}
      */

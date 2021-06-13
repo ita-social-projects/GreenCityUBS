@@ -39,7 +39,7 @@ public class AzureCloudStorageService implements FileService {
     public String upload(MultipartFile multipartFile) {
         final String blob = UUID.randomUUID().toString();
         BlobClient client = containerClient()
-                .getBlobClient(blob + multipartFile.getOriginalFilename());
+            .getBlobClient(blob + multipartFile.getOriginalFilename());
         try {
             client.upload(multipartFile.getInputStream(), multipartFile.getSize());
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class AzureCloudStorageService implements FileService {
 
     private BlobContainerClient containerClient() {
         BlobServiceClient serviceClient = new BlobServiceClientBuilder()
-                .connectionString(connectionString).buildClient();
+            .connectionString(connectionString).buildClient();
         return serviceClient.getBlobContainerClient(containerName);
     }
 }

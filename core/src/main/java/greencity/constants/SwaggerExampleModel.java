@@ -2,21 +2,21 @@ package greencity.constants;
 
 public final class SwaggerExampleModel {
     private static final String BEFORE_EXAMPLE = "<div>\n"
-            + "\t<ul class=\"tab\">\n"
-            + "\t\t<li class=\"tabitem active\">\n"
-            + "\t\t\t<a class=\"tablinks\" data-name=\"example\">Example Value</a>\n"
-            + "\t\t</li>\n"
-            + "\t\t<li class=\"tabitem\">\n"
-            + "\t\t\t<a class=\"tablinks\" data-name=\"model\">Model</a>\n"
-            + "\t\t</li>\n"
-            + "\t</ul>\n"
-            + "\t<pre>\n";
+        + "\t<ul class=\"tab\">\n"
+        + "\t\t<li class=\"tabitem active\">\n"
+        + "\t\t\t<a class=\"tablinks\" data-name=\"example\">Example Value</a>\n"
+        + "\t\t</li>\n"
+        + "\t\t<li class=\"tabitem\">\n"
+        + "\t\t\t<a class=\"tablinks\" data-name=\"model\">Model</a>\n"
+        + "\t\t</li>\n"
+        + "\t</ul>\n"
+        + "\t<pre>\n";
 
     private static final String AFTER_EXAMPLE = "\t</pre>\n"
-            + "</div>";
+        + "</div>";
 
     public static final String ADD_NEW_EMPLOYEE =
-            BEFORE_EXAMPLE
+        BEFORE_EXAMPLE
             + "{\n"
             + "  \"email\": \"string\",\n"
             + "  \"employeePositions\": [ \n"

@@ -20,8 +20,8 @@ public class ReceivingStationDtoMapper extends AbstractConverter<ReceivingStatio
     @Override
     protected ReceivingStationDto convert(ReceivingStation receivingStation) {
         return ReceivingStationDto.builder()
-                .id(receivingStation.getId())
-                .receivingStation(receivingStation.getReceivingStation())
-                .build();
+            .id(receivingStation.getId())
+            .receivingStation(receivingStation.getReceivingStation())
+            .build();
     }
 }

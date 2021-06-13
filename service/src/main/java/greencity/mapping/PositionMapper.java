@@ -20,8 +20,8 @@ public class PositionMapper extends AbstractConverter<PositionDto, Position> {
     @Override
     protected Position convert(PositionDto positionDto) {
         return Position.builder()
-                .id(positionDto.getId())
-                .position(positionDto.getPosition())
-                .build();
+            .id(positionDto.getId())
+            .position(positionDto.getPosition())
+            .build();
     }
 }

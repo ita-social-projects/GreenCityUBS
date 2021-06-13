@@ -62,8 +62,8 @@ public class Employee {
 
     @ManyToMany
     @JoinTable(
-            name = "employee_receiving_station_mapping",
-            joinColumns = {@JoinColumn(name = "employee_id")},
-            inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
+        name = "employee_receiving_station_mapping",
+        joinColumns = {@JoinColumn(name = "employee_id")},
+        inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
     private Set<ReceivingStation> receivingStation;
 }

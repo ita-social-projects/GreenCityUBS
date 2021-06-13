@@ -15,14 +15,14 @@ public class PageableAdvancedDto<T> {
      */
     @JsonCreator
     public PageableAdvancedDto(@JsonProperty("page") List<T> page,
-                               @JsonProperty("totalElements") long totalElements,
-                               @JsonProperty("currentPage") int currentPage,
-                               @JsonProperty("totalPages") int totalPages,
-                               @JsonProperty("number") int number,
-                               @JsonProperty("hasPrevious") boolean hasPrevious,
-                               @JsonProperty("hasNext") boolean hasNext,
-                               @JsonProperty("first") boolean first,
-                               @JsonProperty("last") boolean last) {
+        @JsonProperty("totalElements") long totalElements,
+        @JsonProperty("currentPage") int currentPage,
+        @JsonProperty("totalPages") int totalPages,
+        @JsonProperty("number") int number,
+        @JsonProperty("hasPrevious") boolean hasPrevious,
+        @JsonProperty("hasNext") boolean hasNext,
+        @JsonProperty("first") boolean first,
+        @JsonProperty("last") boolean last) {
         this.page = page;
         this.totalElements = totalElements;
         this.currentPage = currentPage;
@@ -52,4 +52,3 @@ public class PageableAdvancedDto<T> {
 
     private boolean last;
 }
-

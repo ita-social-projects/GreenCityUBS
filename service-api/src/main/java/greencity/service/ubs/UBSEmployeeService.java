@@ -10,7 +10,7 @@ public interface UBSEmployeeService {
     /**
      * Method saves new employee.
      *
-     * @param dto {@link EmployeeDto} that contains new employee.
+     * @param dto   {@link EmployeeDto} that contains new employee.
      * @param image {@link MultipartFile} that contains employee's image.
      * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
@@ -18,10 +18,11 @@ public interface UBSEmployeeService {
     EmployeeDto save(AddEmployeeDto dto, MultipartFile image);
 
     /**
-     * Method finds all employee
+     * Method finds all employee.
      *
      * @param pageable {@link Pageable}
-     * @return pageableDto {@link PageableAdvancedDto} that contains employees from database.
+     * @return pageableDto {@link PageableAdvancedDto} that contains employees from
+     *         database.
      * @author Mykola Danylko
      */
     PageableAdvancedDto<EmployeeDto> findAll(Pageable pageable);

@@ -8,6 +8,9 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDate;
@@ -404,6 +407,59 @@ public class ModelUtils {
         return OrderBagDto.builder()
             .id(1)
             .amount(3)
+            .build();
+    }
+
+    public static AddEmployeeDto getAddEmployeeDto() {
+        return AddEmployeeDto.builder()
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static EmployeeDto getEmployeeDto() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static Employee getEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
             .build();
     }
 }

@@ -32,7 +32,7 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     /**
      * Method creates new employee.
      *
-     * @param dto {@link AddEmployeeDto} that contains new employee.
+     * @param dto   {@link AddEmployeeDto} that contains new employee.
      * @param image {@link MultipartFile} that contains employee's image.
      * @return {@link EmployeeDto}
      */
@@ -41,17 +41,16 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
         dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (employeeRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new EmployeeValidationException(
-                    ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
+                ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
         }
         if (dto.getEmail() != null && employeeRepository.existsByEmail(dto.getEmail())) {
             throw new EmployeeValidationException(
-                    ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
+                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         Employee employee = modelMapper.map(dto, Employee.class);
         if (image != null && image.getSize() < 10_000_000L) {
             employee.setImagePath(fileService.upload(image));
-        }
-        else {
+        } else {
             employee.setImagePath(defaultImagePath);
         }
         return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
@@ -75,14 +74,14 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     public EmployeeDto update(EmployeeDto dto) {
         dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (employeeRepository.existsById(dto.getId())) {
-            if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null){
-                throw  new EmployeeValidationException(
-                        ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
+            if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null) {
+                throw new EmployeeValidationException(
+                    ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
             }
             if (dto.getEmail() != null
-                    && employeeRepository.checkIfEmailUnique(dto.getEmail(), dto.getId()) != null)  {
-                throw  new EmployeeValidationException(
-                        ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
+                && employeeRepository.checkIfEmailUnique(dto.getEmail(), dto.getId()) != null) {
+                throw new EmployeeValidationException(
+                    ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
             }
             Employee employee = modelMapper.map(dto, Employee.class);
             return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
@@ -107,18 +106,18 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
 
     private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {
         List<EmployeeDto> employeeDtos = employeePage.stream()
-                .map(employee -> modelMapper.map(employee, EmployeeDto.class))
-                .collect(Collectors.toList());
+            .map(employee -> modelMapper.map(employee, EmployeeDto.class))
+            .collect(Collectors.toList());
 
         return new PageableAdvancedDto<>(
-                employeeDtos,
-                employeePage.getTotalElements(),
-                employeePage.getPageable().getPageNumber(),
-                employeePage.getTotalPages(),
-                employeePage.getNumber(),
-                employeePage.hasPrevious(),
-                employeePage.hasNext(),
-                employeePage.isFirst(),
-                employeePage.isLast());
+            employeeDtos,
+            employeePage.getTotalElements(),
+            employeePage.getPageable().getPageNumber(),
+            employeePage.getTotalPages(),
+            employeePage.getNumber(),
+            employeePage.hasPrevious(),
+            employeePage.hasNext(),
+            employeePage.isFirst(),
+            employeePage.isLast());
     }
 }

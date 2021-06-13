@@ -7,8 +7,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 /**
- * Class that used by {@link ModelMapper} to map {@link ReceivingStationDto} into
- * {@link ReceivingStation}.
+ * Class that used by {@link ModelMapper} to map {@link ReceivingStationDto}
+ * into {@link ReceivingStation}.
  */
 @Component
 public class ReceivingStationMapper extends AbstractConverter<ReceivingStationDto, ReceivingStation> {
@@ -20,8 +20,8 @@ public class ReceivingStationMapper extends AbstractConverter<ReceivingStationDt
     @Override
     protected ReceivingStation convert(ReceivingStationDto receivingStationDto) {
         return ReceivingStation.builder()
-                .id(receivingStationDto.getId())
-                .receivingStation(receivingStationDto.getReceivingStation())
-                .build();
+            .id(receivingStationDto.getId())
+            .receivingStation(receivingStationDto.getReceivingStation())
+            .build();
     }
 }

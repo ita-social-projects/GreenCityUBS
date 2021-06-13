@@ -45,7 +45,7 @@ class PhoneNumberValidationTest {
     void isValidShouldThrowEmployeeValidationException() {
         String incorrectStr = "jldjfdavn";
         Exception thrown = assertThrows(EmployeeValidationException.class,
-                () -> validation.isValid(incorrectStr, context));
+            () -> validation.isValid(incorrectStr, context));
         assertEquals(thrown.getMessage(), ErrorMessage.PHONE_NUMBER_PARSING_FAIL + incorrectStr);
     }
 }

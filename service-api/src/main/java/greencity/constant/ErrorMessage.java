@@ -35,6 +35,7 @@ public class ErrorMessage {
     public static String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
     public static String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
     public static String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
+
     /**
      * Constructor.
      */

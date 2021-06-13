@@ -3,10 +3,12 @@ package greencity;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
+
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 
 public class ModelUtils {
     public static Principal getPrincipal() {
@@ -68,6 +70,59 @@ public class ModelUtils {
             .id(1L)
             .orderStatus(OrderStatus.FORMED)
             .amount(450L)
+            .build();
+    }
+
+    public static AddEmployeeDto getAddEmployeeDto() {
+        return AddEmployeeDto.builder()
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static EmployeeDto getEmployeeDto() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static Employee getEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .position("Водій")
+                .build()))
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build()))
             .build();
     }
 }

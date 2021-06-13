@@ -249,7 +249,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({EmployeeNotFoundException.class})
     public final ResponseEntity<Object> handleEmployeeNotFoundException(EmployeeNotFoundException ex,
-                                                                             WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
@@ -265,7 +265,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({EmployeeValidationException.class})
     public final ResponseEntity<Object> handleEmployeeValidationException(EmployeeValidationException ex,
-                                                                        WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);

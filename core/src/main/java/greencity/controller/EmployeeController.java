@@ -22,7 +22,6 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/admin/ubs-employee")
 public class EmployeeController {
-
     private final UBSEmployeeService employeeService;
 
     /**
@@ -42,35 +41,36 @@ public class EmployeeController {
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddEmployeeDto.class),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddEmployeeDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PostMapping(value = "/save-employee", consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/save-employee",
+        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeDto> saveEmployee(
-            @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE, required = true) @Valid
-            @RequestPart AddEmployeeDto addEmployeeDto, @RequestPart(required = false) MultipartFile image) {
+        @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
+            required = true) @Valid @RequestPart AddEmployeeDto addEmployeeDto,
+        @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(addEmployeeDto, image));
     }
-
 
     /**
      * Controller gets all employees.
      *
-     * @return {@link PageableAdvancedDto<EmployeeDto>} pageable employees.
+     * @return {@link PageableAdvancedDto} pageable employees.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Get all employees")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/getAll-employees")
     public ResponseEntity<PageableAdvancedDto<EmployeeDto>> getAllEmployees(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(pageable));
     }
+
     /**
      * Controller updates information about employee.
      *
@@ -79,15 +79,16 @@ public class EmployeeController {
      */
     @ApiOperation(value = "Update information about employee")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-employee")
-    public ResponseEntity<EmployeeDto> update( @RequestBody @Valid EmployeeDto employeeDto) {
+    public ResponseEntity<EmployeeDto> update(@RequestBody @Valid EmployeeDto employeeDto) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeDto));
     }
+
     /**
      * Controller deletes employee.
      *
@@ -96,9 +97,9 @@ public class EmployeeController {
      */
     @ApiOperation(value = "Delete employee")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @DeleteMapping("/{id}/delete-employee")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
