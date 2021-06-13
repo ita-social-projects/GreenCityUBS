@@ -1,11 +1,8 @@
 package greencity.dto;
 
-import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
+import greencity.annotations.ValidPhoneNumber;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -25,6 +22,7 @@ public class AddEmployeeDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String lastName;
     @NotNull
+    @ValidPhoneNumber
     private String phoneNumber;
     @Email
     private String email;

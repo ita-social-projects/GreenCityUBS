@@ -27,12 +27,14 @@ public class AzureCloudStorageService implements FileService {
      * Constructor with parameters.
      */
     @Autowired
-    public AzureCloudStorageService(@Autowired PropertyResolver propertyResolver,
-                                    ModelMapper modelMapper) {
+    public AzureCloudStorageService(@Autowired PropertyResolver propertyResolver) {
         this.connectionString = propertyResolver.getProperty("azure.connection.string");
         this.containerName = propertyResolver.getProperty("azure.container.name");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String upload(MultipartFile multipartFile) {
         final String blob = UUID.randomUUID().toString();

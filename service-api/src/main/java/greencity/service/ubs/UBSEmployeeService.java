@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.dto.AddEmployeeDto;
 import greencity.dto.EmployeeDto;
 import greencity.dto.PageableAdvancedDto;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +21,7 @@ public interface UBSEmployeeService {
      * Method finds all employee
      *
      * @param pageable {@link Pageable}
-     * @return employeeDto {@link EmployeeDto} that contains employee from database.
+     * @return pageableDto {@link PageableAdvancedDto} that contains employees from database.
      * @author Mykola Danylko
      */
     PageableAdvancedDto<EmployeeDto> findAll(Pageable pageable);
@@ -37,10 +36,10 @@ public interface UBSEmployeeService {
     EmployeeDto update(EmployeeDto dto);
 
     /**
-     * Method deletes employee from database.
+     * Method deletes employee from database by id.
      *
-     * @param dto {@link EmployeeDto}
+     * @param id {@link Long}
      * @author Mykola Danylko
      */
-    void delete(EmployeeDto dto);
+    void delete(Long id);
 }

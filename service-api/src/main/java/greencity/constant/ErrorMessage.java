@@ -31,9 +31,10 @@ public class ErrorMessage {
     public static String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
     public static String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
     public static String FILE_NOT_SAVED = "File hasn't been saved";
-    public static String MULTIPART_FILE_BAD_REQUEST = "Incorrect input image string: ";
     public static String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
-
+    public static String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
+    public static String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
+    public static String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
     /**
      * Constructor.
      */

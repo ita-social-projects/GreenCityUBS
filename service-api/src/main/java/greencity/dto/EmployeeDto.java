@@ -1,6 +1,6 @@
 package greencity.dto;
 
-import greencity.entity.user.employee.Position;
+import greencity.annotations.ValidPhoneNumber;
 import lombok.*;
 
 import javax.validation.constraints.*;
@@ -22,6 +22,7 @@ public class EmployeeDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String lastName;
     @NotNull
+    @ValidPhoneNumber
     private String phoneNumber;
     @Email
     private String email;

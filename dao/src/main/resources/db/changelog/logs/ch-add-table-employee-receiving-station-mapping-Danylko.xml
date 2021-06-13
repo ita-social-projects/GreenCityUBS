@@ -11,6 +11,8 @@
                 <constraints nullable="false"/>
             </column> 
         </createTable>
+        <addPrimaryKey tableName="employee_receiving_station_mapping"
+                       columnNames="employee_id,receiving_station_id"/>
         <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
                                  baseColumnNames="employee_id"
                                  constraintName="fk_employee_receiving_station_employee_id"

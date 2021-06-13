@@ -26,7 +26,6 @@ public final class SwaggerExampleModel {
             + "    }\n"
             + "  ],\n"
             + "  \"firstName\": \"string\",\n"
-            + "  \"image\": \"string\",\n"
             + "  \"lastName\": \"string\",\n"
             + "  \"phoneNumber\": \"string\",\n"
             + "  \"receivingStations\": [\n"
