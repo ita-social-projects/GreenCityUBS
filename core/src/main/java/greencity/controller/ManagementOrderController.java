@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +115,8 @@ public class ManagementOrderController {
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
-        @RequestParam(required = false, defaultValue = "3000") Integer litres) {
+                                                             @RequestParam(required = false, defaultValue = "3000")
+                                                                 Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getClusteredCoords(radius, litres));
     }
@@ -197,7 +199,7 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser")
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale) {
+                                                        @ApiIgnore @ValidLanguage Locale locale) {
         ubsManagementService.addUserViolation(add);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -215,17 +217,20 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/getAllFieldsFromOrderTable")
-    public ResponseEntity<List<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
+    @GetMapping("/orders")
+    @ApiPageable
+    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
+        @ApiIgnore int page,
+        @ApiIgnore int size,
         @RequestParam(value = "columnName", required = false) String columnName,
         @RequestParam(value = "sortingType", required = false) String sortingType,
         SearchCriteria searchCriteria) {
         if (columnName == null || sortingType == null) {
             return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllValuesFromTable(searchCriteria));
+                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
         } else {
             return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
         }
     }
 

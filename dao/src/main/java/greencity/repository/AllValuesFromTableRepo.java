@@ -52,21 +52,38 @@ public class AllValuesFromTableRepo {
     /**
      * Method for finding elements from Order Table without employee.
      */
-    public List<Map<String, Object>> findAlL(SearchCriteria searchCriteria) {
-        if (searchCriteria.getViolationsAmount() == null | searchCriteria.getOrderDate() == null) {
+    public List<Map<String, Object>> findAlL(SearchCriteria searchCriteria, int pages, int size) {
+        int offset = pages * size;
+        if (searchCriteria.getViolationsAmount() != null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
                 .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
                     + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
                     + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
-                    + "and district like  '%" + searchCriteria.getDistrict() + "%'");
+                    + "and violations = " + searchCriteria.getViolationsAmount()
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
+        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() == null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + "and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "limit " + size + " offset " + offset
+                );
+        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
         } else {
             return jdbcTemplate
                 .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
                     + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
                     + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
-                    + " and violations = " + searchCriteria.getViolationsAmount()
-                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
-                    + "and order_date :: date = '" + searchCriteria.getOrderDate() + "'");
+                    + "and violations = " + searchCriteria.getViolationsAmount()
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'");
         }
     }
 
@@ -81,7 +98,9 @@ public class AllValuesFromTableRepo {
      * Method for finding elements from Order Table without employee with the
      * sorting possibility.
      */
-    public List<Map<String, Object>> findAllWithSorting(String column, String sortingType) {
-        return jdbcTemplate.queryForList(QUERY + " order by " + column + " " + sortingType);
+    public List<Map<String, Object>> findAllWithSorting(String column, String sortingType, int pages, int size) {
+        int offset = pages * size;
+        return jdbcTemplate
+            .queryForList(QUERY + " order by " + column + " " + sortingType + "limit " + size + " offset " + offset);
     }
 }

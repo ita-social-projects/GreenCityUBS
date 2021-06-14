@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.user.User;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +23,20 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @return optional of {@link User} - current user.
      */
     Optional<User> findUserByUuid(String uuid);
+
+    /**
+     * Method that count orders.
+     *
+     * @author Struk Nazariy
+     */
+    @Query(nativeQuery = true, value = "select count(*) from orders")
+    int orderCounter();
+
+    /**
+     * Method that count orders.
+     *
+     * @author Struk Nazariy
+     */
+    @Query(nativeQuery = true, value = "select count(*) from orders")
+    int orderCounterForSorting();
 }

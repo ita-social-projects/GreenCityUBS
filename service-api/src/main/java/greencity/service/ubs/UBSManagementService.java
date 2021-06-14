@@ -4,7 +4,9 @@ import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 
 public interface UBSManagementService {
     /**
@@ -18,7 +20,7 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance);
+                                                               int litres, double additionalDistance);
 
     /**
      * Method to group orders into clusters including summary litres.
@@ -63,8 +65,7 @@ public interface UBSManagementService {
     /**
      * Method returns all users violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     * @return {@link ViolationsInfoDto} count of Users violations with order id descriptions.
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
@@ -87,18 +88,19 @@ public interface UBSManagementService {
     void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 
     /**
-     * Method for getting all values from table .
+     * Method for getting all values from order table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria);
+    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size);
 
     /**
      * Method for getting all sorted values from table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
+    PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+                                                                   int size);
 
     /**
      * Method that read user address by order id.

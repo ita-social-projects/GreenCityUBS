@@ -124,7 +124,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -242,12 +242,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's
-     *         distant @relatives.
+     * @return list of {@link Coordinates} - start coordinates with it's distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -315,7 +314,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
+                                                          List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -409,7 +408,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria) {
+    public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
+                                                                    int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         if (searchCriteria.getPayment() == null) {
             searchCriteria.setPayment("");
@@ -423,59 +423,87 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (searchCriteria.getDistrict() == null) {
             searchCriteria.setDistrict("");
         }
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAlL(searchCriteria);
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
-            }
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+        int elements;
+        try {
+            List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAlL(searchCriteria, pages, size);
+            elements = userRepository.orderCounter();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
                 }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
             }
-            ourDtos.add(allFieldsFromTableDto);
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
         }
-        return ourDtos;
+        int totalPages = (elements / size) + 1;
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPages);
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType) {
+    public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+                                                                          int size) {
+        int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
-            }
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+        try {
+            List<Map<String, Object>> ourResult =
+                allValuesFromTableRepo.findAllWithSorting(column, sortingType, pages, size);
+            numberOfElements1 += userRepository.orderCounterForSorting();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
                 }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
             }
-            ourDtos.add(allFieldsFromTableDto);
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
         }
-        return ourDtos;
+        int totalPages = (numberOfElements1 / size) + 1;
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPages);
     }
 
     /**
