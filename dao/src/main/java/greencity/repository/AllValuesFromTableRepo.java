@@ -68,8 +68,7 @@ public class AllValuesFromTableRepo {
                     + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
                     + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
                     + "and district like  '%" + searchCriteria.getDistrict() + "%'"
-                    + "limit " + size + " offset " + offset
-                );
+                    + "limit " + size + " offset " + offset);
         } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
                 .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
