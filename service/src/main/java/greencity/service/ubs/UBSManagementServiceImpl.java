@@ -11,6 +11,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
+import greencity.filters.SearchCriteria;
 import greencity.repository.*;
 
 import java.time.LocalDate;
@@ -408,61 +409,102 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllValuesFromTable() {
+    public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
+        int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
-            }
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
-                }
-            }
-            ourDtos.add(allFieldsFromTableDto);
+        if (searchCriteria.getPayment() == null) {
+            searchCriteria.setPayment("");
         }
-        return ourDtos;
+        if (searchCriteria.getOrderStatus() == null) {
+            searchCriteria.setOrderStatus("");
+        }
+        if (searchCriteria.getReceivingStation() == null) {
+            searchCriteria.setReceivingStation("");
+        }
+        if (searchCriteria.getDistrict() == null) {
+            searchCriteria.setDistrict("");
+        }
+        int elements;
+        try {
+            List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAlL(searchCriteria, pages, size);
+            elements = userRepository.orderCounter();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
+            }
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
+        }
+        int totalPages = (elements / size) + 1;
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPages);
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType) {
+    public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+        int size) {
+        int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
-            }
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+        try {
+            List<Map<String, Object>> ourResult =
+                allValuesFromTableRepo.findAllWithSorting(column, sortingType, pages, size);
+            numberOfElements1 += userRepository.orderCounterForSorting();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
                 }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
             }
-            ourDtos.add(allFieldsFromTableDto);
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
         }
-        return ourDtos;
+        int totalPages = (numberOfElements1 / size) + 1;
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPages);
     }
 
     /**
