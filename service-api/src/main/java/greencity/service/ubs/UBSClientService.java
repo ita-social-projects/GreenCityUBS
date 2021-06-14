@@ -107,4 +107,14 @@ public interface UBSClientService {
      * @author Danylko Mykola
      */
     List<OrderBagDto> makeOrderAgain(Long orderId);
+
+    /**
+     * Method that save user for current user.
+     *
+     * @param uuid current {@link String} user`s uuid;
+     * @param dto  user`s date {@link UserProfileDto} user;
+     * @return {@link UserProfileDto} contains all information needed save user;
+     * @author Mykhailo Berezhinskiy
+     */
+    UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
 }

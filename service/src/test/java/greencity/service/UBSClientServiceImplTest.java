@@ -4,14 +4,13 @@ import greencity.ModelUtils;
 import static greencity.ModelUtils.*;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.OrderBagDto;
-import greencity.dto.OrderClientDto;
-import greencity.dto.PersonalDataDto;
+import greencity.dto.*;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.NotFoundOrderAddressException;
@@ -20,6 +19,8 @@ import greencity.repository.*;
 import greencity.service.ubs.UBSClientServiceImpl;
 
 import java.util.*;
+
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Assertions;
@@ -168,5 +169,26 @@ class UBSClientServiceImplTest {
             () -> ubsService.makeOrderAgain(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
+    }
+
+    @Test
+    void saveProfileData() {
+        User user = new User();
+        user.setId(13L);
+        String uuid = "35467585763t4sfgchjfuyetf";
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        UserProfileDto userProfileDto = new UserProfileDto();
+        AddressDto addressDto = ModelUtils.addressDto();
+        userProfileDto.setAddressDto(addressDto);
+        Address address = ModelUtils.address();
+        when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
+        when(userRepository.save(user)).thenReturn(user);
+        when(addressRepository.save(address)).thenReturn(address);
+        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        ubsService.saveProfileData(uuid, userProfileDto);
+        assertNotNull(userProfileDto.getAddressDto());
+        assertNotNull(userProfileDto);
+        assertNotNull(address);
     }
 }
