@@ -4,9 +4,7 @@ import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import java.util.List;
 import java.util.Set;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 
 public interface UBSManagementService {
     /**
