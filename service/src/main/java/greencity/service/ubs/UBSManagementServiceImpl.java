@@ -455,12 +455,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } catch (NullPointerException nullPointerException) {
             throw new NullPointerException();
         }
-        int totalPages = (elements / size) + 1;
+        int totalPages = (elements / size);
+        int totalPagesWithCheck = (elements % size) == 0 ? totalPages : totalPages + 1;
+
         return new PageableDto<>(
             ourDtos,
             size,
             pages,
-            totalPages);
+            totalPagesWithCheck);
     }
 
     @Override
@@ -499,12 +501,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } catch (NullPointerException nullPointerException) {
             throw new NullPointerException();
         }
-        int totalPages = (numberOfElements1 / size) + 1;
+        int totalPages = (numberOfElements1 / size);
+        int totalPagesLast = (numberOfElements1 % size) == 0 ? totalPages : totalPages + 1;
+
         return new PageableDto<>(
             ourDtos,
             size,
             pages,
-            totalPages);
+            totalPagesLast);
     }
 
     /**
