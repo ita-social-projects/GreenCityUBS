@@ -6,6 +6,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.EmployeeValidationException;
+import greencity.exceptions.PhoneNumberParseException;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -31,7 +32,7 @@ public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumb
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(value, "UA");
             return phoneUtil.isValidNumber(phoneNumber);
         } catch (NumberParseException e) {
-            throw new EmployeeValidationException(ErrorMessage.PHONE_NUMBER_PARSING_FAIL + value);
+            throw new PhoneNumberParseException(ErrorMessage.PHONE_NUMBER_PARSING_FAIL + value);
         }
     }
 }

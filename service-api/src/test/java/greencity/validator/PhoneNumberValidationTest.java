@@ -3,6 +3,7 @@ package greencity.validator;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.EmployeeValidationException;
 import greencity.exceptions.OrderNotFoundException;
+import greencity.exceptions.PhoneNumberParseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ class PhoneNumberValidationTest {
         String internationalFormatWithoutPlus = "380998754569";
         String nationalFormat = "0678754569";
         String nationalFormatWithoutZero = "938754569";
+
         String incorrectFormat1 = "0114860406";
         String incorrectFormat2 = "4860406";
         String incorrectFormat3 = "067875Dhgjh4569";
@@ -44,7 +46,7 @@ class PhoneNumberValidationTest {
     @Test
     void isValidShouldThrowEmployeeValidationException() {
         String incorrectStr = "jldjfdavn";
-        Exception thrown = assertThrows(EmployeeValidationException.class,
+        Exception thrown = assertThrows(PhoneNumberParseException.class,
             () -> validation.isValid(incorrectStr, context));
         assertEquals(thrown.getMessage(), ErrorMessage.PHONE_NUMBER_PARSING_FAIL + incorrectStr);
     }
