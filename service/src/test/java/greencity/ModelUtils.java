@@ -462,7 +462,7 @@ public class ModelUtils {
                 .receivingStation("Петрівка")
                 .build()));
     }
-    
+
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("Alan Wayn")
