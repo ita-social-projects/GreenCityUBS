@@ -11,6 +11,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.NotFoundOrderAddressException;
@@ -143,14 +144,14 @@ class UBSClientServiceImplTest {
     @Test
     void makeOrderAgain() {
         List<OrderBagDto> dto = Collections.singletonList(getOrderBagDto());
-        when(entityManager.find(Order.class, 1L)).thenReturn(getOrderDoneByUser());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDoneByUser()));
         when(modelMapper.map(any(Order.class), eq(new TypeToken<List<OrderBagDto>>() {
         }.getType()))).thenReturn(dto);
 
         List<OrderBagDto> result = ubsService.makeOrderAgain(1L);
 
         assertEquals(dto, result);
-        verify(entityManager, times(1)).find(Order.class, 1L);
+        verify(orderRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -164,7 +165,7 @@ class UBSClientServiceImplTest {
     void makeOrderAgainShouldThrowBadOrderStatusException() {
         Order order = getOrderDoneByUser();
         order.setOrderStatus(OrderStatus.CANCELLED);
-        when(entityManager.find(Order.class, 1L)).thenReturn(order);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
             () -> ubsService.makeOrderAgain(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST

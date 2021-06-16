@@ -61,8 +61,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
-    @PersistenceContext
-    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
@@ -340,6 +338,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
             order.setOrderStatus(OrderStatus.CANCELLED);
+            order.setCertificates(Collections.emptySet());
+            order.setPointsToUse(0);
+            order.setAmountOfBagsOrdered(Collections.emptyMap());
+            order.getPayment().setAmount(0L);
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
@@ -353,23 +355,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public List<OrderBagDto> makeOrderAgain(Long orderId) {
-        Order order = entityManager.find(Order.class, orderId);
-        if (order == null) {
-            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            Hibernate.initialize(order.getAmountOfBagsOrdered());
-            final Map<Integer, Integer> amountOfBagsClone =
-                new HashMap<>(order.getAmountOfBagsOrdered());
-            entityManager.detach(order);
-            order.setPayment(null);
-            order.setId(null);
-            order.setAmountOfBagsOrdered(amountOfBagsClone);
-            order.setOrderDate(LocalDateTime.now());
-            order.setOrderStatus(OrderStatus.FORMED);
-            entityManager.persist(order);
             return modelMapper.map(order,
                 new TypeToken<List<OrderBagDto>>() {
                 }.getType());
