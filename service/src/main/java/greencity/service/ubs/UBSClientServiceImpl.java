@@ -110,11 +110,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public List<PersonalDataDto> getSecondPageData(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
 
@@ -145,16 +141,19 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
-            throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
-        }
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
         } else {
             sumToPay -= dto.getPointsToUse();
         }
+
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
@@ -165,15 +164,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
-        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
-            throw new NotFoundOrderAddressException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
-        }
+        checkIfAddressHasBeenDeleted(address);
 
-        if (!address.getUser().equals(currentUser)) {
-            throw new NotFoundOrderAddressException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
-        }
+        checkAddressUser(address, currentUser);
         address.setAddressStatus(AddressStatus.IN_ORDER);
 
         userData.setAddress(address);
@@ -196,22 +189,38 @@ public class UBSClientServiceImpl implements UBSClientService {
         return links.attr("href");
     }
 
+    private void checkIfAddressHasBeenDeleted(Address address) {
+        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
+    }
+
+    private void checkAddressUser(Address address, User user) {
+        if (!address.getUser().equals(user)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
+    }
+
+    private void checkIfUserHaveEnoughPoints(Integer i1, Integer i2) {
+        if (i1 < i2) {
+            throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         Long id = userRepository.findByUuid(uuid).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
-            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER)
+            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER || u.getActual() != false)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -222,11 +231,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
             addresses.forEach(u -> {
@@ -558,5 +563,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setRecipientPhone(userProfileDto.getRecipientPhone());
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
+    }
+
+    private void createUserByUuidIfUserDoesNotExist(String uuid) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
     }
 }
