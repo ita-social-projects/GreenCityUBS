@@ -4,13 +4,10 @@ import greencity.dto.EmployeeDto;
 import greencity.dto.PositionDto;
 import greencity.dto.ReceivingStationDto;
 import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 /**
