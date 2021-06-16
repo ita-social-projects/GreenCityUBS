@@ -2,19 +2,6 @@ package greencity.service.ubs;
 
 import greencity.client.RestClient;
 
-import static greencity.constant.ErrorMessage.AMOUNT_OF_POINTS_BIGGER_THAN_SUM;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.MINIMAL_SUM_VIOLATION;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.SUM_IS_COVERED_BY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
@@ -45,6 +32,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import static greencity.constant.ErrorMessage.*;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -378,6 +367,67 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    /**
+     * Method returns info about user, ubsUser and user violations by order orderId.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link UserInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    @Transactional
+    public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        Order order = optionalOrder.get();
+        return UserInfoDto.builder()
+            .customerName(order.getUser().getRecipientName())
+            .customerPhoneNumber(order.getUser().getRecipientPhone())
+            .customerEmail(order.getUser().getRecipientEmail())
+            .violationCount(userRepository.countUsersViolations(order.getUser().getId()))
+            .recipientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
+            .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
+            .recipientEmail(order.getUbsUser().getEmail())
+            .build();
+    }
+
+    /**
+     * Method updates ubs_user information order in order.
+     *
+     * @param dtoUpdate of {@link UbsCustomersDtoUpdate} ubs_user_id;
+     * @return {@link UbsCustomersDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
+        UBSuser ubsUser = orderRepository.findById(dtoUpdate.getId())
+            .orElseThrow(
+                () -> new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId()))
+            .getUbsUser();
+        ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
+
+        Optional<UBSuser> optionalUBSuser = ubsUserRepository.findById(ubsUser.getId());
+        if (optionalUBSuser.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        UBSuser user = optionalUBSuser.get();
+        return UbsCustomersDto.builder()
+            .name(user.getFirstName() + " " + user.getLastName())
+            .email(user.getEmail())
+            .phoneNumber(user.getPhoneNumber())
+            .build();
+    }
+
+    private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
+        ubSuser.setFirstName(dto.getRecipientName().split(" ")[0]);
+        ubSuser.setLastName(dto.getRecipientName().split(" ")[1]);
+        ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
+        ubSuser.setEmail(dto.getRecipientEmail());
+        return ubSuser;
+    }
+
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
         Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
         User currentUser, int sumToPay) {
@@ -492,5 +542,35 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        User user = userRepository.findByUuid(uuid);
+        setUserDate(user, userProfileDto);
+        AddressDto addressDto = userProfileDto.getAddressDto();
+        Address address = modelMapper.map(addressDto, Address.class);
+        address.setUser(user);
+        Address savedAddress = addressRepo.save(address);
+        User savedUser = userRepository.save(user);
+        AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
+        UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
+        mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        return mappedUserProfileDto;
+    }
+
+    private User setUserDate(User user, UserProfileDto userProfileDto) {
+        user.setRecipientName(userProfileDto.getRecipientName());
+        user.setRecipientPhone(userProfileDto.getRecipientPhone());
+        user.setRecipientEmail(userProfileDto.getRecipientEmail());
+        return user;
     }
 }

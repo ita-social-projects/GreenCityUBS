@@ -65,6 +65,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
+
     public static OrderClientDto getOrderClientDto() {
         return OrderClientDto.builder()
             .id(1L)
@@ -123,6 +132,33 @@ public class ModelUtils {
                 .id(1L)
                 .receivingStation("Петрівка")
                 .build()))
+
+    public static UserInfoDto getUserInfoDto() {
+        return UserInfoDto.builder()
+            .customerName("customer name")
+            .customerPhoneNumber("1234")
+            .customerEmail("test@gmail.com")
+            .recipientName("recipient name")
+            .customerPhoneNumber("321")
+            .customerEmail("customer@gmail.com")
+            .violationCount(2)
+            .build();
+    }
+
+    public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
+        return UbsCustomersDtoUpdate.builder()
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientPhoneNumber("095123456")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .build();
+    }
+
+    public static UbsCustomersDto getUbsCustomersDto() {
+        return UbsCustomersDto.builder()
+            .name("Ivan Lipa")
+            .email("lipa@gmail.com")
+            .phoneNumber("096765432")
             .build();
     }
 }
