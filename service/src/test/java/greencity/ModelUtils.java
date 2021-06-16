@@ -13,6 +13,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -459,7 +460,79 @@ public class ModelUtils {
             .receivingStation(Set.of(ReceivingStation.builder()
                 .id(1L)
                 .receivingStation("Петрівка")
-                .build()))
+                .build()));
+    }
+    
+    public static UserInfoDto getUserInfoDto() {
+        return UserInfoDto.builder()
+            .customerName("Alan Wayn")
+            .customerPhoneNumber("091546745")
+            .customerEmail("wayn@email.com")
+            .violationCount(0)
+            .recipientName("Anatolii Petyrov")
+            .recipientPhoneNumber("095123456")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .build();
+    }
+
+    public static Order getOrderDetails() {
+        return Order.builder()
+            .user(User.builder()
+                .recipientName("Alan Wayn")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(0).build())
+            .ubsUser(UBSuser.builder()
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
+                .build())
+            .build();
+    }
+
+    public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
+        return UbsCustomersDtoUpdate.builder()
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
+    }
+
+    public static AddressDto addressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("0666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
+
+    public static Address address() {
+        return Address.builder()
+            .id(addressDto().getId())
+            .city(addressDto().getCity())
+            .district(addressDto().getDistrict())
+            .street(addressDto().getStreet())
+            .coordinates(addressDto().getCoordinates())
+            .entranceNumber(addressDto().getEntranceNumber())
+            .houseNumber(addressDto().getHouseNumber())
+            .houseCorpus(addressDto().getHouseCorpus())
+            .actual(addressDto().getActual())
             .build();
     }
 }
