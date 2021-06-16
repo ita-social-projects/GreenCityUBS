@@ -3,6 +3,7 @@ package greencity;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,6 +61,15 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
+            .build();
+    }
+
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("666051373")
+            .recipientEmail("petrov@gmail.com")
             .build();
     }
 

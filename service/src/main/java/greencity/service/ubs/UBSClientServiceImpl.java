@@ -543,4 +543,34 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
+        User user = userRepository.findByUuid(uuid);
+        setUserDate(user, userProfileDto);
+        AddressDto addressDto = userProfileDto.getAddressDto();
+        Address address = modelMapper.map(addressDto, Address.class);
+        address.setUser(user);
+        Address savedAddress = addressRepo.save(address);
+        User savedUser = userRepository.save(user);
+        AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
+        UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
+        mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        return mappedUserProfileDto;
+    }
+
+    private User setUserDate(User user, UserProfileDto userProfileDto) {
+        user.setRecipientName(userProfileDto.getRecipientName());
+        user.setRecipientPhone(userProfileDto.getRecipientPhone());
+        user.setRecipientEmail(userProfileDto.getRecipientEmail());
+        return user;
+    }
 }

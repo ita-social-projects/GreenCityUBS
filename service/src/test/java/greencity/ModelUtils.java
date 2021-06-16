@@ -438,10 +438,46 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1l)
-            .recipientName("Anatolii Petyrov")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456")
+                .id(1l)
+                .recipientName("Anatolii Petyrov")
+                .recipientEmail("anatolii.andr@gmail.com")
+                .recipientPhoneNumber("095123456").build();
+    }
+
+    public static AddressDto addressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("0666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
+
+    public static Address address() {
+        return Address.builder()
+            .id(addressDto().getId())
+            .city(addressDto().getCity())
+            .district(addressDto().getDistrict())
+            .street(addressDto().getStreet())
+            .coordinates(addressDto().getCoordinates())
+            .entranceNumber(addressDto().getEntranceNumber())
+            .houseNumber(addressDto().getHouseNumber())
+            .houseCorpus(addressDto().getHouseCorpus())
+            .actual(addressDto().getActual())
             .build();
     }
 }
