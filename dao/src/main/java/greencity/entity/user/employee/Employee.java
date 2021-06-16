@@ -13,11 +13,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +21,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @Entity
+@EqualsAndHashCode
 @Table(name = "employees")
 public class Employee {
     @Id
