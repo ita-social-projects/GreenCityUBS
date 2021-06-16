@@ -3,14 +3,11 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 
-import static greencity.ModelUtils.getPrincipal;
-
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.OrderAddressDtoRequest;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.UserInfoDto;
+import greencity.dto.*;
+import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSClientService;
 
 import java.security.Principal;
@@ -19,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 
 import org.mockito.InjectMocks;
@@ -150,15 +148,7 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetailsByOrderId() throws Exception {
-        UserInfoDto userInfoDto = UserInfoDto.builder()
-            .customerName("customer name")
-            .customerPhoneNumber("1234")
-            .customerEmail("test@gmail.com")
-            .recipientName("recipient name")
-            .customerPhoneNumber("321")
-            .customerEmail("customer@gmail.com")
-            .violationCount(2)
-            .build();
+        UserInfoDto userInfoDto = getUserInfoDto();
         when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L)).thenReturn(userInfoDto);
         mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L))
             .andExpect(status().isOk());
@@ -167,8 +157,16 @@ class OrderControllerTest {
     }
 
     @Test
-    void updatesRecipientsInfo() {
+    void updatesRecipientsInfo() throws Exception {
+        UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
+        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate)).thenReturn(ubsCustomersDto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(put(ubsLink + "/update-recipients-data")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate)))
+            .andExpect(status().isOk());
 
+        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
     }
-
 }

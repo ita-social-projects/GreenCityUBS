@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@EqualsAndHashCode
 public class UserInfoDto {
     private String customerName;
     private String customerPhoneNumber;

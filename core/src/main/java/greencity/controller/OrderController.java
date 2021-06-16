@@ -231,7 +231,7 @@ public class OrderController {
      */
     @ApiOperation(value = "Update recipient information in order")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UbsCustomersDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UbsCustomersDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
@@ -239,7 +239,7 @@ public class OrderController {
     @PutMapping("/update-recipients-data")
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
         @Valid @RequestBody UbsCustomersDtoUpdate dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateUbsUserInfoInOrder(dto));
     }
 }
