@@ -1,11 +1,8 @@
 package greencity.entity.user.employee;
 
-import greencity.entity.enums.EmployeePosition;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,9 +26,8 @@ public class Position {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private EmployeePosition position;
+    private String position;
 
     @ManyToMany(mappedBy = "employeePosition")
     private Set<Employee> employees;
