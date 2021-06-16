@@ -438,10 +438,10 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-                .id(1l)
-                .recipientName("Anatolii Petyrov")
-                .recipientEmail("anatolii.andr@gmail.com")
-                .recipientPhoneNumber("095123456").build();
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
     }
 
     public static AddressDto addressDto() {

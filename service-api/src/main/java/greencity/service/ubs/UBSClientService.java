@@ -125,6 +125,7 @@ public interface UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate);
+
     /**
      * Method that save user for current user.
      *

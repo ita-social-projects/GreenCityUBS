@@ -198,9 +198,9 @@ class UBSClientServiceImplTest {
     void updatesRecipientsInfoThrowUBSuserNotFoundException() {
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = ModelUtils.getUbsCustomersDtoUpdate();
         when(orderRepository.findById(ubsCustomersDtoUpdate.getId()))
-                .thenThrow(UBSuserNotFoundException.class);
+            .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
-                () -> ubsService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate));
+            () -> ubsService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate));
     }
 
     @Test
