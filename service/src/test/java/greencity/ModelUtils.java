@@ -460,7 +460,8 @@ public class ModelUtils {
             .receivingStation(Set.of(ReceivingStation.builder()
                 .id(1L)
                 .receivingStation("Петрівка")
-                .build()));
+                .build()))
+            .build();
     }
 
     public static UserInfoDto getUserInfoDto() {
@@ -493,7 +494,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .id(1L)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();

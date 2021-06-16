@@ -132,6 +132,8 @@ public class ModelUtils {
                 .id(1L)
                 .receivingStation("Петрівка")
                 .build()))
+            .build();
+    }
 
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()

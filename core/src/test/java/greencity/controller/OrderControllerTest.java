@@ -7,7 +7,6 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
-import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSClientService;
 
 import java.security.Principal;
