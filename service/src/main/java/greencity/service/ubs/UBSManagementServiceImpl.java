@@ -512,13 +512,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language) {
         OrderDetailDto dto = new OrderDetailDto();
 
-        for (int i = 0; i < request.size(); i++) {
-            updateOrderRepository.updateAmount(request.get(i).getAmount(), request.get(i).getOrderId(),
-                request.get(i).getBagId().longValue());
-            updateOrderRepository.updateExporter(request.get(i).getExportedQuantity(), request.get(i).getOrderId(),
-                request.get(i).getBagId().longValue());
-            updateOrderRepository.updateConfirm(request.get(i).getConfirmedQuantity(), request.get(i).getOrderId(),
-                request.get(i).getBagId().longValue());
+        for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
         }
 
         Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
