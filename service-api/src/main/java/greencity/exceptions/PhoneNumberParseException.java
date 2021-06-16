@@ -1,7 +1,7 @@
 package greencity.exceptions;
 
 /**
- * Exception is thrown when the parsing of a phone number has failed
+ * Exception is thrown when the parsing of a phone number has failed.
  */
 public class PhoneNumberParseException extends RuntimeException {
     /**
