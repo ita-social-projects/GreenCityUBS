@@ -9,5 +9,4 @@ import java.util.Set;
 
 @Repository
 public interface ReceivingStationRepository extends JpaRepository<ReceivingStation, Long> {
-
 }
