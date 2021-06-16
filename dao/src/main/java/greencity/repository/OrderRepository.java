@@ -59,8 +59,8 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         + "WHERE O.ID = :OrderId "
         + "ORDER BY BAG_ID", nativeQuery = true)
     Optional<Order> getOrderDetails(@Param(value = "OrderId") Long id);
-  
-     /**
+
+    /**
      * Method return {@link List} of {@link Order} done by {@link User}.
      *
      * @return a {@link List} of {@link Order}
