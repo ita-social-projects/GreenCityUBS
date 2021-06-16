@@ -10,6 +10,7 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -405,6 +406,42 @@ public class ModelUtils {
             .id(1)
             .amount(3)
             .build();
+    }
+
+    public static UserInfoDto getUserInfoDto() {
+        return UserInfoDto.builder()
+            .customerName("Alan Wayn")
+            .customerPhoneNumber("091546745")
+            .customerEmail("wayn@email.com")
+            .violationCount(0)
+            .recipientName("Anatolii Petyrov")
+            .recipientPhoneNumber("095123456")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .build();
+    }
+
+    public static Order getOrderDetails() {
+        return Order.builder()
+            .user(User.builder()
+                .recipientName("Alan Wayn")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(0).build())
+            .ubsUser(UBSuser.builder()
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
+                .build())
+            .build();
+    }
+
+    public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
+        return UbsCustomersDtoUpdate.builder()
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
     }
 
     public static AddressDto addressDto() {

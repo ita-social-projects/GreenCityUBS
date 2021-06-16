@@ -109,6 +109,24 @@ public interface UBSClientService {
     List<OrderBagDto> makeOrderAgain(Long orderId);
 
     /**
+     * Method returns info about user, ubsUser and user violations by order orderId.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link UserInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId);
+
+    /**
+     * Method updates ubs_user information order in order.
+     *
+     * @param dtoUpdate of {@link UbsCustomersDtoUpdate} ubs_user_id;
+     * @return {@link UbsCustomersDto};
+     * @author Rusanovscaia Nadejda
+     */
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate);
+
+    /**
      * Method that save user for current user.
      *
      * @param uuid current {@link String} user`s uuid;

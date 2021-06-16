@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.user.User;
 import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,15 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @return optional of {@link User} - current user.
      */
     Optional<User> findUserByUuid(String uuid);
+
+    /**
+     * Method returns violations by user id.
+     *
+     * @param userId {@link Integer} - id to connect 2 db.
+     * @return number of {@link User} violations.
+     */
+    @Query(nativeQuery = true, value = "SELECT violations FROM users as v where id = :userId")
+    int countUsersViolations(Long userId);
 
     /**
      * Method that count orders.
