@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Mahdziak" author="Orest Mahdziak">
+        <addColumn tableName="order_bag_mapping">
+            <column name="exported_quantity" type="Integer"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="Mahdziak-1" author="Orest Mahdziak">
+        <addColumn tableName="order_bag_mapping">
+            <column name="confirmed_quantity" type="Integer"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
