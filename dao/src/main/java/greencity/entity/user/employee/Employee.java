@@ -11,11 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +20,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @Entity
+@EqualsAndHashCode
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -34,6 +32,15 @@ public class Employee {
 
     @Column(length = 30, nullable = false)
     private String lastName;
+
+    @Column(length = 30, nullable = false, unique = true)
+    private String phoneNumber;
+
+    @Column(length = 170, unique = true)
+    private String email;
+
+    @Column
+    private String imagePath;
 
     @ManyToMany
     @JoinTable(
@@ -48,4 +55,11 @@ public class Employee {
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "order_id")})
     private Set<Order> attachedOrders;
+
+    @ManyToMany
+    @JoinTable(
+        name = "employee_receiving_station_mapping",
+        joinColumns = {@JoinColumn(name = "employee_id")},
+        inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
+    private Set<ReceivingStation> receivingStation;
 }
