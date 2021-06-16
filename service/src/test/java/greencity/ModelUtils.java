@@ -460,8 +460,9 @@ public class ModelUtils {
             .receivingStation(Set.of(ReceivingStation.builder()
                 .id(1L)
                 .receivingStation("Петрівка")
-                .build()))
-
+                .build()));
+    }
+    
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("Alan Wayn")
