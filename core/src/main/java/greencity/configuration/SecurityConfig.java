@@ -99,9 +99,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.PUT,
                 ADMIN_LINK + "/**")
             .hasAnyRole("ADMIN", "MODERATOR")
-                .antMatchers(HttpMethod.DELETE,
-                        ADMIN_LINK + "/**")
-                .hasAnyRole("ADMIN", "MODERATOR");
+            .antMatchers(HttpMethod.DELETE,
+                ADMIN_LINK + "/**")
+            .hasAnyRole("ADMIN", "MODERATOR");
     }
 
     /**
