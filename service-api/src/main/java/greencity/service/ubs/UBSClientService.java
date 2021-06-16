@@ -79,4 +79,60 @@ public interface UBSClientService {
      * @author Veremchuk Zakhar
      */
     OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid);
+
+    /**
+     * Method returns list of all orders done by user.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link OrderClientDto} that contains client's orders.
+     * @author Danylko Mykola
+     */
+    List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
+
+    /**
+     * Method cancels order with status FORMED.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    OrderClientDto cancelFormedOrder(Long orderId);
+
+    /**
+     * Method creates the same order again if order's status is ON_THE_ROUTE,
+     * CONFIRMED or DONE.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link OrderClientDto} that contains client's order;
+     * @author Danylko Mykola
+     */
+    List<OrderBagDto> makeOrderAgain(Long orderId);
+
+    /**
+     * Method returns info about user, ubsUser and user violations by order orderId.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link UserInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId);
+
+    /**
+     * Method updates ubs_user information order in order.
+     *
+     * @param dtoUpdate of {@link UbsCustomersDtoUpdate} ubs_user_id;
+     * @return {@link UbsCustomersDto};
+     * @author Rusanovscaia Nadejda
+     */
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate);
+
+    /**
+     * Method that save user for current user.
+     *
+     * @param uuid current {@link String} user`s uuid;
+     * @param dto  user`s date {@link UserProfileDto} user;
+     * @return {@link UserProfileDto} contains all information needed save user;
+     * @author Mykhailo Berezhinskiy
+     */
+    UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
 }

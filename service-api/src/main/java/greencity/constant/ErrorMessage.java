@@ -25,10 +25,17 @@ public class ErrorMessage {
     public static String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
         "The user already has connected to Viber bot.";
     public static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
-    public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does mot exist.";
-    public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does mot exist.";
+    public static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
+    public static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist.";
+    public static String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
+    public static String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
+    public static String FILE_NOT_SAVED = "File hasn't been saved";
+    public static String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
+    public static String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
+    public static String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
+    public static String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
 
     /**
      * Constructor.

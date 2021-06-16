@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
@@ -58,4 +59,15 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         + "WHERE O.ID = :OrderId "
         + "ORDER BY BAG_ID", nativeQuery = true)
     Optional<Order> getOrderDetails(@Param(value = "OrderId") Long id);
+  
+     /**
+     * Method return {@link List} of {@link Order} done by {@link User}.
+     *
+     * @return a {@link List} of {@link Order}
+     */
+    @Query(nativeQuery = true, value = "SELECT * FROM orders "
+        + "INNER JOIN ubs_user ON orders.ubs_user_id = ubs_user.id "
+        + "INNER JOIN users ON ubs_user.users_id = users.id "
+        + "WHERE users.uuid = :uuid")
+    List<Order> getAllOrdersOfUser(@Param(value = "uuid") String uuid);
 }
