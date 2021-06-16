@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.Order;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -45,4 +46,16 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         value = "SELECT * FROM orders o INNER JOIN  ubs_user u ON o.ubs_user_id = u.id "
             + "WHERE o.order_status LIKE 'ON_THE_ROUTE'")
     List<Order> getAllUsersInWhichTheRouteIsDefined();
+
+    /**
+     * Method returns {@link Optional Order}.
+     *
+     * @return list of {@link Order}.
+     */
+    @Query(value = "SELECT * FROM ORDERS AS O "
+        + "JOIN ORDER_BAG_MAPPING AS OBM "
+        + "ON O.ID = OBM.ORDER_ID "
+        + "WHERE O.ID = :OrderId "
+        + "ORDER BY BAG_ID", nativeQuery = true)
+    Optional<Order> getOrderDetails(@Param(value = "OrderId") Long id);
 }
