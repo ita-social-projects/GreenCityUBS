@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.user.employee.Employee;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UBSEmployeeServiceImpl implements UBSEmployeeService {
+public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final FileService fileService;
     private final ModelMapper modelMapper;
@@ -31,11 +30,7 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     private String defaultImagePath;
 
     /**
-     * Method creates new employee.
-     *
-     * @param dto   {@link AddEmployeeDto} that contains new employee.
-     * @param image {@link MultipartFile} that contains employee's image.
-     * @return {@link EmployeeDto}
+     * {@inheritDoc}
      */
     @Override
     public EmployeeDto save(AddEmployeeDto dto, MultipartFile image) {
@@ -66,10 +61,7 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     }
 
     /**
-     * Method updates information about employee.
-     *
-     * @param dto {@link EmployeeDto}
-     * @return {@link EmployeeDto}
+     * {@inheritDoc}
      */
     @Override
     public EmployeeDto update(EmployeeDto dto) {
@@ -91,18 +83,80 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     }
 
     /**
-     * Method deletes employee from database.
-     *
-     * @param id {@link Long} employee's id.
+     * {@inheritDoc}
      */
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void deleteEmployee(Long id) {
         if (employeeRepository.existsById(id)) {
             employeeRepository.deleteById(id);
         } else {
             throw new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PositionDto create(AddingPositionDto dto) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PositionDto update(PositionDto dto) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<PositionDto> getAllPositions() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deletePosition(Long id) {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReceivingStationDto create(AddingReceivingStationDto dto) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReceivingStationDto update(ReceivingStationDto dto) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ReceivingStationDto> getAllReceivingStation() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteReceivingStation(Long id) {
+
     }
 
     private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {

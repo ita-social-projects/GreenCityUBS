@@ -10,7 +10,7 @@ import greencity.exceptions.EmployeeNotFoundException;
 import greencity.exceptions.EmployeeValidationException;
 import greencity.repository.EmployeeRepository;
 import greencity.service.ubs.FileService;
-import greencity.service.ubs.UBSEmployeeServiceImpl;
+import greencity.service.ubs.UBSManagementEmployeeServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UBSEmployeeServiceImplTest {
+class UBSManagementEmployeeServiceImplTest {
     @Mock
     private EmployeeRepository repository;
     @Mock
@@ -37,7 +37,7 @@ class UBSEmployeeServiceImplTest {
     @Mock
     private PhoneNumberFormatterService phoneFormatter;
     @InjectMocks
-    private UBSEmployeeServiceImpl employeeService;
+    private UBSManagementEmployeeServiceImpl employeeService;
 
     @Test
     void save() {
@@ -121,12 +121,12 @@ class UBSEmployeeServiceImplTest {
         when(repository.existsById(anyLong())).thenReturn(true, false);
         doNothing().when(repository).deleteById(1L);
 
-        employeeService.delete(1L);
+        employeeService.deleteEmployee(1L);
 
         verify(repository, times(1)).deleteById(1L);
 
         Exception thrown = assertThrows(EmployeeNotFoundException.class,
-            () -> employeeService.delete(1L));
+            () -> employeeService.deleteEmployee(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 1L);
     }
 }

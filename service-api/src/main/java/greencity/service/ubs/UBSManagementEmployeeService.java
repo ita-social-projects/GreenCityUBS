@@ -1,12 +1,12 @@
 package greencity.service.ubs;
 
-import greencity.dto.AddEmployeeDto;
-import greencity.dto.EmployeeDto;
-import greencity.dto.PageableAdvancedDto;
+import greencity.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface UBSEmployeeService {
+import java.util.List;
+
+public interface UBSManagementEmployeeService {
     /**
      * Method saves new employee.
      *
@@ -42,5 +42,63 @@ public interface UBSEmployeeService {
      * @param id {@link Long}
      * @author Mykola Danylko
      */
-    void delete(Long id);
+    void deleteEmployee(Long id);
+
+    /**
+     * Method creates new employee position.
+     *
+     * @param dto {@link AddingPositionDto}
+     * @return {@link PositionDto}
+     */
+    PositionDto create(AddingPositionDto dto);
+
+    /**
+     * Method updates information about position.
+     *
+     * @param dto {@link PositionDto}
+     * @return {@link PositionDto}
+     */
+    PositionDto update(PositionDto dto);
+
+    /**
+     * Method gets all positions.
+     *
+     * @return {@link PositionDto}
+     */
+    List<PositionDto> getAllPositions();
+
+    /**
+     * Method deletes position by id.
+     *
+     * @param id {@link Long} position's id.
+     */
+    void deletePosition(Long id);
+
+    /**
+     * Method creates new receiving station.
+     *
+     * @param dto {@link AddingReceivingStationDto}
+     * @return {@link ReceivingStationDto}
+     */
+    ReceivingStationDto create(AddingReceivingStationDto dto);
+
+    /**
+     * Method updates information about receiving station.
+     *
+     * @param dto {@link ReceivingStationDto}
+     * @return {@link ReceivingStationDto}
+     */
+    ReceivingStationDto update(ReceivingStationDto dto);
+
+    /**
+     * Method gets all receiving stations.
+     * @return {@link ReceivingStationDto}
+     */
+    List<ReceivingStationDto> getAllReceivingStation();
+
+    /**
+     * Method deletes receiving station by id.
+     * @param id {@link Long} receiving station's id
+     */
+    void deleteReceivingStation(Long id);
 }

@@ -3,7 +3,7 @@ package greencity.controller;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.*;
-import greencity.service.ubs.UBSEmployeeService;
+import greencity.service.ubs.UBSManagementEmployeeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -21,14 +21,14 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/admin/ubs-employee")
-public class EmployeeController {
-    private final UBSEmployeeService employeeService;
+public class ManagementEmployeeController {
+    private final UBSManagementEmployeeService employeeService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public EmployeeController(UBSEmployeeService employeeService) {
+    public ManagementEmployeeController(UBSManagementEmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
@@ -103,7 +103,7 @@ public class EmployeeController {
     })
     @DeleteMapping("/{id}/delete-employee")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
-        employeeService.delete(id);
+        employeeService.deleteEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

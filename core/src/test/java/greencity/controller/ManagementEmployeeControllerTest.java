@@ -6,7 +6,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddEmployeeDto;
 import greencity.dto.EmployeeDto;
-import greencity.service.ubs.UBSEmployeeService;
+import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-class EmployeeControllerTest {
+class ManagementEmployeeControllerTest {
     private final String UBS_LINK = "/admin/ubs-employee";
     private final String SAVE_LINK = "/save-employee";
     private final String UPDATE_LINK = "/update-employee";
@@ -40,13 +40,13 @@ class EmployeeControllerTest {
 
     private MockMvc mockMvc;
     @Mock
-    private UBSEmployeeService service;
+    private UBSManagementEmployeeService service;
 
     @Mock
     RestClient restClient;
 
     @InjectMocks
-    EmployeeController controller;
+    ManagementEmployeeController controller;
 
     private Principal principal = getUuid();
 
@@ -111,10 +111,10 @@ class EmployeeControllerTest {
 
     @Test
     void deleteTest() throws Exception {
-        doNothing().when(service).delete(1L);
+        doNothing().when(service).deleteEmployee(1L);
 
         mockMvc.perform(delete(UBS_LINK + "/" + 1 + DELETE_LINK)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).delete(1L);
+        verify(service, times(1)).deleteEmployee(1L);
     }
 }
