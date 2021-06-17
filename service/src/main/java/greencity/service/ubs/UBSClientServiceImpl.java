@@ -355,6 +355,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
+
     private List<OrderBagDto> buildOrderBagDto(Order order) {
         List<OrderBagDto> build = new ArrayList<>();
         for (Map.Entry<Integer, Integer> pair : order.getAmountOfBagsOrdered().entrySet()) {
@@ -366,15 +367,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         return build;
     }
 
-
-
     /**
-                 * Method returns info about user, ubsUser and user violations by order orderId.
-                 *
-                 * @param orderId of {@link Long} order id;
-                 * @return {@link UserInfoDto};
-                 * @author Rusanovscaia Nadejda
-                 */
+     * Method returns info about user, ubsUser and user violations by order orderId.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link UserInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {

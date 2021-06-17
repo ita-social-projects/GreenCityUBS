@@ -157,7 +157,6 @@ class UBSClientServiceImplTest {
         verify(orderRepository, times(1)).findById(1L);
     }
 
-
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
