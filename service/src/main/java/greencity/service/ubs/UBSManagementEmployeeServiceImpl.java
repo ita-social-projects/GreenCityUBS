@@ -10,6 +10,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,8 @@ public class UBSEmployeeServiceImpl implements UBSEmployeeService {
     private final FileService fileService;
     private final ModelMapper modelMapper;
     private final PhoneNumberFormatterService phoneFormatter;
-    private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    @Value("${employee.default.image.path}")
+    private String defaultImagePath;
 
     /**
      * Method creates new employee.
