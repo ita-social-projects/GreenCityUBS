@@ -90,7 +90,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/**")
             .hasAnyRole("USER", "ADMIN", "MODERATOR")
-            .antMatchers(HttpMethod.GET,
+            /*.antMatchers(HttpMethod.GET,
                 ADMIN_LINK + "/**")
             .hasAnyRole("ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.POST,
@@ -101,7 +101,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole("ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.DELETE,
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "MODERATOR");
+            .hasAnyRole("ADMIN", "MODERATOR")*/;
     }
 
     /**

@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/ubs-employee")
@@ -41,7 +42,7 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddEmployeeDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
@@ -63,7 +64,7 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Get all employees")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/getAll-employees")
@@ -101,9 +102,142 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @DeleteMapping("/{id}/delete-employee")
+    @DeleteMapping("/delete-employee/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller creates employee position.
+     *
+     * @return {@link PositionDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Create employee position")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = PositionDto.class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/create-postion")
+    public ResponseEntity<PositionDto> createPosition(@Valid AddingPositionDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
+    }
+
+    /**
+     * Controller updates employee position.
+     *
+     * @return {@link PositionDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Update employee position")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto.class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-postion")
+    public ResponseEntity<PositionDto> updatePosition(@RequestBody @Valid PositionDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
+    }
+    /**
+     * Controller gets all employee positions.
+     *
+     * @return {@link PositionDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Get all employee positions")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto[].class),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @GetMapping("/get-all-positions")
+    public ResponseEntity<List<PositionDto>> getAllPositions() {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllPositions());
+    }
+
+    /**
+     * Controller deletes employee position.
+     *
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Deletes employee position")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @DeleteMapping("/delete-position/{id}")
+    public ResponseEntity<HttpStatus> deletePosition(@PathVariable Long id) {
+        employeeService.deletePosition(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    /**
+     * Controller creates employee receiving station.
+     *
+     * @return {@link ReceivingStationDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Create employee receiving station")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReceivingStationDto.class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/create-receiving-station")
+    public ResponseEntity<ReceivingStationDto> createReceivingStation(@Valid AddingReceivingStationDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
+    }
+
+    /**
+     * Controller updates employee receiving station.
+     *
+     * @return {@link ReceivingStationDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Update employee receiving station")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto.class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-receiving-station")
+    public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
+    }
+    /**
+     * Controller gets all employee receiving stations.
+     *
+     * @return {@link ReceivingStationDto}
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Get all employee receiving stations")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto[].class),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @GetMapping("/get-all-receiving-station")
+    public ResponseEntity<List<ReceivingStationDto>> getAllReceivingStation() {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllReceivingStation());
+    }
+
+    /**
+     * Controller deletes employee receiving station.
+     *
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Deletes employee receiving station")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @DeleteMapping("/delete-receiving-station/{id}")
+    public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
+        employeeService.deleteReceivingStation(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

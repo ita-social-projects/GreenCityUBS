@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
+    boolean existsPositionByPosition(String position);
+    boolean existsPositionByPositionAndIdIsNot(String position, Long id);
 }

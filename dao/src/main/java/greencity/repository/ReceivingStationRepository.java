@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReceivingStationRepository extends JpaRepository<ReceivingStation, Long> {
+    boolean existsReceivingStationByReceivingStation(String receivingStation);
+    boolean existsReceivingStationByReceivingStationAndIdIsNot(String receivingStation, Long id);
 }
