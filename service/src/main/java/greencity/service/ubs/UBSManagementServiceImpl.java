@@ -126,7 +126,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-                                                                      int litres, double additionalDistance) {
+        int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -245,11 +245,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
      * @return list of {@link Coordinates} - start coordinates with it's
-     * distant @relatives.
+     *         distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -317,7 +317,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-                                                          List<GroupedOrderDto> allClusters) {
+        List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -412,7 +412,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
-                                                                    int size) {
+        int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         if (searchCriteria.getPayment() == null) {
             searchCriteria.setPayment("");
@@ -469,7 +469,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
-                                                                          int size) {
+        int size) {
         int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         try {
