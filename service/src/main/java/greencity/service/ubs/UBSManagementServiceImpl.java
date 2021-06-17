@@ -126,7 +126,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -245,11 +245,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
      * @return list of {@link Coordinates} - start coordinates with it's
-     *         distant @relatives.
+     * distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -317,7 +317,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
+                                                          List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -412,7 +412,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
-        int size) {
+                                                                    int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         if (searchCriteria.getPayment() == null) {
             searchCriteria.setPayment("");
@@ -469,7 +469,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
-        int size) {
+                                                                          int size) {
         int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         try {
@@ -596,15 +596,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double sumExported = 0;
 
         List<Integer> amountValues =
-            order.getAmountOfBagsOrdered().entrySet().stream().map(amount -> amount.getValue())
+            order.getAmountOfBagsOrdered().entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
         List<Integer> confirmedValues =
-            order.getConfirmedQuantity().entrySet().stream().map(confirmed -> confirmed.getValue())
+            order.getConfirmedQuantity().entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
         List<Integer> exportedValues =
-            order.getExportedQuantity().entrySet().stream().map(exported -> exported.getValue())
+            order.getExportedQuantity().entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
         for (int i = 0; i < bag.size(); i++) {
@@ -613,20 +613,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             sumExported += exportedValues.get(i) * bag.get(i).getPrice();
         }
 
-        if (currentCertificate.size() > 0) {
+        if (!currentCertificate.isEmpty()) {
             dto.setTotalSumAmount(
-                sumAmount - (currentCertificate.stream().map(x -> x.getPoints()).reduce((a1, a2) -> a1 + a2).get())
+                sumAmount - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     - order.getPointsToUse());
             dto.setTotalSumConfirmed(
-                sumConfirmed - (currentCertificate.stream().map(x -> x.getPoints()).reduce((a1, a2) -> a1 + a2).get())
+                sumConfirmed - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     - order.getPointsToUse());
             dto.setTotalSumExported(
-                sumExported - (currentCertificate.stream().map(x -> x.getPoints()).reduce((a1, a2) -> a1 + a2).get())
+                sumExported - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     - order.getPointsToUse());
             dto.setCertificateBonus(
-                currentCertificate.stream().map(x -> x.getPoints()).reduce((a1, a2) -> a1 + a2).get().doubleValue());
+                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
-                currentCertificate.stream().map(x -> x.getCode()).collect(Collectors.toList()));
+                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
             dto.setTotalSumAmount(sumAmount - order.getPointsToUse());
             dto.setTotalSumConfirmed(sumConfirmed - order.getPointsToUse());
@@ -634,15 +634,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         dto.setTotalAmount(
-            orderRepository.getOrderDetails(id).get().getAmountOfBagsOrdered().entrySet()
-                .stream().map(x -> x.getValue()).reduce(Integer::sum).get().doubleValue());
+            order.getAmountOfBagsOrdered().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalConfirmed(
-            orderRepository.getOrderDetails(id).get().getConfirmedQuantity().entrySet()
-                .stream().map(x -> x.getValue()).reduce(Integer::sum).get().doubleValue());
+            order.getConfirmedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
 
         dto.setTotalExported(
-            orderRepository.getOrderDetails(id).get().getExportedQuantity().entrySet()
-                .stream().map(x -> x.getValue()).reduce(Integer::sum).get().doubleValue());
+            order.getExportedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
 
         dto.setSumAmount(sumAmount);
         dto.setSumConfirmed(sumConfirmed);

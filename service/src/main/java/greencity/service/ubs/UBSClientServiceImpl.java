@@ -350,21 +350,31 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            return modelMapper.map(order,
-                new TypeToken<List<OrderBagDto>>() {
-                }.getType());
+            return buildOrderBagDto(order);
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
+    private List<OrderBagDto> buildOrderBagDto(Order order) {
+        List<OrderBagDto> build = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> pair : order.getAmountOfBagsOrdered().entrySet()) {
+            build.add(OrderBagDto.builder()
+                .id(pair.getKey())
+                .amount(pair.getValue())
+                .build());
+        }
+        return build;
+    }
+
+
 
     /**
-     * Method returns info about user, ubsUser and user violations by order orderId.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link UserInfoDto};
-     * @author Rusanovscaia Nadejda
-     */
+                 * Method returns info about user, ubsUser and user violations by order orderId.
+                 *
+                 * @param orderId of {@link Long} order id;
+                 * @return {@link UserInfoDto};
+                 * @author Rusanovscaia Nadejda
+                 */
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
