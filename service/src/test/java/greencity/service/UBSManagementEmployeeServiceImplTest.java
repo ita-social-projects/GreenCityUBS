@@ -4,11 +4,16 @@ import static greencity.ModelUtils.*;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddEmployeeDto;
+import greencity.dto.AddingPositionDto;
 import greencity.dto.EmployeeDto;
+import greencity.dto.PositionDto;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
 import greencity.exceptions.EmployeeNotFoundException;
 import greencity.exceptions.EmployeeValidationException;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.PositionRepository;
+import greencity.repository.ReceivingStationRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementEmployeeServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -30,6 +35,10 @@ import static org.mockito.Mockito.*;
 class UBSManagementEmployeeServiceImplTest {
     @Mock
     private EmployeeRepository repository;
+    @Mock
+    private PositionRepository positionRepository;
+    @Mock
+    private ReceivingStationRepository stationRepository;
     @Mock
     private FileService fileService;
     @Mock
@@ -128,5 +137,18 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown = assertThrows(EmployeeNotFoundException.class,
             () -> employeeService.deleteEmployee(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 1L);
+    }
+    @Test
+    void createPosition() {
+        when(positionRepository.existsPositionByPosition(any())).thenReturn(false, true);
+        lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
+        when(positionRepository.save(any())).thenReturn(getPosition());
+
+        employeeService.create(AddingPositionDto.builder().position("Петрівка").build());
+
+        verify(positionRepository, times(1)).existsPositionByPosition(any());
+        verify(positionRepository, times(1)).save(any());
+        verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
+
     }
 }

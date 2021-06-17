@@ -536,4 +536,28 @@ public class ModelUtils {
             .actual(addressDto().getActual())
             .build();
     }
+    public static Position getPosition() {
+        return Position.builder()
+                .id(1L)
+                .position("Водій")
+                .build();
+    }
+    public static PositionDto getPositionDto() {
+        return PositionDto.builder()
+                .id(1L)
+                .position("Водій")
+                .build();
+    }
+    public static ReceivingStation getReceivingStation() {
+        return ReceivingStation.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build();
+    }
+    public static ReceivingStationDto getReceivingStationDto() {
+        return ReceivingStationDto.builder()
+                .id(1L)
+                .receivingStation("Петрівка")
+                .build();
+    }
 }
