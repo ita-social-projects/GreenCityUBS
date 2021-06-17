@@ -9,17 +9,17 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
     /**
      * Method checks if position's name already exists.
      *
-     * @param position {@link String} position's name.
+     * @param name {@link String} position's name.
      * @return {@link Boolean}
      */
-    boolean existsPositionByPosition(String position);
+    boolean existsPositionByName(String name);
 
     /**
      * Method checks if position's name already exists and skips position with id.
      *
-     * @param position {@link String} position's name.
+     * @param name {@link String} position's name.
      * @param id {@link Long} position's id.
      * @return {@link Boolean}
      */
-    boolean existsPositionByPositionAndIdIsNot(String position, Long id);
+    boolean existsPositionByNameAndIdIsNot(String name, Long id);
 }

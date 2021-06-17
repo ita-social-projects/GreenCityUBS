@@ -18,7 +18,7 @@ public class ReceivingStation {
     private Long id;
 
     @Column(length = 50, nullable = false, unique = true)
-    private String receivingStation;
+    private String name;
 
     @ManyToMany(mappedBy = "receivingStation")
     private Set<Employee> employees;

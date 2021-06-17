@@ -13,7 +13,6 @@ import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -106,15 +105,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public PositionDto create(AddingPositionDto dto) {
-        if (!positionRepository.existsPositionByPosition(dto.getPosition())) {
+        if (!positionRepository.existsPositionByName(dto.getName())) {
             return modelMapper.map(positionRepository.save(buildPosition(dto)), PositionDto.class);
         }
-        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getPosition());
+        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
-                .position(dto.getPosition())
+                .name(dto.getName())
                 .build();
     }
 
@@ -126,12 +125,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!positionRepository.existsById(dto.getId())) {
             throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
         }
-        if (!positionRepository.existsPositionByPositionAndIdIsNot(
-                        dto.getPosition(), dto.getId())) {
+        if (!positionRepository.existsPositionByNameAndIdIsNot(
+                        dto.getName(), dto.getId())) {
             return modelMapper.map(positionRepository.save(
                     modelMapper.map(dto, Position.class)), PositionDto.class);
         }
-        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getPosition());
+        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
     /**
@@ -162,16 +161,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public ReceivingStationDto create(AddingReceivingStationDto dto) {
-        if (!stationRepository.existsReceivingStationByReceivingStation(dto.getReceivingStation())) {
+        if (!stationRepository.existsReceivingStationByName(dto.getName())) {
             return modelMapper.map(stationRepository.save(buildReceivingStation(dto)), ReceivingStationDto.class);
         }
         throw new ReceivingStationValidationException(
-                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getReceivingStation());
+                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
     private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto) {
         return ReceivingStation.builder()
-                .receivingStation(dto.getReceivingStation())
+                .name(dto.getName())
                 .build();
     }
     /**
@@ -182,13 +181,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!stationRepository.existsById(dto.getId())) {
             throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
         }
-        if (!stationRepository.existsReceivingStationByReceivingStationAndIdIsNot(
-                dto.getReceivingStation(), dto.getId())) {
+        if (!stationRepository.existsReceivingStationByNameAndIdIsNot(
+                dto.getName(), dto.getId())) {
             return modelMapper.map(stationRepository.save(
                     modelMapper.map(dto, ReceivingStation.class)), ReceivingStationDto.class);
         }
         throw new ReceivingStationValidationException(
-                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getReceivingStation());
+                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
     /**

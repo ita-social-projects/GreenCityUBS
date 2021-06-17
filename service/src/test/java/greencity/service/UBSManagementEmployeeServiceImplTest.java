@@ -140,13 +140,13 @@ class UBSManagementEmployeeServiceImplTest {
     }
     @Test
     void createPosition() {
-        when(positionRepository.existsPositionByPosition(any())).thenReturn(false, true);
+        when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
         when(positionRepository.save(any())).thenReturn(getPosition());
 
-        employeeService.create(AddingPositionDto.builder().position("Петрівка").build());
+        employeeService.create(AddingPositionDto.builder().name("Петрівка").build());
 
-        verify(positionRepository, times(1)).existsPositionByPosition(any());
+        verify(positionRepository, times(1)).existsPositionByName(any());
         verify(positionRepository, times(1)).save(any());
         verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
 

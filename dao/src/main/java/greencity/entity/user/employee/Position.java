@@ -27,7 +27,7 @@ public class Position {
     private Long id;
 
     @Column(nullable = false, length = 30, unique = true)
-    private String position;
+    private String name;
 
     @ManyToMany(mappedBy = "employeePosition")
     private Set<Employee> employees;

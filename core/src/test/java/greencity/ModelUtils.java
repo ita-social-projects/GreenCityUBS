@@ -90,11 +90,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStations(List.of(ReceivingStationDto.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -108,11 +108,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStations(List.of(ReceivingStationDto.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -126,11 +126,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStation(Set.of(ReceivingStation.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }

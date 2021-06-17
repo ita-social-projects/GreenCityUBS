@@ -3,6 +3,7 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
@@ -13,5 +14,6 @@ import javax.validation.constraints.Min;
 public class ReceivingStationDto {
     @Min(1)
     private Long id;
-    private String receivingStation;
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    private String name;
 }
