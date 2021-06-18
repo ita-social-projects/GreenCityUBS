@@ -163,4 +163,17 @@ public class ModelUtils {
             .phoneNumber("096765432")
             .build();
     }
+
+    public static OrderDetailInfoDto getOrderDetailInfoDto() {
+        return OrderDetailInfoDto.builder()
+            .orderId(1L)
+            .capacity(10)
+            .price(400)
+            .amount(100)
+            .exportedQuantity(100)
+            .confirmedQuantity(200)
+            .name("test")
+            .bagId(3)
+            .build();
+    }
 }
