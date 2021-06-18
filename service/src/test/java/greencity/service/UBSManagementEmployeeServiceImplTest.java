@@ -3,14 +3,11 @@ package greencity.service;
 import static greencity.ModelUtils.*;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.AddEmployeeDto;
-import greencity.dto.AddingPositionDto;
-import greencity.dto.EmployeeDto;
-import greencity.dto.PositionDto;
+import greencity.dto.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.exceptions.EmployeeNotFoundException;
-import greencity.exceptions.EmployeeValidationException;
+import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.*;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
@@ -140,15 +137,135 @@ class UBSManagementEmployeeServiceImplTest {
     }
     @Test
     void createPosition() {
+        AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
         when(positionRepository.existsPositionByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(Position.class), eq(PositionDto.class))).thenReturn(getPositionDto());
-        when(positionRepository.save(any())).thenReturn(getPosition());
+        when(positionRepository.save(any())).thenReturn(getPosition(), getPosition());
 
-        employeeService.create(AddingPositionDto.builder().name("Петрівка").build());
+        employeeService.create(addingPositionDto);
 
         verify(positionRepository, times(1)).existsPositionByName(any());
         verify(positionRepository, times(1)).save(any());
         verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
 
+        Exception thrown = assertThrows(PositionValidationException.class,
+                () -> employeeService.create(addingPositionDto));
+        assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
+                + addingPositionDto.getName());
+    }
+    @Test
+    void updatePosition() {
+        PositionDto dto = getPositionDto();
+        when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
+        when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false,  true);
+        when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
+
+        employeeService.update(dto);
+
+        verify(positionRepository, times(1)).existsById(dto.getId());
+        verify(positionRepository, times(1)).existsPositionByName(dto.getName());
+        verify(modelMapper, times(2)).map(any(), any());
+
+        Exception thrown = assertThrows(PositionValidationException.class,
+                () -> employeeService.update(dto));
+        Exception thrown1 = assertThrows(PositionNotFoundException.class,
+                () -> employeeService.update(dto));
+
+        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND + dto.getId());
+        assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
+                + dto.getName());
+    }
+    @Test
+    void getAllPosition() {
+        when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
+        when(modelMapper.map(any(), any())).thenReturn(getPositionDto());
+
+        List<PositionDto> positionDtos = employeeService.getAllPositions();
+
+        assertEquals(1, positionDtos.size());
+
+        verify(positionRepository, times(1)).findAll();
+    }
+    @Test
+    void deletePosition() {
+        when(positionRepository.existsById(1L)).thenReturn(true, false);
+
+        employeeService.deletePosition(1L);
+
+        verify(positionRepository, times(1)).existsById(1L);
+        verify(positionRepository, times(1)).deleteById(1L);
+
+        Exception thrown = assertThrows(PositionNotFoundException.class,
+                () -> employeeService.deletePosition(1L));
+
+        assertEquals(thrown.getMessage(), ErrorMessage.POSITION_NOT_FOUND + 1L);
+    }
+    @Test
+    void CreateReceivingStation() {
+        AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
+        when(stationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
+        lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
+                .thenReturn(getReceivingStationDto());
+        when(stationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
+
+        employeeService.create(stationDto);
+
+        verify(stationRepository, times(1)).existsReceivingStationByName(any());
+        verify(stationRepository, times(1)).save(any());
+        verify(modelMapper, times(1))
+                .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+
+        Exception thrown = assertThrows(ReceivingStationValidationException.class,
+                () -> employeeService.create(stationDto));
+        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
+                + stationDto.getName());
+    }
+    @Test
+    void updateReceivingStation() {
+        ReceivingStationDto stationDto = getReceivingStationDto();
+        when(stationRepository.existsById(stationDto.getId())).thenReturn(true, true, false);
+        when(stationRepository.existsReceivingStationByName(stationDto.getName()))
+                .thenReturn(false,  true);
+        when(modelMapper.map(any(), any())).thenReturn(getReceivingStation(), stationDto);
+
+        employeeService.update(stationDto);
+
+        verify(stationRepository, times(1)).existsById(stationDto.getId());
+        verify(stationRepository, times(1)).existsReceivingStationByName(stationDto.getName());
+        verify(modelMapper, times(2)).map(any(), any());
+
+        Exception thrown = assertThrows(ReceivingStationValidationException.class,
+                () -> employeeService.update(stationDto));
+        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
+                () -> employeeService.update(stationDto));
+
+        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + stationDto.getId());
+        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
+                + stationDto.getName());
+    }
+    @Test
+    void getAllReceivingStation() {
+        when(stationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+        when(modelMapper.map(any(), any())).thenReturn(getReceivingStationDto());
+
+        List<ReceivingStationDto> stationDtos = employeeService.getAllReceivingStation();
+
+        assertEquals(1, stationDtos.size());
+
+        verify(stationRepository, times(1)).findAll();
+    }
+    @Test
+    void deleteReceivingStation() {
+        when(stationRepository.existsById(1L)).thenReturn(true, false);
+
+        employeeService.deleteReceivingStation(1L);
+
+        verify(stationRepository, times(1)).existsById(1L);
+        verify(stationRepository, times(1)).deleteById(1L);
+
+        Exception thrown = assertThrows(ReceivingStationNotFoundException.class,
+                () -> employeeService.deleteReceivingStation(1L));
+
+        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + 1L);
     }
 }

@@ -44,6 +44,7 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
@@ -121,7 +122,7 @@ public class ManagementEmployeeController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PostMapping("/create-postion")
+    @PostMapping("/create-position")
     public ResponseEntity<PositionDto> createPosition(@Valid AddingPositionDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
     }
@@ -139,7 +140,7 @@ public class ManagementEmployeeController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PutMapping("/update-postion")
+    @PutMapping("/update-position")
     public ResponseEntity<PositionDto> updatePosition(@RequestBody @Valid PositionDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
     }

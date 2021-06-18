@@ -106,7 +106,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public PositionDto create(AddingPositionDto dto) {
         if (!positionRepository.existsPositionByName(dto.getName())) {
-            return modelMapper.map(positionRepository.save(buildPosition(dto)), PositionDto.class);
+            Position position = positionRepository.save(buildPosition(dto));
+            return modelMapper.map(position, PositionDto.class);
         }
         throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
@@ -125,10 +126,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!positionRepository.existsById(dto.getId())) {
             throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
         }
-        if (!positionRepository.existsPositionByNameAndIdIsNot(
-                        dto.getName(), dto.getId())) {
-            return modelMapper.map(positionRepository.save(
-                    modelMapper.map(dto, Position.class)), PositionDto.class);
+        if (!positionRepository.existsPositionByName(dto.getName())) {
+            Position position = modelMapper.map(dto, Position.class);
+            return modelMapper.map(positionRepository.save(position), PositionDto.class);
         }
         throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
@@ -162,7 +162,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public ReceivingStationDto create(AddingReceivingStationDto dto) {
         if (!stationRepository.existsReceivingStationByName(dto.getName())) {
-            return modelMapper.map(stationRepository.save(buildReceivingStation(dto)), ReceivingStationDto.class);
+            ReceivingStation receivingStation = stationRepository.save(buildReceivingStation(dto));
+            return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new ReceivingStationValidationException(
                 ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
@@ -181,10 +182,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!stationRepository.existsById(dto.getId())) {
             throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
         }
-        if (!stationRepository.existsReceivingStationByNameAndIdIsNot(
-                dto.getName(), dto.getId())) {
-            return modelMapper.map(stationRepository.save(
-                    modelMapper.map(dto, ReceivingStation.class)), ReceivingStationDto.class);
+        if (!stationRepository.existsReceivingStationByName(dto.getName())) {
+            ReceivingStation receivingStation = stationRepository.save(modelMapper.map(dto, ReceivingStation.class));
+            return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new ReceivingStationValidationException(
                 ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());

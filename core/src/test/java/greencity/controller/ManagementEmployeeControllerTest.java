@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.AddEmployeeDto;
-import greencity.dto.EmployeeDto;
+import greencity.dto.*;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.Validator;
 
 import java.security.Principal;
 
@@ -37,6 +37,14 @@ class ManagementEmployeeControllerTest {
     private final String UPDATE_LINK = "/update-employee";
     private final String FIND_ALL_LINK = "/getAll-employees";
     private final String DELETE_LINK = "/delete-employee";
+    private final String SAVE_POSITION_LINK = "/create-position";
+    private final String UPDATE_POSITION_LINK = "/update-position";
+    private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
+    private final String DELETE_POSITION_LINK = "/delete-position/";
+    private final String SAVE_STATION_LINK = "/create-receiving-station";
+    private final String UPDATE_STATION_LINK = "/update-receiving-station";
+    private final String GET_ALL_STATIONS_LINK = "/get-all-receiving-station";
+    private final String DELETE_STATION_LINK = "/delete-receiving-station/";
 
     private MockMvc mockMvc;
     @Mock
@@ -44,6 +52,8 @@ class ManagementEmployeeControllerTest {
 
     @Mock
     RestClient restClient;
+    @Mock
+    private Validator mockValidator;
 
     @InjectMocks
     ManagementEmployeeController controller;
@@ -54,7 +64,7 @@ class ManagementEmployeeControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient))
+                new UserArgumentResolver(restClient)).setValidator(mockValidator)
             .build();
     }
 
@@ -113,8 +123,88 @@ class ManagementEmployeeControllerTest {
     void deleteTest() throws Exception {
         doNothing().when(service).deleteEmployee(1L);
 
-        mockMvc.perform(delete(UBS_LINK + "/" + 1 + DELETE_LINK)
+        mockMvc.perform(delete(UBS_LINK + DELETE_LINK + "/" + 1 )
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deleteEmployee(1L);
+    }
+    @Test
+    void createPosition() throws Exception {
+        AddingPositionDto dto = AddingPositionDto.builder().name("Водій").build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(UBS_LINK + SAVE_POSITION_LINK)
+                .principal(principal)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        verify(service, times(1)).create(any(AddingPositionDto.class));
+    }
+    @Test
+    void updatePosition() throws Exception {
+        PositionDto dto = getPositionDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(UBS_LINK + UPDATE_POSITION_LINK)
+                .principal(principal)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).update(dto);
+    }
+    @Test
+    void getAllPosition() throws Exception {
+        mockMvc.perform(get(UBS_LINK + GET_ALL_POSITIONS_LINK)
+                .principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).getAllPositions();
+    }
+    @Test
+    void deletePosition() throws Exception {
+        mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").
+                principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).deletePosition(1L);
+    }
+    @Test
+    void createReceivingStation() throws Exception {
+        AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Петрівка").build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(UBS_LINK + SAVE_STATION_LINK)
+                .principal(principal)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        verify(service, times(1)).create(any(AddingReceivingStationDto.class));
+    }
+    @Test
+    void updateReceivingStation() throws Exception {
+        ReceivingStationDto dto = getReceivingStationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(UBS_LINK + UPDATE_STATION_LINK)
+                .principal(principal)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).update(dto);
+    }
+    @Test
+    void getAllReceivingStation() throws Exception {
+        mockMvc.perform(get(UBS_LINK + GET_ALL_STATIONS_LINK)
+                .principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).getAllReceivingStation();
+    }
+    @Test
+    void deleteReceivingStation() throws Exception {
+        mockMvc.perform(delete(UBS_LINK + DELETE_STATION_LINK + "/1").
+                principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).deleteReceivingStation(1L);
     }
 }
