@@ -6,4 +6,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReceivingStationRepository extends JpaRepository<ReceivingStation, Long> {
+    /**
+     * Method checks if receiving station name already exists.
+     *
+     * @param name {@link String} receiving station name.
+     * @return {@link Boolean}
+     */
+    boolean existsReceivingStationByName(String name);
 }

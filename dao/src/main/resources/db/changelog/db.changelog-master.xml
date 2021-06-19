@@ -29,4 +29,6 @@
     <include file="db/changelog/logs/ch-add-table-receiving-station-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
     <include file="db/changelog/logs/ch-create-index-employee-email-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-unique-constraint-position-receiving-st-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-change-column-name-position-rec-station-Danylko.xml"/>
 </databaseChangeLog>

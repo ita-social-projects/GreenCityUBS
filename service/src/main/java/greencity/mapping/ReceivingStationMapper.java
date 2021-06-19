@@ -21,7 +21,7 @@ public class ReceivingStationMapper extends AbstractConverter<ReceivingStationDt
     protected ReceivingStation convert(ReceivingStationDto receivingStationDto) {
         return ReceivingStation.builder()
             .id(receivingStationDto.getId())
-            .receivingStation(receivingStationDto.getReceivingStation())
+            .name(receivingStationDto.getName())
             .build();
     }
 }
