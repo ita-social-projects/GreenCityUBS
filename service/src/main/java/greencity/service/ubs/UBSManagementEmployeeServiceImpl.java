@@ -91,6 +91,37 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
+    public PositionDto update(PositionDto dto) {
+        if (!positionRepository.existsById(dto.getId())) {
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
+        }
+        if (!positionRepository.existsPositionByName(dto.getName())) {
+            Position position = modelMapper.map(dto, Position.class);
+            return modelMapper.map(positionRepository.save(position), PositionDto.class);
+        }
+        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReceivingStationDto update(ReceivingStationDto dto) {
+        if (!stationRepository.existsById(dto.getId())) {
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
+        }
+        if (!stationRepository.existsReceivingStationByName(dto.getName())) {
+            ReceivingStation receivingStation = stationRepository.save(modelMapper.map(dto, ReceivingStation.class));
+            return modelMapper.map(receivingStation, ReceivingStationDto.class);
+        }
+        throw new ReceivingStationValidationException(
+            ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Transactional
     public void deleteEmployee(Long id) {
         if (employeeRepository.existsById(id)) {
@@ -112,50 +143,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
-    private Position buildPosition(AddingPositionDto dto) {
-        return Position.builder()
-                .name(dto.getName())
-                .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PositionDto update(PositionDto dto) {
-        if (!positionRepository.existsById(dto.getId())) {
-            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
-        }
-        if (!positionRepository.existsPositionByName(dto.getName())) {
-            Position position = modelMapper.map(dto, Position.class);
-            return modelMapper.map(positionRepository.save(position), PositionDto.class);
-        }
-        throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<PositionDto> getAllPositions() {
-        return positionRepository.findAll().stream()
-                .map(p -> modelMapper.map(p, PositionDto.class))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deletePosition(Long id) {
-        if (positionRepository.existsById(id)) {
-            positionRepository.deleteById(id);
-        }
-        else {
-            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + id);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -166,28 +153,43 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new ReceivingStationValidationException(
-                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
+            ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
+    }
+
+    private Position buildPosition(AddingPositionDto dto) {
+        return Position.builder()
+            .name(dto.getName())
+            .build();
     }
 
     private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto) {
         return ReceivingStation.builder()
-                .name(dto.getName())
-                .build();
+            .name(dto.getName())
+            .build();
     }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public ReceivingStationDto update(ReceivingStationDto dto) {
-        if (!stationRepository.existsById(dto.getId())) {
-            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
+    public List<PositionDto> getAllPositions() {
+        return positionRepository.findAll().stream()
+            .map(p -> modelMapper.map(p, PositionDto.class))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deletePosition(Long id) {
+        Position position = positionRepository.findById(id)
+            .orElseThrow(() -> new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + id));
+        if (position.getEmployees() == null || position.getEmployees().isEmpty()) {
+            positionRepository.delete(position);
+        } else {
+            throw new EmployeeIllegalOperationException(ErrorMessage.EMPLOYEES_ASSIGNED_POSITION);
         }
-        if (!stationRepository.existsReceivingStationByName(dto.getName())) {
-            ReceivingStation receivingStation = stationRepository.save(modelMapper.map(dto, ReceivingStation.class));
-            return modelMapper.map(receivingStation, ReceivingStationDto.class);
-        }
-        throw new ReceivingStationValidationException(
-                ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
     /**
@@ -196,8 +198,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public List<ReceivingStationDto> getAllReceivingStation() {
         return stationRepository.findAll().stream()
-                .map(r -> modelMapper.map(r, ReceivingStationDto.class))
-                .collect(Collectors.toList());
+            .map(r -> modelMapper.map(r, ReceivingStationDto.class))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -205,11 +207,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public void deleteReceivingStation(Long id) {
-        if (stationRepository.existsById(id)) {
-            stationRepository.deleteById(id);
-        }
-        else {
-            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + id);
+        ReceivingStation station = stationRepository.findById(id)
+            .orElseThrow(() -> new ReceivingStationNotFoundException(
+                ErrorMessage.RECEIVING_STATION_NOT_FOUND + id));
+        if (station.getEmployees() == null || station.getEmployees().isEmpty()) {
+            stationRepository.delete(station);
+        } else {
+            throw new EmployeeIllegalOperationException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
         }
     }
 

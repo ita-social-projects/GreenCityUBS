@@ -64,7 +64,8 @@ class ManagementEmployeeControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient)).setValidator(mockValidator)
+                new UserArgumentResolver(restClient))
+            .setValidator(mockValidator)
             .build();
     }
 
@@ -123,10 +124,11 @@ class ManagementEmployeeControllerTest {
     void deleteTest() throws Exception {
         doNothing().when(service).deleteEmployee(1L);
 
-        mockMvc.perform(delete(UBS_LINK + DELETE_LINK + "/" + 1 )
+        mockMvc.perform(delete(UBS_LINK + DELETE_LINK + "/" + 1)
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deleteEmployee(1L);
     }
+
     @Test
     void createPosition() throws Exception {
         AddingPositionDto dto = AddingPositionDto.builder().name("Водій").build();
@@ -134,13 +136,14 @@ class ManagementEmployeeControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(UBS_LINK + SAVE_POSITION_LINK)
-                .principal(principal)
-                .content(json)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
 
         verify(service, times(1)).create(any(AddingPositionDto.class));
     }
+
     @Test
     void updatePosition() throws Exception {
         PositionDto dto = getPositionDto();
@@ -148,25 +151,27 @@ class ManagementEmployeeControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(UBS_LINK + UPDATE_POSITION_LINK)
-                .principal(principal)
-                .content(json)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(service, times(1)).update(dto);
     }
+
     @Test
     void getAllPosition() throws Exception {
         mockMvc.perform(get(UBS_LINK + GET_ALL_POSITIONS_LINK)
-                .principal(principal)).andExpect(status().isOk());
+            .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).getAllPositions();
     }
+
     @Test
     void deletePosition() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").
-                principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deletePosition(1L);
     }
+
     @Test
     void createReceivingStation() throws Exception {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Петрівка").build();
@@ -174,13 +179,14 @@ class ManagementEmployeeControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(UBS_LINK + SAVE_STATION_LINK)
-                .principal(principal)
-                .content(json)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
 
         verify(service, times(1)).create(any(AddingReceivingStationDto.class));
     }
+
     @Test
     void updateReceivingStation() throws Exception {
         ReceivingStationDto dto = getReceivingStationDto();
@@ -188,23 +194,24 @@ class ManagementEmployeeControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(UBS_LINK + UPDATE_STATION_LINK)
-                .principal(principal)
-                .content(json)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(service, times(1)).update(dto);
     }
+
     @Test
     void getAllReceivingStation() throws Exception {
         mockMvc.perform(get(UBS_LINK + GET_ALL_STATIONS_LINK)
-                .principal(principal)).andExpect(status().isOk());
+            .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).getAllReceivingStation();
     }
+
     @Test
     void deleteReceivingStation() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + DELETE_STATION_LINK + "/1").
-                principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(delete(UBS_LINK + DELETE_STATION_LINK + "/1").principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deleteReceivingStation(1L);
     }
 }

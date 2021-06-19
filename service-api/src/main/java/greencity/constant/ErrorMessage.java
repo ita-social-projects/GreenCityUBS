@@ -40,6 +40,8 @@ public class ErrorMessage {
     public static String POSITION_NOT_FOUND = "Position with current id doesn't exist: ";
     public static String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static String RECEIVING_STATION_NOT_FOUND = "Receiving station with current id doesn't exist: ";
+    public static String EMPLOYEES_ASSIGNED_STATION = "There are employees assigned to this receiving station.";
+    public static String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
 
     /**
      * Constructor.

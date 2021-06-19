@@ -281,7 +281,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({PositionValidationException.class})
     public final ResponseEntity<Object> handlePositionValidationException(PositionValidationException ex,
-                                                                          WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
@@ -296,8 +296,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({ReceivingStationValidationException.class})
-    public final ResponseEntity<Object> handleReceivingStationValidationException(ReceivingStationValidationException ex,
-                                                                          WebRequest webRequest) {
+    public final ResponseEntity<Object> handleReceivingStationValidationException(
+        ReceivingStationValidationException ex,
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
@@ -313,7 +314,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({PositionNotFoundException.class})
     public final ResponseEntity<Object> handlePositionNotFoundException(PositionNotFoundException ex,
-                                                                                  WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
@@ -329,9 +330,25 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({ReceivingStationNotFoundException.class})
     public final ResponseEntity<Object> handleReceivingStationNotFoundException(ReceivingStationNotFoundException ex,
-                                                                        WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link EmployeeIllegalOperationException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EmployeeIllegalOperationException.class})
+    public final ResponseEntity<Object> handleEmployeeIllegalOperationException(EmployeeIllegalOperationException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponce);
     }
 }

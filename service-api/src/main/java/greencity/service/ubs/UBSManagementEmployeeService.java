@@ -37,6 +37,24 @@ public interface UBSManagementEmployeeService {
     EmployeeDto update(EmployeeDto dto);
 
     /**
+     * Method updates information about position.
+     *
+     * @param dto {@link PositionDto}
+     * @return {@link PositionDto}
+     * @author Mykola Danylko
+     */
+    PositionDto update(PositionDto dto);
+
+    /**
+     * Method updates information about receiving station.
+     *
+     * @param dto {@link ReceivingStationDto}
+     * @return {@link ReceivingStationDto}
+     * @author Mykola Danylko
+     */
+    ReceivingStationDto update(ReceivingStationDto dto);
+
+    /**
      * Method deletes employee from database by id.
      *
      * @param id {@link Long}
@@ -54,13 +72,13 @@ public interface UBSManagementEmployeeService {
     PositionDto create(AddingPositionDto dto);
 
     /**
-     * Method updates information about position.
+     * Method creates new receiving station.
      *
-     * @param dto {@link PositionDto}
-     * @return {@link PositionDto}
+     * @param dto {@link AddingReceivingStationDto}
+     * @return {@link ReceivingStationDto}
      * @author Mykola Danylko
      */
-    PositionDto update(PositionDto dto);
+    ReceivingStationDto create(AddingReceivingStationDto dto);
 
     /**
      * Method gets all positions.
@@ -71,6 +89,14 @@ public interface UBSManagementEmployeeService {
     List<PositionDto> getAllPositions();
 
     /**
+     * Method gets all receiving stations.
+     *
+     * @return {@link ReceivingStationDto}
+     * @author Mykola Danylko
+     */
+    List<ReceivingStationDto> getAllReceivingStation();
+
+    /**
      * Method deletes position by id.
      *
      * @param id {@link Long} position's id.
@@ -79,32 +105,8 @@ public interface UBSManagementEmployeeService {
     void deletePosition(Long id);
 
     /**
-     * Method creates new receiving station.
-     *
-     * @param dto {@link AddingReceivingStationDto}
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    ReceivingStationDto create(AddingReceivingStationDto dto);
-
-    /**
-     * Method updates information about receiving station.
-     *
-     * @param dto {@link ReceivingStationDto}
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    ReceivingStationDto update(ReceivingStationDto dto);
-
-    /**
-     * Method gets all receiving stations.
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    List<ReceivingStationDto> getAllReceivingStation();
-
-    /**
      * Method deletes receiving station by id.
+     * 
      * @param id {@link Long} receiving station's id
      * @author Mykola Danylko
      */

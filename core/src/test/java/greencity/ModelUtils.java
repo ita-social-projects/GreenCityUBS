@@ -163,28 +163,32 @@ public class ModelUtils {
             .phoneNumber("096765432")
             .build();
     }
+
     public static Position getPosition() {
         return Position.builder()
-                .id(1L)
-                .name("Водій")
-                .build();
+            .id(1L)
+            .name("Водій")
+            .build();
     }
+
     public static PositionDto getPositionDto() {
         return PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build();
+            .id(1L)
+            .name("Водій")
+            .build();
     }
+
     public static ReceivingStation getReceivingStation() {
         return ReceivingStation.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build();
+            .id(1L)
+            .name("Петрівка")
+            .build();
     }
+
     public static ReceivingStationDto getReceivingStationDto() {
         return ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build();
+            .id(1L)
+            .name("Петрівка")
+            .build();
     }
 }

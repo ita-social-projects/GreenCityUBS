@@ -24,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -135,6 +137,7 @@ class UBSManagementEmployeeServiceImplTest {
             () -> employeeService.deleteEmployee(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 1L);
     }
+
     @Test
     void createPosition() {
         AddingPositionDto addingPositionDto = AddingPositionDto.builder().name("Водій").build();
@@ -149,15 +152,16 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
 
         Exception thrown = assertThrows(PositionValidationException.class,
-                () -> employeeService.create(addingPositionDto));
+            () -> employeeService.create(addingPositionDto));
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-                + addingPositionDto.getName());
+            + addingPositionDto.getName());
     }
+
     @Test
     void updatePosition() {
         PositionDto dto = getPositionDto();
         when(positionRepository.existsById(dto.getId())).thenReturn(true, true, false);
-        when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false,  true);
+        when(positionRepository.existsPositionByName(dto.getName())).thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getPosition(), dto);
 
         employeeService.update(dto);
@@ -167,14 +171,15 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(2)).map(any(), any());
 
         Exception thrown = assertThrows(PositionValidationException.class,
-                () -> employeeService.update(dto));
+            () -> employeeService.update(dto));
         Exception thrown1 = assertThrows(PositionNotFoundException.class,
-                () -> employeeService.update(dto));
+            () -> employeeService.update(dto));
 
         assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND + dto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
-                + dto.getName());
+            + dto.getName());
     }
+
     @Test
     void getAllPosition() {
         when(positionRepository.findAll()).thenReturn(List.of(getPosition()));
@@ -186,26 +191,36 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(positionRepository, times(1)).findAll();
     }
+
     @Test
     void deletePosition() {
-        when(positionRepository.existsById(1L)).thenReturn(true, false);
+        Position position = getPosition();
+        when(positionRepository.findById(1L)).thenReturn(Optional.of(position));
 
         employeeService.deletePosition(1L);
 
-        verify(positionRepository, times(1)).existsById(1L);
-        verify(positionRepository, times(1)).deleteById(1L);
+        verify(positionRepository, times(1)).findById(1L);
+        verify(positionRepository, times(1)).delete(position);
 
-        Exception thrown = assertThrows(PositionNotFoundException.class,
-                () -> employeeService.deletePosition(1L));
+        position.setEmployees(Set.of(getEmployee()));
+        Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
+            () -> employeeService.deletePosition(1L));
 
-        assertEquals(thrown.getMessage(), ErrorMessage.POSITION_NOT_FOUND + 1L);
+        when(positionRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Exception thrown1 = assertThrows(PositionNotFoundException.class,
+            () -> employeeService.deletePosition(2L));
+
+        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND + 2L);
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_POSITION);
     }
+
     @Test
     void CreateReceivingStation() {
         AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
         when(stationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
-                .thenReturn(getReceivingStationDto());
+            .thenReturn(getReceivingStationDto());
         when(stationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
 
         employeeService.create(stationDto);
@@ -213,19 +228,20 @@ class UBSManagementEmployeeServiceImplTest {
         verify(stationRepository, times(1)).existsReceivingStationByName(any());
         verify(stationRepository, times(1)).save(any());
         verify(modelMapper, times(1))
-                .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+            .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
 
         Exception thrown = assertThrows(ReceivingStationValidationException.class,
-                () -> employeeService.create(stationDto));
+            () -> employeeService.create(stationDto));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
-                + stationDto.getName());
+            + stationDto.getName());
     }
+
     @Test
     void updateReceivingStation() {
         ReceivingStationDto stationDto = getReceivingStationDto();
         when(stationRepository.existsById(stationDto.getId())).thenReturn(true, true, false);
         when(stationRepository.existsReceivingStationByName(stationDto.getName()))
-                .thenReturn(false,  true);
+            .thenReturn(false, true);
         when(modelMapper.map(any(), any())).thenReturn(getReceivingStation(), stationDto);
 
         employeeService.update(stationDto);
@@ -235,14 +251,15 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(2)).map(any(), any());
 
         Exception thrown = assertThrows(ReceivingStationValidationException.class,
-                () -> employeeService.update(stationDto));
+            () -> employeeService.update(stationDto));
         Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
-                () -> employeeService.update(stationDto));
+            () -> employeeService.update(stationDto));
 
         assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + stationDto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
-                + stationDto.getName());
+            + stationDto.getName());
     }
+
     @Test
     void getAllReceivingStation() {
         when(stationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
@@ -254,18 +271,27 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(stationRepository, times(1)).findAll();
     }
+
     @Test
     void deleteReceivingStation() {
-        when(stationRepository.existsById(1L)).thenReturn(true, false);
+        ReceivingStation station = getReceivingStation();
+        when(stationRepository.findById(1L)).thenReturn(Optional.of(station));
 
         employeeService.deleteReceivingStation(1L);
 
-        verify(stationRepository, times(1)).existsById(1L);
-        verify(stationRepository, times(1)).deleteById(1L);
+        verify(stationRepository, times(1)).findById(1L);
+        verify(stationRepository, times(1)).delete(station);
 
-        Exception thrown = assertThrows(ReceivingStationNotFoundException.class,
-                () -> employeeService.deleteReceivingStation(1L));
+        station.setEmployees(Set.of(getEmployee()));
+        Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
+            () -> employeeService.deleteReceivingStation(1L));
 
-        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + 1L);
+        when(stationRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
+            () -> employeeService.deleteReceivingStation(2L));
+
+        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + 2L);
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
     }
 }
