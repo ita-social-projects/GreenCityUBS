@@ -270,4 +270,85 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
     }
+
+    /**
+     * Method interceptor exception {@link PositionValidationException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({PositionValidationException.class})
+    public final ResponseEntity<Object> handlePositionValidationException(PositionValidationException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link ReceivingStationValidationException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({ReceivingStationValidationException.class})
+    public final ResponseEntity<Object> handleReceivingStationValidationException(
+        ReceivingStationValidationException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link PositionNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({PositionNotFoundException.class})
+    public final ResponseEntity<Object> handlePositionNotFoundException(PositionNotFoundException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link ReceivingStationNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({ReceivingStationNotFoundException.class})
+    public final ResponseEntity<Object> handleReceivingStationNotFoundException(ReceivingStationNotFoundException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link EmployeeIllegalOperationException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EmployeeIllegalOperationException.class})
+    public final ResponseEntity<Object> handleEmployeeIllegalOperationException(EmployeeIllegalOperationException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponce);
+    }
 }

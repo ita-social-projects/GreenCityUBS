@@ -17,8 +17,8 @@ public class ReceivingStation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50, nullable = false)
-    private String receivingStation;
+    @Column(length = 50, nullable = false, unique = true)
+    private String name;
 
     @ManyToMany(mappedBy = "receivingStation")
     private Set<Employee> employees;

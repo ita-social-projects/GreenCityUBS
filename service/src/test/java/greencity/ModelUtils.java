@@ -419,11 +419,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStations(List.of(ReceivingStationDto.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -437,11 +437,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStations(List.of(ReceivingStationDto.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -455,11 +455,11 @@ public class ModelUtils {
             .email("test@gmail.com")
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
-                .position("Водій")
+                .name("Водій")
                 .build()))
             .receivingStation(Set.of(ReceivingStation.builder()
                 .id(1L)
-                .receivingStation("Петрівка")
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -534,6 +534,34 @@ public class ModelUtils {
             .houseNumber(addressDto().getHouseNumber())
             .houseCorpus(addressDto().getHouseCorpus())
             .actual(addressDto().getActual())
+            .build();
+    }
+
+    public static Position getPosition() {
+        return Position.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static PositionDto getPositionDto() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static ReceivingStation getReceivingStation() {
+        return ReceivingStation.builder()
+            .id(1L)
+            .name("Петрівка")
+            .build();
+    }
+
+    public static ReceivingStationDto getReceivingStationDto() {
+        return ReceivingStationDto.builder()
+            .id(1L)
+            .name("Петрівка")
             .build();
     }
 }
