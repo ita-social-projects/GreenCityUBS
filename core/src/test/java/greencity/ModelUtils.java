@@ -175,6 +175,7 @@ public class ModelUtils {
             .name("test")
             .bagId(3)
             .build();
+    }
 
     public static Position getPosition() {
         return Position.builder()
