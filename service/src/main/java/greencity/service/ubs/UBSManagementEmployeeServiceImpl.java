@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.user.employee.Employee;
@@ -31,8 +32,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final FileService fileService;
     private final ModelMapper modelMapper;
     private final PhoneNumberFormatterService phoneFormatter;
-    @Value("${employee.default.image.path}")
-    private String defaultImagePath;
+    private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
      * {@inheritDoc}
