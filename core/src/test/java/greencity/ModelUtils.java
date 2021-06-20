@@ -174,6 +174,7 @@ public class ModelUtils {
             .confirmedQuantity(200)
             .name("test")
             .bagId(3)
+            .build();
 
     public static Position getPosition() {
         return Position.builder()
