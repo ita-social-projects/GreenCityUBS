@@ -6,4 +6,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
+    /**
+     * Method checks if position's name already exists.
+     *
+     * @param name {@link String} position's name.
+     * @return {@link Boolean}
+     */
+    boolean existsPositionByName(String name);
 }
