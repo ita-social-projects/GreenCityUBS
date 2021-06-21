@@ -270,4 +270,63 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateAddress(dto));
     }
+
+    /**
+     * Controller for get order info.
+     *
+     * @return {@link List OrderDetailInfoDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Get order detail info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailInfoDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/read-order-info/{id}")
+    public ResponseEntity<List<OrderDetailInfoDto>> getOrderInfo(
+        @Valid @PathVariable("id") Long id, @RequestParam String language) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderDetails(id, language));
+    }
+
+    /**
+     * Controller for update order info.
+     *
+     * @return {@link List OrderDetailInfoDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Update order detail info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/set-order-detail")
+    public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
+        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.setOrderDetail(dto, language));
+    }
+
+    /**
+     * Controller for calculate order sum.
+     *
+     * @return {@link CounterOrderDetailsDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Get order sum delails")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/get-order-sum-detail/{id}")
+    public ResponseEntity<CounterOrderDetailsDto> getOrderSumDetails(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderSumDetails(id));
+    }
 }
