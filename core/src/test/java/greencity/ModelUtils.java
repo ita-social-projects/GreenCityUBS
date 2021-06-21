@@ -164,6 +164,19 @@ public class ModelUtils {
             .build();
     }
 
+    public static OrderDetailInfoDto getOrderDetailInfoDto() {
+        return OrderDetailInfoDto.builder()
+            .orderId(1L)
+            .capacity(10)
+            .price(400)
+            .amount(100)
+            .exportedQuantity(100)
+            .confirmedQuantity(200)
+            .name("test")
+            .bagId(3)
+            .build();
+    }
+
     public static Position getPosition() {
         return Position.builder()
             .id(1L)

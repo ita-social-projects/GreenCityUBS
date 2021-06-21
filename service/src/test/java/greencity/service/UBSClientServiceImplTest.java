@@ -28,18 +28,17 @@ import java.util.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import javax.persistence.EntityManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,14 +148,12 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgain() {
-        List<OrderBagDto> dto = Collections.singletonList(getOrderBagDto());
+        List<OrderBagDto> dto = List.of(getOrderBagDto());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDoneByUser()));
-        when(modelMapper.map(any(Order.class), eq(new TypeToken<List<OrderBagDto>>() {
-        }.getType()))).thenReturn(dto);
 
         List<OrderBagDto> result = ubsService.makeOrderAgain(1L);
 
-        assertEquals(dto, result);
+        assertEquals(dto.get(0).getId(), result.get(0).getId());
         verify(orderRepository, times(1)).findById(1L);
     }
 
