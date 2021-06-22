@@ -6,12 +6,15 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
+import greencity.dto.UbsCustomersDtoUpdate;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
 import java.util.Locale;
 import javax.validation.constraints.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -199,5 +202,44 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.deleteCurrentAddressForOrder(id, uuid));
+    }
+
+    /**
+     * Controller gets info about user, ubs_user and user violations by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Get user and ubs_user and violations info in order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @ApiLocale
+    @GetMapping("/user-info/{orderId}")
+    public ResponseEntity<UserInfoDto> getOrderDetailsByOrderId(
+        @Valid @PathVariable("orderId") Long id) {
+        return ResponseEntity.ok()
+            .body(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(id));
+    }
+
+    /**
+     * Controller updates info about ubs_user in order .
+     *
+     * @param dto {@link UbsCustomersDtoUpdate}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Update recipient information in order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UbsCustomersDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/update-recipients-data")
+    public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
+        @Valid @RequestBody UbsCustomersDtoUpdate dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.updateUbsUserInfoInOrder(dto));
     }
 }

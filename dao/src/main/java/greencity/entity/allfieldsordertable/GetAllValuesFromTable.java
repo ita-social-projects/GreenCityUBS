@@ -1,11 +1,5 @@
 package greencity.entity.allfieldsordertable;
 
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Payment;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter

@@ -2,28 +2,26 @@ package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
-import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
-import greencity.exceptions.ActiveOrdersNotFoundException;
-import greencity.exceptions.IncorrectValueException;
-import greencity.exceptions.UnexistingOrderException;
-import greencity.exceptions.UnexistingUuidExeption;
+import greencity.entity.user.ubs.Address;
+import greencity.exceptions.*;
+import greencity.filters.SearchCriteria;
 import greencity.repository.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import javassist.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
+
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +40,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final HttpServletRequest httpServletRequest;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
+    private final BagRepository bagRepository;
+    private final BagTranslationRepository bagTranslationRepository;
+    private final UpdateOrderDetail updateOrderRepository;
 
     /**
      * {@inheritDoc}
@@ -243,7 +244,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param allCoords      - list of {@link Coordinates} which shows all
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's in
+     * @return list of {@link Coordinates} - start coordinates with it's
      *         distant @relatives.
      * @author Oleh Bilonizhka
      */
@@ -410,52 +411,274 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllValuesFromTable() {
+    public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
+        int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAll();
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
-                }
-            }
-            ourDtos.add(allFieldsFromTableDto);
+        if (searchCriteria.getPayment() == null) {
+            searchCriteria.setPayment("");
         }
-        return ourDtos;
+        if (searchCriteria.getOrderStatus() == null) {
+            searchCriteria.setOrderStatus("");
+        }
+        if (searchCriteria.getReceivingStation() == null) {
+            searchCriteria.setReceivingStation("");
+        }
+        if (searchCriteria.getDistrict() == null) {
+            searchCriteria.setDistrict("");
+        }
+        int elements;
+        try {
+            List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAlL(searchCriteria, pages, size);
+            elements = userRepository.orderCounter();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
+            }
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
+        }
+        int totalPages = (elements / size);
+        int totalPagesWithCheck = (elements % size) == 0 ? totalPages : totalPages + 1;
+
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPagesWithCheck);
     }
 
     @Override
-    public List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType) {
+    public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+        int size) {
+        int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = allValuesFromTableRepo.findAllWithSorting(column, sortingType);
-        for (Map<String, Object> map : ourResult) {
-            AllFieldsFromTableDto allFieldsFromTableDto = objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-            List<Map<String, Object>> employees = allValuesFromTableRepo
-                .findAllEmpl(allFieldsFromTableDto.getOrderId());
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+        try {
+            List<Map<String, Object>> ourResult =
+                allValuesFromTableRepo.findAllWithSorting(column, sortingType, pages, size);
+            numberOfElements1 += userRepository.orderCounterForSorting();
+            for (Map<String, Object> map : ourResult) {
+                AllFieldsFromTableDto allFieldsFromTableDto =
+                    objectMapper.convertValue(map, AllFieldsFromTableDto.class);
+                if (allFieldsFromTableDto.getDateOfExport() == null
+                    || allFieldsFromTableDto.getTimeOfExport() == null) {
+                    allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
                 }
+                List<Map<String, Object>> employees = allValuesFromTableRepo
+                    .findAllEmpl(allFieldsFromTableDto.getOrderId());
+                for (Map<String, Object> objectMap : employees) {
+                    Long positionId = (Long) objectMap.get("position_id");
+                    if (positionId == 1) {
+                        allFieldsFromTableDto.setResponsibleManager((String) objectMap.get("name"));
+                    } else if (positionId == 2) {
+                        allFieldsFromTableDto.setResponsibleLogicMan((String) objectMap.get("name"));
+                    } else if (positionId == 3) {
+                        allFieldsFromTableDto.setResponsibleDriver((String) objectMap.get("name"));
+                    } else if (positionId == 4) {
+                        allFieldsFromTableDto.setResponsibleNavigator((String) objectMap.get("name"));
+                    }
+                }
+                ourDtos.add(allFieldsFromTableDto);
             }
-            ourDtos.add(allFieldsFromTableDto);
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException();
         }
-        return ourDtos;
+        int totalPages = (numberOfElements1 / size);
+        int totalPagesLast = (numberOfElements1 % size) == 0 ? totalPages : totalPages + 1;
+
+        return new PageableDto<>(
+            ourDtos,
+            size,
+            pages,
+            totalPagesLast);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
+        orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate) {
+        Address address = orderRepository.findById(dtoUpdate.getId())
+            .orElseThrow(() -> new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()))
+            .getUbsUser().getAddress();
+        addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
+        return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language) {
+        OrderDetailDto dto = new OrderDetailDto();
+        Order order = orderRepository.getOrderDetails(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        setOrderDetailDto(dto, order, orderId, language);
+        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language) {
+        OrderDetailDto dto = new OrderDetailDto();
+
+        for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+        }
+
+        Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
+            .orElseThrow(() -> new UnexistingOrderException(
+                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
+
+        setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
+
+        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public CounterOrderDetailsDto getOrderSumDetails(Long id) {
+        CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
+        Order order = orderRepository.getOrderDetails(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<Bag> bag = bagRepository.findBagByOrderId(id);
+        List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
+
+        double sumAmount = 0;
+        double sumConfirmed = 0;
+        double sumExported = 0;
+
+        List<Integer> amountValues =
+            order.getAmountOfBagsOrdered().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        List<Integer> confirmedValues =
+            order.getConfirmedQuantity().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        List<Integer> exportedValues =
+            order.getExportedQuantity().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < bag.size(); i++) {
+            sumAmount += amountValues.get(i) * bag.get(i).getPrice();
+            sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+            sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+        }
+
+        if (!currentCertificate.isEmpty()) {
+            dto.setTotalSumAmount(
+                sumAmount - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setTotalSumConfirmed(
+                sumConfirmed - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setTotalSumExported(
+                sumExported - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setCertificateBonus(
+                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
+            dto.setCertificate(
+                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+        } else {
+            dto.setTotalSumAmount(sumAmount - order.getPointsToUse());
+            dto.setTotalSumConfirmed(sumConfirmed - order.getPointsToUse());
+            dto.setTotalSumExported(sumExported - order.getPointsToUse());
+        }
+
+        dto.setTotalAmount(
+            order.getAmountOfBagsOrdered().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+        dto.setTotalConfirmed(
+            order.getConfirmedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+
+        dto.setTotalExported(
+            order.getExportedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+
+        dto.setSumAmount(sumAmount);
+        dto.setSumConfirmed(sumConfirmed);
+        dto.setSumExported(sumExported);
+        dto.setOrderComment(order.getComment());
+        dto.setNumberOrderFromShop(order.getAdditionalOrders());
+        dto.setBonus(order.getPointsToUse().doubleValue());
+
+        return dto;
+    }
+
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
+        dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
+        }.getType()));
+
+        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(orderId)
+            .stream()
+            .map(b -> modelMapper.map(b, BagInfoDto.class))
+            .collect(Collectors.toList()));
+
+        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, orderId)
+            .stream()
+            .map(b -> modelMapper.map(b, BagTransDto.class))
+            .collect(Collectors.toList()));
+
+        dto.setOrderId(orderId);
+
+        return dto;
+    }
+
+    private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {
+        address.setHouseNumber(dto.getHouseNumber());
+        address.setEntranceNumber(dto.getEntranceNumber());
+        address.setDistrict(dto.getDistrict());
+        address.setStreet(dto.getStreet());
+        address.setHouseCorpus(dto.getHouseCorpus());
+        return address;
     }
 }

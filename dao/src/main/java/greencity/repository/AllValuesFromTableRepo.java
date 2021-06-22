@@ -1,6 +1,8 @@
 package greencity.repository;
 
-import java.util.*;
+import greencity.filters.SearchCriteria;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -48,23 +50,56 @@ public class AllValuesFromTableRepo {
         + "where order_id =";
 
     /**
-     * Method returns of undelivered orders.
+     * Method for finding elements from Order Table without employee.
      */
-    public List<Map<String, Object>> findAll() {
-        return jdbcTemplate.queryForList(QUERY);
+    public List<Map<String, Object>> findAlL(SearchCriteria searchCriteria, int pages, int size) {
+        int offset = pages * size;
+        if (searchCriteria.getViolationsAmount() != null && searchCriteria.getOrderDate() != null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + "and violations = " + searchCriteria.getViolationsAmount()
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
+        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() == null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + "and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + " limit " + size + " offset " + offset);
+        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
+        } else {
+            return jdbcTemplate
+                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
+                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
+                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                    + "and violations = " + searchCriteria.getViolationsAmount()
+                    + " and district like  '%" + searchCriteria.getDistrict() + "%'");
+        }
     }
 
     /**
-     * Method returns of u.
+     * Method for finding all employee.
      */
     public List<Map<String, Object>> findAllEmpl(Long orderId) {
         return jdbcTemplate.queryForList(EMPLOYEEQUERY + orderId);
     }
 
     /**
-     * Method returns of undelivered orders.
+     * Method for finding elements from Order Table without employee with the
+     * sorting possibility.
      */
-    public List<Map<String, Object>> findAllWithSorting(String column, String sortingType) {
-        return jdbcTemplate.queryForList(QUERY + " order by " + column + " " + sortingType);
+    public List<Map<String, Object>> findAllWithSorting(String column, String sortingType, int pages, int size) {
+        int offset = pages * size;
+        return jdbcTemplate
+            .queryForList(QUERY + " order by " + column + " " + sortingType + " limit " + size + " offset " + offset);
     }
 }

@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.filters.SearchCriteria;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -79,23 +80,63 @@ public interface UBSManagementService {
 
     /**
      * Method for send email with description to user.
-     * 
+     *
      * @param dto {@link AddingViolationsToUserDto } order id with description.
      * @author Veremchuk Zakhar.
      */
     void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 
     /**
-     * Method for getting all values from table .
+     * Method for getting all values from order table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllValuesFromTable();
+    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size);
 
     /**
      * Method for getting all sorted values from table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
+    PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+        int size);
+
+    /**
+     * Method that read user address by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ReadAddressByOrderDto} that contains one address;
+     * @author Mahdziak Orest
+     */
+    ReadAddressByOrderDto getAddressByOrderId(Long orderId);
+
+    /**
+     * Method that update address.
+     *
+     * @param dtoUpdate of {@link OrderAddressDtoUpdate} order id;
+     * @return {@link OrderAddressDtoResponse} that contains address;
+     * @author Mahdziak Orest
+     */
+    OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
+
+    /**
+     * Method for getting order detail by language and order id.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language);
+
+    /**
+     * Method for updating order details.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+
+    /**
+     * Method that count sum order.
+     *
+     * @author Mahdziak Orest
+     */
+    CounterOrderDetailsDto getOrderSumDetails(Long id);
 }

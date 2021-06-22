@@ -5,10 +5,11 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.service.ubs.AllValuesFromTableService;
-import greencity.service.ubs.AllValuesFromTableSortingService;
+import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -27,20 +28,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final ModelMapper mapper;
-    private final AllValuesFromTableService allValuesFromTableService;
-    private final AllValuesFromTableSortingService allValuesFromTableSortingService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper,
-        AllValuesFromTableService allValuesFromTableService,
-        AllValuesFromTableSortingService allValuesFromTableSortingService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
         this.ubsManagementService = ubsManagementService;
         this.mapper = mapper;
-        this.allValuesFromTableService = allValuesFromTableService;
-        this.allValuesFromTableSortingService = allValuesFromTableSortingService;
     }
 
     /**
@@ -211,65 +206,127 @@ public class ManagementOrderController {
     /**
      * Controller for getting User violations.
      *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
      * @author Nazar Struk
      */
-    @ApiOperation("Get all info from Table order")
+    @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/getAllFields")
-    public ResponseEntity<List<GetAllFieldsMainDto>> getAllFieldsFromOrderTableInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(allValuesFromTableService.findAllValues());
-    }
-
-    /**
-     * Controller for sorting values in order-table.
-     *
-     * @return {@link GetAllFieldsMainDto}.
-     * @author Nazar Struk
-     */
-    @ApiOperation("Get all info from Table order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/getAllSortingFields")
-    public ResponseEntity<List<GetAllFieldsMainDto>> getAllFieldsFromOrderTableSortingInfo(
-        @RequestParam String columnName, @RequestParam String sortingType) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(allValuesFromTableSortingService.getAllSortingValues(columnName, sortingType));
-    }
-
-    /**
-     * Controller for getting User violations.
-     *
-     * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
-     * @author Nazar Struk
-     */
-    @ApiOperation("Get all info from Table order")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/getAllFields2")
-    public ResponseEntity<List<AllFieldsFromTableDto>> getAllFieldsFromOrderTable2Info(
+    @GetMapping("/orders")
+    @ApiPageable
+    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
+        @ApiIgnore int page,
+        @ApiIgnore int size,
         @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType) {
+        @RequestParam(value = "sortingType", required = false) String sortingType,
+        SearchCriteria searchCriteria) {
         if (columnName == null || sortingType == null) {
-            return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllValuesFromTable());
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
         } else {
             return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType));
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
         }
+    }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReadAddressByOrderDto.class),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAddressByOrderId(id));
+    }
+
+    /**
+     * Controller for update order address.
+     *
+     * @return {@link OrderAddressDtoResponse}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Update order address")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderAddressDtoResponse.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/update-address")
+    public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
+        @Valid @RequestBody OrderAddressDtoUpdate dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.updateAddress(dto));
+    }
+
+    /**
+     * Controller for get order info.
+     *
+     * @return {@link List OrderDetailInfoDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Get order detail info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailInfoDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/read-order-info/{id}")
+    public ResponseEntity<List<OrderDetailInfoDto>> getOrderInfo(
+        @Valid @PathVariable("id") Long id, @RequestParam String language) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderDetails(id, language));
+    }
+
+    /**
+     * Controller for update order info.
+     *
+     * @return {@link List OrderDetailInfoDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Update order detail info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/set-order-detail")
+    public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
+        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.setOrderDetail(dto, language));
+    }
+
+    /**
+     * Controller for calculate order sum.
+     *
+     * @return {@link CounterOrderDetailsDto}.
+     * @author Orest Mahdziak
+     */
+
+    @ApiOperation(value = "Get order sum delails")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/get-order-sum-detail/{id}")
+    public ResponseEntity<CounterOrderDetailsDto> getOrderSumDetails(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderSumDetails(id));
     }
 }
