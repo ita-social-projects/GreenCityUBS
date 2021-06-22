@@ -89,7 +89,8 @@ public class ModelUtils {
             .recipientName("recipient name")
             .customerPhoneNumber("321")
             .customerEmail("customer@gmail.com")
-            .violationCount(2)
+            .totalUserViolations(2)
+            .userViolationForCurrentOrder(1)
             .build();
     }
 
