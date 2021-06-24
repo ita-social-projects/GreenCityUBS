@@ -13,6 +13,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.NotFoundOrderAddressException;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.ui.Model;
+
 
 import javax.persistence.EntityManager;
 
@@ -150,15 +151,13 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgain() {
-        List<OrderBagDto> dto = Collections.singletonList(getOrderBagDto());
-        when(entityManager.find(Order.class, 1L)).thenReturn(getOrderDoneByUser());
-        when(modelMapper.map(any(Order.class), eq(new TypeToken<List<OrderBagDto>>() {
-        }.getType()))).thenReturn(dto);
+        List<OrderBagDto> dto = List.of(getOrderBagDto());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDoneByUser()));
 
         List<OrderBagDto> result = ubsService.makeOrderAgain(1L);
 
-        assertEquals(dto, result);
-        verify(entityManager, times(1)).find(Order.class, 1L);
+        assertEquals(dto.get(0).getId(), result.get(0).getId());
+        verify(orderRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -172,7 +171,7 @@ class UBSClientServiceImplTest {
     void makeOrderAgainShouldThrowBadOrderStatusException() {
         Order order = getOrderDoneByUser();
         order.setOrderStatus(OrderStatus.CANCELLED);
-        when(entityManager.find(Order.class, 1L)).thenReturn(order);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
             () -> ubsService.makeOrderAgain(1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST

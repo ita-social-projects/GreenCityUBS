@@ -8,6 +8,9 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 
@@ -408,6 +411,59 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddEmployeeDto getAddEmployeeDto() {
+        return AddEmployeeDto.builder()
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static EmployeeDto getEmployeeDto() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static Employee getEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("Alan Wayn")
@@ -442,7 +498,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .id(1L)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
@@ -485,6 +541,7 @@ public class ModelUtils {
             .build();
     }
 
+
     public static UbsCustomersDto getUbsCustomersDto() {
         return UbsCustomersDto.builder()
             .name("Ivan Michalov")
@@ -492,4 +549,32 @@ public class ModelUtils {
             .phoneNumber("095531111")
             .build();
     };
+
+    public static Position getPosition() {
+        return Position.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static PositionDto getPositionDto() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static ReceivingStation getReceivingStation() {
+        return ReceivingStation.builder()
+            .id(1L)
+            .name("Петрівка")
+            .build();
+    }
+
+    public static ReceivingStationDto getReceivingStationDto() {
+        return ReceivingStationDto.builder()
+            .id(1L)
+            .name("Петрівка")
+            .build();
+    }
 }

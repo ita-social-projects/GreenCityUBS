@@ -1,9 +1,14 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static greencity.ModelUtils.getPrincipal;
+
+import greencity.ModelUtils;
 import greencity.dto.CertificateDtoForAdding;
+import greencity.dto.OrderDetailInfoDto;
 import greencity.service.ubs.UBSManagementService;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -64,6 +69,16 @@ class ManagementOrderControllerTest {
         + " \"houseNumber\": \"1\"\n"
         + "}";
 
+    public static final String contentForUpdatingOrderDetailController = "[\n"
+        + "{\n"
+        + "\"amount\": 0,\n"
+        + "\"bagId\": 0,\n"
+        + "\"confirmedQuantity\": 0,\n"
+        + "\"exportedQuantity\": 0,\n"
+        + "\"orderId\": 0\n"
+        + "}\n"
+        + "]";
+
     private Principal principal = getPrincipal();
 
     @BeforeEach
@@ -111,5 +126,30 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(contentForUpdatingController))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void updateOrderDetail() throws Exception {
+        OrderDetailInfoDto dto = ModelUtils.getOrderDetailInfoDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        this.mockMvc.perform(put(ubsLink + "/update-address")
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void getOrderDetail() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/read-order-info" + "/{id}", 1L)
+            .param("language", "ua"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getSumOrderDetail() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-sum-detail" + "/{id}", 1L))
+            .andExpect(status().isOk());
     }
 }
