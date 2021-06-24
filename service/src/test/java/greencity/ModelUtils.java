@@ -541,7 +541,6 @@ public class ModelUtils {
             .build();
     }
 
-
     public static UbsCustomersDto getUbsCustomersDto() {
         return UbsCustomersDto.builder()
             .name("Ivan Michalov")
