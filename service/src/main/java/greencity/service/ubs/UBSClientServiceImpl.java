@@ -404,18 +404,12 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
-        Optional<Order> optionalOrder = orderRepository.findById(dtoUpdate.getId());
-        if (optionalOrder.isEmpty()) {
+        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
+        if (optionalUbsUser.isEmpty()) {
             throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
         }
-        UBSuser ubsUser = optionalOrder.get().getUbsUser();
-        ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
-
-        Optional<UBSuser> optionalUBSuser = ubsUserRepository.findById(ubsUser.getId());
-        if (optionalUBSuser.isEmpty()) {
-            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
-        UBSuser user = optionalUBSuser.get();
+        UBSuser user = optionalUbsUser.get();
+        ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
         return UbsCustomersDto.builder()
             .name(user.getFirstName() + " " + user.getLastName())
             .email(user.getEmail())

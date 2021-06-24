@@ -431,6 +431,7 @@ public class ModelUtils {
                 .recipientEmail("wayn@email.com")
                 .violations(4).build())
             .ubsUser(UBSuser.builder()
+                .id(1l)
                 .firstName("Anatolii")
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
@@ -483,4 +484,12 @@ public class ModelUtils {
             .actual(addressDto().getActual())
             .build();
     }
+
+    public static UbsCustomersDto getUbsCustomersDto() {
+        return UbsCustomersDto.builder()
+            .name("Ivan Michalov")
+            .email("michalov@gmail.com")
+            .phoneNumber("095531111")
+            .build();
+    };
 }
