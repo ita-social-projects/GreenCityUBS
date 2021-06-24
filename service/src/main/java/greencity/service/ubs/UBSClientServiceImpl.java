@@ -71,7 +71,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         orderPayment = modelMapper.map(dto, Payment.class);
         order.setPayment(orderPayment);
-
+        order.getCertificates().stream().forEach(s -> s.setCertificateStatus(CertificateStatus.USED));
         orderRepository.save(order);
     }
 
@@ -428,8 +428,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
-        User currentUser, int sumToPay) {
+                                   Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
+                                   User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
@@ -482,7 +482,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-        Order order, int sumToPay) {
+                                                              Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             int certPoints = 0;
@@ -493,7 +493,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 Certificate certificate = certificateRepository.findById(temp).orElseThrow(
                     () -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
                 validateCertificate(certificate);
-                certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
