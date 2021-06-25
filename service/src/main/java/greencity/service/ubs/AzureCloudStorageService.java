@@ -46,6 +46,11 @@ public class AzureCloudStorageService implements FileService {
         return client.getBlobUrl();
     }
 
+    @Override
+    public void delete(String path) {
+        
+    }
+
     private BlobContainerClient containerClient() {
         BlobServiceClient serviceClient = new BlobServiceClientBuilder()
             .connectionString(connectionString).buildClient();

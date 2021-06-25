@@ -175,7 +175,7 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(PositionNotFoundException.class,
             () -> employeeService.update(dto));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND + dto.getId());
+        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
             + dto.getName());
     }
@@ -211,7 +211,7 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(PositionNotFoundException.class,
             () -> employeeService.deletePosition(2L));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND + 2L);
+        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + 2L);
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_POSITION);
     }
 
@@ -255,7 +255,7 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
             () -> employeeService.update(stationDto));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + stationDto.getId());
+        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + stationDto.getId());
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
     }
@@ -291,7 +291,7 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
             () -> employeeService.deleteReceivingStation(2L));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND + 2L);
+        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L);
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
     }
 }

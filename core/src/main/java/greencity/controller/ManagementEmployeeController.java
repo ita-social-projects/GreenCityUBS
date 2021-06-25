@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.*;
@@ -53,7 +54,7 @@ public class ManagementEmployeeController {
     public ResponseEntity<EmployeeDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
             required = true) @Valid @RequestPart AddEmployeeDto addEmployeeDto,
-        @RequestPart(required = false) MultipartFile image) {
+        @ApiParam(value = "Employee's image")@RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(addEmployeeDto, image));
     }
 
@@ -68,6 +69,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
+    @ApiPageable
     @GetMapping("/getAll-employees")
     public ResponseEntity<PageableAdvancedDto<EmployeeDto>> getAllEmployees(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(pageable));

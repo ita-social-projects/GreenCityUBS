@@ -37,9 +37,11 @@ public class ErrorMessage {
     public static String CURRENT_EMAIL_ALREADY_EXISTS = "Employee with this email already exists: ";
     public static String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
     public static String CURRENT_POSITION_ALREADY_EXISTS = "Position with this name already exists: ";
-    public static String POSITION_NOT_FOUND = "Position with current id doesn't exist: ";
+    public static String POSITION_NOT_FOUND_BY_ID = "Position with current id doesn't exist: ";
+    public static String POSITION_NOT_FOUND = "Position doesn't exist";
     public static String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
-    public static String RECEIVING_STATION_NOT_FOUND = "Receiving station with current id doesn't exist: ";
+    public static String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
+    public static String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static String EMPLOYEES_ASSIGNED_STATION = "There are employees assigned to this receiving station.";
     public static String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
 

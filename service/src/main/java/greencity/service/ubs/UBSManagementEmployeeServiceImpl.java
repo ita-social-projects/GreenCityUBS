@@ -13,7 +13,6 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,13 +47,34 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             throw new EmployeeValidationException(
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
+        checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
         Employee employee = modelMapper.map(dto, Employee.class);
-        if (image != null && image.getSize() < 10_000_000L) {
+        if (image != null) {
             employee.setImagePath(fileService.upload(image));
         } else {
             employee.setImagePath(defaultImagePath);
         }
         return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+    }
+
+    private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
+                                                       List<ReceivingStationDto> stations) {
+        if (!existPositions(positions)) {
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
+        }
+        if (!existReceivingStation(stations)) {
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND);
+        }
+    }
+
+    private boolean existPositions(List<PositionDto> positions) {
+        return positions.stream()
+                .allMatch(p -> positionRepository.existsPositionByIdAndName(p.getId(), p.getName()));
+    }
+
+    private boolean existReceivingStation(List<ReceivingStationDto> stations) {
+        return stations.stream()
+                .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
     }
 
     /**
@@ -93,7 +113,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public PositionDto update(PositionDto dto) {
         if (!positionRepository.existsById(dto.getId())) {
-            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         }
         if (!positionRepository.existsPositionByName(dto.getName())) {
             Position position = modelMapper.map(dto, Position.class);
@@ -108,7 +128,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public ReceivingStationDto update(ReceivingStationDto dto) {
         if (!stationRepository.existsById(dto.getId())) {
-            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getId());
         }
         if (!stationRepository.existsReceivingStationByName(dto.getName())) {
             ReceivingStation receivingStation = stationRepository.save(modelMapper.map(dto, ReceivingStation.class));
@@ -184,7 +204,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public void deletePosition(Long id) {
         Position position = positionRepository.findById(id)
-            .orElseThrow(() -> new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + id));
+            .orElseThrow(() -> new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + id));
         if (position.getEmployees() == null || position.getEmployees().isEmpty()) {
             positionRepository.delete(position);
         } else {
@@ -209,7 +229,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     public void deleteReceivingStation(Long id) {
         ReceivingStation station = stationRepository.findById(id)
             .orElseThrow(() -> new ReceivingStationNotFoundException(
-                ErrorMessage.RECEIVING_STATION_NOT_FOUND + id));
+                ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + id));
         if (station.getEmployees() == null || station.getEmployees().isEmpty()) {
             stationRepository.delete(station);
         } else {
