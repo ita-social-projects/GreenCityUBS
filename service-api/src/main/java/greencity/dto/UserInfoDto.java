@@ -16,5 +16,6 @@ public class UserInfoDto {
     private String recipientName;
     private String recipientPhoneNumber;
     private String recipientEmail;
-    private int violationCount;
+    private int totalUserViolations;
+    private int userViolationForCurrentOrder;
 }
