@@ -8,7 +8,6 @@ import greencity.constant.ErrorMessage;
 import greencity.exceptions.BlobNotFoundException;
 import greencity.exceptions.FileNotSavedException;
 import greencity.exceptions.ImageUrlParseException;
-import greencity.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
