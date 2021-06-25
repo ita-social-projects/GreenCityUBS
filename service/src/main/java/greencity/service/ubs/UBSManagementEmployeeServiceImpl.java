@@ -146,7 +146,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Transactional
     public void deleteEmployeeImage(Long id) {
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+            .orElseThrow(() -> new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (!employee.getImagePath().equals(defaultImagePath)) {
             fileService.delete(employee.getImagePath());
             employee.setImagePath(defaultImagePath);

@@ -2,6 +2,7 @@ package greencity.service;
 
 import static greencity.ModelUtils.*;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.user.employee.Employee;
@@ -336,5 +337,35 @@ class UBSManagementEmployeeServiceImplTest {
 
         assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L);
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
+    }
+
+    @Test
+    void deleteEmployeeImage() {
+        Employee employee = getEmployee();
+        employee.setImagePath("path");
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+
+        employeeService.deleteEmployeeImage(anyLong());
+
+        verify(repository, times(1)).findById(anyLong());
+        verify(fileService, times(1)).delete("path");
+        verify(repository, times(1)).save(employee);
+    }
+
+    @Test
+    void deleteEmployeeImageShouldThrowExceptions() {
+        Employee employee = getEmployee();
+        employee.setImagePath(AppConstant.DEFAULT_IMAGE);
+        when(repository.findById(2L)).thenReturn(Optional.empty());
+
+        Exception thrown1 = assertThrows(EmployeeNotFoundException.class,
+                () -> employeeService.deleteEmployeeImage(2L));
+        assertEquals(thrown1.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        Exception thrown2 = assertThrows(EmployeeIllegalOperationException.class,
+                () -> employeeService.deleteEmployeeImage(1L));
+        assertEquals(thrown2.getMessage(), ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE);
     }
 }
