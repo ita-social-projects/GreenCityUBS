@@ -26,13 +26,28 @@ public interface UserRepository extends CrudRepository<User, Long> {
     Optional<User> findUserByUuid(String uuid);
 
     /**
-     * Method returns violations by user id.
+     * Method returns total user violations.
      *
-     * @param userId {@link Integer} - id to connect 2 db.
+     * @param userId {@link Long} - id to connect 2 db.
      * @return number of {@link User} violations.
      */
-    @Query(nativeQuery = true, value = "SELECT violations FROM users as v where id = :userId")
-    int countUsersViolations(Long userId);
+    @Query(nativeQuery = true,
+        value = "SELECT COUNT(user_id) FROM violations_description_mapping as v where v.user_id = :userId")
+    int countTotalUsersViolations(Long userId);
+
+    /**
+     * Method returns 1 if user has violations for the current order made by user or
+     * 0 if there are no violations.
+     *
+     * @param userId  {@link Long} - id to connect 2 db.
+     * @param orderId {@link Long}
+     * @return number of {@link User} violations.
+     */
+    @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS "
+        + "(SELECT TRUE FROM violations_description_mapping "
+        + " AS v WHERE v.user_id = :userId and v.order_id = :orderId)\n"
+        + " THEN 1 ELSE 0 END AS INT);")
+    int checkIfUserHasViolationForCurrentOrder(Long userId, Long orderId);
 
     /**
      * Method that count orders.

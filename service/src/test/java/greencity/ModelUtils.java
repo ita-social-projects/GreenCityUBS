@@ -469,21 +469,25 @@ public class ModelUtils {
             .customerName("Alan Wayn")
             .customerPhoneNumber("091546745")
             .customerEmail("wayn@email.com")
-            .violationCount(0)
             .recipientName("Anatolii Petyrov")
             .recipientPhoneNumber("095123456")
             .recipientEmail("anatolii.andr@gmail.com")
+            .totalUserViolations(4)
+            .userViolationForCurrentOrder(1)
             .build();
     }
 
     public static Order getOrderDetails() {
         return Order.builder()
+            .id(1L)
             .user(User.builder()
+                .id(1L)
                 .recipientName("Alan Wayn")
                 .recipientPhone("091546745")
                 .recipientEmail("wayn@email.com")
-                .violations(0).build())
+                .violations(4).build())
             .ubsUser(UBSuser.builder()
+                .id(1l)
                 .firstName("Anatolii")
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
@@ -536,6 +540,14 @@ public class ModelUtils {
             .actual(addressDto().getActual())
             .build();
     }
+
+    public static UbsCustomersDto getUbsCustomersDto() {
+        return UbsCustomersDto.builder()
+            .name("Ivan Michalov")
+            .email("michalov@gmail.com")
+            .phoneNumber("095531111")
+            .build();
+    };
 
     public static Position getPosition() {
         return Position.builder()

@@ -28,7 +28,6 @@ import java.util.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +38,9 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.ui.Model;
+
 import javax.persistence.EntityManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -185,20 +187,54 @@ class UBSClientServiceImplTest {
 
     @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
-        UserInfoDto expected = ModelUtils.getUserInfoDto();
+        UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
+        when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
+        when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
+            .thenReturn(expectedResult.getUserViolationForCurrentOrder());
         UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L);
 
-        assertEquals(expected, actual);
+        verify(orderRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).countTotalUsersViolations(1L);
+        verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
+
+        assertEquals(expectedResult, actual);
     }
 
     @Test
-    void updatesRecipientsInfoThrowUBSuserNotFoundException() {
-        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = ModelUtils.getUbsCustomersDtoUpdate();
-        when(orderRepository.findById(ubsCustomersDtoUpdate.getId()))
+    void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
+        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
+
+        when(ubsUserRepository.findById(1L))
             .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
-            () -> ubsService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate));
+            () -> ubsService.updateUbsUserInfoInOrder(request));
+    }
+
+    @Test
+    void updatesUbsUserInfoInOrder() {
+        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
+            .id(1l)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
+
+        Optional<UBSuser> user = Optional.of(ModelUtils.getUBSuser());
+        when(ubsUserRepository.findById(1L)).thenReturn(user);
+        when(ubsUserRepository.save(user.get())).thenReturn(user.get());
+
+        UbsCustomersDto expected = UbsCustomersDto.builder()
+            .name("Anatolii Petyrov")
+            .email("anatolii.andr@gmail.com")
+            .phoneNumber("095123456")
+            .build();
+
+        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request);
+        assertEquals(expected, actual);
     }
 
     @Test
