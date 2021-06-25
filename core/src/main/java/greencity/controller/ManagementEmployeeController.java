@@ -87,7 +87,8 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PutMapping("/update-employee")
+    @PutMapping(value = "/update-employee",
+        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeDto> update(
         @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
             required = true) @RequestPart @Valid EmployeeDto employeeDto,
@@ -108,7 +109,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @DeleteMapping("/delete-employee/{id}")
-    public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
