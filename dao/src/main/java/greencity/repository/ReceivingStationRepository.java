@@ -17,7 +17,7 @@ public interface ReceivingStationRepository extends JpaRepository<ReceivingStati
     /**
      * Method checks if receiving station already exists by id and name.
      *
-     * @param id {@link Long} receiving station id.
+     * @param id   {@link Long} receiving station id.
      * @param name {@link String} receiving station name.
      * @return {@link Boolean}
      */

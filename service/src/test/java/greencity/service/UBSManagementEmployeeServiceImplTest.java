@@ -48,15 +48,17 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
 
     @Test
-    void save() {
+    void saveEmployee() {
         Employee employee = getEmployee();
         employee.setId(null);
         when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
-            .thenReturn(getAddEmployeeDto().getPhoneNumber(), getAddEmployeeDto().getPhoneNumber());
-        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false, true, false);
-        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false, true);
+            .thenReturn(getAddEmployeeDto().getPhoneNumber());
+        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
         when(repository.save(any())).thenReturn(getEmployee());
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
 
         EmployeeDto result = employeeService.save(getAddEmployeeDto(), null);
 
@@ -69,9 +71,23 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository, times(1)).save(any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
+    }
 
+    @Test
+    void saveEmployeeShouldThrowException() {
+        Employee employee = getEmployee();
+        employee.setId(null);
         AddEmployeeDto employeeDto = getAddEmployeeDto();
         employeeDto.setEmail("test@gmail.com");
+        when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
+            .thenReturn(getAddEmployeeDto().getPhoneNumber());
+        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber()))
+            .thenReturn(true, false, false, false);
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
 
         Exception thrown = assertThrows(EmployeeValidationException.class,
             () -> employeeService.save(employeeDto, null));
@@ -81,7 +97,12 @@ class UBSManagementEmployeeServiceImplTest {
             () -> employeeService.save(employeeDto, null));
         assertEquals(thrown1.getMessage(),
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeDto.getEmail());
-
+        Exception thrown3 = assertThrows(PositionNotFoundException.class,
+            () -> employeeService.save(employeeDto, null));
+        assertEquals(thrown3.getMessage(), ErrorMessage.POSITION_NOT_FOUND);
+        Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
+            () -> employeeService.save(employeeDto, null));
+        assertEquals(thrown4.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND);
     }
 
     @Test
@@ -96,32 +117,54 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void update() {
+    void updateEmployee() {
         when(phoneFormatter.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
         when(modelMapper.map(any(), any())).thenReturn(getEmployee(), getEmployeeDto());
-        when(repository.existsById(any())).thenReturn(true, true, true, false);
+        when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
-            .thenReturn(null, getEmployee(), null);
+            .thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong()))
-            .thenReturn(null, getEmployee());
+            .thenReturn(null);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
 
-        employeeService.update(getEmployeeDto());
+        employeeService.update(getEmployeeDto(), null);
 
         verify(repository, times(1)).save(any());
         verify(repository, times(1)).checkIfEmailUnique(anyString(), anyLong());
         verify(repository, times(1)).checkIfPhoneNumberUnique(anyString(), anyLong());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
+    }
 
+    @Test
+    void updateEmployeeShouldThrowExceptions() {
+        when(phoneFormatter.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
+        when(repository.existsById(any())).thenReturn(false, true, true, true, true);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
+            .thenReturn(getEmployee(), null, null, null);
+        when(repository.checkIfEmailUnique(anyString(), anyLong()))
+            .thenReturn(getEmployee(), null, null);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
+
+        Exception thrown2 = assertThrows(EmployeeNotFoundException.class,
+            () -> employeeService.update(getEmployeeDto(), null));
+        assertEquals(thrown2.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId());
         Exception thrown = assertThrows(EmployeeValidationException.class,
-            () -> employeeService.update(getEmployeeDto()));
+            () -> employeeService.update(getEmployeeDto(), null));
         assertEquals(thrown.getMessage(),
             ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + getEmployeeDto().getPhoneNumber());
         Exception thrown1 = assertThrows(EmployeeValidationException.class,
-            () -> employeeService.update(getEmployeeDto()));
+            () -> employeeService.update(getEmployeeDto(), null));
         assertEquals(thrown1.getMessage(),
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + getEmployeeDto().getEmail());
-        Exception thrown2 = assertThrows(EmployeeNotFoundException.class,
-            () -> employeeService.update(getEmployeeDto()));
-        assertEquals(thrown2.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId());
+        Exception thrown3 = assertThrows(PositionNotFoundException.class,
+            () -> employeeService.update(getEmployeeDto(), null));
+        assertEquals(thrown3.getMessage(), ErrorMessage.POSITION_NOT_FOUND);
+        Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
+            () -> employeeService.update(getEmployeeDto(), null));
+        assertEquals(thrown4.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND);
     }
 
     @Test

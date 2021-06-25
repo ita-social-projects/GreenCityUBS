@@ -18,7 +18,7 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
      * Method checks if position already exists.
      *
      * @param name {@link String} position's name.
-     * @param id {@link Long} position's id.
+     * @param id   {@link Long} position's id.
      * @return {@link Boolean}
      */
     boolean existsPositionByIdAndName(Long id, String name);

@@ -36,4 +36,28 @@ public final class SwaggerExampleModel {
             + "  ]\n"
             + "}"
             + AFTER_EXAMPLE;
+
+    public static final String EMPLOYEE_DTO =
+        BEFORE_EXAMPLE
+            + "{\n"
+            + "  \"email\": \"string\",\n"
+            + "  \"employeePositions\": [ \n"
+            + "    {\n"
+            + "      \"id\": 0,\n"
+            + "      \"name\": \"string\"\n"
+            + "    }\n"
+            + "  ],\n"
+            + "  \"firstName\": \"string\",\n"
+            + "  \"id\": 0,\n"
+            + "  \"image\": \"string\","
+            + "  \"lastName\": \"string\",\n"
+            + "  \"phoneNumber\": \"string\",\n"
+            + "  \"receivingStations\": [\n"
+            + "    {\n"
+            + "      \"id\": 0,\n"
+            + "      \"name\": \"string\"\n"
+            + "    }\n"
+            + "  ]\n"
+            + "}"
+            + AFTER_EXAMPLE;
 }

@@ -45,7 +45,6 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
@@ -54,7 +53,7 @@ public class ManagementEmployeeController {
     public ResponseEntity<EmployeeDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
             required = true) @Valid @RequestPart AddEmployeeDto addEmployeeDto,
-        @ApiParam(value = "Employee's image")@RequestPart(required = false) MultipartFile image) {
+        @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(addEmployeeDto, image));
     }
 
@@ -89,8 +88,11 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-employee")
-    public ResponseEntity<EmployeeDto> update(@RequestBody @Valid EmployeeDto employeeDto) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeDto));
+    public ResponseEntity<EmployeeDto> update(
+        @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
+            required = true) @RequestPart @Valid EmployeeDto employeeDto,
+        @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeDto, image));
     }
 
     /**
@@ -246,6 +248,25 @@ public class ManagementEmployeeController {
     @DeleteMapping("/delete-receiving-station/{id}")
     public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
         employeeService.deleteReceivingStation(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller deletes employee image.
+     *
+     * @author Mykola Danylko.
+     */
+    @ApiOperation(value = "Deletes employee image")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY),
+    })
+    @DeleteMapping("/delete-employee-image/{id}")
+    public ResponseEntity<HttpStatus> deleteEmployeeImage(@PathVariable Long id) {
+        employeeService.deleteEmployeeImage(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

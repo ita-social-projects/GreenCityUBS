@@ -30,11 +30,12 @@ public interface UBSManagementEmployeeService {
     /**
      * Method updates information about employee.
      *
-     * @param dto {@link EmployeeDto}
+     * @param dto   {@link EmployeeDto}
+     * @param image {@link MultipartFile} that contains employee's image.
      * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
-    EmployeeDto update(EmployeeDto dto);
+    EmployeeDto update(EmployeeDto dto, MultipartFile image);
 
     /**
      * Method updates information about position.
