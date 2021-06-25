@@ -57,26 +57,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
     }
 
-    private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
-                                                       List<ReceivingStationDto> stations) {
-        if (!existPositions(positions)) {
-            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
-        }
-        if (!existReceivingStation(stations)) {
-            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND);
-        }
-    }
-
-    private boolean existPositions(List<PositionDto> positions) {
-        return positions.stream()
-                .allMatch(p -> positionRepository.existsPositionByIdAndName(p.getId(), p.getName()));
-    }
-
-    private boolean existReceivingStation(List<ReceivingStationDto> stations) {
-        return stations.stream()
-                .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -235,6 +215,26 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             throw new EmployeeIllegalOperationException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
         }
+    }
+
+    private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
+                                                       List<ReceivingStationDto> stations) {
+        if (!existPositions(positions)) {
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
+        }
+        if (!existReceivingStation(stations)) {
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND);
+        }
+    }
+
+    private boolean existPositions(List<PositionDto> positions) {
+        return positions.stream()
+                .allMatch(p -> positionRepository.existsPositionByIdAndName(p.getId(), p.getName()));
+    }
+
+    private boolean existReceivingStation(List<ReceivingStationDto> stations) {
+        return stations.stream()
+                .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
     }
 
     private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {

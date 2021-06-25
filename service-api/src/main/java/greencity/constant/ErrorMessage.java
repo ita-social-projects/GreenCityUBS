@@ -44,6 +44,8 @@ public class ErrorMessage {
     public static String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static String EMPLOYEES_ASSIGNED_STATION = "There are employees assigned to this receiving station.";
     public static String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
+    public static String PARSING_URL_FAILED = "Can't parse image's url: ";
+    public static String BLOB_DOES_NOT_EXIST = "Blob with current file name doesn't exist.";
 
     /**
      * Constructor.

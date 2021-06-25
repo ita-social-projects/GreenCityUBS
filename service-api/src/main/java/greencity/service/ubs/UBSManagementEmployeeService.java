@@ -111,4 +111,12 @@ public interface UBSManagementEmployeeService {
      * @author Mykola Danylko
      */
     void deleteReceivingStation(Long id);
+
+    /**
+     * Method deletes employee image.
+     *
+     * @param id (@link Long) employee id.
+     * @author Mykola Danylko
+     */
+    void deleteEmployeeImage(Long id);
 }

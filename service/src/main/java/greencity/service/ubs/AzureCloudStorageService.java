@@ -6,6 +6,8 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.FileNotSavedException;
+import greencity.exceptions.ImageUrlParseException;
+import greencity.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -47,8 +52,20 @@ public class AzureCloudStorageService implements FileService {
     }
 
     @Override
-    public void delete(String path) {
-        
+    public void delete(String url) {
+        String fileName;
+        try {
+            fileName = Paths.get(new URI(url).getPath()).getFileName().toString();
+        } catch (URISyntaxException e) {
+            throw new ImageUrlParseException(ErrorMessage.PARSING_URL_FAILED + url);
+        }
+        BlobClient client = containerClient().getBlobClient(fileName);
+        if (client.exists()) {
+            client.delete();
+        }
+        else {
+            throw new NotFoundException(ErrorMessage.BLOB_DOES_NOT_EXIST);
+        }
     }
 
     private BlobContainerClient containerClient() {
