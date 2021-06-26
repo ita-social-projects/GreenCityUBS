@@ -2,14 +2,12 @@ package greencity.mapping;
 
 import greencity.dto.OrderClientDto;
 import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 @Component
 public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDto> {
