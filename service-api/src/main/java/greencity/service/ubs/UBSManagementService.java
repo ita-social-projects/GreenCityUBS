@@ -126,7 +126,7 @@ public interface UBSManagementService {
      * @author Struk Nazar
      */
     PaymentTableInfoDto getPaymentInfo(long orderId);
-  
+
     /**
      * Method for getting order detail by language and order id.
      *

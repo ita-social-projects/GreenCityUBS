@@ -1,5 +1,7 @@
 package greencity.service.ubs;
+
 import greencity.client.RestClient;
+
 import greencity.constant.ErrorMessage;
 import static greencity.constant.ErrorMessage.*;
 import greencity.dto.*;
@@ -13,10 +15,14 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
+
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -73,8 +79,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderPayment = modelMapper.map(dto, Payment.class);
         orderPayment.setOrder(order);
         paymentRepository.save(orderPayment);
-        order.setPayment(orderPayment);
-        order.getCertificates().stream().forEach(s -> s.setCertificateStatus(CertificateStatus.USED));
         orderRepository.save(order);
     }
 
@@ -333,7 +337,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setCertificates(Collections.emptySet());
             order.setPointsToUse(0);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
-            order.getPayment().setAmount(0L);
+            order.getPayment().stream().forEach(x -> x.setAmount(0L));
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
