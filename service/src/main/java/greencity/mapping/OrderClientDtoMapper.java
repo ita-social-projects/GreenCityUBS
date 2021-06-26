@@ -24,9 +24,9 @@ public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDt
             .id(order.getId())
             .orderStatus(order.getOrderStatus())
             .amount(Optional.ofNullable(order.getPayment())
-                    .stream().flatMap(Collection::stream)
-                    .flatMapToLong(payment -> LongStream.of(payment.getAmount()))
-                    .reduce(Long::sum).orElse(0L))
+                .stream().flatMap(Collection::stream)
+                .flatMapToLong(payment -> LongStream.of(payment.getAmount()))
+                .reduce(Long::sum).orElse(0L))
             .build();
     }
 }
