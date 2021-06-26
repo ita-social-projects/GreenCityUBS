@@ -10,4 +10,11 @@ public interface FileService {
      * @return public image url.
      **/
     String upload(MultipartFile multipartFile);
+
+    /**
+     * Delete file from Azure Cloud Storage.
+     *
+     * @param path {@link String}
+     */
+    void delete(String path);
 }

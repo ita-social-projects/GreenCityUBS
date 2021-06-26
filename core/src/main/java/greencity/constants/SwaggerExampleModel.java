@@ -15,25 +15,39 @@ public final class SwaggerExampleModel {
     private static final String AFTER_EXAMPLE = "\t</pre>\n"
         + "</div>";
 
-    public static final String ADD_NEW_EMPLOYEE =
-        BEFORE_EXAMPLE
-            + "{\n"
+    private static final String EMPLOYEE_BEGIN =
+        "{\n"
             + "  \"email\": \"string\",\n"
             + "  \"employeePositions\": [ \n"
             + "    {\n"
             + "      \"id\": 0,\n"
-            + "      \"position\": \"string\"\n"
+            + "      \"name\": \"string\"\n"
             + "    }\n"
             + "  ],\n"
-            + "  \"firstName\": \"string\",\n"
-            + "  \"lastName\": \"string\",\n"
+            + "  \"firstName\": \"string\",\n";
+
+    private static final String EMPLOYEE_END =
+        "  \"lastName\": \"string\",\n"
             + "  \"phoneNumber\": \"string\",\n"
             + "  \"receivingStations\": [\n"
             + "    {\n"
             + "      \"id\": 0,\n"
-            + "      \"receivingStation\": \"string\"\n"
+            + "      \"name\": \"string\"\n"
             + "    }\n"
             + "  ]\n"
-            + "}"
+            + "}";
+
+    public static final String ADD_NEW_EMPLOYEE =
+        BEFORE_EXAMPLE
+            + EMPLOYEE_BEGIN
+            + EMPLOYEE_END
+            + AFTER_EXAMPLE;
+
+    public static final String EMPLOYEE_DTO =
+        BEFORE_EXAMPLE
+            + EMPLOYEE_BEGIN
+            + "  \"id\": 0,\n"
+            + "  \"image\": \"string\",\n"
+            + EMPLOYEE_END
             + AFTER_EXAMPLE;
 }
