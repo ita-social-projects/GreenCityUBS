@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Struk1235" author="Nazar Struk">
+        <addColumn tableName="payment">
+            <column name="order_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="payment"
+                                 constraintName="fk_payment_to_order"
+                                 referencedColumnNames="id"
+                                 referencedTableName="orders"/>
+    </changeSet>
+
+</databaseChangeLog>

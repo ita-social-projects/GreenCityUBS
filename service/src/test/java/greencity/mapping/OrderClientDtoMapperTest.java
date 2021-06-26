@@ -5,12 +5,12 @@ import greencity.dto.OrderClientDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import java.util.Collections;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderClientDtoMapperTest {
@@ -24,9 +24,9 @@ class OrderClientDtoMapperTest {
         Order order = Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.DONE)
-            .payment(new Payment())
+            .payment(Collections.singletonList(new Payment()))
             .build();
-        order.getPayment().setAmount(350L);
+        order.getPayment().get(0).setAmount(350L);
 
         assertEquals(expected, mapper.convert(order));
 

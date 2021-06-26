@@ -40,7 +40,7 @@ public class AllValuesFromTableRepo {
         + "left join ubs_user on orders.ubs_user_id = ubs_user.id\n"
         + "left join users on orders.users_id = users.id\n"
         + "left join address on ubs_user.address_id = address.id\n"
-        + "left join payment on orders.payment_id = payment.id\n"
+        + "left join payment on payment.order_id = orders.id\n"
         + "left join certificate on orders.id = certificate.order_id";
 
     private static final String EMPLOYEEQUERY = "select concat_ws(' ', first_name, "
