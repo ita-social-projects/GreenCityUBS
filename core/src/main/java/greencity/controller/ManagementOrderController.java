@@ -288,14 +288,14 @@ public class ManagementOrderController {
     public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getPaymentInfo(orderId));
-      
+    }
+
     /**
      * Controller for get order info.
      *
      * @return {@link List OrderDetailInfoDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Get order detail info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailInfoDto.class),
@@ -314,7 +314,6 @@ public class ManagementOrderController {
      * @return {@link List OrderDetailInfoDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Update order detail info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
@@ -335,7 +334,6 @@ public class ManagementOrderController {
      * @return {@link CounterOrderDetailsDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Get order sum delails")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),
