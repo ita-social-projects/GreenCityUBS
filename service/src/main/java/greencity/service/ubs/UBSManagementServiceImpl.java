@@ -195,12 +195,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         Long paidAmount = 0L;
         Long unPaidAmount = 0L;
-        Order order = orderRepository.findById(orderId).orElse(null);
-        for (Payment paymant : order.getPayment()) {
-            if (paymant.getOrderStatus().equals("approved")) {
-                paidAmount += paymant.getAmount();
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        ;
+        for (Payment payment : order.getPayment()) {
+            if (payment.getOrderStatus().equals("approved")) {
+                paidAmount += payment.getAmount();
             } else {
-                unPaidAmount += paymant.getAmount();
+                unPaidAmount += payment.getAmount();
             }
         }
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
