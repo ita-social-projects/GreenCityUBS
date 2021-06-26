@@ -120,6 +120,14 @@ public interface UBSManagementService {
     OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
 
     /**
+     * Method that gets all order payments.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Struk Nazar
+     */
+    PaymentTableInfoDto getPaymentInfo(long orderId);
+
+    /**
      * Method for getting order detail by language and order id.
      *
      * @author Mahdziak Orest

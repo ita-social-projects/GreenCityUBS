@@ -26,6 +26,9 @@
     <include file="db/changelog/logs/сh-add-new-column-status-to-address-Veremchuk.xml"/>
     <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
     <include file="db/changelog/logs/ch-add-column-users-surname-Berezhinkiy.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-payment_id-Struk.xml"/>
+    <include file="db/changelog/logs/ch-add-column-payment-id-in- orders-table-Struk.xml"/>
+    <include file="db/changelog/logs/ch-add-column-comment-paymant-Struk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-phone-number-email-receiving-station-to-employees-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-table-receiving-station-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
