@@ -3,13 +3,10 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 
-import static greencity.ModelUtils.getPrincipal;
-
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.OrderAddressDtoRequest;
-import greencity.dto.OrderResponseDto;
+import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
 
 import java.security.Principal;
@@ -18,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 
 import org.mockito.InjectMocks;
@@ -147,4 +145,27 @@ class OrderControllerTest {
             .andExpect(status().isNotFound());
     }
 
+    @Test
+    void getOrderDetailsByOrderId() throws Exception {
+        UserInfoDto userInfoDto = getUserInfoDto();
+        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L)).thenReturn(userInfoDto);
+        mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getUserAndUserUbsAndViolationsInfoByOrderId(1L);
+    }
+
+    @Test
+    void updatesRecipientsInfo() throws Exception {
+        UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
+        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate)).thenReturn(ubsCustomersDto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(put(ubsLink + "/update-recipients-data")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate)))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
+    }
 }

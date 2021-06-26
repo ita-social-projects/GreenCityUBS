@@ -126,4 +126,25 @@ public interface UBSManagementService {
      * @author Struk Nazar
      */
     PaymentTableInfoDto getPaymentInfo(long orderId);
+  
+    /**
+     * Method for getting order detail by language and order id.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language);
+
+    /**
+     * Method for updating order details.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+
+    /**
+     * Method that count sum order.
+     *
+     * @author Mahdziak Orest
+     */
+    CounterOrderDetailsDto getOrderSumDetails(Long id);
 }

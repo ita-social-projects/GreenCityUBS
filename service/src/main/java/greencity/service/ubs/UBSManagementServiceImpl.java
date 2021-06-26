@@ -10,6 +10,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final HttpServletRequest httpServletRequest;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
+    private final BagRepository bagRepository;
+    private final BagTranslationRepository bagTranslationRepository;
+    private final UpdateOrderDetail updateOrderRepository;
 
     /**
      * {@inheritDoc}
@@ -555,6 +560,143 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .getUbsUser().getAddress();
         addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
         return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language) {
+        OrderDetailDto dto = new OrderDetailDto();
+        Order order = orderRepository.getOrderDetails(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        setOrderDetailDto(dto, order, orderId, language);
+        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language) {
+        OrderDetailDto dto = new OrderDetailDto();
+
+        for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            updateOrderRepository
+                .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+        }
+
+        Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
+            .orElseThrow(() -> new UnexistingOrderException(
+                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
+
+        setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
+
+        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public CounterOrderDetailsDto getOrderSumDetails(Long id) {
+        CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
+        Order order = orderRepository.getOrderDetails(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<Bag> bag = bagRepository.findBagByOrderId(id);
+        List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
+
+        double sumAmount = 0;
+        double sumConfirmed = 0;
+        double sumExported = 0;
+
+        List<Integer> amountValues =
+            order.getAmountOfBagsOrdered().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        List<Integer> confirmedValues =
+            order.getConfirmedQuantity().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        List<Integer> exportedValues =
+            order.getExportedQuantity().entrySet().stream().map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < bag.size(); i++) {
+            sumAmount += amountValues.get(i) * bag.get(i).getPrice();
+            sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+            sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+        }
+
+        if (!currentCertificate.isEmpty()) {
+            dto.setTotalSumAmount(
+                sumAmount - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setTotalSumConfirmed(
+                sumConfirmed - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setTotalSumExported(
+                sumExported - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse());
+            dto.setCertificateBonus(
+                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
+            dto.setCertificate(
+                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+        } else {
+            dto.setTotalSumAmount(sumAmount - order.getPointsToUse());
+            dto.setTotalSumConfirmed(sumConfirmed - order.getPointsToUse());
+            dto.setTotalSumExported(sumExported - order.getPointsToUse());
+        }
+
+        dto.setTotalAmount(
+            order.getAmountOfBagsOrdered().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+        dto.setTotalConfirmed(
+            order.getConfirmedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+
+        dto.setTotalExported(
+            order.getExportedQuantity().entrySet()
+                .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
+
+        dto.setSumAmount(sumAmount);
+        dto.setSumConfirmed(sumConfirmed);
+        dto.setSumExported(sumExported);
+        dto.setOrderComment(order.getComment());
+        dto.setNumberOrderFromShop(order.getAdditionalOrders());
+        dto.setBonus(order.getPointsToUse().doubleValue());
+
+        return dto;
+    }
+
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
+        dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
+        }.getType()));
+
+        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(orderId)
+            .stream()
+            .map(b -> modelMapper.map(b, BagInfoDto.class))
+            .collect(Collectors.toList()));
+
+        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, orderId)
+            .stream()
+            .map(b -> modelMapper.map(b, BagTransDto.class))
+            .collect(Collectors.toList()));
+
+        dto.setOrderId(orderId);
+
+        return dto;
     }
 
     private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {

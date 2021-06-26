@@ -43,6 +43,18 @@ public class Order {
     @CollectionTable(name = "order_bag_mapping",
         joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
     @MapKeyColumn(name = "bag_id")
+    @Column(name = "exported_quantity")
+    private Map<Integer, Integer> exportedQuantity;
+    @ElementCollection
+    @CollectionTable(name = "order_bag_mapping",
+        joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "bag_id")
+    @Column(name = "confirmed_quantity")
+    private Map<Integer, Integer> confirmedQuantity;
+    @ElementCollection
+    @CollectionTable(name = "order_bag_mapping",
+        joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "bag_id")
     @Column(name = "amount")
     private Map<Integer, Integer> amountOfBagsOrdered;
 

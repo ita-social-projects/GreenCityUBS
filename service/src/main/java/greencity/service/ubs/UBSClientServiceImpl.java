@@ -1,5 +1,4 @@
 package greencity.service.ubs;
-
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import static greencity.constant.ErrorMessage.*;
@@ -15,21 +14,18 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import static greencity.constant.ErrorMessage.*;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -77,6 +73,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderPayment = modelMapper.map(dto, Payment.class);
         orderPayment.setOrder(order);
         paymentRepository.save(orderPayment);
+        order.setPayment(orderPayment);
+        order.getCertificates().stream().forEach(s -> s.setCertificateStatus(CertificateStatus.USED));
         orderRepository.save(order);
     }
 
@@ -114,11 +112,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public List<PersonalDataDto> getSecondPageData(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
 
@@ -149,16 +143,19 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        if (currentUser.getCurrentPoints() < dto.getPointsToUse()) {
-            throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
-        }
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
         } else {
             sumToPay -= dto.getPointsToUse();
         }
+
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
@@ -169,15 +166,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
-        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
-            throw new NotFoundOrderAddressException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
-        }
+        checkIfAddressHasBeenDeleted(address);
 
-        if (!address.getUser().equals(currentUser)) {
-            throw new NotFoundOrderAddressException(
-                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId());
-        }
+        checkAddressUser(address, currentUser);
         address.setAddressStatus(AddressStatus.IN_ORDER);
 
         userData.setAddress(address);
@@ -200,22 +191,38 @@ public class UBSClientServiceImpl implements UBSClientService {
         return links.attr("href");
     }
 
+    private void checkIfAddressHasBeenDeleted(Address address) {
+        if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
+    }
+
+    private void checkAddressUser(Address address, User user) {
+        if (!address.getUser().equals(user)) {
+            throw new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
+    }
+
+    private void checkIfUserHaveEnoughPoints(Integer i1, Integer i2) {
+        if (i1 < i2) {
+            throw new IncorrectValueException(USER_DONT_HAVE_ENOUGH_POINTS);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         Long id = userRepository.findByUuid(uuid).getId();
         List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
-            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER)
+            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER || u.getActual() != false)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -226,11 +233,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
             addresses.forEach(u -> {
@@ -327,6 +330,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
             order.setOrderStatus(OrderStatus.CANCELLED);
+            order.setCertificates(Collections.emptySet());
+            order.setPointsToUse(0);
+            order.setAmountOfBagsOrdered(Collections.emptyMap());
+            order.getPayment().setAmount(0L);
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
@@ -340,29 +347,84 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public List<OrderBagDto> makeOrderAgain(Long orderId) {
-        Order order = entityManager.find(Order.class, orderId);
-        if (order == null) {
-            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            Hibernate.initialize(order.getAmountOfBagsOrdered());
-            final Map<Integer, Integer> amountOfBagsClone =
-                new HashMap<>(order.getAmountOfBagsOrdered());
-            entityManager.detach(order);
-            order.setPayment(null);
-            order.setId(null);
-            order.setAmountOfBagsOrdered(amountOfBagsClone);
-            order.setOrderDate(LocalDateTime.now());
-            order.setOrderStatus(OrderStatus.FORMED);
-            entityManager.persist(order);
-            return modelMapper.map(order,
-                new TypeToken<List<OrderBagDto>>() {
-                }.getType());
+            return buildOrderBagDto(order);
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
+    }
+
+    private List<OrderBagDto> buildOrderBagDto(Order order) {
+        List<OrderBagDto> build = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> pair : order.getAmountOfBagsOrdered().entrySet()) {
+            build.add(OrderBagDto.builder()
+                .id(pair.getKey())
+                .amount(pair.getValue())
+                .build());
+        }
+        return build;
+    }
+
+    /**
+     * Method returns info about user, ubsUser and user violations by order orderId.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link UserInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    @Transactional
+    public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        Order order = optionalOrder.get();
+        return UserInfoDto.builder()
+            .customerName(order.getUser().getRecipientName())
+            .customerPhoneNumber(order.getUser().getRecipientPhone())
+            .customerEmail(order.getUser().getRecipientEmail())
+            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+            .recipientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
+            .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
+            .recipientEmail(order.getUbsUser().getEmail())
+            .userViolationForCurrentOrder(
+                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+            .build();
+    }
+
+    /**
+     * Method updates ubs_user information order in order.
+     *
+     * @param dtoUpdate of {@link UbsCustomersDtoUpdate} ubs_user_id;
+     * @return {@link UbsCustomersDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
+        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
+        if (optionalUbsUser.isEmpty()) {
+            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
+        }
+        UBSuser user = optionalUbsUser.get();
+        ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
+        return UbsCustomersDto.builder()
+            .name(user.getFirstName() + " " + user.getLastName())
+            .email(user.getEmail())
+            .phoneNumber(user.getPhoneNumber())
+            .build();
+    }
+
+    private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
+        ubSuser.setFirstName(dto.getRecipientName().split(" ")[0]);
+        ubSuser.setLastName(dto.getRecipientName().split(" ")[1]);
+        ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
+        ubSuser.setEmail(dto.getRecipientEmail());
+        return ubSuser;
     }
 
     private Order formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
@@ -438,7 +500,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 Certificate certificate = certificateRepository.findById(temp).orElseThrow(
                     () -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
                 validateCertificate(certificate);
-                certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
@@ -516,5 +577,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setRecipientPhone(userProfileDto.getRecipientPhone());
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
+    }
+
+    private void createUserByUuidIfUserDoesNotExist(String uuid) {
+        if (userRepository.findByUuid(uuid) == null) {
+            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+            uuid = dto.getUuid();
+            createRecordInUBStable(uuid);
+        }
     }
 }

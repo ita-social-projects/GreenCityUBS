@@ -24,8 +24,16 @@
     <include file="db/changelog/logs/сh-add-column-active-to-address-Veremchuk.xml"/>
     <include file="db/changelog/logs/сh-fk_ubs_users_and_addreses-Veremchuk.xml"/>
     <include file="db/changelog/logs/сh-add-new-column-status-to-address-Veremchuk.xml"/>
+    <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
     <include file="db/changelog/logs/ch-add-column-users-surname-Berezhinkiy.xml"/>
     <include file="db/changelog/logs/ch-drop-column-payment_id-Struk.xml"/>
     <include file="db/changelog/logs/ch-add-column-payment-id-in- orders-table-Struk.xml"/>
     <include file="db/changelog/logs/ch-add-column-comment-paymant-Struk.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-phone-number-email-receiving-station-to-employees-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-receiving-station-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-create-index-employee-email-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
+    <include file="db/changelog/logs/ch-add-unique-constraint-position-receiving-st-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-change-column-name-position-rec-station-Danylko.xml"/>
 </databaseChangeLog>
