@@ -349,6 +349,38 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponce);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link ImageUrlParseException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({ImageUrlParseException.class})
+    public final ResponseEntity<Object> handleImageUrlParseException(ImageUrlParseException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link BlobNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({BlobNotFoundException.class})
+    public final ResponseEntity<Object> handleBlobNotFoundException(BlobNotFoundException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
     }
 }

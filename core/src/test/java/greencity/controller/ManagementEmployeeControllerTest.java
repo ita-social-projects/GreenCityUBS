@@ -19,6 +19,8 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
@@ -45,6 +47,7 @@ class ManagementEmployeeControllerTest {
     private final String UPDATE_STATION_LINK = "/update-receiving-station";
     private final String GET_ALL_STATIONS_LINK = "/get-all-receiving-station";
     private final String DELETE_STATION_LINK = "/delete-receiving-station/";
+    private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
 
     private MockMvc mockMvc;
     @Mock
@@ -108,25 +111,39 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void update() throws Exception {
+    void updateEmployeeBadRequest() throws Exception {
         EmployeeDto dto = getEmployeeDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("EmployeeDto",
+            "", "application/json", responseJSON.getBytes());
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
 
-        mockMvc.perform(put(UBS_LINK + UPDATE_LINK)
+        mockMvc.perform(builder.file(jsonFile)
             .principal(principal)
-            .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
-    void deleteTest() throws Exception {
+    void deleteEmployeeTest() throws Exception {
         doNothing().when(service).deleteEmployee(1L);
 
         mockMvc.perform(delete(UBS_LINK + DELETE_LINK + "/" + 1)
             .principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deleteEmployee(1L);
+    }
+
+    @Test
+    void deleteEmployeeImage() throws Exception {
+        mockMvc.perform(delete(UBS_LINK + DELETE_IMAGE_LINK + 1)
+            .principal(principal)).andExpect(status().isOk());
+        verify(service, atLeastOnce()).deleteEmployeeImage(1L);
     }
 
     @Test
