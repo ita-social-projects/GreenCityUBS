@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.client.RestClient;
 
 import greencity.constant.ErrorMessage;
-import static greencity.constant.ErrorMessage.*;
 import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
