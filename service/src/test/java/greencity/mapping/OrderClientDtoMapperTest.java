@@ -31,7 +31,7 @@ class OrderClientDtoMapperTest {
         assertEquals(expected, mapper.convert(order));
 
         order.setPayment(null);
-        expected.setAmount(null);
+        expected.setAmount(0L);
 
         assertEquals(expected, mapper.convert(order));
     }
