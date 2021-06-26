@@ -2,8 +2,14 @@ package greencity.mapping;
 
 import greencity.dto.OrderClientDto;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 @Component
 public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDto> {
@@ -14,17 +20,13 @@ public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDt
      */
     @Override
     protected OrderClientDto convert(Order order) {
-        OrderClientDto build = OrderClientDto.builder()
+        return OrderClientDto.builder()
             .id(order.getId())
             .orderStatus(order.getOrderStatus())
+            .amount(Optional.ofNullable(order.getPayment())
+                    .stream().flatMap(Collection::stream)
+                    .flatMapToLong(payment -> LongStream.of(payment.getAmount()))
+                    .reduce(Long::sum).orElse(0L))
             .build();
-        if (order.getPayment() == null) {
-            build.setAmount(null);
-        } else {
-            if (order.getPayment().stream().findFirst().isPresent()) {
-                build.setAmount(order.getPayment().stream().findFirst().get().getAmount());
-            }
-        }
-        return build;
     }
 }
