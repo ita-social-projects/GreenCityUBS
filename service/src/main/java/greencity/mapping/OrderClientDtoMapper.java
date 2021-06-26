@@ -21,7 +21,7 @@ public class OrderClientDtoMapper extends AbstractConverter<Order, OrderClientDt
         if (order.getPayment() == null) {
             build.setAmount(null);
         } else {
-            build.setAmount(order.getPayment().getAmount());
+            build.setAmount(order.getPayment().stream().findFirst().get().getAmount());
         }
         return build;
     }

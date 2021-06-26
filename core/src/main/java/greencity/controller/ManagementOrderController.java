@@ -270,4 +270,23 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateAddress(dto));
     }
+
+    /**
+     * Controller returns information about order payments.
+     *
+     * @return list of {@link PaymentTableInfoDto}.
+     * @author Nazar Struk
+     */
+    @ApiOperation(value = "Get information about order payments.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getPaymentInfo")
+    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getPaymentInfo(orderId));
+    }
 }

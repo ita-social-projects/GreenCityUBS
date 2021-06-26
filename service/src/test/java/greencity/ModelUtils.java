@@ -391,10 +391,10 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.DONE)
-            .payment(Payment.builder()
+            .payment(Collections.singletonList(new Payment().builder()
                 .id(1L)
                 .amount(350L)
-                .build())
+                .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .build();

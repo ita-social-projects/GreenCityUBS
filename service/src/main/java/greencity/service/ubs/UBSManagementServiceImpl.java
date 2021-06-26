@@ -3,31 +3,29 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+import static greencity.constant.ErrorMessage.*;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
 import greencity.repository.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -178,13 +176,38 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 break;
             }
         }
-
-        // mapping coordinates to orderDto
         List<GroupedOrderDto> groupedOrderDtos = new ArrayList<>();
         getUndeliveredOrdersByGroupedCoordinates(result,
             allCoordsCapacity, groupedOrderDtos);
 
         return groupedOrderDtos;
+    }
+
+    /**
+     * Method gets all order payments and count paid amount and amount which user
+     * should paid.
+     *
+     * @return {@link PaymentTableInfoDto }
+     */
+    @Override
+    public PaymentTableInfoDto getPaymentInfo(long orderId) {
+        PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
+        Long paidAmount = 0L;
+        Long unPaidAmount = 0L;
+        Order order = orderRepository.findById(orderId).orElse(null);
+        for (Payment paymant : order.getPayment()) {
+            if (paymant.getOrderStatus().equals("approved")) {
+                paidAmount += paymant.getAmount();
+            } else {
+                unPaidAmount += paymant.getAmount();
+            }
+        }
+        paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
+        paymentTableInfoDto.setPaidAmount(paidAmount);
+        List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
+            .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
+        paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
+        return paymentTableInfoDto;
     }
 
     /**
