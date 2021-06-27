@@ -493,7 +493,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
                 certPoints += certificate.getPoints();
-                if (certPoints >= sumToPay) {
+                if (certPoints > sumToPay) {
                     sumToPay = 0;
                     certificate.setCertificateStatus(CertificateStatus.USED);
                     tooManyCertificates = true;
