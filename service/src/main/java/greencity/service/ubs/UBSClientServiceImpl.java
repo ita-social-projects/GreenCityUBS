@@ -225,7 +225,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
-            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER || u.getActual() != false)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -506,10 +505,10 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
-
                 certPoints += certificate.getPoints();
-                if (certPoints >= sumToPay) {
+                if (certPoints > sumToPay) {
                     sumToPay = 0;
+                    certificate.setCertificateStatus(CertificateStatus.USED);
                     tooManyCertificates = true;
                     if (dto.getPointsToUse() > 0) {
                         throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
