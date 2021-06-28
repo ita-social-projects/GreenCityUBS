@@ -481,7 +481,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
-            int certPoints = 0;
             for (String temp : dto.getCertificates()) {
                 if (tooManyCertificates) {
                     throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
@@ -492,19 +491,22 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
-                certPoints += certificate.getPoints();
-                if (certPoints > sumToPay) {
-                    sumToPay = 0;
-                    certificate.setCertificateStatus(CertificateStatus.USED);
-                    tooManyCertificates = true;
-                    if (dto.getPointsToUse() > 0) {
-                        throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-                    }
-                }
+                tooManyCertificates = dontSendLinkToFondyIf(sumToPay, certificate, dto);
             }
         }
-
         return sumToPay;
+    }
+
+    private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
+        if (sumToPay <= 0) {
+            sumToPay = 0;
+            certificate.setCertificateStatus(CertificateStatus.USED);
+            if (orderResponseDto.getPointsToUse() > 0) {
+                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
+            }
+            return true;
+        }
+        return false;
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
