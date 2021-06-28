@@ -491,7 +491,10 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
-                tooManyCertificates = dontSendLinkToFondyIf(sumToPay, certificate, dto);
+                if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
+                    sumToPay = 0;
+                    tooManyCertificates = true;
+                }
             }
         }
         return sumToPay;
@@ -499,7 +502,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
         if (sumToPay <= 0) {
-            sumToPay = 0;
             certificate.setCertificateStatus(CertificateStatus.USED);
             if (orderResponseDto.getPointsToUse() > 0) {
                 throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
