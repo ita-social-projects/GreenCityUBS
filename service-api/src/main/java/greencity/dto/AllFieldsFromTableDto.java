@@ -65,7 +65,7 @@ public class AllFieldsFromTableDto {
     @JsonProperty("time_of_export")
     private String timeOfExport;
     @JsonProperty("id_order_from_shop")
-    private Long idOrderFromShop;
+    private String idOrderFromShop;
     @JsonProperty("receiving_station")
     private String receivingStation;
     @JsonProperty("responsible_manager")
