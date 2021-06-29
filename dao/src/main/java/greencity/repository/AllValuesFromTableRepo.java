@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class AllValuesFromTableRepo {
     private final JdbcTemplate jdbcTemplate;
-    private static final String QUERY = "select orders.id as orderId, orders.order_status , orders.order_date,\n"
+    private static final String QUERY = "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
         + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
         + "ubs_user.phone_number ,ubs_user.email,"
         + "users.violations,"
@@ -28,7 +28,11 @@ public class AllValuesFromTableRepo {
         + "(select amount from order_bag_mapping where  bag_id = 3 "
         + "and order_bag_mapping.order_id = orders.id)as bo_Bags_20_Amount,\n"
         + "payment.amount as total_Order_Sum,\n"
-        + "certificate.code,certificate.points,(payment.amount-certificate.points)as amount_Due,\n"
+        + "(select string_agg(certificate.code,',')\n"
+        + "as order_certificate_code from certificate where order_id = orders.id),\n"
+        + "(select string_agg(certificate.points::text,',')\n"
+        + "as order_certificate_points from certificate where order_id = orders.id),\n"
+        + "(payment.amount-certificate.points)as amount_Due,\n"
         + "orders.comment as comment_For_Order_By_Client,\n"
         + "payment.payment_system,\n"
         + "cast(orders.deliver_from as date) as date_Of_Export,\n"

@@ -50,10 +50,10 @@ public class AllFieldsFromTableDto {
     private Integer boBags20Amount;
     @JsonProperty("total_order_sum")
     private Long totalSumOrder;
-    @JsonProperty("code")
-    private String certificateNumber;
-    @JsonProperty("points")
-    private Integer discount;
+    @JsonProperty("order_certificate_code")
+    private String certificateCode;
+    @JsonProperty("order_certificate_points")
+    private String certificatePoints;
     @JsonProperty("amount_due")
     private Long amountDue;
     @JsonProperty("comment_for_order_by_client")
