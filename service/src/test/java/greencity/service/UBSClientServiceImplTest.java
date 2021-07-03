@@ -16,7 +16,6 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.exceptions.OrderNotFoundException;
 
 import greencity.repository.*;
@@ -178,6 +177,20 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void findAllOrdersByUuid() {
+        when(orderRepository.findAllOrdersByUserUuid("87df9ad5-6393-441f-8423-8b2e770b01a8"))
+            .thenReturn(Arrays.asList(ModelUtils.getOrder()));
+        assertEquals(ModelUtils.getOrder().getPointsToUse(),
+            ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8").getUserBonuses());
+    }
+
+    @Test
+    void findAllOrderNotFoundException() {
+        Exception thrown = assertThrows(OrderNotFoundException.class,
+            () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        assertEquals(thrown.getMessage(), ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+    }
+
     void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
         when(orderRepository.findById(1L))
             .thenThrow(OrderNotFoundException.class);
