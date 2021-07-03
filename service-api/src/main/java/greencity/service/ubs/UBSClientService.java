@@ -116,7 +116,8 @@ public interface UBSClientService {
      * @author Liubomyr Bratakh
      */
     AllPointsUserDto findAllCurrentPointsForUser(String uuid);
-
+    
+    /**
      * Method returns info about user, ubsUser and user violations by order orderId.
      *
      * @param orderId of {@link Long} order id;
