@@ -493,4 +493,24 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
+
+    @Override
+    public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
+        List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
+        if (allByUserId.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        }
+        List<PointsForUbsUserDto> bonusForUbsUser = allByUserId.stream()
+            .filter(a -> a.getPointsToUse() != 0)
+            .map(u -> modelMapper.map(u, PointsForUbsUserDto.class))
+            .collect(Collectors.toList());
+        AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
+        allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
+        allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
+        return allBonusesForUserDto;
+    }
+
+    private Integer sumUserPoints(List<Order> allByUserId) {
+        return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
+    }
 }
