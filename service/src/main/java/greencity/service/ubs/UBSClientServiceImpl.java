@@ -574,7 +574,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private Integer sumUserPoints(List<Order> allByUserId) {
         return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
     }
-  
+
     /**
      * {@inheritDoc}
      */
