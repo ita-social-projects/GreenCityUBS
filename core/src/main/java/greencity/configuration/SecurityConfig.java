@@ -32,6 +32,7 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String UBS_LINK = "/ubs";
+    private static final String ADMIN_LINK = "/admin";
     private final JwtTool jwtTool;
     private final RestClient restClient;
 
@@ -88,7 +89,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole("USER", "ADMIN", "MODERATOR")
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/**")
-            .hasAnyRole("USER", "ADMIN", "MODERATOR");
+            .hasAnyRole("USER", "ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.GET,
+                ADMIN_LINK + "/**")
+            .hasAnyRole("ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.POST,
+                ADMIN_LINK + "/**")
+            .hasAnyRole("ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.PUT,
+                ADMIN_LINK + "/**")
+            .hasAnyRole("ADMIN", "MODERATOR")
+            .antMatchers(HttpMethod.DELETE,
+                ADMIN_LINK + "/**")
+            .hasAnyRole("ADMIN", "MODERATOR");
     }
 
     /**

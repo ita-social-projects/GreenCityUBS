@@ -8,8 +8,12 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -391,10 +395,10 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.DONE)
-            .payment(Payment.builder()
+            .payment(Collections.singletonList(new Payment().builder()
                 .id(1L)
                 .amount(350L)
-                .build())
+                .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .build();
@@ -427,5 +431,171 @@ public class ModelUtils {
             .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
             .amount(700)
             .numberOfOrder(35478L).build();
+    }
+  
+    public static AddEmployeeDto getAddEmployeeDto() {
+        return AddEmployeeDto.builder()
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static EmployeeDto getEmployeeDto() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static Employee getEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static UserInfoDto getUserInfoDto() {
+        return UserInfoDto.builder()
+            .customerName("Alan Wayn")
+            .customerPhoneNumber("091546745")
+            .customerEmail("wayn@email.com")
+            .recipientName("Anatolii Petyrov")
+            .recipientPhoneNumber("095123456")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .totalUserViolations(4)
+            .userViolationForCurrentOrder(1)
+            .build();
+    }
+
+    public static Order getOrderDetails() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Alan Wayn")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(4).build())
+            .ubsUser(UBSuser.builder()
+                .id(1l)
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
+                .build())
+            .build();
+    }
+
+    public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
+        return UbsCustomersDtoUpdate.builder()
+            .id(1L)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
+    }
+
+    public static AddressDto addressDto() {
+        return AddressDto.builder()
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
+    }
+
+    public static UserProfileDto userProfileDto() {
+        return UserProfileDto.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("0666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
+
+    public static Address address() {
+        return Address.builder()
+            .id(addressDto().getId())
+            .city(addressDto().getCity())
+            .district(addressDto().getDistrict())
+            .street(addressDto().getStreet())
+            .coordinates(addressDto().getCoordinates())
+            .entranceNumber(addressDto().getEntranceNumber())
+            .houseNumber(addressDto().getHouseNumber())
+            .houseCorpus(addressDto().getHouseCorpus())
+            .actual(addressDto().getActual())
+            .build();
+    }
+
+    public static UbsCustomersDto getUbsCustomersDto() {
+        return UbsCustomersDto.builder()
+            .name("Ivan Michalov")
+            .email("michalov@gmail.com")
+            .phoneNumber("095531111")
+            .build();
+    };
+
+    public static Position getPosition() {
+        return Position.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static PositionDto getPositionDto() {
+        return PositionDto.builder()
+            .id(1L)
+            .name("Водій")
+            .build();
+    }
+
+    public static ReceivingStation getReceivingStation() {
+        return ReceivingStation.builder()
+            .id(1L)
+            .name("Петрівка")
+            .build();
+    }
+
+    public static ReceivingStationDto getReceivingStationDto() {
+        return ReceivingStationDto.builder()
+            .id(1L)
+            .name("Петрівка")
+            .build();
     }
 }

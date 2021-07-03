@@ -8,30 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import javax.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 @Entity
@@ -61,6 +39,18 @@ public class Order {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
+    @ElementCollection
+    @CollectionTable(name = "order_bag_mapping",
+        joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "bag_id")
+    @Column(name = "exported_quantity")
+    private Map<Integer, Integer> exportedQuantity;
+    @ElementCollection
+    @CollectionTable(name = "order_bag_mapping",
+        joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "bag_id")
+    @Column(name = "confirmed_quantity")
+    private Map<Integer, Integer> confirmedQuantity;
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",
         joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})
@@ -101,7 +91,6 @@ public class Order {
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToOne
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
+    @OneToMany(mappedBy = "order")
+    private List<Payment> payment;
 }

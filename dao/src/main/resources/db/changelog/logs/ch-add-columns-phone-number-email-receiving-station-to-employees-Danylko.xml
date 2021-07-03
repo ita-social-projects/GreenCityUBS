@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Danylko-1" author="Danylko Mykola">
+        <addColumn tableName="employees">
+            <column name="phone_number" type="varchar(30)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="varchar(170)">
+                <constraints unique="true"/>
+            </column>
+            <column name="image_path" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -10,6 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>service-api</artifactId>
+
+    <properties>
+        <libphonenumber.version>8.12.24</libphonenumber.version>
+    </properties>
     <dependencies>
 
         <!-- other modules -->
@@ -89,7 +93,12 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-
+        <!-- libphonenumber -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>${libphonenumber.version}</version>
+        </dependency>
     </dependencies>
 
 

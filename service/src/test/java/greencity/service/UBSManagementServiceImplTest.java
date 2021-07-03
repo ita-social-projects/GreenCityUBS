@@ -91,7 +91,6 @@ public class UBSManagementServiceImplTest {
         getMocksBehavior();
         List<GroupedOrderDto> expected = ModelUtils.getGroupedOrders();
         List<GroupedOrderDto> actual = ubsManagementService.getClusteredCoords(distance, litres);
-
         assertEquals(expected, actual);
     }
 

@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.filters.SearchCriteria;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
@@ -86,18 +87,19 @@ public interface UBSManagementService {
     void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 
     /**
-     * Method for getting all values from table .
+     * Method for getting all values from order table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllValuesFromTable();
+    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size);
 
     /**
      * Method for getting all sorted values from table .
      *
      * @author Nazar Struk
      */
-    List<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType);
+    PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
+        int size);
 
     /**
      * Method that read user address by order id.
@@ -116,4 +118,33 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
+
+    /**
+     * Method that gets all order payments.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Struk Nazar
+     */
+    PaymentTableInfoDto getPaymentInfo(long orderId);
+
+    /**
+     * Method for getting order detail by language and order id.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language);
+
+    /**
+     * Method for updating order details.
+     *
+     * @author Mahdziak Orest
+     */
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+
+    /**
+     * Method that count sum order.
+     *
+     * @author Mahdziak Orest
+     */
+    CounterOrderDetailsDto getOrderSumDetails(Long id);
 }
