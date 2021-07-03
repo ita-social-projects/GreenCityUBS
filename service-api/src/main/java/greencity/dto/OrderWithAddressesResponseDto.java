@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class OrderWithAddressesResponseDto {
     private List<AddressDto> addressList;
 }
