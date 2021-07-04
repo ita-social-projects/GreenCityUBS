@@ -13,7 +13,6 @@ import greencity.repository.ReceivingStationRepository;
 import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,8 +47,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             throw new EmployeeValidationException(
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
+        checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
         Employee employee = modelMapper.map(dto, Employee.class);
-        if (image != null && image.getSize() < 10_000_000L) {
+        if (image != null) {
             employee.setImagePath(fileService.upload(image));
         } else {
             employee.setImagePath(defaultImagePath);
@@ -69,22 +69,30 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public EmployeeDto update(EmployeeDto dto) {
-        dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-        if (employeeRepository.existsById(dto.getId())) {
-            if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null) {
-                throw new EmployeeValidationException(
-                    ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
-            }
-            if (dto.getEmail() != null
-                && employeeRepository.checkIfEmailUnique(dto.getEmail(), dto.getId()) != null) {
-                throw new EmployeeValidationException(
-                    ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
-            }
-            Employee employee = modelMapper.map(dto, Employee.class);
-            return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+    @Transactional
+    public EmployeeDto update(EmployeeDto dto, MultipartFile image) {
+        if (!employeeRepository.existsById(dto.getId())) {
+            throw new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId());
         }
-        throw new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId());
+        dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
+        if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null) {
+            throw new EmployeeValidationException(
+                ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
+        }
+        if (dto.getEmail() != null
+            && employeeRepository.checkIfEmailUnique(dto.getEmail(), dto.getId()) != null) {
+            throw new EmployeeValidationException(
+                ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
+        }
+        checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
+        Employee employee = modelMapper.map(dto, Employee.class);
+        if (image != null) {
+            if (!employee.getImagePath().equals(defaultImagePath)) {
+                fileService.delete(employee.getImagePath());
+            }
+            employee.setImagePath(fileService.upload(image));
+        }
+        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
     }
 
     /**
@@ -93,7 +101,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public PositionDto update(PositionDto dto) {
         if (!positionRepository.existsById(dto.getId())) {
-            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + dto.getId());
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
         }
         if (!positionRepository.existsPositionByName(dto.getName())) {
             Position position = modelMapper.map(dto, Position.class);
@@ -108,7 +116,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public ReceivingStationDto update(ReceivingStationDto dto) {
         if (!stationRepository.existsById(dto.getId())) {
-            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND + dto.getId());
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getId());
         }
         if (!stationRepository.existsReceivingStationByName(dto.getName())) {
             ReceivingStation receivingStation = stationRepository.save(modelMapper.map(dto, ReceivingStation.class));
@@ -128,6 +136,23 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employeeRepository.deleteById(id);
         } else {
             throw new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteEmployeeImage(Long id) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
+        if (!employee.getImagePath().equals(defaultImagePath)) {
+            fileService.delete(employee.getImagePath());
+            employee.setImagePath(defaultImagePath);
+            employeeRepository.save(employee);
+        } else {
+            throw new EmployeeIllegalOperationException(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE);
         }
     }
 
@@ -184,7 +209,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public void deletePosition(Long id) {
         Position position = positionRepository.findById(id)
-            .orElseThrow(() -> new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND + id));
+            .orElseThrow(() -> new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + id));
         if (position.getEmployees() == null || position.getEmployees().isEmpty()) {
             positionRepository.delete(position);
         } else {
@@ -209,12 +234,32 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     public void deleteReceivingStation(Long id) {
         ReceivingStation station = stationRepository.findById(id)
             .orElseThrow(() -> new ReceivingStationNotFoundException(
-                ErrorMessage.RECEIVING_STATION_NOT_FOUND + id));
+                ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + id));
         if (station.getEmployees() == null || station.getEmployees().isEmpty()) {
             stationRepository.delete(station);
         } else {
             throw new EmployeeIllegalOperationException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
         }
+    }
+
+    private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
+        List<ReceivingStationDto> stations) {
+        if (!existPositions(positions)) {
+            throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
+        }
+        if (!existReceivingStation(stations)) {
+            throw new ReceivingStationNotFoundException(ErrorMessage.RECEIVING_STATION_NOT_FOUND);
+        }
+    }
+
+    private boolean existPositions(List<PositionDto> positions) {
+        return positions.stream()
+            .allMatch(p -> positionRepository.existsPositionByIdAndName(p.getId(), p.getName()));
+    }
+
+    private boolean existReceivingStation(List<ReceivingStationDto> stations) {
+        return stations.stream()
+            .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
     }
 
     private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {

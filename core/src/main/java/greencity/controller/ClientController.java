@@ -86,4 +86,21 @@ public class ClientController {
     public ResponseEntity<List<OrderBagDto>> makeOrderAgain(@PathVariable(name = "id") Long orderId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.makeOrderAgain(orderId));
     }
+
+    /**
+     * Controller returns all bonuses of user..
+     *
+     * @param uuid {@link String} id.
+     * @return list of {@link AllPointsUserDto}.
+     * @author Liubomyr Bratakh
+     */
+    @ApiOperation(value = "Get user's personal data.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AllPointsUserDto.class)
+    })
+    @GetMapping("/users-pointsToUse")
+    public ResponseEntity<AllPointsUserDto> getAllPointsForUser(
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllCurrentPointsForUser(uuid));
+    }
 }

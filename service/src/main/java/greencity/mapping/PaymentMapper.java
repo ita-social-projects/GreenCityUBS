@@ -15,7 +15,7 @@ public class PaymentMapper extends AbstractConverter<PaymentResponseDto, Payment
     @Override
     protected Payment convert(PaymentResponseDto dto) {
         return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id()))
+            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
             .orderStatus(dto.getOrder_status())

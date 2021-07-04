@@ -272,12 +272,30 @@ public class ManagementOrderController {
     }
 
     /**
+     * Controller returns information about order payments.
+     *
+     * @return list of {@link PaymentTableInfoDto}.
+     * @author Nazar Struk
+     */
+    @ApiOperation(value = "Get information about order payments.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getPaymentInfo")
+    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getPaymentInfo(orderId));
+    }
+
+    /**
      * Controller for get order info.
      *
      * @return {@link List OrderDetailInfoDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Get order detail info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailInfoDto.class),
@@ -296,7 +314,6 @@ public class ManagementOrderController {
      * @return {@link List OrderDetailInfoDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Update order detail info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
@@ -317,7 +334,6 @@ public class ManagementOrderController {
      * @return {@link CounterOrderDetailsDto}.
      * @author Orest Mahdziak
      */
-
     @ApiOperation(value = "Get order sum delails")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),

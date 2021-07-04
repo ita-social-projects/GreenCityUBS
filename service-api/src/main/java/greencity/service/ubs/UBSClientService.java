@@ -109,6 +109,15 @@ public interface UBSClientService {
     List<OrderBagDto> makeOrderAgain(Long orderId);
 
     /**
+     * Method returns list all bonuses of user.
+     *
+     * @param uuid of {@link User}'s uuid;
+     * @return {@link AllPointsUserDto} that contains all client's bonuses;
+     * @author Liubomyr Bratakh
+     */
+    AllPointsUserDto findAllCurrentPointsForUser(String uuid);
+
+    /**
      * Method returns info about user, ubsUser and user violations by order orderId.
      *
      * @param orderId of {@link Long} order id;

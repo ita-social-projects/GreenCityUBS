@@ -18,6 +18,8 @@ import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
+    private final PaymentRepository paymentRepository;
+    @PersistenceContext
+    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
@@ -59,9 +64,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        Order order = orderRepository.findById(Long.valueOf(dto.getOrder_id()))
+        String[] ids = dto.getOrder_id().split("_");
+        Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        Payment orderPayment = order.getPayment();
+        Payment orderPayment = order.getPayment().get(order.getPayment().size() - 1);
         if (!orderPayment.getCurrency().equals(dto.getCurrency())
             || !orderPayment.getAmount().equals(Long.valueOf(dto.getAmount()))) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
@@ -70,8 +76,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderStatus(OrderStatus.PAID);
         }
         orderPayment = modelMapper.map(dto, Payment.class);
-        order.setPayment(orderPayment);
-        order.getCertificates().stream().forEach(s -> s.setCertificateStatus(CertificateStatus.USED));
+        orderPayment.setOrder(order);
+        paymentRepository.save(orderPayment);
         orderRepository.save(order);
     }
 
@@ -219,7 +225,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
-            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER || u.getActual() != false)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -330,7 +335,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setCertificates(Collections.emptySet());
             order.setPointsToUse(0);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
-            order.getPayment().setAmount(0L);
+            order.getPayment().stream().forEach(x -> x.setAmount(0L));
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
@@ -438,16 +443,23 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderStatus("created")
             .currency("UAH")
             .order(order).build();
-        order.setPayment(payment);
+        if (order.getPayment() != null) {
+            order.getPayment().add(payment);
+        } else {
+            ArrayList<Payment> arrayOfPayments = new ArrayList<>();
+            arrayOfPayments.add(payment);
+            order.setPayment(arrayOfPayments);
+        }
         orderRepository.save(order);
-
         return order;
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
+        Order testOrder = orderRepository.findById(orderId).orElseThrow(null);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(orderId.toString())
+            .orderId(orderId.toString() + "_"
+                + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100).build();
@@ -482,7 +494,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
-            int certPoints = 0;
             for (String temp : dto.getCertificates()) {
                 if (tooManyCertificates) {
                     throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
@@ -493,19 +504,24 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
-
-                certPoints += certificate.getPoints();
-                if (certPoints >= sumToPay) {
+                if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
-                    if (dto.getPointsToUse() > 0) {
-                        throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-                    }
                 }
             }
         }
-
         return sumToPay;
+    }
+
+    private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
+        if (sumToPay <= 0) {
+            certificate.setCertificateStatus(CertificateStatus.USED);
+            if (orderResponseDto.getPointsToUse() > 0) {
+                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
+            }
+            return true;
+        }
+        return false;
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
@@ -537,6 +553,26 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+    }
+
+    @Override
+    public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
+        List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
+        if (allByUserId.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        }
+        List<PointsForUbsUserDto> bonusForUbsUser = allByUserId.stream()
+            .filter(a -> a.getPointsToUse() != 0)
+            .map(u -> modelMapper.map(u, PointsForUbsUserDto.class))
+            .collect(Collectors.toList());
+        AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
+        allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
+        allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
+        return allBonusesForUserDto;
+    }
+
+    private Integer sumUserPoints(List<Order> allByUserId) {
+        return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
     }
 
     /**
