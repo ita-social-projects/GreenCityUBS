@@ -36,4 +36,5 @@
     <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
     <include file="db/changelog/logs/ch-add-unique-constraint-position-receiving-st-Danylko.xml"/>
     <include file="db/changelog/logs/ch-change-column-name-position-rec-station-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-new-payment-status-column-Mahdziak.xml"/>
 </databaseChangeLog>
