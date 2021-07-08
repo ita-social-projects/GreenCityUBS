@@ -2,8 +2,8 @@ package greencity.entity.enums;
 
 public enum OrderStatus {
     FORMED,
-    PAID,
     ADJUSTMENT,
+    BROUGHT_IT_HIMSELF,
     CONFIRMED,
     ON_THE_ROUTE,
     DONE,

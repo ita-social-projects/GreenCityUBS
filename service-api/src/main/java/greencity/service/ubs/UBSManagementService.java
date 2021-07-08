@@ -147,4 +147,18 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     CounterOrderDetailsDto getOrderSumDetails(Long id);
+
+    /**
+     * Method that get order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto getOrderDetailStatus(Long id);
+
+    /**
+     * Method that update order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
 }

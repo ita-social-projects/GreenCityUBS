@@ -7,6 +7,7 @@ import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -73,7 +74,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
-            order.setOrderStatus(OrderStatus.PAID);
+            orderPayment.setPaymentStatus(PaymentStatus.PAID);
         }
         orderPayment = modelMapper.map(dto, Payment.class);
         orderPayment.setOrder(order);

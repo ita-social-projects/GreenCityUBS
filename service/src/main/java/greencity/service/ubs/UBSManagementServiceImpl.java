@@ -3,9 +3,13 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+
 import static greencity.constant.ErrorMessage.*;
+
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -15,6 +19,7 @@ import greencity.repository.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +45,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
+    private final PaymentRepository paymentRepository;
 
     /**
      * {@inheritDoc}
@@ -614,10 +620,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Bag> bag = bagRepository.findBagByOrderId(id);
         List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
+        final List<Payment> payment = paymentRepository.paymentInfo(id);
 
         double sumAmount = 0;
         double sumConfirmed = 0;
         double sumExported = 0;
+        double totalSumAmount;
+        double totalSumConfirmed;
+        double totalSumExported;
 
         List<Integer> amountValues =
             order.getAmountOfBagsOrdered().entrySet().stream().map(Map.Entry::getValue)
@@ -638,32 +648,32 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         if (!currentCertificate.isEmpty()) {
-            dto.setTotalSumAmount(
-                sumAmount - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse());
-            dto.setTotalSumConfirmed(
-                sumConfirmed - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse());
-            dto.setTotalSumExported(
-                sumExported - (currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse());
+            totalSumAmount =
+                (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse()));
+            totalSumConfirmed =
+                (sumConfirmed
+                    - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                        - order.getPointsToUse()));
+            totalSumExported =
+                (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    - order.getPointsToUse()));
             dto.setCertificateBonus(
                 currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
                 currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
-            dto.setTotalSumAmount(sumAmount - order.getPointsToUse());
-            dto.setTotalSumConfirmed(sumConfirmed - order.getPointsToUse());
-            dto.setTotalSumExported(sumExported - order.getPointsToUse());
+            totalSumAmount = sumAmount - order.getPointsToUse();
+            totalSumConfirmed = sumConfirmed - order.getPointsToUse();
+            totalSumExported = sumExported - order.getPointsToUse();
         }
 
-        dto.setTotalAmount(
+        dto.setTotalExported(
             order.getAmountOfBagsOrdered().entrySet()
                 .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalConfirmed(
             order.getConfirmedQuantity().entrySet()
                 .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
-
         dto.setTotalExported(
             order.getExportedQuantity().entrySet()
                 .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
@@ -674,8 +684,85 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setOrderComment(order.getComment());
         dto.setNumberOrderFromShop(order.getAdditionalOrders());
         dto.setBonus(order.getPointsToUse().doubleValue());
+        dto.setTotalSumAmount(totalSumAmount);
+        dto.setTotalSumConfirmed(totalSumConfirmed);
+        dto.setTotalSumExported(totalSumExported);
 
+        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
         return dto;
+    }
+
+    private void updateStatus(List<Payment> payments, Order currentOrder, double totalConfirmed, double totalExported) {
+        if (currentOrder.getOrderStatus() == OrderStatus.FORMED
+            || currentOrder.getOrderStatus() == OrderStatus.CONFIRMED
+            || currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+            if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
+                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+            }
+            if (totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)
+                && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) == 0L) {
+                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.UNPAID));
+            }
+            if (totalConfirmed > 0 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) > 0
+                && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
+                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+            }
+        } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || currentOrder.getOrderStatus() == OrderStatus.DONE
+            || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
+            if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
+                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+            }
+            if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
+                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+            }
+        }
+        paymentRepository.saveAll(payments);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public OrderDetailStatusDto getOrderDetailStatus(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<Payment> payment = paymentRepository.paymentInfo(id);
+        if (payment.size() == 0) {
+            throw new PaymentNotFoundException("payment not found for order id " + id);
+        }
+        return buildStatuses(order, payment.get(0));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<Payment> payment = paymentRepository.paymentInfo(id);
+        if (payment.size() == 0) {
+            throw new PaymentNotFoundException("payment not found for order id " + id);
+        }
+        order.setComment(dto.getOrderComment());
+        order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
+        paymentRepository.paymentInfo(id)
+            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
+        orderRepository.save(order);
+        paymentRepository.saveAll(payment);
+        return buildStatuses(order, payment.get(0));
+    }
+
+    private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
+        return OrderDetailStatusDto.builder()
+            .orderStatus(order.getOrderStatus().name())
+            .paymentStatus(payment.getPaymentStatus().name())
+            .date(order.getOrderDate().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .build();
     }
 
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {

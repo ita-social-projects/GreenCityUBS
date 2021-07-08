@@ -7,6 +7,7 @@ import static greencity.ModelUtils.getPrincipal;
 import greencity.ModelUtils;
 import greencity.dto.CertificateDtoForAdding;
 import greencity.dto.OrderDetailInfoDto;
+import greencity.dto.OrderDetailStatusDto;
 import greencity.service.ubs.UBSManagementService;
 
 import static org.mockito.Mockito.times;
@@ -152,4 +153,23 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/get-order-sum-detail" + "/{id}", 1L))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void updateOrderStatusesDetail() throws Exception {
+        OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        this.mockMvc.perform(put(ubsLink + "/update-order-detail-status" + "/{id}", 1L)
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void geOrderStatusesDetail() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/read-order-detail-status" + "/{id}", 1L))
+            .andExpect(status().isOk());
+    }
+
 }
