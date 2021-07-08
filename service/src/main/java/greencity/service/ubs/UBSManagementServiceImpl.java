@@ -730,7 +730,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
-        if (payment.size() == 0) {
+        if (payment.isEmpty()) {
             throw new PaymentNotFoundException("payment not found for order id " + id);
         }
         return buildStatuses(order, payment.get(0));
@@ -745,7 +745,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
-        if (payment.size() == 0) {
+        if (payment.isEmpty()) {
             throw new PaymentNotFoundException("payment not found for order id " + id);
         }
         order.setComment(dto.getOrderComment());
