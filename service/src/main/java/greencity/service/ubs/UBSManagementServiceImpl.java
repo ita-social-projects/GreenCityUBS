@@ -668,7 +668,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumExported = sumExported - order.getPointsToUse();
         }
 
-        dto.setTotalExported(
+        dto.setTotalAmount(
             order.getAmountOfBagsOrdered().entrySet()
                 .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalConfirmed(
@@ -678,6 +678,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.getExportedQuantity().entrySet()
                 .stream().map(Map.Entry::getValue).reduce(Integer::sum).orElse(0).doubleValue());
 
+        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
+            order);
+        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
+        return dto;
+    }
+
+    private void setDtoInfo(CounterOrderDetailsDto dto, double sumAmount, double sumExported, double sumConfirmed,
+        double totalSumAmount, double totalSumConfirmed, double totalSumExported, Order order) {
         dto.setSumAmount(sumAmount);
         dto.setSumConfirmed(sumConfirmed);
         dto.setSumExported(sumExported);
@@ -687,9 +695,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setTotalSumAmount(totalSumAmount);
         dto.setTotalSumConfirmed(totalSumConfirmed);
         dto.setTotalSumExported(totalSumExported);
-
-        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
-        return dto;
     }
 
     private void updateStatus(List<Payment> payments, Order currentOrder, double totalConfirmed, double totalExported) {
