@@ -387,8 +387,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Method interceptor exception {@link PaymentNotFoundException}.
      *
-     * @param exception      Exception which should be intercepted.
-     * @param request contain detail about occur exception.
+     * @param exception Exception which should be intercepted.
+     * @param request   contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
