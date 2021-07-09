@@ -8,6 +8,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
@@ -18,6 +19,8 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -40,6 +43,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
+    private final ViolationRepository violationRepository;
 
     /**
      * {@inheritDoc}
@@ -676,6 +680,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setBonus(order.getPointsToUse().doubleValue());
 
         return dto;
+    }
+
+    /**
+     * Method returns detailed information about user
+     * violation by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ViolationDetailInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    @Transactional
+    public ViolationDetailInfoDto getViolationDetailsByOrderId(Long orderId) {
+    Optional<Violation> optionalViolation = violationRepository.findByOrderId(orderId);
+           if(optionalViolation.isEmpty()){
+        throw new ViolationNotFoundException(ErrorMessage.NO_VIOLATION_IN_ORDER);
+    }
+    Violation violation = optionalViolation.get();
+    return ViolationDetailInfoDto.builder()
+            .orderId(orderId)
+            .userName(violation.getUser().getRecipientName())
+            .violationLevel(violation.getViolationLevel())
+            .description(violation.getDescription())
+            .violationDate(violation.getViolationDate())
+            .build();
     }
 
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {

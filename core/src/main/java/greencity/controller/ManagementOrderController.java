@@ -345,4 +345,25 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderSumDetails(id));
     }
+
+    /**
+     * Controller gets details of user rule violation added to the current order.
+     *
+     * @param orderId {@link Long}.
+     * @return {@link ViolationDetailInfoDto} gets details of user rule violation added to the current order.
+     */
+    @ApiOperation("Get details of user violation")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = ViolationDetailInfoDto.class),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/violation-details/{orderId}")
+    public ResponseEntity<ViolationDetailInfoDto> getViolationDetailsForCurrentOrder(
+            @Valid @PathVariable("orderId") Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsManagementService.getViolationDetailsByOrderId(orderId));
+    }
+
 }

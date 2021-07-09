@@ -147,4 +147,14 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     CounterOrderDetailsDto getOrderSumDetails(Long id);
+
+    /**
+     * Method returns detailed information about user
+     * violation by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ViolationDetailInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    ViolationDetailInfoDto getViolationDetailsByOrderId(Long orderId);
 }
