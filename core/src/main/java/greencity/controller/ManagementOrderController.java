@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -163,7 +165,7 @@ public class ManagementOrderController {
      * Controller for getting User violations.
      *
      * @return {@link ViolationsInfoDto} count of Users violations with order id
-     *         descriptions.
+     *         descriptions
      * @author Nazar Struk
      */
     @ApiOperation("Get User violations")
@@ -334,7 +336,7 @@ public class ManagementOrderController {
      * @return {@link CounterOrderDetailsDto}.
      * @author Orest Mahdziak
      */
-    @ApiOperation(value = "Get order sum delails")
+    @ApiOperation(value = "Get order sum details")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
@@ -344,6 +346,34 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderSumDetails(id));
+    }
+
+    /**
+     * Controller gets details of user rule violation added to the current order.
+     *
+     * @param orderId {@link Long}.
+     * @return {@link ViolationDetailInfoDto} gets details of user rule violation
+     *         added to the current order
+     */
+    @ApiOperation("Get details of user violation")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ViolationDetailInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/violation-details/{orderId}")
+    public ResponseEntity<ViolationDetailInfoDto> getViolationDetailsForCurrentOrder(
+        @Valid @PathVariable("orderId") Long orderId) {
+        Optional<ViolationDetailInfoDto> violationDetailsByOrderId =
+            ubsManagementService.getViolationDetailsByOrderId(orderId);
+        if (violationDetailsByOrderId.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(violationDetailsByOrderId.get());
+        }
     }
 
     /**

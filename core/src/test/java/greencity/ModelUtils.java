@@ -10,7 +10,10 @@ import greencity.entity.user.employee.ReceivingStation;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
+
+import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
     public static Principal getPrincipal() {
@@ -213,6 +216,20 @@ public class ModelUtils {
         return ReceivingStationDto.builder()
             .id(1L)
             .name("Петрівка")
+            .build();
+    }
+
+    public static ViolationDetailInfoDto getViolationDetailInfoDto() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
+
+        return ViolationDetailInfoDto.builder()
+            .orderId(1L)
+            .userName("Alan Po")
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
             .build();
     }
 }
