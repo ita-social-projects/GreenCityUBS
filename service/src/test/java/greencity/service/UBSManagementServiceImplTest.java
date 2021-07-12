@@ -6,6 +6,7 @@ import greencity.entity.coords.Coordinates;
 
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.Violation;
 
 import greencity.exceptions.NotFoundOrderAddressException;
 
@@ -13,11 +14,12 @@ import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.PaymentRepository;
+import greencity.repository.ViolationRepository;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +59,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private ViolationRepository violationRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -148,9 +153,21 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
+    void returnsViolationDetailsByOrderId() {
+        Violation violation = ModelUtils.getViolation();
+        Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
+        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        Optional<ViolationDetailInfoDto> actual = ubsManagementService.getViolationDetailsByOrderId(1L);
+        verify(violationRepository, times(1)).findByOrderId(1L);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void checkPaymentNotFound() {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderDetailStatus(100L);
         });
+
     }
 }

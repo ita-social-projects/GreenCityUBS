@@ -22,7 +22,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -39,12 +40,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
-    private final HttpServletRequest httpServletRequest;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
+    private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
 
     /**
@@ -203,7 +204,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long unPaidAmount = 0L;
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        ;
         for (Payment payment : order.getPayment()) {
             if (payment.getOrderStatus().equals("approved")) {
                 paidAmount += payment.getAmount();
@@ -768,6 +768,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentStatus(payment.getPaymentStatus().name())
             .date(order.getOrderDate().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .build();
+    }
+
+    /**
+     * Method returns detailed information about user violation by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ViolationDetailInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    @Override
+    @Transactional
+    public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
+        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
+            .orderId(orderId)
+            .userName(v.getUser().getRecipientName())
+            .violationLevel(v.getViolationLevel())
+            .description(v.getDescription())
+            .violationDate(v.getViolationDate())
+            .build());
     }
 
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
