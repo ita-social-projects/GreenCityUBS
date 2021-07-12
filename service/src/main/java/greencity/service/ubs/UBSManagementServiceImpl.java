@@ -8,7 +8,6 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import lombok.AllArgsConstructor;
@@ -37,7 +35,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
-    private final HttpServletRequest httpServletRequest;
     private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
@@ -201,7 +198,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long unPaidAmount = 0L;
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        ;
         for (Payment payment : order.getPayment()) {
             if (payment.getOrderStatus().equals("approved")) {
                 paidAmount += payment.getAmount();
@@ -683,8 +679,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method returns detailed information about user
-     * violation by order id.
+     * Method returns detailed information about user violation by order id.
      *
      * @param orderId of {@link Long} order id;
      * @return {@link ViolationDetailInfoDto};
@@ -692,19 +687,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     @Transactional
-    public ViolationDetailInfoDto getViolationDetailsByOrderId(Long orderId) {
-    Optional<Violation> optionalViolation = violationRepository.findByOrderId(orderId);
-           if(optionalViolation.isEmpty()){
-        throw new ViolationNotFoundException(ErrorMessage.NO_VIOLATION_IN_ORDER);
-    }
-    Violation violation = optionalViolation.get();
-    return ViolationDetailInfoDto.builder()
+    public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
+        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
             .orderId(orderId)
-            .userName(violation.getUser().getRecipientName())
-            .violationLevel(violation.getViolationLevel())
-            .description(violation.getDescription())
-            .violationDate(violation.getViolationDate())
-            .build();
+            .userName(v.getUser().getRecipientName())
+            .violationLevel(v.getViolationLevel())
+            .description(v.getDescription())
+            .violationDate(v.getViolationDate())
+            .build());
     }
 
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {

@@ -1,6 +1,5 @@
 package greencity.entity.user;
 
-
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;

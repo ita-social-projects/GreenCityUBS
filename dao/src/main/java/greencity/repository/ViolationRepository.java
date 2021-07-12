@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import org.springframework.data.repository.CrudRepository;
 
