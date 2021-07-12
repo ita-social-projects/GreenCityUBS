@@ -147,4 +147,11 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     CounterOrderDetailsDto getOrderSumDetails(Long id);
+
+    /**
+     * Method that gets bags information.
+     *
+     * @author Nazar Struk
+     */
+    List<DetailsOrderInfoDto> getOrderDetails(Long orderId);
 }

@@ -40,6 +40,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
+    private final BagsInfoRepo bagsInfoRepository;
 
     /**
      * {@inheritDoc}
@@ -704,5 +705,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         address.setStreet(dto.getStreet());
         address.setHouseCorpus(dto.getHouseCorpus());
         return address;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<DetailsOrderInfoDto> getOrderDetails(Long orderId) {
+        List<DetailsOrderInfoDto> detailsOrderInfoDtos = new ArrayList<>();
+        List<Map<String, Object>> ourResult = bagsInfoRepository.getBagInfo(orderId);
+        for (Map<String, Object> array : ourResult) {
+            DetailsOrderInfoDto dto = objectMapper.convertValue(array, DetailsOrderInfoDto.class);
+            detailsOrderInfoDtos.add(dto);
+        }
+        return detailsOrderInfoDtos;
     }
 }
