@@ -155,7 +155,7 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
-  
+
     /**
      * Method returns detailed information about user violation by order id.
      *

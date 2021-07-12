@@ -366,6 +366,7 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderBagsDetails(id));
     }
+
     /**
      * Controller gets details of user rule violation added to the current order.
      *
