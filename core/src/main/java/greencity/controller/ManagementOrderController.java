@@ -377,6 +377,25 @@ public class ManagementOrderController {
     }
 
     /**
+     * Controller deletes violation from order.
+     *
+     * @return {@link HttpStatus}
+     * @author Nadia Rusanovscaia.
+     */
+    @ApiOperation(value = "Delete violation from order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ViolationDetailInfoDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/delete-violation-from-order/{orderId}")
+    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId) {
+        ubsManagementService.deleteViolation(orderId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
      * Controller for get order detail status.
      *
      * @return {@link OrderDetailStatusDto}.

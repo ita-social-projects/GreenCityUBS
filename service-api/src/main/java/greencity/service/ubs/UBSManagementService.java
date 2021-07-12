@@ -171,4 +171,12 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+
+    /**
+     * Method deletes violation from database by orderId.
+     *
+     * @param orderId {@link Long}
+     * @author Nadia Rusanovscaia
+     */
+    void deleteViolation(Long orderId);
 }
