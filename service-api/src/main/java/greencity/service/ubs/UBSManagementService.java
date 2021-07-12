@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
@@ -154,6 +155,15 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
+  
+    /**
+     * Method returns detailed information about user violation by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ViolationDetailInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId);
 
     /**
      * Method that get order and payment status.

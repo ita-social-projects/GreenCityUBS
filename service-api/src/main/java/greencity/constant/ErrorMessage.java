@@ -52,6 +52,7 @@ public class ErrorMessage {
     /**
      * Constructor.
      */
+
     public ErrorMessage() {
     }
 }
