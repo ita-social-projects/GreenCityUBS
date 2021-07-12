@@ -1,13 +1,12 @@
 package greencity.entity.user;
 
-import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,6 +35,7 @@ public class Violation {
     @Column(name = "violation_date")
     private LocalDateTime violationDate;
 
+    @Nullable
     @Column(name = "image_path")
     private String image;
 

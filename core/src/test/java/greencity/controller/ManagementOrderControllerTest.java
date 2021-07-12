@@ -7,10 +7,11 @@ import static greencity.ModelUtils.getPrincipal;
 import greencity.ModelUtils;
 import greencity.dto.CertificateDtoForAdding;
 import greencity.dto.OrderDetailInfoDto;
+import greencity.dto.ViolationDetailInfoDto;
 import greencity.service.ubs.UBSManagementService;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static greencity.ModelUtils.getViolationDetailInfoDto;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,6 +20,8 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.service.ubs.UBSClientService;
 import java.security.Principal;
+import java.util.Optional;
+
 import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -151,5 +154,24 @@ class ManagementOrderControllerTest {
     void getSumOrderDetail() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-order-sum-detail" + "/{id}", 1L))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void answersNotFoundWhenNoViolationWithGivenOrderId() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
+                .andExpect(status().isNotFound());
+
+        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+    }
+
+    @Test
+    void returnsDetailsAboutViolationWithGivenOrderId() throws Exception {
+        ViolationDetailInfoDto violationDetailInfoDto = getViolationDetailInfoDto();
+        when(ubsManagementService.getViolationDetailsByOrderId(1l)).thenReturn(Optional.of(violationDetailInfoDto));
+
+        this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
+                .andExpect(status().isOk());
+
+        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
     }
 }

@@ -8,6 +8,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -16,7 +17,10 @@ import greencity.entity.user.ubs.UBSuser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
+
+import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
 
@@ -598,4 +602,36 @@ public class ModelUtils {
             .name("Петрівка")
             .build();
     }
+
+    public static Violation getViolation(){
+        LocalDateTime localdatetime
+                = LocalDateTime.of(
+                2021, Month.MARCH,
+                16, 13, 00, 00);
+        return Violation.builder()
+                .id(1L)
+                .user(User.builder()
+                .recipientName("Alan Po").build())
+                .order(Order.builder()
+                .id(1L).build())
+                .violationLevel(MAJOR)
+                .description("violation1")
+                .violationDate(localdatetime)
+                .build();
+    }
+
+    public static ViolationDetailInfoDto getViolationDetailInfoDto(){
+        LocalDateTime localdatetime
+                = LocalDateTime.of(
+                2021, Month.MARCH,
+                16, 13, 00, 00);
+        return ViolationDetailInfoDto.builder()
+                .orderId(1L)
+                .userName("Alan Po")
+                .violationLevel(MAJOR)
+                .description("violation1")
+                .violationDate(localdatetime)
+                .build();
+    }
+
 }

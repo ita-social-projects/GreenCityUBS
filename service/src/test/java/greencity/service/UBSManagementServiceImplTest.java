@@ -5,15 +5,24 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
+import greencity.repository.ViolationRepository;
 import greencity.service.ubs.UBSManagementServiceImpl;
+
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -48,6 +57,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private ViolationRepository violationRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -136,5 +148,16 @@ public class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
             ubsManagementService.getAddressByOrderId(10000000l);
         });
+    }
+
+    @Test
+    void returnsViolationDetailsByOrderId(){
+        Violation violation = ModelUtils.getViolation();
+        Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
+        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        Optional<ViolationDetailInfoDto> actual = ubsManagementService.getViolationDetailsByOrderId(1L);
+        verify(violationRepository, times(1)).findByOrderId(1L);
+
+        assertEquals(expected, actual);
     }
 }
