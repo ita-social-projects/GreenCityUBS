@@ -8,6 +8,7 @@ import greencity.ModelUtils;
 import greencity.dto.CertificateDtoForAdding;
 import greencity.dto.OrderDetailInfoDto;
 import greencity.dto.ViolationDetailInfoDto;
+import greencity.dto.OrderDetailStatusDto;
 import greencity.service.ubs.UBSManagementService;
 
 import static greencity.ModelUtils.getViolationDetailInfoDto;
@@ -173,5 +174,22 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+    }
+
+    void updateOrderStatusesDetail() throws Exception {
+        OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        this.mockMvc.perform(put(ubsLink + "/update-order-detail-status" + "/{id}", 1L)
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void geOrderStatusesDetail() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/read-order-detail-status" + "/{id}", 1L))
+            .andExpect(status().isOk());
     }
 }

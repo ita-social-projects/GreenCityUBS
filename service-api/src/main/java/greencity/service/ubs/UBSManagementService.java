@@ -157,4 +157,18 @@ public interface UBSManagementService {
      * @author Rusanovscaia Nadejda
      */
     Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId);
+
+    /**
+     * Method that get order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto getOrderDetailStatus(Long id);
+
+    /**
+     * Method that update order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
 }

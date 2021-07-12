@@ -3,6 +3,7 @@ package greencity;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -179,6 +180,14 @@ public class ModelUtils {
             .confirmedQuantity(200)
             .name("test")
             .bagId(3)
+            .build();
+    }
+
+    public static OrderDetailStatusDto getOrderDetailStatusDto() {
+        return OrderDetailStatusDto.builder()
+            .paymentStatus(PaymentStatus.PAID.name())
+            .orderStatus(OrderStatus.CONFIRMED.name())
+            .date(LocalDateTime.now().toString())
             .build();
     }
 

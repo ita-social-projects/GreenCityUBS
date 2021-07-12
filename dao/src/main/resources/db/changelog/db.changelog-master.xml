@@ -39,4 +39,5 @@
     <include file="db/changelog/logs/ch-add-columns-violation-level-violation-date-in-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-image-path-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-id-to-violations-description-mapping-Rusanovscaia.xml"/>
+    <include file="db/changelog/logs/ch-add-new-payment-status-column-Mahdziak.xml"/>
 </databaseChangeLog>

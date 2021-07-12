@@ -3,26 +3,26 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
+
 import greencity.exceptions.NotFoundOrderAddressException;
+
+import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.AddressRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
-import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,7 +34,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -159,5 +161,13 @@ public class UBSManagementServiceImplTest {
         verify(violationRepository, times(1)).findByOrderId(1L);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void checkPaymentNotFound() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderDetailStatus(100L);
+        });
+
     }
 }
