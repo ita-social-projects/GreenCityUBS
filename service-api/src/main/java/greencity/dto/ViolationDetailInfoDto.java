@@ -19,5 +19,4 @@ public class ViolationDetailInfoDto {
     private String description;
     private String image;
     private LocalDateTime violationDate;
-
 }

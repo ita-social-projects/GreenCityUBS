@@ -6,7 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
 public interface ViolationRepository extends CrudRepository<Violation, Long> {
-
     /**
      * Method returns violation by order id.
      *

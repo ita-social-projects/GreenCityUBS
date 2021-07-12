@@ -210,18 +210,17 @@ public class ModelUtils {
             .build();
     }
 
-    public static ViolationDetailInfoDto getViolationDetailInfoDto(){
-        LocalDateTime localdatetime
-                = LocalDateTime.of(
-                2021, Month.MARCH,
-                16, 13, 00, 00);
+    public static ViolationDetailInfoDto getViolationDetailInfoDto() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
 
         return ViolationDetailInfoDto.builder()
-                .orderId(1L)
-                .userName("Alan Po")
-                .violationLevel(MAJOR)
-                .description("violation1")
-                .violationDate(localdatetime)
-                .build();
+            .orderId(1L)
+            .userName("Alan Po")
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
     }
 }

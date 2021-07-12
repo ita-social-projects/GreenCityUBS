@@ -159,7 +159,7 @@ class ManagementOrderControllerTest {
     @Test
     void answersNotFoundWhenNoViolationWithGivenOrderId() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
 
         verify(ubsManagementService).getViolationDetailsByOrderId(1L);
     }
@@ -170,7 +170,7 @@ class ManagementOrderControllerTest {
         when(ubsManagementService.getViolationDetailsByOrderId(1l)).thenReturn(Optional.of(violationDetailInfoDto));
 
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         verify(ubsManagementService).getViolationDetailsByOrderId(1L);
     }

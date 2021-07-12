@@ -151,7 +151,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    void returnsViolationDetailsByOrderId(){
+    void returnsViolationDetailsByOrderId() {
         Violation violation = ModelUtils.getViolation();
         Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));

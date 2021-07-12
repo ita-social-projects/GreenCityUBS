@@ -603,35 +603,33 @@ public class ModelUtils {
             .build();
     }
 
-    public static Violation getViolation(){
-        LocalDateTime localdatetime
-                = LocalDateTime.of(
-                2021, Month.MARCH,
-                16, 13, 00, 00);
+    public static Violation getViolation() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
         return Violation.builder()
-                .id(1L)
-                .user(User.builder()
+            .id(1L)
+            .user(User.builder()
                 .recipientName("Alan Po").build())
-                .order(Order.builder()
+            .order(Order.builder()
                 .id(1L).build())
-                .violationLevel(MAJOR)
-                .description("violation1")
-                .violationDate(localdatetime)
-                .build();
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
     }
 
-    public static ViolationDetailInfoDto getViolationDetailInfoDto(){
-        LocalDateTime localdatetime
-                = LocalDateTime.of(
-                2021, Month.MARCH,
-                16, 13, 00, 00);
+    public static ViolationDetailInfoDto getViolationDetailInfoDto() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
         return ViolationDetailInfoDto.builder()
-                .orderId(1L)
-                .userName("Alan Po")
-                .violationLevel(MAJOR)
-                .description("violation1")
-                .violationDate(localdatetime)
-                .build();
+            .orderId(1L)
+            .userName("Alan Po")
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
     }
 
 }
