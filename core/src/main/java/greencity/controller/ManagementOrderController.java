@@ -364,4 +364,42 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderDetails(id));
     }
+  
+    /**
+     * Controller for get order detail status.
+     *
+     * @return {@link OrderDetailStatusDto}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get order detail status")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailStatusDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/read-order-detail-status/{id}")
+    public ResponseEntity<OrderDetailStatusDto> getOrderDetailStatus(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderDetailStatus(id));
+    }
+
+    /**
+     * Controller for update order and payment status.
+     *
+     * @return {@link OrderDetailStatusDto}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Update order detail status")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailStatusDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PutMapping("/update-order-detail-status/{id}")
+    public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
+        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.updateOrderDetailStatus(id, dto));
+    }
 }

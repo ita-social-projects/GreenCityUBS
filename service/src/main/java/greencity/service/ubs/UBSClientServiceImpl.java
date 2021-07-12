@@ -7,6 +7,7 @@ import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -73,7 +74,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
-            order.setOrderStatus(OrderStatus.PAID);
+            orderPayment.setPaymentStatus(PaymentStatus.PAID);
         }
         orderPayment = modelMapper.map(dto, Payment.class);
         orderPayment.setOrder(order);
@@ -225,7 +226,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .sorted(Comparator.comparing(Address::getId))
             .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
-            .filter(u -> u.getAddressStatus() != AddressStatus.IN_ORDER || u.getActual() != false)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -495,7 +495,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, int sumToPay) {
         if (dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
-            int certPoints = 0;
             for (String temp : dto.getCertificates()) {
                 if (tooManyCertificates) {
                     throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
@@ -506,19 +505,24 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setOrder(order);
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
-
-                certPoints += certificate.getPoints();
-                if (certPoints >= sumToPay) {
+                if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
-                    if (dto.getPointsToUse() > 0) {
-                        throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-                    }
                 }
             }
         }
-
         return sumToPay;
+    }
+
+    private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
+        if (sumToPay <= 0) {
+            certificate.setCertificateStatus(CertificateStatus.USED);
+            if (orderResponseDto.getPointsToUse() > 0) {
+                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
+            }
+            return true;
+        }
+        return false;
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
@@ -550,6 +554,26 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createRecordInUBStable(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+    }
+
+    @Override
+    public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
+        List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
+        if (allByUserId.isEmpty()) {
+            throw new OrderNotFoundException(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        }
+        List<PointsForUbsUserDto> bonusForUbsUser = allByUserId.stream()
+            .filter(a -> a.getPointsToUse() != 0)
+            .map(u -> modelMapper.map(u, PointsForUbsUserDto.class))
+            .collect(Collectors.toList());
+        AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
+        allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
+        allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
+        return allBonusesForUserDto;
+    }
+
+    private Integer sumUserPoints(List<Order> allByUserId) {
+        return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
     }
 
     /**

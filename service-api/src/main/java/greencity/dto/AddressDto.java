@@ -14,6 +14,7 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class AddressDto implements Serializable {
     @NotNull
     @Min(1)

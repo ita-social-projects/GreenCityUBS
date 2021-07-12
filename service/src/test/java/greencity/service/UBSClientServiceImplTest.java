@@ -1,47 +1,42 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import static greencity.ModelUtils.*;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.*;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.*;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.exceptions.OrderNotFoundException;
 
 import greencity.repository.*;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSClientServiceImpl;
-
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.ui.Model;
 
 import javax.persistence.EntityManager;
+import java.util.*;
+
+import static greencity.ModelUtils.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSClientServiceImplTest {
@@ -178,6 +173,20 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void findAllOrdersByUuid() {
+        when(orderRepository.findAllOrdersByUserUuid("87df9ad5-6393-441f-8423-8b2e770b01a8"))
+            .thenReturn(Arrays.asList(ModelUtils.getOrder()));
+        assertEquals(ModelUtils.getOrder().getPointsToUse(),
+            ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8").getUserBonuses());
+    }
+
+    @Test
+    void findAllOrderNotFoundException() {
+        Exception thrown = assertThrows(OrderNotFoundException.class,
+            () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        assertEquals(thrown.getMessage(), ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+    }
+
     void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
         when(orderRepository.findById(1L))
             .thenThrow(OrderNotFoundException.class);
@@ -256,5 +265,120 @@ class UBSClientServiceImplTest {
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
         assertNotNull(address);
+    }
+
+    @Test
+    void testFindAllAddressesForCurrentOrder() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+
+        List<AddressDto> testAddressesDto = getTestAddressesDto();
+
+        OrderWithAddressesResponseDto expected = new OrderWithAddressesResponseDto(testAddressesDto);
+
+        List<Address> addresses = getTestAddresses(user);
+
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
+        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
+
+        OrderWithAddressesResponseDto actual = ubsService.findAllAddressesForCurrentOrder(uuid);
+
+        assertEquals(actual, expected);
+        verify(userRepository, times(2)).findByUuid(uuid);
+        verify(addressRepository, times(1)).findAllByUserId(user.getId());
+    }
+
+    private List<Address> getTestAddresses(User user) {
+        Address address1 = Address.builder()
+            .addressStatus(AddressStatus.NEW).id(13L).city("Kyiv").district("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5)).ubsUsers(new LinkedList<>())
+            .build();
+
+        Address address2 = Address.builder()
+            .addressStatus(AddressStatus.NEW).id(42L).city("Lviv").district("Syhiv")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
+            .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5)).ubsUsers(new LinkedList<>())
+            .build();
+
+        return Arrays.asList(address1, address2);
+    }
+
+    private List<AddressDto> getTestAddressesDto() {
+        AddressDto addressDto1 = AddressDto.builder().actual(true).id(13L).city("Kyiv").district("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .coordinates(new Coordinates(12.5, 34.5)).build();
+
+        AddressDto addressDto2 = AddressDto.builder().actual(true).id(42L).city("Lviv").district("Syhiv")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
+            .coordinates(new Coordinates(13.5, 36.5)).build();
+
+        return Arrays.asList(addressDto1, addressDto2);
+    }
+
+    @Test
+    void testSaveCurrentAddressForOrder() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+
+        List<Address> addresses = getTestAddresses(user);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+
+        addresses.get(0).setActual(false);
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+
+        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+        dtoRequest.setId(42L);
+        when(addressRepository.findById(dtoRequest.getId())).thenReturn(Optional.of(addresses.get(0)));
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
+
+        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER); // AddressStatus.DELETED
+
+        ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
+
+        verify(addressRepository, times(1)).save(addresses.get(0));
+    }
+
+    @Test
+    void testDeleteCurrentAddressForOrder() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+        List<Address> addresses = getTestAddresses(user);
+        Address address = addresses.get(0);
+        List<AddressDto> addressDtos = getTestAddressesDto();
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findById(address.getId())).thenReturn(Optional.of(address));
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.save(address)).thenReturn(address);
+
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(addressDtos.get(1));
+
+        address.setAddressStatus(AddressStatus.DELETED);
+        ubsService.deleteCurrentAddressForOrder(address.getId(), uuid);
+        verify(addressRepository, times(1)).save(address);
+    }
+
+    @Test
+    void testDeleteUnexistingAddress() {
+        when(addressRepository.findById(42L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundOrderAddressException.class,
+            () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void testDeleteUnexistingAddressForCurrentUser() {
+        Address address = getTestAddresses(new User()).get(0);
+        when(addressRepository.findById(42L)).thenReturn(Optional.of(address));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(null);
+        assertThrows(NotFoundOrderAddressException.class,
+            () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
 }

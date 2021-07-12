@@ -411,6 +411,28 @@ public class ModelUtils {
             .build();
     }
 
+    public static AllPointsUserDto allPointsUserDto() {
+        return AllPointsUserDto.builder()
+            .userBonuses(100)
+            .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
+                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                .amount(50)
+                .numberOfOrder(36874L).build(),
+                PointsForUbsUserDto.builder()
+                    .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                    .amount(50)
+                    .numberOfOrder(35478L).build()))
+            .build();
+
+    }
+
+    public static PointsForUbsUserDto pointsForUbsUserDto() {
+        return PointsForUbsUserDto.builder()
+            .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+            .amount(700)
+            .numberOfOrder(35478L).build();
+    }
+
     public static AddEmployeeDto getAddEmployeeDto() {
         return AddEmployeeDto.builder()
             .firstName("Петро")
