@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.order.BagTranslation;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
