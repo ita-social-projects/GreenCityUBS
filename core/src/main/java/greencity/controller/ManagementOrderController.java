@@ -362,7 +362,7 @@ public class ManagementOrderController {
     public ResponseEntity<List<DetailsOrderInfoDto>> getOrderBagsInfo(
         @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderDetails(id));
+            .body(ubsManagementService.getOrderBagsDetails(id));
     }
 
     /**

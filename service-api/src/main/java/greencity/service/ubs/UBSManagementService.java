@@ -153,7 +153,7 @@ public interface UBSManagementService {
      *
      * @author Nazar Struk
      */
-    List<DetailsOrderInfoDto> getOrderDetails(Long orderId);
+    List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
 
     /**
      * Method that get order and payment status.

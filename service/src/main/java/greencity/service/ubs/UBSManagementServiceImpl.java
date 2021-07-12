@@ -804,7 +804,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<DetailsOrderInfoDto> getOrderDetails(Long orderId) {
+    public List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId) {
         List<DetailsOrderInfoDto> detailsOrderInfoDtos = new ArrayList<>();
         List<Map<String, Object>> ourResult = bagsInfoRepository.getBagInfo(orderId);
         for (Map<String, Object> array : ourResult) {
