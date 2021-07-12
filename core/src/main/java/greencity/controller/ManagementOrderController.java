@@ -364,7 +364,7 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderDetails(id));
     }
-  
+
     /**
      * Controller for get order detail status.
      *
