@@ -85,8 +85,8 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
     List<Order> findAllOrdersByUserUuid(@Param("uuid") String uuid);
 
     /**
-     * Method update status to 'ON_THE_ROUTE' for {@link Order} in which order status
-     * is 'confirmed' and deliver from is current date.
+     * Method update status to 'ON_THE_ROUTE' for {@link Order} in which order
+     * status is 'confirmed' and deliver from is current date.
      */
     @Modifying
     @Query(value = "UPDATE ORDERS SET ORDER_STATUS = 'ON_THE_ROUTE' "
