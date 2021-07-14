@@ -12,6 +12,7 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
@@ -29,7 +30,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
@@ -788,6 +791,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(v.getDescription())
             .violationDate(v.getViolationDate())
             .build());
+    }
+
+    @Override
+    @Transactional
+    public void deleteViolation(Long id) {
+        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
+        if (violationOptional.isPresent()) {
+            violationRepository.deleteById(violationOptional.get().getId());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
+        }
     }
 
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
