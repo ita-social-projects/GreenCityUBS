@@ -70,9 +70,9 @@ public interface UserRepository extends CrudRepository<User, Long> {
      *
      * @author Struk Nazariy
      */
-    @Query(nativeQuery = true, value = "SELECT users.* " +
-        "FROM orders as o " +
-        "JOIN users ON o.users_id = users.id " +
-        "WHERE o.id = :orderId")
+    @Query(nativeQuery = true, value = "SELECT users.* "
+        + "FROM orders as o "
+        + "JOIN users ON o.users_id = users.id "
+        + "WHERE o.id = :orderId")
     Optional<User> findUserByOrderId(Long orderId);
 }
