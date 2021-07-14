@@ -174,11 +174,8 @@ public class UBSManagementServiceImplTest {
 
     @Test
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
-        Violation violation = ModelUtils.getViolation();
-        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
-        if (!violationRepository.findByOrderId(1L).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
+        Assertions.assertThrows(ResponseStatusException.class, () -> ubsManagementService.deleteViolation(1L));
         verify(violationRepository, times(1)).findByOrderId(1L);
     }
 
