@@ -43,6 +43,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 public class UBSManagementServiceImplTest {
@@ -168,6 +170,26 @@ public class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderDetailStatus(100L);
         });
+    }
 
+    @Test
+    void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
+        Violation violation = ModelUtils.getViolation();
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
+        if (!violationRepository.findByOrderId(1L).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        verify(violationRepository, times(1)).findByOrderId(1L);
+    }
+
+    @Test
+    void deleteViolationFromOrderByOrderId() {
+        Violation violation = ModelUtils.getViolation();
+        Long id = ModelUtils.getViolation().getOrder().getId();
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
+        doNothing().when(violationRepository).deleteById(id);
+        ubsManagementService.deleteViolation(id);
+
+        verify(violationRepository, times(1)).deleteById(id);
     }
 }

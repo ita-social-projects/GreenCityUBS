@@ -17,13 +17,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import greencity.client.RestClient;
-import greencity.configuration.SecurityConfig;
-import greencity.converters.UserArgumentResolver;
-import greencity.service.ubs.UBSClientService;
 import java.security.Principal;
 import java.util.Optional;
 
-import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -176,6 +172,7 @@ class ManagementOrderControllerTest {
         verify(ubsManagementService).getViolationDetailsByOrderId(1L);
     }
 
+    @Test
     void updateOrderStatusesDetail() throws Exception {
         OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -191,5 +188,13 @@ class ManagementOrderControllerTest {
     void geOrderStatusesDetail() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/read-order-detail-status" + "/{id}", 1L))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void deletesViolationFromOrder() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))
+            .andExpect(status().isOk());
+
+        verify(ubsManagementService).deleteViolation(1L);
     }
 }
