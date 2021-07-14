@@ -178,4 +178,11 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+
+    /**
+     * Method that gets bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
 }
