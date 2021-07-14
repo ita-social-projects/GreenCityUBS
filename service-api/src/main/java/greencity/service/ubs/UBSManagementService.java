@@ -150,6 +150,13 @@ public interface UBSManagementService {
     CounterOrderDetailsDto getOrderSumDetails(Long id);
 
     /**
+     * Method that gets bags information.
+     *
+     * @author Nazar Struk
+     */
+    List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
+
+    /**
      * Method returns detailed information about user violation by order id.
      *
      * @param orderId of {@link Long} order id;
