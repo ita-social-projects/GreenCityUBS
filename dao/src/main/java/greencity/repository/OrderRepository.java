@@ -4,6 +4,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -82,4 +83,13 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
         + "JOIN users as u ON ubs.users_id = u.id "
         + "WHERE u.uuid = :uuid", nativeQuery = true)
     List<Order> findAllOrdersByUserUuid(@Param("uuid") String uuid);
+
+    /**
+     * Method update status to 'ON_THE_ROUTE' for {@link Order} in which order
+     * status is 'confirmed' and deliver from is current date.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = 'ON_THE_ROUTE' "
+        + "WHERE ORDER_STATUS = 'CONFIRMED' AND DATE(DELIVER_FROM) <= CURRENT_DATE", nativeQuery = true)
+    void updateOrderStatusToOnTheRoute();
 }
