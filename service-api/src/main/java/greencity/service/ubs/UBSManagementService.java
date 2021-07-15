@@ -185,7 +185,7 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
-  
+
     /**
      * Method deletes violation from database by orderId.
      *

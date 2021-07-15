@@ -350,7 +350,7 @@ public class ManagementOrderController {
 
     /**
      * Controller for getting bags information.
-     * 
+     *
      * @author Nazar Struk
      */
     @ApiOperation(value = "Get bags info")
@@ -450,7 +450,8 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAdditionalBagsInfo(id));
-      
+    }
+
     /**
      * Controller deletes violation from order.
      *
