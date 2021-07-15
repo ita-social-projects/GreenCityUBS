@@ -180,6 +180,13 @@ public interface UBSManagementService {
     OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
 
     /**
+     * Method that gets bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
+
+    /**
      * Method deletes violation from database by orderId.
      *
      * @param orderId {@link Long}

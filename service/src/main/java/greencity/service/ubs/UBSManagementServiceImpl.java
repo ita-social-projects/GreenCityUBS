@@ -51,6 +51,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagsInfoRepo bagsInfoRepository;
     private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
+    private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
 
     /**
      * {@inheritDoc}
@@ -845,5 +846,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             detailsOrderInfoDtos.add(dto);
         }
         return detailsOrderInfoDtos;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId) {
+        User user = userRepository.findUserByOrderId(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        String recipientEmail = user.getRecipientEmail();
+        List<AdditionalBagInfoDto> ourResult1 = new ArrayList<>();
+        List<Map<String, Object>> ourResult = additionalBagsInfoRepo.getAdditionalBagInfo(orderId, recipientEmail);
+        for (Map<String, Object> array : ourResult) {
+            AdditionalBagInfoDto dto = objectMapper.convertValue(array, AdditionalBagInfoDto.class);
+            ourResult1.add(dto);
+        }
+        return ourResult1;
     }
 }

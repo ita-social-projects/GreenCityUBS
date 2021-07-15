@@ -350,7 +350,7 @@ public class ManagementOrderController {
 
     /**
      * Controller for getting bags information.
-     * 
+     *
      * @author Nazar Struk
      */
     @ApiOperation(value = "Get bags info")
@@ -431,6 +431,25 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderDetailStatus(id, dto));
+    }
+
+    /**
+     * Controller for getting bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    @ApiOperation(value = "Get bags additional info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getAdditionalOrderBagsInfo/{id}")
+    public ResponseEntity<List<AdditionalBagInfoDto>> getAdditionalOrderBagsInfo(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAdditionalBagsInfo(id));
     }
 
     /**
