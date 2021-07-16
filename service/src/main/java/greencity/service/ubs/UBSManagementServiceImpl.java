@@ -284,7 +284,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long overpayment = calculateOverpayment(order, sumToPay);
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
         PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
-            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE).toString()).build();
+            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
         if (marker == 1L) {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
@@ -948,7 +948,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long paymentSum = order.getPayment().stream()
             .map(Payment::getAmount)
             .reduce(Long::sum)
-            .get();
+            .orElse(0L);
         return paymentSum - sumToPay;
     }
 
