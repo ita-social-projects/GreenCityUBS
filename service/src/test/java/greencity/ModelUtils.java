@@ -95,6 +95,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrderExportDetails() {
+        return Order.builder()
+            .id(1L)
+            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .receivingStation("Petrivka")
+            .build();
+    }
+
     public static OrderDto getOrderDto() {
         return OrderDto.builder()
             .firstName("oleh")
@@ -118,6 +126,22 @@ public class ModelUtils {
         return CoordinatesDto.builder()
             .latitude(49.83)
             .longitude(23.88)
+            .build();
+    }
+
+    public static ExportDetailsDto getExportDetails() {
+        return ExportDetailsDto.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
+            .build();
+    }
+
+    public static ExportDetailsDtoRequest getExportDetailsRequest() {
+        return ExportDetailsDtoRequest.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
             .build();
     }
 
