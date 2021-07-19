@@ -507,8 +507,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private OrderPaymentDetailDto buildOrderPaymentDetailDto(Order order) {
         int certificatePoints = order.getCertificates().stream()
             .flatMapToInt(c -> IntStream.of(c.getPoints()))
-            .reduce(Integer::sum).orElse(0);
-        int pointsToUse = order.getPointsToUse();
+            .reduce(Integer::sum).orElse(0) * 100;
+        int pointsToUse = order.getPointsToUse() * 100;
         long amount = order.getPayment().stream()
             .flatMapToLong(p -> LongStream.of(p.getAmount()))
             .reduce(Long::sum).orElse(0);

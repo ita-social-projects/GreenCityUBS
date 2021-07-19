@@ -636,10 +636,10 @@ public class ModelUtils {
 
     public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
         return OrderPaymentDetailDto.builder()
-            .amount(950L + 10 + 700)
-            .certificates(-10)
-            .pointsToUse(-700)
-            .amountToPay(950L)
+            .amount(95000L + 1000 + 70000)
+            .certificates(-1000)
+            .pointsToUse(-70000)
+            .amountToPay(95000L)
             .currency("UAH")
             .build();
     }
@@ -648,7 +648,7 @@ public class ModelUtils {
         return Payment.builder()
             .id(1L)
             .paymentStatus(PaymentStatus.UNPAID)
-            .amount(950L)
+            .amount(95000L)
             .currency("UAH")
             .build();
     }

@@ -395,7 +395,6 @@ class UBSClientServiceImplTest {
         OrderPaymentDetailDto actual = ubsService.getOrderPaymentDetail(1L);
 
         assertEquals(getOrderPaymentDetailDto(), actual);
-
     }
 
     @Test
