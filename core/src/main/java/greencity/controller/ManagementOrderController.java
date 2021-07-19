@@ -435,6 +435,46 @@ public class ManagementOrderController {
     }
 
     /**
+     * Controller for get export details by order id.
+     *
+     * @return {@link ExportDetailsDto}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Get export details")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ExportDetailsDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-order-export-details/{id}")
+    public ResponseEntity<ExportDetailsDto> getOrderExportInfo(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderExportDetails(id));
+    }
+
+    /**
+     * Controller for update export details.
+     *
+     * @return {@link ExportDetailsDto}.
+     * @author Orest Mahdziak
+     */
+    @ApiOperation(value = "Update export details")
+    @ApiResponses({
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ExportDetailsDtoRequest.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping("/update-order-export-details/{id}")
+    public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
+        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.updateOrderExportDetails(id, dto));
+    }
+
+    /**
      * Controller for getting bags additional information.
      *
      * @author Nazar Struk
