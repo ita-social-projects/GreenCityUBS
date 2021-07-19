@@ -40,6 +40,30 @@ public interface UBSManagementService {
     List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters();
 
     /**
+     * Method returns payment info.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Struk Nazar
+     */
+    PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @author Ostap Mykhailivskyi
+     */
+    void returnOverpayment(Long orderId,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Ostap Mykhailivskyi
+     */
+    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker);
+
+    /**
      * Method returns all certificates.
      *
      * @return List of {@link greencity.entity.order.Certificate} lists.
@@ -126,7 +150,6 @@ public interface UBSManagementService {
      * @return {@link PaymentTableInfoDto};
      * @author Struk Nazar
      */
-    PaymentTableInfoDto getPaymentInfo(long orderId);
 
     /**
      * Method for getting order detail by language and order id.
