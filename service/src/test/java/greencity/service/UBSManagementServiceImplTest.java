@@ -8,18 +8,14 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
 import greencity.exceptions.UnexistingOrderException;
-import greencity.repository.AddressRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.ViolationRepository;
+import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +58,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ViolationRepository violationRepository;
+
+    @Mock
+    private ReceivingStationRepository receivingStationRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -168,6 +167,38 @@ public class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderDetailStatus(100L);
         });
+    }
 
+    @Test
+    void returnExportDetailsByOrderId() {
+        ExportDetailsDto expected = ModelUtils.getExportDetails();
+        Order order = ModelUtils.getOrderExportDetails();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
+        when(receivingStationRepository.findAll()).thenReturn(stations);
+
+        assertEquals(expected, ubsManagementService.getOrderExportDetails(1L));
+    }
+
+    @Test
+    void updateExportDetailsByOrderId() {
+        ExportDetailsDtoRequest dto = ModelUtils.getExportDetailsRequest();
+        Order order = ModelUtils.getOrderExportDetails();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
+        when(receivingStationRepository.findAll()).thenReturn(stations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), dto);
+
+        verify(orderRepository, times(1)).save(order);
+    }
+
+    @Test
+    void checkStationNotFound() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderExportDetails(100L);
+        });
     }
 }

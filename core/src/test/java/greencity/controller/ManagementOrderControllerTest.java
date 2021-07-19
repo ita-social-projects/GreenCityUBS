@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static greencity.ModelUtils.getPrincipal;
 
 import greencity.ModelUtils;
-import greencity.dto.CertificateDtoForAdding;
-import greencity.dto.OrderDetailInfoDto;
-import greencity.dto.ViolationDetailInfoDto;
-import greencity.dto.OrderDetailStatusDto;
+import greencity.dto.*;
 import greencity.service.ubs.UBSManagementService;
 
 import static greencity.ModelUtils.getViolationDetailInfoDto;
@@ -17,13 +14,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import greencity.client.RestClient;
-import greencity.configuration.SecurityConfig;
-import greencity.converters.UserArgumentResolver;
-import greencity.service.ubs.UBSClientService;
 import java.security.Principal;
 import java.util.Optional;
 
-import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -168,7 +161,7 @@ class ManagementOrderControllerTest {
     @Test
     void returnsDetailsAboutViolationWithGivenOrderId() throws Exception {
         ViolationDetailInfoDto violationDetailInfoDto = getViolationDetailInfoDto();
-        when(ubsManagementService.getViolationDetailsByOrderId(1l)).thenReturn(Optional.of(violationDetailInfoDto));
+        when(ubsManagementService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
 
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isOk());
@@ -176,6 +169,7 @@ class ManagementOrderControllerTest {
         verify(ubsManagementService).getViolationDetailsByOrderId(1L);
     }
 
+    @Test
     void updateOrderStatusesDetail() throws Exception {
         OrderDetailStatusDto dto = ModelUtils.getOrderDetailStatusDto();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -191,5 +185,25 @@ class ManagementOrderControllerTest {
     void geOrderStatusesDetail() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/read-order-detail-status" + "/{id}", 1L))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getOrderExportDetail() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-order-export-details" + "/{id}", 1L))
+            .andExpect(status().isOk());
+
+        verify(ubsManagementService).getOrderExportDetails(1L);
+    }
+
+    @Test
+    void updateOrderExportedDetail() throws Exception {
+        ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        this.mockMvc.perform(put(ubsLink + "/update-order-export-details" + "/{id}", 1L)
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
     }
 }
