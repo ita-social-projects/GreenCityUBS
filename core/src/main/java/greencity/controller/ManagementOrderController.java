@@ -473,7 +473,7 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderExportDetails(id, dto));
     }
-  
+
     /**
      * Controller for getting bags additional information.
      *

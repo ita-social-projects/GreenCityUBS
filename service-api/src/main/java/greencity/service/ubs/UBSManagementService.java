@@ -215,8 +215,8 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
-  
-     /**
+
+    /**
      * Method that gets bags additional information.
      *
      * @author Nazar Struk

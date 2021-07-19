@@ -206,7 +206,7 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
-  
+
     @Test
     void deletesViolationFromOrder() throws Exception {
         mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))

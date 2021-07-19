@@ -203,7 +203,7 @@ public class UBSManagementServiceImplTest {
             ubsManagementService.getOrderExportDetails(100L);
         });
     }
-  
+
     @Test
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
