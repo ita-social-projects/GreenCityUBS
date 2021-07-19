@@ -191,6 +191,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static ExportDetailsDto getOrderDetailExportDto() {
+        return ExportDetailsDto.builder()
+            .exportedDate("2020")
+            .exportedTime("10:20:30")
+            .receivingStation("Petrivka")
+            .allReceivingStations(Arrays.asList("a,b,v"))
+            .build();
+    }
+
     public static Position getPosition() {
         return Position.builder()
             .id(1L)
