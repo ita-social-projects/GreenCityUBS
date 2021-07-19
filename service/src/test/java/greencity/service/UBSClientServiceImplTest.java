@@ -381,4 +381,30 @@ class UBSClientServiceImplTest {
         assertThrows(NotFoundOrderAddressException.class,
             () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
+
+    @Test
+    void getOrderPaymentDetail() {
+        Order order = getOrder();
+        Certificate certificate = getCertificate();
+        certificate.setOrder(order);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(List.of(getPayment()));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        OrderPaymentDetailDto actual = ubsService.getOrderPaymentDetail(1L);
+
+        assertEquals(getOrderPaymentDetailDto(), actual);
+
+    }
+
+    @Test
+    void getOrderPaymentDetailShouldThrowOrderNotFoundException() {
+        when(orderRepository.findById(any())).thenReturn(Optional.empty());
+
+        Exception thrown = assertThrows(OrderNotFoundException.class,
+            () -> ubsService.getOrderPaymentDetail(any()));
+
+        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
+    }
 }
