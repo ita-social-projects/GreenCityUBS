@@ -12,6 +12,7 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
@@ -48,6 +49,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagsInfoRepo bagsInfoRepository;
     private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ReceivingStationRepository receivingStationRepository;
 
     /**
      * {@inheritDoc}
@@ -737,7 +740,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
         if (payment.isEmpty()) {
-            throw new PaymentNotFoundException("payment not found for order id " + id);
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
         }
         return buildStatuses(order, payment.get(0));
     }
@@ -752,7 +755,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
         if (payment.isEmpty()) {
-            throw new PaymentNotFoundException("payment not found for order id " + id);
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
         }
         order.setComment(dto.getOrderComment());
         order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
@@ -764,10 +767,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String orderDate = order.getOrderDate().toLocalDate().format(formatter);
         return OrderDetailStatusDto.builder()
             .orderStatus(order.getOrderStatus().name())
             .paymentStatus(payment.getPaymentStatus().name())
-            .date(order.getOrderDate().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .date(orderDate)
             .build();
     }
 
@@ -831,5 +836,63 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             detailsOrderInfoDtos.add(dto);
         }
         return detailsOrderInfoDtos;
+    }
+
+    /**
+     * Method returns export details by order id.
+     *
+     * @param id of {@link Long} order id;
+     * @return {@link ExportDetailsDto};
+     * @author Orest Mahdziak
+     */
+    @Override
+    public ExportDetailsDto getOrderExportDetails(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
+        if (receivingStation.isEmpty()) {
+            throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
+        }
+        return buildExportDto(order, receivingStation);
+    }
+
+    /**
+     * Method returns update export details by order id.
+     *
+     * @param id  of {@link Long} order id;
+     * @param dto of{@link ExportDetailsDtoRequest}
+     * @return {@link ExportDetailsDto};
+     * @author Orest Mahdziak
+     */
+    @Override
+    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
+        if (receivingStation.isEmpty()) {
+            throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
+        }
+        String str = dto.getExportedDate() + " " + dto.getExportedTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+        order.setDeliverFrom(dateTime);
+        order.setReceivingStation(dto.getReceivingStation());
+        orderRepository.save(order);
+        return buildExportDto(order, receivingStation);
+    }
+
+    private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStation) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String date =
+            order.getDeliverFrom() == null ? "" : order.getDeliverFrom().toLocalDate().format(formatter);
+        String time =
+            order.getDeliverFrom() == null ? "" : order.getDeliverFrom().toLocalTime().format(formatter2);
+        return ExportDetailsDto.builder()
+            .allReceivingStations(receivingStation.stream().map(ReceivingStation::getName).collect(Collectors.toList()))
+            .exportedDate(date)
+            .exportedTime(time)
+            .receivingStation(order.getReceivingStation())
+            .build();
     }
 }

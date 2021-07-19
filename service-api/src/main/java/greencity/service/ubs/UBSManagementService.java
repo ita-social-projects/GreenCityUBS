@@ -178,4 +178,18 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+
+    /**
+     * Method that get export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto getOrderExportDetails(Long id);
+
+    /**
+     * Method that update export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
 }
