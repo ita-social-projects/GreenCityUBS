@@ -13,4 +13,5 @@ public class PaymentTableInfoDto {
     Long paidAmount;
     Long unPaidAmount;
     List<PaymentInfoDto> paymentInfoDtos;
+    Long overpayment;
 }

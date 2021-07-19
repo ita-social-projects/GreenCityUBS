@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 
 import static greencity.constant.ErrorMessage.*;
@@ -13,6 +14,7 @@ import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
@@ -30,7 +32,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
@@ -51,6 +55,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
+    private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
 
     /**
      * {@inheritDoc}
@@ -201,26 +206,96 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @return {@link PaymentTableInfoDto }
      */
+    /**
+     * Method gets all order payments, count paid amount, amount which user should
+     * paid and overpayment amount.
+     *
+     * @param orderId  of {@link Long} order id;
+     * @param sumToPay of {@link Long} sum to pay;
+     * @return {@link PaymentTableInfoDto }
+     * @author Nazar Struk, Ostap Mykhailivskyi
+     */
     @Override
-    public PaymentTableInfoDto getPaymentInfo(long orderId) {
-        PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
-        Long paidAmount = 0L;
-        Long unPaidAmount = 0L;
+    public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        for (Payment payment : order.getPayment()) {
-            if (payment.getOrderStatus().equals("approved")) {
-                paidAmount += payment.getAmount();
-            } else {
-                unPaidAmount += payment.getAmount();
-            }
+        Long paidAmount = calculatePaidAmount(order);
+        Long unPaidAmount = sumToPay - paidAmount;
+        Long overpayment = calculateOverpayment(order, sumToPay);
+        if (overpayment < 0L) {
+            overpayment = 0L;
         }
+        if (unPaidAmount < 0) {
+            unPaidAmount = 0L;
+        }
+        PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
+        paymentTableInfoDto.setOverpayment(overpayment);
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
         paymentTableInfoDto.setPaidAmount(paidAmount);
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
+    }
+
+    /**
+     * Method return's overpayment and bonuses to user's account.
+     *
+     * @param orderId                   of {@link Long} order id;
+     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}
+     * @author Ostap Mykhailivskyi
+     */
+    @Override
+    public void returnOverpayment(Long orderId,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        User user = userRepository.findUserByOrderId(orderId)
+            .orElseThrow(
+                () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Payment payment = createPayment(order, overpaymentInfoRequestDto);
+
+        if ((order.getOrderStatus() == OrderStatus.DONE)) {
+            returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
+        }
+        if (order.getOrderStatus() == OrderStatus.CANCELLED
+            && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
+            returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
+        }
+        if (order.getOrderStatus() == OrderStatus.CANCELLED && overpaymentInfoRequestDto.getComment()
+            .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
+            returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
+        }
+        order.getPayment().add(payment);
+        userRepository.save(user);
+    }
+
+    /**
+     * Method return's information about overpayment and used bonuses on canceled
+     * and done orders.
+     *
+     * @param orderId  of {@link Long} order id;
+     * @param sumToPay of {@link Long} sum to pay;
+     * @param marker   of {@link Long} marker;
+     * @return {@link PaymentTableInfoDto }
+     * @author Ostap Mykhailivskyi
+     */
+    @Override
+    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Long overpayment = calculateOverpayment(order, sumToPay);
+        PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
+        PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
+            .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
+        if (marker == 1L) {
+            payDto.setComment(AppConstant.PAYMENT_REFUND);
+        } else {
+            payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+        }
+        dto.getPaymentInfoDtos().add(payDto);
+        dto.setOverpayment(dto.getOverpayment() - overpayment);
+        return dto;
     }
 
     /**
@@ -795,6 +870,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build());
     }
 
+    @Override
+    @Transactional
+    public void deleteViolation(Long id) {
+        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
+        if (violationOptional.isPresent()) {
+            violationRepository.deleteById(violationOptional.get().getId());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
+        }
+    }
+
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
@@ -894,5 +980,96 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .exportedTime(time)
             .receivingStation(order.getReceivingStation())
             .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId) {
+        User user = userRepository.findUserByOrderId(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        String recipientEmail = user.getRecipientEmail();
+        List<AdditionalBagInfoDto> ourResult1 = new ArrayList<>();
+        List<Map<String, Object>> ourResult = additionalBagsInfoRepo.getAdditionalBagInfo(orderId, recipientEmail);
+        for (Map<String, Object> array : ourResult) {
+            AdditionalBagInfoDto dto = objectMapper.convertValue(array, AdditionalBagInfoDto.class);
+            ourResult1.add(dto);
+        }
+        return ourResult1;
+    }
+
+    /**
+     * Method that calculate's overpayment on user's order.
+     *
+     * @param order    of {@link Order} order;
+     * @param sumToPay of {@link Long} sum to pay;
+     * @return {@link Long }
+     * @author Ostap Mykhailivskyi
+     */
+    private Long calculateOverpayment(Order order, Long sumToPay) {
+        Long paymentSum = order.getPayment().stream()
+            .map(Payment::getAmount)
+            .reduce(Long::sum)
+            .orElse(0L);
+        return paymentSum - sumToPay;
+    }
+
+    /**
+     * Method that calculate paid amount.
+     *
+     * @param order of {@link Order} order id;
+     * @return {@link Long }
+     * @author Ostap Mykhailivskyi
+     */
+    private Long calculatePaidAmount(Order order) {
+        return order.getPayment().stream().filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+            .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
+    }
+
+    private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
+        return ChangeOfPoints.builder()
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .amount(Math.toIntExact(amount))
+            .build();
+    }
+
+    private Payment createPayment(Order order, OverpaymentInfoRequestDto dto) {
+        return Payment.builder()
+            .order(order)
+            .orderStatus("approved")
+            .comment(dto.getComment())
+            .currency("UAH")
+            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .paymentStatus(PaymentStatus.PAYMENT_REFUNDED)
+            .amount(dto.getOverpayment())
+            .build();
+    }
+
+    private void returnOverpaymentForStatusDone(User user, Order order,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto,
+        Payment payment) {
+        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()));
+        user.getChangeOfPointsList()
+            .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
+        payment.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+    }
+
+    private void returnOverpaymentAsMoneyForStatusCancelled(User user, Order order,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getBonuses()));
+        user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
+        order.getPayment().forEach(p -> p.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED));
+    }
+
+    private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()
+            + overpaymentInfoRequestDto.getBonuses()));
+        user.getChangeOfPointsList()
+            .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
+        user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
     }
 }

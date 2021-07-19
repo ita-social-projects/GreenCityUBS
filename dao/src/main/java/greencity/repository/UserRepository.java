@@ -64,4 +64,15 @@ public interface UserRepository extends CrudRepository<User, Long> {
      */
     @Query(nativeQuery = true, value = "select count(*) from orders")
     int orderCounterForSorting();
+
+    /**
+     * Method that count orders.
+     *
+     * @author Struk Nazariy
+     */
+    @Query(nativeQuery = true, value = "SELECT users.* "
+        + "FROM orders as o "
+        + "JOIN users ON o.users_id = users.id "
+        + "WHERE o.id = :orderId")
+    Optional<User> findUserByOrderId(Long orderId);
 }

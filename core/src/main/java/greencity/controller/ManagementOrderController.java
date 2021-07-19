@@ -287,9 +287,10 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/getPaymentInfo")
-    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId) {
+    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId,
+        @RequestParam Long sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getPaymentInfo(orderId));
+            .body(ubsManagementService.getPaymentInfo(orderId, sumToPay));
     }
 
     /**
@@ -471,5 +472,110 @@ public class ManagementOrderController {
         @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderExportDetails(id, dto));
+    }
+  
+    /**
+     * Controller for getting bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    @ApiOperation(value = "Get bags additional info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/getAdditionalOrderBagsInfo/{id}")
+    public ResponseEntity<List<AdditionalBagInfoDto>> getAdditionalOrderBagsInfo(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAdditionalBagsInfo(id));
+    }
+
+    /**
+     * Controller deletes violation from order.
+     *
+     * @return {@link HttpStatus}
+     * @author Nadia Rusanovscaia.
+     */
+    @ApiOperation(value = "Delete violation from order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ViolationDetailInfoDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/delete-violation-from-order/{orderId}")
+    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId) {
+        ubsManagementService.deleteViolation(orderId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller returns overpayment as bonuses information.
+     *
+     * @param orderId  {@link Long}.
+     * @param sumToPay {@link Long}.
+     * @return list of {@link PaymentTableInfoDto}.
+     * @author Ostap Mykhailivskyi
+     */
+    @ApiOperation(value = "Return overpayment as bonuses information")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/return-overpayment-as-bonuses-info")
+    public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsBonusesInfo(@RequestParam Long orderId,
+        @RequestParam Long sumToPay) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 2L));
+    }
+
+    /**
+     * Controller returns overpayment as money information.
+     *
+     * @param orderId  {@link Long}.
+     * @param sumToPay {@link Long}.
+     * @return list of {@link PaymentTableInfoDto}.
+     * @author Ostap Mykhailivskyi
+     */
+    @ApiOperation(value = "Return overpayment as Money information")
+    @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/return-overpayment-as-money-info")
+    public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsMoneyInfo(@RequestParam Long orderId,
+        @RequestParam Long sumToPay) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.returnOverpaymentInfo(orderId, sumToPay, 1L));
+    }
+
+    /**
+     * Controller returns overpayment to user.
+     *
+     * @param orderId                   {@link Long}.
+     * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}.
+     * @return {@link HttpStatus} - http status.
+     * @author Ostap Mykhailivskyi
+     */
+    @ApiOperation(value = "Return overpayment to user")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/return-overpayment")
+    public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
+        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

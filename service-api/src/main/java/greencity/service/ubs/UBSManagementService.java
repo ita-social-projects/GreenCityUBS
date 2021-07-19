@@ -40,6 +40,30 @@ public interface UBSManagementService {
     List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters();
 
     /**
+     * Method returns payment info.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Struk Nazar
+     */
+    PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @author Ostap Mykhailivskyi
+     */
+    void returnOverpayment(Long orderId,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Ostap Mykhailivskyi
+     */
+    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker);
+
+    /**
      * Method returns all certificates.
      *
      * @return List of {@link greencity.entity.order.Certificate} lists.
@@ -126,7 +150,6 @@ public interface UBSManagementService {
      * @return {@link PaymentTableInfoDto};
      * @author Struk Nazar
      */
-    PaymentTableInfoDto getPaymentInfo(long orderId);
 
     /**
      * Method for getting order detail by language and order id.
@@ -192,4 +215,19 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
+  
+     /**
+     * Method that gets bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
+
+    /**
+     * Method deletes violation from database by orderId.
+     *
+     * @param orderId {@link Long}
+     * @author Nadia Rusanovscaia
+     */
+    void deleteViolation(Long orderId);
 }
