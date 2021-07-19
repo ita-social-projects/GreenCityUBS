@@ -4,6 +4,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
@@ -68,6 +69,7 @@ public class ModelUtils {
 
     public static Order getOrder() {
         return Order.builder()
+            .id(1L)
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
@@ -632,4 +634,22 @@ public class ModelUtils {
             .build();
     }
 
+    public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
+        return OrderPaymentDetailDto.builder()
+            .amount(95000L + 1000 + 70000)
+            .certificates(-1000)
+            .pointsToUse(-70000)
+            .amountToPay(95000L)
+            .currency("UAH")
+            .build();
+    }
+
+    public static Payment getPayment() {
+        return Payment.builder()
+            .id(1L)
+            .paymentStatus(PaymentStatus.UNPAID)
+            .amount(95000L)
+            .currency("UAH")
+            .build();
+    }
 }

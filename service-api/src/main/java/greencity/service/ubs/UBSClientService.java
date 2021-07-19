@@ -144,4 +144,14 @@ public interface UBSClientService {
      * @author Mykhailo Berezhinskiy
      */
     UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
+
+    /**
+     * Method returns information about order payment by orderId.
+     *
+     * @param orderId {@link Long}
+     * @return {@link OrderPaymentDetailDto} dto that contain information about
+     *         order payment.
+     * @author Mykola Danylko
+     */
+    OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
 }
