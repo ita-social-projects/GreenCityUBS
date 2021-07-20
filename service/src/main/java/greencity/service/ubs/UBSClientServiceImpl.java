@@ -578,13 +578,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
+
     @Override
     public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
-        if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
-        }
+        UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+        uuid = dto.getUuid();
         User user = userRepository.findByUuid(uuid);
         setUserDate(user, userProfileDto);
         AddressDto addressDto = userProfileDto.getAddressDto();
@@ -598,11 +596,41 @@ public class UBSClientServiceImpl implements UBSClientService {
         return mappedUserProfileDto;
     }
 
+    @Override
+    public UserProfileDto getProfileData(String uuid) {
+        UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
+        uuid = dto.getUuid();
+        User user = userRepository.findByUuid(uuid);
+        UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
+        List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
+        if (allAddress == null) {
+            throw new AddressNotFoundException(NOT_FOUND_ADDRESS_BY_USER_UUID);
+        }
+        for (Address address : allAddress) {
+            AddressDto addressDto = modelMapper.map(address, AddressDto.class);
+            setAddressDate(address, addressDto);
+            userProfileDto.setAddressDto(addressDto);
+        }
+        return userProfileDto;
+    }
+
     private User setUserDate(User user, UserProfileDto userProfileDto) {
         user.setRecipientName(userProfileDto.getRecipientName());
+        user.setRecipientSurname(userProfileDto.getRecipientSurname());
         user.setRecipientPhone(userProfileDto.getRecipientPhone());
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
+    }
+
+    private Address setAddressDate(Address address, AddressDto addressDto) {
+        address.setCity(addressDto.getCity());
+        address.setStreet(addressDto.getStreet());
+        address.setDistrict(addressDto.getDistrict());
+        address.setHouseNumber(addressDto.getHouseNumber());
+        address.setEntranceNumber(addressDto.getEntranceNumber());
+        address.setHouseCorpus(addressDto.getHouseCorpus());
+
+        return address;
     }
 
     private void createUserByUuidIfUserDoesNotExist(String uuid) {

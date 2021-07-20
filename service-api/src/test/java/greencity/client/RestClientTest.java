@@ -1,6 +1,7 @@
 package greencity.client;
 
 import greencity.ModelUtils;
+import greencity.dto.UbsTableCreationDto;
 import greencity.dto.UserVO;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;

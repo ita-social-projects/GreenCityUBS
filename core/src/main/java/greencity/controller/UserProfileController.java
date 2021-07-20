@@ -10,10 +10,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
@@ -43,12 +40,28 @@ public class UserProfileController {
     @ApiOperation(value = "Create user profile")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UserProfileDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
     })
     @PostMapping("/user/save")
-    public ResponseEntity<UserProfileDto> saveUserDate(@ApiIgnore @CurrentUserUuid String userUuid,
+    public ResponseEntity<UserProfileDto> saveUserDate(@ApiIgnore  @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileDto userProfileDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsClientService.saveProfileData(userUuid, userProfileDto));
+    }
+
+    /**
+     * Controller returns user's profile ..
+     *
+     *
+     * @author Liubomyr Bratakh
+     */
+    @ApiOperation(value = "Get user's profile data.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserProfileDto.class),
+    })
+    @GetMapping("/user/getUserProfile")
+    public ResponseEntity<UserProfileDto> getUserData(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
     }
 }

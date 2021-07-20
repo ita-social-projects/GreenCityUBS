@@ -13,13 +13,11 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.exceptions.CertificateNotFoundException;
 import greencity.exceptions.OrderNotFoundException;
 
 import greencity.repository.*;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSClientServiceImpl;
 
 import java.util.*;
@@ -254,7 +252,9 @@ class UBSClientServiceImplTest {
     void saveProfileData() {
         User user = new User();
         user.setId(13L);
-        String uuid = "35467585763t4sfgchjfuyetf";
+        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
+        when(restClient.getDataForUbsTableRecordCreation())
+            .thenReturn(UbsTableCreationDto.builder().uuid(uuid).build());
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         UserProfileDto userProfileDto = new UserProfileDto();
         AddressDto addressDto = ModelUtils.addressDto();
@@ -269,5 +269,23 @@ class UBSClientServiceImplTest {
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
         assertNotNull(address);
+    }
+
+    @Test
+    void getProfileData() {
+        UbsTableCreationDto dto = getUbsTableCreationDto();
+        User user = userRepository.findByUuid(dto.getUuid());
+        UserProfileDto userProfileDto = ModelUtils.userProfileDto();
+        AddressDto addressDto = ModelUtils.addressDto();
+        Address address = ModelUtils.address();
+        userProfileDto.setAddressDto(addressDto);
+        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        assertEquals(userProfileDto, modelMapper.map(user, UserProfileDto.class));
+        assertEquals(addressDto, modelMapper.map(address, AddressDto.class));
+        assertNotNull(userProfileDto.getAddressDto());
+        assertNotNull(userProfileDto);
+        assertNotNull(address);
+
     }
 }
