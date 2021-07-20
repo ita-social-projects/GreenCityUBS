@@ -1,5 +1,6 @@
 package greencity;
 
+import greencity.dto.UbsTableCreationDto;
 import greencity.dto.UserVO;
 import greencity.dto.UserViolationMailDto;
 
@@ -9,6 +10,12 @@ public class ModelUtils {
         return UserVO.builder()
             .id(13L)
             .email("email").build();
+    }
+
+    public static UbsTableCreationDto getUbsTableCreationDto() {
+        return UbsTableCreationDto.builder()
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .build();
     }
 
     public static UserViolationMailDto getUserViolationMailDto() {

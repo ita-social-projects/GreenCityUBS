@@ -629,6 +629,10 @@ public class ModelUtils {
             .build();
     }
 
+    public static UbsTableCreationDto getUbsTableCreationDto() {
+        return UbsTableCreationDto.builder().uuid("87df9ad5-6393-441f-8423-8b2e770b01a8").build();
+    }
+
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
@@ -674,6 +678,18 @@ public class ModelUtils {
             .paymentStatus(PaymentStatus.UNPAID)
             .amount(95000L)
             .currency("UAH")
+            .build();
+    }
+
+    public static User getUser() {
+        return User.builder()
+            .id(1L)
+            .addresses(Collections.singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
             .build();
     }
 }

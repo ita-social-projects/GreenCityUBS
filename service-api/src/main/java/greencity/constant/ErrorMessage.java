@@ -48,6 +48,7 @@ public class ErrorMessage {
     public static String PARSING_URL_FAILED = "Can't parse image's url: ";
     public static String BLOB_DOES_NOT_EXIST = "Blob with current file name doesn't exist.";
     public static String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
+    public static String NOT_FOUND_ADDRESS_BY_USER_UUID = "Not found address for user. ";
     public static String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
 
     /**

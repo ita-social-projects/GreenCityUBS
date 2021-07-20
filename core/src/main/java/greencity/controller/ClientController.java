@@ -94,7 +94,7 @@ public class ClientController {
      * @return list of {@link AllPointsUserDto}.
      * @author Liubomyr Bratakh
      */
-    @ApiOperation(value = "Get user's personal data.")
+    @ApiOperation(value = "Get user's bonuses.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = AllPointsUserDto.class)
     })

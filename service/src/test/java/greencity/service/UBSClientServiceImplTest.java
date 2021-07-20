@@ -268,6 +268,21 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getProfileData() {
+        User user = ModelUtils.getUser();
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        UserProfileDto userProfileDto = new UserProfileDto();
+        AddressDto addressDto = ModelUtils.addressDto();
+        userProfileDto.setAddressDto(addressDto);
+        Address address = ModelUtils.address();
+        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
+        assertNotNull(addressDto);
+        assertNotNull(userProfileDto);
+        assertNotNull(address);
+    }
+
+    @Test
     void testFindAllAddressesForCurrentOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
@@ -315,7 +330,6 @@ class UBSClientServiceImplTest {
         AddressDto addressDto2 = AddressDto.builder().actual(true).id(42L).city("Lviv").district("Syhiv")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
             .coordinates(new Coordinates(13.5, 36.5)).build();
-
         return Arrays.asList(addressDto1, addressDto2);
     }
 
@@ -324,7 +338,6 @@ class UBSClientServiceImplTest {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
         user.setId(13L);
-
         List<Address> addresses = getTestAddresses(user);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
@@ -403,7 +416,6 @@ class UBSClientServiceImplTest {
 
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.getOrderPaymentDetail(any()));
-
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 }
