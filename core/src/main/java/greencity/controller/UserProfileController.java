@@ -1,4 +1,5 @@
 package greencity.controller;
+
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.UserProfileDto;
