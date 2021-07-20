@@ -141,9 +141,18 @@ public interface UBSClientService {
      * @param uuid current {@link String} user`s uuid;
      * @param dto  user`s date {@link UserProfileDto} user;
      * @return {@link UserProfileDto} contains all information needed save user;
-     * @author Mykhailo Berezhinskiy
+     * @author Liubomyr Bratakh
      */
     UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
+
+    /**
+     * Method that get user profile for current user.
+     *
+     * @param uuid current {@link String} user`s uuid;
+     * @return {@link UserProfileDto} contains information about user;
+     * @author Liubomyr Bratkh
+     */
+    UserProfileDto getProfileData(String uuid);
 
     /**
      * Method returns information about order payment by orderId.
