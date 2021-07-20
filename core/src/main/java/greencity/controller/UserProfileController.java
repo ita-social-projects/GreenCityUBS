@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
 import javax.validation.Valid;
 
 @RestController
@@ -30,7 +29,7 @@ public class UserProfileController {
     /**
      * Controller returns user`s date of saved or update {@link UserProfileDto}
      * date.
-     *
+     * 
      * @param userUuid       {@link UserProfileDto} id.
      * @param userProfileDto {@link UserProfileDto}
      * @return {@link UserProfileDto}.
