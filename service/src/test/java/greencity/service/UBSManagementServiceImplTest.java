@@ -3,17 +3,22 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.user.Violation;
+
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
-import greencity.repository.AddressRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.OrderRepository;
+
+import greencity.exceptions.UnexistingOrderException;
+import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,13 +30,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 public class UBSManagementServiceImplTest {
@@ -48,6 +57,12 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private ViolationRepository violationRepository;
+
+    @Mock
+    private ReceivingStationRepository receivingStationRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -136,5 +151,74 @@ public class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
             ubsManagementService.getAddressByOrderId(10000000l);
         });
+    }
+
+    @Test
+    void returnsViolationDetailsByOrderId() {
+        Violation violation = ModelUtils.getViolation();
+        Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
+        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
+        Optional<ViolationDetailInfoDto> actual = ubsManagementService.getViolationDetailsByOrderId(1L);
+        verify(violationRepository, times(1)).findByOrderId(1L);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void checkPaymentNotFound() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderDetailStatus(100L);
+        });
+    }
+
+    @Test
+    void returnExportDetailsByOrderId() {
+        ExportDetailsDto expected = ModelUtils.getExportDetails();
+        Order order = ModelUtils.getOrderExportDetails();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
+        when(receivingStationRepository.findAll()).thenReturn(stations);
+
+        assertEquals(expected, ubsManagementService.getOrderExportDetails(1L));
+    }
+
+    @Test
+    void updateExportDetailsByOrderId() {
+        ExportDetailsDtoRequest dto = ModelUtils.getExportDetailsRequest();
+        Order order = ModelUtils.getOrderExportDetails();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
+        when(receivingStationRepository.findAll()).thenReturn(stations);
+
+        ubsManagementService.updateOrderExportDetails(order.getId(), dto);
+
+        verify(orderRepository, times(1)).save(order);
+    }
+
+    @Test
+    void checkStationNotFound() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderExportDetails(100L);
+        });
+    }
+
+    @Test
+    void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
+        Assertions.assertThrows(ResponseStatusException.class, () -> ubsManagementService.deleteViolation(1L));
+        verify(violationRepository, times(1)).findByOrderId(1L);
+    }
+
+    @Test
+    void deleteViolationFromOrderByOrderId() {
+        Violation violation = ModelUtils.getViolation();
+        Long id = ModelUtils.getViolation().getOrder().getId();
+        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
+        doNothing().when(violationRepository).deleteById(id);
+        ubsManagementService.deleteViolation(id);
+
+        verify(violationRepository, times(1)).deleteById(id);
     }
 }

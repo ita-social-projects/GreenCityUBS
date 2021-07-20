@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
@@ -37,6 +38,30 @@ public interface UBSManagementService {
      * @author Oleh Bilonizhka
      */
     List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters();
+
+    /**
+     * Method returns payment info.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Struk Nazar
+     */
+    PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @author Ostap Mykhailivskyi
+     */
+    void returnOverpayment(Long orderId,
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto);
+
+    /**
+     * Method returns overpayment to user.
+     *
+     * @return {@link PaymentTableInfoDto};
+     * @author Ostap Mykhailivskyi
+     */
+    PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker);
 
     /**
      * Method returns all certificates.
@@ -125,7 +150,6 @@ public interface UBSManagementService {
      * @return {@link PaymentTableInfoDto};
      * @author Struk Nazar
      */
-    PaymentTableInfoDto getPaymentInfo(long orderId);
 
     /**
      * Method for getting order detail by language and order id.
@@ -147,4 +171,63 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     CounterOrderDetailsDto getOrderSumDetails(Long id);
+
+    /**
+     * Method that gets bags information.
+     *
+     * @author Nazar Struk
+     */
+    List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
+
+    /**
+     * Method returns detailed information about user violation by order id.
+     *
+     * @param orderId of {@link Long} order id;
+     * @return {@link ViolationDetailInfoDto};
+     * @author Rusanovscaia Nadejda
+     */
+    Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId);
+
+    /**
+     * Method that get order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto getOrderDetailStatus(Long id);
+
+    /**
+     * Method that update order and payment status.
+     *
+     * @author Mahdziak Orest
+     */
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+
+    /**
+     * Method that get export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto getOrderExportDetails(Long id);
+
+    /**
+     * Method that update export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
+
+    /**
+     * Method that gets bags additional information.
+     *
+     * @author Nazar Struk
+     */
+    List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
+
+    /**
+     * Method deletes violation from database by orderId.
+     *
+     * @param orderId {@link Long}
+     * @author Nadia Rusanovscaia
+     */
+    void deleteViolation(Long orderId);
 }

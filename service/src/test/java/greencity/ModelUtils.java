@@ -4,10 +4,12 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -16,7 +18,10 @@ import greencity.entity.user.ubs.UBSuser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
+
+import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
 
@@ -64,6 +69,7 @@ public class ModelUtils {
 
     public static Order getOrder() {
         return Order.builder()
+            .id(1L)
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
@@ -91,6 +97,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrderExportDetails() {
+        return Order.builder()
+            .id(1L)
+            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .receivingStation("Petrivka")
+            .build();
+    }
+
     public static OrderDto getOrderDto() {
         return OrderDto.builder()
             .firstName("oleh")
@@ -114,6 +128,22 @@ public class ModelUtils {
         return CoordinatesDto.builder()
             .latitude(49.83)
             .longitude(23.88)
+            .build();
+    }
+
+    public static ExportDetailsDto getExportDetails() {
+        return ExportDetailsDto.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
+            .build();
+    }
+
+    public static ExportDetailsDtoRequest getExportDetailsRequest() {
+        return ExportDetailsDtoRequest.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
             .build();
     }
 
@@ -598,8 +628,54 @@ public class ModelUtils {
             .name("Петрівка")
             .build();
     }
-
     public static UbsTableCreationDto getUbsTableCreationDto() {
         return UbsTableCreationDto.builder().uuid("87df9ad5-6393-441f-8423-8b2e770b01a8").build();
+}
+    public static Violation getViolation() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
+        return Violation.builder()
+            .id(1L)
+            .user(User.builder()
+                .recipientName("Alan Po").build())
+            .order(Order.builder()
+                .id(1L).build())
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
+    }
+
+    public static ViolationDetailInfoDto getViolationDetailInfoDto() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
+        return ViolationDetailInfoDto.builder()
+            .orderId(1L)
+            .userName("Alan Po")
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
+    }
+
+    public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
+        return OrderPaymentDetailDto.builder()
+            .amount(95000L + 1000 + 70000)
+            .certificates(-1000)
+            .pointsToUse(-70000)
+            .amountToPay(95000L)
+            .currency("UAH")
+            .build();
+    }
+
+    public static Payment getPayment() {
+        return Payment.builder()
+            .id(1L)
+            .paymentStatus(PaymentStatus.UNPAID)
+            .amount(95000L)
+            .currency("UAH")
+            .build();
     }
 }

@@ -6,6 +6,7 @@ import greencity.dto.*;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -17,6 +18,8 @@ import greencity.util.EncryptionUtil;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -72,7 +75,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getOrder_status().equals("approved")) {
-            order.setOrderStatus(OrderStatus.PAID);
+            orderPayment.setPaymentStatus(PaymentStatus.PAID);
         }
         orderPayment = modelMapper.map(dto, Payment.class);
         orderPayment.setOrder(order);
@@ -441,6 +444,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .amount((long) (sumToPay * 100))
             .orderStatus("created")
             .currency("UAH")
+            .paymentStatus(PaymentStatus.UNPAID)
             .order(order).build();
         if (order.getPayment() != null) {
             order.getPayment().add(payment);
@@ -487,6 +491,33 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             return ubsUserFromDatabaseById;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderPaymentDetailDto getOrderPaymentDetail(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return buildOrderPaymentDetailDto(order);
+    }
+
+    private OrderPaymentDetailDto buildOrderPaymentDetailDto(Order order) {
+        int certificatePoints = order.getCertificates().stream()
+            .flatMapToInt(c -> IntStream.of(c.getPoints()))
+            .reduce(Integer::sum).orElse(0) * 100;
+        int pointsToUse = order.getPointsToUse() * 100;
+        long amount = order.getPayment().stream()
+            .flatMapToLong(p -> LongStream.of(p.getAmount()))
+            .reduce(Long::sum).orElse(0);
+        return OrderPaymentDetailDto.builder()
+            .amount(amount != 0 ? amount + certificatePoints + pointsToUse : 0)
+            .certificates(-certificatePoints)
+            .pointsToUse(-pointsToUse)
+            .amountToPay(amount)
+            .currency(order.getPayment().get(0).getCurrency())
+            .build();
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
