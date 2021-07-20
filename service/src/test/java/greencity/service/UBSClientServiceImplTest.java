@@ -285,8 +285,8 @@ class UBSClientServiceImplTest {
         assertNotNull(userProfileDto);
         assertNotNull(address);
     }
-  
-   @Test
+
+    @Test
     void testFindAllAddressesForCurrentOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();

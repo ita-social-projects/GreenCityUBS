@@ -153,7 +153,7 @@ public interface UBSClientService {
      * @author Liubomyr Bratkh
      */
     UserProfileDto getProfileData(String uuid);
-  
+
     /**
      * Method returns information about order payment by orderId.
      *

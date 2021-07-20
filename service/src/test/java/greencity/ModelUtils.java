@@ -628,9 +628,11 @@ public class ModelUtils {
             .name("Петрівка")
             .build();
     }
+
     public static UbsTableCreationDto getUbsTableCreationDto() {
         return UbsTableCreationDto.builder().uuid("87df9ad5-6393-441f-8423-8b2e770b01a8").build();
-}
+    }
+
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
