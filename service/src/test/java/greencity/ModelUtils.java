@@ -680,4 +680,16 @@ public class ModelUtils {
             .currency("UAH")
             .build();
     }
+
+    public static User getUser() {
+        return User.builder()
+            .id(1L)
+            .addresses(Collections.singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .build();
+    }
 }

@@ -611,8 +611,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
-        UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-        uuid = dto.getUuid();
+        createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserDate(user, userProfileDto);
         AddressDto addressDto = userProfileDto.getAddressDto();
@@ -628,14 +627,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public UserProfileDto getProfileData(String uuid) {
-        UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-        uuid = dto.getUuid();
+        createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
-        UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
-        if (allAddress == null) {
-            throw new AddressNotFoundException(NOT_FOUND_ADDRESS_BY_USER_UUID);
-        }
+        UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         for (Address address : allAddress) {
             AddressDto addressDto = modelMapper.map(address, AddressDto.class);
             setAddressDate(address, addressDto);

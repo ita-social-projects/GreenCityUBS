@@ -4,9 +4,11 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.ubs.Address;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -239,6 +241,20 @@ public class ModelUtils {
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
+            .build();
+    }
+
+    public static Address address() {
+        return Address.builder()
+            .id(addressDto().getId())
+            .city(addressDto().getCity())
+            .district(addressDto().getDistrict())
+            .street(addressDto().getStreet())
+            .coordinates(addressDto().getCoordinates())
+            .entranceNumber(addressDto().getEntranceNumber())
+            .houseNumber(addressDto().getHouseNumber())
+            .houseCorpus(addressDto().getHouseCorpus())
+            .actual(addressDto().getActual())
             .build();
     }
 }

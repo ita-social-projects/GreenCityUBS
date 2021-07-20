@@ -250,9 +250,7 @@ class UBSClientServiceImplTest {
     void saveProfileData() {
         User user = new User();
         user.setId(13L);
-        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
-        when(restClient.getDataForUbsTableRecordCreation())
-            .thenReturn(UbsTableCreationDto.builder().uuid(uuid).build());
+        String uuid = "35467585763t4sfgchjfuyetf";
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         UserProfileDto userProfileDto = new UserProfileDto();
         AddressDto addressDto = ModelUtils.addressDto();
@@ -271,17 +269,15 @@ class UBSClientServiceImplTest {
 
     @Test
     void getProfileData() {
-        UbsTableCreationDto dto = getUbsTableCreationDto();
-        User user = userRepository.findByUuid(dto.getUuid());
-        UserProfileDto userProfileDto = ModelUtils.userProfileDto();
+        User user = ModelUtils.getUser();
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        UserProfileDto userProfileDto = new UserProfileDto();
         AddressDto addressDto = ModelUtils.addressDto();
-        Address address = ModelUtils.address();
         userProfileDto.setAddressDto(addressDto);
+        Address address = ModelUtils.address();
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
-        assertEquals(userProfileDto, modelMapper.map(user, UserProfileDto.class));
-        assertEquals(addressDto, modelMapper.map(address, AddressDto.class));
-        assertNotNull(userProfileDto.getAddressDto());
+        assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
+        assertNotNull(addressDto);
         assertNotNull(userProfileDto);
         assertNotNull(address);
     }
@@ -334,7 +330,6 @@ class UBSClientServiceImplTest {
         AddressDto addressDto2 = AddressDto.builder().actual(true).id(42L).city("Lviv").district("Syhiv")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
             .coordinates(new Coordinates(13.5, 36.5)).build();
-
         return Arrays.asList(addressDto1, addressDto2);
     }
 
