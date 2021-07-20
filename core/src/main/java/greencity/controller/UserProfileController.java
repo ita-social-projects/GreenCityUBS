@@ -41,9 +41,10 @@ public class UserProfileController {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UserProfileDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping("/user/save")
-    public ResponseEntity<UserProfileDto> saveUserDate(@ApiIgnore  @CurrentUserUuid String userUuid,
+    public ResponseEntity<UserProfileDto> saveUserDate(@ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileDto userProfileDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsClientService.saveProfileData(userUuid, userProfileDto));
@@ -58,6 +59,7 @@ public class UserProfileController {
     @ApiOperation(value = "Get user's profile data.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserProfileDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/user/getUserProfile")
     public ResponseEntity<UserProfileDto> getUserData(

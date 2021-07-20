@@ -250,19 +250,4 @@ public class RestClient {
         restTemplate.exchange(greenCityUserServerAddress + "/email/sendUserViolation",
             HttpMethod.POST, entity, Object.class).getBody();
     }
-
-    /**
-     * Method that allow you to find User by uuid {@link UbsCustomersDto}.
-     *
-     * @param email - {@link User}'s uuid
-     * @return {@link User}
-     * @author Nazar Struk
-     */
-    public Optional<User> findUserByEmail(String email) {
-        HttpEntity<String> entity = new HttpEntity<>(setHeader());
-        User body = restTemplate.exchange(greenCityUserServerAddress + "user/findUserByEmail"
-            + "?email=" + email, HttpMethod.GET, entity, User.class).getBody();
-        assert body != null;
-        return Optional.of(body);
-    }
 }
