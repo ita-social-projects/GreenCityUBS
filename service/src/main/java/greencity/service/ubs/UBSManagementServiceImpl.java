@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
+import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -56,6 +57,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
+    private final NotificationServiceImpl notificationService;
 
     /**
      * {@inheritDoc}
@@ -257,6 +259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
+            notificationService.notifyBonuses(order);
         }
         if (order.getOrderStatus() == OrderStatus.CANCELLED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
@@ -467,6 +470,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User ourUser = order.getUser();
         ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
         ourUser.setViolations(ourUser.getViolations() + 1);
+        notificationService.notifyAddViolation(order);
         userRepository.save(ourUser);
     }
 
@@ -782,6 +786,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             || currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
             if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
                 payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                notificationService.notifyPaidOrder(currentOrder);
+                if(currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT){
+                    notificationService.notifyCourierItineraryFormed(currentOrder);
+                }
             }
             if (totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)
                 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) == 0L) {
@@ -790,6 +798,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (totalConfirmed > 0 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) > 0
                 && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                notificationService.notifyHalfPaidPackage(currentOrder);
             }
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
@@ -797,9 +806,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                notificationService.notifyHalfPaidPackage(currentOrder);
             }
             if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                notificationService.notifyPaidOrder(currentOrder);
             }
         }
         paymentRepository.saveAll(payments);

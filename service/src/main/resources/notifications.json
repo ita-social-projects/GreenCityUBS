@@ -1,0 +1,92 @@
+[
+  {
+   "type" : "UNPAID_ORDER",
+    "title" : "Неоплачене замовлення",
+    "body" : "Вітання!\nВи нещодавно залишили заявку для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі?\nЯкщо у вас залишилися будь-які питання — з радістю відповім!\nЧат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "UNPAID_ORDER",
+    "title" : "Unpaid order",
+    "body" : "Hello!\nRecently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues?\nWe will gladly answer any questions you might still have! \nChat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "ORDER_IS_PAID",
+    "title" : "Оплата пройшла успішно",
+    "body" : "Вітаємо!\nВи успішно замовили й оплатили послугу «УБС Кур'єр»!\nУБС Кур'єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги.\nКоли маршрут буде сформовано, ми обов’язково зв'яжемося з вами для узгодження деталей.\nЯкщо у вас залишилися будь-які питання — з радістю відповім!\nЧат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "ORDER_IS_PAID",
+    "title" : "Payment successful",
+    "body" : "Hello!\nYou have successfully purchased a “UBS Courier” service!\nUBS Courier will collect your bags within 2-9 days from the payment date.\nOnce the route is created, we will contact you to confirm the details.\nWe will gladly answer any questions you might still have!\nChat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "COURIER_ITINERARY_FORMED",
+    "title" : "Маршрут сформовано",
+    "body" : "Вітання!\nМи сформували маршрут УБС Кур’єра. Наш Кур’єр буде у вас завтра, {XX Mісяць}.\nРобочий час Кур'єра: з {XX:XX} до {XX:XX}. \nБудь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів!\nНомер Кур'єра — +380638175035 або +380931038987.\nЯкщо у вас залишилися будь-які питання — з радістю відповім!\nЧат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "COURIER_ITINERARY_FORMED",
+    "title" : "Route created",
+    "body" : "Hello!\nWe have created the route for your UBS Courier. Your Courier will arrive tomorrow {XX Mісяць}.\nCourier’s hours of operation: from {XX:XX} to {XX:XX}.\nPlease be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers!\nCourier’s number - +380638175035 or +380931038987. \nWe will gladly answer any questions you might still have!\nChat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "UNPAID_PACKAGE",
+    "title" : "Оплатіть зміну у замовлені",
+    "body" : "Вітання!\nВи внесли зміни у замовлення №{ХХХХ}.\nПросимо вас, будь ласка, доплатити {ХХХ} грн.\nОплатити: {кнопка “Оплатити”}. \nЯкщо у вас залишилися будь-які питання — з радістю відповім!\nЧат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "UNPAID_PACKAGE",
+    "title" : "Please make payment for an order change",
+    "body" : "Hello!\nYou have made some changes to the following order: N{ХХХХ}\nPlease pay the remaining fee of {ХХХ} hrn.\n{“Pay now” button}\nWe will gladly answer any questions you might still have!\nChat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "ACCRUED_BONUSES_TO_ACCOUNT",
+    "title" : "Нараховано бонуси",
+    "body" : "Вітання!\nСьогодні УБС Кур’єр забрав у вас пакетів: {ХХХ}.\nА оплачували ви: {ХХХ}.\nТож фіксуємо для вас депозит для наступного вивозу на суму {ХХХ} грн.\nГарного дня!",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "ACCRUED_BONUSES_TO_ACCOUNT",
+    "title" : "Bonus points added",
+    "body" : "Hello!\nAmount of bags collected by your UBS Courier today: {ХХХ}.\nHowever, you paid for: {ХХХ} bags.\nSo we have credited your account with {ХХХ} hrn toward your next collection.\nHave a great day!",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "VIOLATION_THE_RULES",
+    "title" : "Недотримання правил УБС",
+    "body" : "Вітання!\nНа жаль, у ваших пакетах було виявлено: {ХХХ}. Це відходи, які ми не приймаємо.\nБудь ласка, ознайомтеся ще раз із нашими правилами сортування: https://bit.ly/2Q2esLB\nНЕ приймаємо взагалі:\n-батарейки, акумулятори, ртутьвмісні (люмінесцентні) лампи й термометри;\n-ліки та фармацевтичні відходи (маски, рукавички, шприци), а також усе, що контактувало з рідинами тіла (кров’ю, сечею, слиною, виділеннями); \n-використані засоби особистої гігієни та контрацепції (підгузки, прокладки, тампони, презервативи тощо);\n-картриджі принтера;\n-будівельні відходи, лаки, фарби, пластилін;\n-недопалки/стіки від електронних аксесуарів для куріння;\n-газові балони, запальнички, вибухонебезпечні предмети (гільзи, снаряди тощо);\n-кераміку;\n-гострі та ріжучі предмети.\nДякуємо за розуміння!",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "VIOLATION_THE_RULES",
+    "title" : "UBS Rules Violation",
+    "body" : "Hello!\nUnfortunately, your bags contained the following: {ХХХ}. This is the type of waste we do not collect.\nPlease familiarize yourself with our recycling rules once more: https://bit.ly/2Q2esLB\nWe do NOT collect any type of the following waste:\n-batteries, accumulators (lead-acid batteries), mercury-containing (fluorescent) light bulbs and thermometers;\n-medicine and pharmaceutical waste (masks, gloves, syringes), and anything that came into contact with bodily fluids (blood, urine, saliva, bodily secretions);\n-personal hygiene and contraception items that have been used (diapers, pads, tampons, condoms, etc.);\n-printer cartridges;\n-construction waste, varnish, paint, plasticine;\n-cigarette butts/e-cigarettes and their accessories;\n-gas cylinders, lighters, explosive materials (shell casings, ammunition, etc.);\n-ceramics;\n-sharp and cutting objects.\nThank you for your understanding!",
+    "languageCode" : "2"
+  },
+
+  {
+    "type" : "LETS_STAY_CONNECTED",
+    "title" : "Давайте залишатися на зв'язку",
+    "body" : "Привіт!\nМи помітили, що ви не користувалися послугою «УБС Кур‘єр» уже 2 місяці. Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме.",
+    "languageCode" : "1"
+  },
+  {
+    "type" : "LETS_STAY_CONNECTED",
+    "title" : "Let's stay connected",
+    "body" : "Hi there!\nWe noticed that you have not used the UBS Courier service for 2 months. Maybe you went on a long journey, or maybe something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how.",
+    "languageCode" : "2"
+  }
+]

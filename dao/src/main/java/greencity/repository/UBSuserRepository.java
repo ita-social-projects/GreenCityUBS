@@ -30,4 +30,16 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
         value = "SELECT * FROM ubs_user u INNER JOIN orders o ON u.id = o.ubs_user_id "
             + "WHERE CAST(o.order_date AS DATE) = :localDate AND o.order_status LIKE 'FORMED'")
     List<UBSuser> getAllUBSusersWhoHaveNotPaid(LocalDate localDate);
+
+
+    /**
+     * Finds list of UBSuser who have no orders after {@param localDate}.
+     *
+     * @param localDate - date after which user have no orders.
+     * @return a {@link List} of {@link UBSuser} - which have no orders after {@param localDate}.
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM ubs_user as u INNER JOIN orders as o ON u.id = o.ubs_user_id " +
+                    "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :localDate)!=0")
+    List<UBSuser> getAllInactiveUsers(LocalDate localDate);
 }
