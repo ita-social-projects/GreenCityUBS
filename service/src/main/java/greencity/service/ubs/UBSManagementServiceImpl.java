@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
