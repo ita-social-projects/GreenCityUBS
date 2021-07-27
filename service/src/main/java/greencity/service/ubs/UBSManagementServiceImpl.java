@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
@@ -291,7 +292,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         }
         dto.getPaymentInfoDtos().add(payDto);
-        dto.setOverpayment(dto.getOverpayment() - overpayment);
         return dto;
     }
 
