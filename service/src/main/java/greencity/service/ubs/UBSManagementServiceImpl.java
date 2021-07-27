@@ -294,7 +294,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         }
         dto.getPaymentInfoDtos().add(payDto);
-        dto.setOverpayment(dto.getOverpayment() - overpayment);
         return dto;
     }
 
