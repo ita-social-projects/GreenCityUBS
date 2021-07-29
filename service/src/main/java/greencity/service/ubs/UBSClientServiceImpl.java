@@ -334,10 +334,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
             order.setOrderStatus(OrderStatus.CANCELLED);
-            order.setCertificates(Collections.emptySet());
+            order.getUser().setCurrentPoints(order.getUser().getCurrentPoints() + order.getPointsToUse());
             order.setPointsToUse(0);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
-            order.getPayment().stream().forEach(x -> x.setAmount(0L));
+            order.getPayment().forEach(p -> p.setAmount(0L));
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
@@ -367,20 +367,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
         for (BagTranslation bag : bags) {
             bagOrderDtoList.add(BagOrderDto.builder()
-                    .bagId(bag.getBag().getId())
-                    .name(bag.getName())
-                    .capacity(bag.getBag().getCapacity())
-                    .price(bag.getBag().getPrice())
-                    .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
-                    .build());
+                .bagId(bag.getBag().getId())
+                .name(bag.getName())
+                .capacity(bag.getBag().getCapacity())
+                .price(bag.getBag().getPrice())
+                .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
+                .build());
         }
         return MakeOrderAgainDto.builder()
-                .orderId(order.getId())
-                .orderAmount(order.getPayment().stream()
-                        .flatMapToLong(p -> LongStream.of(p.getAmount()))
-                        .reduce(Long::sum).orElse(0L))
-                .bagOrderDtoList(bagOrderDtoList)
-                .build();
+            .orderId(order.getId())
+            .orderAmount(order.getPayment().stream()
+                .flatMapToLong(p -> LongStream.of(p.getAmount()))
+                .reduce(Long::sum).orElse(0L))
+            .bagOrderDtoList(bagOrderDtoList)
+            .build();
     }
 
     /**

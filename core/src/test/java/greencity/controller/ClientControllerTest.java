@@ -95,13 +95,13 @@ class ClientControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink + "/en")
+        mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink)
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), null);
+        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), 1L);
     }
 
     @Test

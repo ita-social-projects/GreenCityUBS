@@ -107,7 +107,7 @@ public interface UBSClientService {
      * @return {@link OrderClientDto} that contains client's order;
      * @author Danylko Mykola
      */
-    MakeOrderAgainDto makeOrderAgain(Locale locale,Long orderId);
+    MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
 
     /**
      * Method returns list all bonuses of user.
