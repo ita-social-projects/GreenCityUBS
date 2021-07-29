@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
+import greencity.annotations.ValidLanguage;
 import greencity.dto.*;
 import greencity.constants.HttpStatuses;
 import greencity.dto.OrderClientDto;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/ubs/client")
@@ -77,14 +79,15 @@ public class ClientController {
      */
     @ApiOperation(value = "Make order again if our status of Order is ON_THE_ROUTE, CONFIRMED, DONE")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/{id}/make-order-again")
-    public ResponseEntity<List<OrderBagDto>> makeOrderAgain(@PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.makeOrderAgain(orderId));
+    public ResponseEntity<MakeOrderAgainDto> makeOrderAgain(@PathVariable(name = "id") Long orderId,
+                                                            @ApiIgnore @ValidLanguage Locale locale) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.makeOrderAgain(locale, orderId));
     }
 
     /**

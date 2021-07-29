@@ -350,27 +350,37 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public List<OrderBagDto> makeOrderAgain(Long orderId) {
+    public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            return buildOrderBagDto(order);
+            List<BagTranslation> bags = bagTranslationRepository.findAllByLanguageOrder(locale.getLanguage(), orderId);
+            return buildOrderBagDto(order, bags);
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
 
-    private List<OrderBagDto> buildOrderBagDto(Order order) {
-        List<OrderBagDto> build = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> pair : order.getAmountOfBagsOrdered().entrySet()) {
-            build.add(OrderBagDto.builder()
-                .id(pair.getKey())
-                .amount(pair.getValue())
-                .build());
+    private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
+        List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
+        for (BagTranslation bag : bags) {
+            bagOrderDtoList.add(BagOrderDto.builder()
+                    .bagId(bag.getBag().getId())
+                    .name(bag.getName())
+                    .capacity(bag.getBag().getCapacity())
+                    .price(bag.getBag().getPrice())
+                    .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
+                    .build());
         }
-        return build;
+        return MakeOrderAgainDto.builder()
+                .orderId(order.getId())
+                .orderAmount(order.getPayment().stream()
+                        .flatMapToLong(p -> LongStream.of(p.getAmount()))
+                        .reduce(Long::sum).orElse(0L))
+                .bagOrderDtoList(bagOrderDtoList)
+                .build();
     }
 
     /**

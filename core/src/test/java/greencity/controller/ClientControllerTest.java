@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.Mockito.*;
@@ -94,13 +95,13 @@ class ClientControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink)
+        mockMvc.perform(post(ubsLink + "/" + 1L + makeOrderAgainLink + "/en")
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
 
-        verify(ubsClientService, times(1)).makeOrderAgain(1L);
+        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), null);
     }
 
     @Test
