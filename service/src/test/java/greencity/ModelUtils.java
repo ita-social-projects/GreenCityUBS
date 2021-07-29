@@ -5,9 +5,8 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+import greencity.entity.language.Language;
+import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -690,6 +689,40 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
+            .build();
+    }
+
+    public static BagTranslation getBagTranslation() {
+        return BagTranslation.builder()
+            .id(1L)
+            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .build();
+    }
+
+    public static BagOrderDto getBagOrderDto() {
+        return BagOrderDto.builder()
+            .bagId(1)
+            .price(350)
+            .capacity(120)
+            .bagAmount(1)
+            .name("Useless paper")
+            .build();
+    }
+
+    public static Order getFormedOrder() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .payment(Collections.singletonList(Payment.builder()
+                .id(1L)
+                .amount(350L)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
             .build();
     }
 }
