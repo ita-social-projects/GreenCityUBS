@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.Mockito.*;
@@ -98,9 +99,9 @@ class ClientControllerTest {
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).makeOrderAgain(1L);
+        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), 1L);
     }
 
     @Test

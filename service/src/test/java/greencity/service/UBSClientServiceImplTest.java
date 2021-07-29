@@ -41,6 +41,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UBSClientServiceImplTest {
     @Mock
+    private BagTranslationRepository bagTranslationRepository;
+    @Mock
     private UserRepository userRepository;
     @Mock
     private BagRepository bagRepository;
@@ -110,8 +112,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void cancelFormedOrder() {
-        Order order = getOrderDoneByUser();
-        order.setOrderStatus(OrderStatus.FORMED);
+        Order order = getFormedOrder();
         OrderClientDto expected = getOrderClientDto();
         expected.setOrderStatus(OrderStatus.CANCELLED);
 
@@ -145,19 +146,28 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgain() {
-        List<OrderBagDto> dto = List.of(getOrderBagDto());
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDoneByUser()));
+        MakeOrderAgainDto dto = MakeOrderAgainDto.builder()
+            .orderId(1L)
+            .orderAmount(350L)
+            .bagOrderDtoList(List.of(getBagOrderDto()))
+            .build();
+        Order order = getOrderDoneByUser();
+        order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(bagTranslationRepository.findAllByLanguageOrder("en", 1L))
+            .thenReturn(List.of(getBagTranslation()));
 
-        List<OrderBagDto> result = ubsService.makeOrderAgain(1L);
+        MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
 
-        assertEquals(dto.get(0).getId(), result.get(0).getId());
+        assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
+        verify(bagTranslationRepository, times(1)).findAllByLanguageOrder("en", 1L);
     }
 
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.makeOrderAgain(1L));
+            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
     }
 
@@ -167,7 +177,7 @@ class UBSClientServiceImplTest {
         order.setOrderStatus(OrderStatus.CANCELLED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
-            () -> ubsService.makeOrderAgain(1L));
+            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
     }
