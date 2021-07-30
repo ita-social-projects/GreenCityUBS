@@ -217,14 +217,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long paidAmount = calculatePaidAmount(order);
-        Long unPaidAmount = sumToPay - paidAmount;
         Long overpayment = calculateOverpayment(order, sumToPay);
-        if (overpayment < 0L) {
-            overpayment = 0L;
-        }
-        if (unPaidAmount < 0) {
-            unPaidAmount = 0L;
-        }
+        Long unPaidAmount = calculateUnpaidAmount(sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         paymentTableInfoDto.setOverpayment(overpayment);
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
@@ -948,7 +942,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
-        return paymentSum - sumToPay;
+        return Math.max((paymentSum - sumToPay), 0L);
     }
 
     /**
@@ -961,6 +955,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Long calculatePaidAmount(Order order) {
         return order.getPayment().stream().filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
             .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
+    }
+
+    /**
+     * Method that calculate unpaid amount.
+     *
+     * @param sumToPay   of {@link Long} sum to pay;
+     * @param paidAmount of {@link Long} sum to pay;
+     * @return {@link Long }
+     * @author Ostap Mykhailivskyi
+     */
+    private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
+        return Math.max((sumToPay - paidAmount), 0L);
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
