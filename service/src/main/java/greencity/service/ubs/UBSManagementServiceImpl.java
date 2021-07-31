@@ -227,6 +227,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
         paymentTableInfoDto.setPaidAmount(paidAmount);
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID)
+                || payment.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
@@ -1003,6 +1005,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
         Long paymentSum = order.getPayment().stream()
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
+                || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
@@ -1017,7 +1021,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
+            || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
     }
 
