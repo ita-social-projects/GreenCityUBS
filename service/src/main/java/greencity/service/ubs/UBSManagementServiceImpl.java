@@ -230,7 +230,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method return's overpayment and bonuses to user's account.
+     * Method returns overpayment and bonuses to users account.
      *
      * @param orderId                   of {@link Long} order id;
      * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}
