@@ -136,7 +136,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-                                                                      int litres, double additionalDistance) {
+        int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
@@ -239,7 +239,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public void returnOverpayment(Long orderId,
-                                  OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         User user = userRepository.findUserByOrderId(orderId)
@@ -346,11 +346,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *                       unclustered coordinates.
      * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
      * @return list of {@link Coordinates} - start coordinates with it's
-     * distant @relatives.
+     *         distant @relatives.
      * @author Oleh Bilonizhka
      */
     private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-                                                         Set<Coordinates> allCoords, Coordinates currentlyCoord) {
+        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
         Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
 
         for (Coordinates checked : allCoords) {
@@ -418,7 +418,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-                                                          List<GroupedOrderDto> allClusters) {
+        List<GroupedOrderDto> allClusters) {
         List<Order> orderslist = new ArrayList<>();
         for (Coordinates coordinates : closeRelatives) {
             List<Order> orders =
@@ -513,7 +513,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages,
-                                                                    int size) {
+        int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         if (searchCriteria.getPayment() == null) {
             searchCriteria.setPayment("");
@@ -570,7 +570,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
-                                                                          int size) {
+        int size) {
         int numberOfElements1 = 0;
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         try {
@@ -725,7 +725,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse()));
+                        - order.getPointsToUse()));
             totalSumExported =
                 (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     - order.getPointsToUse()));
@@ -756,7 +756,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setDtoInfo(CounterOrderDetailsDto dto, double sumAmount, double sumExported, double sumConfirmed,
-                            double totalSumAmount, double totalSumConfirmed, double totalSumExported, Order order) {
+        double totalSumAmount, double totalSumConfirmed, double totalSumExported, Order order) {
         dto.setSumAmount(sumAmount);
         dto.setSumConfirmed(sumConfirmed);
         dto.setSumExported(sumExported);
@@ -941,8 +941,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
         Long paymentSum = order.getPayment().stream()
-            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID) ||
-                x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
+                || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
@@ -957,8 +957,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID) ||
-            x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
+        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
+            || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
     }
 
@@ -996,8 +996,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void returnOverpaymentForStatusDone(User user, Order order,
-                                                OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-                                                Payment payment) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto,
+        Payment payment) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()));
         user.getChangeOfPointsList()
             .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
@@ -1005,14 +1005,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void returnOverpaymentAsMoneyForStatusCancelled(User user, Order order,
-                                                            OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getBonuses()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
         order.getPayment().forEach(p -> p.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED));
     }
 
     private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order,
-                                                              OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()
             + overpaymentInfoRequestDto.getBonuses()));
         user.getChangeOfPointsList()
