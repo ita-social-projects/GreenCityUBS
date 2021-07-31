@@ -224,7 +224,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
         paymentTableInfoDto.setPaidAmount(paidAmount);
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID)
+                || payment.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
