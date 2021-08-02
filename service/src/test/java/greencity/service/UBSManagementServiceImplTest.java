@@ -249,7 +249,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void checkReturnOverpaymentForStatusDone() {
+    void checkReturnOverpaymentForStatusDone() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.DONE);
@@ -261,7 +261,7 @@ public class UBSManagementServiceImplTest {
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(2L, order.getPayment().size());
-        assertEquals(user.getChangeOfPointsList().size(), 2L);
+        assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
@@ -269,7 +269,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void returnOverpaymentAsMoneyForStatusCancelled() {
+    void returnOverpaymentAsMoneyForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELLED);
@@ -280,7 +280,7 @@ public class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
-        assertEquals(user.getChangeOfPointsList().size(), 2L);
+        assertEquals(3L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.PAYMENT_REFUND,
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
@@ -288,7 +288,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void returnOverpaymentAsBonusesForStatusCancelled() {
+    void returnOverpaymentAsBonusesForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELLED);
@@ -299,7 +299,7 @@ public class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
-        assertEquals(user.getChangeOfPointsList().size(), 3L);
+        assertEquals(3L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
