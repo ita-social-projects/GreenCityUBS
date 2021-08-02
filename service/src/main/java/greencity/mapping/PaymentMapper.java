@@ -1,6 +1,7 @@
 package greencity.mapping;
 
 import greencity.dto.PaymentResponseDto;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Payment;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class PaymentMapper extends AbstractConverter<PaymentResponseDto, Payment
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
             .paymentId(Long.valueOf(dto.getPayment_id()))
+            .paymentStatus(PaymentStatus.PAID)
             .build();
     }
 }
