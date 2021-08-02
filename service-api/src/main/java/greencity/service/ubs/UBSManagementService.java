@@ -203,6 +203,20 @@ public interface UBSManagementService {
     OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
 
     /**
+     * Method that get export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto getOrderExportDetails(Long id);
+
+    /**
+     * Method that update export details by order id.
+     *
+     * @author Mahdziak Orest
+     */
+    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
+
+    /**
      * Method that gets bags additional information.
      *
      * @author Nazar Struk

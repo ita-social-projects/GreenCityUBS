@@ -7,10 +7,10 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+
+import greencity.entity.language.Language;
+import greencity.entity.order.*;
+
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -125,6 +125,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrderExportDetails() {
+        return Order.builder()
+            .id(1L)
+            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .receivingStation("Petrivka")
+            .build();
+    }
+
     public static OrderDto getOrderDto() {
         return OrderDto.builder()
             .firstName("oleh")
@@ -148,6 +156,22 @@ public class ModelUtils {
         return CoordinatesDto.builder()
             .latitude(49.83)
             .longitude(23.88)
+            .build();
+    }
+
+    public static ExportDetailsDto getExportDetails() {
+        return ExportDetailsDto.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
+            .build();
+    }
+
+    public static ExportDetailsDtoRequest getExportDetailsRequest() {
+        return ExportDetailsDtoRequest.builder()
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
             .build();
     }
 
@@ -605,8 +629,6 @@ public class ModelUtils {
             .build();
     }
 
-    ;
-
     public static Position getPosition() {
         return Position.builder()
             .id(1L)
@@ -633,6 +655,10 @@ public class ModelUtils {
             .id(1L)
             .name("Петрівка")
             .build();
+    }
+
+    public static UbsTableCreationDto getUbsTableCreationDto() {
+        return UbsTableCreationDto.builder().uuid("87df9ad5-6393-441f-8423-8b2e770b01a8").build();
     }
 
     public static Violation getViolation() {
@@ -664,11 +690,77 @@ public class ModelUtils {
             .build();
     }
 
+
     public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
         return OverpaymentInfoRequestDto.builder()
             .overpayment(200L)
             .bonuses(300L)
             .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
+            .build();
+    }
+
+    public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
+        return OrderPaymentDetailDto.builder()
+            .amount(95000L + 1000 + 70000)
+            .certificates(-1000)
+            .pointsToUse(-70000)
+            .amountToPay(95000L)
+            .currency("UAH")
+            .build();
+    }
+
+    public static Payment getPayment() {
+        return Payment.builder()
+            .id(1L)
+            .paymentStatus(PaymentStatus.UNPAID)
+            .amount(95000L)
+            .currency("UAH")
+            .build();
+    }
+
+    public static User getUser() {
+        return User.builder()
+            .id(1L)
+            .addresses(Collections.singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .build();
+    }
+
+    public static BagTranslation getBagTranslation() {
+        return BagTranslation.builder()
+            .id(1L)
+            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .build();
+    }
+
+    public static BagOrderDto getBagOrderDto() {
+        return BagOrderDto.builder()
+            .bagId(1)
+            .price(350)
+            .capacity(120)
+            .bagAmount(1)
+            .name("Useless paper")
+            .build();
+    }
+
+    public static Order getFormedOrder() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .payment(Collections.singletonList(Payment.builder()
+                .id(1L)
+                .amount(350L)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
             .build();
     }
 }

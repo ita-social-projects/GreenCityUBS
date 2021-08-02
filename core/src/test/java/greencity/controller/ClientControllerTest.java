@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.Mockito.*;
@@ -33,6 +34,7 @@ class ClientControllerTest {
     private static final String getAllUserOrderLink = "/getAll-users-orders";
     private static final String cancelFormedOrderLink = "/cancel-formed-order";
     private static final String makeOrderAgainLink = "/make-order-again";
+    private static final String getOrderPaymentDetailLink = "/order-payment-detail/";
 
     private MockMvc mockMvc;
 
@@ -97,8 +99,18 @@ class ClientControllerTest {
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).makeOrderAgain(1L);
+        verify(ubsClientService, times(1)).makeOrderAgain(new Locale("en"), 1L);
+    }
+
+    @Test
+    void getOrderPaymentDetail() throws Exception {
+        mockMvc.perform(get(ubsLink + getOrderPaymentDetailLink + 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService, times(1)).getOrderPaymentDetail(1L);
     }
 }
