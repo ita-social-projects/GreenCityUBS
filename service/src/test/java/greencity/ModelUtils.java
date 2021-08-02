@@ -70,7 +70,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static User getUser() {
+    public static User getTestUser() {
         return User.builder()
             .id(1L)
             .orders(Lists.newArrayList(getOrder()))

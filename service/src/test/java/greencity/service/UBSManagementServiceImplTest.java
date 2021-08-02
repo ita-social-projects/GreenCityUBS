@@ -250,7 +250,7 @@ public class UBSManagementServiceImplTest {
 
     @Test
     public void checkReturnOverpaymentForStatusDone() {
-        User user = ModelUtils.getUser();
+        User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.DONE);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
@@ -270,7 +270,7 @@ public class UBSManagementServiceImplTest {
 
     @Test
     public void returnOverpaymentAsMoneyForStatusCancelled() {
-        User user = ModelUtils.getUser();
+        User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELLED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
@@ -289,7 +289,7 @@ public class UBSManagementServiceImplTest {
 
     @Test
     public void returnOverpaymentAsBonusesForStatusCancelled() {
-        User user = ModelUtils.getUser();
+        User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELLED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
