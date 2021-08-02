@@ -33,7 +33,7 @@ public class PaymentMapper extends AbstractConverter<PaymentResponseDto, Payment
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
             .paymentId(Long.valueOf(dto.getPayment_id()))
-            .paymentStatus(PaymentStatus.PAID)
+            .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
 }
