@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -71,6 +72,10 @@ public class Order {
     @Column(nullable = false, name = "order_status", length = 15)
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private OrderPaymentStatus orderPaymentStatus;
 
     @Column(length = 50)
     private String receivingStation;
