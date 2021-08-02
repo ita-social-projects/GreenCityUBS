@@ -1095,10 +1095,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public EmployeePositionDtoRequest getAllEmployeesByPosition(Long id) {
-        orderRepository.findById(id)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + id));
-        EmployeePositionDtoRequest dto = EmployeePositionDtoRequest.builder().orderId(id).build();
-        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(id);
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        EmployeePositionDtoRequest dto = EmployeePositionDtoRequest.builder().orderId(order.getId()).build();
+        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(order.getId());
         if (!newList.isEmpty()) {
             Map<PositionDto, String> currentPositionEmployee = new HashMap<>();
             newList.forEach(x -> currentPositionEmployee.put(
