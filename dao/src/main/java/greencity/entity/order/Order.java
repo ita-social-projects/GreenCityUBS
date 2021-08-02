@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+import greencity.entity.user.employee.EmployeeOrderPosition;
 
 @Entity
 @NoArgsConstructor
@@ -81,8 +82,12 @@ public class Order {
 
     private LocalDateTime deliverTo;
 
-    @ManyToMany(mappedBy = "attachedOrders")
-    private Set<Employee> attachedEmployees;
+    @ManyToMany
+    @JoinTable(
+        name = "order_employee",
+        joinColumns = {@JoinColumn(name = "order_id")},
+        inverseJoinColumns = {@JoinColumn(name = "employee_id")})
+    private Set<Employee> attachedOrders;
 
     @ElementCollection
     @CollectionTable(name = "order_additional", joinColumns = @JoinColumn(name = "orders_id"))
@@ -93,4 +98,8 @@ public class Order {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OneToMany(mappedBy = "order")
     private List<Payment> payment;
+
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
+    private Set<EmployeeOrderPosition> employeeOrderPositions;
 }

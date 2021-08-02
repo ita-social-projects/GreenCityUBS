@@ -40,4 +40,5 @@
     <include file="db/changelog/logs/ch-add-column-image-path-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-id-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-new-payment-status-column-Mahdziak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-to-employee_order_position-table.xml"/>
 </databaseChangeLog>

@@ -13,6 +13,9 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
@@ -56,6 +59,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
+    private final PositionRepository positionRepository;
+    private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
 
     /**
      * {@inheritDoc}
@@ -1082,5 +1087,66 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         user.getChangeOfPointsList()
             .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public EmployeePositionDtoRequest getAllEmployeesByPosition(Long id) {
+        orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + id));
+        EmployeePositionDtoRequest dto = EmployeePositionDtoRequest.builder().orderId(id).build();
+        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(id);
+        if (!newList.isEmpty()) {
+            Map<PositionDto, String> currentPositionEmployee = new HashMap<>();
+            newList.forEach(x -> currentPositionEmployee.put(
+                PositionDto.builder().id(x.getPosition().getId()).name(x.getPosition().getName()).build(),
+                x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
+            dto.setCurrentPositionEmployees(currentPositionEmployee);
+        }
+        List<Position> positions = positionRepository.findAll();
+        Map<PositionDto, List<String>> allPositionEmployee = new HashMap<>();
+        for (Position position : positions) {
+            PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
+            allPositionEmployee.put(positionDto, employeeRepository.getAllEmployeeByPositionId(position.getId())
+                .stream().map(e -> e.getFirstName() + " " + e.getLastName()).collect(Collectors.toList()));
+        }
+        dto.setAllPositionsEmployees(allPositionEmployee);
+
+        return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    @Transactional
+    public void updatePositions(EmployeePositionDtoResponse dto) {
+        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(dto.getOrderId());
+        if (!newList.isEmpty()) {
+            employeeOrderPositionRepository.deleteAll(newList);
+        }
+
+        Order order = orderRepository.findById(dto.getOrderId())
+            .orElseThrow(
+                () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
+
+        List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
+        for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
+            String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
+                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
+            Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
+                .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
+            employeeOrderPositions.add(EmployeeOrderPosition.builder()
+                .employee(employee)
+                .position(position)
+                .order(order)
+                .build());
+        }
+        employeeOrderPositionRepository.saveAll(employeeOrderPositions);
     }
 }
