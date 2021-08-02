@@ -1,10 +1,14 @@
 package greencity;
 
+import com.google.common.collect.Lists;
+import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
@@ -66,8 +70,34 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getUser() {
+        return User.builder()
+            .id(1L)
+            .orders(Lists.newArrayList(getOrder()))
+            .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
+            .currentPoints(getChangeOfPoints().getAmount())
+            .orders(Lists.newArrayList(getOrder()))
+            .build();
+    }
+
+    public static ChangeOfPoints getChangeOfPoints() {
+        return ChangeOfPoints.builder()
+            .id(1L)
+            .amount(0)
+            .order(getOrder())
+            .date(LocalDateTime.now())
+            .build();
+    }
+
     public static Order getOrder() {
         return Order.builder()
+            .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId(1L)
+                .amount(200L)
+                .currency("UAH")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
@@ -573,7 +603,9 @@ public class ModelUtils {
             .email("michalov@gmail.com")
             .phoneNumber("095531111")
             .build();
-    };
+    }
+
+    ;
 
     public static Position getPosition() {
         return Position.builder()
@@ -632,4 +664,11 @@ public class ModelUtils {
             .build();
     }
 
+    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
+        return OverpaymentInfoRequestDto.builder()
+            .overpayment(200L)
+            .bonuses(300L)
+            .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
+            .build();
+    }
 }
