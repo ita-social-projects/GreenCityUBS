@@ -70,6 +70,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             orderPayment.setOrder(order);
+            paymentRepository.save(orderPayment);
             orderRepository.save(order);
         }
     }
