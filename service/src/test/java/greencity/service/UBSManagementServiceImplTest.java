@@ -195,7 +195,7 @@ public class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         Long sumToPay = 0L;
-        assertEquals(200L, ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L)
+        assertEquals(0L, ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L)
             .getOverpayment());
         assertEquals(AppConstant.PAYMENT_REFUND,
             ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
