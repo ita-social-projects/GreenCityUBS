@@ -280,7 +280,7 @@ public class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
-        assertEquals(3L, user.getChangeOfPointsList().size());
+        assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.PAYMENT_REFUND,
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
