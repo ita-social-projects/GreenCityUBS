@@ -1,7 +1,8 @@
 package greencity.entity.enums;
 
-public enum PaymentStatus {
+public enum OrderPaymentStatus {
     PAID,
     UNPAID,
+    HALF_PAID,
     PAYMENT_REFUNDED
 }

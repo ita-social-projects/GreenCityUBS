@@ -2,17 +2,10 @@ package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
 import java.util.Set;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,12 +42,8 @@ public class Employee {
         inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
 
-    @ManyToMany
-    @JoinTable(
-        name = "order_employee",
-        joinColumns = {@JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "order_id")})
-    private Set<Order> attachedOrders;
+    @ManyToMany(mappedBy = "attachedOrders")
+    private Set<Order> attachedEmployees;
 
     @ManyToMany
     @JoinTable(
@@ -62,4 +51,8 @@ public class Employee {
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
     private Set<ReceivingStation> receivingStation;
+
+    @OneToMany(mappedBy = "employee")
+    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
+    private Set<EmployeeOrderPosition> employeeOrderPositions;
 }

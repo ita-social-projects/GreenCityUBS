@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Provides an interface to manage {@link Employee} entity.
  *
@@ -66,4 +69,32 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         + "WHERE email = :email "
         + "AND id <> :id")
     Employee checkIfEmailUnique(String email, Long id);
+
+    /**
+     * Method return all employees depends from they positions.
+     *
+     * @param positionId {@link Integer}
+     * @return {@link List}of{@link Employee}
+     * @author Bohdan Fedorkiv
+     */
+    @Query(value = "SELECT * FROM EMPLOYEES "
+        + "JOIN EMPLOYEE_POSITION "
+        + "ON EMPLOYEES.ID = EMPLOYEE_POSITION.EMPLOYEE_ID "
+        + "JOIN POSITIONS "
+        + "ON EMPLOYEE_POSITION.POSITION_ID = POSITIONS.ID "
+        + "WHERE POSITIONS.ID = :positionId", nativeQuery = true)
+    List<Employee> getAllEmployeeByPositionId(Long positionId);
+
+    /**
+     * Method find employee by his firstName and lastName.
+     *
+     * @param firstName {@link String}
+     * @param lastName  {@link String}
+     * @return {@link Optional}of{@link Employee}
+     * @author Bohdan Fedorkiv
+     */
+    @Query(value = "SELECT * FROM EMPLOYEES "
+        + "WHERE EMPLOYEES.FIRST_NAME = :firstName "
+        + "AND EMPLOYEES.LAST_NAME = :lastName ", nativeQuery = true)
+    Optional<Employee> findByName(String firstName, String lastName);
 }

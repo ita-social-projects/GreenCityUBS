@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.dto.NotificationDto;
 import greencity.entity.enums.NotificationType;
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
@@ -45,7 +46,7 @@ public class NotificationServiceImpl implements NotificationService {
     private BagRepository bagRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private OrderRepository orderRepository;
 
     @Autowired
     private ViolationRepository violationRepository;
@@ -56,8 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUnpaidOrders() {
-        for (Payment payment: paymentRepository.findAllByPaymentStatus(PaymentStatus.UNPAID)) {
-            Order order = payment.getOrder();
+        for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
                     .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(), order.getId().toString());
             if((lastNotification.isEmpty()
@@ -129,8 +129,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyAllHalfPaidPackages() {
-        for (Payment payment: paymentRepository.findAllByPaymentStatus(PaymentStatus.HALF_PAID)) {
-            Order order = payment.getOrder();
+        for (Order order: orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
                     .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_PACKAGE.toString(), order.getId().toString());
             if((lastNotification.isEmpty()

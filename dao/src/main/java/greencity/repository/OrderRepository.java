@@ -1,9 +1,13 @@
 package greencity.repository;
 
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -11,7 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderRepository extends CrudRepository<Order, Long> {
+public interface OrderRepository extends CrudRepository<Order, Long>, JpaRepository<Order, Long> {
     /**
      * The method returns undelivered orders to group them.
      *
@@ -92,4 +96,6 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
     @Query(value = "UPDATE ORDERS SET ORDER_STATUS = 'ON_THE_ROUTE' "
         + "WHERE ORDER_STATUS = 'CONFIRMED' AND DATE(DELIVER_FROM) <= CURRENT_DATE", nativeQuery = true)
     void updateOrderStatusToOnTheRoute();
+
+    List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
 }
