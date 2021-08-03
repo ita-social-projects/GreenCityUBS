@@ -230,4 +230,16 @@ public interface UBSManagementService {
      * @author Nadia Rusanovscaia
      */
     void deleteViolation(Long orderId);
+
+    /**
+     * Method that return all employees by position.
+     *
+     * @author Bohdan Fedorkiv
+     */
+    EmployeePositionDtoRequest getAllEmployeesByPosition(Long id);
+
+    /**
+     * Method that update EmployeePositionDtoResponse.
+     */
+    void updatePositions(EmployeePositionDtoResponse dto);
 }
