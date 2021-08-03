@@ -163,4 +163,13 @@ public interface UBSClientService {
      * @author Mykola Danylko
      */
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
+
+    /**
+     * Method that mark user as DEACTIVATED.
+     *
+     * @param id {@link Long}
+     *
+     * @author Liubomyr Bratakh
+     */
+    void markUserAsDeactivated(Long id);
 }
