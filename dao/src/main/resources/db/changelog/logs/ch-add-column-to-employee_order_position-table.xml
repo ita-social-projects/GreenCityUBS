@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Fedorkiv-1" author="Bohdan Fedorkiv">
+        <addColumn tableName="employee_order_position">
+            <column name="order_id" type="BIGINT"/>
+            <column name="employee_id" type="BIGINT"/>
+            <column name="position_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
