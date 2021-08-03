@@ -5,7 +5,6 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import greencity.constant.ErrorMessage;
-import greencity.exceptions.BlobNotFoundException;
 import greencity.exceptions.FileNotSavedException;
 import greencity.exceptions.ImageUrlParseException;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +61,6 @@ public class AzureCloudStorageService implements FileService {
         BlobClient client = containerClient().getBlobClient(fileName);
         if (client.exists()) {
             client.delete();
-        } else {
-            throw new BlobNotFoundException(ErrorMessage.BLOB_DOES_NOT_EXIST);
         }
     }
 
