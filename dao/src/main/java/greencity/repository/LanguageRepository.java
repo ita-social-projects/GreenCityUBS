@@ -22,4 +22,6 @@ public interface LanguageRepository extends JpaRepository<Language, Long> {
      */
     @Query("SELECT code FROM Language")
     List<String> findAllLanguageCodes();
+
+     Language findLanguageByCode(String code);
 }

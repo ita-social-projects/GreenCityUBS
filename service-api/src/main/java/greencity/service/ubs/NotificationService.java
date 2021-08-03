@@ -14,11 +14,13 @@ public interface NotificationService {
 
     void notifyHalfPaidPackage(Order order);
 
-    void notifyBonuses(Order order);
+    void notifyBonuses(Order order, Long overpayment);
 
     void notifyAddViolation(Order order);
 
     void notifyInactiveAccounts();
 
     List<NotificationDto> getAllNotificationsForUser(String userUuid, String language);
+
+    void notifyAllHalfPaidPackages();
 }

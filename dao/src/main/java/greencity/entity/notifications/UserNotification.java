@@ -5,14 +5,16 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.management.Notification;
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode
 @Entity
 @Table(name = "user_notifications")
 public class UserNotification {
@@ -32,4 +34,7 @@ public class UserNotification {
     @OneToMany(mappedBy = "userNotification")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<NotificationParameter> parameters;
+
+    @Column(name = "notification_time")
+    private LocalDateTime notificationTime;
 }

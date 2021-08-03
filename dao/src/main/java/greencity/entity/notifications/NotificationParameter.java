@@ -1,17 +1,15 @@
 package greencity.entity.notifications;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
-@EqualsAndHashCode
 @Data
+@EqualsAndHashCode
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "notification_parameters")
 public class NotificationParameter {
 
@@ -20,6 +18,8 @@ public class NotificationParameter {
     private Long id;
 
     @ManyToOne
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "notification_id")
     private UserNotification userNotification;
 

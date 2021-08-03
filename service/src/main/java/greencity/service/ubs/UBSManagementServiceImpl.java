@@ -259,7 +259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
-            notificationService.notifyBonuses(order);
+            notificationService.notifyBonuses(order, overpaymentInfoRequestDto.getOverpayment());
         }
         if (order.getOrderStatus() == OrderStatus.CANCELLED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {

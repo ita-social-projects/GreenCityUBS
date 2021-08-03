@@ -19,9 +19,14 @@ public class NotificationScheduler {
      * System checks BD at 18.00 daily and sends messages in case the order was formed 3 days ago
      * and wasn’t paid by client
      */
-    @Scheduled(cron = "0 0 18 * * ?", zone = "Europe/Kiev")
+    @Scheduled(cron = "0 0/57 22 * * ?", zone = "Europe/Kiev")
     public void notifyUnpaidOrders() {
         notificationService.notifyUnpaidOrders();
+    }
+
+    @Scheduled(cron = "0 0 18 * * ?", zone = "Europe/Kiev")
+    public void notifyHalfPaidPackages() {
+        notificationService.notifyAllHalfPaidPackages();
     }
 
     @Scheduled(cron = "0 0 18 * * ?", zone = "Europe/Kiev")

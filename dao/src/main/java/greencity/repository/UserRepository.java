@@ -1,8 +1,12 @@
 package greencity.repository;
 
 import greencity.entity.user.User;
+
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
+import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -75,4 +79,27 @@ public interface UserRepository extends CrudRepository<User, Long> {
         + "JOIN users ON o.users_id = users.id "
         + "WHERE o.id = :orderId")
     Optional<User> findUserByOrderId(Long orderId);
+
+    /**
+     * Finds list of User who have not paid of the order within three days.
+     *
+     * @param localDate - date when the user made an order.
+     * @return a {@link List} of {@link User} - which need to send a message.
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM users u INNER JOIN orders o ON u.id = o.users_id "
+                    + "WHERE CAST(o.order_date AS DATE) < :localDate AND o.order_status LIKE 'FORMED'")
+    List<User> getAllUsersWhoHaveNotPaid(LocalDate localDate);
+
+    /**
+     * Finds list of User who have no orders after {@param localDate}.
+     *
+     * @param toDate - date after which user have no orders.
+     * @return a {@link List} of {@link User} - which have no orders after {@param localDate}.
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id " +
+                    "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate)!=0 " +
+                    "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
+    List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);
 }

@@ -13,6 +13,9 @@
             <column name="notification_type" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="notification_time" type="TIMESTAMP(6)" defaultValue="NOW()">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <addPrimaryKey tableName="user_notifications"
@@ -126,10 +129,10 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="COURIER_ITINERARY_FORMED"/>
             <column name="title" value="Маршрут сформовано"/>
             <column name="body" value="Вітання!
-Ми сформували маршрут УБС Кур’єра. Наш Кур’єр буде у вас завтра, {XX Mісяць}.
-Робочий час Кур'єра: з {XX:XX} до {XX:XX}.
+Ми сформували маршрут УБС Кур’єра. Наш Кур’єр буде у вас завтра, ${date}>.
+Робочий час Кур'єра: з ${startTime} до ${endTime}.
 Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур'єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов'язково попередьте про це Кур'єра або менеджерів!
-Номер Кур'єра — {+380638175035} або {+380931038987}.
+Номер Кур'єра — ${phoneNumber}.
 Якщо у вас залишилися будь-які питання — з радістю відповім!
 Чат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
         </insert>
@@ -138,10 +141,10 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="COURIER_ITINERARY_FORMED"/>
             <column name="title" value="Route created"/>
             <column name="body" value="Hello!
-We have created the route for your UBS Courier. Your Courier will arrive tomorrow {XX Mісяць}.
-Courier’s hours of operation: from {XX:XX} to {XX:XX}.
+We have created the route for your UBS Courier. Your Courier will arrive tomorrow ${date}.
+Courier’s hours of operation: from ${startTime} to ${endTime}.
 Please be available during this time frame and make sure your phone is not on “silent”. The Courier will call you in advance, and upon arrival. If you are unable to be present during the agreed time, you may leave your bags with the concierge, but please, do notify your Courier or one of the managers!
-Courier’s number - {+380638175035} or {+380931038987}.
+Courier’s number - ${phoneNumber}.
 We will gladly answer any questions you might still have!
 Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
         </insert>
@@ -150,9 +153,9 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="UNPAID_PACKAGE"/>
             <column name="title" value="Оплатіть зміну у замовлені"/>
             <column name="body" value="Вітання!
-Ви внесли зміни у замовлення №{ХХХХ}.
-Просимо вас, будь ласка, доплатити {ХХХ} грн.
-Оплатити: {кнопка “Оплатити”}.
+Ви внесли зміни у замовлення №${orderNumber}.
+Просимо вас, будь ласка, доплатити ${amountToPay} грн.
+Оплатити: [payButton].
 Якщо у вас залишилися будь-які питання — з радістю відповім!
 Чат з менеджеркою t.me/nowaste_service_bot чи e-mail hello@nowaste.org.ua"/>
         </insert>
@@ -161,9 +164,9 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="UNPAID_PACKAGE"/>
             <column name="title" value="Please make payment for an order change"/>
             <column name="body" value="Hello!
-You have made some changes to the following order: N{ХХХХ}
-Please pay the remaining fee of {ХХХ} hrn.
-{“Pay now” button}
+You have made some changes to the following order: #${orderNumber}
+Please pay the remaining fee of ${amountToPay} UAH.
+[payButton]
 We will gladly answer any questions you might still have!
 Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
         </insert>
@@ -172,9 +175,9 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="ACCRUED_BONUSES_TO_ACCOUNT"/>
             <column name="title" value="Нараховано бонуси"/>
             <column name="body" value="Вітання!
-Сьогодні УБС Кур’єр забрав у вас пакетів: {ХХХ}.
-А оплачували ви: {ХХХ}.
-Тож фіксуємо для вас депозит для наступного вивозу на суму {ХХХ} грн.
+Сьогодні УБС Кур’єр забрав у вас пакетів: ${realPackageNumber}.
+А оплачували ви: ${paidPackageNumber}.
+Тож фіксуємо для вас депозит для наступного вивозу на суму ${overpayment} грн.
 Гарного дня!"/>
         </insert>
         <insert tableName="notification_templates">
@@ -182,9 +185,9 @@ Chat with a manager t.me/nowaste_service_bot or email hello@nowaste.org.ua"/>
             <column name="notification_type" value="ACCRUED_BONUSES_TO_ACCOUNT"/>
             <column name="title" value="Bonus points added"/>
             <column name="body" value="Hello!
-Amount of bags collected by your UBS Courier today: {ХХХ}.
-However, you paid for: {ХХХ} bags.
-So we have credited your account with {ХХХ} hrn toward your next collection.
+Amount of bags collected by your UBS Courier today: ${realPackageNumber}.
+However, you paid for: ${paidPackageNumber} bags.
+So we have credited your account with ${overpayment} UAH toward your next collection.
 Have a great day!"/>
         </insert>
         <insert tableName="notification_templates">
@@ -192,7 +195,7 @@ Have a great day!"/>
             <column name="notification_type" value="VIOLATION_THE_RULES"/>
             <column name="title" value="Недотримання правил УБС"/>
             <column name="body" value="Вітання!
-На жаль, у ваших пакетах було виявлено: {ХХХ}. Це відходи, які ми не приймаємо.
+На жаль, у ваших пакетах було виявлено: ${violationDescription}. Це відходи, які ми не приймаємо.
 Будь ласка, ознайомтеся ще раз із нашими правилами сортування: https://bit.ly/2Q2esLB
 НЕ приймаємо взагалі:
 -батарейки, акумулятори, ртутьвмісні (люмінесцентні) лампи й термометри;
@@ -211,7 +214,7 @@ Have a great day!"/>
             <column name="notification_type" value="VIOLATION_THE_RULES"/>
             <column name="title" value="UBS Rules Violation"/>
             <column name="body" value="Hello!
-Unfortunately, your bags contained the following: {ХХХ}. This is the type of waste we do not collect.
+Unfortunately, your bags contained the following: ${violationDescription}. This is the type of waste we do not collect.
 Please familiarize yourself with our recycling rules once more: https://bit.ly/2Q2esLB
 We do NOT collect any type of the following waste:
 -batteries, accumulators (lead-acid batteries), mercury-containing (fluorescent) light bulbs and thermometers;
