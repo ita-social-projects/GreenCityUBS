@@ -70,11 +70,11 @@ VALUES (1,'Бавовняна сумка',1,1),
        (8,'Березентова сумка',2,3),
        (9,'Сумка из бамбуковой ткани',3,3);
 
-INSERT INTO receiving_stations (id, receiving_station)
+INSERT INTO receiving_stations (id, name)
 VALUES (1, 'Саперно-Слобідська'),
        (2, 'Петрівка');
 
-INSERT INTO positions (id, position)
+INSERT INTO positions (id, name)
 VALUES (1, 'Менеджер обдзвону'),
        (2, 'Менеджер послуги'),
        (3, 'Логіст'),

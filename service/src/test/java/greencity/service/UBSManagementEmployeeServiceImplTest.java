@@ -170,12 +170,15 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void delete() {
-        when(repository.existsById(anyLong())).thenReturn(true, false);
+        Employee employee = getEmployee();
+        employee.setImagePath("Pass");
+        when(repository.findById(1L)).thenReturn(Optional.of(employee), Optional.empty());
         doNothing().when(repository).deleteById(1L);
 
         employeeService.deleteEmployee(1L);
 
         verify(repository, times(1)).deleteById(1L);
+        verify(fileService, times(1)).delete(employee.getImagePath());
 
         Exception thrown = assertThrows(EmployeeNotFoundException.class,
             () -> employeeService.deleteEmployee(1L));
