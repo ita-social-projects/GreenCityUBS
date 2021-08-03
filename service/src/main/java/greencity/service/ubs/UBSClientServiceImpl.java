@@ -3,10 +3,7 @@ package greencity.service.ubs;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -69,18 +66,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         String[] ids = dto.getOrder_id().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        Payment orderPayment = order.getPayment().get(order.getPayment().size() - 1);
-        if (!orderPayment.getCurrency().equals(dto.getCurrency())
-            || !orderPayment.getAmount().equals(Long.valueOf(dto.getAmount()))) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
         if (dto.getOrder_status().equals("approved")) {
+            Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
+            orderPayment.setOrder(order);
+            paymentRepository.save(orderPayment);
+            orderRepository.save(order);
         }
-        orderPayment = modelMapper.map(dto, Payment.class);
-        orderPayment.setOrder(order);
-        paymentRepository.save(orderPayment);
-        orderRepository.save(order);
     }
 
     /**
@@ -445,6 +437,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
         User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);

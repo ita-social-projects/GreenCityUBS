@@ -9,6 +9,7 @@ import static greencity.constant.ErrorMessage.*;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
@@ -232,8 +233,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
         paymentTableInfoDto.setPaidAmount(paidAmount);
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
-            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID)
-                || payment.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
@@ -782,25 +782,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             || currentOrder.getOrderStatus() == OrderStatus.CONFIRMED
             || currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
             if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             }
             if (totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)
                 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) == 0L) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.UNPAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             }
             if (totalConfirmed > 0 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) > 0
                 && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             }
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
             || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             }
             if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             }
         }
         paymentRepository.saveAll(payments);
@@ -1010,8 +1010,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
         Long paymentSum = order.getPayment().stream()
-            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
-                || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
@@ -1026,8 +1025,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID)
-            || x.getPaymentStatus().equals(PaymentStatus.HALF_PAID))
+        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
     }
 
