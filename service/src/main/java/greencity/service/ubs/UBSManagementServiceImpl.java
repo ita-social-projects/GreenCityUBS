@@ -785,7 +785,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
                 notificationService.notifyPaidOrder(currentOrder);
-                if(currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT){
+                if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                     notificationService.notifyCourierItineraryFormed(currentOrder);
                 }
             }
@@ -797,7 +797,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
                 notificationService.notifyHalfPaidPackage(currentOrder);
-
             }
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
@@ -806,7 +805,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
                 notificationService.notifyHalfPaidPackage(currentOrder);
-
             }
             if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);

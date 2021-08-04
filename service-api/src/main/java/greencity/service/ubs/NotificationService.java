@@ -6,7 +6,6 @@ import greencity.entity.order.Order;
 import java.util.List;
 
 public interface NotificationService {
-
     /**
      * Method that creates notification for unpaid order.
      *

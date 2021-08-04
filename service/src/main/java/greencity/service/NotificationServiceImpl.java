@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -58,8 +57,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(), order.getId().toString());
-            if((lastNotification.isEmpty()
+                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                            order.getId().toString());
+            if ((lastNotification.isEmpty()
                     || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1)))
                     && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))) {
                 UserNotification userNotification = new UserNotification();
@@ -72,7 +72,8 @@ public class NotificationServiceImpl implements NotificationService {
 
                 userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
                 UserNotification created = userNotificationRepository.save(userNotification);
-                NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId().toString());
+                NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
+                        .toString());
                 notificationParameter.setUserNotification(created);
                 notificationParameterRepository.save(notificationParameter);
             }
@@ -92,7 +93,6 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyCourierItineraryFormed(Order order) {
-        UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder().key("date")
                 .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))).build());
@@ -102,6 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .value(order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
                 .value("+380638175035, +380931038987").build());
+        UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
         userNotification.setUser(order.getUser());
         UserNotification created = userNotificationRepository.save(userNotification);
@@ -117,7 +118,8 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        Long paidAmount = order.getPayment().stream().filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+        Long paidAmount = order.getPayment().stream()
+                .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
                 .map(Payment::getAmount).reduce(0L, Long::sum);
 
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
@@ -148,10 +150,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyAllHalfPaidPackages() {
         for (Order order: orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_PACKAGE.toString(), order.getId().toString());
-            if((lastNotification.isEmpty()
+                    .findLastNotificationByNotificationTypeAndOrderNumber(
+                            NotificationType.UNPAID_PACKAGE.toString(),
+                            order.getId().toString());
+            if ((lastNotification.isEmpty()
                     || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1)))
-                    && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))){
+                    && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))) {
                 notifyHalfPaidPackage(order);
             }
         }
@@ -162,7 +166,6 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyBonuses(Order order, Long overpayment) {
-        UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Integer paidBags = order.getConfirmedQuantity().values().stream()
@@ -177,6 +180,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
                 .value(paidBags.toString()).build());
 
+        UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
         userNotification.setUser(order.getUser());
         UserNotification created = userNotificationRepository.save(userNotification);
@@ -208,13 +212,16 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyInactiveAccounts() {
-        List<User> users = userRepository.getAllInactiveUsers(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(2));
+        List<User> users = userRepository
+                .getAllInactiveUsers(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(2));
         log.info("Found {} inactive users", users.size());
         for (User user : users) {
             Optional<UserNotification> lastNotification =
-                    userNotificationRepository.findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
+                    userNotificationRepository
+                            .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                             NotificationType.LETS_STAY_CONNECTED);
-            if(lastNotification.isEmpty() || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1))){
+            if (lastNotification.isEmpty()
+                    || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1))) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
