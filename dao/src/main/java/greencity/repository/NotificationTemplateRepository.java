@@ -13,7 +13,8 @@ import java.util.Optional;
 @Repository
 public interface NotificationTemplateRepository extends JpaRepository<NotificationTemplate, Long> {
     /**
-     * method, that returns {@link Optional}of{@link NotificationTemplate} by Type and LanguageCode.
+     * method, that returns {@link Optional}of{@link NotificationTemplate} by Type
+     * and LanguageCode.
      *
      *
      * @return {@link Optional} of {@link NotificationTemplate} with all codes.

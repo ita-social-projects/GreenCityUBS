@@ -29,15 +29,16 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         NotificationType type);
 
     /**
-     * The method returns last notification by {@link NotificationType}
-     * and orderNumber from {@link greencity.entity.notifications.NotificationParameter}.
+     * The method returns last notification by {@link NotificationType} and
+     * orderNumber from
+     * {@link greencity.entity.notifications.NotificationParameter}.
      *
      * @return {@link Optional} of {@link UserNotification}.
      */
     @Query(nativeQuery = true, value = "select * from user_notifications "
-            + "join notification_parameters np on user_notifications.id = np.notification_id "
-            + "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber "
-            + "order by notification_time desc "
-            + "limit 1;")
+        + "join notification_parameters np on user_notifications.id = np.notification_id "
+        + "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber "
+        + "order by notification_time desc "
+        + "limit 1;")
     Optional<UserNotification> findLastNotificationByNotificationTypeAndOrderNumber(String type, String orderNumber);
 }
