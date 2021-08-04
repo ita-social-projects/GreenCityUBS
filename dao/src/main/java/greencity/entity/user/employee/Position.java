@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,4 +27,8 @@ public class Position {
 
     @ManyToMany(mappedBy = "employeePosition")
     private Set<Employee> employees;
+
+    @OneToMany(mappedBy = "position")
+    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
+    private Set<EmployeeOrderPosition> employeeOrderPositions;
 }

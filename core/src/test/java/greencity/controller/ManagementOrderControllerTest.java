@@ -78,6 +78,16 @@ class ManagementOrderControllerTest {
         + "}\n"
         + "]";
 
+    public static final String contentForUpdatingEmployeeByOrderController = "{\n"
+        + "\"employeeOrderPositionDTOS\": [\n"
+        + "{\n"
+        + "\"name\": \"Alisson Becker\",\n"
+        + "\"positionId\": 1\n"
+        + "}\n"
+        + "],\n"
+        + "\"orderId\": 8\n"
+        + "}";
+
     private Principal principal = getPrincipal();
 
     @BeforeEach
@@ -229,7 +239,21 @@ class ManagementOrderControllerTest {
             .file(jsonFile)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+            .andDo(print())
+            .andExpect(status().isCreated());
+    }
+  
+    @Test
+    void getAllEmployeeByPositionTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-all-employee-by-position" + "/{id}", 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void updatePositionByOrderTest() throws Exception {
+        this.mockMvc.perform(put(ubsLink + "/update-position-by-order")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(contentForUpdatingEmployeeByOrderController))
             .andExpect(status().isCreated());
     }
 }

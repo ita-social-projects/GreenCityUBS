@@ -4,6 +4,7 @@ import greencity.dto.*;
 import greencity.entity.user.User;
 
 import java.util.List;
+import java.util.Locale;
 
 public interface UBSClientService {
     /**
@@ -106,7 +107,7 @@ public interface UBSClientService {
      * @return {@link OrderClientDto} that contains client's order;
      * @author Danylko Mykola
      */
-    List<OrderBagDto> makeOrderAgain(Long orderId);
+    MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
 
     /**
      * Method returns list all bonuses of user.
@@ -163,4 +164,13 @@ public interface UBSClientService {
      * @author Mykola Danylko
      */
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
+
+    /**
+     * Method that mark user as DEACTIVATED.
+     *
+     * @param id {@link Long}
+     *
+     * @author Liubomyr Bratakh
+     */
+    void markUserAsDeactivated(Long id);
 }

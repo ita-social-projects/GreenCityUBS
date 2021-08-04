@@ -1,12 +1,16 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 
+import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+
+import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 
 import greencity.entity.user.employee.ReceivingStation;
@@ -29,8 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 
 import static org.mockito.Mockito.*;
 
@@ -55,6 +58,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     OrderRepository orderRepository;
+
+    @Mock
+    UserRepository userRepository;
 
     @Mock
     CertificateRepository certificateRepository;
@@ -243,5 +249,84 @@ public class UBSManagementServiceImplTest {
 
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1l);
+    }
+
+      @Test
+      void checkReturnOverpaymentInfo() {
+        Order order = ModelUtils.getOrder();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        Long sumToPay = 0L;
+        assertEquals(0L, ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L)
+            .getOverpayment());
+        assertEquals(AppConstant.PAYMENT_REFUND,
+            ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
+                .getComment());
+    }
+
+    @Test
+    void checkGetPaymentInfo() {
+        Order order = ModelUtils.getOrder();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getOverpayment());
+        assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
+    }
+
+    @Test
+    void checkReturnOverpaymentForStatusDone() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderStatus(OrderStatus.DONE);
+        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
+        dto.setBonuses(0L);
+        when(orderRepository.findById(order.getId())).thenReturn(
+            Optional.ofNullable(order));
+        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
+        when(userRepository.save(any())).thenReturn(user);
+        ubsManagementService.returnOverpayment(order.getId(), dto);
+        assertEquals(2L, order.getPayment().size());
+        assertEquals(2L, user.getChangeOfPointsList().size());
+        assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
+        assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
+        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
+    }
+
+    @Test
+    void returnOverpaymentAsMoneyForStatusCancelled() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
+        dto.setComment(AppConstant.PAYMENT_REFUND);
+        when(orderRepository.findById(order.getId())).thenReturn(
+            Optional.ofNullable(order));
+        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
+        when(userRepository.save(any())).thenReturn(user);
+        ubsManagementService.returnOverpayment(order.getId(), dto);
+        assertEquals(2L, user.getChangeOfPointsList().size());
+        assertEquals(AppConstant.PAYMENT_REFUND,
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
+        assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
+        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
+    }
+
+    @Test
+    void returnOverpaymentAsBonusesForStatusCancelled() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
+        dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+        when(orderRepository.findById(order.getId())).thenReturn(
+            Optional.ofNullable(order));
+        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
+        when(userRepository.save(any())).thenReturn(user);
+        ubsManagementService.returnOverpayment(order.getId(), dto);
+        assertEquals(3L, user.getChangeOfPointsList().size());
+        assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
+        assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
+        assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
     }
 }

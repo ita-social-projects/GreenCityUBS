@@ -1,13 +1,16 @@
 package greencity;
 
+import com.google.common.collect.Lists;
+import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+
+import greencity.entity.language.Language;
+import greencity.entity.order.*;
+
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -68,9 +71,34 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getTestUser() {
+        return User.builder()
+            .id(1L)
+            .orders(Lists.newArrayList(getOrder()))
+            .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
+            .currentPoints(getChangeOfPoints().getAmount())
+            .orders(Lists.newArrayList(getOrder()))
+            .build();
+    }
+
+    public static ChangeOfPoints getChangeOfPoints() {
+        return ChangeOfPoints.builder()
+            .id(1L)
+            .amount(0)
+            .order(getOrder())
+            .date(LocalDateTime.now())
+            .build();
+    }
+
     public static Order getOrder() {
         return Order.builder()
             .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId(1L)
+                .amount(200L)
+                .currency("UAH")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
@@ -602,8 +630,6 @@ public class ModelUtils {
             .build();
     }
 
-    ;
-
     public static Position getPosition() {
         return Position.builder()
             .id(1L)
@@ -662,6 +688,14 @@ public class ModelUtils {
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
+            .build();
+    }
+
+    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
+        return OverpaymentInfoRequestDto.builder()
+            .overpayment(200L)
+            .bonuses(300L)
+            .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
             .build();
     }
 
@@ -738,4 +772,37 @@ public class ModelUtils {
             .build();
     }
 
+    public static BagTranslation getBagTranslation() {
+        return BagTranslation.builder()
+            .id(1L)
+            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .build();
+    }
+
+    public static BagOrderDto getBagOrderDto() {
+        return BagOrderDto.builder()
+            .bagId(1)
+            .price(350)
+            .capacity(120)
+            .bagAmount(1)
+            .name("Useless paper")
+            .build();
+    }
+
+    public static Order getFormedOrder() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .payment(Collections.singletonList(Payment.builder()
+                .id(1L)
+                .amount(350L)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
+    }
 }

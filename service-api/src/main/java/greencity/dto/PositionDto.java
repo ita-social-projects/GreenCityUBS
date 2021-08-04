@@ -11,6 +11,7 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
+@ToString
 public class PositionDto {
     @Min(1)
     private Long id;

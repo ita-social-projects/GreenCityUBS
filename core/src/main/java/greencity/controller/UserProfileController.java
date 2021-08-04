@@ -65,4 +65,24 @@ public class UserProfileController {
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
     }
+
+    /**
+     * Controller updates user (mark as DEACTIVATED).
+     *
+     * @return {@link ResponseEntity} update user.
+     * @author Liubomyr Bratakh.
+     */
+    @ApiOperation(value = "mark user as DEACTIVATED")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/user/markUserAsDeactivated")
+    public ResponseEntity<HttpStatus> deactivateUser(
+        @RequestParam Long id) {
+        ubsClientService.markUserAsDeactivated(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

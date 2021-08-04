@@ -9,10 +9,14 @@ import static greencity.constant.ErrorMessage.*;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
@@ -58,6 +62,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final FileService fileService;
+    private final PositionRepository positionRepository;
+    private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
 
     /**
      * {@inheritDoc}
@@ -222,26 +228,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long paidAmount = calculatePaidAmount(order);
-        Long unPaidAmount = sumToPay - paidAmount;
         Long overpayment = calculateOverpayment(order, sumToPay);
-        if (overpayment < 0L) {
-            overpayment = 0L;
-        }
-        if (unPaidAmount < 0) {
-            unPaidAmount = 0L;
-        }
+        Long unPaidAmount = calculateUnpaidAmount(sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         paymentTableInfoDto.setOverpayment(overpayment);
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
         paymentTableInfoDto.setPaidAmount(paidAmount);
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
         return paymentTableInfoDto;
     }
 
     /**
-     * Method return's overpayment and bonuses to user's account.
+     * Method returns overpayment and bonuses to users account.
      *
      * @param orderId                   of {@link Long} order id;
      * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}
@@ -296,6 +297,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         }
         dto.getPaymentInfoDtos().add(payDto);
+        dto.setOverpayment(dto.getOverpayment() - overpayment);
         return dto;
     }
 
@@ -782,25 +784,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             || currentOrder.getOrderStatus() == OrderStatus.CONFIRMED
             || currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
             if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             }
             if (totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)
                 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) == 0L) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.UNPAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             }
             if (totalConfirmed > 0 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) > 0
                 && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             }
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
             || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
             || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.HALF_PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             }
             if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                payments.forEach(x -> x.setPaymentStatus(PaymentStatus.PAID));
+                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             }
         }
         paymentRepository.saveAll(payments);
@@ -1010,10 +1012,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
         Long paymentSum = order.getPayment().stream()
+            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
-        return paymentSum - sumToPay;
+        return Math.max((paymentSum - sumToPay), 0L);
     }
 
     /**
@@ -1024,8 +1027,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculatePaidAmount(Order order) {
-        return order.getPayment().stream().filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+        return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
+    }
+
+    /**
+     * Method that calculate unpaid amount.
+     *
+     * @param sumToPay   of {@link Long} sum to pay;
+     * @param paidAmount of {@link Long} sum to pay;
+     * @return {@link Long }
+     * @author Ostap Mykhailivskyi
+     */
+    private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
+        return Math.max((sumToPay - paidAmount), 0L);
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
@@ -1112,5 +1127,62 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payment.setImagePath(fileService.upload(image));
         }
         return payment;
+    }
+
+    @Override
+    public EmployeePositionDtoRequest getAllEmployeesByPosition(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        EmployeePositionDtoRequest dto = EmployeePositionDtoRequest.builder().orderId(order.getId()).build();
+        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(order.getId());
+        if (!newList.isEmpty()) {
+            Map<PositionDto, String> currentPositionEmployee = new HashMap<>();
+            newList.forEach(x -> currentPositionEmployee.put(
+                PositionDto.builder().id(x.getPosition().getId()).name(x.getPosition().getName()).build(),
+                x.getEmployee().getFirstName().concat(" ").concat(x.getEmployee().getLastName())));
+            dto.setCurrentPositionEmployees(currentPositionEmployee);
+        }
+        List<Position> positions = positionRepository.findAll();
+        Map<PositionDto, List<String>> allPositionEmployee = new HashMap<>();
+        for (Position position : positions) {
+            PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
+            allPositionEmployee.put(positionDto, employeeRepository.getAllEmployeeByPositionId(position.getId())
+                .stream().map(e -> e.getFirstName() + " " + e.getLastName()).collect(Collectors.toList()));
+        }
+        dto.setAllPositionsEmployees(allPositionEmployee);
+
+        return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    @Transactional
+    public void updatePositions(EmployeePositionDtoResponse dto) {
+        List<EmployeeOrderPosition> newList = employeeOrderPositionRepository.findAllByOrderId(dto.getOrderId());
+        if (!newList.isEmpty()) {
+            employeeOrderPositionRepository.deleteAll(newList);
+        }
+
+        Order order = orderRepository.findById(dto.getOrderId())
+            .orElseThrow(
+                () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
+
+        List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
+        for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
+            String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
+                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
+            Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
+                .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
+            employeeOrderPositions.add(EmployeeOrderPosition.builder()
+                .employee(employee)
+                .position(position)
+                .order(order)
+                .build());
+        }
+        employeeOrderPositionRepository.saveAll(employeeOrderPositions);
     }
 }

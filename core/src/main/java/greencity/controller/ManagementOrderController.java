@@ -604,4 +604,42 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.saveNewPayment(id, manualPaymentDto, image));
     }
+
+    /** Controller for get employees depends from position.
+     *
+     * @return {EmployeePositionDtoRequest}.
+     * @author Bohdan Fedorkiv
+     */
+
+    @ApiOperation(value = "Get all employee by positions")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @GetMapping("/get-all-employee-by-position/{id}")
+    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllEmployeesByPosition(id));
+    }
+
+    /**
+     * Controller for update depends from position.
+     *
+     * @return {EmployeePositionDtoResponse}.
+     * @author Bohdan Fedorkiv
+     */
+
+    @ApiOperation(value = "Update employee position by order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-position-by-order")
+    public ResponseEntity<HttpStatus> updateByOrder(
+        @RequestBody @Valid EmployeePositionDtoResponse dto) {
+        ubsManagementService.updatePositions(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

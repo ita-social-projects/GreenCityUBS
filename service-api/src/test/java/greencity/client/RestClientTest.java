@@ -1,7 +1,6 @@
 package greencity.client;
 
 import greencity.ModelUtils;
-import greencity.dto.UbsTableCreationDto;
 import greencity.dto.UserVO;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +17,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientTest {

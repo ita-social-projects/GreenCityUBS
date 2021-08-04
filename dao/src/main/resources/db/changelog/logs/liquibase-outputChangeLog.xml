@@ -252,4 +252,11 @@
     <changeSet author="User (generated)" id="1614595847330-37">
         <addForeignKeyConstraint baseColumnNames="orders_id" baseTableName="order_additional" constraintName="fkpry0lrfjcpcpjo0wl6w6spscy" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orders"/>
     </changeSet>
+    <changeSet author="Bohdan" id="1614595847330-42">
+        <createTable tableName="employee_order_position">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="employee_order_position_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

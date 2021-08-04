@@ -3,10 +3,7 @@ package greencity.service.ubs;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -69,18 +66,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         String[] ids = dto.getOrder_id().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        Payment orderPayment = order.getPayment().get(order.getPayment().size() - 1);
-        if (!orderPayment.getCurrency().equals(dto.getCurrency())
-            || !orderPayment.getAmount().equals(Long.valueOf(dto.getAmount()))) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
         if (dto.getOrder_status().equals("approved")) {
+            Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
+            orderPayment.setOrder(order);
+            paymentRepository.save(orderPayment);
+            orderRepository.save(order);
         }
-        orderPayment = modelMapper.map(dto, Payment.class);
-        orderPayment.setOrder(order);
-        paymentRepository.save(orderPayment);
-        orderRepository.save(order);
     }
 
     /**
@@ -334,10 +326,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
             order.setOrderStatus(OrderStatus.CANCELLED);
-            order.setCertificates(Collections.emptySet());
+            order.getUser().setCurrentPoints(order.getUser().getCurrentPoints() + order.getPointsToUse());
             order.setPointsToUse(0);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
-            order.getPayment().stream().forEach(x -> x.setAmount(0L));
+            order.getPayment().forEach(p -> p.setAmount(0L));
             order = orderRepository.save(order);
             return modelMapper.map(order, OrderClientDto.class);
         } else {
@@ -350,27 +342,37 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public List<OrderBagDto> makeOrderAgain(Long orderId) {
+    public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            return buildOrderBagDto(order);
+            List<BagTranslation> bags = bagTranslationRepository.findAllByLanguageOrder(locale.getLanguage(), orderId);
+            return buildOrderBagDto(order, bags);
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
     }
 
-    private List<OrderBagDto> buildOrderBagDto(Order order) {
-        List<OrderBagDto> build = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> pair : order.getAmountOfBagsOrdered().entrySet()) {
-            build.add(OrderBagDto.builder()
-                .id(pair.getKey())
-                .amount(pair.getValue())
+    private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
+        List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
+        for (BagTranslation bag : bags) {
+            bagOrderDtoList.add(BagOrderDto.builder()
+                .bagId(bag.getBag().getId())
+                .name(bag.getName())
+                .capacity(bag.getBag().getCapacity())
+                .price(bag.getBag().getPrice())
+                .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
                 .build());
         }
-        return build;
+        return MakeOrderAgainDto.builder()
+            .orderId(order.getId())
+            .orderAmount(order.getPayment().stream()
+                .flatMapToLong(p -> LongStream.of(p.getAmount()))
+                .reduce(Long::sum).orElse(0L))
+            .bagOrderDtoList(bagOrderDtoList)
+            .build();
     }
 
     /**
@@ -435,6 +437,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
         User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
@@ -664,5 +667,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             uuid = dto.getUuid();
             createRecordInUBStable(uuid);
         }
+    }
+
+    @Override
+    public void markUserAsDeactivated(Long id) {
+        User user =
+            userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        restClient.markUserDeactivated(user.getUuid());
     }
 }
