@@ -12,11 +12,13 @@ import javax.persistence.*;
 @Builder
 @Table(name = "notification_parameters")
 public class NotificationParameter {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Constructor.
+     */
     public NotificationParameter(String key, String value) {
         this.key = key;
         this.value = value;
@@ -33,5 +35,4 @@ public class NotificationParameter {
 
     @Column(nullable = false, name = "value", length = 100)
     private String value;
-
 }

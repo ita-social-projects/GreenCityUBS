@@ -18,7 +18,6 @@ import java.util.Set;
 @Entity
 @Table(name = "user_notifications")
 public class UserNotification {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

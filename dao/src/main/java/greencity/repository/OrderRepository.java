@@ -96,5 +96,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         + "WHERE ORDER_STATUS = 'CONFIRMED' AND DATE(DELIVER_FROM) <= CURRENT_DATE", nativeQuery = true)
     void updateOrderStatusToOnTheRoute();
 
+    /**
+     * Method that returns all orders by it's {@link OrderPaymentStatus}.
+     */
     List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
 }

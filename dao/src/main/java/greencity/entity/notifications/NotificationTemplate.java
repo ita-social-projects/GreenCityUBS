@@ -16,7 +16,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "notification_templates")
 public class NotificationTemplate {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
