@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UBSManagementService {
     /**
@@ -230,6 +231,18 @@ public interface UBSManagementService {
      * @author Nadia Rusanovscaia
      */
     void deleteViolation(Long orderId);
+
+    /**
+     * Method that saves manual payment and returns response with required fields.
+     *
+     * @param orderId           of {@link Long} order id;
+     * @param paymentRequestDto of {@link ManualPaymentRequestDto} order id;
+     * @param image             {@link MultipartFile} image of receipt.
+     * @return {@link ManualPaymentResponseDto }
+     * @author Denys Kisliak
+     */
+    ManualPaymentResponseDto saveNewPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
+        MultipartFile image);
 
     /**
      * Method that return all employees by position.
