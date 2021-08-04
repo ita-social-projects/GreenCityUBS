@@ -251,8 +251,8 @@ public class UBSManagementServiceImplTest {
         verify(orderRepository, times(1)).findById(1l);
     }
 
-      @Test
-      void checkReturnOverpaymentInfo() {
+    @Test
+    void checkReturnOverpaymentInfo() {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         Long sumToPay = 0L;

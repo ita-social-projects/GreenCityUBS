@@ -605,7 +605,8 @@ public class ManagementOrderController {
             .body(ubsManagementService.saveNewPayment(id, manualPaymentDto, image));
     }
 
-    /** Controller for get employees depends from position.
+    /**
+     * Controller for get employees depends from position.
      *
      * @return {EmployeePositionDtoRequest}.
      * @author Bohdan Fedorkiv

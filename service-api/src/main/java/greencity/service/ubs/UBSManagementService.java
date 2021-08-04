@@ -244,7 +244,7 @@ public interface UBSManagementService {
     ManualPaymentResponseDto saveNewPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image);
 
-   /**
+    /**
      * Method that return all employees by position.
      *
      * @author Bohdan Fedorkiv
