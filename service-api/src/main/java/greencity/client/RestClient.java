@@ -250,4 +250,18 @@ public class RestClient {
         restTemplate.exchange(greenCityUserServerAddress + "/email/sendUserViolation",
             HttpMethod.POST, entity, Object.class).getBody();
     }
+
+    /**
+     * Method that change userStatus to "DEACTIVATED" by uuid.
+     *
+     * @param uuid - {@link User}'s uuid
+     *
+     * @author Liubomyr Bratakh.
+     */
+    public void markUserDeactivated(String uuid) {
+        HttpHeaders httpHeaders = new HttpHeaders(setHeader());
+        HttpEntity<Long> entity = new HttpEntity<>(httpHeaders);
+        restTemplate.exchange(greenCityUserServerAddress + "user/markUserAsDeactivated"
+            + "?uuid=" + uuid, HttpMethod.PUT, entity, Object.class).getBody();
+    }
 }
