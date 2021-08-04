@@ -28,11 +28,11 @@ import java.security.Principal;
 import static greencity.ModelUtils.getPrincipal;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class UserProfileControllerTest {
+    private static final String deactivateUser = "/user/markUserAsDeactivated";
 
     private MockMvc mockMvc;
 
@@ -76,5 +76,12 @@ class UserProfileControllerTest {
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void deactivateUser() throws Exception {
+        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser + "?id=5"))
+            .andExpect(status().isOk());
+        verify(ubsClientService).markUserAsDeactivated(5L);
     }
 }
