@@ -20,8 +20,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -577,6 +579,30 @@ public class ManagementOrderController {
         @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
         ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller saves manual payment.
+     *
+     * @param id               {@link Long}.
+     * @param manualPaymentDto {@link ManualPaymentRequestDto}
+     * @return {@link ManualPaymentResponseDto}
+     * @author Denys Kisliak.
+     */
+    @ApiOperation(value = "Save manual payment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ManualPaymentRequestDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping(value = "/add-receipt/{id}",
+        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long id,
+        @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @RequestPart(required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.saveNewPayment(id, manualPaymentDto, image));
     }
 
     /**
