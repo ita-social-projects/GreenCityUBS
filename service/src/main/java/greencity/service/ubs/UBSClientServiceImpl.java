@@ -665,4 +665,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             createRecordInUBStable(uuid);
         }
     }
+
+    @Override
+    public void markUserAsDeactivated(Long id) {
+        User user =
+            userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        restClient.markUserDeactivated(user.getUuid());
+    }
 }

@@ -26,6 +26,7 @@ public final class ErrorMessage {
         "The user already has connected to Viber bot.";
     public final static String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
     public final static String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
+    public final static String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public final static String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist.";
     public final static String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public final static String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";

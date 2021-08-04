@@ -1,19 +1,20 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static greencity.ModelUtils.getPrincipal;
 
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.service.ubs.UBSManagementService;
 
-import static greencity.ModelUtils.getViolationDetailInfoDto;
+import static greencity.ModelUtils.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import greencity.client.RestClient;
+
 import java.security.Principal;
 import java.util.Optional;
 
@@ -27,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -223,6 +225,22 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsManagementService).deleteViolation(1L);
+    }
+
+    @Test
+    void addManualPayment() throws Exception {
+        ManualPaymentRequestDto dto = getRequestDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", responseJSON.getBytes());
+
+        mockMvc.perform(multipart(ubsLink + "/add-receipt/{id}", 1)
+            .file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isCreated());
     }
 
     @Test
