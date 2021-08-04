@@ -87,12 +87,8 @@ public class Order {
 
     private LocalDateTime deliverTo;
 
-    @ManyToMany
-    @JoinTable(
-        name = "order_employee",
-        joinColumns = {@JoinColumn(name = "order_id")},
-        inverseJoinColumns = {@JoinColumn(name = "employee_id")})
-    private Set<Employee> attachedOrders;
+    @ManyToMany(mappedBy = "attachedOrders")
+    private Set<Employee> attachedEmployees;
 
     @ElementCollection
     @CollectionTable(name = "order_additional", joinColumns = @JoinColumn(name = "orders_id"))
