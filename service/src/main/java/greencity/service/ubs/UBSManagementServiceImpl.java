@@ -263,7 +263,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (order.getOrderStatus() == OrderStatus.CANCELLED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
-            returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
+            returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto, payment);
         }
         if (order.getOrderStatus() == OrderStatus.CANCELLED && overpaymentInfoRequestDto.getComment()
             .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
@@ -1074,10 +1074,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void returnOverpaymentAsMoneyForStatusCancelled(User user, Order order,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto ,Payment payment) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getBonuses()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
-        order.getPayment().forEach(p -> p.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED));
+        payment.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+
     }
 
     private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order,
@@ -1087,6 +1089,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         user.getChangeOfPointsList()
             .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
     }
 
     /**
