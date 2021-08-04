@@ -87,19 +87,20 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @return a {@link List} of {@link User} - which need to send a message.
      */
     @Query(nativeQuery = true,
-            value = "SELECT * FROM users u INNER JOIN orders o ON u.id = o.users_id "
-                    + "WHERE CAST(o.order_date AS DATE) < :localDate AND o.order_status LIKE 'FORMED'")
+        value = "SELECT * FROM users u INNER JOIN orders o ON u.id = o.users_id "
+            + "WHERE CAST(o.order_date AS DATE) < :localDate AND o.order_status LIKE 'FORMED'")
     List<User> getAllUsersWhoHaveNotPaid(LocalDate localDate);
 
     /**
      * Finds list of User who have no orders after {@param localDate}.
      *
      * @param toDate - date after which user have no orders.
-     * @return a {@link List} of {@link User} - which have no orders after {@param localDate}.
+     * @return a {@link List} of {@link User} - which have no orders after
+     *         {@param localDate}.
      */
     @Query(nativeQuery = true,
-            value = "SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id " +
-                    "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate " +
-                    "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
+        value = "SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id " +
+            "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate " +
+            "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
     List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);
 }

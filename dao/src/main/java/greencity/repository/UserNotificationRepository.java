@@ -15,14 +15,14 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
 
     List<UserNotification> findAllByUser(User user);
 
-    Optional<UserNotification> findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(User user, NotificationType type);
+    Optional<UserNotification> findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(User user,
+        NotificationType type);
 
     @Query(nativeQuery = true, value = "select * from user_notifications " +
-            "join notification_parameters np on user_notifications.id = np.notification_id " +
-            "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber " +
-            "order by notification_time desc " +
-            "limit 1;")
+        "join notification_parameters np on user_notifications.id = np.notification_id " +
+        "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber " +
+        "order by notification_time desc " +
+        "limit 1;")
     Optional<UserNotification> findLastNotificationByNotificationTypeAndOrderNumber(String type, String orderNumber);
-
 
 }

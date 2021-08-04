@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface NotificationTemplateRepository extends JpaRepository<NotificationTemplate, Long> {
 
     Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndLanguageCode(
-            NotificationType type, String languageCode);
+        NotificationType type, String languageCode);
 }
