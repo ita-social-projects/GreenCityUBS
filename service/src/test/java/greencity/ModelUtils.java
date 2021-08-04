@@ -19,6 +19,7 @@ import greencity.entity.user.ubs.UBSuser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.entity.enums.ViolationLevel.MAJOR;
@@ -599,7 +600,9 @@ public class ModelUtils {
             .email("michalov@gmail.com")
             .phoneNumber("095531111")
             .build();
-    };
+    }
+
+    ;
 
     public static Position getPosition() {
         return Position.builder()
@@ -692,4 +695,47 @@ public class ModelUtils {
             .recipientName("Taras")
             .build();
     }
+
+    public static Payment getManualPayment() {
+        return Payment.builder()
+            .settlementDate("02-08-2021")
+            .amount(500l)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId(1l)
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .build();
+    }
+
+    public static Order getOrderTest() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .comment("near mall")
+                    .houseCorpus(null)
+                    .houseNumber("4R")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .build();
+    }
+
 }

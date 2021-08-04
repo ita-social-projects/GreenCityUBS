@@ -11,6 +11,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -255,6 +256,26 @@ public class ModelUtils {
             .houseNumber(addressDto().getHouseNumber())
             .houseCorpus(addressDto().getHouseCorpus())
             .actual(addressDto().getActual())
+            .build();
+    }
+
+    public static ManualPaymentResponseDto getResponseDto() {
+        return ManualPaymentResponseDto.builder()
+            .amount(500l)
+            .paymentDate("09-02-2021")
+            .paymentId(10l)
+            .currentDate("10-02-2021")
+            .receiptLink("somelink.com")
+            .imagePath("imagepath")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getRequestDto() {
+        return ManualPaymentRequestDto.builder()
+            .amount(500l)
+            .paymentDate("09-02-2021")
+            .receiptLink("somelink.com")
+            .paymentId(10l)
             .build();
     }
 }

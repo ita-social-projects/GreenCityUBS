@@ -6,6 +6,7 @@ import greencity.entity.coords.Coordinates;
 
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.Violation;
 
 import greencity.entity.user.employee.ReceivingStation;
@@ -40,6 +41,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +67,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private ReceivingStationRepository receivingStationRepository;
+
+    @Mock
+    private PaymentRepository paymentRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -220,5 +227,21 @@ public class UBSManagementServiceImplTest {
         ubsManagementService.deleteViolation(id);
 
         verify(violationRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void saveNewPayment() {
+        Order order = ModelUtils.getOrderTest();
+        Payment payment = ModelUtils.getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+            .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
+
+        when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+            .thenReturn(payment);
+        ubsManagementService.saveNewPayment(1l, paymentDetails, null);
+
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1l);
     }
 }

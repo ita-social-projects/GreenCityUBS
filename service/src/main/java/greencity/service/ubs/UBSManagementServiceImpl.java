@@ -34,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -56,6 +57,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
+    private final FileService fileService;
 
     /**
      * {@inheritDoc}
@@ -1070,5 +1072,45 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         user.getChangeOfPointsList()
             .add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getOverpayment()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ManualPaymentResponseDto saveNewPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
+        MultipartFile image) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        return buildPaymentResponseDto(paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image)));
+    }
+
+    private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return ManualPaymentResponseDto.builder()
+            .paymentId(payment.getPaymentId())
+            .paymentDate(payment.getSettlementDate())
+            .amount(payment.getAmount())
+            .receiptLink(payment.getReceiptLink())
+            .imagePath(payment.getImagePath())
+            .currentDate(LocalDate.now().format(formatter))
+            .build();
+    }
+
+    private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image) {
+        Payment payment = Payment.builder()
+            .settlementDate(paymentRequestDto.getPaymentDate())
+            .amount(paymentRequestDto.getAmount())
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId(paymentRequestDto.getPaymentId())
+            .receiptLink(paymentRequestDto.getReceiptLink())
+            .currency("UAH")
+            .order(order)
+            .orderStatus(order.getOrderStatus().toString())
+            .build();
+        if (image != null) {
+            payment.setImagePath(fileService.upload(image));
+        }
+        return payment;
     }
 }
