@@ -1074,7 +1074,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void returnOverpaymentAsMoneyForStatusCancelled(User user, Order order,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto ,Payment payment) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto, Payment payment) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getBonuses()));
         user.getChangeOfPointsList().add(createChangeOfPoints(order, user, overpaymentInfoRequestDto.getBonuses()));
         payment.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED);
