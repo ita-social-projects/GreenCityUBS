@@ -46,6 +46,10 @@ public class Payment {
     private String paymentSystem;
     @Column(length = 254)
     private String senderEmail;
+    @Column
+    private String receiptLink;
+    @Column
+    private String imagePath;
     @Column(length = 19)
     private Long paymentId;
     @ManyToOne
