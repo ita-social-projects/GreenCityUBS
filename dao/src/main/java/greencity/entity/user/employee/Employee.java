@@ -42,8 +42,12 @@ public class Employee {
         inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> employeePosition;
 
-    @ManyToMany(mappedBy = "attachedOrders")
-    private Set<Order> attachedEmployees;
+    @ManyToMany
+    @JoinTable(
+        name = "order_employee",
+        joinColumns = {@JoinColumn(name = "employee_id")},
+        inverseJoinColumns = {@JoinColumn(name = "order_id")})
+    private Set<Order> attachedOrders;
 
     @ManyToMany
     @JoinTable(
