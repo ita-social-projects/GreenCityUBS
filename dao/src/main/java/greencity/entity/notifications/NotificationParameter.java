@@ -17,10 +17,15 @@ public class NotificationParameter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public NotificationParameter(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
     @ManyToOne
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "notification_id")
+    @JoinColumn(name = "notification_id", nullable = false)
     private UserNotification userNotification;
 
     @Column(nullable = false, name = "key", length = 50)

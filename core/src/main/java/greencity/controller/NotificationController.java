@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,7 +28,6 @@ import java.util.Locale;
 @RequestMapping("/notifications")
 @Validated
 public class NotificationController {
-
     @Autowired
     private final NotificationService notificationService;
 
@@ -41,6 +39,12 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    /**
+     * Controller for getting all notifications for current user.
+     *
+     * @return @List of all notifications.
+     * @author Ann Sakhno
+     */
     @ApiOperation(value = "Get all notifications for active user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK, response = NotificationDto[].class),
@@ -56,5 +60,4 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage()));
     }
-
 }

@@ -51,9 +51,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private ViolationRepository violationRepository;
 
-    public List<NotificationTemplate> getNotificationTemplates() {
-        return notificationTemplateRepository.findAll();
-    }
+    @Autowired
+    private NotificationParameterRepository notificationParameterRepository;
 
     @Override
     public void notifyUnpaidOrders() {
@@ -62,14 +61,20 @@ public class NotificationServiceImpl implements NotificationService {
                     .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(), order.getId().toString());
             if((lastNotification.isEmpty()
                     || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1)))
-                    && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))){
-                List<User> users = userRepository.getAllUsersWhoHaveNotPaid(LocalDate.now().minusDays(3));
-                for (User user : users) {
-                    UserNotification userNotification = new UserNotification();
-                    userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-                    userNotification.setUser(user);
-                    userNotificationRepository.save(userNotification);
+                    && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))) {
+                UserNotification userNotification = new UserNotification();
+                if (lastNotification.isPresent()) {
+                    UserNotification oldNotification = lastNotification.get();
+                    userNotification.setUser(oldNotification.getUser());
+                } else {
+                    userNotification.setUser(order.getUser());
                 }
+
+                userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+                UserNotification created = userNotificationRepository.save(userNotification);
+                NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId().toString());
+                notificationParameter.setUserNotification(created);
+                notificationParameterRepository.save(notificationParameter);
             }
         }
     }
@@ -82,6 +87,9 @@ public class NotificationServiceImpl implements NotificationService {
         userNotificationRepository.save(userNotification);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyCourierItineraryFormed(Order order) {
         UserNotification userNotification = new UserNotification();
@@ -96,10 +104,14 @@ public class NotificationServiceImpl implements NotificationService {
                 .value("+380638175035, +380931038987").build());
         userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
         userNotification.setUser(order.getUser());
-        userNotification.setParameters(parameters);
-        userNotificationRepository.save(userNotification);
+        UserNotification created = userNotificationRepository.save(userNotification);
+        parameters.forEach(parameter -> parameter.setUserNotification(created));
+        notificationParameterRepository.saveAll(parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyHalfPaidPackage(Order order) {
         UserNotification userNotification = new UserNotification();
@@ -123,10 +135,15 @@ public class NotificationServiceImpl implements NotificationService {
 
         userNotification.setNotificationType(NotificationType.UNPAID_PACKAGE);
         userNotification.setUser(order.getUser());
-        userNotification.setParameters(parameters);
-        userNotificationRepository.save(userNotification);
+
+        UserNotification created = userNotificationRepository.save(userNotification);
+        parameters.forEach(parameter -> parameter.setUserNotification(created));
+        notificationParameterRepository.saveAll(parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyAllHalfPaidPackages() {
         for (Order order: orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
@@ -140,6 +157,9 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyBonuses(Order order, Long overpayment) {
         UserNotification userNotification = new UserNotification();
@@ -159,10 +179,14 @@ public class NotificationServiceImpl implements NotificationService {
 
         userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
         userNotification.setUser(order.getUser());
-        userNotification.setParameters(parameters);
-        userNotificationRepository.save(userNotification);
+        UserNotification created = userNotificationRepository.save(userNotification);
+        parameters.forEach(parameter -> parameter.setUserNotification(created));
+        notificationParameterRepository.saveAll(parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyAddViolation(Order order) {
         UserNotification userNotification = new UserNotification();
@@ -171,20 +195,26 @@ public class NotificationServiceImpl implements NotificationService {
                 .ifPresent(value -> parameters.add(NotificationParameter.builder()
                     .key("violationDescription")
                     .value(value.getDescription()).build()));
-        userNotification.setParameters(parameters);
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(order.getUser());
-        userNotificationRepository.save(userNotification);
+
+        UserNotification created = userNotificationRepository.save(userNotification);
+        parameters.forEach(parameter -> parameter.setUserNotification(created));
+        notificationParameterRepository.saveAll(parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyInactiveAccounts() {
         List<User> users = userRepository.getAllInactiveUsers(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(2));
+        log.info("Found {} inactive users", users.size());
         for (User user : users) {
             Optional<UserNotification> lastNotification =
                     userNotificationRepository.findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                             NotificationType.LETS_STAY_CONNECTED);
-            if(lastNotification.isEmpty() || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusMonths(2))){
+            if(lastNotification.isEmpty() || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1))){
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
@@ -193,6 +223,9 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<NotificationDto> getAllNotificationsForUser(String userUuid, String language) {
         User user = userRepository.findByUuid(userUuid);

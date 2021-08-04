@@ -36,5 +36,5 @@ public class UserNotification {
     private Set<NotificationParameter> parameters;
 
     @Column(name = "notification_time")
-    private LocalDateTime notificationTime;
+    private LocalDateTime notificationTime = LocalDateTime.now();
 }

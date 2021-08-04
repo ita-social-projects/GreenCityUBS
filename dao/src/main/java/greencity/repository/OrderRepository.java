@@ -10,12 +10,11 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderRepository extends CrudRepository<Order, Long>, JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * The method returns undelivered orders to group them.
      *
@@ -58,8 +57,8 @@ public interface OrderRepository extends CrudRepository<Order, Long>, JpaReposit
      *
      * @return list of {@link Order}.
      */
-    @Query(value = "SELECT * FROM ORDERS AS O "
-        + "JOIN ORDER_BAG_MAPPING AS OBM "
+    @Query(value = "SELECT * FROM ORDERS O "
+        + "JOIN ORDER_BAG_MAPPING OBM "
         + "ON O.ID = OBM.ORDER_ID "
         + "WHERE O.ID = :OrderId "
         + "ORDER BY BAG_ID", nativeQuery = true)

@@ -20,9 +20,5 @@ public class NotificationServiceImplTest {
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
-    @Test
-    void testGetNotificationTemplates(){
-        notificationService.getNotificationTemplates();
-    }
 
 }
