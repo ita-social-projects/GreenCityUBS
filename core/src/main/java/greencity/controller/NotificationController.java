@@ -47,17 +47,17 @@ public class NotificationController {
      */
     @ApiOperation(value = "Get all notifications for active user")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = NotificationDto[].class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = NotificationDto[].class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping
     public ResponseEntity<List<NotificationDto>> getNotificationsForCurrentUser(
-            @ApiIgnore @CurrentUserUuid String userUuid,
-            @ApiIgnore @ValidLanguage Locale locale) {
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage()));
+            .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage()));
     }
 }
