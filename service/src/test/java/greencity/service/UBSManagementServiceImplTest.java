@@ -13,6 +13,9 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
@@ -20,6 +23,8 @@ import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,6 +81,15 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private EmployeeOrderPositionRepository employeeOrderPositionRepository;
+
+    @Mock
+    private PositionRepository positionRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -328,5 +342,47 @@ public class UBSManagementServiceImplTest {
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
         assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
+    }
+
+    @Test
+    void updateOrderDetailStatus() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
+
+        List<Payment> payment = new ArrayList<>();
+        payment.add(Payment.builder().build());
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.saveAll(any())).thenReturn(payment);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
+        OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
+        OrderDetailStatusDto producedObject = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail);
+        assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObject.getDate());
+    }
+
+    @Test
+    void getAllEmployeesByPosition() {
+        Order order = ModelUtils.getOrder();
+        EmployeePositionDtoRequest dto = ModelUtils.getEmployeePositionDtoRequest();
+        List<EmployeeOrderPosition> newList = new ArrayList<>();
+        newList.add(ModelUtils.getEmployeeOrderPosition());
+
+        List<Position> positionList = new ArrayList<>();
+        positionList.add(ModelUtils.getPosition());
+
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
+        when(positionRepository.findAll()).thenReturn(positionList);
+        when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
+        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId()));
     }
 }
