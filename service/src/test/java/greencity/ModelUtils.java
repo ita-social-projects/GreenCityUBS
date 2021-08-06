@@ -808,42 +808,42 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto (){
+    public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
-                .orderStatus("FORMED")
-                .orderComment("all good")
-                .paymentStatus("PAID").build();
+            .orderStatus("FORMED")
+            .orderComment("all good")
+            .paymentStatus("PAID").build();
     }
 
-    public static OrderDetailStatusDto getTestOrderDetailStatusDto(){
+    public static OrderDetailStatusDto getTestOrderDetailStatusDto() {
         return OrderDetailStatusDto.builder()
-                .orderStatus("FORMED")
-                .paymentStatus("PAID")
-                .date("15-05-2021")
-                .build();
+            .orderStatus("FORMED")
+            .paymentStatus("PAID")
+            .date("15-05-2021")
+            .build();
     }
 
-    public static EmployeeOrderPosition getEmployeeOrderPosition(){
+    public static EmployeeOrderPosition getEmployeeOrderPosition() {
         return EmployeeOrderPosition.builder()
-                .id(1L)
-                .order(getOrder())
-                .position(getPosition())
-                .employee(getEmployee())
-                .build();
+            .id(1L)
+            .order(getOrder())
+            .position(getPosition())
+            .employee(getEmployee())
+            .build();
     }
 
-    public static EmployeePositionDtoRequest getEmployeePositionDtoRequest(){
+    public static EmployeePositionDtoRequest getEmployeePositionDtoRequest() {
         Map<PositionDto, List<String>> allPositionsEmployees = new HashMap<>();
         Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
-        String value = getEmployee().getFirstName()+" "+ getEmployee().getLastName();
+        String value = getEmployee().getFirstName() + " " + getEmployee().getLastName();
         List<String> valueList = new ArrayList();
         valueList.add(value);
-        allPositionsEmployees.put(getPositionDto(),valueList);
+        allPositionsEmployees.put(getPositionDto(), valueList);
         currentPositionEmployees.put(getPositionDto(), value);
         return EmployeePositionDtoRequest.builder()
-                .orderId(1L)
-                .allPositionsEmployees(allPositionsEmployees)
-                .currentPositionEmployees(currentPositionEmployees)
-                .build();
+            .orderId(1L)
+            .allPositionsEmployees(allPositionsEmployees)
+            .currentPositionEmployees(currentPositionEmployees)
+            .build();
     }
 }
