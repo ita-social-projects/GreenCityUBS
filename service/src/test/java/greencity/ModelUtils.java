@@ -14,10 +14,12 @@ import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -804,5 +806,44 @@ public class ModelUtils {
             .pointsToUse(100)
             .user(User.builder().id(1L).currentPoints(100).build())
             .build();
+    }
+
+    public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto (){
+        return OrderDetailStatusRequestDto.builder()
+                .orderStatus("FORMED")
+                .orderComment("all good")
+                .paymentStatus("PAID").build();
+    }
+
+    public static OrderDetailStatusDto getTestOrderDetailStatusDto(){
+        return OrderDetailStatusDto.builder()
+                .orderStatus("FORMED")
+                .paymentStatus("PAID")
+                .date("15-05-2021")
+                .build();
+    }
+
+    public static EmployeeOrderPosition getEmployeeOrderPosition(){
+        return EmployeeOrderPosition.builder()
+                .id(1L)
+                .order(getOrder())
+                .position(getPosition())
+                .employee(getEmployee())
+                .build();
+    }
+
+    public static EmployeePositionDtoRequest getEmployeePositionDtoRequest(){
+        Map<PositionDto, List<String>> allPositionsEmployees = new HashMap<>();
+        Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
+        String value = getEmployee().getFirstName()+" "+ getEmployee().getLastName();
+        List<String> valueList = new ArrayList();
+        valueList.add(value);
+        allPositionsEmployees.put(getPositionDto(),valueList);
+        currentPositionEmployees.put(getPositionDto(), value);
+        return EmployeePositionDtoRequest.builder()
+                .orderId(1L)
+                .allPositionsEmployees(allPositionsEmployees)
+                .currentPositionEmployees(currentPositionEmployees)
+                .build();
     }
 }

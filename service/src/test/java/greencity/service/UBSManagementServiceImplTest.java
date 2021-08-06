@@ -13,6 +13,9 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
@@ -20,6 +23,8 @@ import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,6 +82,16 @@ public class UBSManagementServiceImplTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private EmployeeOrderPositionRepository employeeOrderPositionRepository;
+
+    @Mock
+    private PositionRepository positionRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
 
@@ -86,24 +101,24 @@ public class UBSManagementServiceImplTest {
 
         for (Coordinates coordinate : ModelUtils.getCoordinatesSet()) {
             List<Order> orders = ModelUtils.getOrdersToGroupThem().stream()
-                .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
-                    Collectors.toList());
+                    .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
+                            Collectors.toList());
             when(orderRepository.undeliveredOrdersGroupThem(coordinate.getLatitude(), coordinate.getLongitude()))
-                .thenReturn(orders);
+                    .thenReturn(orders);
             for (Order order : orders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(OrderDto.builder()
-                    .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
-                    .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
-                    .build());
+                        .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
+                        .build());
             }
         }
     }
 
     private static Stream<Arguments> provideDistanceAndLitres() {
         return Stream.of(Arguments.of(-1, 5),
-            Arguments.of(25, 5),
-            Arguments.of(10, -5),
-            Arguments.of(10, 20000));
+                Arguments.of(25, 5),
+                Arguments.of(10, -5),
+                Arguments.of(10, 20000));
     }
 
     @ParameterizedTest
@@ -115,7 +130,7 @@ public class UBSManagementServiceImplTest {
     @Test
     void getClusteredCoordsTest() {
         when(addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres))
-            .thenReturn(ModelUtils.getCoordinatesSet());
+                .thenReturn(ModelUtils.getCoordinatesSet());
         getMocksBehavior();
         List<GroupedOrderDto> expected = ModelUtils.getGroupedOrders();
         List<GroupedOrderDto> actual = ubsManagementService.getClusteredCoords(distance, litres);
@@ -146,14 +161,14 @@ public class UBSManagementServiceImplTest {
         Pageable pageable = PageRequest.of(0, 5);
         CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
         List<Certificate> certificates =
-            Collections.singletonList(ModelUtils.getCertificate());
+                Collections.singletonList(ModelUtils.getCertificate());
         List<CertificateDtoForSearching> certificateDtoForSearchings =
-            Collections.singletonList(certificateDtoForSearching);
+                Collections.singletonList(certificateDtoForSearching);
         PageableDto<CertificateDtoForSearching> certificateDtoForSearchingPageableDto =
-            new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
+                new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
         Page<Certificate> certificates1 = new PageImpl<>(certificates, pageable, certificates.size());
         when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
-            .thenReturn(certificateDtoForSearching);
+                .thenReturn(certificateDtoForSearching);
         when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
@@ -240,11 +255,11 @@ public class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrderTest();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
+                .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
 
         when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-            .thenReturn(payment);
+                .thenReturn(payment);
         ubsManagementService.saveNewPayment(1l, paymentDetails, null);
 
         verify(paymentRepository, times(1)).save(any());
@@ -257,10 +272,10 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         Long sumToPay = 0L;
         assertEquals(0L, ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L)
-            .getOverpayment());
+                .getOverpayment());
         assertEquals(AppConstant.PAYMENT_REFUND,
-            ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
-                .getComment());
+                ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
+                        .getComment());
     }
 
     @Test
@@ -280,14 +295,14 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setBonuses(0L);
         when(orderRepository.findById(order.getId())).thenReturn(
-            Optional.ofNullable(order));
+                Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(2L, order.getPayment().size());
         assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
+                order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
     }
@@ -300,13 +315,13 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.PAYMENT_REFUND);
         when(orderRepository.findById(order.getId())).thenReturn(
-            Optional.ofNullable(order));
+                Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.PAYMENT_REFUND,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
+                order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
     }
@@ -319,14 +334,56 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         when(orderRepository.findById(order.getId())).thenReturn(
-            Optional.ofNullable(order));
+                Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(3L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-            order.getPayment().get(order.getPayment().size() - 1).getComment());
+                order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
         assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
+    }
+
+    @Test
+    void updateOrderDetailStatus() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
+
+        List<Payment> payment = new ArrayList<>();
+        payment.add(Payment.builder().build());
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.saveAll(any())).thenReturn(payment);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
+        OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
+        OrderDetailStatusDto producedObject = ubsManagementService
+                .updateOrderDetailStatus(order.getId(), testOrderDetail);
+        assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObject.getDate());
+    }
+
+    @Test
+    void getAllEmployeesByPosition(){
+        Order order = ModelUtils.getOrder();
+        EmployeePositionDtoRequest dto = ModelUtils.getEmployeePositionDtoRequest();
+        List<EmployeeOrderPosition> newList = new ArrayList<>();
+        newList.add(ModelUtils.getEmployeeOrderPosition());
+
+        List<Position> positionList = new ArrayList<>();
+        positionList.add(ModelUtils.getPosition());
+
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
+        when(positionRepository.findAll()).thenReturn(positionList);
+        when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
+        assertEquals(dto,ubsManagementService.getAllEmployeesByPosition(order.getId()));
     }
 }
