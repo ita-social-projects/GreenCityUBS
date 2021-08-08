@@ -29,7 +29,7 @@ import java.util.Locale;
 @Validated
 public class NotificationController {
     @Autowired
-    private final NotificationService notificationService;
+    private NotificationService notificationService;
 
     /**
      * Constructor with parameters.
