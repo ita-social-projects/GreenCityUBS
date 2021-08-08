@@ -34,6 +34,7 @@ public class UserNotification {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<NotificationParameter> parameters;
 
+    @EqualsAndHashCode.Exclude
     @Column(name = "notification_time")
     private LocalDateTime notificationTime = LocalDateTime.now();
 }

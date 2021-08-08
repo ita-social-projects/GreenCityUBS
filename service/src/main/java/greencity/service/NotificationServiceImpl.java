@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +53,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private NotificationParameterRepository notificationParameterRepository;
 
+    @Autowired
+    private Clock clock;
+
     @Override
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
@@ -59,8 +63,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
                     order.getId().toString());
             if ((lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
                 UserNotification userNotification = new UserNotification();
                 if (lastNotification.isPresent()) {
                     UserNotification oldNotification = lastNotification.get();
@@ -68,7 +72,7 @@ public class NotificationServiceImpl implements NotificationService {
                 } else {
                     userNotification.setUser(order.getUser());
                 }
-
+                userNotification.setNotificationTime(LocalDateTime.now(clock));
                 userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
                 UserNotification created = userNotificationRepository.save(userNotification);
                 NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
@@ -153,8 +157,8 @@ public class NotificationServiceImpl implements NotificationService {
                     NotificationType.UNPAID_PACKAGE.toString(),
                     order.getId().toString());
             if ((lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now().minusMonths(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
                 notifyHalfPaidPackage(order);
             }
         }
@@ -212,7 +216,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyInactiveAccounts() {
         List<User> users = userRepository
-            .getAllInactiveUsers(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(2));
+            .getAllInactiveUsers(LocalDate.now(clock).minusYears(1), LocalDate.now(clock).minusMonths(2));
         log.info("Found {} inactive users", users.size());
         for (User user : users) {
             Optional<UserNotification> lastNotification =
@@ -220,7 +224,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                         NotificationType.LETS_STAY_CONNECTED);
             if (lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now().minusWeeks(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1))) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
