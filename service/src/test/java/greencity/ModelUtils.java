@@ -46,7 +46,7 @@ public class ModelUtils {
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
-            singletonList(createOrderDetailInfoDto());
+        singletonList(createOrderDetailInfoDto());
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
@@ -921,13 +921,13 @@ public class ModelUtils {
     private static List<Payment> createPaymentList() {
         return List.of(
             Payment.builder()
-                    .id(1L)
-                    .paymentStatus(PaymentStatus.PAID)
-                    .build(),
+                .id(1L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build(),
             Payment.builder()
-                    .id(2L)
-                    .paymentStatus(PaymentStatus.PAID)
-                    .build());
+                .id(2L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build());
     }
 
     private static OrderDetailStatusDto createOrderDetailStatusDto() {
@@ -957,8 +957,8 @@ public class ModelUtils {
     private static List<BagMappingDto> createBagMappingDtoList() {
         return Collections.singletonList(
             BagMappingDto.builder()
-                    .amount(4)
-                    .build());
+                .amount(4)
+                .build());
     }
 
     private static Bag createBag() {
