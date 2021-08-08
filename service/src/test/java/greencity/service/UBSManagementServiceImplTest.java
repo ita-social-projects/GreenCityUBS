@@ -492,7 +492,11 @@ public class UBSManagementServiceImplTest {
         User user = ModelUtils.getUser();
         user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
         user.setViolations(1);
-        user.setViolationsDescription(new HashMap<>(){{put(1L, "Some violation");}});
+        user.setViolationsDescription(new HashMap<>() {
+            {
+                put(1L, "Some violation");
+            }
+        });
 
         ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
 
