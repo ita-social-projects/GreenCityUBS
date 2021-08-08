@@ -412,7 +412,7 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundOrderAddressException.class,
-                () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
     }
 
     @Test
@@ -435,7 +435,7 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UnexistingOrderException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -444,7 +444,7 @@ public class UBSManagementServiceImplTest {
         when(paymentRepository.paymentInfo(1)).thenReturn(Collections.emptyList());
 
         assertThrows(PaymentNotFoundException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -480,6 +480,6 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(UnexistingOrderException.class,
-                () -> ubsManagementService.getOrderDetails(1L, "ua"));
+            () -> ubsManagementService.getOrderDetails(1L, "ua"));
     }
 }
