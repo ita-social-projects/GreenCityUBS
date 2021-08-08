@@ -28,8 +28,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.entity.enums.ViolationLevel.MAJOR;
+import static java.util.Collections.singletonList;
 
 public class ModelUtils {
+
+    public static final Order TEST_ORDER = createOrder();
+    public static final Address TEST_ADDRESS = createAddress2();
+    public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
+    public static final OrderAddressDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE = createOrderAddressDtoUpdate();
+    public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
+    public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
+    public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
+    public static final BagTransDto TEST_BAG_TRANS_DTO = createBagTransDto();
+    public static final BagTranslation TEST_BAG_TRANSLATION = createBagTranslation();
+    public static final List<BagTranslation> TEST_BAG_TRANSLATION_LIST = singletonList(TEST_BAG_TRANSLATION);
+    public static final Bag TEST_BAG = createBag();
+    public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
+    public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
+    public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
+            singletonList(createOrderDetailInfoDto());
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
@@ -456,7 +473,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.DONE)
-            .payment(Collections.singletonList(new Payment().builder()
+            .payment(singletonList(new Payment().builder()
                 .id(1L)
                 .amount(350L)
                 .build()))
@@ -723,7 +740,7 @@ public class ModelUtils {
     public static User getUser() {
         return User.builder()
             .id(1L)
-            .addresses(Collections.singletonList(address()))
+            .addresses(singletonList(address()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
@@ -797,7 +814,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.FORMED)
-            .payment(Collections.singletonList(Payment.builder()
+            .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(350L)
                 .build()))
@@ -844,6 +861,122 @@ public class ModelUtils {
             .orderId(1L)
             .allPositionsEmployees(allPositionsEmployees)
             .currentPositionEmployees(currentPositionEmployees)
+            .build();
+    }
+
+    private static Order createOrder() {
+        return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .ubsUser(createUbsUser())
+            .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5))
+            .build();
+    }
+
+    private static UBSuser createUbsUser() {
+        return UBSuser.builder()
+            .id(10L)
+            .address(createAddress())
+            .build();
+    }
+
+    private static Address createAddress() {
+        return Address.builder()
+            .id(2L)
+            .build();
+    }
+
+    private static Address createAddress2() {
+        return Address.builder()
+            .id(2L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
+    }
+
+    private static OrderAddressDtoUpdate createOrderAddressDtoUpdate() {
+        return OrderAddressDtoUpdate.builder()
+            .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
+    }
+
+    private static OrderAddressDtoResponse createOrderAddressDtoResponse() {
+        return OrderAddressDtoResponse.builder()
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
+    }
+
+    private static List<Payment> createPaymentList() {
+        return List.of(
+            Payment.builder()
+                    .id(1L)
+                    .paymentStatus(PaymentStatus.PAID)
+                    .build(),
+            Payment.builder()
+                    .id(2L)
+                    .paymentStatus(PaymentStatus.PAID)
+                    .build());
+    }
+
+    private static OrderDetailStatusDto createOrderDetailStatusDto() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String orderDate = TEST_ORDER.getOrderDate().toLocalDate().format(formatter);
+
+        return OrderDetailStatusDto.builder()
+            .orderStatus(TEST_ORDER.getOrderStatus().name())
+            .paymentStatus(TEST_PAYMENT_LIST.get(0).getPaymentStatus().name())
+            .date(orderDate)
+            .build();
+    }
+
+    private static BagInfoDto createBagInfoDto() {
+        return BagInfoDto.builder()
+            .id(1)
+            .capacity(4)
+            .build();
+    }
+
+    private static BagTransDto createBagTransDto() {
+        return BagTransDto.builder()
+            .name("test")
+            .build();
+    }
+
+    private static List<BagMappingDto> createBagMappingDtoList() {
+        return Collections.singletonList(
+            BagMappingDto.builder()
+                    .amount(4)
+                    .build());
+    }
+
+    private static Bag createBag() {
+        return Bag.builder()
+            .id(2)
+            .build();
+    }
+
+    private static OrderDetailInfoDto createOrderDetailInfoDto() {
+        return OrderDetailInfoDto.builder()
+            .amount(5)
+            .capacity(4)
+            .build();
+    }
+
+    private static BagTranslation createBagTranslation() {
+        return BagTranslation.builder()
+            .id(4L)
             .build();
     }
 }

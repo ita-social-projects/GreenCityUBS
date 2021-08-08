@@ -19,16 +19,17 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
+import greencity.exceptions.PaymentNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -44,14 +45,11 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.ui.Model;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,6 +88,12 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private EmployeeRepository employeeRepository;
+
+    @Mock
+    private BagRepository bagRepository;
+
+    @Mock
+    private BagTranslationRepository bagTranslationRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -384,5 +388,98 @@ public class UBSManagementServiceImplTest {
         when(positionRepository.findAll()).thenReturn(positionList);
         when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
         assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId()));
+    }
+
+    @Test
+    void testUpdateAddress() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(TEST_ORDER));
+        when(addressRepository.save(TEST_ADDRESS)).thenReturn(TEST_ADDRESS);
+        when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(TEST_ADDRESS));
+        when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
+
+        OrderAddressDtoResponse actual = ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+
+        assertEquals(TEST_ORDER_ADDRESS_DTO_RESPONSE, actual);
+
+        verify(orderRepository).findById(1L);
+        verify(addressRepository).save(TEST_ADDRESS);
+        verify(addressRepository).findById(TEST_ADDRESS.getId());
+        verify(modelMapper).map(TEST_ADDRESS, OrderAddressDtoResponse.class);
+    }
+
+    @Test
+    void testUpdateAddressThrowsException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundOrderAddressException.class,
+                () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
+    }
+
+    @Test
+    void testGetOrderDetailStatus() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(TEST_PAYMENT_LIST);
+
+        OrderDetailStatusDto actual = ubsManagementService.getOrderDetailStatus(1L);
+
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getOrderStatus(), actual.getOrderStatus());
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getPaymentStatus(), actual.getPaymentStatus());
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getDate(), actual.getDate());
+
+        verify(orderRepository).findById(1L);
+        verify(paymentRepository).paymentInfo(1L);
+    }
+
+    @Test
+    void testGetOrderDetailStatusThrowsUnExistingOrderException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+                () -> ubsManagementService.getOrderDetailStatus(1L));
+    }
+
+    @Test
+    void testGetOrderDetailStatusThrowsPaymentNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
+        when(paymentRepository.paymentInfo(1)).thenReturn(Collections.emptyList());
+
+        assertThrows(PaymentNotFoundException.class,
+                () -> ubsManagementService.getOrderDetailStatus(1L));
+    }
+
+    @Test
+    void testGetOrderDetails() {
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(TEST_ORDER));
+        when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
+        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
+        when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
+        when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
+
+        List<OrderDetailInfoDto> actual = ubsManagementService.getOrderDetails(1L, "ua");
+
+        assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType());
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
+        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
+        verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
+        verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()));
+
+    }
+
+    @Test
+    void testGetOrderDetailsThrowsException() {
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+                () -> ubsManagementService.getOrderDetails(1L, "ua"));
     }
 }
