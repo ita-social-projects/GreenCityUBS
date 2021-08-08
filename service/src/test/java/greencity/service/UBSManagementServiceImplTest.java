@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
@@ -94,6 +95,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private BagTranslationRepository bagTranslationRepository;
+
+    @Mock
+    private RestClient restClient;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -481,5 +485,43 @@ public class UBSManagementServiceImplTest {
 
         assertThrows(UnexistingOrderException.class,
             () -> ubsManagementService.getOrderDetails(1L, "ua"));
+    }
+
+    @Test
+    void checkGetAllUserViolations() {
+        User user = ModelUtils.getUser();
+        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setViolations(1);
+        user.setViolationsDescription(new HashMap<>() {
+            {
+                put(1L, "Some violation");
+            }
+        });
+
+        ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.ofNullable(user));
+
+        ViolationsInfoDto actual = ubsManagementService.getAllUserViolations(user.getRecipientEmail());
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void checkAddUserViolation() {
+        User user = ModelUtils.getTestUser();
+        user.setViolations(0);
+        user.setViolationsDescription(new HashMap<>());
+        Order order = user.getOrders().get(0);
+        order.setUser(user);
+        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
+        add.setOrderID(order.getId());
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+
+        ubsManagementService.addUserViolation(add);
+
+        assertEquals(1, user.getViolations());
+        assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
     }
 }
