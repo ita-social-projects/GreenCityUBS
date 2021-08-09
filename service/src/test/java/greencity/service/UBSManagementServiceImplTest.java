@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
@@ -13,17 +14,23 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
+import greencity.exceptions.PaymentNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -39,14 +46,11 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.ui.Model;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,6 +80,24 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private EmployeeOrderPositionRepository employeeOrderPositionRepository;
+
+    @Mock
+    private PositionRepository positionRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+    @Mock
+    private BagRepository bagRepository;
+
+    @Mock
+    private BagTranslationRepository bagTranslationRepository;
+
+    @Mock
+    private RestClient restClient;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -328,5 +350,178 @@ public class UBSManagementServiceImplTest {
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
         assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
+    }
+
+    @Test
+    void updateOrderDetailStatus() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
+
+        List<Payment> payment = new ArrayList<>();
+        payment.add(Payment.builder().build());
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.saveAll(any())).thenReturn(payment);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
+        OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
+        OrderDetailStatusDto producedObject = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail);
+        assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObject.getDate());
+    }
+
+    @Test
+    void getAllEmployeesByPosition() {
+        Order order = ModelUtils.getOrder();
+        EmployeePositionDtoRequest dto = ModelUtils.getEmployeePositionDtoRequest();
+        List<EmployeeOrderPosition> newList = new ArrayList<>();
+        newList.add(ModelUtils.getEmployeeOrderPosition());
+
+        List<Position> positionList = new ArrayList<>();
+        positionList.add(ModelUtils.getPosition());
+
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
+        when(positionRepository.findAll()).thenReturn(positionList);
+        when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
+        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId()));
+    }
+
+    @Test
+    void testUpdateAddress() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(TEST_ORDER));
+        when(addressRepository.save(TEST_ADDRESS)).thenReturn(TEST_ADDRESS);
+        when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(TEST_ADDRESS));
+        when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
+
+        OrderAddressDtoResponse actual = ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
+
+        assertEquals(TEST_ORDER_ADDRESS_DTO_RESPONSE, actual);
+
+        verify(orderRepository).findById(1L);
+        verify(addressRepository).save(TEST_ADDRESS);
+        verify(addressRepository).findById(TEST_ADDRESS.getId());
+        verify(modelMapper).map(TEST_ADDRESS, OrderAddressDtoResponse.class);
+    }
+
+    @Test
+    void testUpdateAddressThrowsException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundOrderAddressException.class,
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
+    }
+
+    @Test
+    void testGetOrderDetailStatus() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(TEST_PAYMENT_LIST);
+
+        OrderDetailStatusDto actual = ubsManagementService.getOrderDetailStatus(1L);
+
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getOrderStatus(), actual.getOrderStatus());
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getPaymentStatus(), actual.getPaymentStatus());
+        assertEquals(ORDER_DETAIL_STATUS_DTO.getDate(), actual.getDate());
+
+        verify(orderRepository).findById(1L);
+        verify(paymentRepository).paymentInfo(1L);
+    }
+
+    @Test
+    void testGetOrderDetailStatusThrowsUnExistingOrderException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.getOrderDetailStatus(1L));
+    }
+
+    @Test
+    void testGetOrderDetailStatusThrowsPaymentNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
+        when(paymentRepository.paymentInfo(1)).thenReturn(Collections.emptyList());
+
+        assertThrows(PaymentNotFoundException.class,
+            () -> ubsManagementService.getOrderDetailStatus(1L));
+    }
+
+    @Test
+    void testGetOrderDetails() {
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(TEST_ORDER));
+        when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
+        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
+        when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
+        when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
+
+        List<OrderDetailInfoDto> actual = ubsManagementService.getOrderDetails(1L, "ua");
+
+        assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType());
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
+        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
+        verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
+        verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()));
+
+    }
+
+    @Test
+    void testGetOrderDetailsThrowsException() {
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.getOrderDetails(1L, "ua"));
+    }
+
+    @Test
+    void checkGetAllUserViolations() {
+        User user = ModelUtils.getUser();
+        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setViolations(1);
+        user.setViolationsDescription(new HashMap<>() {
+            {
+                put(1L, "Some violation");
+            }
+        });
+
+        ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.ofNullable(user));
+
+        ViolationsInfoDto actual = ubsManagementService.getAllUserViolations(user.getRecipientEmail());
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void checkAddUserViolation() {
+        User user = ModelUtils.getTestUser();
+        user.setViolations(0);
+        user.setViolationsDescription(new HashMap<>());
+        Order order = user.getOrders().get(0);
+        order.setUser(user);
+        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
+        add.setOrderID(order.getId());
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+
+        ubsManagementService.addUserViolation(add);
+
+        assertEquals(1, user.getViolations());
+        assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
     }
 }
