@@ -228,6 +228,7 @@ public class NotificationServiceImpl implements NotificationService {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
+                userNotification.setNotificationTime(LocalDateTime.now(clock));
                 userNotificationRepository.save(userNotification);
             }
         }
