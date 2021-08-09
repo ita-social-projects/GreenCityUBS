@@ -99,6 +99,9 @@ public class UBSManagementServiceImplTest {
     @Mock
     private RestClient restClient;
 
+    @Mock
+    private NotificationServiceImpl notificationService;
+
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
 
