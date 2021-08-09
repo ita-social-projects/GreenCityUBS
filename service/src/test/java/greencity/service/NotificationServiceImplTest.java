@@ -4,11 +4,13 @@ import greencity.dto.NotificationDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.language.Language;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.repository.*;
@@ -72,37 +74,40 @@ public class NotificationServiceImplTest {
 
     @Test
     public void testNotifyUnpaidOrders() {
-        Order order = Order.builder().id(42L).user(User.builder().id(42L).build())
+        User user = User.builder().id(42L).build();
+        List<Order> orders = List.of(Order.builder().id(42L).user(user)
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .orderDate(LocalDateTime.now(fixedClock).minusMonths(1).plusDays(1)).build();
+            .orderDate(LocalDateTime.now(fixedClock).minusMonths(1).plusDays(1)).build(),
+            Order.builder().id(50L).user(user)
+                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                .orderDate(LocalDateTime.now(fixedClock).minusDays(9)).build());
 
         when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID))
-            .thenReturn(Collections.singletonList(order));
+            .thenReturn(orders);
 
         doReturn(Optional.empty()).when(userNotificationRepository)
             .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                order.getId().toString());
+                orders.get(0).getId().toString());
+
+        UserNotification secondOrderLastNotification = new UserNotification();
+        secondOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+        secondOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusDays(8));
+
+        doReturn(Optional.of(secondOrderLastNotification)).when(userNotificationRepository)
+            .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                orders.get(1).getId().toString());
 
         UserNotification created = new UserNotification();
         created.setNotificationType(NotificationType.UNPAID_ORDER);
         created.setNotificationTime(LocalDateTime.now(fixedClock));
-        created.setUser(order.getUser());
+        created.setUser(orders.get(0).getUser());
         created.setId(42L);
-
-        UserNotification expectedUserNotification = new UserNotification();
-        created.setNotificationType(NotificationType.UNPAID_ORDER);
-        created.setNotificationTime(LocalDateTime.now(fixedClock));
-        created.setUser(order.getUser());
 
         when(userNotificationRepository.save(any())).thenReturn(created);
 
         NotificationParameter createdNotificationParameter = NotificationParameter.builder().id(42L)
             .userNotification(created).key("orderNumber")
-            .value(order.getId().toString()).build();
-
-        NotificationParameter expectedNotificationParameter = NotificationParameter.builder()
-            .userNotification(created).key("orderNumber")
-            .value(order.getId().toString()).build();
+            .value(orders.get(0).getId().toString()).build();
 
         createdNotificationParameter.setUserNotification(created);
 
@@ -110,8 +115,8 @@ public class NotificationServiceImplTest {
 
         notificationService.notifyUnpaidOrders();
 
-        verify(notificationParameterRepository, times(1)).save(any());
-        verify(userNotificationRepository, times(1)).save(any());
+        verify(notificationParameterRepository, times(2)).save(any());
+        verify(userNotificationRepository, times(2)).save(any());
     }
 
     @Test
@@ -234,8 +239,9 @@ public class NotificationServiceImplTest {
     }
 
     @Test
-    public void testnNtifyInactiveAccounts() {
+    public void testNotifyInactiveAccounts() {
         User user = User.builder().id(42L).build();
+        User user1 = User.builder().id(43L).build();
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
         notification.setUser(user);
@@ -243,28 +249,41 @@ public class NotificationServiceImplTest {
 
         when(userRepository
             .getAllInactiveUsers(LocalDate.now(fixedClock).minusYears(1), LocalDate.now(fixedClock).minusMonths(2)))
-                .thenReturn(Collections.singletonList(user));
+                .thenReturn(List.of(user, user1));
         when(userNotificationRepository
             .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                 NotificationType.LETS_STAY_CONNECTED))
                     .thenReturn(Optional.of(notification));
-        when(userNotificationRepository.save(notification)).thenReturn(notification);
+        when(userNotificationRepository
+            .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user1,
+                NotificationType.LETS_STAY_CONNECTED))
+                    .thenReturn(Optional.empty());
+        when(userNotificationRepository.save(any())).thenReturn(notification);
 
         notificationService.notifyInactiveAccounts();
 
-        verify(userNotificationRepository).save(notification);
+        verify(userNotificationRepository, times(2)).save(any());
     }
 
     @Test
     public void testNotifyAllHalfPaidPackages() {
-        Order order = Order.builder().id(47L).user(User.builder().id(42L).build())
+        User user = User.builder().id(42L).build();
+        List<Order> orders = List.of(Order.builder().id(47L).user(user)
             .orderDate(LocalDateTime.now(fixedClock))
             .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
             .payment(Collections.emptyList())
-            .build();
+            .build(),
+            Order.builder().id(51L).user(user)
+                .orderDate(LocalDateTime.now(fixedClock))
+                .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                .payment(Collections.singletonList(
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAID).amount(0L)
+                        .build()))
+                .build());
 
         when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID))
-            .thenReturn(Collections.singletonList(order));
+            .thenReturn(orders);
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
@@ -273,18 +292,22 @@ public class NotificationServiceImplTest {
 
         when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
             NotificationType.UNPAID_PACKAGE.toString(),
-            order.getId().toString())).thenReturn(Optional.of(notification));
+            orders.get(0).getId().toString())).thenReturn(Optional.of(notification));
+
+        when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
+            NotificationType.UNPAID_PACKAGE.toString(),
+            orders.get(1).getId().toString())).thenReturn(Optional.empty());
 
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(Collections.emptyList());
+        when(bagRepository.findBagByOrderId(any())).thenReturn(Collections.emptyList());
 
         long amountToPay = 0L;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
-            .value(order.getId().toString()).build());
+            .value(orders.get(0).getId().toString()).build());
 
         when(userNotificationRepository.save(notification)).thenReturn(notification);
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
@@ -292,12 +315,12 @@ public class NotificationServiceImplTest {
 
         notificationService.notifyAllHalfPaidPackages();
 
-        verify(userNotificationRepository).save(notification);
-        verify(notificationParameterRepository).saveAll(parameters);
+        verify(userNotificationRepository, times(2)).save(notification);
+        verify(notificationParameterRepository, times(2)).saveAll(any());
     }
 
     @Test
-    public void testgetAllNotificationsForUser() {
+    public void testGetAllNotificationsForUser() {
         User user = User.builder().uuid("123").id(42L).build();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
