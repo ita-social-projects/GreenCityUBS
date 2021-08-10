@@ -679,11 +679,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return OrderCancellationReasonDto.builder()
-                .cancellationReason(order.getCancellationReason())
-                .cancellationComment(order.getCancellationComment())
-                .build();
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
     }
 
     @Override
