@@ -490,7 +490,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         mappedFromDtoUser.setUser(currentUser);
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
-            mappedFromDtoUser.setPhoneNumber(phoneNumberFormatterService.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
+            mappedFromDtoUser.setPhoneNumber(
+                phoneNumberFormatterService.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
             return mappedFromDtoUser;

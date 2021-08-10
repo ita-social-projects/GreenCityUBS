@@ -39,7 +39,7 @@ public class ModelUtils {
                 .lastName("Antonov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .phoneNumber("067894522")
+                .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
             .build();
