@@ -68,6 +68,7 @@ public class Order {
     private String cancellationComment;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private CancellationReason cancellationReason;
 
     @Column(columnDefinition = "int default 0")
