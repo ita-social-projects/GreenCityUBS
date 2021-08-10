@@ -64,10 +64,10 @@ public class Order {
     @Column
     private String comment;
 
-    @Column
+    @Column(name = "cancellationComment")
     private String cancellationComment;
 
-    @Column
+    @Column(name = "cancellationComment")
     @Enumerated(EnumType.STRING)
     private CancellationReason cancellationReason;
 
