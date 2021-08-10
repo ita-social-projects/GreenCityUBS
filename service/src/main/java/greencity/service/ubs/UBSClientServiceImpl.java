@@ -688,15 +688,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto) {
-        if (orderRepository.existsById(id)) {
-            Order order = orderRepository.findById(id).get();
-            order.setCancellationReason(dto.getCancellationReason());
-            order.setCancellationComment(dto.getCancellationComment());
-            order.setId(id);
-            orderRepository.save(order);
-            return dto;
-        } else {
-            throw new NoSuchElementException("order with ID " + id + " NOT FOUND");
-        }
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        order.setCancellationReason(dto.getCancellationReason());
+        order.setCancellationComment(dto.getCancellationComment());
+        order.setId(id);
+        orderRepository.save(order);
+        return dto;
     }
 }
