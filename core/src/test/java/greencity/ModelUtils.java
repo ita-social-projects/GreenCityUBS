@@ -2,6 +2,7 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.user.User;
@@ -276,6 +277,13 @@ public class ModelUtils {
             .paymentDate("09-02-2021")
             .receiptLink("somelink.com")
             .paymentId(10l)
+            .build();
+    }
+
+    public static OrderCancellationReasonDto getCancellationDto() {
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
             .build();
     }
 }

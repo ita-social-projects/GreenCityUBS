@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -787,6 +788,8 @@ public class ModelUtils {
                     .build())
                 .build())
             .certificates(Collections.emptySet())
+            .cancellationComment("Garbage disappeared")
+            .cancellationReason(CancellationReason.OTHER)
             .pointsToUse(700)
             .build();
     }
@@ -977,6 +980,13 @@ public class ModelUtils {
     private static BagTranslation createBagTranslation() {
         return BagTranslation.builder()
             .id(4L)
+            .build();
+    }
+
+    public static OrderCancellationReasonDto getCancellationDto() {
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
             .build();
     }
 }

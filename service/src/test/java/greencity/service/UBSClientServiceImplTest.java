@@ -428,4 +428,31 @@ class UBSClientServiceImplTest {
             () -> ubsService.getOrderPaymentDetail(any()));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
+
+    @Test
+    void testGetOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+
+    }
+
+    @Test
+    void testUpdateOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        when(orderRepository.save(any())).thenReturn(orderDto);
+        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+        assert orderDto != null;
+        verify(orderRepository).save(orderDto);
+        verify(orderRepository).findById(1L);
+    }
 }
