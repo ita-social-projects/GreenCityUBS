@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
@@ -62,6 +63,12 @@ public class Order {
 
     @Column
     private String comment;
+
+    @Column
+    private String cancellationComment;
+
+    @Column
+    private CancellationReason cancellationReason;
 
     @Column(columnDefinition = "int default 0")
     private Integer pointsToUse;
