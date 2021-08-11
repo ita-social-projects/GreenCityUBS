@@ -53,6 +53,7 @@ public final class ErrorMessage {
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String NOT_FOUND_ADDRESS_BY_USER_UUID = "Not found address for user. ";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
+    public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
 
     /**
      * Constructor.
