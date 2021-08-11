@@ -232,6 +232,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
+            boolean exist = addresses.stream()
+                .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
+                .anyMatch(d -> d.equals(dtoRequest));
+
+            if (exist) {
+                throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
+            }
+
             addresses.forEach(u -> {
                 u.setActual(false);
                 addressRepo.save(u);
