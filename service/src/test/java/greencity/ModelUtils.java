@@ -48,6 +48,7 @@ public class ModelUtils {
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
         singletonList(createOrderDetailInfoDto());
+    public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
@@ -985,8 +986,16 @@ public class ModelUtils {
 
     public static OrderCancellationReasonDto getCancellationDto() {
         return OrderCancellationReasonDto.builder()
-            .cancellationReason(CancellationReason.OTHER)
-            .cancellationComment("Garbage disappeared")
+                .cancellationReason(CancellationReason.OTHER)
+                .cancellationComment("Garbage disappeared")
+                .build();
+    }
+
+    private static OrderAddressDtoRequest createOrderDtoRequest() {
+        return OrderAddressDtoRequest.builder()
+            .id(13L).city("Kyiv").district("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
     }
 }
