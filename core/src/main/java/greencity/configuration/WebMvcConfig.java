@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,5 +54,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new UserArgumentResolver(restClient));
+    }
+
+    /**
+     * Needed for unit tests to provide fixed clock.
+     */
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
     }
 }

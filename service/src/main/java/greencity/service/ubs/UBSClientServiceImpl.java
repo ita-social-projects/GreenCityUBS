@@ -393,11 +393,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isEmpty()) {
-            throw new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
-        Order order = optionalOrder.get();
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return UserInfoDto.builder()
             .customerName(order.getUser().getRecipientName())
             .customerPhoneNumber(order.getUser().getRecipientPhone())
@@ -472,7 +469,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order testOrder = orderRepository.findById(orderId).orElseThrow(null);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(orderId.toString() + "_"
+            .orderId(orderId + "_"
                 + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
