@@ -986,9 +986,9 @@ public class ModelUtils {
 
     public static OrderCancellationReasonDto getCancellationDto() {
         return OrderCancellationReasonDto.builder()
-                .cancellationReason(CancellationReason.OTHER)
-                .cancellationComment("Garbage disappeared")
-                .build();
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
+            .build();
     }
 
     private static OrderAddressDtoRequest createOrderDtoRequest() {
