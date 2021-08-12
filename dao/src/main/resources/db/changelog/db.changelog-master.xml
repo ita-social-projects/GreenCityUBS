@@ -43,4 +43,5 @@
     <include file="db/changelog/logs/ch-add-column-receipt-image-image-path-Kisliak.xml"/>
     <include file="db/changelog/logs/ch-add-column-order-payment-status-into-order-table-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-column-to-employee_order_position-table.xml"/>
+    <include file="db/changelog/logs/ch-add-column-payment-type-Kisliak.xml"/>
 </databaseChangeLog>

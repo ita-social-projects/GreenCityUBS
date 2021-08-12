@@ -18,4 +18,9 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
         + "join Order o on p.order.id = o.id "
         + "where p.order.id = :orderId")
     List<Payment> paymentInfo(long orderId);
+
+    /**
+     * This method deletes payment by id.
+     */
+    void deletePaymentById(Long paymentId);
 }

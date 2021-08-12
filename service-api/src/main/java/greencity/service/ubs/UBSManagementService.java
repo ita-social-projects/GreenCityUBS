@@ -236,12 +236,34 @@ public interface UBSManagementService {
      * Method that saves manual payment and returns response with required fields.
      *
      * @param orderId           of {@link Long} order id;
-     * @param paymentRequestDto of {@link ManualPaymentRequestDto} order id;
+     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
+     *                          request dto;
      * @param image             {@link MultipartFile} image of receipt.
      * @return {@link ManualPaymentResponseDto }
      * @author Denys Kisliak
      */
-    ManualPaymentResponseDto saveNewPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
+    ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
+        MultipartFile image);
+
+    /**
+     * Method that deletes manual payment.
+     *
+     * @param paymentId of {@link Long} payment id;
+     * @author Denys Kisliak
+     */
+    void deleteManualPayment(Long paymentId);
+
+    /**
+     * Method that updates manual payment and returns response with required fields.
+     *
+     * @param paymentId         of {@link Long} payment id;
+     * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
+     *                          request dto;
+     * @param image             {@link MultipartFile} image of receipt.
+     * @return {@link ManualPaymentResponseDto }
+     * @author Denys Kisliak
+     */
+    ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image);
 
     /**
