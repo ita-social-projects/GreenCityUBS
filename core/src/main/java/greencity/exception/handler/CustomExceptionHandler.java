@@ -397,4 +397,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
+
+    /**
+     * Method interceptor exception {@link PhoneNumberParseException}.
+     *
+     * @param exception Exception which should be intercepted.
+     * @param request   contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({AddressAlreadyExistException.class})
+    public final ResponseEntity<Object> handleAlreadyExistingAddress(AddressAlreadyExistException exception,
+        WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(exception.getMessage(), exception);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
 }

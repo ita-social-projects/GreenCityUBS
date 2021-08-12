@@ -11,6 +11,7 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"id"})
 @ToString
 @Builder
 public class OrderAddressDtoRequest {
