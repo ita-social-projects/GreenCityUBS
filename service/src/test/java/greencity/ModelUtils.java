@@ -758,6 +758,16 @@ public class ModelUtils {
             .paymentId(1l)
             .receiptLink("somelink.com")
             .currency("UAH")
+            .imagePath("")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDto() {
+        return ManualPaymentRequestDto.builder()
+            .paymentDate("02-08-2021")
+            .amount(500l)
+            .receiptLink("link")
+            .paymentId(1l)
             .build();
     }
 

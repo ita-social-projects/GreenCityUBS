@@ -30,6 +30,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -235,12 +236,38 @@ class ManagementOrderControllerTest {
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
             "", "application/json", responseJSON.getBytes());
 
-        mockMvc.perform(multipart(ubsLink + "/add-receipt/{id}", 1)
+        mockMvc.perform(multipart(ubsLink + "/add-manual-payment/{id}", 1)
             .file(jsonFile)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void deleteManualPayment() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1l))
+            .andExpect(status().isOk()).andDo(print());
+    }
+
+    @Test
+    void updateManualPayment() throws Exception {
+        ManualPaymentRequestDto dto = getRequestDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", responseJSON.getBytes());
+
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsLink + "/update-manual-payment/{id}", 1l);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+
+        mockMvc.perform(builder.file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
