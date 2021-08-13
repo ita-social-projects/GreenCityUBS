@@ -318,7 +318,6 @@ public class UBSManagementServiceImplTest {
 
     @Test
     void checkManualPaymentNotFound() {
-//        when(paymentRepository.findById(1l)).thenThrow(new PaymentNotFoundException());
         assertThrows(PaymentNotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), null));
         verify(paymentRepository, times(1)).findById(1l);
