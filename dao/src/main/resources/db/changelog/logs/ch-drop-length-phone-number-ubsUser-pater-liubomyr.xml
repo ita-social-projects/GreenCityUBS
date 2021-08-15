@@ -7,4 +7,5 @@
                 newDataType="varchar(15)"
                 tableName="ubs_user"/>
     </changeSet>
+
 </databaseChangeLog>
