@@ -23,6 +23,7 @@ import greencity.exceptions.NotFoundOrderAddressException;
 import greencity.exceptions.PaymentNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
+import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.getManualPayment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -51,6 +53,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +62,9 @@ public class UBSManagementServiceImplTest {
     AddressRepository addressRepository;
     double distance = 2;
     int litres = 1000;
+
+    @Mock
+    private FileService fileService;
 
     @Mock
     OrderRepository orderRepository;
@@ -98,6 +104,9 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private RestClient restClient;
+
+    @Mock
+    private NotificationServiceImpl notificationService;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -258,7 +267,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    void saveNewPayment() {
+    void saveNewManualPayment() {
         Order order = ModelUtils.getOrderTest();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
@@ -267,10 +276,53 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        ubsManagementService.saveNewPayment(1l, paymentDetails, null);
+        ubsManagementService.saveNewManualPayment(1l, paymentDetails, null);
 
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1l);
+    }
+
+    @Test
+    void checkDeleteManualPayment() {
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        doNothing().when(paymentRepository).deletePaymentById(1l);
+        doNothing().when(fileService).delete("");
+        ubsManagementService.deleteManualPayment(1l);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(1)).deletePaymentById(1l);
+    }
+
+    @Test
+    void checkUpdateManualPayment() {
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), null);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(2)).save(any());
+        verify(fileService, times(0)).delete(null);
+    }
+
+    @Test
+    void checkUpdateManualPaymentWithImage() {
+        MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", "random Bytes".getBytes());
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        when(fileService.upload(file)).thenReturn("path");
+        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), file);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(2)).save(any());
+        verify(fileService, times(1)).delete("path");
+        verify(fileService, times(1)).delete("path");
+    }
+
+    @Test
+    void checkManualPaymentNotFound() {
+        ManualPaymentRequestDto manualPaymentRequestDto = getManualPaymentRequestDto();
+        when(paymentRepository.findById(1l)).thenReturn(Optional.empty());
+        assertThrows(PaymentNotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1l, manualPaymentRequestDto, null));
+        verify(paymentRepository, times(1)).findById(1l);
     }
 
     @Test
