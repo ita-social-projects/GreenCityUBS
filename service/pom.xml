@@ -115,11 +115,11 @@
             <version>1.0.11</version>
         </dependency>
         <!--liqPay API-->
-        <dependency>
+        <!--<dependency>
             <groupId>com.liqpay</groupId>
             <artifactId>liqpay-sdk</artifactId>
             <version>0.7-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
 
         <!-- libphonenumber -->
         <dependency>
@@ -135,7 +135,7 @@
         </dependency>
     </dependencies>
 
-    <repositories>
+<!--    <repositories>
         <repository>
             <id>repository</id>
             <url>https://github.com/liqpay/sdk-java/raw/repository</url>
@@ -144,7 +144,7 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
-    </repositories>
+    </repositories>-->
 
 
 </project>
