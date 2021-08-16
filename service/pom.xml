@@ -27,7 +27,6 @@
             <version>1.13.1</version>
         </dependency>
 
-
         <!-- other modules -->
         <dependency>
             <groupId>com.greencity</groupId>
