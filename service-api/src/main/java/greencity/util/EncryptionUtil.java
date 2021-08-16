@@ -15,7 +15,7 @@ public class EncryptionUtil {
      * @param merchantId - fondy merchant id.
      * @return {@String} - encrypted signature.
      */
-    public static String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
+    public  String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
         StringBuilder stringBuilder = new StringBuilder(password);
         stringBuilder.append("|" + dto.getAmount());
         stringBuilder.append("|" + dto.getCurrency());
@@ -33,7 +33,7 @@ public class EncryptionUtil {
      * @param password - fondy password.
      * @return {@link Boolean} - whether the data is valid.
      */
-    public static boolean checkIfResponseSignatureIsValid(PaymentResponseDto dto, String password) {
+    public boolean checkIfResponseSignatureIsValid(PaymentResponseDto dto, String password) {
         if (dto.getFee() == null) {
             dto.setFee(0);
         }
