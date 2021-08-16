@@ -3,9 +3,10 @@ package greencity.util;
 import greencity.dto.PaymentRequestDto;
 import greencity.dto.PaymentResponseDto;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.stereotype.Component;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
-
+@Component
 public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on order details.
