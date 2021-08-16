@@ -6,6 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
+
 @Component
 public class EncryptionUtil {
     /**
@@ -16,7 +17,7 @@ public class EncryptionUtil {
      * @param merchantId - fondy merchant id.
      * @return {@String} - encrypted signature.
      */
-    public  String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
+    public String formRequestSignature(PaymentRequestDto dto, String password, String merchantId) {
         StringBuilder stringBuilder = new StringBuilder(password);
         stringBuilder.append("|" + dto.getAmount());
         stringBuilder.append("|" + dto.getCurrency());
