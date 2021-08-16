@@ -4,13 +4,11 @@ import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Getter
 @Setter
-@Builder
 @EqualsAndHashCode
-public class UserVO {
+@Builder
+public class LanguageVO {
     private Long id;
-    private String email;
-    private LanguageVO languageVO;
+    private String code;
 }

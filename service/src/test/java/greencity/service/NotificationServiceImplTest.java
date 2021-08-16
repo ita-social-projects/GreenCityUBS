@@ -276,9 +276,12 @@ public class NotificationServiceImplTest {
             Order.builder().id(51L).user(user)
                 .orderDate(LocalDateTime.now(fixedClock))
                 .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                .payment(Collections.singletonList(
+                .payment(List.of(
                     Payment.builder()
                         .paymentStatus(PaymentStatus.PAID).amount(0L)
+                        .build(),
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
                         .build()))
                 .build());
 

@@ -13,6 +13,7 @@
 
     <properties>
         <libphonenumber.version>8.12.24</libphonenumber.version>
+        <jjwt.version>0.9.1</jjwt.version>
     </properties>
     <dependencies>
 
@@ -98,6 +99,13 @@
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
             <version>${libphonenumber.version}</version>
+        </dependency>
+        <!-- jsonwebtoken -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -25,12 +25,12 @@ public class NotificationControllerTest {
     @Mock
     private NotificationService notificationService;
 
-    @InjectMocks
     private NotificationController notificationController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        this.notificationController = new NotificationController(notificationService);
     }
 
     @Test

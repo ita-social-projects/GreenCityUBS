@@ -200,7 +200,7 @@ public class RestClient {
      * @return @return @return {@link String} - which contains the status of success
      *         or failure.
      */
-    public ResponseEntity<String> sentMessage(SendMessageToUserDto sendMessageToUserDto) {
+    public ResponseEntity<String> sendMessage(SendMessageToUserDto sendMessageToUserDto) {
         HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
         return restTemplate.exchange(RestTemplateLinks.SEND_MESSAGE, HttpMethod.POST, entity, String.class);
     }
