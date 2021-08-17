@@ -51,7 +51,8 @@ public class ManagementOrderController {
     @ApiOperation(value = "Get all certificates")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/getAllCertificates")
@@ -71,9 +72,8 @@ public class ManagementOrderController {
     @ApiOperation("Add Certificate")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/addCertificate")
@@ -92,8 +92,8 @@ public class ManagementOrderController {
     @ApiOperation(value = "Get all undelivered orders.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/all-undelivered")
@@ -113,8 +113,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GroupedOrderDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/group-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
@@ -195,7 +194,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -246,6 +246,8 @@ public class ManagementOrderController {
     @ApiOperation(value = "Get address by order id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReadAddressByOrderDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/read-address-order/{id}")
@@ -266,7 +268,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = OrderAddressDtoResponse.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/update-address")
     public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
@@ -283,6 +286,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get information about order payments.")
     @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PaymentTableInfoDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -304,7 +308,10 @@ public class ManagementOrderController {
     @ApiOperation(value = "Get order detail info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailInfoDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/read-order-info/{id}")
     public ResponseEntity<List<OrderDetailInfoDto>> getOrderInfo(
@@ -324,7 +331,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/set-order-detail")
     public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
@@ -342,7 +350,10 @@ public class ManagementOrderController {
     @ApiOperation(value = "Get order sum details")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CounterOrderDetailsDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-order-sum-detail/{id}")
     public ResponseEntity<CounterOrderDetailsDto> getOrderSumDetails(
@@ -358,6 +369,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get bags info")
     @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -408,7 +420,9 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderDetailStatusDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/read-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> getOrderDetailStatus(
@@ -427,7 +441,9 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailStatusDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
@@ -447,6 +463,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ExportDetailsDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-order-export-details/{id}")
@@ -467,6 +484,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ExportDetailsDtoRequest.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/update-order-export-details/{id}")
@@ -483,6 +501,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Get bags additional info")
     @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -506,6 +525,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ViolationDetailInfoDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-violation-from-order/{orderId}")
@@ -524,6 +544,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Return overpayment as bonuses information")
     @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -546,6 +567,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Return overpayment as Money information")
     @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -594,6 +616,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ManualPaymentRequestDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PostMapping(value = "/add-receipt/{id}",
@@ -616,6 +640,8 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-employee-by-position/{id}")
     public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long id) {
@@ -635,6 +661,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-position-by-order")
