@@ -72,8 +72,6 @@ class UBSClientServiceImplTest {
     @Mock
     private PaymentRepository paymentRepository;
 
-
-
     @Test
     @Transactional
     void testValidatePayment() {
@@ -83,7 +81,7 @@ class UBSClientServiceImplTest {
         dto.setResponse_status("approved");
         dto.setOrder_status("approved");
         Payment payment = getPayment();
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto,null)).thenReturn(true);
+        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
         ubsService.validatePayment(dto);
@@ -95,18 +93,20 @@ class UBSClientServiceImplTest {
     void testValidatePaymentFailureResponse() {
         PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
         paymentResponseDto.setResponse_status("failure");
-        assertThrows(PaymentValidationException.class,()-> ubsService.validatePayment(paymentResponseDto));
+        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
     }
 
     @Test
-    void getFirstPageData(){
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(),600);
+    void getFirstPageData() {
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
+            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 600);
 
         User user = ModelUtils.getUser();
         user.setCurrentPoints(600);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual = ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", "en");
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", "en");
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
@@ -143,10 +143,10 @@ class UBSClientServiceImplTest {
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
-        for(Field f : fields){
-            if(f.getName().equals("merchantId")){
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
                 f.setAccessible(true);
-                f.set(ubsService,"1");
+                f.set(ubsService, "1");
             }
         }
 
@@ -157,9 +157,9 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(),eq(null),eq("1"))).thenReturn("TestValue");
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
-        String  result = ubsService.saveFullOrderToDB(dto,"35467585763t4sfgchjfuyetf");
+        String result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
 
     }
