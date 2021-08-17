@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
@@ -10,6 +9,7 @@ import greencity.exceptions.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.NotificationServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -17,6 +17,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramService {
     private final UBSTelegramBot ubsTelegramBot;
     private final OutOfRequestRestClient restClient;
@@ -44,6 +45,8 @@ public class TelegramService {
             SendMessage sendMessage = new SendMessage(
                     notification.getUser().getTelegramBot().getChatId().toString(),
                     notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
+            log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
+                    notification.getNotificationType());
             sendMessageToUser(sendMessage);
         }
     }

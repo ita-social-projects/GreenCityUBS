@@ -20,6 +20,7 @@ import greencity.repository.ViberBotRepository;
 import greencity.service.NotificationServiceImpl;
 import greencity.service.ubs.ViberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ViberServiceImpl implements ViberService {
     private final RestClient restClient;
     private final OutOfRequestRestClient outOfRequestRestClient;
@@ -139,6 +141,8 @@ public class ViberServiceImpl implements ViberService {
                     .type(MessageType.text)
                     .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
                     .build();
+            log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
+                    notification.getNotificationType());
             sendMessageToUser(sendMessageToUserDto);
         }
     }
