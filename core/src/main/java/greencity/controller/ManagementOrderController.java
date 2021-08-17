@@ -606,27 +606,73 @@ public class ManagementOrderController {
     /**
      * Controller saves manual payment.
      *
-     * @param id               {@link Long}.
+     * @param orderId          {@link Long}.
      * @param manualPaymentDto {@link ManualPaymentRequestDto}
      * @return {@link ManualPaymentResponseDto}
      * @author Denys Kisliak.
      */
     @ApiOperation(value = "Save manual payment")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ManualPaymentRequestDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ManualPaymentResponseDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PostMapping(value = "/add-receipt/{id}",
+    @PostMapping(value = "/add-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long id,
+    public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
         @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewPayment(id, manualPaymentDto, image));
+            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image));
+    }
+
+    /**
+     * Controller deletes manual payment.
+     *
+     * @param paymentId {@link Long}.
+     * @return {@link HttpStatus}
+     * @author Denys Kisliak.
+     */
+    @ApiOperation(value = "Delete manual payment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/delete-manual-payment/{id}")
+    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId) {
+        ubsManagementService.deleteManualPayment(paymentId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller updates manual payment.
+     *
+     * @param paymentId        {@link Long}.
+     * @param manualPaymentDto {@link ManualPaymentRequestDto}
+     * @return {@link ManualPaymentResponseDto}
+     * @author Denys Kisliak.
+     */
+    @ApiOperation(value = "Update manual payment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ManualPaymentResponseDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping(value = "/update-manual-payment/{id}",
+        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
+        @RequestPart ManualPaymentRequestDto manualPaymentDto,
+        @RequestPart(required = false) MultipartFile image) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image));
     }
 
     /**
@@ -661,6 +707,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 401, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })

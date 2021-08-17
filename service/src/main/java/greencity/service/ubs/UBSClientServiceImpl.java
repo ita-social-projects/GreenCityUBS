@@ -10,6 +10,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
+import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
 
 import java.time.LocalDate;
@@ -47,6 +48,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final PaymentRepository paymentRepository;
+    private final PhoneNumberFormatterService phoneNumberFormatterService;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -233,6 +235,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
             boolean exist = addresses.stream()
+                .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
                 .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
                 .anyMatch(d -> d.equals(dtoRequest));
 
@@ -493,6 +496,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         mappedFromDtoUser.setUser(currentUser);
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
+            mappedFromDtoUser.setPhoneNumber(
+                phoneNumberFormatterService.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
             return mappedFromDtoUser;
