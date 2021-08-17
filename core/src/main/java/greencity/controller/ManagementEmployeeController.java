@@ -46,6 +46,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PostMapping(value = "/save-employee",
@@ -66,7 +67,8 @@ public class ManagementEmployeeController {
     @ApiOperation(value = "Get all employees")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @ApiPageable
     @GetMapping("/getAll-employees")
@@ -85,6 +87,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping(value = "/update-employee",
@@ -107,6 +110,8 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-employee/{id}")
     public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
@@ -125,6 +130,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = PositionDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PostMapping("/create-position")
@@ -143,6 +149,8 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-position")
@@ -160,6 +168,7 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PositionDto[].class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/get-all-positions")
     public ResponseEntity<List<PositionDto>> getAllPositions() {
@@ -175,6 +184,7 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-position/{id}")
@@ -194,6 +204,7 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReceivingStationDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PostMapping("/create-receiving-station")
@@ -212,6 +223,8 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-receiving-station")
@@ -229,6 +242,7 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto[].class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/get-all-receiving-station")
     public ResponseEntity<List<ReceivingStationDto>> getAllReceivingStation() {
@@ -244,7 +258,8 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-receiving-station/{id}")
     public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
@@ -262,8 +277,9 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @DeleteMapping("/delete-employee-image/{id}")
     public ResponseEntity<HttpStatus> deleteEmployeeImage(@PathVariable Long id) {
