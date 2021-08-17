@@ -88,7 +88,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             currentUserPoints = user.getCurrentPoints();
         }
 
-        List<BagTranslationDto> btdList = bagTranslationRepository.findAllByLanguage(language)
+        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
