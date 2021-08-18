@@ -22,7 +22,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.getOrderClientDto;
+import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

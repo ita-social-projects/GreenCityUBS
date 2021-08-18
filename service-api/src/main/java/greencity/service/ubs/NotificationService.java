@@ -1,9 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.NotificationDto;
-import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
-import greencity.repository.NotificationTemplateRepository;
 
 import java.util.List;
 

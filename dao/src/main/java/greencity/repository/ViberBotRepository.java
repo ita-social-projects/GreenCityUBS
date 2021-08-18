@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.telegram.TelegramBot;
 import greencity.entity.viber.ViberBot;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

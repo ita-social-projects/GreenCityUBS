@@ -2,9 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
-import greencity.dto.*;
 import greencity.constants.HttpStatuses;
-import greencity.dto.OrderClientDto;
+import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

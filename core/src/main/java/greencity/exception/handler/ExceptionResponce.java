@@ -1,9 +1,10 @@
 package greencity.exception.handler;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * Response object with information of occur exception.
