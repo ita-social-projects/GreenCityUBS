@@ -36,7 +36,7 @@ public class UBSuser {
     @Column(length = 30, nullable = false)
     private String lastName;
 
-    @Column(length = 9, nullable = false)
+    @Column(length = 15, nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false, length = 50)

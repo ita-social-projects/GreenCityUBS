@@ -18,11 +18,12 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.NotFoundOrderAddressException;
+import greencity.exceptions.*;
 
 import greencity.exceptions.PaymentNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
+import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.getManualPayment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -42,6 +44,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,6 +54,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +63,9 @@ public class UBSManagementServiceImplTest {
     AddressRepository addressRepository;
     double distance = 2;
     int litres = 1000;
+
+    @Mock
+    private FileService fileService;
 
     @Mock
     OrderRepository orderRepository;
@@ -261,7 +268,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    void saveNewPayment() {
+    void saveNewManualPayment() {
         Order order = ModelUtils.getOrderTest();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
@@ -270,10 +277,53 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
-        ubsManagementService.saveNewPayment(1l, paymentDetails, null);
+        ubsManagementService.saveNewManualPayment(1l, paymentDetails, null);
 
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1l);
+    }
+
+    @Test
+    void checkDeleteManualPayment() {
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        doNothing().when(paymentRepository).deletePaymentById(1l);
+        doNothing().when(fileService).delete("");
+        ubsManagementService.deleteManualPayment(1l);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(1)).deletePaymentById(1l);
+    }
+
+    @Test
+    void checkUpdateManualPayment() {
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), null);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(2)).save(any());
+        verify(fileService, times(0)).delete(null);
+    }
+
+    @Test
+    void checkUpdateManualPaymentWithImage() {
+        MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", "random Bytes".getBytes());
+        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.save(any())).thenReturn(getManualPayment());
+        when(fileService.upload(file)).thenReturn("path");
+        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), file);
+        verify(paymentRepository, times(1)).findById(1l);
+        verify(paymentRepository, times(2)).save(any());
+        verify(fileService, times(1)).delete("path");
+        verify(fileService, times(1)).delete("path");
+    }
+
+    @Test
+    void checkManualPaymentNotFound() {
+        ManualPaymentRequestDto manualPaymentRequestDto = getManualPaymentRequestDto();
+        when(paymentRepository.findById(1l)).thenReturn(Optional.empty());
+        assertThrows(PaymentNotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1l, manualPaymentRequestDto, null));
+        verify(paymentRepository, times(1)).findById(1l);
     }
 
     @Test
@@ -526,5 +576,64 @@ public class UBSManagementServiceImplTest {
 
         assertEquals(1, user.getViolations());
         assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
+    }
+
+    @Test
+    void testAllUndeliveredOrdersWithLitersThrowException() {
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
+
+        List<Order> undeliveredOrders = new ArrayList<>();
+
+        when(orderRepository.undeliveredAddresses()).thenReturn(undeliveredOrders);
+
+        assertThrows(ActiveOrdersNotFoundException.class,
+            () -> ubsManagementService.getAllUndeliveredOrdersWithLiters());
+    }
+
+    @Test
+    void testGetAllUndeliveredOrdersWithLiters() {
+        List<Order> allUndeliveredOrders = ModelUtils.getOrdersToGroupThem();
+
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
+        when(orderRepository.undeliveredAddresses()).thenReturn(allUndeliveredOrders);
+        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(75, 25);
+
+        for (Coordinates cord : ModelUtils.getCoordinatesSet()) {
+            List<Order> currentOrders = allUndeliveredOrders.stream().filter(
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
+            for (Order order : currentOrders) {
+                when(modelMapper.map(order, OrderDto.class)).thenReturn(
+                    OrderDto.builder().latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude()).build());
+            }
+        }
+
+        List<GroupedOrderDto> expected = ubsManagementService.getAllUndeliveredOrdersWithLiters();
+        List<GroupedOrderDto> actual = ModelUtils.getGroupedOrdersWithLiters();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testAddPointToUserThrowsException() {
+        User user = ModelUtils.getTestUser();
+        user.setUuid(null);
+
+        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(
+            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
+    }
+
+    @Test
+    void testAddPointsToUser() {
+        User user = ModelUtils.getTestUser();
+        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setCurrentPoints(1);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenReturn(user);
+
+        ubsManagementService.addPointsToUser(AddingPointsToUserDto.builder().additionalPoints(anyInt()).build());
+
+        assertEquals(2L, user.getChangeOfPointsList().size());
     }
 }
