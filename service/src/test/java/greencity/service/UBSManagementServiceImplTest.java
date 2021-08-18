@@ -18,7 +18,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.NotFoundOrderAddressException;
+import greencity.exceptions.*;
 
 import greencity.exceptions.PaymentNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
@@ -44,6 +44,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -575,5 +576,64 @@ public class UBSManagementServiceImplTest {
 
         assertEquals(1, user.getViolations());
         assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
+    }
+
+    @Test
+    void testAllUndeliveredOrdersWithLitersThrowException() {
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
+
+        List<Order> undeliveredOrders = new ArrayList<>();
+
+        when(orderRepository.undeliveredAddresses()).thenReturn(undeliveredOrders);
+
+        assertThrows(ActiveOrdersNotFoundException.class,
+            () -> ubsManagementService.getAllUndeliveredOrdersWithLiters());
+    }
+
+    @Test
+    void testGetAllUndeliveredOrdersWithLiters() {
+        List<Order> allUndeliveredOrders = ModelUtils.getOrdersToGroupThem();
+
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
+        when(orderRepository.undeliveredAddresses()).thenReturn(allUndeliveredOrders);
+        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(75, 25);
+
+        for (Coordinates cord : ModelUtils.getCoordinatesSet()) {
+            List<Order> currentOrders = allUndeliveredOrders.stream().filter(
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
+            for (Order order : currentOrders) {
+                when(modelMapper.map(order, OrderDto.class)).thenReturn(
+                    OrderDto.builder().latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude()).build());
+            }
+        }
+
+        List<GroupedOrderDto> expected = ubsManagementService.getAllUndeliveredOrdersWithLiters();
+        List<GroupedOrderDto> actual = ModelUtils.getGroupedOrdersWithLiters();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testAddPointToUserThrowsException() {
+        User user = ModelUtils.getTestUser();
+        user.setUuid(null);
+
+        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(
+            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
+    }
+
+    @Test
+    void testAddPointsToUser() {
+        User user = ModelUtils.getTestUser();
+        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setCurrentPoints(1);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenReturn(user);
+
+        ubsManagementService.addPointsToUser(AddingPointsToUserDto.builder().additionalPoints(anyInt()).build());
+
+        assertEquals(2L, user.getChangeOfPointsList().size());
     }
 }
