@@ -107,24 +107,24 @@ public class UBSManagementServiceImplTest {
 
         for (Coordinates coordinate : ModelUtils.getCoordinatesSet()) {
             List<Order> orders = ModelUtils.getOrdersToGroupThem().stream()
-                    .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
-                            Collectors.toList());
+                .filter(e -> e.getUbsUser().getAddress().getCoordinates().equals(coordinate)).collect(
+                    Collectors.toList());
             when(orderRepository.undeliveredOrdersGroupThem(coordinate.getLatitude(), coordinate.getLongitude()))
-                    .thenReturn(orders);
+                .thenReturn(orders);
             for (Order order : orders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(OrderDto.builder()
-                        .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
-                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
-                        .build());
+                    .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                    .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())
+                    .build());
             }
         }
     }
 
     private static Stream<Arguments> provideDistanceAndLitres() {
         return Stream.of(Arguments.of(-1, 5),
-                Arguments.of(25, 5),
-                Arguments.of(10, -5),
-                Arguments.of(10, 20000));
+            Arguments.of(25, 5),
+            Arguments.of(10, -5),
+            Arguments.of(10, 20000));
     }
 
     @ParameterizedTest
@@ -136,7 +136,7 @@ public class UBSManagementServiceImplTest {
     @Test
     void getClusteredCoordsTest() {
         when(addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres))
-                .thenReturn(ModelUtils.getCoordinatesSet());
+            .thenReturn(ModelUtils.getCoordinatesSet());
         getMocksBehavior();
         List<GroupedOrderDto> expected = ModelUtils.getGroupedOrders();
         List<GroupedOrderDto> actual = ubsManagementService.getClusteredCoords(distance, litres);
@@ -168,14 +168,14 @@ public class UBSManagementServiceImplTest {
         Pageable pageable = PageRequest.of(0, 5);
         CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
         List<Certificate> certificates =
-                Collections.singletonList(ModelUtils.getCertificate());
+            Collections.singletonList(ModelUtils.getCertificate());
         List<CertificateDtoForSearching> certificateDtoForSearchings =
-                Collections.singletonList(certificateDtoForSearching);
+            Collections.singletonList(certificateDtoForSearching);
         PageableDto<CertificateDtoForSearching> certificateDtoForSearchingPageableDto =
-                new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
+            new PageableDto<>(certificateDtoForSearchings, certificateDtoForSearchings.size(), 0, 1);
         Page<Certificate> certificates1 = new PageImpl<>(certificates, pageable, certificates.size());
         when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
-                .thenReturn(certificateDtoForSearching);
+            .thenReturn(certificateDtoForSearching);
         when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
@@ -262,11 +262,11 @@ public class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrderTest();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-                .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
+            .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
 
         when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
-                .thenReturn(payment);
+            .thenReturn(payment);
         ubsManagementService.saveNewPayment(1l, paymentDetails, null);
 
         verify(paymentRepository, times(1)).save(any());
@@ -279,10 +279,10 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         Long sumToPay = 0L;
         assertEquals(0L, ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L)
-                .getOverpayment());
+            .getOverpayment());
         assertEquals(AppConstant.PAYMENT_REFUND,
-                ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
-                        .getComment());
+            ubsManagementService.returnOverpaymentInfo(order.getId(), sumToPay, 1L).getPaymentInfoDtos().get(1)
+                .getComment());
     }
 
     @Test
@@ -302,14 +302,14 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setBonuses(0L);
         when(orderRepository.findById(order.getId())).thenReturn(
-                Optional.ofNullable(order));
+            Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(2L, order.getPayment().size());
         assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-                order.getPayment().get(order.getPayment().size() - 1).getComment());
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
     }
@@ -322,13 +322,13 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.PAYMENT_REFUND);
         when(orderRepository.findById(order.getId())).thenReturn(
-                Optional.ofNullable(order));
+            Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(2L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.PAYMENT_REFUND,
-                order.getPayment().get(order.getPayment().size() - 1).getComment());
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getBonuses(), user.getCurrentPoints().longValue());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
     }
@@ -341,13 +341,13 @@ public class UBSManagementServiceImplTest {
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         when(orderRepository.findById(order.getId())).thenReturn(
-                Optional.ofNullable(order));
+            Optional.ofNullable(order));
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
         when(userRepository.save(any())).thenReturn(user);
         ubsManagementService.returnOverpayment(order.getId(), dto);
         assertEquals(3L, user.getChangeOfPointsList().size());
         assertEquals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT,
-                order.getPayment().get(order.getPayment().size() - 1).getComment());
+            order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
         assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
     }
@@ -369,7 +369,7 @@ public class UBSManagementServiceImplTest {
         OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
         OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
         OrderDetailStatusDto producedObject = ubsManagementService
-                .updateOrderDetailStatus(order.getId(), testOrderDetail);
+            .updateOrderDetailStatus(order.getId(), testOrderDetail);
         assertEquals(expectedObject.getOrderStatus(), producedObject.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObject.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObject.getDate());
@@ -416,7 +416,7 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundOrderAddressException.class,
-                () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE));
     }
 
     @Test
@@ -439,7 +439,7 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UnexistingOrderException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -448,7 +448,7 @@ public class UBSManagementServiceImplTest {
         when(paymentRepository.paymentInfo(1)).thenReturn(Collections.emptyList());
 
         assertThrows(PaymentNotFoundException.class,
-                () -> ubsManagementService.getOrderDetailStatus(1L));
+            () -> ubsManagementService.getOrderDetailStatus(1L));
     }
 
     @Test
@@ -484,7 +484,7 @@ public class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(UnexistingOrderException.class,
-                () -> ubsManagementService.getOrderDetails(1L, "ua"));
+            () -> ubsManagementService.getOrderDetails(1L, "ua"));
     }
 
     @Test
@@ -526,50 +526,52 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testAllUndeliveredOrdersWithLitersThrowException(){
+    void testAllUndeliveredOrdersWithLitersThrowException() {
         when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
 
         List<Order> undeliveredOrders = new ArrayList<>();
 
         when(orderRepository.undeliveredAddresses()).thenReturn(undeliveredOrders);
 
-        assertThrows(ActiveOrdersNotFoundException.class,()->ubsManagementService.getAllUndeliveredOrdersWithLiters());
+        assertThrows(ActiveOrdersNotFoundException.class,
+            () -> ubsManagementService.getAllUndeliveredOrdersWithLiters());
     }
+
     @Test
     void testGetAllUndeliveredOrdersWithLiters() {
         List<Order> allUndeliveredOrders = ModelUtils.getOrdersToGroupThem();
 
         when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
         when(orderRepository.undeliveredAddresses()).thenReturn(allUndeliveredOrders);
-        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(75,25);
+        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(75, 25);
 
-        for(Coordinates cord : ModelUtils.getCoordinatesSet()){
+        for (Coordinates cord : ModelUtils.getCoordinatesSet()) {
             List<Order> currentOrders = allUndeliveredOrders.stream().filter(
-                    o->o.getUbsUser().getAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
-            for(Order order : currentOrders) {
+                o -> o.getUbsUser().getAddress().getCoordinates().equals(cord)).collect(Collectors.toList());
+            for (Order order : currentOrders) {
                 when(modelMapper.map(order, OrderDto.class)).thenReturn(
-                        OrderDto.builder().latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
-                                .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude()).build());
+                    OrderDto.builder().latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
+                        .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude()).build());
             }
         }
 
         List<GroupedOrderDto> expected = ubsManagementService.getAllUndeliveredOrdersWithLiters();
         List<GroupedOrderDto> actual = ModelUtils.getGroupedOrdersWithLiters();
 
-        assertEquals(expected,actual);
+        assertEquals(expected, actual);
     }
 
     @Test
-    void testAddPointToUserThrowsException(){
+    void testAddPointToUserThrowsException() {
         User user = ModelUtils.getTestUser();
         user.setUuid(null);
 
-        assertThrows(UnexistingUuidExeption.class,()->ubsManagementService.addPointsToUser(
-                AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
+        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(
+            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
     }
 
     @Test
-    void testAddPointsToUser(){
+    void testAddPointsToUser() {
         User user = ModelUtils.getTestUser();
         user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
         user.setCurrentPoints(1);
@@ -579,6 +581,6 @@ public class UBSManagementServiceImplTest {
 
         ubsManagementService.addPointsToUser(AddingPointsToUserDto.builder().additionalPoints(anyInt()).build());
 
-        assertEquals(2L,user.getChangeOfPointsList().size());
+        assertEquals(2L, user.getChangeOfPointsList().size());
     }
 }

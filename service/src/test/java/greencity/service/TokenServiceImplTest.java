@@ -23,15 +23,14 @@ public class TokenServiceImplTest {
     TokenServiceImpl tokenService;
 
     @Test
-    void testPassTokenToCookies(){
+    void testPassTokenToCookies() {
         String checkToken = "eyJhbGciOiJIUzI1NiB9";
         String accessToken = "eyJhbGciOiJIUzI1NiJ9";
 
-        assertThrows(BadRequestException.class,()-> tokenService.passTokenToCookies(checkToken,null));
+        assertThrows(BadRequestException.class, () -> tokenService.passTokenToCookies(checkToken, null));
 
-        tokenService.passTokenToCookies(accessToken,httpServletResponse);
+        tokenService.passTokenToCookies(accessToken, httpServletResponse);
 
         verify(httpServletResponse).addCookie(any(Cookie.class));
     }
 }
-
