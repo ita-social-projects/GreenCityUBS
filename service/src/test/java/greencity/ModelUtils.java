@@ -340,6 +340,90 @@ public class ModelUtils {
         return list;
     }
 
+    public static List<GroupedOrderDto> getGroupedOrdersWithLiters() {
+        List<GroupedOrderDto> list = new ArrayList<>();
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(75)
+                .groupOfOrders(List.of(OrderDto.builder()
+                                .latitude(49.854)
+                                .longitude(24.069)
+                                .build()))
+                .build());
+
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.812)
+                        .longitude(24.035)
+                        .build()))
+                .build());
+
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.795)
+                        .longitude(24.052)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.796)
+                        .longitude(24.931)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.871)
+                        .longitude(24.029)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.894)
+                        .longitude(24.107)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.666)
+                        .longitude(24.013)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.856)
+                        .longitude(24.049)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.862)
+                        .longitude(24.039)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.771)
+                        .longitude(23.909)
+                        .build()))
+                .build());
+        list.add(GroupedOrderDto.builder()
+                .amountOfLitres(25)
+                .groupOfOrders(List.of(OrderDto.builder()
+                        .latitude(49.801)
+                        .longitude(24.164)
+                        .build()))
+                .build());
+        return list;
+    }
+
     public static List<GroupedOrderDto> getGroupedOrdersFor60LitresLimit() {
         List<GroupedOrderDto> list = new ArrayList<>();
         list.add(GroupedOrderDto.builder()
