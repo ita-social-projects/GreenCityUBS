@@ -90,11 +90,11 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void unvalidValidatePayment(){
+    void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         dto.setResponse_status("approved");
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
-        assertThrows(PaymentValidationException.class,()-> ubsService.validatePayment(dto));
+        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
     }
 
     @Test
