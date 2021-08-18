@@ -686,4 +686,25 @@ public class UBSClientServiceImpl implements UBSClientService {
             userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         restClient.markUserDeactivated(user.getUuid());
     }
+
+    @Override
+    public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
+    }
+
+    @Override
+    public OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        order.setCancellationReason(dto.getCancellationReason());
+        order.setCancellationComment(dto.getCancellationComment());
+        order.setId(id);
+        orderRepository.save(order);
+        return dto;
+    }
 }
