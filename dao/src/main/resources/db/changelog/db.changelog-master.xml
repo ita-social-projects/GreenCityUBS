@@ -40,7 +40,11 @@
     <include file="db/changelog/logs/ch-add-column-image-path-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-column-id-to-violations-description-mapping-Rusanovscaia.xml"/>
     <include file="db/changelog/logs/ch-add-new-payment-status-column-Mahdziak.xml"/>
+    <include file="db/changelog/logs/ch-add-table-user-notifications-Sakhno.xml"/>
     <include file="db/changelog/logs/ch-add-column-receipt-image-image-path-Kisliak.xml"/>
     <include file="db/changelog/logs/ch-add-column-order-payment-status-into-order-table-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-column-to-employee_order_position-table.xml"/>
+    <include file="db/changelog/logs/ch-add-column-payment-type-Kisliak.xml"/>
+    <include file="db/changelog/logs/ch-drop-length-phone-number-ubsUser-pater-liubomyr.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-orders-table.xml"/>
 </databaseChangeLog>
