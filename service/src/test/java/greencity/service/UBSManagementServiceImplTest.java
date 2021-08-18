@@ -21,6 +21,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
 
 import greencity.repository.*;
+import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementServiceImpl;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
+
+import static greencity.ModelUtils.getManualPayment;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
