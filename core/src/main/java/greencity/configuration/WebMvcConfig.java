@@ -25,7 +25,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private RestClient restClient;
 
     /**
-     * Method to get single threaded executor
+     * Method to get single threaded executor.
+     *
+     * @return {@link ExecutorService}
      */
     @Bean("singleThreadedExecutor")
     public ExecutorService singleThreadedExecutor() {

@@ -53,15 +53,18 @@ public class NotificationServiceImpl implements NotificationService {
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                            order.getId().toString());
+                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                    order.getId().toString());
             if ((lastNotification.isEmpty()
-                    || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-                    && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
                 UserNotification userNotification = new UserNotification();
                 if (lastNotification.isPresent()) {
                     UserNotification oldNotification = lastNotification.get();
@@ -73,7 +76,7 @@ public class NotificationServiceImpl implements NotificationService {
                 userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
                 UserNotification created = userNotificationRepository.save(userNotification);
                 NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
-                        .toString());
+                    .toString());
                 notificationParameter.setUserNotification(created);
                 NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
                 created.setParameters(Collections.singleton(createdParameter));
@@ -82,6 +85,9 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyPaidOrder(Order order) {
         UserNotification userNotification = new UserNotification();
@@ -98,13 +104,13 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyCourierItineraryFormed(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder().key("date")
-                .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))).build());
+            .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))).build());
         parameters.add(NotificationParameter.builder().key("startTime")
-                .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
+            .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
         parameters.add(NotificationParameter.builder().key("endTime")
-                .value(order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
+            .value(order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
-                .value("+380638175035, +380931038987").build());
+            .value("+380638175035, +380931038987").build());
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
         userNotification.setUser(order.getUser());
@@ -124,21 +130,21 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Long paidAmount = order.getPayment().stream()
-                .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
-                .map(Payment::getAmount).reduce(0L, Long::sum);
+            .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+            .map(Payment::getAmount).reduce(0L, Long::sum);
 
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBagsOrdered = order.getAmountOfBagsOrdered();
 
         Integer price = bags.stream().map(bag -> amountOfBagsOrdered.get(bag.getId()) * bag.getPrice())
-                .reduce(0, Integer::sum);
+            .reduce(0, Integer::sum);
 
         long amountToPay = price - paidAmount;
 
         parameters.add(NotificationParameter.builder().key("amountToPay")
-                .value(String.format("%.2f", (double) amountToPay)).build());
+            .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
-                .value(order.getId().toString()).build());
+            .value(order.getId().toString()).build());
 
         userNotification.setNotificationType(NotificationType.UNPAID_PACKAGE);
         userNotification.setUser(order.getUser());
@@ -157,12 +163,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyAllHalfPaidPackages() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                    .findLastNotificationByNotificationTypeAndOrderNumber(
-                            NotificationType.UNPAID_PACKAGE.toString(),
-                            order.getId().toString());
+                .findLastNotificationByNotificationTypeAndOrderNumber(
+                    NotificationType.UNPAID_PACKAGE.toString(),
+                    order.getId().toString());
             if ((lastNotification.isEmpty()
-                    || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-                    && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
                 notifyHalfPaidPackage(order);
             }
         }
@@ -176,16 +182,16 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Integer paidBags = order.getConfirmedQuantity().values().stream()
-                .reduce(0, Integer::sum);
+            .reduce(0, Integer::sum);
         Integer exportedBags = order.getExportedQuantity().values().stream()
-                .reduce(0, Integer::sum);
+            .reduce(0, Integer::sum);
 
         parameters.add(NotificationParameter.builder().key("overpayment")
-                .value(String.valueOf(overpayment)).build());
+            .value(String.valueOf(overpayment)).build());
         parameters.add(NotificationParameter.builder().key("realPackageNumber")
-                .value(exportedBags.toString()).build());
+            .value(exportedBags.toString()).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
-                .value(paidBags.toString()).build());
+            .value(paidBags.toString()).build());
 
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
@@ -205,9 +211,9 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
         violationRepository.findByOrderId(order.getId())
-                .ifPresent(value -> parameters.add(NotificationParameter.builder()
-                        .key("violationDescription")
-                        .value(value.getDescription()).build()));
+            .ifPresent(value -> parameters.add(NotificationParameter.builder()
+                .key("violationDescription")
+                .value(value.getDescription()).build()));
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(order.getUser());
 
@@ -224,15 +230,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyInactiveAccounts() {
         List<User> users = userRepository
-                .getAllInactiveUsers(LocalDate.now(clock).minusYears(1), LocalDate.now(clock).minusMonths(2));
+            .getAllInactiveUsers(LocalDate.now(clock).minusYears(1), LocalDate.now(clock).minusMonths(2));
         log.info("Found {} inactive users", users.size());
         for (User user : users) {
             Optional<UserNotification> lastNotification =
-                    userNotificationRepository
-                            .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
-                                    NotificationType.LETS_STAY_CONNECTED);
+                userNotificationRepository
+                    .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
+                        NotificationType.LETS_STAY_CONNECTED);
             if (lastNotification.isEmpty()
-                    || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1))) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
@@ -264,24 +270,27 @@ public class NotificationServiceImpl implements NotificationService {
         });
     }
 
+    /**
+     * Creating notification with parameters.
+     */
     public static NotificationDto createNotificationDto(UserNotification notification, String language,
-                                                        NotificationTemplateRepository templateRepository) {
+        NotificationTemplateRepository templateRepository) {
         NotificationTemplate template = templateRepository
-                .findNotificationTemplateByNotificationTypeAndLanguageCode(
-                        notification.getNotificationType(),
-                        language)
-                .orElseThrow(() -> new NotFoundException("Template not found"));
+            .findNotificationTemplateByNotificationTypeAndLanguageCode(
+                notification.getNotificationType(),
+                language)
+            .orElseThrow(() -> new NotFoundException("Template not found"));
         String templateBody = template.getBody();
         if (notification.getParameters() == null) {
             notification.setParameters(Collections.emptySet());
         }
         Map<String, String> valuesMap = notification.getParameters().stream()
-                .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
+            .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(templateBody);
 
         return NotificationDto.builder().title(template.getTitle())
-                .body(resultBody).build();
+            .body(resultBody).build();
     }
 }

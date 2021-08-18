@@ -38,15 +38,15 @@ public class TelegramService {
     public void sendNotification(UserNotification notification) {
         UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-                .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
 
         if (Objects.nonNull(notification.getUser().getTelegramBot())
-                && Objects.nonNull(notification.getUser().getTelegramBot().getChatId())) {
+            && Objects.nonNull(notification.getUser().getTelegramBot().getChatId())) {
             SendMessage sendMessage = new SendMessage(
-                    notification.getUser().getTelegramBot().getChatId().toString(),
-                    notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
+                notification.getUser().getTelegramBot().getChatId().toString(),
+                notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
             log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
-                    notification.getNotificationType());
+                notification.getNotificationType());
             sendMessageToUser(sendMessage);
         }
     }

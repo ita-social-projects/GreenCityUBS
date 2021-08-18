@@ -27,12 +27,15 @@ public class OutOfRequestRestClient {
     @Autowired
     private JwtTool jwtTool;
 
+    /**
+     * Find user by email.
+     */
     public Optional<UserVO> findUserByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader(email));
         UserVO body = restTemplate.exchange(greenCityUserServerAddress
-                        + "/user/findByEmail" + "?email="
-                        + email, HttpMethod.GET, entity, UserVO.class)
-                .getBody();
+            + "/user/findByEmail" + "?email="
+            + email, HttpMethod.GET, entity, UserVO.class)
+            .getBody();
         return Optional.ofNullable(body);
     }
 

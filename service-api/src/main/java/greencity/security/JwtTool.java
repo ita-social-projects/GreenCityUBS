@@ -60,7 +60,7 @@ public class JwtTool {
      * Method for creating access token.
      *
      * @param email this is email of user.
-     * @param ttl is token time to live.
+     * @param ttl   is token time to live.
      */
     public String createAccessToken(String email, int ttl) {
         Claims claims = Jwts.claims().setSubject(email);
@@ -70,10 +70,10 @@ public class JwtTool {
         calendar.setTime(now);
         calendar.add(Calendar.MINUTE, ttl);
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(calendar.getTime())
-                .signWith(SignatureAlgorithm.HS256, accessTokenKey)
-                .compact();
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(calendar.getTime())
+            .signWith(SignatureAlgorithm.HS256, accessTokenKey)
+            .compact();
     }
 }

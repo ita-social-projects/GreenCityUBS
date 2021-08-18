@@ -130,19 +130,20 @@ public class ViberServiceImpl implements ViberService {
      */
     @Override
     public void sendNotification(UserNotification notification) {
-        UserVO userVO = outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
+        UserVO userVO =
+            outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-                .createNotificationDto(notification, userVO.getLanguageVO().getCode(),templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
 
         if (Objects.nonNull(notification.getUser().getViberBot())
-                && Objects.nonNull(notification.getUser().getViberBot().getChatId())) {
+            && Objects.nonNull(notification.getUser().getViberBot().getChatId())) {
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                    .receiver(notification.getUser().getViberBot().getChatId())
-                    .type(MessageType.text)
-                    .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
-                    .build();
+                .receiver(notification.getUser().getViberBot().getChatId())
+                .type(MessageType.text)
+                .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
+                .build();
             log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
-                    notification.getNotificationType());
+                notification.getNotificationType());
             sendMessageToUser(sendMessageToUserDto);
         }
     }
