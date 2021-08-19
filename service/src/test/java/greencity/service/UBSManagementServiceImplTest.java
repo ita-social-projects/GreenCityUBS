@@ -1,5 +1,6 @@
 package greencity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
@@ -98,6 +99,15 @@ public class UBSManagementServiceImplTest {
 
     @Mock
     private NotificationServiceImpl notificationService;
+
+    @Mock
+    private AdditionalBagsInfoRepo additionalBagsInfoRepo;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private UpdateOrderDetail updateOrderRepository;
 
     @InjectMocks
     UBSManagementServiceImpl ubsManagementService;
@@ -625,5 +635,123 @@ public class UBSManagementServiceImplTest {
         ubsManagementService.addPointsToUser(AddingPointsToUserDto.builder().additionalPoints(anyInt()).build());
 
         assertEquals(2L, user.getChangeOfPointsList().size());
+    }
+
+    @Test
+    void testUpdatePositionTest() {
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
+        when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
+        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
+        when(employeeOrderPositionRepository.saveAll(anyIterable()))
+            .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
+
+        ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE);
+
+        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+        verify(orderRepository).findById(1L);
+        verify(positionRepository).findById(2L);
+        verify(employeeRepository).findByName(anyString(), anyString());
+        verify(employeeOrderPositionRepository).saveAll(anyIterable());
+    }
+
+    @Test
+    void testUpdatePositionThrowsOrderNotFoundException() {
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE));
+    }
+
+    @Test
+    void testUpdatePositionThrowsPositionNotFoundException() {
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
+        when(positionRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(PositionNotFoundException.class,
+            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE));
+    }
+
+    @Test
+    void testUpdatePositionThrowsEmployeeNotFoundException() {
+        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
+        when(positionRepository.findById(2L)).thenReturn(Optional.of(TEST_POSITION));
+        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(EmployeeNotFoundException.class,
+            () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE));
+    }
+
+    @Test
+    void testGetAdditionalBagsInfo() {
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));
+        when(additionalBagsInfoRepo.getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail()))
+            .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
+        when(objectMapper.convertValue(any(), eq(AdditionalBagInfoDto.class)))
+            .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
+
+        List<AdditionalBagInfoDto> actual = ubsManagementService.getAdditionalBagsInfo(1L);
+
+        assertEquals(TEST_ADDITIONAL_BAG_INFO_DTO_LIST, actual);
+
+        verify(userRepository).findUserByOrderId(1L);
+        verify(additionalBagsInfoRepo).getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail());
+        verify(objectMapper).convertValue(any(), eq(AdditionalBagInfoDto.class));
+    }
+
+    @Test
+    void testGetAdditionalBagsInfoThrowsException() {
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.getAdditionalBagsInfo(1L));
+    }
+
+    @Test
+    void testSetOrderDetail() {
+        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
+        when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
+        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
+        when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
+        when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
+
+        List<OrderDetailInfoDto> actual = ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua");
+
+        assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
+
+        verify(updateOrderRepository).updateAmount(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        verify(orderRepository).getOrderDetails(1L);
+        verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
+        }.getType());
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
+        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
+        verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
+        verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType()));
+    }
+
+    @Test
+    void testSetOrderDetailThrowsException() {
+        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua"));
     }
 }
