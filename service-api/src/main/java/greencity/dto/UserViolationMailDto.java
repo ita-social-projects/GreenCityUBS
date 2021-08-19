@@ -1,7 +1,8 @@
 package greencity.dto;
 
-import javax.validation.constraints.NotNull;
 import lombok.*;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter

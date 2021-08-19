@@ -1,9 +1,10 @@
 package greencity.dto;
 
-import java.util.List;
+import lombok.*;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import lombok.*;
+import java.util.List;
 
 @Getter
 @Setter

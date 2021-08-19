@@ -1,8 +1,9 @@
 package greencity.exception.handler;
 
-import java.io.Serializable;
 import lombok.Data;
 import org.springframework.validation.FieldError;
+
+import java.io.Serializable;
 
 /**
  * Dto for sending information about bad fields while validation.

@@ -1,8 +1,9 @@
 package greencity.entity.order;
 
 import greencity.entity.language.Language;
-import javax.persistence.*;
 import lombok.*;
+
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor

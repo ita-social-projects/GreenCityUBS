@@ -1,8 +1,6 @@
 package greencity.validator;
 
 import greencity.constant.ErrorMessage;
-import greencity.exceptions.EmployeeValidationException;
-import greencity.exceptions.OrderNotFoundException;
 import greencity.exceptions.PhoneNumberParseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
