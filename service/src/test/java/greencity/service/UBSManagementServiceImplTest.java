@@ -21,9 +21,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
-import greencity.exceptions.PaymentNotFoundException;
-import greencity.exceptions.ReceivingStationNotFoundException;
-import greencity.exceptions.UnexistingOrderException;
+import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementServiceImpl;

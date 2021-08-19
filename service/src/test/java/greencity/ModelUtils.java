@@ -19,7 +19,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,7 +48,6 @@ public class ModelUtils {
         singletonList(createOrderDetailInfoDto());
     public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
     public static final Order GET_ORDER_DETAILS = getOrderDetails();
-
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
             .capacity("One")
