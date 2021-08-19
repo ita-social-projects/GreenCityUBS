@@ -57,7 +57,7 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String userUuid,
         @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, locale.getLanguage()));
+            .body(ubsClientService.getFirstPageData(userUuid));
     }
 
     /**

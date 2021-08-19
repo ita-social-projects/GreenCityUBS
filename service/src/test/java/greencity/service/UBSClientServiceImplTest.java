@@ -111,7 +111,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", "en");
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
