@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+
 import java.util.List;
 
 public interface EmployeeOrderPositionRepository extends CrudRepository<EmployeeOrderPosition, Long> {

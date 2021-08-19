@@ -1,8 +1,8 @@
 package greencity.dto;
 
-import javax.validation.constraints.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.*;
 
 @Getter
 @Setter

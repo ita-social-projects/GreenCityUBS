@@ -1,8 +1,9 @@
 package greencity.dto;
 
 import greencity.entity.enums.CertificateStatus;
-import java.time.LocalDate;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
