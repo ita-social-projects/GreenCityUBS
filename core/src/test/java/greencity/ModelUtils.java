@@ -2,16 +2,15 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -276,6 +275,13 @@ public class ModelUtils {
             .paymentDate("09-02-2021")
             .receiptLink("somelink.com")
             .paymentId(10l)
+            .build();
+    }
+
+    public static OrderCancellationReasonDto getCancellationDto() {
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
             .build();
     }
 }

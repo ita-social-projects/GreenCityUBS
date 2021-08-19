@@ -2,12 +2,13 @@ package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import java.util.List;
-import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface AddressRepository extends CrudRepository<Address, Long> {

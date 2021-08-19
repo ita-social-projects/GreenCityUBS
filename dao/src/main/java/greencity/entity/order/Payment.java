@@ -1,9 +1,10 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.PaymentStatus;
-import javax.persistence.*;
 import greencity.entity.enums.PaymentType;
 import lombok.*;
+
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor

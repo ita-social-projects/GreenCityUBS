@@ -16,10 +16,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.exceptions.BadOrderStatusRequestException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.OrderNotFoundException;
-
 import greencity.repository.*;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.util.EncryptionUtil;
@@ -39,7 +35,8 @@ import java.util.*;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -114,7 +111,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", "en");
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
@@ -555,5 +552,32 @@ class UBSClientServiceImplTest {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.getOrderPaymentDetail(any()));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
+    }
+
+    @Test
+    void testGetOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+
+    }
+
+    @Test
+    void testUpdateOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        when(orderRepository.save(any())).thenReturn(orderDto);
+        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+        assert orderDto != null;
+        verify(orderRepository).save(orderDto);
+        verify(orderRepository).findById(1L);
     }
 }

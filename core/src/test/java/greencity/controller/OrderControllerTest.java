@@ -2,22 +2,14 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
-
-import java.security.Principal;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import static greencity.ModelUtils.*;
-import static org.mockito.ArgumentMatchers.*;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,12 +17,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.Mockito.*;
+import java.security.Principal;
+
+import static greencity.ModelUtils.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -67,7 +63,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", "en");
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -167,5 +163,27 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
+    }
+
+    @Test
+    void getsCancellationReason() throws Exception {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        when(ubsClientService.getOrderCancellationReason(anyLong())).thenReturn(dto);
+        mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L))
+            .andExpect(status().isOk());
+        verify(ubsClientService).getOrderCancellationReason(1L);
+    }
+
+    @Test
+    void updatesCancellationReason() throws Exception {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        when(ubsClientService.updateOrderCancellationReason(anyLong(), any())).thenReturn(dto);
+        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation/", 1L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).updateOrderCancellationReason(anyLong(), anyObject());
     }
 }

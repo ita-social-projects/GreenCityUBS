@@ -1,9 +1,10 @@
 package greencity.entity.language;
 
 import greencity.entity.order.BagTranslation;
-import java.util.List;
-import javax.persistence.*;
 import lombok.*;
+
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Data

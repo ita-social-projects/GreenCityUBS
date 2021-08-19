@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.entity.notifications.UserNotification;
 import org.springframework.http.ResponseEntity;
 
 public interface ViberService {
@@ -41,4 +42,9 @@ public interface ViberService {
      * @param receiverId - indicates which user to send the greeting message.
      */
     void sendMessageAndRegisterViberBotForUser(String receiverId);
+
+    /**
+     * The method send a notification to users.
+     */
+    void sendNotification(UserNotification notification);
 }

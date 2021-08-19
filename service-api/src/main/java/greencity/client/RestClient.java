@@ -1,20 +1,14 @@
 package greencity.client;
 
-import greencity.dto.*;
 import greencity.constant.RestTemplateLinks;
-import greencity.dto.UbsTableCreationDto;
-import greencity.dto.UserViolationMailDto;
+import greencity.dto.*;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.EventTypes;
 import greencity.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -200,7 +194,7 @@ public class RestClient {
      * @return @return @return {@link String} - which contains the status of success
      *         or failure.
      */
-    public ResponseEntity<String> sentMessage(SendMessageToUserDto sendMessageToUserDto) {
+    public ResponseEntity<String> sendMessage(SendMessageToUserDto sendMessageToUserDto) {
         HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
         return restTemplate.exchange(RestTemplateLinks.SEND_MESSAGE, HttpMethod.POST, entity, String.class);
     }

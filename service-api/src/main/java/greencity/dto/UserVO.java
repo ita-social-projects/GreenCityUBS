@@ -12,4 +12,5 @@ import lombok.*;
 public class UserVO {
     private Long id;
     private String email;
+    private LanguageVO languageVO;
 }
