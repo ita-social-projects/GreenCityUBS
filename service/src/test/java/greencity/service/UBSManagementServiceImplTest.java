@@ -1,5 +1,6 @@
 package greencity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
@@ -21,6 +22,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.NotFoundOrderAddressException;
 
 import greencity.exceptions.PaymentNotFoundException;
+import greencity.exceptions.ReceivingStationNotFoundException;
 import greencity.exceptions.UnexistingOrderException;
 import greencity.repository.*;
 import greencity.service.ubs.FileService;
@@ -108,8 +110,14 @@ public class UBSManagementServiceImplTest {
     @Mock
     private NotificationServiceImpl notificationService;
 
+    @Mock
+    private BagsInfoRepo bagsInfoRepo;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
-    UBSManagementServiceImpl ubsManagementService;
+    private UBSManagementServiceImpl ubsManagementService;
 
     private void getMocksBehavior() {
 
@@ -528,7 +536,54 @@ public class UBSManagementServiceImplTest {
         verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
         verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()));
+    }
 
+    @Test
+    public void testGetOrdersBagsDetails() {
+        List<DetailsOrderInfoDto> detailsOrderInfoDtoList = new ArrayList<>();
+        Map<String, Object> mapOne = Map.of("One", "Two");
+        Map<String, Object> mapTwo = Map.of("One", "Two");
+        List<Map<String, Object>> mockBagInfoRepository = Arrays.asList(mapOne, mapTwo);
+        when(bagsInfoRepo.getBagInfo(1L)).thenReturn(mockBagInfoRepository);
+        for (Map<String, Object> map : mockBagInfoRepository) {
+            when(objectMapper.convertValue(map, DetailsOrderInfoDto.class)).thenReturn(getTestDetailsOrderInfoDto());
+            detailsOrderInfoDtoList.add(getTestDetailsOrderInfoDto());
+        }
+        assertEquals(detailsOrderInfoDtoList.toString(),
+            ubsManagementService.getOrderBagsDetails(1L).toString());
+    }
+
+    @Test
+    public void testSendNotificationAboutViolationWithFoundOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto(1L, "violation");
+        Order order = GET_ORDER_DETAILS;
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
+        UserViolationMailDto mailDto =
+            new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
+                addingViolationsToUserDto.getViolationDescription());
+        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(1)).sendViolationOnMail(mailDto);
+    }
+
+    @Test
+    public void testSendNotificationAboutViolationWithoutOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto();
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
+        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
+    }
+
+    @Test
+    public void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
+        when(orderRepository.findById(1L))
+            .thenReturn(Optional.of(ModelUtils.getOrder()));
+        List<ReceivingStation> receivingStations = new ArrayList<>();
+        when(receivingStationRepository.findAll())
+            .thenReturn(receivingStations);
+        assertThrows(ReceivingStationNotFoundException.class,
+            () -> ubsManagementService.getOrderExportDetails(1L));
     }
 
     @Test
