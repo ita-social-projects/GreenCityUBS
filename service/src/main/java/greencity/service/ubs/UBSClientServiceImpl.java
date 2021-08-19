@@ -81,7 +81,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, String language) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         if (user != null) {
