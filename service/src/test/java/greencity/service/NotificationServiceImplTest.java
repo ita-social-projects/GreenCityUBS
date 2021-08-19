@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,11 +56,14 @@ public class NotificationServiceImplTest {
     @Mock
     private NotificationTemplateRepository notificationTemplateRepository;
 
-    @InjectMocks
-    private NotificationServiceImpl notificationService;
-
     @Mock
     private Clock clock;
+
+    @Mock
+    private ExecutorService executorService;
+
+    @InjectMocks
+    private NotificationServiceImpl notificationService;
 
     private Clock fixedClock;
 
@@ -166,8 +170,8 @@ public class NotificationServiceImplTest {
 
         notificationService.notifyCourierItineraryFormed(order);
 
-        verify(userNotificationRepository, times(1)).save(userNotification);
-        verify(notificationParameterRepository, times(1)).saveAll(new HashSet<>(parameters));
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(new HashSet<>(parameters));
 
     }
 
@@ -203,7 +207,7 @@ public class NotificationServiceImplTest {
 
         notificationService.notifyBonuses(order, overpayment);
 
-        verify(userNotificationRepository).save(userNotification);
+        verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(parameters);
     }
 
@@ -234,7 +238,7 @@ public class NotificationServiceImplTest {
 
         notificationService.notifyAddViolation(order);
 
-        verify(userNotificationRepository).save(userNotification);
+        verify(userNotificationRepository).save(any());
         verify(notificationParameterRepository).saveAll(Collections.singleton(parameter));
     }
 
@@ -276,9 +280,12 @@ public class NotificationServiceImplTest {
             Order.builder().id(51L).user(user)
                 .orderDate(LocalDateTime.now(fixedClock))
                 .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                .payment(Collections.singletonList(
+                .payment(List.of(
                     Payment.builder()
                         .paymentStatus(PaymentStatus.PAID).amount(0L)
+                        .build(),
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
                         .build()))
                 .build());
 
@@ -309,7 +316,7 @@ public class NotificationServiceImplTest {
         parameters.add(NotificationParameter.builder().key("orderNumber")
             .value(orders.get(0).getId().toString()).build());
 
-        when(userNotificationRepository.save(notification)).thenReturn(notification);
+        when(userNotificationRepository.save(any())).thenReturn(notification);
         parameters.forEach(parameter -> parameter.setUserNotification(notification));
         when(notificationParameterRepository.saveAll(parameters)).thenReturn(new ArrayList<>(parameters));
 

@@ -2,10 +2,11 @@ package greencity.mapping;
 
 import greencity.dto.OrderResponseDto;
 import greencity.entity.order.Order;
-import java.time.LocalDateTime;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link OrderResponseDto} into

@@ -1,14 +1,12 @@
 package greencity.config;
 
 import greencity.service.NotificationServiceImpl;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Configuration
@@ -42,7 +40,8 @@ public class NotificationScheduler {
      * System checks BD at 18.00 daily and sends message in case if user's last
      * order was more than 2 month. Repeat every 2 month over the year
      */
-    @Scheduled(cron = "0 0 18 * * ?", zone = "Europe/Kiev")
+    @Scheduled(cron = "0 0/36 22 * * ?", zone = "Europe/Kiev")
+    @Scheduled(cron = "0 0/36 22 * * ?", zone = "Europe/Kiev")
     public void notifyInactiveAccount() {
         log.info("Notifying inactive users");
         notificationService.notifyInactiveAccounts();

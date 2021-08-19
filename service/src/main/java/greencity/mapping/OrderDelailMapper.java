@@ -2,10 +2,11 @@ package greencity.mapping;
 
 import greencity.dto.OrderDetailDto;
 import greencity.dto.OrderDetailInfoDto;
-import java.util.ArrayList;
-import java.util.List;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class OrderDelailMapper extends AbstractConverter<OrderDetailDto, List<OrderDetailInfoDto>> {
