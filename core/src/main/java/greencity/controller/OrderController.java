@@ -242,4 +242,44 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateUbsUserInfoInOrder(dto));
     }
+
+    /**
+     * Controller updates info about order cancellation reason .
+     *
+     * @param id  {@link Long}.
+     * @param dto {@link OrderCancellationReasonDto}
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "updates info about order cancellation reason ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/order/{id}/cancellation/")
+    public ResponseEntity<OrderCancellationReasonDto> updateCancellationReason(
+        @RequestBody final OrderCancellationReasonDto dto,
+        @PathVariable("id") final Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto));
+    }
+
+    /**
+     * Controller gets info about order cancellation reason.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "gets info about order cancellation reason ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/order/{id}/cancellation")
+    public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
+        @PathVariable("id") final Long id) {
+        return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id));
+    }
 }

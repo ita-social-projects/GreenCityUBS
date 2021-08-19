@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -167,5 +168,27 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
+    }
+
+    @Test
+    void getsCancellationReason() throws Exception {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        when(ubsClientService.getOrderCancellationReason(anyLong())).thenReturn(dto);
+        mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L))
+            .andExpect(status().isOk());
+        verify(ubsClientService).getOrderCancellationReason(1L);
+    }
+
+    @Test
+    void updatesCancellationReason() throws Exception {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        when(ubsClientService.updateOrderCancellationReason(anyLong(), any())).thenReturn(dto);
+        mockMvc.perform(post(ubsLink + "/order/{id}/cancellation/", 1L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).updateOrderCancellationReason(anyLong(), anyObject());
     }
 }

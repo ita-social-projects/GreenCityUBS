@@ -173,4 +173,27 @@ public interface UBSClientService {
      * @author Liubomyr Bratakh
      */
     void markUserAsDeactivated(Long id);
+
+    /**
+     * Method returns cancellation reason and comment.
+     *
+     * @param orderId {@link Long};
+     * @return {@link OrderCancellationReasonDto} dto that contains cancellation
+     *         reason and comment;
+     *
+     * @author Oleksandr Khomiakov
+     */
+    OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
+
+    /**
+     * Method updates cancellation reason and comment.
+     *
+     * @param id  {@link Long};
+     * @param dto {@link OrderCancellationReasonDto};
+     * @return {@link OrderCancellationReasonDto} dto that contains cancellation
+     *         reason and comment;
+     *
+     * @author Oleksandr Khomiakov
+     */
+    OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto);
 }

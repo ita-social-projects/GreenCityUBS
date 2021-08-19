@@ -49,6 +49,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final RestClient restClient;
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
+    private final EncryptionUtil encryptionUtil;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -62,7 +63,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getResponse_status().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
+        if (!encryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         String[] ids = dto.getOrder_id().split("_");
@@ -478,7 +479,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .currency("UAH")
             .amount(sumToPay * 100).build();
 
-        paymentRequestDto.setSignature(EncryptionUtil
+        paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
 
         return paymentRequestDto;
@@ -684,5 +685,26 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user =
             userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         restClient.markUserDeactivated(user.getUuid());
+    }
+
+    @Override
+    public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(order.getCancellationReason())
+            .cancellationComment(order.getCancellationComment())
+            .build();
+    }
+
+    @Override
+    public OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        order.setCancellationReason(dto.getCancellationReason());
+        order.setCancellationComment(dto.getCancellationComment());
+        order.setId(id);
+        orderRepository.save(order);
+        return dto;
     }
 }
