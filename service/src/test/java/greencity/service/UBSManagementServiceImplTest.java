@@ -535,7 +535,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void testGetOrdersBagsDetails() {
+    void testGetOrdersBagsDetails() {
         List<DetailsOrderInfoDto> detailsOrderInfoDtoList = new ArrayList<>();
         Map<String, Object> mapOne = Map.of("One", "Two");
         Map<String, Object> mapTwo = Map.of("One", "Two");
@@ -550,7 +550,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void testSendNotificationAboutViolationWithFoundOrder() {
+    void testSendNotificationAboutViolationWithFoundOrder() {
         AddingViolationsToUserDto addingViolationsToUserDto =
             new AddingViolationsToUserDto(1L, "violation");
         Order order = GET_ORDER_DETAILS;
@@ -563,7 +563,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void testSendNotificationAboutViolationWithoutOrder() {
+    void testSendNotificationAboutViolationWithoutOrder() {
         AddingViolationsToUserDto addingViolationsToUserDto =
             new AddingViolationsToUserDto();
         when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
@@ -572,7 +572,7 @@ public class UBSManagementServiceImplTest {
     }
 
     @Test
-    public void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
+    void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder()));
         List<ReceivingStation> receivingStations = new ArrayList<>();
