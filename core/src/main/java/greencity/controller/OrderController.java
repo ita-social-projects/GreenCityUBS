@@ -54,11 +54,9 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @ApiLocale
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @ApiIgnore @ValidLanguage Locale locale) {
+        @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageData(userUuid));
     }
