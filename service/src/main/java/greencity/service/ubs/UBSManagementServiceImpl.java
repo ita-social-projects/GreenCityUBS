@@ -474,8 +474,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User ourUser = order.getUser();
         ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
         ourUser.setViolations(ourUser.getViolations() + 1);
-        notificationService.notifyAddViolation(order);
         userRepository.save(ourUser);
+        notificationService.notifyAddViolation(order);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
