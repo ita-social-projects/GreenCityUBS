@@ -1,8 +1,9 @@
 package greencity.dto;
 
-import java.io.Serializable;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+
+import java.io.Serializable;
 
 @Getter
 @Setter

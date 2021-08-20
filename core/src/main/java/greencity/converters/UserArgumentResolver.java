@@ -1,5 +1,6 @@
 package greencity.converters;
 
+import greencity.annotations.CurrentUserUuid;
 import greencity.client.RestClient;
 import lombok.AllArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import greencity.annotations.CurrentUserUuid;
 
 import java.security.Principal;
 

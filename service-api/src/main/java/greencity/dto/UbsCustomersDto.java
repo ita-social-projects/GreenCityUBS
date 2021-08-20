@@ -1,6 +1,5 @@
 package greencity.dto;
 
-import javax.validation.constraints.Email;
 import lombok.*;
 
 import java.io.Serializable;

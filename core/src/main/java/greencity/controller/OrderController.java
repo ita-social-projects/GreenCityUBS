@@ -6,15 +6,10 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
-import greencity.dto.UbsCustomersDtoUpdate;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import java.util.Locale;
-import javax.validation.constraints.Pattern;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/ubs")

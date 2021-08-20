@@ -2,14 +2,10 @@ package greencity.client;
 
 import greencity.ModelUtils;
 import greencity.dto.UserVO;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
