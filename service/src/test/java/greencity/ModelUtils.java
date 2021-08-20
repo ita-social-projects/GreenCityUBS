@@ -46,6 +46,15 @@ public class ModelUtils {
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
         singletonList(createOrderDetailInfoDto());
     public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
+    public static final Order GET_ORDER_DETAILS = getOrderDetails();
+
+    public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
+        return DetailsOrderInfoDto.builder()
+            .capacity("One")
+            .sum("Two")
+            .build();
+    }
+
     public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
