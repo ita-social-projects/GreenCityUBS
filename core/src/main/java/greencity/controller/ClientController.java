@@ -60,6 +60,7 @@ public class ClientController {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PatchMapping("/{id}/cancel-formed-order")
@@ -81,6 +82,7 @@ public class ClientController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/{id}/make-order-again")
@@ -98,7 +100,9 @@ public class ClientController {
      */
     @ApiOperation(value = "Get user's bonuses.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AllPointsUserDto.class)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AllPointsUserDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/users-pointsToUse")
     public ResponseEntity<AllPointsUserDto> getAllPointsForUser(
@@ -117,6 +121,7 @@ public class ClientController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderPaymentDetailDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/order-payment-detail/{orderId}")
