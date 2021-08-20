@@ -101,6 +101,9 @@ public class UBSManagementServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     @Mock
+    private BagsInfoRepo bagsInfoRepo;
+
+    @Mock
     private AdditionalBagsInfoRepo additionalBagsInfoRepo;
 
     @Mock
@@ -110,7 +113,7 @@ public class UBSManagementServiceImplTest {
     private UpdateOrderDetail updateOrderRepository;
 
     @InjectMocks
-    UBSManagementServiceImpl ubsManagementService;
+    private UBSManagementServiceImpl ubsManagementService;
 
     private void getMocksBehavior() {
 
@@ -529,7 +532,54 @@ public class UBSManagementServiceImplTest {
         verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
         verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()));
+    }
 
+    @Test
+    void testGetOrdersBagsDetails() {
+        List<DetailsOrderInfoDto> detailsOrderInfoDtoList = new ArrayList<>();
+        Map<String, Object> mapOne = Map.of("One", "Two");
+        Map<String, Object> mapTwo = Map.of("One", "Two");
+        List<Map<String, Object>> mockBagInfoRepository = Arrays.asList(mapOne, mapTwo);
+        when(bagsInfoRepo.getBagInfo(1L)).thenReturn(mockBagInfoRepository);
+        for (Map<String, Object> map : mockBagInfoRepository) {
+            when(objectMapper.convertValue(map, DetailsOrderInfoDto.class)).thenReturn(getTestDetailsOrderInfoDto());
+            detailsOrderInfoDtoList.add(getTestDetailsOrderInfoDto());
+        }
+        assertEquals(detailsOrderInfoDtoList.toString(),
+            ubsManagementService.getOrderBagsDetails(1L).toString());
+    }
+
+    @Test
+    void testSendNotificationAboutViolationWithFoundOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto(1L, "violation");
+        Order order = GET_ORDER_DETAILS;
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
+        UserViolationMailDto mailDto =
+            new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
+                addingViolationsToUserDto.getViolationDescription());
+        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(1)).sendViolationOnMail(mailDto);
+    }
+
+    @Test
+    void testSendNotificationAboutViolationWithoutOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto();
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
+        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
+    }
+
+    @Test
+    void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
+        when(orderRepository.findById(1L))
+            .thenReturn(Optional.of(ModelUtils.getOrder()));
+        List<ReceivingStation> receivingStations = new ArrayList<>();
+        when(receivingStationRepository.findAll())
+            .thenReturn(receivingStations);
+        assertThrows(ReceivingStationNotFoundException.class,
+            () -> ubsManagementService.getOrderExportDetails(1L));
     }
 
     @Test
