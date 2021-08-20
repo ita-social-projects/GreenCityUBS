@@ -40,8 +40,7 @@ public class NotificationScheduler {
      * System checks BD at 18.00 daily and sends message in case if user's last
      * order was more than 2 month. Repeat every 2 month over the year
      */
-    @Scheduled(cron = "0 0/36 22 * * ?", zone = "Europe/Kiev")
-    @Scheduled(cron = "0 0/36 22 * * ?", zone = "Europe/Kiev")
+    @Scheduled(cron = "0 0 18 * * ?", zone = "Europe/Kiev")
     public void notifyInactiveAccount() {
         log.info("Notifying inactive users");
         notificationService.notifyInactiveAccounts();
