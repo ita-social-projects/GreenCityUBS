@@ -19,15 +19,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query(nativeQuery = true, value = "select * "
-        + "from address "
-        + "inner join ubs_user "
-        + "on address.id = ubs_user.address_id "
-        + "inner join orders "
-        + "on orders.ubs_user_id = ubs_user.id "
-        + "where orders.order_status = 'PAID'"
-        + "and address.latitude = :latitude "
-        + "and address.longitude = :longitude")
+    @Query("select o from Address a "
+        + "inner join UBSuser u "
+        + "on a.id = u.address.id "
+        + "inner join Order o "
+        + "on o.ubsUser.id = u.id "
+        + "where o.orderPaymentStatus = 'PAID'"
+        + "and a.coordinates.latitude  > :latitude - 0.000001 and a.coordinates.latitude  < :latitude + 0.000001 "
+        + "and a.coordinates.longitude > :longitude - 0.000001 and a.coordinates.longitude < :longitude + 0.000001 ")
     List<Order> undeliveredOrdersGroupThem(@Param(value = "latitude") double latitude,
         @Param(value = "longitude") double longitude);
 
