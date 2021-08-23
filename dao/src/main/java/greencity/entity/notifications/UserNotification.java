@@ -1,16 +1,14 @@
 package greencity.entity.notifications;
 
 import greencity.entity.enums.NotificationType;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Certificate;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.UBSuser;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Cascade;
 
-import javax.management.Notification;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -32,7 +30,7 @@ public class UserNotification {
 
     @OneToMany(mappedBy = "userNotification")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private Set<NotificationParameter> parameters;
+    private Set<NotificationParameter> parameters = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @Column(name = "notification_time")

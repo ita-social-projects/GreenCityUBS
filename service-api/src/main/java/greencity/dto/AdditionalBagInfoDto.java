@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 @ToString
 public class AdditionalBagInfoDto {
     @JsonProperty("recipient_name")

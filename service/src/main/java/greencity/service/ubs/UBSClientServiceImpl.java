@@ -10,17 +10,8 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
+import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,6 +19,15 @@ import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -47,6 +47,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final PaymentRepository paymentRepository;
+    private final PhoneNumberFormatterService phoneNumberFormatterService;
+    private final EncryptionUtil encryptionUtil;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -60,7 +62,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getResponse_status().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!EncryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
+        if (!encryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         String[] ids = dto.getOrder_id().split("_");
@@ -79,14 +81,14 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, String language) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         if (user != null) {
             currentUserPoints = user.getCurrentPoints();
         }
 
-        List<BagTranslationDto> btdList = bagTranslationRepository.findAllByLanguage(language)
+        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
@@ -233,6 +235,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
             boolean exist = addresses.stream()
+                .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
                 .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
                 .anyMatch(d -> d.equals(dtoRequest));
 
@@ -475,7 +478,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .currency("UAH")
             .amount(sumToPay * 100).build();
 
-        paymentRequestDto.setSignature(EncryptionUtil
+        paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
 
         return paymentRequestDto;
@@ -493,6 +496,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         mappedFromDtoUser.setUser(currentUser);
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
+            mappedFromDtoUser.setPhoneNumber(
+                phoneNumberFormatterService.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
             return mappedFromDtoUser;

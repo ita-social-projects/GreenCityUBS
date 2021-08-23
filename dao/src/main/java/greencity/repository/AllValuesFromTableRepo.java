@@ -1,11 +1,12 @@
 package greencity.repository;
 
 import greencity.filters.SearchCriteria;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Map;
 
 @Repository
 @AllArgsConstructor

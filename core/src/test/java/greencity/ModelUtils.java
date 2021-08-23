@@ -5,14 +5,12 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -40,7 +38,7 @@ public class ModelUtils {
                 .lastName("Antonov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .phoneNumber("067894522")
+                .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
             .build();

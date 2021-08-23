@@ -5,7 +5,6 @@ import greencity.service.ubs.NotificationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,12 +24,12 @@ public class NotificationControllerTest {
     @Mock
     private NotificationService notificationService;
 
-    @InjectMocks
     private NotificationController notificationController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        this.notificationController = new NotificationController(notificationService);
     }
 
     @Test

@@ -1,11 +1,17 @@
 package greencity.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -48,5 +54,26 @@ public class JwtTool {
             .filter(authHeader -> authHeader.startsWith("Bearer "))
             .map(token -> token.substring(7))
             .orElse(null);
+    }
+
+    /**
+     * Method for creating access token.
+     *
+     * @param email this is email of user.
+     * @param ttl   is token time to live.
+     */
+    public String createAccessToken(String email, int ttl) {
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("authorities", Collections.singleton("ROLE_USER"));
+        Date now = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(now);
+        calendar.add(Calendar.MINUTE, ttl);
+        return Jwts.builder()
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(calendar.getTime())
+            .signWith(SignatureAlgorithm.HS256, accessTokenKey)
+            .compact();
     }
 }

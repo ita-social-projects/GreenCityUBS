@@ -14,9 +14,13 @@ import greencity.entity.user.User;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
+import greencity.ubstelegrambot.TelegramService;
+import greencity.ubsviberbot.ViberServiceImpl;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,37 +29,33 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.stream.Collectors.toMap;
 
 @Service
 @Transactional
+@AllArgsConstructor
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
-    @Autowired
     private NotificationTemplateRepository notificationTemplateRepository;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private UserNotificationRepository userNotificationRepository;
-
-    @Autowired
     private BagRepository bagRepository;
-
-    @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
     private ViolationRepository violationRepository;
-
-    @Autowired
     private NotificationParameterRepository notificationParameterRepository;
+    private Clock clock;
+    private ViberServiceImpl viberService;
+    private TelegramService telegramService;
 
     @Autowired
-    private Clock clock;
+    @Qualifier("singleThreadedExecutor")
+    private ExecutorService executor;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyUnpaidOrders() {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
@@ -78,17 +78,23 @@ public class NotificationServiceImpl implements NotificationService {
                 NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
                     .toString());
                 notificationParameter.setUserNotification(created);
-                notificationParameterRepository.save(notificationParameter);
+                NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
+                created.setParameters(Collections.singleton(createdParameter));
+                sendNotificationsForBots(created);
             }
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyPaidOrder(Order order) {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ORDER_IS_PAID);
         userNotification.setUser(order.getUser());
-        userNotificationRepository.save(userNotification);
+        UserNotification notification = userNotificationRepository.save(userNotification);
+        sendNotificationsForBots(notification);
     }
 
     /**
@@ -110,7 +116,9 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setUser(order.getUser());
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
-        notificationParameterRepository.saveAll(parameters);
+        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+        created.setParameters(new HashSet<>(notificationParameters));
+        sendNotificationsForBots(created);
     }
 
     /**
@@ -143,7 +151,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
-        notificationParameterRepository.saveAll(parameters);
+        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+        created.setParameters(new HashSet<>(notificationParameters));
+        sendNotificationsForBots(created);
     }
 
     /**
@@ -188,7 +198,9 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setUser(order.getUser());
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
-        notificationParameterRepository.saveAll(parameters);
+        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+        created.setParameters(new HashSet<>(notificationParameters));
+        sendNotificationsForBots(created);
     }
 
     /**
@@ -207,7 +219,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
-        notificationParameterRepository.saveAll(parameters);
+        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+        created.setParameters(new HashSet<>(notificationParameters));
+        sendNotificationsForBots(created);
     }
 
     /**
@@ -229,7 +243,8 @@ public class NotificationServiceImpl implements NotificationService {
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
                 userNotification.setNotificationTime(LocalDateTime.now(clock));
-                userNotificationRepository.save(userNotification);
+                UserNotification notification = userNotificationRepository.save(userNotification);
+                sendNotificationsForBots(notification);
             }
         }
     }
@@ -243,21 +258,39 @@ public class NotificationServiceImpl implements NotificationService {
         List<UserNotification> notifications = userNotificationRepository.findAllByUser(user);
         List<NotificationDto> notificationDtos = new LinkedList<>();
         for (UserNotification notification : notifications) {
-            NotificationTemplate template = notificationTemplateRepository
-                .findNotificationTemplateByNotificationTypeAndLanguageCode(
-                    notification.getNotificationType(),
-                    language)
-                .orElseThrow(() -> new NotFoundException("Template not found"));
-            String templateBody = template.getBody();
-            Map<String, String> valuesMap = notification.getParameters().stream()
-                .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
-
-            StringSubstitutor sub = new StringSubstitutor(valuesMap);
-            String resultBody = sub.replace(templateBody);
-
-            notificationDtos.add(NotificationDto.builder().title(template.getTitle())
-                .body(resultBody).build());
+            notificationDtos.add(createNotificationDto(notification, language, notificationTemplateRepository));
         }
         return notificationDtos;
+    }
+
+    private void sendNotificationsForBots(UserNotification notification) {
+        executor.execute(() -> {
+            viberService.sendNotification(notification);
+            telegramService.sendNotification(notification);
+        });
+    }
+
+    /**
+     * Creating notification with parameters.
+     */
+    public static NotificationDto createNotificationDto(UserNotification notification, String language,
+        NotificationTemplateRepository templateRepository) {
+        NotificationTemplate template = templateRepository
+            .findNotificationTemplateByNotificationTypeAndLanguageCode(
+                notification.getNotificationType(),
+                language)
+            .orElseThrow(() -> new NotFoundException("Template not found"));
+        String templateBody = template.getBody();
+        if (notification.getParameters() == null) {
+            notification.setParameters(Collections.emptySet());
+        }
+        Map<String, String> valuesMap = notification.getParameters().stream()
+            .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
+
+        StringSubstitutor sub = new StringSubstitutor(valuesMap);
+        String resultBody = sub.replace(templateBody);
+
+        return NotificationDto.builder().title(template.getTitle())
+            .body(resultBody).build();
     }
 }

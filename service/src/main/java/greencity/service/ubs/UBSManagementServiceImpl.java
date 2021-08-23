@@ -4,33 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-
-import static greencity.constant.ErrorMessage.*;
-
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.PaymentType;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
 import greencity.repository.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -41,6 +31,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -474,8 +474,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User ourUser = order.getUser();
         ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
         ourUser.setViolations(ourUser.getViolations() + 1);
-        notificationService.notifyAddViolation(order);
         userRepository.save(ourUser);
+        notificationService.notifyAddViolation(order);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -1104,11 +1104,58 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public ManualPaymentResponseDto saveNewPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
+    public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         return buildPaymentResponseDto(paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteManualPayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
+        if (payment.getImagePath() != null) {
+            fileService.delete(payment.getImagePath());
+        }
+        paymentRepository.deletePaymentById(paymentId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ManualPaymentResponseDto updateManualPayment(Long paymentId,
+        ManualPaymentRequestDto paymentRequestDto,
+        MultipartFile image) {
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(
+            () -> new PaymentNotFoundException(PAYMENT_NOT_FOUND + paymentId));
+        paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
+        return buildPaymentResponseDto(
+            paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image)));
+    }
+
+    private Payment changePaymentEntity(Payment updatePayment,
+        ManualPaymentRequestDto requestDto,
+        MultipartFile image) {
+        updatePayment.setSettlementDate(requestDto.getPaymentDate());
+        updatePayment.setAmount(requestDto.getAmount());
+        updatePayment.setPaymentId(requestDto.getPaymentId());
+        updatePayment.setReceiptLink(requestDto.getReceiptLink());
+        if (updatePayment.getImagePath() != null) {
+            fileService.delete(updatePayment.getImagePath());
+        }
+        if (image != null) {
+            updatePayment.setImagePath(fileService.upload(image));
+        } else {
+            updatePayment.setImagePath(null);
+        }
+
+        return updatePayment;
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
@@ -1131,6 +1178,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentId(paymentRequestDto.getPaymentId())
             .receiptLink(paymentRequestDto.getReceiptLink())
             .currency("UAH")
+            .paymentType(PaymentType.MANUAL)
             .order(order)
             .orderStatus(order.getOrderStatus().toString())
             .build();

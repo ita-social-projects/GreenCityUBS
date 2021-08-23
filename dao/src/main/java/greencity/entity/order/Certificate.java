@@ -1,10 +1,10 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.CertificateStatus;
-import java.time.LocalDate;
-import java.util.Date;
-import javax.persistence.*;
 import lombok.*;
+
+import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor

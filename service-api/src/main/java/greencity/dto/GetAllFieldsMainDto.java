@@ -2,7 +2,6 @@ package greencity.dto;
 
 import greencity.entity.allfieldsordertable.GetAllValuesFromTable;
 import lombok.*;
-import java.util.List;
 
 @Getter
 @Setter
