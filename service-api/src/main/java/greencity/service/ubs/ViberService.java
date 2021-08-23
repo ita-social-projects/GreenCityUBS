@@ -32,9 +32,9 @@ public interface ViberService {
      * of user.
      *
      * @param receiverId - indicates which user to send the greeting message.
-     * @param context    - contains uuid user.
+     * @param uuid       - contains uuid user.
      */
-    void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String context);
+    void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid);
 
     /**
      * The method sends a message to user and is performed registration of user.
