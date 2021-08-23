@@ -69,10 +69,10 @@ public class ViberServiceImpl implements ViberService {
             .orElseThrow(() -> new UnexistingUuidExeption(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (user.getViberBot() == null) {
             viberBotRepository.save(ViberBot.builder()
-                    .chatId(receiverId)
-                    .isNotify(false)
-                    .user(user)
-                    .build());
+                .chatId(receiverId)
+                .isNotify(false)
+                .user(user)
+                .build());
         } else {
             throw new ViberBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT);
         }
