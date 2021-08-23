@@ -998,4 +998,13 @@ public class ModelUtils {
             .actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
     }
+
+    public static Set<CoordinatesDto> getCoordinatesDtoSet() {
+        Set<CoordinatesDto> set = new HashSet<>();
+        set.add(CoordinatesDto.builder()
+            .latitude(49.83)
+            .longitude(23.88)
+            .build());
+        return set;
+    }
 }

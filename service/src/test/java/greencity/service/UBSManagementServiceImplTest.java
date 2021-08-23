@@ -44,13 +44,16 @@ import org.mockito.*;
 
 import static org.mockito.Mockito.*;
 
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.ui.Model;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -526,5 +529,32 @@ public class UBSManagementServiceImplTest {
 
         assertEquals(1, user.getViolations());
         assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
+    }
+
+    @Test
+    void getClusteredCoordsAlongWithSpecifiedTest() {
+        Coordinates coord = ModelUtils.getCoordinates();
+        Set<Coordinates> result = new HashSet<>();
+        result.add(coord);
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(ModelUtils.getOrderTest());
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(result);
+        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(300);
+        when(orderRepository.undeliveredOrdersGroupThem(anyDouble(), anyDouble())).thenReturn(orderList);
+        when(modelMapper.map(any(), any())).thenAnswer(new Answer() {
+            private int count = 0;
+
+            public Object answer(InvocationOnMock invocation) {
+                if (count == 0) {
+                    count++;
+                    return coord;
+                }
+                return ModelUtils.getOrderDto();
+            }
+        });
+        GroupedOrderDto groupedOrderDto = ubsManagementService
+            .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
+        assertEquals(groupedOrderDto.getAmountOfLitres(), 300);
+        assertEquals(groupedOrderDto.getGroupOfOrders().get(0).equals(ModelUtils.getOrderDto()), true);
     }
 }
