@@ -524,12 +524,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         long amount = order.getPayment().stream()
             .flatMapToLong(p -> LongStream.of(p.getAmount()))
             .reduce(Long::sum).orElse(0);
+        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().get(0).getCurrency();
         return OrderPaymentDetailDto.builder()
             .amount(amount != 0 ? amount + certificatePoints + pointsToUse : 0)
             .certificates(-certificatePoints)
             .pointsToUse(-pointsToUse)
             .amountToPay(amount)
-            .currency(order.getPayment().get(0).getCurrency())
+            .currency(currency)
             .build();
     }
 
