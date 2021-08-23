@@ -660,6 +660,7 @@ public class UBSManagementServiceImplTest {
         assertEquals(groupedOrderDto.getGroupOfOrders().get(0).equals(ModelUtils.getOrderDto()), true);
     }
 
+    @Test
     void testAllUndeliveredOrdersWithLitersThrowException() {
         when(addressRepository.undeliveredOrdersCoords()).thenReturn(ModelUtils.getCoordinatesSet());
 
