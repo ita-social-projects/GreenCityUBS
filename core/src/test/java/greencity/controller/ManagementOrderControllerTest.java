@@ -279,4 +279,13 @@ class ManagementOrderControllerTest {
             .content(contentForUpdatingEmployeeByOrderController))
             .andExpect(status().isCreated());
     }
+
+    @Test
+    void groupCoordsWithSpecifiedOnes() throws Exception {
+        this.mockMvc.perform(
+            post(ubsLink + "/group-undelivered-with-specified")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
+            .andExpect(status().isOk());
+    }
 }
