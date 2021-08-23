@@ -175,19 +175,6 @@ public class RestClient {
     }
 
     /**
-     * The method sends a welcome message to user and is performed pre-registration
-     * of user.
-     *
-     * @param sendMessageToUserDto {@link SendMessageToUserDto}
-     * @return @return {@link String} - which contains the status of success or
-     *         failure.
-     */
-    public ResponseEntity<String> sendWelcomeMessage(SendMessageToUserDto sendMessageToUserDto) {
-        HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
-        return restTemplate.exchange(RestTemplateLinks.SEND_MESSAGE, HttpMethod.POST, entity, String.class);
-    }
-
-    /**
      * The method sends a message to user and is performed registration of user.
      *
      * @param sendMessageToUserDto {@link SendMessageToUserDto}
