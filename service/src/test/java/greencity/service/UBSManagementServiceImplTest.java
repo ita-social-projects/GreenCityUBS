@@ -27,6 +27,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.InjectMocks;
@@ -49,8 +51,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -656,8 +656,8 @@ public class UBSManagementServiceImplTest {
         });
         GroupedOrderDto groupedOrderDto = ubsManagementService
             .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
-        assertEquals(groupedOrderDto.getAmountOfLitres(), 300);
-        assertEquals(groupedOrderDto.getGroupOfOrders().get(0).equals(ModelUtils.getOrderDto()), true);
+        assertEquals(300, groupedOrderDto.getAmountOfLitres());
+        assertEquals(groupedOrderDto.getGroupOfOrders().get(0), getOrderDto());
     }
 
     @Test
