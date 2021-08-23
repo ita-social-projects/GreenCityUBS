@@ -1196,12 +1196,13 @@ public class ModelUtils {
             .confirmedQuantity(10)
             .build();
     }
-  
+
     public static Set<CoordinatesDto> getCoordinatesDtoSet() {
-      Set<CoordinatesDto> set = new HashSet<>();
-      set.add(CoordinatesDto.builder()
-          .latitude(49.83)
-          .longitude(23.88)
-          .build());
-      return set;
+        Set<CoordinatesDto> set = new HashSet<>();
+        set.add(CoordinatesDto.builder()
+            .latitude(49.83)
+            .longitude(23.88)
+            .build());
+        return set;
+    }
 }
