@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.specialized.BlockBlobClient;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.FileNotSavedException;
 import greencity.exceptions.ImageUrlParseException;
@@ -40,14 +41,14 @@ public class AzureCloudStorageService implements FileService {
     @Override
     public String upload(MultipartFile multipartFile) {
         final String blob = UUID.randomUUID().toString();
-        BlobClient client = containerClient()
-            .getBlobClient(blob + multipartFile.getOriginalFilename());
+        BlockBlobClient blockBlobClient = containerClient()
+            .getBlobClient(blob + multipartFile.getOriginalFilename()).getBlockBlobClient();
         try {
-            client.upload(multipartFile.getInputStream(), multipartFile.getSize());
+            blockBlobClient.upload(multipartFile.getInputStream(), multipartFile.getSize());
         } catch (IOException e) {
             throw new FileNotSavedException(ErrorMessage.FILE_NOT_SAVED);
         }
-        return client.getBlobUrl();
+        return blockBlobClient.getBlobUrl();
     }
 
     @Override
@@ -64,9 +65,24 @@ public class AzureCloudStorageService implements FileService {
         }
     }
 
-    private BlobContainerClient containerClient() {
-        BlobServiceClient serviceClient = new BlobServiceClientBuilder()
-            .connectionString(connectionString).buildClient();
-        return serviceClient.getBlobContainerClient(containerName);
+    private BlobServiceClient blobServiceClient(){
+
+        return new BlobServiceClientBuilder()
+                .endpoint("https://csb10032000a548f571.blob.core.windows.net/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacuptfx&se=2021-08-25T21:29:37Z&st=2021-08-25T13:29:37Z&spr=https&sig=rVOqWEvdSvpOzY%2BRAr6FmBi%2BW5vLDFbOP1HccF5A%2BX8%3D")
+                /*.sasToken("?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacuptfx&se=2021-08-25T19:20:48Z&st=2021-08-25T11:20:48Z&spr=" +
+                        "https&sig=V1e21IwYYaAFtzGF2epsjko7mDfjtD%2BKuzRp6DpeG0E%3D")*/
+                .buildClient();
     }
+
+    private BlobContainerClient containerClient() {
+        return blobServiceClient().getBlobContainerClient(containerName);
+    }
+
+
+    /*private BlobClient blobClient(){
+        return containerClient().getBlobClient();
+    }
+*/
+
+
 }
