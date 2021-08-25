@@ -68,6 +68,8 @@ class UBSClientServiceImplTest {
     EncryptionUtil encryptionUtil;
     @Mock
     private PaymentRepository paymentRepository;
+    @Mock
+    private PhoneNumberFormatterService phoneNumberFormatterService;
 
     @Test
     @Transactional
