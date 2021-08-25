@@ -47,4 +47,6 @@
     <include file="db/changelog/logs/ch-add-column-payment-type-Kisliak.xml"/>
     <include file="db/changelog/logs/ch-drop-length-phone-number-ubsUser-pater-liubomyr.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-orders-table.xml"/>
+    <include file="db/changelog/logs/ch-add-table-locations-Kisliak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-last-order-location-Kisliak.xml"/>
 </databaseChangeLog>

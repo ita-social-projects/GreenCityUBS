@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -13,6 +14,7 @@ import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +52,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
+    private final LocationRepository locationRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -85,6 +88,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
+        Location lastLocation = user.getLastLocation();
         if (user != null) {
             currentUserPoints = user.getCurrentPoints();
         }
@@ -93,7 +97,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
+        return new UserPointsAndAllBagsDto(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -148,7 +152,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+        int sumToPay =
+            formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(), dto.getMinAmountOfBigBags());
 
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
@@ -568,16 +573,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
-    private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
+    private int formBagsToBeSavedAndCalculateOrderSum(
+        Map<Integer, Integer> map, List<BagDto> bags, Long minAmountOfBigBags) {
         int sumToPay = 0;
+        int bigBagCounter = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
             sumToPay += bag.getPrice() * temp.getAmount();
+            if (bag.getCapacity() >= 100) {
+                bigBagCounter += temp.getAmount();
+            }
             map.put(temp.getId(), temp.getAmount());
         }
-        if (sumToPay < 500) {
-            throw new IncorrectValueException(MINIMAL_SUM_VIOLATION);
+        if (bigBagCounter < minAmountOfBigBags) {
+            throw new IncorrectValueException(NOT_ENOUGH_BIG_BAGS + minAmountOfBigBags);
         }
 
         return sumToPay;
@@ -706,5 +716,47 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setId(id);
         orderRepository.save(order);
         return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<LocationResponseDto> getAllLocations(String userUuid) {
+        User user = userRepository.findByUuid(userUuid);
+        List<Location> locations = locationRepository.findAll();
+        Location lastOrderLocation = user.getLastLocation();
+
+        if (lastOrderLocation != null) {
+            locations.remove(lastOrderLocation);
+            locations.add(0, lastOrderLocation);
+        }
+        return buildLocationResponseList(locations);
+    }
+
+    private List<LocationResponseDto> buildLocationResponseList(List<Location> locations) {
+        return locations.stream()
+            .map(a -> buildLocationResponseDto(a))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
+        User currentUser = userRepository.findByUuid(userUuid);
+        Location location = locationRepository.findById(locationIdDto.getLocationId())
+            .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
+
+        currentUser.setLastLocation(location);
+        userRepository.save(currentUser);
+    }
+
+    private LocationResponseDto buildLocationResponseDto(Location location) {
+        return LocationResponseDto.builder()
+            .id(location.getId())
+            .name(location.getLocationName())
+            .build();
     }
 }

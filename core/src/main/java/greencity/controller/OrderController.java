@@ -282,4 +282,45 @@ public class OrderController {
         @PathVariable("id") final Long id) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id));
     }
+
+    /**
+     * Controller gets list of locations.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "gets list of locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationResponseDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/order/get-locations")
+    public ResponseEntity<List<LocationResponseDto>> getAllLocationsForPopUp(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.ok(ubsClientService.getAllLocations(userUuid));
+    }
+
+    /**
+     * Controller sets new last order location.
+     *
+     * @param locationId {@link LocationIdDto}
+     * @param userUuid   {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "sets new last order location")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/order/get-locations")
+    public ResponseEntity setNewLastOrderLocationForUser(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody LocationIdDto locationId) {
+        ubsClientService.setNewLastOrderLocation(userUuid, locationId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

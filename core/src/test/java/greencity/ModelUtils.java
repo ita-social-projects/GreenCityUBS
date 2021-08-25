@@ -5,14 +5,12 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -35,6 +33,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .minAmountOfBigBags(10l)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")
@@ -284,6 +283,12 @@ public class ModelUtils {
         return OrderCancellationReasonDto.builder()
             .cancellationReason(CancellationReason.OTHER)
             .cancellationComment("Garbage disappeared")
+            .build();
+    }
+
+    public static LocationIdDto getLocationIdDto() {
+        return LocationIdDto.builder()
+            .locationId(1l)
             .build();
     }
 }
