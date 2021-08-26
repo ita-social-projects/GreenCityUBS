@@ -1166,7 +1166,8 @@ public class ModelUtils {
         list.add(locationResponseDto2);
         return list;
     }
-      private static List<String> createAllLanguageCode() {
+
+    private static List<String> createAllLanguageCode() {
         return List.of("ua", "en");
     }
 
