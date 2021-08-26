@@ -33,7 +33,7 @@ jobs:
           ls /home/runner/work/GreenCityUBS/GreenCityUBS/target/
           echo "*************"
           ls /home/runner/work/GreenCityUBS/GreenCityUBS/target/sites
-          ls build/reports/jacoco/test/jacocoTestReport.xml
+          ls /build/reports/jacoco/test/jacocoTestReport.xml
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Deploy 🚀
         if: ${{ github.event_name == 'push' }}
