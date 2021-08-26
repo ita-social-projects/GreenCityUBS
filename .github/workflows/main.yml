@@ -30,7 +30,7 @@ jobs:
         run: |
           git fetch --unshallow
           mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-city-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes
-          ls /home/runner/work/GreenCityUBS/GreenCityUBS/core/target/sonar/
+          ls /home/runner/work/GreenCityUBS/GreenCityUBS/core/target/
           echo "*************"
           ls /home/runner/work/GreenCityUBS/GreenCityUBS/core/target/surefire-reports
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
