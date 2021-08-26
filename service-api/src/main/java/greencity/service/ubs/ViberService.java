@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.entity.notifications.UserNotification;
 import org.springframework.http.ResponseEntity;
 
 public interface ViberService {
@@ -31,9 +32,9 @@ public interface ViberService {
      * of user.
      *
      * @param receiverId - indicates which user to send the greeting message.
-     * @param context    - contains uuid user.
+     * @param uuid       - contains uuid user.
      */
-    void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String context);
+    void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid);
 
     /**
      * The method sends a message to user and is performed registration of user.
@@ -41,4 +42,9 @@ public interface ViberService {
      * @param receiverId - indicates which user to send the greeting message.
      */
     void sendMessageAndRegisterViberBotForUser(String receiverId);
+
+    /**
+     * The method send a notification to users.
+     */
+    void sendNotification(UserNotification notification);
 }

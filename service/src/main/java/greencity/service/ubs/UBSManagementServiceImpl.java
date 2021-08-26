@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-
-import static greencity.constant.ErrorMessage.*;
-
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -15,24 +12,15 @@ import greencity.entity.enums.PaymentStatus;
 import greencity.entity.enums.PaymentType;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.entity.user.Violation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
 import greencity.repository.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -43,6 +31,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -476,8 +474,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User ourUser = order.getUser();
         ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
         ourUser.setViolations(ourUser.getViolations() + 1);
-        notificationService.notifyAddViolation(order);
         userRepository.save(ourUser);
+        notificationService.notifyAddViolation(order);
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {

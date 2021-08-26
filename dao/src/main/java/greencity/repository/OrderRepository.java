@@ -2,16 +2,15 @@ package greencity.repository;
 
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -20,15 +19,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query(nativeQuery = true, value = "select * "
-        + "from address "
-        + "inner join ubs_user "
-        + "on address.id = ubs_user.address_id "
-        + "inner join orders "
-        + "on orders.ubs_user_id = ubs_user.id "
-        + "where orders.order_status = 'PAID'"
-        + "and address.latitude = :latitude "
-        + "and address.longitude = :longitude")
+    @Query("select o from Address a "
+        + "inner join UBSuser u "
+        + "on a.id = u.address.id "
+        + "inner join Order o "
+        + "on o.ubsUser.id = u.id "
+        + "where o.orderPaymentStatus = 'PAID'"
+        + "and a.coordinates.latitude  > :latitude - 0.000001 and a.coordinates.latitude  < :latitude + 0.000001 "
+        + "and a.coordinates.longitude > :longitude - 0.000001 and a.coordinates.longitude < :longitude + 0.000001 ")
     List<Order> undeliveredOrdersGroupThem(@Param(value = "latitude") double latitude,
         @Param(value = "longitude") double longitude);
 

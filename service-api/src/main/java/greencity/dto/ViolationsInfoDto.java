@@ -1,7 +1,8 @@
 package greencity.dto;
 
-import java.util.Map;
 import lombok.*;
+
+import java.util.Map;
 
 @Getter
 @Setter

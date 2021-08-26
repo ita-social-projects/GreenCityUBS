@@ -17,10 +17,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.exceptions.BadOrderStatusRequestException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.OrderNotFoundException;
-
 import greencity.repository.*;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.util.EncryptionUtil;
@@ -40,7 +36,8 @@ import java.util.*;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -74,6 +71,8 @@ class UBSClientServiceImplTest {
     EncryptionUtil encryptionUtil;
     @Mock
     private PaymentRepository paymentRepository;
+    @Mock
+    private PhoneNumberFormatterService phoneNumberFormatterService;
 
     @Test
     @Transactional

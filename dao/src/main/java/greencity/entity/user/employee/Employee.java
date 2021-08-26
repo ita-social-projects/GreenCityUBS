@@ -1,11 +1,11 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
-import java.util.Set;
-import javax.persistence.*;
-
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
