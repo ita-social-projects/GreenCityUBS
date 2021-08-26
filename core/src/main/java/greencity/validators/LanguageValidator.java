@@ -2,11 +2,12 @@ package greencity.validators;
 
 import greencity.annotations.ValidLanguage;
 import greencity.service.language.LanguageService;
-import java.util.List;
-import java.util.Locale;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Locale;
 
 public class LanguageValidator implements ConstraintValidator<ValidLanguage, Locale> {
     private List<String> codes;

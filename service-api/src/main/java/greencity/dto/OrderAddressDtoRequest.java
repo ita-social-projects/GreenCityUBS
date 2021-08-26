@@ -1,16 +1,18 @@
 package greencity.dto;
 
 import greencity.entity.coords.Coordinates;
+import lombok.*;
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"id"})
 @ToString
 @Builder
 public class OrderAddressDtoRequest {

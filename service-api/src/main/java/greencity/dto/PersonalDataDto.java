@@ -1,14 +1,11 @@
 package greencity.dto;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import greencity.annotations.ValidPhoneNumber;
 import lombok.*;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import java.io.Serializable;
 import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.*;
+import java.io.Serializable;
 
 @Getter
 @Setter
@@ -31,7 +28,7 @@ public class PersonalDataDto implements Serializable {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
     private String lastName;
     @NotBlank
-    @Pattern(regexp = "[0-9]{9}")
+    @ValidPhoneNumber
     private String phoneNumber;
 
     @Length(max = 200)

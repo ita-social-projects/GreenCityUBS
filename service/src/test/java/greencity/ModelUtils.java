@@ -4,13 +4,12 @@ import com.google.common.collect.Lists;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
-
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -19,7 +18,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +45,32 @@ public class ModelUtils {
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
         singletonList(createOrderDetailInfoDto());
+    public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
+    public static final Order GET_ORDER_DETAILS = getOrderDetails();
+
+    public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
+        return DetailsOrderInfoDto.builder()
+            .capacity("One")
+            .sum("Two")
+            .build();
+    }
+
+    public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
+    public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
+    public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
+    public static final EmployeePositionDtoResponse TEST_EMPLOYEE_POSITION_DTO_RESPONSE =
+        createEmployeePositionDtoResponse();
+    public static final Position TEST_POSITION = createPosition();
+    public static final Employee TEST_EMPLOYEE = createEmployee();
+    public static final User TEST_USER = createUser();
+    public static final AdditionalBagInfoDto TEST_ADDITIONAL_BAG_INFO_DTO = createAdditionalBagInfoDto();
+    public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
+    public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
+    public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
+        Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
+    public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
+    public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
+        Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
@@ -321,6 +345,90 @@ public class ModelUtils {
             .groupOfOrders(List.of(OrderDto.builder()
                 .latitude(49.666)
                 .longitude(24.013)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
+        return list;
+    }
+
+    public static List<GroupedOrderDto> getGroupedOrdersWithLiters() {
+        List<GroupedOrderDto> list = new ArrayList<>();
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(75)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.854)
+                .longitude(24.069)
+                .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
+
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.856)
+                .longitude(24.049)
+                .build()))
+            .build());
+        list.add(GroupedOrderDto.builder()
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.862)
+                .longitude(24.039)
                 .build()))
             .build());
         list.add(GroupedOrderDto.builder()
@@ -757,6 +865,16 @@ public class ModelUtils {
             .paymentId(1l)
             .receiptLink("somelink.com")
             .currency("UAH")
+            .imagePath("")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDto() {
+        return ManualPaymentRequestDto.builder()
+            .paymentDate("02-08-2021")
+            .amount(500l)
+            .receiptLink("link")
+            .paymentId(1l)
             .build();
     }
 
@@ -787,6 +905,8 @@ public class ModelUtils {
                     .build())
                 .build())
             .certificates(Collections.emptySet())
+            .cancellationComment("Garbage disappeared")
+            .cancellationReason(CancellationReason.OTHER)
             .pointsToUse(700)
             .build();
     }
@@ -978,5 +1098,111 @@ public class ModelUtils {
         return BagTranslation.builder()
             .id(4L)
             .build();
+    }
+
+    public static OrderCancellationReasonDto getCancellationDto() {
+        return OrderCancellationReasonDto.builder()
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
+            .build();
+    }
+
+    private static OrderAddressDtoRequest createOrderDtoRequest() {
+        return OrderAddressDtoRequest.builder()
+            .id(13L).city("Kyiv").district("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .actual(true).coordinates(new Coordinates(12.5, 34.5))
+            .build();
+    }
+
+    private static List<String> createAllLanguageCode() {
+        return List.of("ua", "en");
+    }
+
+    private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
+        return EmployeePositionDtoResponse.builder()
+            .orderId(1L)
+            .employeeOrderPositionDTOS(createEmployeePositionDto())
+            .build();
+    }
+
+    private static List<EmployeeOrderPositionDTO> createEmployeePositionDto() {
+        return List.of(
+            EmployeeOrderPositionDTO.builder()
+                .name("Test Test")
+                .positionId(2L)
+                .build());
+    }
+
+    private static List<EmployeeOrderPosition> createEmployeeOrderPositionList() {
+        return List.of(
+            EmployeeOrderPosition.builder()
+                .id(1L)
+                .employee(createEmployee())
+                .position(createPosition())
+                .order(createOrder2())
+                .build());
+    }
+
+    private static Position createPosition() {
+        return Position.builder()
+            .id(2L)
+            .build();
+    }
+
+    private static Order createOrder2() {
+        return Order.builder()
+            .id(2L)
+            .build();
+    }
+
+    private static Employee createEmployee() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Test")
+            .lastName("Test")
+            .build();
+    }
+
+    private static Map<String, Object> createMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("Test", new Object());
+        return map;
+    }
+
+    private static List<AdditionalBagInfoDto> createAdditionalBagInfoDtoList() {
+        return Collections.singletonList(createAdditionalBagInfoDto());
+    }
+
+    private static AdditionalBagInfoDto createAdditionalBagInfoDto() {
+        return AdditionalBagInfoDto.builder()
+            .recipientEmail("test@mail.com")
+            .build();
+    }
+
+    private static User createUser() {
+        return User.builder()
+            .id(1L)
+            .recipientEmail("test@mail.com")
+            .build();
+    }
+
+    private static UpdateOrderDetailDto createUpdateOrderDetailDto() {
+        return UpdateOrderDetailDto.builder()
+            .amount(5)
+            .orderId(1L)
+            .bagId(1)
+            .exportedQuantity(10)
+            .confirmedQuantity(10)
+            .build();
+    }
+
+    public static Set<CoordinatesDto> getCoordinatesDtoSet() {
+        Set<CoordinatesDto> set = new HashSet<>();
+        set.add(CoordinatesDto.builder()
+            .latitude(49.83)
+            .longitude(23.88)
+            .build());
+        return set;
     }
 }

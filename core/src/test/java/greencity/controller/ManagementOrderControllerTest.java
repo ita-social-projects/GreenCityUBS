@@ -1,23 +1,10 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import greencity.ModelUtils;
+import greencity.client.RestClient;
 import greencity.dto.*;
 import greencity.service.ubs.UBSManagementService;
-
-import static greencity.ModelUtils.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import greencity.client.RestClient;
-
-import java.security.Principal;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,10 +17,20 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
+
+import java.security.Principal;
+import java.util.Optional;
+
+import static greencity.ModelUtils.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class ManagementOrderControllerTest {
@@ -235,12 +232,38 @@ class ManagementOrderControllerTest {
         MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
             "", "application/json", responseJSON.getBytes());
 
-        mockMvc.perform(multipart(ubsLink + "/add-receipt/{id}", 1)
+        mockMvc.perform(multipart(ubsLink + "/add-manual-payment/{id}", 1)
             .file(jsonFile)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void deleteManualPayment() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/delete-manual-payment/{id}", 1l))
+            .andExpect(status().isOk()).andDo(print());
+    }
+
+    @Test
+    void updateManualPayment() throws Exception {
+        ManualPaymentRequestDto dto = getRequestDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", responseJSON.getBytes());
+
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(ubsLink + "/update-manual-payment/{id}", 1l);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+
+        mockMvc.perform(builder.file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -255,5 +278,14 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(contentForUpdatingEmployeeByOrderController))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void groupCoordsWithSpecifiedOnes() throws Exception {
+        this.mockMvc.perform(
+            post(ubsLink + "/group-undelivered-with-specified")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
+            .andExpect(status().isOk());
     }
 }

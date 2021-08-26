@@ -3,10 +3,10 @@ package greencity.entity.user.ubs;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.user.User;
-import java.util.List;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor

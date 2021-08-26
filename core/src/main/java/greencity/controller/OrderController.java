@@ -2,19 +2,13 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
-import greencity.dto.UbsCustomersDtoUpdate;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import java.util.Locale;
-import javax.validation.constraints.Pattern;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @RestController
@@ -54,13 +49,11 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @ApiLocale
     @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @ApiIgnore @ValidLanguage Locale locale) {
+        @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageData(userUuid, locale.getLanguage()));
+            .body(ubsClientService.getFirstPageData(userUuid));
     }
 
     /**
@@ -213,7 +206,9 @@ public class OrderController {
     @ApiOperation(value = "Get user and ubs_user and violations info in order")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserInfoDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @ApiLocale
     @GetMapping("/user-info/{orderId}")
@@ -241,5 +236,45 @@ public class OrderController {
         @Valid @RequestBody UbsCustomersDtoUpdate dto) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateUbsUserInfoInOrder(dto));
+    }
+
+    /**
+     * Controller updates info about order cancellation reason .
+     *
+     * @param id  {@link Long}.
+     * @param dto {@link OrderCancellationReasonDto}
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "updates info about order cancellation reason ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/order/{id}/cancellation/")
+    public ResponseEntity<OrderCancellationReasonDto> updateCancellationReason(
+        @RequestBody final OrderCancellationReasonDto dto,
+        @PathVariable("id") final Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.updateOrderCancellationReason(id, dto));
+    }
+
+    /**
+     * Controller gets info about order cancellation reason.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "gets info about order cancellation reason ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderCancellationReasonDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/order/{id}/cancellation")
+    public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
+        @PathVariable("id") final Long id) {
+        return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id));
     }
 }

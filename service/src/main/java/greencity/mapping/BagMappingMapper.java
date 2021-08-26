@@ -2,11 +2,12 @@ package greencity.mapping;
 
 import greencity.dto.BagMappingDto;
 import greencity.entity.order.Order;
+import org.modelmapper.AbstractConverter;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.modelmapper.AbstractConverter;
-import org.springframework.stereotype.Component;
 
 @Component
 public class BagMappingMapper extends AbstractConverter<Order, List<BagMappingDto>> {

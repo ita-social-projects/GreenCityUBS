@@ -1,12 +1,13 @@
 package greencity.dto;
 
 import greencity.entity.coords.Coordinates;
-import java.io.Serializable;
+import lombok.*;
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.validator.constraints.Length;
+import java.io.Serializable;
 
 @Getter
 @Setter

@@ -1,18 +1,20 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.ubs.UBSuser;
+import lombok.*;
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.Cascade;
-import greencity.entity.user.employee.EmployeeOrderPosition;
 
 @Entity
 @NoArgsConstructor
@@ -62,6 +64,13 @@ public class Order {
 
     @Column
     private String comment;
+
+    @Column
+    private String cancellationComment;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private CancellationReason cancellationReason;
 
     @Column(columnDefinition = "int default 0")
     private Integer pointsToUse;

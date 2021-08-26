@@ -8,18 +8,17 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.exceptions.BadOrderStatusRequestException;
-import greencity.exceptions.CertificateNotFoundException;
-import greencity.exceptions.OrderNotFoundException;
-
 import greencity.repository.*;
 import greencity.service.ubs.UBSClientServiceImpl;
+import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +26,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
@@ -62,6 +64,112 @@ class UBSClientServiceImplTest {
     private OrderRepository orderRepository;
     @InjectMocks
     UBSClientServiceImpl ubsService;
+    @Mock
+    EncryptionUtil encryptionUtil;
+    @Mock
+    private PaymentRepository paymentRepository;
+    @Mock
+    private PhoneNumberFormatterService phoneNumberFormatterService;
+
+    @Test
+    @Transactional
+    void testValidatePayment() {
+        PaymentResponseDto dto = new PaymentResponseDto();
+        Order order = ModelUtils.getOrder();
+        dto.setOrder_id(order.getId().toString());
+        dto.setResponse_status("approved");
+        dto.setOrder_status("approved");
+        Payment payment = getPayment();
+        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
+        ubsService.validatePayment(dto);
+        verify(paymentRepository, times(1)).save(payment);
+
+    }
+
+    @Test
+    void unvalidValidatePayment() {
+        PaymentResponseDto dto = new PaymentResponseDto();
+        dto.setResponse_status("approved");
+        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
+        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
+    }
+
+    @Test
+    void testValidatePaymentFailureResponse() {
+        PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
+        paymentResponseDto.setResponse_status("failure");
+        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
+    }
+
+    @Test
+    void getFirstPageData() {
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
+            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 600);
+
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(600);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
+
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+    }
+
+    @Test
+    void testSaveToDB() throws InvocationTargetException, IllegalAccessException {
+
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(35);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
+        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+        String result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        assertNotNull(result);
+
+    }
 
     @Test
     void getSecondPageData() {
@@ -351,6 +459,7 @@ class UBSClientServiceImplTest {
         List<Address> addresses = getTestAddresses(user);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
 
         addresses.get(0).setActual(false);
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
@@ -365,6 +474,24 @@ class UBSClientServiceImplTest {
         ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
 
         verify(addressRepository, times(1)).save(addresses.get(0));
+    }
+
+    @Test
+    void testSaveCurrentAddressForOrderThrows() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+        List<Address> addresses = getTestAddresses(user);
+
+        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+        dtoRequest.setId(42L);
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
+
+        assertThrows(AddressAlreadyExistException.class,
+            () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
     }
 
     @Test
@@ -427,5 +554,32 @@ class UBSClientServiceImplTest {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.getOrderPaymentDetail(any()));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
+    }
+
+    @Test
+    void testGetOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+
+    }
+
+    @Test
+    void testUpdateOrderCancellationReason() {
+        OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
+        Order orderDto = ModelUtils.getOrderTest();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        when(orderRepository.save(any())).thenReturn(orderDto);
+        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto);
+
+        assertEquals(dto.getCancellationReason(), result.getCancellationReason());
+        assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+        assert orderDto != null;
+        verify(orderRepository).save(orderDto);
+        verify(orderRepository).findById(1L);
     }
 }
