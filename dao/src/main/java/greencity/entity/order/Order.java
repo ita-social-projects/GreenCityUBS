@@ -112,4 +112,7 @@ public class Order {
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    private List<Event> events;
 }
