@@ -3,7 +3,6 @@ package greencity.repository;
 import greencity.filters.SearchCriteria;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -110,14 +109,7 @@ public class AllValuesFromTableRepo {
      */
     public List<Map<String, Object>> findAllWithSorting(String column, String sortingType, int pages, int size) {
         int offset = pages * size;
-        return jdbcTemplate.queryForList((QUERY + " order by ?, ? limit ? offset ?"), new PreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps) throws SQLException {
-                ps.setString(1, column);
-                ps.setString(2, sortingType);
-                ps.setString(3, Integer.toString(size));
-                ps.setString(4, Integer.toString(offset));
-            }
-        });
+        return jdbcTemplate
+            .queryForList(QUERY + " order by " + column + " " + sortingType + " limit " + size + " offset " + offset);
     }
 }
