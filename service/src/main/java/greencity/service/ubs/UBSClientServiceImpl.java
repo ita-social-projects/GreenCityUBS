@@ -248,18 +248,18 @@ public class UBSClientServiceImpl implements UBSClientService {
                 addressRepo.save(u);
             });
         }
-        Address address;
+        Address address = null;
         Address forOrderAfterUpdate;
-
         if (dtoRequest.getId() != 0) {
             address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+            if (address == null) {
+                throw new AddressNotFoundException(ADDRESS_NOT_FOUND_BY_ID + dtoRequest.getId());
+            }
             forOrderAfterUpdate = modelMapper.map(dtoRequest, Address.class);
-
             if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
                 address = null;
             }
         } else {
-            address = null;
             forOrderAfterUpdate = null;
         }
 
