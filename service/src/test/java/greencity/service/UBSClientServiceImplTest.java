@@ -495,6 +495,19 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testSaveCurrentAddressForOrderThrowsAddressNotFoundException() {
+        String uuid = "5345345erertertertertsdfrq4vv";
+        User user = new User();
+        user.setId(13L);
+        List<Address> addresses = List.of(ModelUtils.address(), ModelUtils.address());
+        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+        dtoRequest.setId(42L);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        assertThrows(AddressNotFoundException.class,
+            () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
+    }
+
+    @Test
     void testDeleteCurrentAddressForOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
