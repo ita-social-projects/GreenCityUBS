@@ -109,13 +109,6 @@ public class AllValuesFromTableRepo {
     public List<Map<String, Object>> findAllWithSorting(String column, String sortingType, int pages, int size) {
         int offset = pages * size;
         return jdbcTemplate
-            .queryForList((QUERY + " order by ? ? limit ? offset ?"),
-                (PreparedStatementCallback<Boolean>) ps -> {
-                    ps.setString(1, column);
-                    ps.setString(2, sortingType);
-                    ps.setString(3, Integer.toString(size));
-                    ps.setString(4, Integer.toString(offset));
-                    return ps.execute();
-                });
+            .queryForList(QUERY + " order by " + column + " " + sortingType + " limit " + size + " offset " + offset);
     }
 }
