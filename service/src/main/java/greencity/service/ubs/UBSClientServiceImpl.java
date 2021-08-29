@@ -88,9 +88,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         Location lastLocation = user.getLastLocation();
-        if (user != null) {
-            currentUserPoints = user.getCurrentPoints();
-        }
 
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()

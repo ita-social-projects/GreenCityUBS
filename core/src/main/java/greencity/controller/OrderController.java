@@ -312,7 +312,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/order/get-locations")
-    public ResponseEntity setNewLastOrderLocationForUser(
+    public ResponseEntity<> setNewLastOrderLocationForUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody LocationIdDto locationId) {
         ubsClientService.setNewLastOrderLocation(userUuid, locationId);

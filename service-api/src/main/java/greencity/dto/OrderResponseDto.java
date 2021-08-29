@@ -41,5 +41,5 @@ public class OrderResponseDto implements Serializable {
     private PersonalDataDto personalData;
 
     @NotNull
-    Long minAmountOfBigBags;
+    private Long minAmountOfBigBags;
 }
