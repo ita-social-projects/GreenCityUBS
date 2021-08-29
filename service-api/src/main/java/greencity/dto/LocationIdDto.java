@@ -9,5 +9,5 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class LocationIdDto {
-    Long locationId;
+    private Long locationId;
 }

@@ -10,6 +10,6 @@ import lombok.*;
 @ToString
 @Builder
 public class LocationResponseDto {
-    public Long id;
-    public String name;
+    private Long id;
+    private String name;
 }
