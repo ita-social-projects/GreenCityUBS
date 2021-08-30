@@ -650,7 +650,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()))
             .getUbsUser().getAddress();
         addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
-        return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+        if (addressRepository.findById(address.getId()).isPresent()) {
+            return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+        }
+        return null;
     }
 
     /**
