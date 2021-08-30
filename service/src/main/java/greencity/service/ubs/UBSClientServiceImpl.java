@@ -250,17 +250,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         Address address;
         Address forOrderAfterUpdate;
-
         if (dtoRequest.getId() != 0) {
             address = addressRepo.findById(dtoRequest.getId()).orElse(null);
             forOrderAfterUpdate = modelMapper.map(dtoRequest, Address.class);
-
-            if (address.getAddressStatus().equals(AddressStatus.DELETED)) {
+            if (address != null && address.getAddressStatus().equals(AddressStatus.DELETED)) {
                 address = null;
             }
         } else {
-            address = null;
             forOrderAfterUpdate = null;
+            address = null;
         }
 
         if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {

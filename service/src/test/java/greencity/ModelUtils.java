@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.CancellationReason;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
@@ -746,6 +743,7 @@ public class ModelUtils {
             .houseNumber(addressDto().getHouseNumber())
             .houseCorpus(addressDto().getHouseCorpus())
             .actual(addressDto().getActual())
+            .addressStatus(AddressStatus.DELETED)
             .build();
     }
 
