@@ -468,7 +468,7 @@ public class UBSManagementServiceImplTest {
 
         verify(orderRepository).findById(1L);
         verify(addressRepository).save(TEST_ADDRESS);
-        verify(addressRepository).findById(TEST_ADDRESS.getId());
+        verify(addressRepository, times(2)).findById(TEST_ADDRESS.getId());
         verify(modelMapper).map(TEST_ADDRESS, OrderAddressDtoResponse.class);
     }
 
