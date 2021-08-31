@@ -23,14 +23,10 @@ public class TelegramService {
     private final OutOfRequestRestClient restClient;
     private final NotificationTemplateRepository templateRepository;
 
-    private void sendMessageToUser(SendMessage sendMessage) {
+    private void sendMessageToUser(SendMessage sendMessage) throws InterruptedException {
         try {
             ubsTelegramBot.execute(sendMessage);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            Thread.sleep(2000);
         } catch (Exception e) {
             throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
         }
@@ -51,7 +47,11 @@ public class TelegramService {
                 notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
             log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
                 notification.getNotificationType());
-            sendMessageToUser(sendMessage);
+            try {
+                sendMessageToUser(sendMessage);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -82,7 +82,11 @@ public class ViberServiceImpl implements ViberService {
             .text("Привіт!\nЦе UbsBot!\n"
                 + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
             .build();
-        sendMessageToUser(sendMessageToUserDto);
+        try {
+            sendMessageToUser(sendMessageToUserDto);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
@@ -101,25 +105,29 @@ public class ViberServiceImpl implements ViberService {
                 .type(MessageType.text)
                 .text("Вітаємо!\nВи підписались на UbsBot")
                 .build();
-            sendMessageToUser(sendMessageToUserDto);
+            try {
+                sendMessageToUser(sendMessageToUserDto);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
                 .receiver(receiverId)
                 .type(MessageType.text)
                 .text("Упс!\nВи вже підписані на UbsBot")
                 .build();
-            sendMessageToUser(sendMessageToUserDto);
-        }
-    }
-
-    private void sendMessageToUser(SendMessageToUserDto sendMessageToUserDto) {
-        try {
-            restClient.sendMessage(sendMessageToUserDto);
             try {
-                Thread.sleep(2000);
+                sendMessageToUser(sendMessageToUserDto);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    private void sendMessageToUser(SendMessageToUserDto sendMessageToUserDto) throws InterruptedException {
+        try {
+            restClient.sendMessage(sendMessageToUserDto);
+            Thread.sleep(2000);
         } catch (Exception e) {
             throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
         }
@@ -144,7 +152,11 @@ public class ViberServiceImpl implements ViberService {
                 .build();
             log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
                 notification.getNotificationType());
-            sendMessageToUser(sendMessageToUserDto);
+            try {
+                sendMessageToUser(sendMessageToUserDto);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
