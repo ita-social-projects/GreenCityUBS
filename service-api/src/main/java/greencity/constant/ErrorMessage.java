@@ -55,6 +55,7 @@ public final class ErrorMessage {
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND_BY_ID = "Address couldn't found by id: ";
+    public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown";
 
     /**
      * Constructor.
