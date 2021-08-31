@@ -27,6 +27,9 @@ public class TelegramService {
         try {
             ubsTelegramBot.execute(sendMessage);
             Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error(ErrorMessage.INTERRUPTED_EXCEPTION);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
         }
