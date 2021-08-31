@@ -108,7 +108,7 @@ public class ViberServiceImpl implements ViberService {
             try {
                 sendMessageToUser(sendMessageToUserDto);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         } else {
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
