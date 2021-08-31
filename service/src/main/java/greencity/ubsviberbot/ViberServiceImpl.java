@@ -118,7 +118,7 @@ public class ViberServiceImpl implements ViberService {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                throw new InterruptedException(ErrorMessage.INTERRUPTED_EXCEPTION);
+                Thread.currentThread().interrupt();
             }
         } catch (Exception e) {
             throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
