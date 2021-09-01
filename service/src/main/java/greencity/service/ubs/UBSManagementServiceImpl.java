@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -99,7 +98,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
-        while (allCoords.size() > 0) {
+        while (!allCoords.isEmpty()) {
             Coordinates currentlyCoord = allCoords.stream().findAny().get();
 
             Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
@@ -111,7 +110,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
                 centralCoord = getNewCentralCoordinate(closeRelatives);
             }
-
             int amountOfLitresInCluster = 0;
             for (Coordinates current : closeRelatives) {
                 int currentCoordinatesCapacity =
@@ -140,7 +138,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
                 amountOfLitresInCluster, allClusters);
         }
-
         return allClusters;
     }
 
@@ -636,8 +633,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        if (orderRepository.findById(orderId).isEmpty()) {
+            throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
+        }
         return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
     }
 
