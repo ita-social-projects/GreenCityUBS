@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -98,47 +97,46 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
-        if (!allCoords.isEmpty()) {
-            while (allCoords.size() > 0) {
-                Coordinates currentlyCoord = allCoords.stream().findAny().get();
 
-                Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
-                    allCoords, currentlyCoord);
-                Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
+        while (!allCoords.isEmpty()) {
+            Coordinates currentlyCoord = allCoords.stream().findAny().get();
 
-                while (!centralCoord.equals(currentlyCoord)) {
-                    currentlyCoord = centralCoord;
-                    closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
-                    centralCoord = getNewCentralCoordinate(closeRelatives);
-                }
-                int amountOfLitresInCluster = 0;
-                for (Coordinates current : closeRelatives) {
-                    int currentCoordinatesCapacity =
-                        addressRepository.capacity(current.getLatitude(), current.getLongitude());
-                    amountOfLitresInCluster += currentCoordinatesCapacity;
-                }
+            Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
+                allCoords, currentlyCoord);
+            Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
 
-                if (amountOfLitresInCluster > litres) {
-                    List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
-                    closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
-                    int indexOfCoordToBeDeleted = -1;
-                    while (amountOfLitresInCluster > litres) {
-                        Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
-                        int anountOfLitresInCurrentOrder = addressRepository
-                            .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
-                        amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
-                        closeRelatives.remove(coordToBeDeleted);
-                    }
-                }
-
-                for (Coordinates grouped : closeRelatives) {
-                    allCoords.remove(grouped);
-                }
-
-                // mapping coordinates to orderDto
-                getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
-                    amountOfLitresInCluster, allClusters);
+            while (!centralCoord.equals(currentlyCoord)) {
+                currentlyCoord = centralCoord;
+                closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
+                centralCoord = getNewCentralCoordinate(closeRelatives);
             }
+            int amountOfLitresInCluster = 0;
+            for (Coordinates current : closeRelatives) {
+                int currentCoordinatesCapacity =
+                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
+                amountOfLitresInCluster += currentCoordinatesCapacity;
+            }
+
+            if (amountOfLitresInCluster > litres) {
+                List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
+                closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
+                int indexOfCoordToBeDeleted = -1;
+                while (amountOfLitresInCluster > litres) {
+                    Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
+                    int anountOfLitresInCurrentOrder = addressRepository
+                        .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
+                    amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
+                    closeRelatives.remove(coordToBeDeleted);
+                }
+            }
+
+            for (Coordinates grouped : closeRelatives) {
+                allCoords.remove(grouped);
+            }
+
+            // mapping coordinates to orderDto
+            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
+                amountOfLitresInCluster, allClusters);
         }
         return allClusters;
     }
