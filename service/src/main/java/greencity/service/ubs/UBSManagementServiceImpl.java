@@ -529,7 +529,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(
-            SearchCriteria searchCriteria, int pages, int size) {
+        SearchCriteria searchCriteria, int pages, int size) {
         List<AllFieldsFromTableDto> ourDtos = new ArrayList<>();
         if (searchCriteria.getPayment() == null) {
             searchCriteria.setPayment("");
