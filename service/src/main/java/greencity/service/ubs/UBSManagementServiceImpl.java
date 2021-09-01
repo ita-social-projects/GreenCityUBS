@@ -635,7 +635,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        if (orderRepository.findById(orderId).isPresent()) {
+        if (orderRepository.findById(orderId).isEmpty()) {
             throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
         return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
