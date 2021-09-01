@@ -98,7 +98,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
-        while (allCoords.size() > 0) {
+        while (!allCoords.isEmpty()) {
             Optional<Coordinates> any = allCoords.stream().findAny();
             any.ifPresent(coordinates -> {
                 Coordinates currentlyCoord = coordinates;
