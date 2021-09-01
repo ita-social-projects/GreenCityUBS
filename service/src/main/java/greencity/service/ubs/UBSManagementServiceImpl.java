@@ -103,7 +103,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 Coordinates currentlyCoord = allCoords.stream().findAny().get();
 
                 Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
-                        allCoords, currentlyCoord);
+                    allCoords, currentlyCoord);
                 Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
 
                 while (!centralCoord.equals(currentlyCoord)) {
@@ -114,7 +114,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 int amountOfLitresInCluster = 0;
                 for (Coordinates current : closeRelatives) {
                     int currentCoordinatesCapacity =
-                            addressRepository.capacity(current.getLatitude(), current.getLongitude());
+                        addressRepository.capacity(current.getLatitude(), current.getLongitude());
                     amountOfLitresInCluster += currentCoordinatesCapacity;
                 }
 
@@ -125,7 +125,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     while (amountOfLitresInCluster > litres) {
                         Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                         int anountOfLitresInCurrentOrder = addressRepository
-                                .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
+                            .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
                         amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
                         closeRelatives.remove(coordToBeDeleted);
                     }
@@ -137,7 +137,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
                 // mapping coordinates to orderDto
                 getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
-                        amountOfLitresInCluster, allClusters);
+                    amountOfLitresInCluster, allClusters);
             }
         }
         return allClusters;
