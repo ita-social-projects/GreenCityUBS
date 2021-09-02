@@ -14,6 +14,8 @@ import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import greencity.exceptions.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.ViberBotRepository;
 import greencity.service.NotificationServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,12 @@ public class ViberServiceImplTest {
 
     @Mock
     private RestClient restClient;
+
+    @Mock
+    UserRepository userRepository;
+
+    @Mock
+    ViberBotRepository viberBotRepository;
 
     @InjectMocks
     private ViberServiceImpl viberService;
@@ -73,6 +81,31 @@ public class ViberServiceImplTest {
     }
 
     @Test
+    public void testSendWelcomeMessageAndPreRegisterViberBotForUser() {
+        prepareTest();
+        User unauthorizedUser = user;
+        unauthorizedUser.setViberBot(null);
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(unauthorizedUser));
+        when(viberBotRepository.save(any())).thenReturn(user.getViberBot());
+        viberService.sendWelcomeMessageAndPreRegisterViberBotForUser("42", "32L");
+        verify(viberBotRepository, times(1)).save(any());
+        verify(userRepository, times(1)).findUserByUuid(anyString());
+    }
+
+    @Test
+    public void testSendMessageAndRegisterViberBotForUser() {
+        prepareTest();
+        User noBotUser = user;
+        noBotUser.setViberBot(ViberBot.builder().id(1L).chatId("1").isNotify(false).build());
+        when(viberBotRepository.findViberBotByChatId(anyString())).thenReturn(Optional.of(noBotUser.getViberBot()));
+        when(viberBotRepository.save(any())).thenReturn(user.getViberBot());
+        viberService.sendMessageAndRegisterViberBotForUser("1");
+        viberService.sendMessageAndRegisterViberBotForUser("2");
+        verify(viberBotRepository, times(1)).save(any());
+        verify(viberBotRepository, times(2)).findViberBotByChatId(any());
+    }
+
+    @Test
     public void testSendNotification() {
         prepareTest();
         NotificationDto notificationDto = NotificationServiceImpl
@@ -98,5 +131,4 @@ public class ViberServiceImplTest {
         when(restClient.sendMessage(any())).thenThrow(new RuntimeException());
         viberService.sendNotification(notification);
     }
-
 }
