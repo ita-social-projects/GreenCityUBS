@@ -22,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RestClient {
     private static final String TOKEN_HEADER_NAME = "X-Viber-Auth-Token";
+    private static final String EMAIL = "?email=";
     private final RestTemplate restTemplate;
     @Value("${greencityuser.server.address}")
     private String greenCityUserServerAddress;
@@ -48,7 +49,7 @@ public class RestClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+        HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
 
         return restTemplate.exchange(RestTemplateLinks.FONDY_LINK, HttpMethod.POST, entity,
             String.class).getBody();
@@ -63,7 +64,7 @@ public class RestClient {
     public Long findIdByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-            + "/user/findIdByEmail" + "?email=" + email, HttpMethod.GET, entity, Long.class)
+            + "/user/findIdByEmail" + EMAIL + email, HttpMethod.GET, entity, Long.class)
             .getBody();
     }
 
