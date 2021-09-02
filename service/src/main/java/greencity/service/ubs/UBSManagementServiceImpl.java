@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -99,8 +98,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
-        while (allCoords.size() > 0) {
-            Coordinates currentlyCoord = allCoords.stream().findAny().get();
+        while (!allCoords.isEmpty()) {
+            Optional<Coordinates> any = allCoords.stream().findAny();
+            mainBlockOfGetClusteredCoords(allCoords, distance, litres, any, allClusters);
+        }
+        return allClusters;
+    }
+
+    private void mainBlockOfGetClusteredCoords(Set<Coordinates> allCoords, double distance,
+        int litres, Optional<Coordinates> any, List<GroupedOrderDto> allClusters) {
+        any.ifPresent(coordinates -> {
+            Coordinates currentlyCoord = coordinates;
 
             Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
                 allCoords, currentlyCoord);
@@ -111,18 +119,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
                 centralCoord = getNewCentralCoordinate(closeRelatives);
             }
-
             int amountOfLitresInCluster = 0;
             for (Coordinates current : closeRelatives) {
                 int currentCoordinatesCapacity =
                     addressRepository.capacity(current.getLatitude(), current.getLongitude());
                 amountOfLitresInCluster += currentCoordinatesCapacity;
             }
-
             if (amountOfLitresInCluster > litres) {
                 List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
                 closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
                 int indexOfCoordToBeDeleted = -1;
+
                 while (amountOfLitresInCluster > litres) {
                     Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                     int anountOfLitresInCurrentOrder = addressRepository
@@ -131,7 +138,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     closeRelatives.remove(coordToBeDeleted);
                 }
             }
-
             for (Coordinates grouped : closeRelatives) {
                 allCoords.remove(grouped);
             }
@@ -139,9 +145,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             // mapping coordinates to orderDto
             getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
                 amountOfLitresInCluster, allClusters);
-        }
-
-        return allClusters;
+        });
     }
 
     /**
@@ -636,8 +640,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ReadAddressByOrderDto getAddressByOrderId(Long orderId) {
-        orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
+        if (orderRepository.findById(orderId).isEmpty()) {
+            throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
+        }
         return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
     }
 
@@ -650,7 +655,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId()))
             .getUbsUser().getAddress();
         addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
-        return modelMapper.map(addressRepository.findById(address.getId()).get(), OrderAddressDtoResponse.class);
+        Optional<Address> optionalAddress = addressRepository.findById(address.getId());
+        return optionalAddress.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class)).orElse(null);
     }
 
     /**

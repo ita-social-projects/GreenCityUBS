@@ -11,6 +11,11 @@ import java.util.Map;
 @Repository
 @AllArgsConstructor
 public class AllValuesFromTableRepo {
+    private static final String WHERE_ORDERS_ORDER_STATUS_LIKE = " where orders.order_status like '%";
+    private static final String AND_PAYMENT_SYSTEM_LIKE = "and payment_system like '%";
+    private static final String AND_RECEIVING_STATION_LIKE = "and receiving_station like '%";
+    private static final String AND_DISTRICT_LIKE = " and district like  '%";
+
     private final JdbcTemplate jdbcTemplate;
     private static final String QUERY =
         "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
@@ -64,33 +69,33 @@ public class AllValuesFromTableRepo {
         int offset = pages * size;
         if (searchCriteria.getViolationsAmount() != null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
-                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
-                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
-                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
+                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
+                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
                     + "and violations = " + searchCriteria.getViolationsAmount()
-                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
                     + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
         } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() == null) {
             return jdbcTemplate
-                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
-                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
-                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
-                    + "and district like  '%" + searchCriteria.getDistrict() + "%'"
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
+                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
+                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
+                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
                     + " limit " + size + " offset " + offset);
         } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
-                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
-                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
-                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
-                    + " and district like  '%" + searchCriteria.getDistrict() + "%'"
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
+                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
+                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
+                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
                     + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
         } else {
             return jdbcTemplate
-                .queryForList(QUERY + " where orders.order_status like '%" + searchCriteria.getOrderStatus() + "%'"
-                    + "and payment_system like '%" + searchCriteria.getPayment() + "%'"
-                    + "and receiving_station like '%" + searchCriteria.getReceivingStation() + "%'"
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
+                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
+                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
                     + "and violations = " + searchCriteria.getViolationsAmount()
-                    + " and district like  '%" + searchCriteria.getDistrict() + "%'");
+                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'");
         }
     }
 

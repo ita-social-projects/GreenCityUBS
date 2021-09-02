@@ -56,6 +56,8 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String NOT_ENOUGH_BIG_BAGS = "The minimal amount of big bags is ";
+    public static final String ADDRESS_NOT_FOUND_BY_ID = "Address couldn't found by id: ";
+    public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
 
     /**
      * Constructor.

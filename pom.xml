@@ -18,7 +18,7 @@
     <groupId>com.greencity</groupId>
     <artifactId>ubs</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ubs</name>
+    <name>Green City UBS</name>
     <description>Demo project for UBS</description>
 
     <properties>
