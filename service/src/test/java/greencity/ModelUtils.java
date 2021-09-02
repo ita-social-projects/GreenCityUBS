@@ -563,6 +563,7 @@ public class ModelUtils {
         return AddingViolationsToUserDto.builder()
             .orderID(1L)
             .violationDescription("String string string")
+            .violationLevel("low")
             .build();
     }
 
@@ -794,7 +795,7 @@ public class ModelUtils {
         return Violation.builder()
             .id(1L)
             .user(User.builder()
-                .recipientName("Alan Po").build())
+                .recipientName("Alan Po").violations(1).build())
             .order(Order.builder()
                 .id(1L).build())
             .violationLevel(MAJOR)
