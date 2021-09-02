@@ -284,4 +284,10 @@ public class ModelUtils {
             .cancellationComment("Garbage disappeared")
             .build();
     }
+
+    public static LocationIdDto getLocationIdDto() {
+        return LocationIdDto.builder()
+            .locationId(1l)
+            .build();
+    }
 }

@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -12,6 +13,16 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,15 +30,6 @@ import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -49,6 +51,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
+    private final LocationRepository locationRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -84,15 +87,28 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
-        if (user != null) {
-            currentUserPoints = user.getCurrentPoints();
-        }
-
+        currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) {
+        int currentUserPoints = 0;
+        User user = userRepository.findByUuid(uuid);
+        Location lastLocation = user.getLastLocation();
+        currentUserPoints = user.getCurrentPoints();
+        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
+            .stream()
+            .map(this::buildBagTranslationDto)
+            .collect(Collectors.toList());
+        return new UserPointsAndAllBagsDtoTest(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -566,7 +582,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
-    private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
+    private int formBagsToBeSavedAndCalculateOrderSum(
+        Map<Integer, Integer> map, List<BagDto> bags) {
         int sumToPay = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
@@ -574,10 +591,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
-        if (sumToPay < 500) {
-            throw new IncorrectValueException(MINIMAL_SUM_VIOLATION);
-        }
-
         return sumToPay;
     }
 
@@ -704,5 +717,47 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setId(id);
         orderRepository.save(order);
         return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<LocationResponseDto> getAllLocations(String userUuid) {
+        User user = userRepository.findByUuid(userUuid);
+        List<Location> locations = locationRepository.findAll();
+        Location lastOrderLocation = user.getLastLocation();
+
+        if (lastOrderLocation != null) {
+            locations.remove(lastOrderLocation);
+            locations.add(0, lastOrderLocation);
+        }
+        return buildLocationResponseList(locations);
+    }
+
+    private List<LocationResponseDto> buildLocationResponseList(List<Location> locations) {
+        return locations.stream()
+            .map(a -> buildLocationResponseDto(a))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
+        User currentUser = userRepository.findByUuid(userUuid);
+        Location location = locationRepository.findById(locationIdDto.getLocationId())
+            .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
+
+        currentUser.setLastLocation(location);
+        userRepository.save(currentUser);
+    }
+
+    private LocationResponseDto buildLocationResponseDto(Location location) {
+        return LocationResponseDto.builder()
+            .id(location.getId())
+            .name(location.getLocationName())
+            .build();
     }
 }
