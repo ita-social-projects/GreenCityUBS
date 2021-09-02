@@ -200,10 +200,10 @@ public class ManagementOrderController {
     })
     @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping(value = "/addViolationToUser")
-    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestBody AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale) {
-        ubsManagementService.addUserViolation(add);
+    @PostMapping(value = "/addViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
+        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) MultipartFile[] files) {
+        ubsManagementService.addUserViolation(add, files);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -717,5 +717,27 @@ public class ManagementOrderController {
         @RequestBody @Valid EmployeePositionDtoResponse dto) {
         ubsManagementService.updatePositions(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating User violation.
+     *
+     * @author Bohdan Melnyk
+     */
+    @ApiOperation("Update Violation to User")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @ApiLocale
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
+        @RequestPart(required = false) MultipartFile[] multipartFiles) {
+        ubsManagementService.updateUserViolation(add, multipartFiles);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

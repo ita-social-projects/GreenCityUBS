@@ -5,10 +5,7 @@ import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
-import greencity.entity.enums.PaymentType;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
@@ -472,14 +469,39 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void addUserViolation(AddingViolationsToUserDto add) {
+    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
         Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User ourUser = order.getUser();
-        ourUser.getViolationsDescription().put(order.getId(), add.getViolationDescription());
-        ourUser.setViolations(ourUser.getViolations() + 1);
-        userRepository.save(ourUser);
+        User user = order.getUser();
+        Violation violation = violationBuilder(add, order, user);
+        if (multipartFiles.length > 0) {
+            List<String> images = new LinkedList<>();
+            for (int i = 0; i < multipartFiles.length; i++) {
+                images.add(fileService.upload(multipartFiles[i]));
+            }
+            violation.setImage(String.join("; ", images));
+        }
+        if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
+            if (user.getViolations() < 0) {
+                user.setViolations(0);
+            }
+            user.setViolations(user.getViolations() + 1);
+            violationRepository.save(violation);
+            userRepository.save(user);
+        } else {
+            throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
+        }
         notificationService.notifyAddViolation(order);
+    }
+
+    private Violation violationBuilder(AddingViolationsToUserDto add, Order order, User user) {
+        return Violation.builder()
+            .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
+            .description(add.getViolationDescription())
+            .violationDate(order.getOrderDate())
+            .order(order)
+            .user(user)
+            .build();
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -895,9 +917,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void deleteViolation(Long id) {
         Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
         if (violationOptional.isPresent()) {
+            if (violationOptional.get().getImage() != null) {
+                List<String> images = new LinkedList<>(Arrays.asList(violationOptional.get().getImage().split("; ")));
+                for (int i = 0; i < images.size(); i++) {
+                    fileService.delete(images.get(i));
+                }
+            }
             violationRepository.deleteById(violationOptional.get().getId());
+            User user = violationOptional.get().getUser();
+            if (user.getViolations() <= 0) {
+                user.setViolations(0);
+            } else {
+                user.setViolations(user.getViolations() - 1);
+            }
+            userRepository.save(user);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
+            throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
         }
     }
 
@@ -1249,5 +1284,40 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         }
         employeeOrderPositionRepository.saveAll(employeeOrderPositions);
+    }
+
+    @Override
+    public void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
+        Violation violation = violationRepository.findByOrderId(add.getOrderID())
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
+        updateViolation(violation, add, multipartFiles);
+        violationRepository.save(violation);
+    }
+
+    private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
+        violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
+        violation.setDescription(add.getViolationDescription());
+        if (violation.getImage() != null) {
+            List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
+            for (int i = 0; i < images.size(); i++) {
+                fileService.delete(images.get(i));
+            }
+            violation.setImage(null);
+            images.clear();
+            if (multipartFiles.length > 0) {
+                for (int i = 0; i < multipartFiles.length; i++) {
+                    images.add(fileService.upload(multipartFiles[i]));
+                }
+                violation.setImage(String.join("; ", images));
+            }
+        } else {
+            if (multipartFiles.length > 0) {
+                List<String> images = new LinkedList<>();
+                for (int i = 0; i < multipartFiles.length; i++) {
+                    images.add(fileService.upload(multipartFiles[i]));
+                }
+                violation.setImage(String.join("; ", images));
+            }
+        }
     }
 }
