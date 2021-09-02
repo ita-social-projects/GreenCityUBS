@@ -99,7 +99,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<GroupedOrderDto> allClusters = new ArrayList<>();
 
         while (!allCoords.isEmpty()) {
-            Coordinates currentlyCoord = allCoords.stream().findAny().get();
+            Optional<Coordinates> any = allCoords.stream().findAny();
+            mainBlockOfGetClusteredCoords(allCoords, distance, litres, any, allClusters);
+        }
+        return allClusters;
+    }
+
+    private void mainBlockOfGetClusteredCoords(Set<Coordinates> allCoords, double distance,
+        int litres, Optional<Coordinates> any, List<GroupedOrderDto> allClusters) {
+        any.ifPresent(coordinates -> {
+            Coordinates currentlyCoord = coordinates;
 
             Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
                 allCoords, currentlyCoord);
@@ -116,11 +125,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     addressRepository.capacity(current.getLatitude(), current.getLongitude());
                 amountOfLitresInCluster += currentCoordinatesCapacity;
             }
-
             if (amountOfLitresInCluster > litres) {
                 List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
                 closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
                 int indexOfCoordToBeDeleted = -1;
+
                 while (amountOfLitresInCluster > litres) {
                     Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
                     int anountOfLitresInCurrentOrder = addressRepository
@@ -129,7 +138,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     closeRelatives.remove(coordToBeDeleted);
                 }
             }
-
             for (Coordinates grouped : closeRelatives) {
                 allCoords.remove(grouped);
             }
@@ -137,8 +145,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             // mapping coordinates to orderDto
             getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
                 amountOfLitresInCluster, allClusters);
-        }
-        return allClusters;
+        });
     }
 
     /**
