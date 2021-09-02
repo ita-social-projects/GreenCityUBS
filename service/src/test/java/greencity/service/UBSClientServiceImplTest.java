@@ -123,6 +123,22 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getFirstPageDataTest() {
+        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoExpected =
+            new UserPointsAndAllBagsDtoTest(new ArrayList<BagTranslationDto>(), 2l, 600);
+
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(600);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+
+        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageDataTest("35467585763t4sfgchjfuyetf");
+
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+    }
+
+    @Test
     void testSaveToDB() throws InvocationTargetException, IllegalAccessException {
 
         User user = ModelUtils.getUserWithLastLocation();
@@ -666,4 +682,5 @@ class UBSClientServiceImplTest {
 
         assertEquals(user.getLastLocation(), lastLocation);
     }
+
 }
