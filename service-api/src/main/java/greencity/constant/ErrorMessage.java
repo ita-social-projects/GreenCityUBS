@@ -56,6 +56,9 @@ public final class ErrorMessage {
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
     public static final String ADDRESS_NOT_FOUND_BY_ID = "Address couldn't found by id: ";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
+    public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
+    public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
+    public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
 
     /**
      * Constructor.
