@@ -79,7 +79,6 @@ public class ModelUtils {
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
-            .minAmountOfBigBags(1l)
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .personalData(PersonalDataDto.builder()

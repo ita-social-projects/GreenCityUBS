@@ -10,8 +10,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserPointsAndAllBagsDto implements Serializable {
+public class UserPointsAndAllBagsDtoTest implements Serializable {
     private List<BagTranslationDto> bags;
+
+    private Long minAmountOfBigBags;
 
     private int points;
 }

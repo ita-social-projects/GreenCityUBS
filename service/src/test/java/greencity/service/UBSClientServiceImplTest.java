@@ -108,8 +108,8 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageData() {
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 2l, 600);
+        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoExpected =
+            new UserPointsAndAllBagsDtoTest(new ArrayList<BagTranslationDto>(), 2l, 600);
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
@@ -184,7 +184,7 @@ class UBSClientServiceImplTest {
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.setMinAmountOfBigBags(10000l);
+//        dto.setMinAmountOfBigBags(10000l);
         dto.getBags().get(0).setAmount(35);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());

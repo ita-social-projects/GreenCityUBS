@@ -33,7 +33,6 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .minAmountOfBigBags(10l)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")

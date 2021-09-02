@@ -24,6 +24,13 @@ public interface UBSClientService {
     UserPointsAndAllBagsDto getFirstPageData(String uuid);
 
     /**
+     * test method for frontend.
+     * 
+     * @author Denys Kisliak
+     */
+    UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid);
+
+    /**
      * Methods returns all saved user data.
      *
      * @param uuid current {@link User}'s uuid.
