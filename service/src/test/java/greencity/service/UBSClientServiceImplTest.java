@@ -8,10 +8,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -33,6 +30,7 @@ import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
@@ -73,6 +71,8 @@ class UBSClientServiceImplTest {
     private PaymentRepository paymentRepository;
     @Mock
     private PhoneNumberFormatterService phoneNumberFormatterService;
+    @Mock
+    private EventRepository eventRepository;
 
     @Test
     @Transactional
@@ -683,4 +683,29 @@ class UBSClientServiceImplTest {
         assertEquals(user.getLastLocation(), lastLocation);
     }
 
+    @Test
+    void testGelAllEventsFromOrderByOrderId() {
+        List<Event> orderEvents = ModelUtils.getListOfEvents();
+        when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
+        List<EventDto> eventDTOS = orderEvents.stream()
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .collect(Collectors.toList());
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrderById(1L));
+    }
+
+    @Test
+    void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsService.getAllEventsForOrderById(1L));
+    }
+
+    @Test
+    void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
+        assertThrows(EventsNotFoundException.class,
+            () -> ubsService.getAllEventsForOrderById(1L));
+    }
 }

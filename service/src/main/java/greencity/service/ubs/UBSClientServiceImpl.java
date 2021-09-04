@@ -52,6 +52,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
+    private final EventRepository eventRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -624,6 +625,25 @@ public class UBSClientServiceImpl implements UBSClientService {
         allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
         allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
         return allBonusesForUserDto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EventDto> getAllEventsForOrderById(Long orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isEmpty()) {
+            throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
+        if (orderEvents.isEmpty()) {
+            throw new EventsNotFoundException(ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+        return orderEvents
+            .stream()
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .collect(Collectors.toList());
     }
 
     private Integer sumUserPoints(List<Order> allByUserId) {
