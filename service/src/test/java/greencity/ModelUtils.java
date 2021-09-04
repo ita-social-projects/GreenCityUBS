@@ -71,6 +71,54 @@ public class ModelUtils {
     public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
         Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
 
+    public static Optional<Order> getOrderWithEvents() {
+        return Optional.of(Order.builder()
+            .id(1L)
+            .events(List.of(Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build()))
+            .build());
+    }
+
+    public static List<Event> getListOfEvents() {
+        return List.of(Event.builder()
+            .id(1L)
+            .authorName("Igor")
+            .eventDate(LocalDateTime.now())
+            .authorName("Igor")
+            .order(new Order())
+            .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build());
+    }
+
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
