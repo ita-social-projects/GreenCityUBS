@@ -196,7 +196,7 @@ class UBSClientServiceImplTest {
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, user);
+        Location location = new Location(1l, "Name", 100l, List.of(user));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
