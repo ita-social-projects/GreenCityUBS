@@ -433,7 +433,6 @@ class UBSClientServiceImplTest {
         assertEquals(expected, actual);
     }
 
-
     void saveProfileData() {
         User user = new User();
         user.setId(13L);
@@ -447,7 +446,7 @@ class UBSClientServiceImplTest {
         UBSuser ubSuser = getUBSuser();
         Optional<UBSuser> optionalUBSuser = Optional.of(ubSuser);
         PersonalDataDto dto = PersonalDataDto.builder().email(ubSuser.getEmail()).firstName(ubSuser.getFirstName())
-        .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).build();
+            .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).build();
         dto.setId(1L);
         lenient().when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
         when(userRepository.save(user)).thenReturn(user);
