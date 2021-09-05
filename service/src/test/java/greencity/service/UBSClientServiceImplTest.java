@@ -433,7 +433,7 @@ class UBSClientServiceImplTest {
         assertEquals(expected, actual);
     }
 
-    @Test
+
     void saveProfileData() {
         User user = new User();
         user.setId(13L);
@@ -442,12 +442,22 @@ class UBSClientServiceImplTest {
         UserProfileDto userProfileDto = new UserProfileDto();
         AddressDto addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
+        userProfileDto.setRecipientEmail("mail@mail.ua");
         Address address = ModelUtils.address();
-        when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
+        UBSuser ubSuser = getUBSuser();
+        Optional<UBSuser> optionalUBSuser = Optional.of(ubSuser);
+        PersonalDataDto dto = PersonalDataDto.builder().email(ubSuser.getEmail()).firstName(ubSuser.getFirstName())
+        .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).build();
+        dto.setId(1L);
+        lenient().when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
         when(userRepository.save(user)).thenReturn(user);
         when(addressRepository.save(address)).thenReturn(address);
-        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
-        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        when(ubsUserRepository.findByEmail("mail@mail.ua")).thenReturn(optionalUBSuser);
+        when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
+        when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
+        lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.saveProfileData(uuid, userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
