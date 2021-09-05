@@ -688,7 +688,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private User setUserData(User user, UserProfileDto userProfileDto) {
         user.setRecipientName(userProfileDto.getRecipientName());
         user.setRecipientSurname(userProfileDto.getRecipientSurname());
-        user.setRecipientPhone(phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
+        user.setRecipientPhone(
+            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
     }
@@ -784,7 +785,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
-        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName()).lastName(userProfileDto.getRecipientSurname())
+        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
+            .lastName(userProfileDto.getRecipientSurname())
             .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
         Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
             .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST)).getId();

@@ -244,8 +244,8 @@ public interface UBSClientService {
      * Methods for saving UbsUser when User is saving profile data.
      *
      * @param userProfileDto {@link UserProfileDto}.
-     * @param savedUser {@link User}.
-     * @param savedAddress {@link Address}.
+     * @param savedUser      {@link User}.
+     * @param savedAddress   {@link Address}.
      * @author Liyubomy Pater.
      */
     void createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
