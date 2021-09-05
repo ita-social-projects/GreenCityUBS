@@ -3,6 +3,7 @@ package greencity.entity.user;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @EqualsAndHashCode(exclude = "user")
@@ -22,6 +23,6 @@ public class Location {
     @Column(name = "min_amount_of_big_bags")
     Long minAmountOfBigBags;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "lastLocation")
-    User user;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
+    List<User> user;
 }

@@ -76,7 +76,7 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Violation> violationsList;
 
-    @OneToOne()
+    @ManyToOne()
     @JoinColumn(name = "last_order_location", referencedColumnName = "id")
     private Location lastLocation;
 }
