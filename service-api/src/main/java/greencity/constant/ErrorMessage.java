@@ -54,6 +54,14 @@ public final class ErrorMessage {
     public static final String NOT_FOUND_ADDRESS_BY_USER_UUID = "Not found address for user. ";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
+    public static final String LOCATION_DOESNT_FOUND = "Location does not found";
+    public static final String NOT_ENOUGH_BIG_BAGS = "The minimal amount of big bags is ";
+    public static final String ADDRESS_NOT_FOUND_BY_ID = "Address couldn't found by id: ";
+    public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
+    public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
+    public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
+    public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
+    public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
 
     /**
      * Constructor.

@@ -64,8 +64,8 @@ public class ViberServiceImpl implements ViberService {
      * {@inheritDoc}
      */
     @Override
-    public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String context) {
-        User user = userRepository.findUserByUuid(context)
+    public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid) {
+        User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UnexistingUuidExeption(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (user.getViberBot() == null) {
             viberBotRepository.save(ViberBot.builder()
@@ -73,10 +73,6 @@ public class ViberServiceImpl implements ViberService {
                 .isNotify(false)
                 .user(user)
                 .build());
-            ViberBot viberBot = viberBotRepository.findByChatId(receiverId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
-            user.setViberBot(viberBot);
-            userRepository.save(user);
         } else {
             throw new ViberBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT);
         }
@@ -86,7 +82,7 @@ public class ViberServiceImpl implements ViberService {
             .text("Привіт!\nЦе UbsBot!\n"
                 + "Надішли будь який символ для того щоб підписатись на бота і отримувати сповіщення.")
             .build();
-        restClient.sendWelcomeMessage(sendMessageToUserDto);
+        sendMessageToUser(sendMessageToUserDto);
     }
 
     /**
@@ -95,9 +91,9 @@ public class ViberServiceImpl implements ViberService {
     @Override
     public void sendMessageAndRegisterViberBotForUser(String receiverId) {
         ViberBot viberBot = viberBotRepository
-            .findByChatId(receiverId)
+            .findViberBotByChatId(receiverId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
-        if (viberBot.getChatId().equals(receiverId) && viberBot.getIsNotify().equals(false)) {
+        if (viberBot.getChatId().equals(receiverId) && !viberBot.getIsNotify()) {
             viberBot.setIsNotify(true);
             viberBotRepository.save(viberBot);
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
@@ -120,6 +116,9 @@ public class ViberServiceImpl implements ViberService {
         try {
             restClient.sendMessage(sendMessageToUserDto);
             Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error(ErrorMessage.INTERRUPTED_EXCEPTION);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
         }

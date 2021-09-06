@@ -2,6 +2,8 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +24,13 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     UserPointsAndAllBagsDto getFirstPageData(String uuid);
+
+    /**
+     * test method for frontend.
+     *
+     * @author Denys Kisliak
+     */
+    UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid);
 
     /**
      * Methods returns all saved user data.
@@ -192,8 +201,53 @@ public interface UBSClientService {
      * @param dto {@link OrderCancellationReasonDto};
      * @return {@link OrderCancellationReasonDto} dto that contains cancellation
      *         reason and comment;
-     *
      * @author Oleksandr Khomiakov
      */
     OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto);
+
+    /**
+     * Method gets list of locations.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @return {@link LocationResponseDto} dto that contains location id and name;
+     * @author Denys Kisliak
+     */
+    List<LocationResponseDto> getAllLocations(String userUuid);
+
+    /**
+     * Method updates last order location.
+     *
+     * @param userUuid   {@link UserVO} id.
+     * @param locationId {@link LocationIdDto} id.
+     * @author Denys Kisliak
+     */
+    void setNewLastOrderLocation(String userUuid, LocationIdDto locationId);
+
+    /**
+     * Methods for finding all events for Order.
+     *
+     * @param orderId {@link Long} id.
+     * @return {@link List} that contains list of EventsDTOS.
+     * @author Yuriy Bahly.
+     */
+    List<EventDto> getAllEventsForOrderById(Long orderId);
+
+    /**
+     * Methods for converting UserProfileDTO to PersonalDataDTO.
+     *
+     * @param userProfileDto {@link UserProfileDto}.
+     * @return {@link PersonalDataDto}.
+     * @author Liyubomy Pater.
+     */
+    PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
+
+    /**
+     * Methods for saving UbsUser when User is saving profile data.
+     *
+     * @param userProfileDto {@link UserProfileDto}.
+     * @param savedUser      {@link User}.
+     * @param savedAddress   {@link Address}.
+     * @author Liyubomy Pater.
+     */
+    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
 }

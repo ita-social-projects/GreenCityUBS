@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Bratakh-1" author="Bratakh Liubomyr">
+        <createTable tableName="events">
+            <column name="id" type="BIGINT" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_date" type="TIMESTAMP">
+            </column>
+            <column name="event_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+        <addPrimaryKey tableName="events"
+                       columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="events"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_events_order_id"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

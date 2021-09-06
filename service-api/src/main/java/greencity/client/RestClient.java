@@ -22,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RestClient {
     private static final String TOKEN_HEADER_NAME = "X-Viber-Auth-Token";
+    private static final String EMAIL = "?email=";
     private final RestTemplate restTemplate;
     @Value("${greencityuser.server.address}")
     private String greenCityUserServerAddress;
@@ -48,7 +49,7 @@ public class RestClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+        HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
 
         return restTemplate.exchange(RestTemplateLinks.FONDY_LINK, HttpMethod.POST, entity,
             String.class).getBody();
@@ -63,7 +64,7 @@ public class RestClient {
     public Long findIdByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-            + "/user/findIdByEmail" + "?email=" + email, HttpMethod.GET, entity, Long.class)
+            + "/user/findIdByEmail" + EMAIL + email, HttpMethod.GET, entity, Long.class)
             .getBody();
     }
 
@@ -172,19 +173,6 @@ public class RestClient {
 
         HttpEntity<String> entity = new HttpEntity<>(jsonString, setHeadersForViberBot());
         return restTemplate.exchange(RestTemplateLinks.SET_WEBHOOK, HttpMethod.POST, entity, String.class);
-    }
-
-    /**
-     * The method sends a welcome message to user and is performed pre-registration
-     * of user.
-     *
-     * @param sendMessageToUserDto {@link SendMessageToUserDto}
-     * @return @return {@link String} - which contains the status of success or
-     *         failure.
-     */
-    public ResponseEntity<String> sendWelcomeMessage(SendMessageToUserDto sendMessageToUserDto) {
-        HttpEntity<SendMessageToUserDto> entity = new HttpEntity<>(sendMessageToUserDto, setHeadersForViberBot());
-        return restTemplate.exchange(RestTemplateLinks.SEND_MESSAGE, HttpMethod.POST, entity, String.class);
     }
 
     /**

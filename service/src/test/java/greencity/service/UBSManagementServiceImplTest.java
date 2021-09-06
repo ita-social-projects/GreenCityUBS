@@ -26,16 +26,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.ui.Model;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -44,8 +52,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -255,7 +261,7 @@ public class UBSManagementServiceImplTest {
     @Test
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
-        Assertions.assertThrows(ResponseStatusException.class, () -> ubsManagementService.deleteViolation(1L));
+        Assertions.assertThrows(UnexistingOrderException.class, () -> ubsManagementService.deleteViolation(1L));
         verify(violationRepository, times(1)).findByOrderId(1L);
     }
 
@@ -552,7 +558,7 @@ public class UBSManagementServiceImplTest {
     @Test
     void testSendNotificationAboutViolationWithFoundOrder() {
         AddingViolationsToUserDto addingViolationsToUserDto =
-            new AddingViolationsToUserDto(1L, "violation");
+            new AddingViolationsToUserDto(1L, "violation", "LOW");
         Order order = GET_ORDER_DETAILS;
         when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
         UserViolationMailDto mailDto =
@@ -614,7 +620,9 @@ public class UBSManagementServiceImplTest {
     void checkAddUserViolation() {
         User user = ModelUtils.getTestUser();
         user.setViolations(0);
-        user.setViolationsDescription(new HashMap<>());
+        Map<Long, String> map = new HashMap<>();
+        map.put(0L, "String, string, string");
+        user.setViolationsDescription(map);
         Order order = user.getOrders().get(0);
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
@@ -622,10 +630,36 @@ public class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
 
-        ubsManagementService.addUserViolation(add);
+        ubsManagementService.addUserViolation(add, new MultipartFile[2]);
 
         assertEquals(1, user.getViolations());
-        assertEquals(add.getViolationDescription(), user.getViolationsDescription().get(order.getId()));
+    }
+
+    @Test
+    void getClusteredCoordsAlongWithSpecifiedTest() {
+        Coordinates coord = ModelUtils.getCoordinates();
+        Set<Coordinates> result = new HashSet<>();
+        result.add(coord);
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(ModelUtils.getOrderTest());
+        when(addressRepository.undeliveredOrdersCoords()).thenReturn(result);
+        when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(300);
+        when(orderRepository.undeliveredOrdersGroupThem(anyDouble(), anyDouble())).thenReturn(orderList);
+        when(modelMapper.map(any(), any())).thenAnswer(new Answer() {
+            private int count = 0;
+
+            public Object answer(InvocationOnMock invocation) {
+                if (count == 0) {
+                    count++;
+                    return coord;
+                }
+                return ModelUtils.getOrderDto();
+            }
+        });
+        GroupedOrderDto groupedOrderDto = ubsManagementService
+            .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
+        assertEquals(300, groupedOrderDto.getAmountOfLitres());
+        assertEquals(groupedOrderDto.getGroupOfOrders().get(0), getOrderDto());
     }
 
     @Test

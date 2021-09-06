@@ -219,6 +219,26 @@ public class OrderController {
     }
 
     /**
+     * Controller gets info about events history from,order bu order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Get events history from order by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EventDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @ApiLocale
+    @GetMapping("/order_history/{orderId}")
+    public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
+        @Valid @PathVariable("orderId") Long id) {
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrderById(id));
+    }
+
+    /**
      * Controller updates info about ubs_user in order .
      *
      * @param dto {@link UbsCustomersDtoUpdate}.
@@ -276,5 +296,65 @@ public class OrderController {
     public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
         @PathVariable("id") final Long id) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id));
+    }
+
+    /**
+     * Controller gets list of locations.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "gets list of locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationResponseDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/order/get-locations")
+    public ResponseEntity<List<LocationResponseDto>> getAllLocationsForPopUp(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.ok(ubsClientService.getAllLocations(userUuid));
+    }
+
+    /**
+     * Controller sets new last order location.
+     *
+     * @param locationId {@link LocationIdDto}
+     * @param userUuid   {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "sets new last order location")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/order/get-locations")
+    public ResponseEntity setNewLastOrderLocationForUser(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody LocationIdDto locationId) {
+        ubsClientService.setNewLastOrderLocation(userUuid, locationId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller sets new last order location.
+     *
+     * @param userUuid {@link UserVO} id.
+     */
+    @ApiOperation(value = "Get current user points and all bags list.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/order-details-test")
+    public ResponseEntity<UserPointsAndAllBagsDtoTest> getCurrentUserPointsTest(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getFirstPageDataTest(userUuid));
     }
 }
