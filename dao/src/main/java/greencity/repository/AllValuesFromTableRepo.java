@@ -11,10 +11,10 @@ import java.util.Map;
 @Repository
 @AllArgsConstructor
 public class AllValuesFromTableRepo {
-    private static final String WHERE_ORDERS_ORDER_STATUS_LIKE = " where orders.order_status like '%";
-    private static final String AND_PAYMENT_SYSTEM_LIKE = "and payment_system like '%";
-    private static final String AND_RECEIVING_STATION_LIKE = "and receiving_station like '%";
-    private static final String AND_DISTRICT_LIKE = " and district like  '%";
+    private static final String WHERE_ORDERS_ORDER_STATUS_LIKE = " where orders.order_status like CONCAT( '%',?,'%') ";
+    private static final String AND_PAYMENT_SYSTEM_LIKE = "and payment_system like CONCAT( '%',?,'%') ";
+    private static final String AND_RECEIVING_STATION_LIKE = "and receiving_station like CONCAT( '%',?,'%') ";
+    private static final String AND_DISTRICT_LIKE = " and district like CONCAT( '%',?,'%') ";
 
     private final JdbcTemplate jdbcTemplate;
     private static final String QUERY =
@@ -69,33 +69,55 @@ public class AllValuesFromTableRepo {
         int offset = pages * size;
         if (searchCriteria.getViolationsAmount() != null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
-                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
-                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
-                    + "and violations = " + searchCriteria.getViolationsAmount()
-                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
-                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
+                    + AND_PAYMENT_SYSTEM_LIKE
+                    + AND_RECEIVING_STATION_LIKE
+                    + "and violations = ? "
+                    + AND_DISTRICT_LIKE
+                    + "and order_date :: date = ?",
+                    searchCriteria.getOrderStatus(),
+                    searchCriteria.getPayment(),
+                    searchCriteria.getReceivingStation(),
+                    searchCriteria.getViolationsAmount(),
+                    searchCriteria.getDistrict(),
+                    searchCriteria.getOrderDate());
         } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() == null) {
             return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
-                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
-                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
-                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
-                    + " limit " + size + " offset " + offset);
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
+                    + AND_PAYMENT_SYSTEM_LIKE
+                    + AND_RECEIVING_STATION_LIKE
+                    + AND_DISTRICT_LIKE
+                    + " limit ? offset ?",
+                    searchCriteria.getOrderStatus(),
+                    searchCriteria.getPayment(),
+                    searchCriteria.getReceivingStation(),
+                    searchCriteria.getDistrict(),
+                    size,
+                    offset);
         } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
             return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
-                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
-                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
-                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'"
-                    + "and order_date :: date = " + "'" + searchCriteria.getOrderDate() + "'");
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
+                    + AND_PAYMENT_SYSTEM_LIKE
+                    + AND_RECEIVING_STATION_LIKE
+                    + AND_DISTRICT_LIKE
+                    + "and order_date :: date = ?",
+                    searchCriteria.getOrderStatus(),
+                    searchCriteria.getPayment(),
+                    searchCriteria.getReceivingStation(),
+                    searchCriteria.getDistrict(),
+                    searchCriteria.getOrderDate());
         } else {
             return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE + searchCriteria.getOrderStatus() + "%'"
-                    + AND_PAYMENT_SYSTEM_LIKE + searchCriteria.getPayment() + "%'"
-                    + AND_RECEIVING_STATION_LIKE + searchCriteria.getReceivingStation() + "%'"
-                    + "and violations = " + searchCriteria.getViolationsAmount()
-                    + AND_DISTRICT_LIKE + searchCriteria.getDistrict() + "%'");
+                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
+                    + AND_PAYMENT_SYSTEM_LIKE
+                    + AND_RECEIVING_STATION_LIKE
+                    + "and violations = ? "
+                    + AND_DISTRICT_LIKE,
+                    searchCriteria.getOrderStatus(),
+                    searchCriteria.getPayment(),
+                    searchCriteria.getReceivingStation(),
+                    searchCriteria.getViolationsAmount(),
+                    searchCriteria.getDistrict());
         }
     }
 
@@ -103,7 +125,7 @@ public class AllValuesFromTableRepo {
      * Method for finding all employee.
      */
     public List<Map<String, Object>> findAllEmpl(Long orderId) {
-        return jdbcTemplate.queryForList(EMPLOYEEQUERY + orderId);
+        return jdbcTemplate.queryForList(EMPLOYEEQUERY + "?", orderId);
     }
 
     /**

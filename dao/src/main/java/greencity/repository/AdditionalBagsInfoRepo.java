@@ -22,11 +22,11 @@ public class AdditionalBagsInfoRepo {
     public List<Map<String, Object>> getAdditionalBagInfo(Long orderId, String recipientEmail) {
         return jdbcTemplate.queryForList(QUERY2
             + "(select string_agg(payment_id::text,',')as pay_id "
-            + "from payment where recipient_email = '" + recipientEmail + "') "
+            + "from payment where recipient_email = ?) "
             + "from payment "
             + "join orders o on o.id = payment.order_id "
             + "join users u on u.id = o.users_id "
             + "join address a on u.id = a.user_id "
-            + "where order_id =" + orderId);
+            + "where order_id =?", recipientEmail, orderId);
     }
 }
