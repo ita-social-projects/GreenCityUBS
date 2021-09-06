@@ -442,9 +442,11 @@ class UBSClientServiceImplTest {
         AddressDto addressDto = ModelUtils.addressDto();
         Address address = ModelUtils.address();
 
-        UserProfileDto userProfileDto = UserProfileDto.builder().addressDto(addressDto).recipientEmail(user.getRecipientEmail())
-            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname()).recipientPhone(user.getRecipientPhone())
-            .build();
+        UserProfileDto userProfileDto =
+            UserProfileDto.builder().addressDto(addressDto).recipientEmail(user.getRecipientEmail())
+                .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
+                .recipientPhone(user.getRecipientPhone())
+                .build();
 
         UBSuser ubSuser = new UBSuser(address, user, new ArrayList<>(), 1L, user.getRecipientName(),
             user.getRecipientSurname(), user.getRecipientPhone(), user.getRecipientEmail());
