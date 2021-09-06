@@ -1,13 +1,16 @@
 package greencity.client;
 
+import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
 import greencity.security.JwtTool;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,14 +19,10 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class OutOfRequestRestClient {
-    private static final String TOKEN_HEADER_NAME = "X-Viber-Auth-Token";
     private final RestTemplate restTemplate;
     @Value("${greencityuser.server.address}")
+    @Setter
     private String greenCityUserServerAddress;
-    @Value("${ubs.viber.bot.token}")
-    private String viberBotToken;
-    @Value("${ubs.viber.bot.url}")
-    private String viberBotUrl;
     @Autowired
     private JwtTool jwtTool;
 
@@ -44,5 +43,17 @@ public class OutOfRequestRestClient {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         return headers;
+    }
+
+    /**
+     * Send notification via email.
+     */
+    public void sendEmailNotification(NotificationDto notification, String email) {
+        HttpHeaders httpHeaders = setHeader(email);
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString());
+        HttpEntity<NotificationDto> entity = new HttpEntity<>(notification, httpHeaders);
+        restTemplate.exchange(greenCityUserServerAddress
+            + "/email/notification",
+            HttpMethod.POST, entity, NotificationDto.class);
     }
 }

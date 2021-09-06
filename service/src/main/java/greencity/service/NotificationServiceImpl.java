@@ -1,6 +1,8 @@
 package greencity.service;
 
+import greencity.client.OutOfRequestRestClient;
 import greencity.dto.NotificationDto;
+import greencity.dto.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -48,6 +50,8 @@ public class NotificationServiceImpl implements NotificationService {
     private Clock clock;
     private ViberServiceImpl viberService;
     private TelegramService telegramService;
+    private final NotificationTemplateRepository templateRepository;
+    private final OutOfRequestRestClient restClient;
 
     @Autowired
     @Qualifier("singleThreadedExecutor")
@@ -80,7 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationParameter.setUserNotification(created);
                 NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
                 created.setParameters(Collections.singleton(createdParameter));
-                sendNotificationsForBots(created);
+                sendNotificationsForBotsAndEmail(created);
             }
         }
     }
@@ -94,7 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setNotificationType(NotificationType.ORDER_IS_PAID);
         userNotification.setUser(order.getUser());
         UserNotification notification = userNotificationRepository.save(userNotification);
-        sendNotificationsForBots(notification);
+        sendNotificationsForBotsAndEmail(notification);
     }
 
     /**
@@ -118,7 +122,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBots(created);
+        sendNotificationsForBotsAndEmail(created);
     }
 
     /**
@@ -153,7 +157,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBots(created);
+        sendNotificationsForBotsAndEmail(created);
     }
 
     /**
@@ -200,7 +204,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBots(created);
+        sendNotificationsForBotsAndEmail(created);
     }
 
     /**
@@ -221,7 +225,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBots(created);
+        sendNotificationsForBotsAndEmail(created);
     }
 
     /**
@@ -244,7 +248,7 @@ public class NotificationServiceImpl implements NotificationService {
                 userNotification.setUser(user);
                 userNotification.setNotificationTime(LocalDateTime.now(clock));
                 UserNotification notification = userNotificationRepository.save(userNotification);
-                sendNotificationsForBots(notification);
+                sendNotificationsForBotsAndEmail(notification);
             }
         }
     }
@@ -263,11 +267,20 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationDtos;
     }
 
-    private void sendNotificationsForBots(UserNotification notification) {
+    private void sendNotificationsForBotsAndEmail(UserNotification notification) {
         executor.execute(() -> {
             viberService.sendNotification(notification);
             telegramService.sendNotification(notification);
+            sendEmailNotification(notification);
         });
+    }
+
+    private void sendEmailNotification(UserNotification notification) {
+        UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
+        NotificationDto notificationDto = NotificationServiceImpl
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+
+        restClient.sendEmailNotification(notificationDto, userVO.getEmail());
     }
 
     /**

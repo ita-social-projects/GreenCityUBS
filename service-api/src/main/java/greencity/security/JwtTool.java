@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Class that provides methods for working with JWT.
@@ -64,7 +61,7 @@ public class JwtTool {
      */
     public String createAccessToken(String email, int ttl) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("authorities", Collections.singleton("ROLE_USER"));
+        claims.put("authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
