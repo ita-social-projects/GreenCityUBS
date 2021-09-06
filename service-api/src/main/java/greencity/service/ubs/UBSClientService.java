@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 
 import java.util.List;
 import java.util.Locale;
@@ -248,5 +249,5 @@ public interface UBSClientService {
      * @param savedAddress   {@link Address}.
      * @author Liyubomy Pater.
      */
-    void createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
+    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
 }

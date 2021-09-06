@@ -433,31 +433,37 @@ class UBSClientServiceImplTest {
         assertEquals(expected, actual);
     }
 
+    @Test
     void saveProfileData() {
-        User user = new User();
-        user.setId(13L);
-        String uuid = "35467585763t4sfgchjfuyetf";
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        UserProfileDto userProfileDto = new UserProfileDto();
+        User user = ModelUtils.getUser();
+
+        when(userRepository.findByUuid("87df9ad5-6393-441f-8423-8b2e770b01a8")).thenReturn(user);
+
         AddressDto addressDto = ModelUtils.addressDto();
-        userProfileDto.setAddressDto(addressDto);
-        userProfileDto.setRecipientEmail("mail@mail.ua");
         Address address = ModelUtils.address();
-        UBSuser ubSuser = getUBSuser();
+
+        UserProfileDto userProfileDto = UserProfileDto.builder().addressDto(addressDto).recipientEmail(user.getRecipientEmail())
+            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname()).recipientPhone(user.getRecipientPhone())
+            .build();
+
+        UBSuser ubSuser = new UBSuser(address, user, new ArrayList<>(), 1L, user.getRecipientName(),
+            user.getRecipientSurname(), user.getRecipientPhone(), user.getRecipientEmail());
+
         Optional<UBSuser> optionalUBSuser = Optional.of(ubSuser);
+
         PersonalDataDto dto = PersonalDataDto.builder().email(ubSuser.getEmail()).firstName(ubSuser.getFirstName())
-            .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).build();
-        dto.setId(1L);
+            .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).id(1L).build();
+
         lenient().when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
         when(userRepository.save(user)).thenReturn(user);
         when(addressRepository.save(address)).thenReturn(address);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(ubsUserRepository.findByEmail("mail@mail.ua")).thenReturn(optionalUBSuser);
+        when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
         when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
-        when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
+        lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
-        ubsService.saveProfileData(uuid, userProfileDto);
+        ubsService.saveProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
         assertNotNull(address);

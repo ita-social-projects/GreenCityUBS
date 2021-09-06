@@ -795,9 +795,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress) {
+    public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress) {
         UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
         ubSuser.setAddress(savedAddress);
-        ubsUserRepository.save(ubSuser);
+        return ubsUserRepository.save(ubSuser);
     }
 }
