@@ -788,8 +788,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
             .lastName(userProfileDto.getRecipientSurname())
             .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
+
         Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
-            .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST)).getId();
+            .map(UBSuser::getId).orElse(null);
+
         personalDataDto.setId(ubsUserId);
         return personalDataDto;
     }
