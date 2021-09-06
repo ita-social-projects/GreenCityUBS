@@ -2,6 +2,8 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 
 import java.util.List;
 import java.util.Locale;
@@ -229,4 +231,23 @@ public interface UBSClientService {
      * @author Yuriy Bahly.
      */
     List<EventDto> getAllEventsForOrderById(Long orderId);
+
+    /**
+     * Methods for converting UserProfileDTO to PersonalDataDTO.
+     *
+     * @param userProfileDto {@link UserProfileDto}.
+     * @return {@link PersonalDataDto}.
+     * @author Liyubomy Pater.
+     */
+    PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
+
+    /**
+     * Methods for saving UbsUser when User is saving profile data.
+     *
+     * @param userProfileDto {@link UserProfileDto}.
+     * @param savedUser      {@link User}.
+     * @param savedAddress   {@link Address}.
+     * @author Liyubomy Pater.
+     */
+    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
 }

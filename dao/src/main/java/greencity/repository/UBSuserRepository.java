@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
@@ -30,4 +31,12 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
         value = "SELECT * FROM ubs_user u INNER JOIN orders o ON u.id = o.ubs_user_id "
             + "WHERE CAST(o.order_date AS DATE) = :localDate AND o.order_status LIKE 'FORMED'")
     List<UBSuser> getAllUBSusersWhoHaveNotPaid(LocalDate localDate);
+
+    /**
+     * Finds a UBSuser by email.
+     *
+     * @param email - UBSuser's email.
+     * @return a {@link Optional} of {@link UBSuser}.
+     */
+    Optional<UBSuser> findByEmail(String email);
 }

@@ -607,7 +607,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void createRecordInUBStable(String uuid) {
+    private void createUserInGreenCityUbsDataBase(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
 
@@ -658,12 +658,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
-        setUserDate(user, userProfileDto);
+        setUserData(user, userProfileDto);
         AddressDto addressDto = userProfileDto.getAddressDto();
         Address address = modelMapper.map(addressDto, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepo.save(address);
         User savedUser = userRepository.save(user);
+        createUbsUserBasedUserProfileData(userProfileDto, savedUser, savedAddress);
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
@@ -678,21 +679,22 @@ public class UBSClientServiceImpl implements UBSClientService {
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         for (Address address : allAddress) {
             AddressDto addressDto = modelMapper.map(address, AddressDto.class);
-            setAddressDate(address, addressDto);
+            setAddressData(address, addressDto);
             userProfileDto.setAddressDto(addressDto);
         }
         return userProfileDto;
     }
 
-    private User setUserDate(User user, UserProfileDto userProfileDto) {
+    private User setUserData(User user, UserProfileDto userProfileDto) {
         user.setRecipientName(userProfileDto.getRecipientName());
         user.setRecipientSurname(userProfileDto.getRecipientSurname());
-        user.setRecipientPhone(userProfileDto.getRecipientPhone());
+        user.setRecipientPhone(
+            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
     }
 
-    private Address setAddressDate(Address address, AddressDto addressDto) {
+    private Address setAddressData(Address address, AddressDto addressDto) {
         address.setCity(addressDto.getCity());
         address.setStreet(addressDto.getStreet());
         address.setDistrict(addressDto.getDistrict());
@@ -707,7 +709,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (userRepository.findByUuid(uuid) == null) {
             UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
             uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
+            createUserInGreenCityUbsDataBase(uuid);
         }
     }
 
@@ -779,5 +781,26 @@ public class UBSClientServiceImpl implements UBSClientService {
             .id(location.getId())
             .name(location.getLocationName())
             .build();
+    }
+
+    @Override
+    public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
+        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
+            .lastName(userProfileDto.getRecipientSurname())
+            .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
+
+        Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
+            .map(UBSuser::getId).orElse(null);
+
+        personalDataDto.setId(ubsUserId);
+        return personalDataDto;
+    }
+
+    @Override
+    public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser,
+        Address savedAddress) {
+        UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
+        ubSuser.setAddress(savedAddress);
+        return ubsUserRepository.save(ubSuser);
     }
 }
