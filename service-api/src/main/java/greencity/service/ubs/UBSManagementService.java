@@ -99,11 +99,13 @@ public interface UBSManagementService {
     /**
      * Method for adding violation for user.
      *
-     * @param add {@link AddingViolationsToUserDto} transfer order_id + violation
-     *            description.
+     * @param add            {@link AddingViolationsToUserDto}
+     *
+     * @param multipartFiles {@link MultipartFile}
+     *
      * @author Nazar Struk
      */
-    void addUserViolation(AddingViolationsToUserDto add);
+    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
 
     /**
      * Method for send email with description to user.
@@ -278,4 +280,15 @@ public interface UBSManagementService {
      * Method that update EmployeePositionDtoResponse.
      */
     void updatePositions(EmployeePositionDtoResponse dto);
+
+    /**
+     * Method for adding violation for user.
+     *
+     * @param add            {@link AddingViolationsToUserDto}
+     *
+     * @param multipartFiles {@link MultipartFile}
+     *
+     * @author Bohdan Melnyk
+     */
+    void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
 }

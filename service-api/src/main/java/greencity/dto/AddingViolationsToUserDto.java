@@ -21,4 +21,6 @@ public class AddingViolationsToUserDto {
     @NotNull
     @Length(min = 5, max = 300)
     private String violationDescription;
+    @NotNull
+    private String violationLevel;
 }

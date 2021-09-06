@@ -7,6 +7,8 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
+
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -68,6 +70,54 @@ public class ModelUtils {
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
     public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
         Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
+
+    public static Optional<Order> getOrderWithEvents() {
+        return Optional.of(Order.builder()
+            .id(1L)
+            .events(List.of(Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build()))
+            .build());
+    }
+
+    public static List<Event> getListOfEvents() {
+        return List.of(Event.builder()
+            .id(1L)
+            .authorName("Igor")
+            .eventDate(LocalDateTime.now())
+            .authorName("Igor")
+            .order(new Order())
+            .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build());
+    }
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
@@ -563,6 +613,7 @@ public class ModelUtils {
         return AddingViolationsToUserDto.builder()
             .orderID(1L)
             .violationDescription("String string string")
+            .violationLevel("low")
             .build();
     }
 
@@ -794,7 +845,7 @@ public class ModelUtils {
         return Violation.builder()
             .id(1L)
             .user(User.builder()
-                .recipientName("Alan Po").build())
+                .recipientName("Alan Po").violations(1).build())
             .order(Order.builder()
                 .id(1L).build())
             .violationLevel(MAJOR)
@@ -1111,6 +1162,55 @@ public class ModelUtils {
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
             .actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
+    }
+
+    public static User getUserWithLastLocation() {
+        return User.builder()
+            .id(1L)
+            .addresses(singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .lastLocation(new Location())
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .build();
+    }
+
+    public static Location getLastLocation() {
+        return Location.builder()
+            .id(1l)
+            .locationName("Name1")
+            .minAmountOfBigBags(10l)
+            .build();
+    }
+
+    public static List<Location> getLocationList() {
+        List list = new ArrayList();
+        Location location = Location.builder()
+            .id(2l)
+            .locationName("Name2")
+            .minAmountOfBigBags(20l)
+            .build();
+        list.add(getLastLocation());
+        list.add(location);
+        return list;
+    }
+
+    public static List<LocationResponseDto> getLocationResponseDtoList() {
+        List<LocationResponseDto> list = new ArrayList<>();
+
+        LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
+            .id(1l)
+            .name("Name1")
+            .build();
+        LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
+            .id(2l)
+            .name("Name2")
+            .build();
+        list.add(locationResponseDto1);
+        list.add(locationResponseDto2);
+        return list;
     }
 
     private static List<String> createAllLanguageCode() {

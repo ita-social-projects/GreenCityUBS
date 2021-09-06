@@ -26,6 +26,28 @@ public class ModelUtils {
         return () -> "35467585763t4sfgchjfuyetf";
     }
 
+    public static List<EventDto> getListEventsDTOS() {
+        List<EventDto> eventDTOS = new ArrayList<>();
+        eventDTOS.add(EventDto.builder()
+            .id(1L)
+            .eventDate(LocalDateTime.now())
+            .eventName("Holiday")
+            .authorName("Oleg").build());
+
+        eventDTOS.add(EventDto.builder()
+            .id(1L)
+            .eventDate(LocalDateTime.now())
+            .eventName("Slovak")
+            .authorName("Kola").build());
+
+        eventDTOS.add(EventDto.builder()
+            .id(1L)
+            .eventDate(LocalDateTime.now())
+            .eventName("Weekend")
+            .authorName("Martin").build());
+        return eventDTOS;
+    }
+
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232534634")))
@@ -282,6 +304,12 @@ public class ModelUtils {
         return OrderCancellationReasonDto.builder()
             .cancellationReason(CancellationReason.OTHER)
             .cancellationComment("Garbage disappeared")
+            .build();
+    }
+
+    public static LocationIdDto getLocationIdDto() {
+        return LocationIdDto.builder()
+            .locationId(1l)
             .build();
     }
 }

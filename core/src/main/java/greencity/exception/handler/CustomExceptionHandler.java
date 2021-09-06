@@ -146,11 +146,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Customize the response for HttpMessageNotReadableException.
      *
-     * @param ex      the exception
-     * @param headers the headers to be written to the response
-     * @param status  the selected response status
-     * @param request the current request
-     * @return a {@code ResponseEntity} message
+     * @param ex      the exception.
+     * @param headers the headers to be written to the response.
+     * @param status  the selected response status.
+     * @param request the current request.
+     * @return a {@code ResponseEntity} message.
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
@@ -413,5 +413,37 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Method interceptor exception {@link OrderViolationException}.
+     *
+     * @param exception Exception which should be intercepted.
+     * @param request   contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({OrderViolationException.class})
+    public final ResponseEntity<Object> handleAlreadyExistingAddress(OrderViolationException exception,
+        WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(exception.getMessage(), exception);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Method interceptor exception {@link EventsNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EventsNotFoundException.class})
+    public final ResponseEntity<Object> handleEventsNotFoundException(EventsNotFoundException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
     }
 }

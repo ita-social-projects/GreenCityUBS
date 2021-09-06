@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -12,6 +13,16 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,15 +30,6 @@ import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -49,6 +51,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
+    private final LocationRepository locationRepository;
+    private final EventRepository eventRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -84,15 +88,28 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
-        if (user != null) {
-            currentUserPoints = user.getCurrentPoints();
-        }
-
+        currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) {
+        int currentUserPoints = 0;
+        User user = userRepository.findByUuid(uuid);
+        Location lastLocation = user.getLastLocation();
+        currentUserPoints = user.getCurrentPoints();
+        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
+            .stream()
+            .map(this::buildBagTranslationDto)
+            .collect(Collectors.toList());
+        return new UserPointsAndAllBagsDtoTest(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -566,7 +583,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
-    private int formBagsToBeSavedAndCalculateOrderSum(Map<Integer, Integer> map, List<BagDto> bags) {
+    private int formBagsToBeSavedAndCalculateOrderSum(
+        Map<Integer, Integer> map, List<BagDto> bags) {
         int sumToPay = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
@@ -574,10 +592,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
-        if (sumToPay < 500) {
-            throw new IncorrectValueException(MINIMAL_SUM_VIOLATION);
-        }
-
         return sumToPay;
     }
 
@@ -593,7 +607,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void createRecordInUBStable(String uuid) {
+    private void createUserInGreenCityUbsDataBase(String uuid) {
         userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
 
@@ -613,6 +627,25 @@ public class UBSClientServiceImpl implements UBSClientService {
         return allBonusesForUserDto;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EventDto> getAllEventsForOrderById(Long orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isEmpty()) {
+            throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
+        if (orderEvents.isEmpty()) {
+            throw new EventsNotFoundException(ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+        return orderEvents
+            .stream()
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .collect(Collectors.toList());
+    }
+
     private Integer sumUserPoints(List<Order> allByUserId) {
         return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
     }
@@ -625,12 +658,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
-        setUserDate(user, userProfileDto);
+        setUserData(user, userProfileDto);
         AddressDto addressDto = userProfileDto.getAddressDto();
         Address address = modelMapper.map(addressDto, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepo.save(address);
         User savedUser = userRepository.save(user);
+        createUbsUserBasedUserProfileData(userProfileDto, savedUser, savedAddress);
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
@@ -645,21 +679,22 @@ public class UBSClientServiceImpl implements UBSClientService {
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         for (Address address : allAddress) {
             AddressDto addressDto = modelMapper.map(address, AddressDto.class);
-            setAddressDate(address, addressDto);
+            setAddressData(address, addressDto);
             userProfileDto.setAddressDto(addressDto);
         }
         return userProfileDto;
     }
 
-    private User setUserDate(User user, UserProfileDto userProfileDto) {
+    private User setUserData(User user, UserProfileDto userProfileDto) {
         user.setRecipientName(userProfileDto.getRecipientName());
         user.setRecipientSurname(userProfileDto.getRecipientSurname());
-        user.setRecipientPhone(userProfileDto.getRecipientPhone());
+        user.setRecipientPhone(
+            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
     }
 
-    private Address setAddressDate(Address address, AddressDto addressDto) {
+    private Address setAddressData(Address address, AddressDto addressDto) {
         address.setCity(addressDto.getCity());
         address.setStreet(addressDto.getStreet());
         address.setDistrict(addressDto.getDistrict());
@@ -674,7 +709,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (userRepository.findByUuid(uuid) == null) {
             UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
             uuid = dto.getUuid();
-            createRecordInUBStable(uuid);
+            createUserInGreenCityUbsDataBase(uuid);
         }
     }
 
@@ -704,5 +739,68 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setId(id);
         orderRepository.save(order);
         return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<LocationResponseDto> getAllLocations(String userUuid) {
+        User user = userRepository.findByUuid(userUuid);
+        List<Location> locations = locationRepository.findAll();
+        Location lastOrderLocation = user.getLastLocation();
+
+        if (lastOrderLocation != null) {
+            locations.remove(lastOrderLocation);
+            locations.add(0, lastOrderLocation);
+        }
+        return buildLocationResponseList(locations);
+    }
+
+    private List<LocationResponseDto> buildLocationResponseList(List<Location> locations) {
+        return locations.stream()
+            .map(a -> buildLocationResponseDto(a))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
+        User currentUser = userRepository.findByUuid(userUuid);
+        Location location = locationRepository.findById(locationIdDto.getLocationId())
+            .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
+
+        currentUser.setLastLocation(location);
+        userRepository.save(currentUser);
+    }
+
+    private LocationResponseDto buildLocationResponseDto(Location location) {
+        return LocationResponseDto.builder()
+            .id(location.getId())
+            .name(location.getLocationName())
+            .build();
+    }
+
+    @Override
+    public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
+        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
+            .lastName(userProfileDto.getRecipientSurname())
+            .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
+
+        Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
+            .map(UBSuser::getId).orElse(null);
+
+        personalDataDto.setId(ubsUserId);
+        return personalDataDto;
+    }
+
+    @Override
+    public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser,
+        Address savedAddress) {
+        UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
+        ubSuser.setAddress(savedAddress);
+        return ubsUserRepository.save(ubSuser);
     }
 }
