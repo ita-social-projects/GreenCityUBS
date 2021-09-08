@@ -23,11 +23,19 @@ import springfox.documentation.annotations.ApiIgnore;
 public class AdminUbsController {
     private final UBSManagementService ubsManagementService;
 
+    /**
+     * Constructor with parameters.
+     */
     @Autowired
     public AdminUbsController(UBSManagementService ubsManagementService) {
         this.ubsManagementService = ubsManagementService;
     }
 
+    /**
+     * Controller.
+     *
+     * @author Liubomyr Pater
+     */
     @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
