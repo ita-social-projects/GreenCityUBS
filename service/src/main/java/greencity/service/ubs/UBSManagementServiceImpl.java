@@ -1309,6 +1309,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     images.add(fileService.upload(multipartFiles[i]));
                 }
                 violation.setImage(String.join("; ", images));
+//                Objects.isNull(images);
             }
         } else {
             if (multipartFiles.length > 0) {

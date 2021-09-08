@@ -6,7 +6,9 @@ import lombok.*;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Table(name = "violations_description_mapping")
-@EqualsAndHashCode(exclude = {"description", "violation_level", "violation_date",})
+@EqualsAndHashCode(exclude = {"description", "violationLevel", "violationDate",})
 @Entity
 public class Violation {
     @Id
@@ -35,9 +37,15 @@ public class Violation {
     @Column(name = "violation_date")
     private LocalDateTime violationDate;
 
-    @Nullable
+    @NotNull
     @Column(name = "image_path")
     private String image;
+
+    @ElementCollection
+    @CollectionTable(name = "violation_images",
+            joinColumns = @JoinColumn(name = "violation_id", referencedColumnName = "id"))
+    @Column(name = "image_link")
+    private List<String> images;
 
     @Column(nullable = false, name = "violation_level", length = 15)
     @Enumerated(EnumType.STRING)
