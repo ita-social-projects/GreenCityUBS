@@ -28,28 +28,27 @@ public class AdminUbsController {
         this.ubsManagementService = ubsManagementService;
     }
 
-
     @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/ordersNew")
     @ApiPageable
     public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-            @ApiIgnore int page,
-            @ApiIgnore int size,
-            @RequestParam(value = "columnName", required = false) String columnName,
-            @RequestParam(value = "sortingType", required = false) String sortingType,
-            SearchCriteria searchCriteria) {
+        @ApiIgnore int page,
+        @ApiIgnore int size,
+        @RequestParam(value = "columnName", required = false) String columnName,
+        @RequestParam(value = "sortingType", required = false) String sortingType,
+        SearchCriteria searchCriteria) {
         if (columnName == null || sortingType == null) {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
+                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
         } else {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
+                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
         }
     }
 }
