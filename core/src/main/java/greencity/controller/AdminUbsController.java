@@ -91,7 +91,8 @@ public class AdminUbsController {
         columnStateDTOS
             .add(new ColumnStateDTO("email", new TitleDto("Гггг", "Dddd"), 20, true, false, 6, EditType.INLINE));
         columnStateDTOS
-            .add(new ColumnStateDTO("violations", new TitleDto("Дддд", "Eeee"), 20, true, false, 7, EditType.READ_ONLY));
+            .add(
+                new ColumnStateDTO("violations", new TitleDto("Дддд", "Eeee"), 20, true, false, 7, EditType.READ_ONLY));
         columnStateDTOS
             .add(new ColumnStateDTO("district", new TitleDto("Еееее", "Ffff"), 20, true, false, 8, EditType.READ_ONLY));
         columnStateDTOS
@@ -104,18 +105,21 @@ public class AdminUbsController {
             new ColumnStateDTO("recipient_email", new TitleDto("Иииии", "Pppp"), 20, true, false, 12, EditType.INLINE));
         columnStateDTOS.add(new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Іііі", ""), 20, true,
             false, 13, EditType.INLINE));
-        columnStateDTOS.add(new ColumnStateDTO("garbage_bags_120_amount", new TitleDto("Їїїїї", "Kkkk"), 20, true, false,
-            14, EditType.INLINE));
+        columnStateDTOS
+            .add(new ColumnStateDTO("garbage_bags_120_amount", new TitleDto("Їїїїї", "Kkkk"), 20, true, false,
+                14, EditType.INLINE));
         columnStateDTOS.add(new ColumnStateDTO("bo_bags_120_amount", new TitleDto("Йййй", "Lllll"), 20, true, false, 15,
             EditType.INLINE));
         columnStateDTOS.add(new ColumnStateDTO("bo_bags_20_amount", new TitleDto("Кккк", "Mmmmm"), 20, true, false, 16,
             EditType.INLINE));
         columnStateDTOS.add(
-            new ColumnStateDTO("total_order_sum", new TitleDto("Ллллл", "Nnnn"), 20, true, false, 17, EditType.READ_ONLY));
+            new ColumnStateDTO("total_order_sum", new TitleDto("Ллллл", "Nnnn"), 20, true, false, 17,
+                EditType.READ_ONLY));
         columnStateDTOS.add(new ColumnStateDTO("order_certificate_code", new TitleDto("Мммм", "Ssss"), 20, true, false,
             18, EditType.READ_ONLY));
-        columnStateDTOS.add(new ColumnStateDTO("order_certificate_points", new TitleDto("Ннннн", "Ttttt"), 20, true, false,
-            19, EditType.READ_ONLY));
+        columnStateDTOS
+            .add(new ColumnStateDTO("order_certificate_points", new TitleDto("Ннннн", "Ttttt"), 20, true, false,
+                19, EditType.READ_ONLY));
         columnStateDTOS
             .add(new ColumnStateDTO("amount_due", new TitleDto("Ооооо", ""), 20, true, false, 20, EditType.READ_ONLY));
         columnStateDTOS.add(new ColumnStateDTO("comment_for_order_by_client", new TitleDto("Пппп", "Rrrr"), 20, true,
@@ -125,21 +129,26 @@ public class AdminUbsController {
         columnStateDTOS.add(
             new ColumnStateDTO("date_of_export", new TitleDto("Сссс", "Yyyy"), 20, true, false, 23, EditType.DATE));
         columnStateDTOS.add(
-            new ColumnStateDTO("time_of_export", new TitleDto("Ттттт", "Zzzzz"), 20, true, false, 24, EditType.READ_ONLY));
+            new ColumnStateDTO("time_of_export", new TitleDto("Ттттт", "Zzzzz"), 20, true, false, 24,
+                EditType.READ_ONLY));
         columnStateDTOS.add(new ColumnStateDTO("id_order_from_shop", new TitleDto("Уууу", "Hhhkh"), 20, true, false, 25,
             EditType.READ_ONLY));
         columnStateDTOS.add(
-            new ColumnStateDTO("receiving_station", new TitleDto("Ффффф", ""), 20, true, false, 26, EditType.READ_ONLY));
-        columnStateDTOS.add(new ColumnStateDTO("responsible_manager", new TitleDto("Хххх", "Rytryt"), 20, true, false, 27,
-            EditType.SELECT));
+            new ColumnStateDTO("receiving_station", new TitleDto("Ффффф", ""), 20, true, false, 26,
+                EditType.READ_ONLY));
+        columnStateDTOS
+            .add(new ColumnStateDTO("responsible_manager", new TitleDto("Хххх", "Rytryt"), 20, true, false, 27,
+                EditType.SELECT));
         columnStateDTOS.add(new ColumnStateDTO("responsible_logic_man", new TitleDto("Цццц", "Hhjkhk"), 20, true, false,
             28, EditType.SELECT));
-        columnStateDTOS.add(new ColumnStateDTO("responsible_driver", new TitleDto("Чччч", "Wwrwew"), 20, true, false, 29,
-            EditType.SELECT));
+        columnStateDTOS
+            .add(new ColumnStateDTO("responsible_driver", new TitleDto("Чччч", "Wwrwew"), 20, true, false, 29,
+                EditType.SELECT));
         columnStateDTOS.add(new ColumnStateDTO("responsible_navigator", new TitleDto("Шшшш", "Qqeqw"), 20, true, false,
             30, EditType.SELECT));
-        columnStateDTOS.add(new ColumnStateDTO("comments_for_order", new TitleDto("Щщщщ", "Mjhjhk"), 20, true, false, 31,
-            EditType.INLINE));
+        columnStateDTOS
+            .add(new ColumnStateDTO("comments_for_order", new TitleDto("Щщщщ", "Mjhjhk"), 20, true, false, 31,
+                EditType.INLINE));
 
         TableParamsDTO paramsDTO = new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
         return ResponseEntity.status(HttpStatus.OK).body(paramsDTO);
