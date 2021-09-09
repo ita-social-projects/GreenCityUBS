@@ -6,6 +6,7 @@ import greencity.dto.AllFieldsFromTableDto;
 import greencity.dto.ColumnStateDTO;
 import greencity.dto.PageableDto;
 import greencity.dto.TableParamsDTO;
+import greencity.entity.enums.SortingOrder;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -77,7 +78,7 @@ public class AdminUbsController {
     @GetMapping("/tableParams/{userId}")
     public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
         List<ColumnStateDTO> columnStateDTOS = new ArrayList<>();
-        TableParamsDTO paramsDTO = new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.valueOf("ASC"));
+        TableParamsDTO paramsDTO = new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
         return ResponseEntity.status(HttpStatus.OK).body(paramsDTO);
     }
 }
