@@ -1,6 +1,6 @@
 package greencity.dto;
 
-import greencity.entity.enums.SelectType;
+import greencity.entity.enums.EditType;
 import lombok.*;
 
 @NoArgsConstructor
@@ -15,7 +15,6 @@ public class ColumnStateDTO {
     private int weight;
     private boolean sticky;
     private boolean visible;
-    private boolean editable;
     private int index;
-    private SelectType selectType;
+    private EditType editType;
 }
