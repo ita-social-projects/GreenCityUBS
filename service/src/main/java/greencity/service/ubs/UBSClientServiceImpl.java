@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
@@ -13,23 +14,23 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -59,6 +60,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String fondyPaymentKey;
     @Value("${merchant.id}")
     private String merchantId;
+    @Value("${liqpay.public.key}")
+    private String publicKey;
+    @Value("${liqpay.private.key}")
+    private String privateKey;
+    @Autowired
+    LiqPay liqPay;
 
     @Override
     @Transactional
@@ -802,5 +809,99 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
         ubSuser.setAddress(savedAddress);
         return ubsUserRepository.save(ubSuser);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
+    @Override
+    @Transactional
+    public String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
+        User currentUser = userRepository.findByUuid(uuid);
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+
+        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+
+        if (sumToPay < dto.getPointsToUse()) {
+            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
+        } else {
+            sumToPay -= dto.getPointsToUse();
+        }
+
+        Order order = modelMapper.map(dto, Order.class);
+        Set<Certificate> orderCertificates = new HashSet<>();
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
+
+        UBSuser userData;
+        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+
+        Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
+            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
+
+        checkIfAddressHasBeenDeleted(address);
+
+        checkAddressUser(address, currentUser);
+        address.setAddressStatus(AddressStatus.IN_ORDER);
+
+        userData.setAddress(address);
+
+        if (userData.getAddress().getComment() == null) {
+            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
+        }
+
+        order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
+
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+
+        PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
+
+        return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
+    }
+
+    private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
+        Order order = orderRepository.findById(orderId).orElseThrow(null);
+
+        return PaymentRequestDtoLiqPay.builder()
+            .publicKey(publicKey)
+            .version(3)
+            .action("pay")
+            .amount(sumToPay * 100)
+            .currency("UAH")
+            .description("ubs courier")
+            .orderId(orderId + "_" + order.getPayment()
+                .get(order.getPayment().size() - 1).getId().toString())
+            .language("en")
+            .paytypes("card")
+            .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
+            .build();
+    }
+
+    @Override
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, PaymentRequestDtoLiqPay paymentRequestDtoLiqPay) {
+        if (dto.getStatus().equals("failure")) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
+            .equals(encryptionUtil.formingRequestSignatureLiqPay(paymentRequestDtoLiqPay, privateKey))) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        if (dto.getStatus().equals("error")) {
+            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        }
+        String[] ids = dto.getOrderId().split("_");
+        Order order = orderRepository.findById(Long.valueOf(ids[0]))
+            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
+        if (dto.getStatus().equals("success")) {
+            Payment orderPayment = modelMapper.map(dto, Payment.class);
+            orderPayment.setPaymentStatus(PaymentStatus.PAID);
+            orderPayment.setOrder(order);
+            paymentRepository.save(orderPayment);
+            orderRepository.save(order);
+        }
     }
 }

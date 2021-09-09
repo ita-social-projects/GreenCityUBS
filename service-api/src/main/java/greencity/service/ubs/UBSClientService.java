@@ -250,4 +250,23 @@ public interface UBSClientService {
      * @author Liyubomy Pater.
      */
     UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
+
+    /**
+     * Methods saves all entered by user data to database.
+     * 
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentRequestDto} which contains data to pay order out.
+     * @author Vadym Makitra
+     */
+    String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
+
+    /**
+     * Method validates received payment response.
+     * 
+     * @param dto                     {@link PaymentResponseDtoLiqPay}
+     * @param paymentRequestDtoLiqPay {@link PaymentRequestDtoLiqPay}
+     * @author Vadym Makitra
+     */
+    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, PaymentRequestDtoLiqPay paymentRequestDtoLiqPay);
 }

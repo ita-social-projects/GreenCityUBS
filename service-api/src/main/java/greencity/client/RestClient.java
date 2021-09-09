@@ -1,5 +1,6 @@
 package greencity.client;
 
+import com.liqpay.LiqPay;
 import greencity.constant.RestTemplateLinks;
 import greencity.dto.*;
 import greencity.dto.viber.dto.SendMessageToUserDto;
@@ -7,6 +8,7 @@ import greencity.dto.viber.enums.EventTypes;
 import greencity.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -31,6 +35,8 @@ public class RestClient {
     @Value("${ubs.viber.bot.url}")
     private String viberBotUrl;
     private final HttpServletRequest httpServletRequest;
+    @Autowired
+    LiqPay liqPay;
 
     /**
      * Method return intermediate response from fondy (redirect on payment page).
@@ -245,5 +251,27 @@ public class RestClient {
         HttpEntity<Long> entity = new HttpEntity<>(httpHeaders);
         restTemplate.exchange(greenCityUserServerAddress + "user/markUserAsDeactivated"
             + "?uuid=" + uuid, HttpMethod.PUT, entity, Object.class).getBody();
+    }
+
+    /**
+     * Method that get Data from Request to LiqPay.
+     * 
+     * @param dto {@link PaymentRequestDtoLiqPay}
+     * @return {@link String}
+     * @author Vadym Makitra.
+     */
+    public Map<String, String> getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("action", dto.getAction());
+        params.put("amount", dto.getAmount().toString());
+        params.put("currency", dto.getCurrency());
+        params.put("description", dto.getDescription());
+        params.put("order_id", dto.getOrderId());
+        params.put("version", dto.getVersion().toString());
+        params.put("public_key", dto.getPublicKey());
+        params.put("language", dto.getLanguage());
+        params.put("result_url", dto.getResultUrl());
+        params.put("paytypes", dto.getPaytypes());
+        return params;
     }
 }
