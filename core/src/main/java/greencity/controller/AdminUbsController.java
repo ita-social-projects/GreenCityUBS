@@ -76,7 +76,7 @@ public class AdminUbsController {
     })
     @GetMapping("/tableParams/{userId}")
     public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
-        List<ColumnStateDTO> columnStateDTOS = new ArrayList<>()an ;
+        List<ColumnStateDTO> columnStateDTOS = new ArrayList<>();
         TableParamsDTO paramsDTO = new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.valueOf("ASC"));
         return ResponseEntity.status(HttpStatus.OK).body(paramsDTO);
     }
