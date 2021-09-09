@@ -261,7 +261,7 @@ public class RestClient {
      * @author Vadym Makitra.
      */
     public Map<String, String> getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
-        HashMap<String, String> params = new HashMap<String, String>();
+        HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("amount", dto.getAmount().toString());
         params.put("currency", dto.getCurrency());

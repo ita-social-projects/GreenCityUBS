@@ -147,7 +147,7 @@ public class EncryptionUtil {
 
         String dataToBase64 = Base64.encodeBase64String(data.toString().getBytes(StandardCharsets.UTF_8));
 
-        return str_to_signLiqPay(privateKey + dataToBase64 + privateKey);
+        return strToSignLiqPay(privateKey + dataToBase64 + privateKey);
     }
 
     /**
@@ -160,7 +160,6 @@ public class EncryptionUtil {
     public String formingResponseSignatureLiqPay(PaymentResponseDtoLiqPay dto, String privateKey) {
         JSONObject data = new JSONObject();
         data.put("acq_id", dto.getAcqId());
-        data.put("action", dto.getAction());
         data.put("action", dto.getAction());
         data.put("agent_commission", dto.getAgentCommission());
         data.put("amount", dto.getAmount());
@@ -219,10 +218,10 @@ public class EncryptionUtil {
 
         String dataCoddedByBase64 = Base64.encodeBase64String(data.toString().getBytes(StandardCharsets.UTF_8));
 
-        return str_to_signLiqPay(privateKey + dataCoddedByBase64 + privateKey);
+        return strToSignLiqPay(privateKey + dataCoddedByBase64 + privateKey);
     }
 
-    private String str_to_signLiqPay(String str) {
+    private String strToSignLiqPay(String str) {
         return LiqPayUtil.base64_encode(LiqPayUtil.sha1(str));
     }
 }
