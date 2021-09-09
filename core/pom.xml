@@ -48,7 +48,6 @@
             <groupId>com.greencity</groupId>
             <artifactId>dao</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- swagger -->
