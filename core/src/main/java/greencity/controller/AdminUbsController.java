@@ -3,7 +3,9 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AllFieldsFromTableDto;
+import greencity.dto.ColumnStateDTO;
 import greencity.dto.PageableDto;
+import greencity.dto.TableParamsDTO;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -12,11 +14,11 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -58,5 +60,24 @@ public class AdminUbsController {
             return ResponseEntity.status(HttpStatus.OK)
                 .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
         }
+    }
+
+    /**
+     * Controller.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation("Get all parameters for building table of orders")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/tableParams/{userId}")
+    public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
+        List<ColumnStateDTO> columnStateDTOS = new ArrayList<>()an ;
+        TableParamsDTO paramsDTO = new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.valueOf("ASC"));
+        return ResponseEntity.status(HttpStatus.OK).body(paramsDTO);
     }
 }
