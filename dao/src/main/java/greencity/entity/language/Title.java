@@ -13,4 +13,3 @@ public class Title {
     private String ua;
     private String en;
 }
-
