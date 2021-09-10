@@ -291,4 +291,12 @@ public interface UBSManagementService {
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+
+    /**
+     * Method that return parameters for building table on admin's page.
+     *
+     * @param userId of {@link Long} administrator's user id;
+     * @author Liubomyr Pater
+     */
+    TableParamsDTO getParametersForOrdersTable(Long userId);
 }
