@@ -23,6 +23,6 @@ public class BagsInfoRepo {
      * @author Nazar Struk
      */
     public List<Map<String, Object>> getBagInfo(Long orderId) {
-        return jdbcTemplate.queryForList(QUERY + orderId);
+        return jdbcTemplate.queryForList(QUERY + "?", orderId);
     }
 }

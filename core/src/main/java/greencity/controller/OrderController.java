@@ -219,6 +219,26 @@ public class OrderController {
     }
 
     /**
+     * Controller gets info about events history from,order bu order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Get events history from order by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EventDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @ApiLocale
+    @GetMapping("/order_history/{orderId}")
+    public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
+        @Valid @PathVariable("orderId") Long id) {
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrderById(id));
+    }
+
+    /**
      * Controller updates info about ubs_user in order .
      *
      * @param dto {@link UbsCustomersDtoUpdate}.

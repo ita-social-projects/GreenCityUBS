@@ -40,7 +40,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
         Message message = update.getMessage();
         String uuId = message.getText().replace("/start", "").trim();
         User user = userRepository.findByUuid(uuId);
-        if (user.getTelegramBot() == null && message.getText().startsWith("/start")) {
+        if (user != null && user.getTelegramBot() == null && message.getText().startsWith("/start")) {
             telegramBotRepository.save(TelegramBot.builder()
                 .chatId(message.getChatId())
                 .user(user)

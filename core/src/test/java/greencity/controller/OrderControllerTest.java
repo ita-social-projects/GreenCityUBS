@@ -24,8 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -211,5 +210,16 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService).setNewLastOrderLocation("uuid", locationIdDto);
+    }
+
+    @Test
+    void testGetOrderHistoryByOrderId() throws Exception {
+        when(ubsClientService.getAllEventsForOrderById(1L))
+            .thenReturn(ModelUtils.getListEventsDTOS());
+        mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService, times(1))
+            .getAllEventsForOrderById(1L);
     }
 }

@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import greencity.annotations.ValidPhoneNumber;
 import lombok.*;
 
 import javax.validation.constraints.Email;
@@ -8,6 +9,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
@@ -23,7 +25,7 @@ public class UserProfileDto {
     @Email
     private String recipientEmail;
     @NotBlank
-    @Pattern(regexp = "[0-9]{9}")
+    @ValidPhoneNumber
     private String recipientPhone;
     private AddressDto addressDto;
 }
