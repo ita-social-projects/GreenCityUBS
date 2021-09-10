@@ -3,8 +3,6 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.entity.enums.EditType;
-import greencity.entity.enums.SortingOrder;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -15,9 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/management")
