@@ -100,12 +100,8 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) {
-        try {
-            Thread.sleep(20);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) throws InterruptedException {
+        Thread.sleep(20);
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         Location lastLocation = user.getLastLocation();
