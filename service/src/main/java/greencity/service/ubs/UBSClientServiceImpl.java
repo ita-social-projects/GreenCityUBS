@@ -101,6 +101,11 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) {
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
         Location lastLocation = user.getLastLocation();
@@ -771,8 +776,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser = userRepository.findByUuid(userUuid);
         Location location = locationRepository.findById(locationIdDto.getLocationId())
             .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
-
         currentUser.setLastLocation(location);
+
         userRepository.save(currentUser);
     }
 
