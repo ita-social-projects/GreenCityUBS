@@ -15,8 +15,26 @@
         <libphonenumber.version>8.12.24</libphonenumber.version>
         <jjwt.version>0.9.1</jjwt.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>repository</id>
+            <url>https://github.com/liqpay/sdk-java/raw/repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+
     <dependencies>
 
+        <dependency>
+            <groupId>com.liqpay</groupId>
+            <artifactId>liqpay-sdk</artifactId>
+            <version>0.7-SNAPSHOT</version>
+        </dependency>
         <!-- other modules -->
         <dependency>
             <groupId>com.greencity</groupId>
@@ -113,4 +131,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
