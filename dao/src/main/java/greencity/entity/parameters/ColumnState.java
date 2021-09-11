@@ -4,8 +4,6 @@ import greencity.entity.enums.EditType;
 import greencity.entity.language.Title;
 import lombok.*;
 
-import javax.persistence.*;
-
 //@Entity
 @Data
 @NoArgsConstructor
@@ -33,7 +31,7 @@ public class ColumnState {
     //@Column(nullable = false)
     private Title title;
 
-    @ManyToOne
-    @JoinColumn(name = "table_parameters_id")
+    //@ManyToOne
+    //@JoinColumn(name = "table_parameters_id")
     private TableParameters tableParameters;
 }

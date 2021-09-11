@@ -2,8 +2,6 @@ package greencity.entity.language;
 
 import lombok.*;
 
-import javax.persistence.*;
-
 //@Entity
 @Data
 @NoArgsConstructor

@@ -4,7 +4,6 @@ import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
 import lombok.*;
 
-import javax.persistence.*;
 import java.util.List;
 
 //@Entity
