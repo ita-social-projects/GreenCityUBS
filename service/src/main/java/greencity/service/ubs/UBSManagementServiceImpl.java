@@ -1320,4 +1320,68 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
     }
+
+    @Override
+    public TableParamsDTO getParametersForOrdersTable(Long userId) {
+        List<ColumnStateDTO> columnStateDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+            new ColumnStateDTO("select", new TitleDto("Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX),
+            new ColumnStateDTO("orderid", new TitleDto("Замовлення ID", "Order ID"), 20, true, false, 1,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("order_status", new TitleDto("Cтатус замовлення", "Order sataus"), 20, true, true, 2,
+                EditType.SELECT),
+            new ColumnStateDTO("order_date", new TitleDto("Аааа", "Aaaa"), 20, true, true, 3, EditType.READ_ONLY),
+            new ColumnStateDTO("clientname", new TitleDto("Ббббб", "Bbbb"), 20, false, true, 4, EditType.READ_ONLY),
+            new ColumnStateDTO("phone_number", new TitleDto("Вввв", "Cccc"), 20, false, true, 5, EditType.READ_ONLY),
+            new ColumnStateDTO("email", new TitleDto("Гггг", "Dddd"), 20, false, true, 6, EditType.READ_ONLY),
+            new ColumnStateDTO("violations", new TitleDto("Дддд", "Eeee"), 20, false, true, 7, EditType.READ_ONLY),
+            new ColumnStateDTO("district", new TitleDto("Еееее", "Ffff"), 20, false, true, 8, EditType.READ_ONLY),
+            new ColumnStateDTO("address", new TitleDto("Єєєє", "Gggg"), 20, false, true, 9, EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_name", new TitleDto("Жжжж", "Hhhhh"), 20, false, true, 10,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_phone", new TitleDto("Ззззз", "Oooo"), 20, false, true, 11,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_email", new TitleDto("Иииии", "Pppp"), 20, false, true, 12,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Іііі", ""), 20, false, true, 13,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("garbage_bags_120_amount", new TitleDto("Їїїїї", "Kkkk"), 20, false, true, 14,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("bo_bags_120_amount", new TitleDto("Йййй", "Lllll"), 20, false, true, 15,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("bo_bags_20_amount", new TitleDto("Кккк", "Mmmmm"), 20, false, true, 16,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("total_order_sum", new TitleDto("Ллллл", "Nnnn"), 20, false, true, 17,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("order_certificate_code", new TitleDto("Мммм", "Ssss"), 20, false, true, 18,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("order_certificate_points", new TitleDto("Ннннн", "Ttttt"), 20, false, true, 19,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("amount_due", new TitleDto("Ооооо", ""), 20, false, true, 20, EditType.READ_ONLY),
+            new ColumnStateDTO("comment_for_order_by_client", new TitleDto("Пппп", "Rrrr"), 20, true, true, 21,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("payment_system", new TitleDto("Рррр", "Xxx"), 20, false, true, 22, EditType.READ_ONLY),
+            new ColumnStateDTO("date_of_export", new TitleDto("Сссс", "Yyyy"), 20, false, true, 23, EditType.DATE),
+            new ColumnStateDTO("time_of_export", new TitleDto("Ттттт", "Zzzzz"), 20, false, true, 24,
+                EditType.TIME),
+            new ColumnStateDTO("id_order_from_shop", new TitleDto("Уууу", "Hhhkh"), 20, false, true, 25,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("receiving_station", new TitleDto("Ффффф", ""), 20, false, true, 26, EditType.SELECT),
+            new ColumnStateDTO("responsible_manager", new TitleDto("Хххх", "Rytryt"), 20, false, true, 27,
+                EditType.SELECT),
+            new ColumnStateDTO("responsible_logic_man", new TitleDto("Цццц", "Hhjkhk"), 20, false, true, 28,
+                EditType.SELECT),
+            new ColumnStateDTO("responsible_driver", new TitleDto("Чччч", "Wwrwew"), 20, false, true, 29,
+                EditType.SELECT),
+            new ColumnStateDTO("responsible_navigator", new TitleDto("Шшшш", "Qqeqw"), 20, false, true, 30,
+                EditType.SELECT),
+            new ColumnStateDTO("comments_for_order", new TitleDto("Щщщщ", "Mjhjhk"), 20, false, true, 31,
+                EditType.READ_ONLY))));
+        return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
+    }
+
+    @Override
+    public PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        return new PageableDto<>(new ArrayList<>(), 10, 1, 1);
+    }
 }

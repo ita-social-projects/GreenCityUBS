@@ -291,4 +291,23 @@ public interface UBSManagementService {
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+
+    /**
+     * Method that return parameters for building table on admin's page.
+     *
+     * @param userId of {@link Long} administrator's user id;
+     * @author Liubomyr Pater
+     */
+    TableParamsDTO getParametersForOrdersTable(Long userId);
+
+    /**
+     * Method that return orders table on admin's page after saving changes.
+     *
+     * @param userUuid                     of {@link String} manager's user uuid;
+     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
+     *                                     column & value that need to update;
+     * @author Liubomyr Pater
+     */
+    PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 }
