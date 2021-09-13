@@ -3,7 +3,14 @@ package greencity.entity.parameters;
 import greencity.entity.enums.DataColumnType;
 import greencity.entity.enums.EditType;
 import greencity.entity.language.Title;
+import lombok.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
+@Builder
 public class ColumnState {
     private long id;
     private String name;
