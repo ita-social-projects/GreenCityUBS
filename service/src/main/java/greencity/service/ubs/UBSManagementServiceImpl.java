@@ -1382,6 +1382,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
         RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        return new PageableDto<AllFieldsFromTableDto>(new ArrayList<>(), 10, 1, 1);
+        return new PageableDto<>(new ArrayList<>(), 10, 1, 1);
     }
 }
