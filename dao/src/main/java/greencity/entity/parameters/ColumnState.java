@@ -1,5 +1,6 @@
 package greencity.entity.parameters;
 
+import greencity.entity.enums.DataColumnType;
 import greencity.entity.enums.EditType;
 import greencity.entity.language.Title;
 import lombok.*;
@@ -34,4 +35,6 @@ public class ColumnState {
     //@ManyToOne
     //@JoinColumn(name = "table_parameters_id")
     private TableParameters tableParameters;
+
+    private DataColumnType dataColumnType;
 }
