@@ -291,4 +291,9 @@ public interface UBSManagementService {
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+
+    /**
+     * Method that save ReasonNotTakeBagDto.
+     */
+    ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
 }
