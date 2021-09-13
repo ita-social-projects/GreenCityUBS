@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -78,21 +77,21 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller
+     * Controller.
      *
      * @author Liubomyr Pater
      */
     @ApiOperation(value = "Change order's properties over request from admin's table")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping("/changingOrder")
     public ResponseEntity<PageableDto<AllFieldsFromTableDto>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.changeOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.changeOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO));
     }
-
 }

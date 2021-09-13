@@ -1336,9 +1336,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             new ColumnStateDTO("violations", new TitleDto("Дддд", "Eeee"), 20, false, true, 7, EditType.READ_ONLY),
             new ColumnStateDTO("district", new TitleDto("Еееее", "Ffff"), 20, false, true, 8, EditType.READ_ONLY),
             new ColumnStateDTO("address", new TitleDto("Єєєє", "Gggg"), 20, false, true, 9, EditType.READ_ONLY),
-            new ColumnStateDTO("recipient_name", new TitleDto("Жжжж", "Hhhhh"), 20, false, true, 10, EditType.READ_ONLY),
-            new ColumnStateDTO("recipient_phone", new TitleDto("Ззззз", "Oooo"), 20, false, true, 11, EditType.READ_ONLY),
-            new ColumnStateDTO("recipient_email", new TitleDto("Иииии", "Pppp"), 20, false, true, 12, EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_name", new TitleDto("Жжжж", "Hhhhh"), 20, false, true, 10,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_phone", new TitleDto("Ззззз", "Oooo"), 20, false, true, 11,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("recipient_email", new TitleDto("Иииии", "Pppp"), 20, false, true, 12,
+                EditType.READ_ONLY),
             new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Іііі", ""), 20, false, true, 13,
                 EditType.READ_ONLY),
             new ColumnStateDTO("garbage_bags_120_amount", new TitleDto("Їїїїї", "Kkkk"), 20, false, true, 14,
@@ -1377,7 +1380,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        return new PageableDto<AllFieldsFromTableDto>(new ArrayList<>(), 10,1,1);
+    public PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        return new PageableDto<AllFieldsFromTableDto>(new ArrayList<>(), 10, 1, 1);
     }
 }

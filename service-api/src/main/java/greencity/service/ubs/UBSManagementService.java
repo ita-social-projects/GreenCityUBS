@@ -303,9 +303,11 @@ public interface UBSManagementService {
     /**
      * Method that return orders table on admin's page after saving changes.
      *
-     * @param userUuid of {@link String} manager's user uuid;
-     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO} column & value that need to update;
+     * @param userUuid                     of {@link String} manager's user uuid;
+     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
+     *                                     column & value that need to update;
      * @author Liubomyr Pater
      */
-    PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+    PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 }
