@@ -54,12 +54,12 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
-    @ElementCollection
+    /*@ElementCollection
     @CollectionTable(name = "violations_description_mapping",
         joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")})
     @MapKeyColumn(name = "order_id")
     @Column(name = "description")
-    private Map<Long, String> violationsDescription;
+    private Map<Long, String> violationsDescription;*/
 
     @Column
     private Integer violations;
@@ -73,8 +73,8 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private ViberBot viberBot;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
-    private List<Violation> violationsList;
+    /*@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private List<Violation> violationsList;*/
 
     @ManyToOne()
     @JoinColumn(name = "last_order_location", referencedColumnName = "id")

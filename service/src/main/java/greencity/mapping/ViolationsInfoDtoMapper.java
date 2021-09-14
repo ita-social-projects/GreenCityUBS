@@ -11,7 +11,7 @@ public class ViolationsInfoDtoMapper extends AbstractConverter<User, ViolationsI
     protected ViolationsInfoDto convert(User source) {
         return ViolationsInfoDto.builder()
             .violationsAmount(source.getViolations())
-            .violationsDescription(source.getViolationsDescription())
+            .violationsDescription(null /*source.getViolationsDescription()*/)
             .build();
     }
 }

@@ -479,7 +479,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             for (int i = 0; i < multipartFiles.length; i++) {
                 images.add(fileService.upload(multipartFiles[i]));
             }
-            violation.setImage(String.join("; ", images));
+//            violation.setImage(String.join("; ", images));
         }
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
             if (user.getViolations() < 0) {
@@ -500,7 +500,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .description(add.getViolationDescription())
             .violationDate(order.getOrderDate())
             .order(order)
-            .user(user)
             .build();
     }
 
@@ -905,7 +904,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
         return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
             .orderId(orderId)
-            .userName(v.getUser().getRecipientName())
+            /*.userName(v.getUser().getRecipientName())*/
             .violationLevel(v.getViolationLevel())
             .description(v.getDescription())
             .violationDate(v.getViolationDate())
@@ -917,20 +916,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void deleteViolation(Long id) {
         Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
         if (violationOptional.isPresent()) {
-            if (violationOptional.get().getImage() != null) {
-                List<String> images = new LinkedList<>(Arrays.asList(violationOptional.get().getImage().split("; ")));
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
-                }
-            }
+//            if (violationOptional.get().getImage() != null) {
+//                List<String> images = new LinkedList<>(Arrays.asList(violationOptional.get().getImage().split("; ")));
+//                for (int i = 0; i < images.size(); i++) {
+//                    fileService.delete(images.get(i));
+//                }
+//            }
             violationRepository.deleteById(violationOptional.get().getId());
-            User user = violationOptional.get().getUser();
+            /*User user = violationOptional.get().getUser();
             if (user.getViolations() <= 0) {
                 user.setViolations(0);
             } else {
                 user.setViolations(user.getViolations() - 1);
             }
-            userRepository.save(user);
+            userRepository.save(user);*/
         } else {
             throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
         }
@@ -1297,28 +1296,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
         violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
         violation.setDescription(add.getViolationDescription());
-        if (violation.getImage() != null) {
-            List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
-            for (int i = 0; i < images.size(); i++) {
-                fileService.delete(images.get(i));
-            }
-            violation.setImage(null);
-            images.clear();
-            if (multipartFiles.length > 0) {
-                for (int i = 0; i < multipartFiles.length; i++) {
-                    images.add(fileService.upload(multipartFiles[i]));
-                }
-                violation.setImage(String.join("; ", images));
-//                Objects.isNull(images);
-            }
-        } else {
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                for (int i = 0; i < multipartFiles.length; i++) {
-                    images.add(fileService.upload(multipartFiles[i]));
-                }
-                violation.setImage(String.join("; ", images));
-            }
-        }
+//        if (violation.getImage() != null) {
+//            List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
+//            for (int i = 0; i < images.size(); i++) {
+//                fileService.delete(images.get(i));
+//            }
+//            violation.setImage(null);
+//            images.clear();
+//            if (multipartFiles.length > 0) {
+//                for (int i = 0; i < multipartFiles.length; i++) {
+//                    images.add(fileService.upload(multipartFiles[i]));
+//                }
+//                violation.setImage(String.join("; ", images));
+//            }
+//        } else {
+//            if (multipartFiles.length > 0) {
+//                List<String> images = new LinkedList<>();
+//                for (int i = 0; i < multipartFiles.length; i++) {
+//                    images.add(fileService.upload(multipartFiles[i]));
+//                }
+//                violation.setImage(String.join("; ", images));
+//            }
+//        }
     }
 }
