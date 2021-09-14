@@ -16,5 +16,4 @@ public class MultiValue {
     private List<String> strings;
     private List<LocalDate> dates;
     private List<LocalTime> times;
-    private Class clazz;
 }

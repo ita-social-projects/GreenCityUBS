@@ -1399,35 +1399,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             case BOOLEAN:
                 List<Boolean> booleans = values.stream().map(x -> (Boolean) x).collect(Collectors.toList());
                 multiValue.setBooleans(booleans);
-                multiValue.setClazz(Boolean.class);
                 break;
             case INTEGER:
                 List<Integer> integers = values.stream().map(x -> (Integer) x).collect(Collectors.toList());
                 multiValue.setIntegers(integers);
-                multiValue.setClazz(Integer.class);
                 break;
             case FLOAT:
                 List<Float> floats = values.stream().map(x -> (Float) x).collect(Collectors.toList());
                 multiValue.setFloats(floats);
-                multiValue.setClazz(Float.class);
                 break;
             case STRING:
                 List<String> strings = values.stream().map(x -> (String) x).collect(Collectors.toList());
                 multiValue.setStrings(strings);
-                multiValue.setClazz(String.class);
                 break;
             case DATE:
                 List<LocalDate> dates = values.stream().map(x -> (LocalDate) x).collect(Collectors.toList());
                 multiValue.setDates(dates);
-                multiValue.setClazz(LocalDate.class);
                 break;
             case TIME:
                 List<LocalTime> times = values.stream().map(x -> (LocalTime) x).collect(Collectors.toList());
                 multiValue.setTimes(times);
-                multiValue.setClazz(LocalTime.class);
                 break;
             default:
-                multiValue.setClazz(Object.class);
                 break;
         }
         return multiValue;
