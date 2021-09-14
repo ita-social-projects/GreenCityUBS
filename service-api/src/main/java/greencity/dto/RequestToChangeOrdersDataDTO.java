@@ -1,6 +1,5 @@
 package greencity.dto;
 
-import greencity.entity.enums.DataColumnType;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +13,5 @@ import java.util.List;
 public class RequestToChangeOrdersDataDTO {
     private List<Long> orderId;
     private String columnName;
-    private List<Object> newValues;
-    private DataColumnType dataColumnType;
+    private String newValue;
 }

@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.parameters.MultiValue;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +9,8 @@ public class SaveChangeInOrderRepo {
     /**
      * Method for save changes imputed from orders table.
      */
-    public boolean saveChange(String query, Long orderId, MultiValue multiValue) {
+    public boolean saveChange(String query, Long orderId) {
+        System.out.println(query + orderId);
         return true;
     }
 }
