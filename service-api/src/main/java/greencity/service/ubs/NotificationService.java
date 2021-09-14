@@ -1,9 +1,9 @@
 package greencity.service.ubs;
 
 import greencity.dto.NotificationDto;
+import greencity.dto.PageableDto;
 import greencity.entity.order.Order;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
     /**
@@ -67,5 +67,12 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    List<NotificationDto> getAllNotificationsForUser(String userUuid, String language);
+    PageableDto<NotificationDto> getAllNotificationsForUser(String userUuid, String language, Pageable pageable);
+
+    /**
+     * Method that changes the status of the notification - reviewed.
+     *
+     * @author Ihor Volianskyi
+     */
+    void reviewNotification(Long id);
 }
