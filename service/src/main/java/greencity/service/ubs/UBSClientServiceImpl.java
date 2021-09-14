@@ -870,7 +870,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .publicKey(publicKey)
             .version(3)
             .action("pay")
-            .amount(sumToPay * 100)
+            .amount(sumToPay)
             .currency("UAH")
             .description("ubs courier")
             .orderId(orderId + "_" + order.getPayment()
