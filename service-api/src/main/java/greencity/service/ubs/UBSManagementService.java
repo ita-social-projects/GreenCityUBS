@@ -1,8 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
-import greencity.entity.enums.DataColumnType;
-import greencity.entity.parameters.MultiValue;
 import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -304,21 +302,11 @@ public interface UBSManagementService {
     TableParamsDTO getParametersForOrdersTable(Long userId);
 
     /**
-     * Method that return new value after casting type.
+     * Method that return.
      *
-     * @param dataColumnType of {@link DataColumnType}
-     * @param values         of {@link List}
-     * @author Liubomyr Pater
-     */
-    MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, List<Object> values);
-
-    /**
-     * Method that return orders table on admin's page after saving changes.
-     * 
-     * @param userUuid                     of {@link Long} uuid of logined User;
+     * @param userUuid                     of {@link String}
      * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
-     *                                     column & value that need to update;
      * @author Liubomyr Pater
      */
-    String saveNewValueIntoOrders(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+    HttpStatus chooseOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 }
