@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Volianskyi-1" author="Ihor Volianskyi">
+        <addColumn tableName="user_notifications">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="order_id"
+                                 baseTableName="user_notifications"
+                                 constraintName="fk_user_notifications_order_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="orders"
+                                 onUpdate="NO ACTION"
+                                 onDelete="NO ACTION" />
+    </changeSet>
+
+    <changeSet id="Volianskyi-2" author="Ihor Volianskyi">
+        <addColumn tableName="user_notifications">
+            <column name="read" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
