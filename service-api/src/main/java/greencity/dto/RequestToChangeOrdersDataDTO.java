@@ -9,6 +9,7 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class RequestToChangeOrdersDataDTO {
+    private long orderId;
     private String columnName;
     private Object newValue;
 }

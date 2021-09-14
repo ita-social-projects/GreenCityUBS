@@ -7,6 +7,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.parameters.MultiValue;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -62,6 +63,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private final SaveChangeInOrderRepo saveChangeInOrderRepo;
 
     /**
      * {@inheritDoc}
@@ -1329,72 +1331,121 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 EditType.READ_ONLY),
             new ColumnStateDTO("order_status", new TitleDto("Cтатус замовлення", "Order sataus"), 20, true, true, 2,
                 EditType.SELECT),
-            new ColumnStateDTO("payment_status", new TitleDto("Статус оплати", "Aaaa"), 20, true, true, 3, EditType.READ_ONLY),
-            new ColumnStateDTO("order_date", new TitleDto("Дата замовлення", "Aaaa"), 20, true, true, 4, EditType.READ_ONLY),
-            new ColumnStateDTO("payment_date", new TitleDto("Дата оплати", "Aaaa"), 20, true, true, 5, EditType.READ_ONLY),
-            new ColumnStateDTO("client_name", new TitleDto("Ім'я замовника", "Bbbb"), 20, false, true, 6, EditType.READ_ONLY),
-            new ColumnStateDTO("phone_number", new TitleDto("Телефон замовника", "Cccc"), 20, false, true, 7, EditType.READ_ONLY),
-            new ColumnStateDTO("email", new TitleDto("Email замовника", "Dddd"), 20, false, true, 8, EditType.READ_ONLY),
+            new ColumnStateDTO("payment_status", new TitleDto("Статус оплати", "Aaaa"), 20, true, true, 3,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("order_date", new TitleDto("Дата замовлення", "Aaaa"), 20, true, true, 4,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("payment_date", new TitleDto("Дата оплати", "Aaaa"), 20, true, true, 5,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("client_name", new TitleDto("Ім'я замовника", "Bbbb"), 20, false, true, 6,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("phone_number", new TitleDto("Телефон замовника", "Cccc"), 20, false, true, 7,
+                EditType.READ_ONLY),
+            new ColumnStateDTO("email", new TitleDto("Email замовника", "Dddd"), 20, false, true, 8,
+                EditType.READ_ONLY),
             new ColumnStateDTO("sender_name", new TitleDto("Ім'я відправника", "Hhhhh"), 20, false, true, 9,
-                    EditType.READ_ONLY),
+                EditType.READ_ONLY),
             new ColumnStateDTO("sender_phone", new TitleDto("Телефон відправника", "Oooo"), 20, false, true, 10,
-                    EditType.READ_ONLY),
+                EditType.READ_ONLY),
             new ColumnStateDTO("sender_email", new TitleDto("Email відправника", "Pppp"), 20, false, true, 11,
-                    EditType.READ_ONLY),
-            new ColumnStateDTO("violations", new TitleDto("Кількість порушень клієнта", "Eeee"), 20, false, true, 12, EditType.READ_ONLY),
+                EditType.READ_ONLY),
+            new ColumnStateDTO("violations", new TitleDto("Кількість порушень клієнта", "Eeee"), 20, false, true, 12,
+                EditType.READ_ONLY),
             new ColumnStateDTO("location", new TitleDto("Локація", "Eeee"), 20, false, true, 13, EditType.READ_ONLY),
             new ColumnStateDTO("district", new TitleDto("Район", "Ffff"), 20, false, true, 14, EditType.READ_ONLY),
             new ColumnStateDTO("address", new TitleDto("Адреса", "Gggg"), 20, false, true, 15, EditType.READ_ONLY),
-            new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Коментар до адреси від клієнта", ""), 20, false, true, 16,
-                EditType.READ_ONLY),
+            new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Коментар до адреси від клієнта", ""), 20,
+                false, true, 16, EditType.READ_ONLY),
             new ColumnStateDTO("bags_amount", new TitleDto("К-сть пакетів", "Kkkk"), 20, false, true, 17,
                 EditType.READ_ONLY),
             new ColumnStateDTO("total_order_sum", new TitleDto("Сума замовлення", "Nnnn"), 20, false, true, 18,
                 EditType.READ_ONLY),
             new ColumnStateDTO("order_certificate_code", new TitleDto("Номер сертифікату", "Ssss"), 20, false, true, 19,
                 EditType.READ_ONLY),
-            new ColumnStateDTO("order_certificate_points", new TitleDto("Загальна знижка", "Ttttt"), 20, false, true, 20,
+            new ColumnStateDTO("order_certificate_points", new TitleDto("Загальна знижка", "Ttttt"), 20, false, true,
+                20, EditType.READ_ONLY),
+            new ColumnStateDTO("amount_due", new TitleDto("Сума до оплати", ""), 20, false, true, 21,
                 EditType.READ_ONLY),
-            new ColumnStateDTO("amount_due", new TitleDto("Сума до оплати", ""), 20, false, true, 21, EditType.READ_ONLY),
-            new ColumnStateDTO("comment_for_order_by_client", new TitleDto("Коментар до замовлення від клієнта", "Rrrr"), 20, true, true, 22,
+            new ColumnStateDTO("comment_for_order_by_client",
+                new TitleDto("Коментар до замовлення від клієнта", "Rrrr"), 20, true, true, 22,
                 EditType.READ_ONLY),
             new ColumnStateDTO("payment", new TitleDto("Оплата", "Xxx"), 20, false, true, 23, EditType.READ_ONLY),
-            new ColumnStateDTO("date_of_export", new TitleDto("Дата вивезення", "Yyyy"), 20, false, true, 24, EditType.DATE),
+            new ColumnStateDTO("date_of_export", new TitleDto("Дата вивезення", "Yyyy"), 20, false, true, 24,
+                EditType.DATE),
             new ColumnStateDTO("time_of_export", new TitleDto("Час вивезення", "Zzzzz"), 20, false, true, 25,
                 EditType.TIME),
-            new ColumnStateDTO("id_order_from_shop", new TitleDto("Номер замовлення з магазину", "Hhhkh"), 20, false, true, 26,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("receiving_station", new TitleDto("Станція приймання", ""), 20, false, true, 27, EditType.SELECT),
+            new ColumnStateDTO("id_order_from_shop", new TitleDto("Номер замовлення з магазину", "Hhhkh"), 20, false,
+                true, 26, EditType.READ_ONLY),
+            new ColumnStateDTO("receiving_station", new TitleDto("Станція приймання", ""), 20, false, true, 27,
+                EditType.SELECT),
             new ColumnStateDTO("responsible_manager", new TitleDto("Менеджер послуги", "Rytryt"), 20, false, true, 28,
                 EditType.SELECT),
             new ColumnStateDTO("responsible_caller", new TitleDto("Менеджер обдзвону", "Rytryt"), 20, false, true, 29,
-                    EditType.SELECT),
+                EditType.SELECT),
             new ColumnStateDTO("responsible_logic_man", new TitleDto("Логіст", "Hhjkhk"), 20, false, true, 30,
                 EditType.SELECT),
             new ColumnStateDTO("responsible_driver", new TitleDto("Водій", "Wwrwew"), 20, false, true, 31,
                 EditType.SELECT),
             new ColumnStateDTO("responsible_navigator", new TitleDto("Штурман", "Qqeqw"), 20, false, true, 32,
                 EditType.SELECT),
-            new ColumnStateDTO("comments_for_order", new TitleDto("Коментарі до замовлення", "Mjhjhk"), 20, false, true, 33,
-                EditType.READ_ONLY))));
+            new ColumnStateDTO("comments_for_order", new TitleDto("Коментарі до замовлення", "Mjhjhk"), 20, false, true,
+                33, EditType.READ_ONLY))));
         return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
     }
 
     @Override
-    public PageableDto<AllFieldsFromTableDto> changeOrdersDataSwitcher(String userUuid,
-        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-
-        DataColumnType dataColumnType = returnColumnTypeForDevelopStage();
-        switch (dataColumnType){
-
+    public MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, Object value) {
+        MultiValue<?> multiValue;
+        switch (dataColumnType) {
+            case BOOLEAN:
+                multiValue = new MultiValue<>((Boolean) value);
+                multiValue.setClazz(Boolean.class);
+                break;
+            case INTEGER:
+                multiValue = new MultiValue<>((Integer) value);
+                multiValue.setClazz(Integer.class);
+                break;
+            case FLOAT:
+                multiValue = new MultiValue<>((Float) value);
+                multiValue.setClazz(Float.class);
+                break;
+            case STRING:
+                multiValue = new MultiValue<>((String) value);
+                multiValue.setClazz(String.class);
+                break;
+            case DATE:
+                multiValue = new MultiValue<>((LocalDate) value);
+                multiValue.setClazz(LocalDate.class);
+                break;
+            case TIME:
+                multiValue = new MultiValue<>((LocalTime) value);
+                multiValue.setClazz(LocalTime.class);
+                break;
+            default:
+                multiValue = new MultiValue<>(value);
+                multiValue.setClazz(Object.class);
+                break;
         }
 
-
-
-        return new PageableDto<>(new ArrayList<>(), 10, 1, 1);
+        return multiValue;
     }
 
-    private DataColumnType returnColumnTypeForDevelopStage(){
-        return DataColumnType.BOOLEAN;
+    private DataColumnType returnColumnTypeForDevelopStage(String columnName) {
+        return DataColumnType.INTEGER;
+    }
+
+    private String getQueryByColumnForSavingChanges(String columnName) {
+        return "query";
+    }
+
+    @Override
+    public String saveNewValueIntoOrder(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        MultiValue multiValue =
+            chooseOrdersDataSwitcher(returnColumnTypeForDevelopStage(requestToChangeOrdersDataDTO.getColumnName()),
+                requestToChangeOrdersDataDTO.getNewValue());
+        String query = getQueryByColumnForSavingChanges(requestToChangeOrdersDataDTO.getColumnName());
+        Long orderId = requestToChangeOrdersDataDTO.getOrderId();
+        saveChangeInOrderRepo.saveChange(query, orderId, multiValue);
+        return "OK";
     }
 }

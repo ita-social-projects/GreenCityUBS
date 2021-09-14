@@ -88,10 +88,10 @@ public class AdminUbsController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping("/changingOrder")
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> saveNewValueFromOrdersTable(
+    public ResponseEntity<HttpStatus> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.changeOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO));
+        ubsManagementService.saveNewValueIntoOrder(userUuid, requestToChangeOrdersDataDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
