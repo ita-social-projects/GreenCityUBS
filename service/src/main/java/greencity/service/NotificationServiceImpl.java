@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.client.OutOfRequestRestClient;
 import greencity.dto.NotificationDto;
+import greencity.dto.PageableDto;
 import greencity.dto.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -14,6 +15,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import greencity.ubstelegrambot.TelegramService;
@@ -23,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +36,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
+import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.NOTIFICATION_HAS_ALREADY_READ;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -78,6 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
                 }
                 userNotification.setNotificationTime(LocalDateTime.now(clock));
                 userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+                userNotification.setOrder(order);
                 UserNotification created = userNotificationRepository.save(userNotification);
                 NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
                     .toString());
@@ -97,6 +105,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ORDER_IS_PAID);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
         sendNotificationsForBotsAndEmail(notification);
     }
@@ -118,6 +127,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -152,7 +162,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         userNotification.setNotificationType(NotificationType.UNPAID_PACKAGE);
         userNotification.setUser(order.getUser());
-
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -200,6 +210,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -220,7 +231,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .value(value.getDescription()).build()));
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(order.getUser());
-
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -257,14 +268,35 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public List<NotificationDto> getAllNotificationsForUser(String userUuid, String language) {
+    public PageableDto<NotificationDto> getAllNotificationsForUser(String userUuid, String language,
+        Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
-        List<UserNotification> notifications = userNotificationRepository.findAllByUser(user);
-        List<NotificationDto> notificationDtos = new LinkedList<>();
-        for (UserNotification notification : notifications) {
-            notificationDtos.add(createNotificationDto(notification, language, notificationTemplateRepository));
+        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageable);
+        List<NotificationDto> notificationDtoList = notifications.stream()
+            .map(n -> createNotificationDto(n, language, notificationTemplateRepository))
+            .sorted(Comparator.comparing(NotificationDto::getNotificationTime).reversed())
+            .collect(Collectors.toCollection(LinkedList::new));
+
+        return new PageableDto<>(
+            notificationDtoList,
+            notifications.getTotalElements(),
+            notifications.getPageable().getPageNumber(),
+            notifications.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reviewNotification(Long id) {
+        UserNotification notification = userNotificationRepository.findById(id)
+            .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
+
+        if (notification.isRead()) {
+            throw new NotificationNotFoundException(NOTIFICATION_HAS_ALREADY_READ);
         }
-        return notificationDtos;
+
+        notification.setRead(true);
     }
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification) {
@@ -303,7 +335,15 @@ public class NotificationServiceImpl implements NotificationService {
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(templateBody);
 
-        return NotificationDto.builder().title(template.getTitle())
-            .body(resultBody).build();
+        Long orderId = Objects.nonNull(notification.getOrder()) ? notification.getOrder().getId() : null;
+
+        return NotificationDto.builder()
+            .id(notification.getId())
+            .orderId(orderId)
+            .read(notification.isRead())
+            .title(template.getTitle())
+            .body(resultBody)
+            .notificationTime(notification.getNotificationTime())
+            .build();
     }
 }
