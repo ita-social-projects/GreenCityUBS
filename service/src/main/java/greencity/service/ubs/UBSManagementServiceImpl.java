@@ -1455,29 +1455,38 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void orderStatusForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void receivingStationForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 
     private void responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 }
