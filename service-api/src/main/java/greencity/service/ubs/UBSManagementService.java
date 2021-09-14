@@ -314,7 +314,8 @@ public interface UBSManagementService {
 
     /**
      * Method that return orders table on admin's page after saving changes.
-     * @param userUuid of {@link Long} uuid of logined User;
+     * 
+     * @param userUuid                     of {@link Long} uuid of logined User;
      * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
      *                                     column & value that need to update;
      * @author Liubomyr Pater
