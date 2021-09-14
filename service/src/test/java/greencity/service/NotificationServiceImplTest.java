@@ -1,18 +1,12 @@
 package greencity.service;
 
-import greencity.dto.NotificationDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
-import greencity.entity.language.Language;
 import greencity.entity.notifications.NotificationParameter;
-import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,15 +18,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceImplTest {
+class NotificationServiceImplTest {
     private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
 
     @Mock
@@ -77,7 +73,7 @@ public class NotificationServiceImplTest {
     }
 
     @Test
-    public void testNotifyUnpaidOrders() {
+    void testNotifyUnpaidOrders() {
         User user = User.builder().id(42L).build();
         List<Order> orders = List.of(Order.builder().id(42L).user(user)
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
@@ -124,23 +120,7 @@ public class NotificationServiceImplTest {
     }
 
     @Test
-    public void testNotifyPaidOrder() {
-        Order order = Order.builder().id(43L).user(User.builder().id(42L).build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now(fixedClock)).build();
-
-        UserNotification notification = new UserNotification();
-        notification.setNotificationType(NotificationType.ORDER_IS_PAID);
-        notification.setUser(order.getUser());
-
-        when(userNotificationRepository.save(notification)).thenReturn(notification);
-
-        notificationService.notifyPaidOrder(order);
-
-        verify(userNotificationRepository, times(1)).save(notification);
-    }
-
-    @Test
-    public void testNotifyCourierItineraryFormed() {
+    void testNotifyCourierItineraryFormed() {
         Order order = Order.builder().id(44L).user(User.builder().id(42L).build())
             .deliverFrom(LocalDateTime.now(fixedClock).plusDays(1))
             .deliverFrom(LocalDateTime.now(fixedClock).minusHours(3))
@@ -176,74 +156,7 @@ public class NotificationServiceImplTest {
     }
 
     @Test
-    public void testNotifyBonuses() {
-        Long overpayment = 2L;
-        Order order = Order.builder().id(45L).user(User.builder().id(42L).build())
-            .confirmedQuantity(new HashMap<>())
-            .exportedQuantity(new HashMap<>())
-            .orderStatus(OrderStatus.ADJUSTMENT)
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
-            .orderDate(LocalDateTime.now(fixedClock))
-            .build();
-
-        Set<NotificationParameter> parameters = new HashSet<>();
-
-        parameters.add(NotificationParameter.builder().key("overpayment")
-            .value(String.valueOf(overpayment)).build());
-        parameters.add(NotificationParameter.builder().key("realPackageNumber")
-            .value(String.valueOf(0)).build());
-        parameters.add(NotificationParameter.builder().key("paidPackageNumber")
-            .value(String.valueOf(0)).build());
-
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
-        userNotification.setUser(order.getUser());
-
-        when(userNotificationRepository.save(userNotification)).thenReturn(userNotification);
-
-        parameters.forEach(parameter -> parameter.setUserNotification(userNotification));
-
-        when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
-
-        notificationService.notifyBonuses(order, overpayment);
-
-        verify(userNotificationRepository).save(any());
-        verify(notificationParameterRepository).saveAll(parameters);
-    }
-
-    @Test
-    public void testNotifyAddViolation() {
-        Order order = Order.builder().id(46L).user(User.builder().id(42L).build())
-            .orderDate(LocalDateTime.now(fixedClock))
-            .build();
-
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
-        userNotification.setUser(order.getUser());
-
-        NotificationParameter parameter = NotificationParameter.builder()
-            .key("violationDescription")
-            .value("violation description")
-            .build();
-
-        Violation violation = Violation.builder().description("violation description").build();
-
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(violation));
-
-        when(userNotificationRepository.save(userNotification)).thenReturn(userNotification);
-        parameter.setUserNotification(userNotification);
-        when(notificationParameterRepository.saveAll(Collections.singleton(parameter)))
-            .thenReturn(Collections.singletonList(parameter));
-        parameter.setUserNotification(userNotification);
-
-        notificationService.notifyAddViolation(order);
-
-        verify(userNotificationRepository).save(any());
-        verify(notificationParameterRepository).saveAll(Collections.singleton(parameter));
-    }
-
-    @Test
-    public void testNotifyInactiveAccounts() {
+    void testNotifyInactiveAccounts() {
         User user = User.builder().id(42L).build();
         User user1 = User.builder().id(43L).build();
         UserNotification notification = new UserNotification();
@@ -268,101 +181,4 @@ public class NotificationServiceImplTest {
 
         verify(userNotificationRepository, times(2)).save(any());
     }
-
-    @Test
-    public void testNotifyAllHalfPaidPackages() {
-        User user = User.builder().id(42L).build();
-        List<Order> orders = List.of(Order.builder().id(47L).user(user)
-            .orderDate(LocalDateTime.now(fixedClock))
-            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-            .payment(Collections.emptyList())
-            .build(),
-            Order.builder().id(51L).user(user)
-                .orderDate(LocalDateTime.now(fixedClock))
-                .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                .payment(List.of(
-                    Payment.builder()
-                        .paymentStatus(PaymentStatus.PAID).amount(0L)
-                        .build(),
-                    Payment.builder()
-                        .paymentStatus(PaymentStatus.PAYMENT_REFUNDED).amount(0L)
-                        .build()))
-                .build());
-
-        when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID))
-            .thenReturn(orders);
-
-        UserNotification notification = new UserNotification();
-        notification.setNotificationType(NotificationType.UNPAID_PACKAGE);
-        notification.setUser(User.builder().id(42L).build());
-        notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
-
-        when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
-            NotificationType.UNPAID_PACKAGE.toString(),
-            orders.get(0).getId().toString())).thenReturn(Optional.of(notification));
-
-        when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
-            NotificationType.UNPAID_PACKAGE.toString(),
-            orders.get(1).getId().toString())).thenReturn(Optional.empty());
-
-        Set<NotificationParameter> parameters = new HashSet<>();
-
-        when(bagRepository.findBagByOrderId(any())).thenReturn(Collections.emptyList());
-
-        long amountToPay = 0L;
-
-        parameters.add(NotificationParameter.builder().key("amountToPay")
-            .value(String.format("%.2f", (double) amountToPay)).build());
-        parameters.add(NotificationParameter.builder().key("orderNumber")
-            .value(orders.get(0).getId().toString()).build());
-
-        when(userNotificationRepository.save(any())).thenReturn(notification);
-        parameters.forEach(parameter -> parameter.setUserNotification(notification));
-        when(notificationParameterRepository.saveAll(parameters)).thenReturn(new ArrayList<>(parameters));
-
-        notificationService.notifyAllHalfPaidPackages();
-
-        verify(userNotificationRepository, times(2)).save(notification);
-        verify(notificationParameterRepository, times(2)).saveAll(any());
-    }
-
-    @Test
-    public void testGetAllNotificationsForUser() {
-        User user = User.builder().uuid("123").id(42L).build();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-
-        UserNotification notification = new UserNotification();
-        notification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
-        notification.setUser(user);
-        notification.setParameters(Collections.singleton(new NotificationParameter("text", "of notification")));
-
-        when(userNotificationRepository.findAllByUser(user)).thenReturn(Collections.singletonList(notification));
-
-        String language = "en";
-        NotificationTemplate template = new NotificationTemplate();
-        template.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
-        template.setId(20L);
-        template.setLanguage(Language.builder().code(language).build());
-        template.setTitle("Title");
-        template.setBody("Body ${text}");
-
-        when(notificationTemplateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCode(
-                notification.getNotificationType(),
-                language)).thenReturn(Optional.of(template));
-
-        List<NotificationDto> expected = Collections.singletonList(
-            new NotificationDto("Title", "Body of notification"));
-
-        List<NotificationDto> actual = notificationService.getAllNotificationsForUser("123", "en");
-
-        assertEquals(expected, actual);
-        verify(userRepository).findByUuid(user.getUuid());
-        verify(userNotificationRepository).findAllByUser(user);
-        verify(notificationTemplateRepository)
-            .findNotificationTemplateByNotificationTypeAndLanguageCode(notification.getNotificationType(),
-                language);
-    }
-
 }
