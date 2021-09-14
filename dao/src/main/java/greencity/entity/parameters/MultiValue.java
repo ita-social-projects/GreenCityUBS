@@ -8,8 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode
-@Builder
+@NoArgsConstructor
 public class MultiValue {
     private List<Boolean> booleans;
     private List<Integer> integers;
@@ -18,10 +17,4 @@ public class MultiValue {
     private List<LocalDate> dates;
     private List<LocalTime> times;
     private Class clazz;
-
-    /**
-     * Constructor.
-     **/
-    public MultiValue() {
-    }
 }
