@@ -1426,7 +1426,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 multiValue.setClazz(Object.class);
                 break;
         }
-
         return multiValue;
     }
 
