@@ -1,8 +1,11 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.entity.enums.DataColumnType;
+import greencity.entity.parameters.MultiValue;
 import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -291,4 +294,31 @@ public interface UBSManagementService {
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+
+    /**
+     * Method that return parameters for building table on admin's page.
+     *
+     * @param userId of {@link Long} administrator's user id;
+     * @author Liubomyr Pater
+     */
+    TableParamsDTO getParametersForOrdersTable(Long userId);
+
+    /**
+     * Method that return new value after casting type.
+     *
+     * @param dataColumnType of {@link DataColumnType}
+     * @param values         of {@link List}
+     * @author Liubomyr Pater
+     */
+    MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, List<Object> values);
+
+    /**
+     * Method that return orders table on admin's page after saving changes.
+     * 
+     * @param userUuid                     of {@link Long} uuid of logined User;
+     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
+     *                                     column & value that need to update;
+     * @author Liubomyr Pater
+     */
+    String saveNewValueIntoOrders(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 }

@@ -62,6 +62,8 @@ public final class ErrorMessage {
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
+    public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
+    public static final String NOTIFICATION_HAS_ALREADY_READ = "Notification has already read";
 
     /**
      * Constructor.
