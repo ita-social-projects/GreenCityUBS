@@ -30,7 +30,7 @@ public interface UBSClientService {
      *
      * @author Denys Kisliak
      */
-    UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid);
+    UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) throws InterruptedException;
 
     /**
      * Methods returns all saved user data.

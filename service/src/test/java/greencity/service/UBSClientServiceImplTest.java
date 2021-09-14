@@ -123,7 +123,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getFirstPageDataTest() {
+    void getFirstPageDataTest() throws InterruptedException {
         UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoExpected =
             new UserPointsAndAllBagsDtoTest(new ArrayList<BagTranslationDto>(), 2l, 600);
 

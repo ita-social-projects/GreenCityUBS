@@ -353,7 +353,7 @@ public class OrderController {
     })
     @GetMapping("/order-details-test")
     public ResponseEntity<UserPointsAndAllBagsDtoTest> getCurrentUserPointsTest(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+        @ApiIgnore @CurrentUserUuid String userUuid) throws InterruptedException {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageDataTest(userUuid));
     }
