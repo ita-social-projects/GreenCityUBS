@@ -3,6 +3,8 @@ package greencity.dto;
 import greencity.entity.enums.EditType;
 import lombok.*;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -17,4 +19,5 @@ public class ColumnStateDTO {
     private boolean visible;
     private int index;
     private EditType editType;
+    private List<TitleDto> optional;
 }

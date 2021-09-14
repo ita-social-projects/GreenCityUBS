@@ -91,7 +91,7 @@ public class AdminUbsController {
     public ResponseEntity<HttpStatus> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        ubsManagementService.saveNewValueIntoOrders(userUuid, requestToChangeOrdersDataDTO);
+        ubsManagementService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
