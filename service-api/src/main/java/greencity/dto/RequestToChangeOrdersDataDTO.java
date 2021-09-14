@@ -1,6 +1,9 @@
 package greencity.dto;
 
+import greencity.entity.enums.DataColumnType;
 import lombok.*;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -9,7 +12,8 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class RequestToChangeOrdersDataDTO {
-    private long orderId;
+    private List<Long> orderId;
     private String columnName;
-    private Object newValue;
+    private List<Object> newValues;
+    private DataColumnType dataColumnType;
 }

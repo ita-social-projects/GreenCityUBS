@@ -1,34 +1,27 @@
 package greencity.entity.parameters;
 
-public class MultiValue<T> {
-    private T value;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+@Getter
+@Setter
+@EqualsAndHashCode
+@Builder
+public class MultiValue {
+    private List<Boolean> booleans;
+    private List<Integer> integers;
+    private List<Float> floats;
+    private List<String> strings;
+    private List<LocalDate> dates;
+    private List<LocalTime> times;
     private Class clazz;
 
     /**
-     * Method for .
-     */
-    public MultiValue(T value) {
-        this.value = value;
-    }
-
-    /**
-     * Method for .
-     */
-    public T getValue() {
-        return value;
-    }
-
-    /**
-     * Method for .
-     */
-    public void setClazz(Class clazz) {
-        this.clazz = clazz;
-    }
-
-    /**
-     * Method for .
-     */
-    public Class getClazz() {
-        return clazz;
+     * Constructor.
+     **/
+    public MultiValue() {
     }
 }

@@ -307,10 +307,10 @@ public interface UBSManagementService {
      * Method that return new value after casting type.
      *
      * @param dataColumnType of {@link DataColumnType}
-     * @param value          of {@link Object}
+     * @param values         of {@link List}
      * @author Liubomyr Pater
      */
-    MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, Object value);
+    MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, List<Object> values);
 
     /**
      * Method that return orders table on admin's page after saving changes.
@@ -320,5 +320,5 @@ public interface UBSManagementService {
      *                                     column & value that need to update;
      * @author Liubomyr Pater
      */
-    String saveNewValueIntoOrder(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+    String saveNewValueIntoOrders(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 }

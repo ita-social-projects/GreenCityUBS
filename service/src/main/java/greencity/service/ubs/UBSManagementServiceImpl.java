@@ -63,7 +63,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private final SaveChangeInOrderRepo saveChangeInOrderRepo;
 
     /**
      * {@inheritDoc}
@@ -1394,57 +1393,50 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, Object value) {
-        MultiValue<?> multiValue;
+    public MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, List<Object> values) {
+        MultiValue multiValue = new MultiValue();
         switch (dataColumnType) {
             case BOOLEAN:
-                multiValue = new MultiValue<>((Boolean) value);
+                List<Boolean> booleans = values.stream().map(x -> (Boolean) x).collect(Collectors.toList());
+                multiValue.setBooleans(booleans);
                 multiValue.setClazz(Boolean.class);
                 break;
             case INTEGER:
-                multiValue = new MultiValue<>((Integer) value);
+                List<Integer> integers = values.stream().map(x -> (Integer) x).collect(Collectors.toList());
+                multiValue.setIntegers(integers);
                 multiValue.setClazz(Integer.class);
                 break;
             case FLOAT:
-                multiValue = new MultiValue<>((Float) value);
+                List<Float> floats = values.stream().map(x -> (Float) x).collect(Collectors.toList());
+                multiValue.setFloats(floats);
                 multiValue.setClazz(Float.class);
                 break;
             case STRING:
-                multiValue = new MultiValue<>((String) value);
+                List<String> strings = values.stream().map(x -> (String) x).collect(Collectors.toList());
+                multiValue.setStrings(strings);
                 multiValue.setClazz(String.class);
                 break;
             case DATE:
-                multiValue = new MultiValue<>((LocalDate) value);
+                List<LocalDate> dates = values.stream().map(x -> (LocalDate) x).collect(Collectors.toList());
+                multiValue.setDates(dates);
                 multiValue.setClazz(LocalDate.class);
                 break;
             case TIME:
-                multiValue = new MultiValue<>((LocalTime) value);
+                List<LocalTime> times = values.stream().map(x -> (LocalTime) x).collect(Collectors.toList());
+                multiValue.setTimes(times);
                 multiValue.setClazz(LocalTime.class);
                 break;
             default:
-                multiValue = new MultiValue<>(value);
                 multiValue.setClazz(Object.class);
                 break;
         }
         return multiValue;
     }
 
-    private DataColumnType returnColumnTypeForDevelopStage(String columnName) {
-        return DataColumnType.INTEGER;
-    }
-
-    private String getQueryByColumnForSavingChanges(String columnName) {
-        return "query";
-    }
-
     @Override
-    public String saveNewValueIntoOrder(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        MultiValue multiValue =
-            chooseOrdersDataSwitcher(returnColumnTypeForDevelopStage(requestToChangeOrdersDataDTO.getColumnName()),
-                requestToChangeOrdersDataDTO.getNewValue());
-        String query = getQueryByColumnForSavingChanges(requestToChangeOrdersDataDTO.getColumnName());
-        Long orderId = requestToChangeOrdersDataDTO.getOrderId();
-        saveChangeInOrderRepo.saveChange(query, orderId, multiValue);
+    public String saveNewValueIntoOrders(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        MultiValue multiValue = chooseOrdersDataSwitcher(requestToChangeOrdersDataDTO.getDataColumnType(),
+            requestToChangeOrdersDataDTO.getNewValues());
         return "OK";
     }
 }
