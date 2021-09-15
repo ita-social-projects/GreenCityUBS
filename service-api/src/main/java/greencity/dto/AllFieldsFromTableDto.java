@@ -16,13 +16,13 @@ import lombok.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllFieldsFromTableDto {
-    @JsonProperty("orderid")
+    @JsonProperty("order_id")
     private Long orderId;
     @JsonProperty("order_status")
     private String orderStatus;
     @JsonProperty("order_date")
     private String orderDate;
-    @JsonProperty("clientname")
+    @JsonProperty("client_name")
     private String clientName;
     @JsonProperty("phone_number")
     private String phoneNumber;
