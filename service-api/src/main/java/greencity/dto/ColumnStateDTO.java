@@ -12,7 +12,6 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class ColumnStateDTO {
-    private String name;
     private TitleDto title;
     private int weight;
     private boolean sticky;
