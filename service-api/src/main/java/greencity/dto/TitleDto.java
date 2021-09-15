@@ -9,6 +9,7 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class TitleDto {
+    private String key;
     private String ua;
     private String en;
 }
