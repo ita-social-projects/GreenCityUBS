@@ -4,6 +4,7 @@ import greencity.client.OutOfRequestRestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.notifications.UserNotification;
 import greencity.exceptions.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.Objects;
+
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +44,7 @@ public class TelegramService {
     public void sendNotification(UserNotification notification) {
         UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         if (Objects.nonNull(notification.getUser().getTelegramBot())
             && Objects.nonNull(notification.getUser().getTelegramBot().getChatId())) {

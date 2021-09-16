@@ -4,6 +4,7 @@ import greencity.client.OutOfRequestRestClient;
 import greencity.dto.LanguageVO;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -25,6 +26,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Optional;
 
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,8 +66,9 @@ public class TelegramServiceTest {
         template.setBody("Body");
 
         when(templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCode(notification.getNotificationType(),
-                "en")).thenReturn(Optional.of(template));
+            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+                notification.getNotificationType(),
+                "en", OTHER)).thenReturn(Optional.of(template));
 
         when(restClient.findUserByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
@@ -75,7 +78,7 @@ public class TelegramServiceTest {
     public void testSendNotification() throws TelegramApiException {
         prepareTest();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         SendMessage sendMessage = new SendMessage(
             notification.getUser().getTelegramBot().getChatId().toString(),
