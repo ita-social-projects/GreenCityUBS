@@ -7,6 +7,7 @@ import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
@@ -25,6 +26,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
 
 @Service
 @RequiredArgsConstructor
@@ -132,7 +135,7 @@ public class ViberServiceImpl implements ViberService {
         UserVO userVO =
             outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         if (Objects.nonNull(notification.getUser().getViberBot())
             && Objects.nonNull(notification.getUser().getViberBot().getChatId())) {
