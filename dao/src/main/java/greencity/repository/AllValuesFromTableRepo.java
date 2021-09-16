@@ -18,7 +18,7 @@ public class AllValuesFromTableRepo {
 
     private final JdbcTemplate jdbcTemplate;
     private static final String QUERY =
-        "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
+        "select distinct orders.id as order_id, orders.order_status , orders.order_date,\n"
             + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
             + "ubs_user.phone_number ,ubs_user.email,"
             + "users.violations,"
