@@ -1326,7 +1326,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<ColumnStateDTO> columnStateDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new ColumnStateDTO(new TitleDto("select", "Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX,
                 new ArrayList<>()),
-            new ColumnStateDTO(new TitleDto("order_id", "Номер замовлення", "Order's number"), 20, true, false, 1,
+            new ColumnStateDTO(new TitleDto("orderid", "Номер замовлення", "Order's number"), 20, true, false, 1,
                 EditType.READ_ONLY, new ArrayList<>()),
             new ColumnStateDTO(new TitleDto("order_status", "Статус замовлення", "Order's status"), 20, true, true, 2,
                 EditType.SELECT, orderStatusListForDevelopStage()),
