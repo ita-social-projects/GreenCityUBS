@@ -1,7 +1,6 @@
 package greencity.dto;
 
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.user.ubs.Address;
 import lombok.*;
 
 import java.util.List;
