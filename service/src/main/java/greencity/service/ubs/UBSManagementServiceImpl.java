@@ -704,17 +704,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
-        Address address = order.get().getUbsUser().getAddress();
+        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         User user = address.getUser();
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.get().getOrderStatus())
+            .orderDiscountedPrice(prices.getTotalSumAmount()).
+                orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone()).recipientEmail(user.getRecipientEmail())
             .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
             .addressComment(address.getComment()).bags(bagInfo)
-            .amountOfBagsOrdered(order.get().getAmountOfBagsOrdered())
-            .additionalOrders(order.get().getAdditionalOrders()).amountOfBagsExported(order.get().getExportedQuantity())
+            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
+            .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null)).
+                amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .build();
     }
