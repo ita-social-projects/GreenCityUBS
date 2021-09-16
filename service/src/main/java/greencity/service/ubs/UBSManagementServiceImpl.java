@@ -686,7 +686,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<OrderInfoDto> getOrdersForUser(String uuid){
+    public List<OrderInfoDto> getOrdersForUser(String uuid) {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderInfoDto> dto = new ArrayList<>();
         orders.forEach(order -> dto.add(modelMapper.map(order, OrderInfoDto.class)));
@@ -698,7 +698,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData (Long orderId){
+    public OrderStatusPageDto getOrderStatusData(Long orderId) {
         CounterOrderDetailsDto prices = getOrderSumDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
@@ -706,28 +706,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.get().getUbsUser().getAddress();
         User user = address.getUser();
-        return OrderStatusPageDto.builder().
-                id(orderId).
-                orderFullPrice(prices.getSumAmount()).
-                orderDiscountedPrice(prices.getTotalSumAmount()).
-                orderStatus(order.get().getOrderStatus()).
-                orderBonusDiscount(prices.getBonus()).
-                orderCertificateTotalDiscount(prices.getCertificateBonus()).
-                recipientName(user.getRecipientName()).
-                recipientSurname(user.getRecipientSurname()).
-                recipientPhone(user.getRecipientPhone()).
-                recipientEmail(user.getRecipientEmail()).
-                addressCity(address.getCity()).
-                addressStreet(address.getStreet()).
-                addressDistrict(address.getDistrict()).
-                addressComment(address.getComment()).
-                bags(bagInfo).
-                amountOfBagsOrdered(order.get().getAmountOfBagsOrdered()).
-                additionalOrders(order.get().getAdditionalOrders()).
-                amountOfBagsExported(order.get().getExportedQuantity()).
-                orderExportedPrice(prices.getSumExported()).
-                orderExportedDiscountedPrice(prices.getTotalSumExported()).
-                build();
+        return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
+            .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.get().getOrderStatus())
+            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
+            .recipientPhone(user.getRecipientPhone()).recipientEmail(user.getRecipientEmail())
+            .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
+            .addressComment(address.getComment()).bags(bagInfo)
+            .amountOfBagsOrdered(order.get().getAmountOfBagsOrdered())
+            .additionalOrders(order.get().getAdditionalOrders()).amountOfBagsExported(order.get().getExportedQuantity())
+            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .build();
     }
 
     /**

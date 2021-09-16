@@ -475,41 +475,42 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for getting all user orders
+     * Controller for getting all user orders.
      *
-     * return {@link <List<OrderInfoDto>>}
+     * @return {@link List OrderInfoDto}.
+     * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for specified uuid")
     @ApiResponses({
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderInfoDto[].class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderInfoDto[].class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-orders/{uuid}")
     public ResponseEntity<List<OrderInfoDto>> getAllDataForOrder(
-            @PathVariable("uuid") String uuid) {
+        @PathVariable("uuid") String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrdersForUser(uuid));
     }
 
     /**
-     * Controller for getting order related data
+     * Controller for getting order related data.
      *
-     * return {@link OrderStatusPageDto}
+     * @return {@link OrderStatusPageDto}.
+     * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "Controller for getting order related data")
     @ApiResponses({
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-data-for-order/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-            @PathVariable("id") Long orderId
-    ){
+        @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrderStatusData(orderId));
     }
 

@@ -177,16 +177,16 @@ public interface UBSManagementService {
     CounterOrderDetailsDto getOrderSumDetails(Long id);
 
     /**
-     * Method that returns some info about all orders for specified userID
+     * Method that returns some info about all orders for specified userID.
      *
      * @author Oleksandr Khomiakov
      */
     List<OrderInfoDto> getOrdersForUser(String uuid);
 
     /**
-     * Method that returns order related data
+     * Method that returns order related data.
      *
-     * return {@link OrderStatusPageDto}
+     * @return {@link OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
     OrderStatusPageDto getOrderStatusData(Long orderId);
