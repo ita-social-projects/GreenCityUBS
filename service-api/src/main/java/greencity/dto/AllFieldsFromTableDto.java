@@ -16,7 +16,7 @@ import lombok.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllFieldsFromTableDto {
-    @JsonProperty("order_id")
+    @JsonProperty("orderid")
     private Long orderId;
     @JsonProperty("order_status")
     private String orderStatus;
