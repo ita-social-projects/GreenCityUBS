@@ -844,8 +844,6 @@ public class ModelUtils {
             16, 13, 00, 00);
         return Violation.builder()
             .id(1L)
-            .user(User.builder()
-                .recipientName("Alan Po").violations(1).build())
             .order(Order.builder()
                 .id(1L).build())
             .violationLevel(MAJOR)

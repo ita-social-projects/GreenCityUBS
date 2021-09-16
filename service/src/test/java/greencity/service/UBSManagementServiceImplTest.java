@@ -601,11 +601,10 @@ public class UBSManagementServiceImplTest {
         User user = ModelUtils.getUser();
         user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
         user.setViolations(1);
-        /*user.setViolationsDescription(new HashMap<>() {
-            {
-                put(1L, "Some violation");
-            }
-        });*/
+        /*
+         * user.setViolationsDescription(new HashMap<>() { { put(1L, "Some violation");
+         * } });
+         */
 
         ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
 
@@ -622,7 +621,7 @@ public class UBSManagementServiceImplTest {
         user.setViolations(0);
         Map<Long, String> map = new HashMap<>();
         map.put(0L, "String, string, string");
-        /*user.setViolationsDescription(map);*/
+        /* user.setViolationsDescription(map); */
         Order order = user.getOrders().get(0);
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();

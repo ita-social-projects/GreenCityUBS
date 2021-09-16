@@ -23,9 +23,11 @@ public class Violation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*@ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;*/
+    /*
+     * @ManyToOne
+     * 
+     * @JoinColumn(name = "user_id") private User user;
+     */
 
     @OneToOne
     @JoinColumn(name = "order_id")
@@ -39,7 +41,7 @@ public class Violation {
 
     @ElementCollection
     @CollectionTable(name = "violation_images",
-            joinColumns = {@JoinColumn(name = "violation_id", referencedColumnName = "id")})
+        joinColumns = {@JoinColumn(name = "violation_id", referencedColumnName = "id")})
     @Column(name = "image")
     private List<String> images;
 

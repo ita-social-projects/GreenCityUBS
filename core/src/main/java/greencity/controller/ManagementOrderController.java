@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -192,7 +193,7 @@ public class ManagementOrderController {
      */
     @ApiOperation("Add Violation to User")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddingViolationsToUserDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -202,7 +203,7 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) MultipartFile[] files) {
+        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files) {
         ubsManagementService.addUserViolation(add, files);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
