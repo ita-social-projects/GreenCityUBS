@@ -22,7 +22,7 @@ public class AllFieldsFromTableDto {
     private String orderStatus;
     @JsonProperty("order_date")
     private String orderDate;
-    @JsonProperty("clientname")
+    @JsonProperty("client_name")
     private String clientName;
     @JsonProperty("phone_number")
     private String phoneNumber;

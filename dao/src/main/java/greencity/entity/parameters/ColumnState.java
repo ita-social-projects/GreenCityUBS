@@ -1,6 +1,5 @@
 package greencity.entity.parameters;
 
-import greencity.entity.enums.DataColumnType;
 import greencity.entity.enums.EditType;
 import greencity.entity.language.Title;
 import lombok.*;
@@ -21,5 +20,4 @@ public class ColumnState {
     private EditType editType;
     private Title title;
     private TableParameters tableParameters;
-    private DataColumnType dataColumnType;
 }

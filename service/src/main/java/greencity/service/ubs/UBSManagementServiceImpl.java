@@ -7,7 +7,6 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
-import greencity.entity.parameters.MultiValue;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -1330,111 +1329,168 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
         List<ColumnStateDTO> columnStateDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
-            new ColumnStateDTO("select", new TitleDto("Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX),
-            new ColumnStateDTO("orderid", new TitleDto("Номер замовлення", "Order ID"), 20, true, false, 1,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("order_status", new TitleDto("Cтатус замовлення", "Order sataus"), 20, true, true, 2,
-                EditType.SELECT),
-            new ColumnStateDTO("payment_status", new TitleDto("Статус оплати", "Aaaa"), 20, true, true, 3,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("order_date", new TitleDto("Дата замовлення", "Aaaa"), 20, true, true, 4,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("payment_date", new TitleDto("Дата оплати", "Aaaa"), 20, true, true, 5,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("client_name", new TitleDto("Ім'я замовника", "Bbbb"), 20, false, true, 6,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("phone_number", new TitleDto("Телефон замовника", "Cccc"), 20, false, true, 7,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("email", new TitleDto("Email замовника", "Dddd"), 20, false, true, 8,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("sender_name", new TitleDto("Ім'я відправника", "Hhhhh"), 20, false, true, 9,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("sender_phone", new TitleDto("Телефон відправника", "Oooo"), 20, false, true, 10,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("sender_email", new TitleDto("Email відправника", "Pppp"), 20, false, true, 11,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("violations", new TitleDto("Кількість порушень клієнта", "Eeee"), 20, false, true, 12,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("location", new TitleDto("Локація", "Eeee"), 20, false, true, 13, EditType.READ_ONLY),
-            new ColumnStateDTO("district", new TitleDto("Район", "Ffff"), 20, false, true, 14, EditType.READ_ONLY),
-            new ColumnStateDTO("address", new TitleDto("Адреса", "Gggg"), 20, false, true, 15, EditType.READ_ONLY),
-            new ColumnStateDTO("comment_to_address_for_client", new TitleDto("Коментар до адреси від клієнта", ""), 20,
-                false, true, 16, EditType.READ_ONLY),
-            new ColumnStateDTO("bags_amount", new TitleDto("К-сть пакетів", "Kkkk"), 20, false, true, 17,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("total_order_sum", new TitleDto("Сума замовлення", "Nnnn"), 20, false, true, 18,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("order_certificate_code", new TitleDto("Номер сертифікату", "Ssss"), 20, false, true, 19,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("order_certificate_points", new TitleDto("Загальна знижка", "Ttttt"), 20, false, true,
-                20, EditType.READ_ONLY),
-            new ColumnStateDTO("amount_due", new TitleDto("Сума до оплати", ""), 20, false, true, 21,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("comment_for_order_by_client",
-                new TitleDto("Коментар до замовлення від клієнта", "Rrrr"), 20, true, true, 22,
-                EditType.READ_ONLY),
-            new ColumnStateDTO("payment", new TitleDto("Оплата", "Xxx"), 20, false, true, 23, EditType.READ_ONLY),
-            new ColumnStateDTO("date_of_export", new TitleDto("Дата вивезення", "Yyyy"), 20, false, true, 24,
-                EditType.DATE),
-            new ColumnStateDTO("time_of_export", new TitleDto("Час вивезення", "Zzzzz"), 20, false, true, 25,
-                EditType.TIME),
-            new ColumnStateDTO("id_order_from_shop", new TitleDto("Номер замовлення з магазину", "Hhhkh"), 20, false,
-                true, 26, EditType.READ_ONLY),
-            new ColumnStateDTO("receiving_station", new TitleDto("Станція приймання", ""), 20, false, true, 27,
-                EditType.SELECT),
-            new ColumnStateDTO("responsible_manager", new TitleDto("Менеджер послуги", "Rytryt"), 20, false, true, 28,
-                EditType.SELECT),
-            new ColumnStateDTO("responsible_caller", new TitleDto("Менеджер обдзвону", "Rytryt"), 20, false, true, 29,
-                EditType.SELECT),
-            new ColumnStateDTO("responsible_logic_man", new TitleDto("Логіст", "Hhjkhk"), 20, false, true, 30,
-                EditType.SELECT),
-            new ColumnStateDTO("responsible_driver", new TitleDto("Водій", "Wwrwew"), 20, false, true, 31,
-                EditType.SELECT),
-            new ColumnStateDTO("responsible_navigator", new TitleDto("Штурман", "Qqeqw"), 20, false, true, 32,
-                EditType.SELECT),
-            new ColumnStateDTO("comments_for_order", new TitleDto("Коментарі до замовлення", "Mjhjhk"), 20, false, true,
-                33, EditType.READ_ONLY))));
+            new ColumnStateDTO(new TitleDto("select", "Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX,
+                new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("orderid", "Номер замовлення", "Order's number"), 20, true, false, 1,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("order_status", "Статус замовлення", "Order's status"), 20, true, true, 2,
+                EditType.SELECT, orderStatusListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("payment_status", "Статус оплати", "Aaaa"), 20, true, true, 3,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("order_date", "Дата замовлення", "Order date"), 20, true, true, 4,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("payment_date", "Дата оплати", "Payment date"), 20, true, true, 5,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("client_name", "Ім'я замовника", "Client name"), 20, false, true, 6,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("phone_number", "Телефон замовника", "Phone number"), 20, false, true, 7,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("email", "Email замовника", "Email"), 20, false, true, 8,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("sender_name", "Ім'я відправника", "Sender name"), 20, false, true, 9,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("sender_phone", "Телефон відправника", "Sender phone"), 20, false, true, 10,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("sender_email", "Email відправника", "Sender email"), 20, false, true, 11,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("violations", "Кількість порушень клієнта", "Violations"), 20, false, true,
+                12, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("location", "Локація", "Location"), 20, false, true, 13, EditType.READ_ONLY,
+                new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("district", "Район", "District"), 20, false, true, 14, EditType.READ_ONLY,
+                new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("address", "Адреса", "Address"), 20, false, true, 15, EditType.READ_ONLY,
+                new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("comment_to_address_for_client", "Коментар до адреси від клієнта",
+                "Comment to address for client"), 20, false, true, 16, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("bags_amount", "К-сть пакетів", "Bags amount"), 20, false, true, 17,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("total_order_sum", "Сума замовлення", "Total order sum"), 20, false, true,
+                18, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("order_certificate_code", "Номер сертифікату", "Order certificate code"),
+                20, false, true, 19, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("order_certificate_points", "Загальна знижка", "Order certificate points"),
+                20, false, true, 20, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("amount_due", "Сума до оплати", "Amount due"), 20, false, true, 21,
+                EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("comment_for_order_by_client", "Коментар до замовлення від клієнта",
+                "Comment for order by client"), 20, true, true, 22, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("payment", "Оплата", "Payment"), 20, false, true, 23, EditType.READ_ONLY,
+                new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("date_of_export", "Дата вивезення", "Date of export"), 20, false, true, 24,
+                EditType.DATE, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("time_of_export", "Час вивезення", "Time of export"), 20, false, true, 25,
+                EditType.TIME, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("id_order_from_shop", "Номер замовлення з магазину", "Id order from shop"),
+                20, false, true, 26, EditType.READ_ONLY, new ArrayList<>()),
+            new ColumnStateDTO(new TitleDto("receiving_station", "Станція приймання", "Receiving station"), 20, false,
+                true, 27, EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("responsible_manager", "Менеджер послуги", "Responsible manager"), 20,
+                false, true, 28, EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("responsible_caller", "Менеджер обдзвону", "Responsible caller"), 20, false,
+                true, 29, EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("responsible_logic_man", "Логіст", "Responsible logic man"), 20, false,
+                true, 30, EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("responsible_driver", "Водій", "Responsible driver"), 20, false, true, 31,
+                EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("responsible_navigator", "Штурман", "Responsible navigator"), 20, false,
+                true, 32, EditType.SELECT, orderOptionalListForDevelopStage()),
+            new ColumnStateDTO(new TitleDto("comments_for_order", "Коментарі до замовлення", "Comments for order"), 20,
+                false, true, 33, EditType.READ_ONLY, new ArrayList<>()))));
         return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
     }
 
     @Override
-    public MultiValue chooseOrdersDataSwitcher(DataColumnType dataColumnType, List<Object> values) {
-        MultiValue multiValue = new MultiValue();
-        switch (dataColumnType) {
-            case BOOLEAN:
-                List<Boolean> booleans = values.stream().map(x -> (Boolean) x).collect(Collectors.toList());
-                multiValue.setBooleans(booleans);
-                break;
-            case INTEGER:
-                List<Integer> integers = values.stream().map(x -> (Integer) x).collect(Collectors.toList());
-                multiValue.setIntegers(integers);
-                break;
-            case FLOAT:
-                List<Float> floats = values.stream().map(x -> (Float) x).collect(Collectors.toList());
-                multiValue.setFloats(floats);
-                break;
-            case STRING:
-                List<String> strings = values.stream().map(x -> (String) x).collect(Collectors.toList());
-                multiValue.setStrings(strings);
-                break;
-            case DATE:
-                List<LocalDate> dates = values.stream().map(x -> (LocalDate) x).collect(Collectors.toList());
-                multiValue.setDates(dates);
-                break;
-            case TIME:
-                List<LocalTime> times = values.stream().map(x -> (LocalTime) x).collect(Collectors.toList());
-                multiValue.setTimes(times);
-                break;
+    public HttpStatus chooseOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        String columnName = requestToChangeOrdersDataDTO.getColumnName();
+        String value = requestToChangeOrdersDataDTO.getNewValue();
+        List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
+        switch (columnName) {
+            case "order_status":
+                orderStatusForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "date_of_export":
+                dateOfExportForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "time_of_export":
+                timeOfExportForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "receiving_station":
+                receivingStationForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "responsible_manager":
+                responsibleManagerForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "responsible_caller":
+                responsibleCallerForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "responsible_logic_man":
+                responsibleLogicManForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "responsible_driver":
+                responsibleDriverForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
+            case "responsible_navigator":
+                responsibleNavigatorForDevelopStage(ordersId, value);
+                return HttpStatus.ACCEPTED;
             default:
-                break;
+                return HttpStatus.BAD_REQUEST;
         }
-        return multiValue;
     }
 
-    @Override
-    public String saveNewValueIntoOrders(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        MultiValue multiValue = chooseOrdersDataSwitcher(requestToChangeOrdersDataDTO.getDataColumnType(),
-            requestToChangeOrdersDataDTO.getNewValues());
-        return "OK";
+    private List<TitleDto> orderStatusListForDevelopStage() {
+        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+            new TitleDto("FORMED", "Сформовано", "Formed"),
+            new TitleDto("ADJUSTMENT", "На узгодженні", "Adjustment"),
+            new TitleDto("BROUGHT_IT_HIMSELF", "Заберуть самостійно", "Brought it himself"),
+            new TitleDto("CONFIRMED", "Підтверджено", "Confirmed"),
+            new TitleDto("ON_THE_ROUTE", "В дорозі", "On the route"),
+            new TitleDto("DONE", "Виконано", "Done"),
+            new TitleDto("NOT_TAKEN_OUT", "Не вивезено", "Not taken out"),
+            new TitleDto("CANCELLED", "Скасовано", "Canceled"))));
+    }
+
+    private List<TitleDto> orderOptionalListForDevelopStage() {
+        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+            new TitleDto("1", "Щось перше", "Something first"),
+            new TitleDto("2", "Щось інше", "Something other"),
+            new TitleDto("3", "Третій варіант", "Thirst variant"))));
+    }
+
+    private void orderStatusForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void receivingStationForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+    }
+
+    private void responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
     }
 }
