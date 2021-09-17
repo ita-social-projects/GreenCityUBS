@@ -178,6 +178,21 @@ public interface UBSManagementService {
     CounterOrderDetailsDto getOrderSumDetails(Long id);
 
     /**
+     * Method that returns some info about all orders for specified userID.
+     *
+     * @author Oleksandr Khomiakov
+     */
+    List<OrderInfoDto> getOrdersForUser(String uuid);
+
+    /**
+     * Method that returns order related data.
+     *
+     * @return {@link OrderStatusPageDto}.
+     * @author Oleksandr Khomiakov
+     */
+    OrderStatusPageDto getOrderStatusData(Long orderId);
+
+    /**
      * Method that gets bags information.
      *
      * @author Nazar Struk
