@@ -5,6 +5,7 @@ import greencity.annotations.ApiPageableWithLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
+import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
 import greencity.service.ubs.NotificationService;
@@ -50,10 +51,10 @@ public class NotificationController {
     })
     @PostMapping(value = "/{id}")
     @ApiLocale
-    public ResponseEntity<HttpStatus> getNotification(@ApiIgnore @CurrentUserUuid String userUuid,
+    public ResponseEntity<NotificationDto> getNotification(@ApiIgnore @CurrentUserUuid String userUuid,
         @PathVariable Long id, @ApiIgnore @ValidLanguage Locale locale) {
-        notificationService.getNotification(userUuid, id, locale.getLanguage());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(notificationService.getNotification(userUuid, id, locale.getLanguage()));
     }
 
     /**
