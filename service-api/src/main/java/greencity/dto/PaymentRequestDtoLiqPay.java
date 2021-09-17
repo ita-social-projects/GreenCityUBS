@@ -21,4 +21,5 @@ public class PaymentRequestDtoLiqPay {
     private String language;
     private String paytypes;
     private String resultUrl;
+    private String server_url;
 }

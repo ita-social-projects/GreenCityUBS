@@ -866,18 +866,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId).orElseThrow(null);
 
         return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("ubs courier")
-            .orderId(orderId + "_" + order.getPayment()
+                .publicKey(publicKey)
+                .version(3)
+                .action("pay")
+                .amount(sumToPay)
+                .currency("UAH")
+                .description("ubs courier")
+                .orderId(orderId + "_" + order.getPayment()
                 .get(order.getPayment().size() - 1).getId().toString())
-            .language("en")
-            .paytypes("card")
-            .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .build();
+                .language("en")
+                .paytypes("card")
+                .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
+                .server_url("https://ita-social-projects.github.io/GreenCityClient/")
+                .build();
     }
 
     @Override
