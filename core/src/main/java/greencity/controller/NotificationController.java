@@ -1,10 +1,12 @@
 package greencity.controller;
 
+import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageableWithLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.NotificationDto;
+import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
 import greencity.service.ubs.NotificationService;
 import io.swagger.annotations.ApiOperation;
@@ -24,8 +26,7 @@ import java.util.Locale;
 @RequestMapping("/notifications")
 @Validated
 public class NotificationController {
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Constructor with parameters.
@@ -36,11 +37,11 @@ public class NotificationController {
     }
 
     /**
-     * Controller changes the status of the notification - reviewed.
+     * Controller return body of the notification and set status - is read.
      *
      * @author Ihor Volianskyi
      */
-    @ApiOperation("Change the status of the notification - reviewed")
+    @ApiOperation("Return body of the notification and set status - is read")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -48,19 +49,21 @@ public class NotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping(value = "/review/{id}")
-    public ResponseEntity<HttpStatus> reviewNotification(@PathVariable Long id) {
-        notificationService.reviewNotification(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping(value = "/{id}")
+    @ApiLocale
+    public ResponseEntity<NotificationDto> getNotification(@ApiIgnore @CurrentUserUuid String userUuid,
+        @PathVariable Long id, @ApiIgnore @ValidLanguage Locale locale) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(notificationService.getNotification(userUuid, id, locale.getLanguage()));
     }
 
     /**
-     * Controller for getting all notifications for current user.
+     * Controller return page with notifications for current user.
      *
-     * @return @List of all notifications.
-     * @author Ann Sakhno
+     * @return Page with notifications.
+     * @author Ihor Volianskyi
      */
-    @ApiOperation(value = "Get all notifications for active user")
+    @ApiOperation(value = "Get page with notifications for current user")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -70,7 +73,7 @@ public class NotificationController {
     })
     @GetMapping
     @ApiPageableWithLocale
-    public ResponseEntity<PageableDto<NotificationDto>> getNotificationsForCurrentUser(
+    public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @ApiIgnore @ValidLanguage Locale locale, @ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
