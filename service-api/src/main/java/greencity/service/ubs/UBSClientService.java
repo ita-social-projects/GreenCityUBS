@@ -119,6 +119,14 @@ public interface UBSClientService {
     MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
 
     /**
+     * Method that returns info about all orders for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleksandr Khomiakov
+     */
+    List<OrderStatusPageDto> getOrdersForUser(String uuid);
+
+    /**
      * Method returns list all bonuses of user.
      *
      * @param uuid of {@link User}'s uuid;

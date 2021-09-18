@@ -49,6 +49,26 @@ public class ClientController {
     }
 
     /**
+     * Controller for getting all user orders.
+     *
+     * @return {@link List OrderInfoDto}.
+     * @author Oleksandr Khomiakov
+     */
+    @ApiOperation(value = "returns all user orders for logged user")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderInfoDto[].class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-all-orders}")
+    public ResponseEntity<List<OrderStatusPageDto>> getAllDataForOrder(
+            @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid));
+    }
+
+    /**
      * Controller cancel order with status FORMED.
      *
      * @param orderId {@link Long} order id.

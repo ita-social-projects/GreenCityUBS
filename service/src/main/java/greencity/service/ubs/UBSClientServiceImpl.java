@@ -54,6 +54,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
+    private final UBSManagementServiceImpl ubsManagementService;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -387,6 +388,18 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderStatusPageDto> getOrdersForUser(String uuid) {
+        List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
+        List<OrderStatusPageDto> dto = new ArrayList<>();
+        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId())));
+        return dto;
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
