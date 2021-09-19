@@ -238,5 +238,22 @@ class OrderControllerTest {
 
         verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"));
         verify(restClient).findUuidByEmail("test@gmail.com");
+
     }
+
+    @Test
+    void reciveLiqPayOrder() throws Exception {
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponce = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
+            .content(jsonResponce)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).validateLiqPayPayment(anyObject(), eq(null));
+    }
+
 }
