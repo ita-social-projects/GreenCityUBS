@@ -869,4 +869,54 @@ class UBSClientServiceImplTest {
         });
     }
 
+    @Test
+    void validateLiqPayPayment() {
+        String signature = "TestSignature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        Order order = ModelUtils.getOrder();
+        dto.setOrderId(order.getId().toString());
+        dto.setStatus("success");
+        Payment payment = getPayment();
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("TestSignature");
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
+
+        ubsService.validateLiqPayPayment(dto, signature);
+
+        verify(paymentRepository).save(payment);
+        ;
+    }
+
+    @Test
+    void validateNotValidLiqPayPayment() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("success");
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("fdf");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
+    @Test
+    void vadlidateLiqPayPaymentWithStatusFailure() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("failure");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
+    @Test
+    void vadlidateLiqPayPaymentWithStatusError() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("error");
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("signature");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
 }

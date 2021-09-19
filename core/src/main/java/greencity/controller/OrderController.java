@@ -393,8 +393,8 @@ public class OrderController {
     @PostMapping("/receiveLiqPayPayment")
     public ResponseEntity receiveLiqPayPayment(
         @RequestBody @Valid PaymentResponseDtoLiqPay dto,
-        @RequestBody @Valid PaymentRequestDtoLiqPay paymentRequestDtoLiqPay) {
-        ubsClientService.validateLiqPayPayment(dto, paymentRequestDtoLiqPay);
+        @ApiIgnore @RequestBody String signature) {
+        ubsClientService.validateLiqPayPayment(dto, signature);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

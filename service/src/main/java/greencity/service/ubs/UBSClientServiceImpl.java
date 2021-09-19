@@ -895,12 +895,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, PaymentRequestDtoLiqPay paymentRequestDtoLiqPay) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
         if (dto.getStatus().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
-            .equals(encryptionUtil.formingRequestSignatureLiqPay(paymentRequestDtoLiqPay, privateKey))) {
+            .equals(signature)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getStatus().equals("error")) {
