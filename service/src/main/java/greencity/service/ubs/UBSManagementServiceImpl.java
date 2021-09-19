@@ -62,7 +62,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    private final static String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
      * {@inheritDoc}
