@@ -62,6 +62,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
      * {@inheritDoc}
@@ -1526,5 +1527,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+    }
+
+    @Override
+    public ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images) {
+        final Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        List<String> pictures = new ArrayList<>();
+        for (MultipartFile image : images) {
+            if (image != null) {
+                pictures.add(fileService.upload(image));
+            } else {
+                pictures.add(defaultImagePath);
+            }
+        }
+        ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
+        dto.setImages(pictures);
+        dto.setDescription(description);
+        dto.setTime(LocalDate.now());
+        dto.setCurrentUser(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname());
+        order.setImageReasonNotTakingBags(pictures);
+        order.setReasonNotTakingBagDescription(description);
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        return dto;
     }
 }

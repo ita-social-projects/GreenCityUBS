@@ -780,4 +780,24 @@ public class ManagementOrderController {
         ubsManagementService.updateUserViolation(add, multipartFiles);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+    /**
+     * Controller for save reason not taking the bag. *
+     *
+     * @return {ReasonNotTakeBagDto}. * @author Bohdan Fedorkiv
+     */
+
+    @ApiOperation(value = "Save reason for not taking the bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReasonNotTakeBagDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)})
+    @PutMapping(value = "/save-reason/{id}",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ReasonNotTakeBagDto> saveReason(@PathVariable("id") Long id,
+        @RequestParam String description,
+        @RequestPart(required = false) List<MultipartFile> images) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
+    }
 }

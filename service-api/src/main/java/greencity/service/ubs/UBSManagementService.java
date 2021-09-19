@@ -324,4 +324,9 @@ public interface UBSManagementService {
      * @author Liubomyr Pater
      */
     HttpStatus chooseOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+
+    /**
+     * Method that save ReasonNotTakeBagDto.
+     */
+    ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
 }
