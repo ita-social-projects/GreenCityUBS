@@ -9,7 +9,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.ubs.UBSuser;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
-
+import greencity.filters.StringListConverter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -115,4 +115,9 @@ public class Order {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<Event> events;
+
+    private String reasonNotTakingBagDescription;
+
+    @Convert(converter = StringListConverter.class)
+    private List<String> imageReasonNotTakingBags;
 }
