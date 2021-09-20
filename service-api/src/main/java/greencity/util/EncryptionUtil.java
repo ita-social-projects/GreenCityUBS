@@ -6,6 +6,7 @@ import greencity.dto.PaymentRequestDtoLiqPay;
 import greencity.dto.PaymentResponseDto;
 import greencity.dto.PaymentResponseDtoLiqPay;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -97,7 +98,7 @@ public class EncryptionUtil {
         checkString(dto.getSettlementDate(), stringBuilder);
         checkString(dto.getTranType(), stringBuilder);
         checkString(dto.getVerificationStatus(), stringBuilder);
-        return sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
+        return DigestUtils.sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 
     private static void checkString(String string, StringBuilder stringBuilder) {
