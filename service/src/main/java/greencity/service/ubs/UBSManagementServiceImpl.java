@@ -580,7 +580,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
@@ -626,7 +626,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
@@ -1370,7 +1370,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("order_status", "Статус замовлення", "Order's status"), 20, true, true, 2,
                 EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
-            new ColumnStateDTO(new TitleDto("payment_status", "Статус оплати", "Aaaa"), 20, false, true, 3,
+            new ColumnStateDTO(new TitleDto("payment_status", "Статус оплати", "Payment status"), 20, false, true, 3,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("order_date", "Дата замовлення", "Order date"), 20, false, true, 4,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
