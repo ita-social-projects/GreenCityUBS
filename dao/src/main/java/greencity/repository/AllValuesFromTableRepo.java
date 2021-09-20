@@ -44,7 +44,7 @@ public class AllValuesFromTableRepo {
             + "orders.comment as comment_For_Order_By_Client,\n"
             + "payment.payment_system,\n"
             + "cast(orders.deliver_from as date) as date_Of_Export,\n"
-            + "concat_Ws('-',cast(orders.deliver_from as time),cast(orders.deliver_to as time)) as time_Of_Export,\n"
+            + "concat_Ws('-',cast(orders.deliver_from as time), cast(orders.deliver_to as time)) as time_Of_Export,\n"
             + "(select string_agg(payment.id::text,',')\n"
             + "as id_Order_From_Shop from payment where payment.order_id = orders.id) ,\n"
             + "orders.receiving_station,\n"
