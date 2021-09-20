@@ -580,7 +580,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
@@ -626,7 +627,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
