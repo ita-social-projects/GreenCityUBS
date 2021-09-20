@@ -10,7 +10,6 @@ import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,15 +31,13 @@ import java.util.Set;
 @RequestMapping("/ubs/management")
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
-    private final ModelMapper mapper;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
+    public ManagementOrderController(UBSManagementService ubsManagementService) {
         this.ubsManagementService = ubsManagementService;
-        this.mapper = mapper;
     }
 
     /**
@@ -81,7 +78,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         ubsManagementService.addCertificate(certificateDtoForAdding);
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**

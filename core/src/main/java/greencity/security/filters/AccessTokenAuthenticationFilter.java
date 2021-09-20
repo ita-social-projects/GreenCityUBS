@@ -42,9 +42,6 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        String uri = request.getRequestURI();
-
         return jwtTool.getTokenFromHttpServletRequest(request);
     }
 

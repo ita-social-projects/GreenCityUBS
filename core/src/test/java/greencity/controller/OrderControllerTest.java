@@ -69,8 +69,7 @@ class OrderControllerTest {
     void checkIfCertificateAvailable() throws Exception {
         mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).checkCertificate(eq("qwefds"));
+        verify(ubsClientService).checkCertificate("qwefds");
     }
 
     @Test
@@ -82,7 +81,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData(eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test
