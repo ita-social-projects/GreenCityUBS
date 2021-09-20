@@ -1341,25 +1341,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         violation.setDescription(add.getViolationDescription());
         if (violation.getImage() != null) {
             List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
-            for (int i = 0; i < images.size(); i++) {
-                fileService.delete(images.get(i));
+            for (String image : images) {
+                fileService.delete(image);
             }
             violation.setImage(null);
             images.clear();
             if (multipartFiles.length > 0) {
-                for (int i = 0; i < multipartFiles.length; i++) {
-                    images.add(fileService.upload(multipartFiles[i]));
+                for (MultipartFile multipartFile : multipartFiles) {
+                    images.add(fileService.upload(multipartFile));
                 }
                 violation.setImage(String.join("; ", images));
             }
+        } else if (multipartFiles.length > 0) {
+            List<String> images = new LinkedList<>();
+            for (MultipartFile multipartFile : multipartFiles) {
+                images.add(fileService.upload(multipartFile));
+            }
+            violation.setImage(String.join("; ", images));
         } else {
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                for (int i = 0; i < multipartFiles.length; i++) {
-                    images.add(fileService.upload(multipartFiles[i]));
-                }
-                violation.setImage(String.join("; ", images));
-            }
+            throw new NullPointerException("Nothing here");
         }
     }
 
