@@ -19,4 +19,5 @@ public class ColumnStateDTO {
     private int index;
     private EditType editType;
     private List<TitleDto> optional;
+    private String columnBelonging;
 }
