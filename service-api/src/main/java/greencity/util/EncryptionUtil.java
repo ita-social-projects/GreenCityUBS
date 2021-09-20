@@ -6,7 +6,6 @@ import greencity.dto.PaymentRequestDtoLiqPay;
 import greencity.dto.PaymentResponseDto;
 import greencity.dto.PaymentResponseDtoLiqPay;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
