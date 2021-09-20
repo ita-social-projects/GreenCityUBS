@@ -1,6 +1,7 @@
 package greencity.dto;
 
 import greencity.entity.enums.EditType;
+import greencity.entity.parameters.ColumnBelonging;
 import lombok.*;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public class ColumnStateDTO {
     private int index;
     private EditType editType;
     private List<TitleDto> optional;
+    private String columnBelonging;
 }

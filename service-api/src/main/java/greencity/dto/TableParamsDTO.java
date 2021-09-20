@@ -1,6 +1,7 @@
 package greencity.dto;
 
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.parameters.ColumnBelonging;
 import lombok.*;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public class TableParamsDTO {
     private List<ColumnStateDTO> columnStateDTOList;
     private String sortingByColumn;
     private SortingOrder sortingOrder;
+    private List<TitleDto> columnBelongingList;
 }
