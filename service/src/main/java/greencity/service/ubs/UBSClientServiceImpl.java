@@ -69,16 +69,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public void validatePayment(PaymentResponseDto dto) {
-        if (dto.getResponse_status().equals("failure")) {
+        if (dto.getResponseStatus().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (!encryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        String[] ids = dto.getOrder_id().split("_");
+        String[] ids = dto.getOrderId().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getOrder_status().equals("approved")) {
+        if (dto.getOrderStatus().equals("approved")) {
             Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             orderPayment.setOrder(order);

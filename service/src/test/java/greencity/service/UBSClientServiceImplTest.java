@@ -81,10 +81,10 @@ class UBSClientServiceImplTest {
     @Transactional
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        Order order = ModelUtils.getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        Order order = getOrder();
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
@@ -97,7 +97,7 @@ class UBSClientServiceImplTest {
     @Test
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        dto.setResponse_status("approved");
+        dto.setResponseStatus("approved");
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
     }
@@ -105,7 +105,7 @@ class UBSClientServiceImplTest {
     @Test
     void testValidatePaymentFailureResponse() {
         PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
-        paymentResponseDto.setResponse_status("failure");
+        paymentResponseDto.setResponseStatus("failure");
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
     }
 
