@@ -8,6 +8,7 @@ public class ValidationConstant {
     /**
      * Constructor.
      */
-    public ValidationConstant() {
+    private ValidationConstant() {
+        // Do nothing because needed.
     }
 }

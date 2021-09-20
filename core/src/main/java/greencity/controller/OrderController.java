@@ -133,7 +133,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/receivePayment")
-    public ResponseEntity receivePayment(
+    public ResponseEntity<HttpStatus> receivePayment(
         @RequestBody @Valid PaymentResponseDto dto) {
         ubsClientService.validatePayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -332,7 +332,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/order/get-locations")
-    public ResponseEntity setNewLastOrderLocationForUser(
+    public ResponseEntity<HttpStatus> setNewLastOrderLocationForUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody LocationIdDto locationId) {
         ubsClientService.setNewLastOrderLocation(userUuid, locationId);
@@ -391,7 +391,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/receiveLiqPayPayment")
-    public ResponseEntity receiveLiqPayPayment(
+    public ResponseEntity<HttpStatus> receiveLiqPayPayment(
         @RequestBody @Valid PaymentResponseDtoLiqPay dto,
         String signature) {
         ubsClientService.validateLiqPayPayment(dto, signature);
