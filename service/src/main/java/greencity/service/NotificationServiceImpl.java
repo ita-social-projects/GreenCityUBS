@@ -281,9 +281,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageRequest);
 
+        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
+
         List<NotificationShortDto> notificationShortDtoList = notifications.stream()
             .map(n -> createNotificationShortDto(n, language))
             .collect(Collectors.toCollection(LinkedList::new));
+
+        notificationShortDtoList.forEach(n -> n.setAmountUnread(amount));
 
         return new PageableDto<>(
             notificationShortDtoList,
@@ -308,7 +312,7 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setRead(true);
         }
 
-        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsTrue(notification.getUser());
+        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsFalse(notification.getUser());
 
         NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository);
         notificationDto.setAmountUnread(amount);
@@ -325,15 +329,12 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long orderId = Objects.nonNull(notification.getOrder()) ? notification.getOrder().getId() : null;
 
-        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsTrue(notification.getUser());
-
         return NotificationShortDto.builder()
             .id(notification.getId())
             .title(template.getTitle())
             .notificationTime(notification.getNotificationTime())
             .read(notification.isRead())
             .orderId(orderId)
-            .amountUnread(amount)
             .build();
     }
 

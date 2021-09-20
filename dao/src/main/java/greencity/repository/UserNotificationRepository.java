@@ -47,5 +47,5 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *
      * @author Ihor Volianskyi
      */
-    int countUserNotificationByUserAndReadIsTrue(User user);
+    int countUserNotificationByUserAndReadIsFalse(User user);
 }
