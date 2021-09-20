@@ -15,4 +15,5 @@ public class TableParamsDTO {
     private List<ColumnStateDTO> columnStateDTOList;
     private String sortingByColumn;
     private SortingOrder sortingOrder;
+    private List<TitleDto> columnBelongingList;
 }
