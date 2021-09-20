@@ -28,7 +28,9 @@ import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -273,11 +275,14 @@ public class NotificationServiceImpl implements NotificationService {
     public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid, String language,
         Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
-        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageable);
+
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+            Sort.by("notificationTime").descending());
+
+        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageRequest);
 
         List<NotificationShortDto> notificationShortDtoList = notifications.stream()
             .map(n -> createNotificationShortDto(n, language))
-            .sorted(Comparator.comparing(NotificationShortDto::getNotificationTime).reversed())
             .collect(Collectors.toCollection(LinkedList::new));
 
         return new PageableDto<>(
@@ -303,7 +308,12 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setRead(true);
         }
 
-        return createNotificationDto(notification, language, SITE, templateRepository);
+        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsTrue(notification.getUser());
+
+        NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository);
+        notificationDto.setAmountUnread(amount);
+
+        return notificationDto;
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language) {
@@ -315,12 +325,15 @@ public class NotificationServiceImpl implements NotificationService {
 
         Long orderId = Objects.nonNull(notification.getOrder()) ? notification.getOrder().getId() : null;
 
+        int amount = userNotificationRepository.countUserNotificationByUserAndReadIsTrue(notification.getUser());
+
         return NotificationShortDto.builder()
             .id(notification.getId())
             .title(template.getTitle())
             .notificationTime(notification.getNotificationTime())
             .read(notification.isRead())
             .orderId(orderId)
+            .amountUnread(amount)
             .build();
     }
 

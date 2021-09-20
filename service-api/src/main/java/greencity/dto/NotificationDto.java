@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class NotificationDto {
     private String title;
     private String body;
+    private int amountUnread;
 }

@@ -41,4 +41,11 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         + "order by notification_time desc "
         + "limit 1;")
     Optional<UserNotification> findLastNotificationByNotificationTypeAndOrderNumber(String type, String orderNumber);
+
+    /**
+     * Method that returns amount unread notifications.
+     *
+     * @author Ihor Volianskyi
+     */
+    int countUserNotificationByUserAndReadIsTrue(User user);
 }

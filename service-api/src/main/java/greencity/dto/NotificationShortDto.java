@@ -17,4 +17,5 @@ public class NotificationShortDto {
     private boolean read;
     private String title;
     private LocalDateTime notificationTime;
+    private int amountUnread;
 }
