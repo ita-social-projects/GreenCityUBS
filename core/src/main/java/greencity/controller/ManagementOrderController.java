@@ -10,7 +10,6 @@ import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,15 +31,13 @@ import java.util.Set;
 @RequestMapping("/ubs/management")
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
-    private final ModelMapper mapper;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, ModelMapper mapper) {
+    public ManagementOrderController(UBSManagementService ubsManagementService) {
         this.ubsManagementService = ubsManagementService;
-        this.mapper = mapper;
     }
 
     /**
@@ -81,7 +78,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         ubsManagementService.addCertificate(certificateDtoForAdding);
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
@@ -475,6 +472,46 @@ public class ManagementOrderController {
     }
 
     /**
+     * Controller for getting all user orders.
+     *
+     * @return {@link List OrderInfoDto}.
+     * @author Oleksandr Khomiakov
+     */
+    @ApiOperation(value = "returns all user orders for specified uuid")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderInfoDto[].class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-all-orders/{uuid}")
+    public ResponseEntity<List<OrderInfoDto>> getAllDataForOrder(
+        @PathVariable("uuid") String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrdersForUser(uuid));
+    }
+
+    /**
+     * Controller for getting order related data.
+     *
+     * @return {@link OrderStatusPageDto}.
+     * @author Oleksandr Khomiakov
+     */
+    @ApiOperation(value = "Controller for getting order related data")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-data-for-order/{id}")
+    public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
+        @PathVariable("id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrderStatusData(orderId));
+    }
+
+    /**
      * Controller for update export details.
      *
      * @return {@link ExportDetailsDto}.
@@ -739,5 +776,25 @@ public class ManagementOrderController {
         @RequestPart(required = false) MultipartFile[] multipartFiles) {
         ubsManagementService.updateUserViolation(add, multipartFiles);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    /**
+     * Controller for save reason not taking the bag. *
+     *
+     * @return {ReasonNotTakeBagDto}. * @author Bohdan Fedorkiv
+     */
+
+    @ApiOperation(value = "Save reason for not taking the bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReasonNotTakeBagDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)})
+    @PutMapping(value = "/save-reason/{id}",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ReasonNotTakeBagDto> saveReason(@PathVariable("id") Long id,
+        @RequestParam String description,
+        @RequestPart(required = false) List<MultipartFile> images) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
     }
 }

@@ -1,5 +1,6 @@
 package greencity.service;
 
+import com.liqpay.LiqPay;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
@@ -39,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
     @Mock
     private BagTranslationRepository bagTranslationRepository;
@@ -73,15 +74,17 @@ class UBSClientServiceImplTest {
     private PhoneNumberFormatterService phoneNumberFormatterService;
     @Mock
     private EventRepository eventRepository;
+    @Mock
+    private LiqPay liqPay;
 
     @Test
     @Transactional
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        Order order = ModelUtils.getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        Order order = getOrder();
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
@@ -94,7 +97,7 @@ class UBSClientServiceImplTest {
     @Test
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        dto.setResponse_status("approved");
+        dto.setResponseStatus("approved");
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
     }
@@ -102,7 +105,7 @@ class UBSClientServiceImplTest {
     @Test
     void testValidatePaymentFailureResponse() {
         PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
-        paymentResponseDto.setResponse_status("failure");
+        paymentResponseDto.setResponseStatus("failure");
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
     }
 
@@ -221,7 +224,6 @@ class UBSClientServiceImplTest {
         Assertions.assertThrows(IncorrectValueException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
-
     }
 
     @Test
@@ -709,4 +711,196 @@ class UBSClientServiceImplTest {
         assertThrows(EventsNotFoundException.class,
             () -> ubsService.getAllEventsForOrderById(1L));
     }
+
+    @Test
+    void saveFullOrderFromLiqPay() {
+        User user = getUserWithLastLocation();
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(35);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        HashMap<String, String> value = new HashMap<>();
+        value.put("action", "pay");
+        value.put("amount", "12000");
+        value.put("currency", "UAH");
+        value.put("description", "ubs user");
+        value.put("order_id", "1_1");
+        value.put("version", "3");
+        value.put("public_key", null);
+        value.put("language", "en");
+        value.put("result_url", "rer.com");
+        value.put("paytypes", "card");
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(restClient.getDataFromLiqPay(any())).thenReturn(value);
+        when(liqPay.cnb_form(any())).thenReturn("Test Values");
+
+        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(bagRepository).findById(3);
+        verify(ubsUserRepository).findById(13L);
+        verify(modelMapper).map(dto, Order.class);
+        verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
+        verify(addressRepository).findById(any());
+        verify(orderRepository).findById(any());
+        verify(restClient).getDataFromLiqPay(any());
+        verify(liqPay).cnb_form(any());
+    }
+
+    @Test
+    void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
+
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(900);
+        Location location = new Location(1l, "Name", 100l, List.of(user));
+        user.setLastLocation(location);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        ;
+        dto.getBags().get(0).setAmount(35);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setPrice(1);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        assertThrows(IncorrectValueException.class, () -> {
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+        });
+    }
+
+    @Test
+    void saveFullOrderFromLiqPayThrowNotFoundOrderAddressException() {
+        User user = getUserWithLastLocation();
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(35);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundOrderAddressException.class, () -> {
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+        });
+    }
+
+    @Test
+    void validateLiqPayPayment() {
+        String signature = "TestSignature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        Order order = ModelUtils.getOrder();
+        dto.setOrderId(order.getId().toString());
+        dto.setStatus("success");
+        Payment payment = getPayment();
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("TestSignature");
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
+
+        ubsService.validateLiqPayPayment(dto, signature);
+
+        verify(paymentRepository).save(payment);
+        ;
+    }
+
+    @Test
+    void validateNotValidLiqPayPayment() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("success");
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("fdf");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
+    @Test
+    void vadlidateLiqPayPaymentWithStatusFailure() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("failure");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
+    @Test
+    void vadlidateLiqPayPaymentWithStatusError() {
+        String signature = "signature";
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        dto.setStatus("error");
+
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("signature");
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
+    }
+
 }

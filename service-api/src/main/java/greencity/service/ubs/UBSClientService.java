@@ -112,6 +112,14 @@ public interface UBSClientService {
     MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId);
 
     /**
+     * Method that returns info about all orders for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleksandr Khomiakov
+     */
+    List<OrderStatusPageDto> getOrdersForUser(String uuid);
+
+    /**
      * Method returns list all bonuses of user.
      *
      * @param uuid of {@link User}'s uuid;
@@ -243,4 +251,23 @@ public interface UBSClientService {
      * @author Liyubomy Pater.
      */
     UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
+
+    /**
+     * Methods saves all entered by user data to database.
+     * 
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentRequestDto} which contains data to pay order out.
+     * @author Vadym Makitra
+     */
+    String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
+
+    /**
+     * Method validates received payment response.
+     * 
+     * @param dto       {@link PaymentResponseDtoLiqPay}
+     * @param signature {@link String} signature that we get from LiqPay
+     * @author Vadym Makitra
+     */
+    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature);
 }

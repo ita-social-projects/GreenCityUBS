@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,12 +12,12 @@ import java.util.Optional;
 public interface NotificationTemplateRepository extends JpaRepository<NotificationTemplate, Long> {
     /**
      * method, that returns {@link Optional}of{@link NotificationTemplate} by Type
-     * and LanguageCode.
+     * and LanguageCode and Receiver Type.
      *
      *
      * @return {@link Optional} of {@link NotificationTemplate} with all codes.
      * @author Ann Sakhno
      */
-    Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndLanguageCode(
-        NotificationType type, String languageCode);
+    Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+        NotificationType type, String languageCode, NotificationReceiverType receiverType);
 }

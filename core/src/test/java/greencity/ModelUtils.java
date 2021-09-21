@@ -111,6 +111,13 @@ public class ModelUtils {
             .build();
     }
 
+    public static NotificationDto getNotificationDto() {
+        return NotificationDto.builder()
+            .title("Test")
+            .body("Test")
+            .build();
+    }
+
     public static AddEmployeeDto getAddEmployeeDto() {
         return AddEmployeeDto.builder()
             .firstName("Петро")

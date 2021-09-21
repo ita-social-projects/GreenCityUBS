@@ -15,6 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.Objects;
 
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +43,7 @@ public class TelegramService {
     public void sendNotification(UserNotification notification) {
         UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         if (Objects.nonNull(notification.getUser().getTelegramBot())
             && Objects.nonNull(notification.getUser().getTelegramBot().getChatId())) {

@@ -2,7 +2,10 @@ package greencity.service;
 
 import greencity.client.OutOfRequestRestClient;
 import greencity.dto.NotificationDto;
+import greencity.dto.NotificationShortDto;
+import greencity.dto.PageableDto;
 import greencity.dto.UserVO;
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -14,6 +17,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import greencity.ubstelegrambot.TelegramService;
@@ -23,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +38,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
+import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -40,7 +51,6 @@ import static java.util.stream.Collectors.toMap;
 @AllArgsConstructor
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
-    private NotificationTemplateRepository notificationTemplateRepository;
     private UserRepository userRepository;
     private UserNotificationRepository userNotificationRepository;
     private BagRepository bagRepository;
@@ -78,6 +88,7 @@ public class NotificationServiceImpl implements NotificationService {
                 }
                 userNotification.setNotificationTime(LocalDateTime.now(clock));
                 userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+                userNotification.setOrder(order);
                 UserNotification created = userNotificationRepository.save(userNotification);
                 NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
                     .toString());
@@ -97,6 +108,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ORDER_IS_PAID);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
         sendNotificationsForBotsAndEmail(notification);
     }
@@ -118,6 +130,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -152,7 +165,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         userNotification.setNotificationType(NotificationType.UNPAID_PACKAGE);
         userNotification.setUser(order.getUser());
-
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -200,6 +213,7 @@ public class NotificationServiceImpl implements NotificationService {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
         userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -220,7 +234,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .value(value.getDescription()).build()));
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(order.getUser());
-
+        userNotification.setOrder(order);
         UserNotification created = userNotificationRepository.save(userNotification);
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
@@ -257,14 +271,58 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public List<NotificationDto> getAllNotificationsForUser(String userUuid, String language) {
+    public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid, String language,
+        Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
-        List<UserNotification> notifications = userNotificationRepository.findAllByUser(user);
-        List<NotificationDto> notificationDtos = new LinkedList<>();
-        for (UserNotification notification : notifications) {
-            notificationDtos.add(createNotificationDto(notification, language, notificationTemplateRepository));
+        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageable);
+
+        List<NotificationShortDto> notificationShortDtoList = notifications.stream()
+            .map(n -> createNotificationShortDto(n, language))
+            .sorted(Comparator.comparing(NotificationShortDto::getNotificationTime).reversed())
+            .collect(Collectors.toCollection(LinkedList::new));
+
+        return new PageableDto<>(
+            notificationShortDtoList,
+            notifications.getTotalElements(),
+            notifications.getPageable().getPageNumber(),
+            notifications.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationDto getNotification(String uuid, Long id, String language) {
+        UserNotification notification = userNotificationRepository.findById(id)
+            .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
+
+        if (!notification.getUser().getUuid().equals(uuid)) {
+            throw new NotificationNotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
-        return notificationDtos;
+
+        if (!notification.isRead()) {
+            notification.setRead(true);
+        }
+
+        return createNotificationDto(notification, language, SITE, templateRepository);
+    }
+
+    private NotificationShortDto createNotificationShortDto(UserNotification notification, String language) {
+        NotificationTemplate template = templateRepository
+            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+                notification.getNotificationType(),
+                language, SITE)
+            .orElseThrow(() -> new NotFoundException("Template not found"));
+
+        Long orderId = Objects.nonNull(notification.getOrder()) ? notification.getOrder().getId() : null;
+
+        return NotificationShortDto.builder()
+            .id(notification.getId())
+            .title(template.getTitle())
+            .notificationTime(notification.getNotificationTime())
+            .read(notification.isRead())
+            .orderId(orderId)
+            .build();
     }
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification) {
@@ -278,7 +336,7 @@ public class NotificationServiceImpl implements NotificationService {
     private void sendEmailNotification(UserNotification notification) {
         UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         restClient.sendEmailNotification(notificationDto, userVO.getEmail());
     }
@@ -287,11 +345,12 @@ public class NotificationServiceImpl implements NotificationService {
      * Creating notification with parameters.
      */
     public static NotificationDto createNotificationDto(UserNotification notification, String language,
+        NotificationReceiverType receiverType,
         NotificationTemplateRepository templateRepository) {
         NotificationTemplate template = templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCode(
+            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
                 notification.getNotificationType(),
-                language)
+                language, receiverType)
             .orElseThrow(() -> new NotFoundException("Template not found"));
         String templateBody = template.getBody();
         if (notification.getParameters() == null) {

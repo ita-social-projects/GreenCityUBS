@@ -446,4 +446,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponce);
     }
+
+    /**
+     * Method interceptor exception {@link NotificationNotFoundException}.
+     *
+     * @param exception Exception which should be intercepted.
+     * @param request   contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({NotificationNotFoundException.class})
+    public final ResponseEntity<Object> handleNotificationNotFoundException(NotificationNotFoundException exception,
+        WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(exception.getMessage(), exception);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
 }

@@ -52,4 +52,7 @@
     <include file="db/changelog/logs/ch-drop-column-notify-telegram-bot-Sakhno.xml"/>
     <include file="db/changelog/logs/ch-add-constraint-column-id-viber-bot-Sakhno.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-Bratakh.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-user-notifications-Volianskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-column-to-notification-template-Volianskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-order-table.xml"/>
 </databaseChangeLog>
