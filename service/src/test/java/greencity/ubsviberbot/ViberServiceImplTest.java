@@ -7,7 +7,6 @@ import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
-import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;

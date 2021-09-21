@@ -42,7 +42,8 @@ import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
-import static greencity.entity.enums.NotificationReceiverType.*;
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static java.util.stream.Collectors.toMap;
 
 @Service

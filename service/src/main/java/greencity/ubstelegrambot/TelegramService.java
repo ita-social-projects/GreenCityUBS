@@ -4,7 +4,6 @@ import greencity.client.OutOfRequestRestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
-import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.notifications.UserNotification;
 import greencity.exceptions.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;
