@@ -4,7 +4,6 @@ import greencity.client.OutOfRequestRestClient;
 import greencity.dto.LanguageVO;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
-import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;

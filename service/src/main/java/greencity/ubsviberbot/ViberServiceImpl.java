@@ -7,7 +7,6 @@ import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
-import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
@@ -96,7 +95,7 @@ public class ViberServiceImpl implements ViberService {
         ViberBot viberBot = viberBotRepository
             .findViberBotByChatId(receiverId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
-        if (viberBot.getChatId().equals(receiverId) && !viberBot.getIsNotify()) {
+        if (viberBot.getChatId().equals(receiverId) && !viberBot.getIsNotify() && viberBot.getIsNotify() != null) {
             viberBot.setIsNotify(true);
             viberBotRepository.save(viberBot);
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
