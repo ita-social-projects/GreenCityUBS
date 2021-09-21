@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -61,7 +60,7 @@ public class AzureCloudStorageService implements FileService {
             throw new ImageUrlParseException(ErrorMessage.PARSING_URL_FAILED + url);
         }
         BlobClient client = containerClient().getBlobClient(fileName);
-        if (client.exists()) {
+        if (client.exists() != null && client.exists()) {
             client.delete();
         }
     }

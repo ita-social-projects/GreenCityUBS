@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,8 +74,9 @@ public class ViberServiceImplTest {
         template.setBody("Body");
 
         when(templateRepository
-            .findNotificationTemplateByNotificationTypeAndLanguageCode(notification.getNotificationType(),
-                "en")).thenReturn(Optional.of(template));
+            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+                notification.getNotificationType(),
+                "en", OTHER)).thenReturn(Optional.of(template));
 
         when(outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
@@ -109,7 +111,7 @@ public class ViberServiceImplTest {
     public void testSendNotification() {
         prepareTest();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(notification.getUser().getViberBot().getChatId())

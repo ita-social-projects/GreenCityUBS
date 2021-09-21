@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -175,6 +176,21 @@ public interface UBSManagementService {
     CounterOrderDetailsDto getOrderSumDetails(Long id);
 
     /**
+     * Method that returns some info about all orders for specified userID.
+     *
+     * @author Oleksandr Khomiakov
+     */
+    List<OrderInfoDto> getOrdersForUser(String uuid);
+
+    /**
+     * Method that returns order related data.
+     *
+     * @return {@link OrderStatusPageDto}.
+     * @author Oleksandr Khomiakov
+     */
+    OrderStatusPageDto getOrderStatusData(Long orderId);
+
+    /**
      * Method that gets bags information.
      *
      * @author Nazar Struk
@@ -296,4 +312,26 @@ public interface UBSManagementService {
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+
+    /**
+     * Method that return parameters for building table on admin's page.
+     *
+     * @param userId of {@link Long} administrator's user id;
+     * @author Liubomyr Pater
+     */
+    TableParamsDTO getParametersForOrdersTable(Long userId);
+
+    /**
+     * Method that return.
+     *
+     * @param userUuid                     of {@link String}
+     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
+     * @author Liubomyr Pater
+     */
+    HttpStatus chooseOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+
+    /**
+     * Method that save ReasonNotTakeBagDto.
+     */
+    ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
 }

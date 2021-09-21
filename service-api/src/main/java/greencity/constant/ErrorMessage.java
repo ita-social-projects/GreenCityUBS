@@ -67,6 +67,8 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_ALREADY_EXIST = "Employee already exist";
     public static final String EMPLOYEE_IS_NOT_ASSIGN = "Employee service could not be assign for order ";
     public static final String USER_COUlD_NOT_FIND = "User with current id could not find";
+    public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
+    public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
 
     /**
      * Constructor.

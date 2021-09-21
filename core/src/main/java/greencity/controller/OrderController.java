@@ -133,7 +133,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/receivePayment")
-    public ResponseEntity receivePayment(
+    public ResponseEntity<HttpStatus> receivePayment(
         @RequestBody @Valid PaymentResponseDto dto) {
         ubsClientService.validatePayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -332,7 +332,7 @@ public class OrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/order/get-locations")
-    public ResponseEntity setNewLastOrderLocationForUser(
+    public ResponseEntity<HttpStatus> setNewLastOrderLocationForUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody LocationIdDto locationId) {
         ubsClientService.setNewLastOrderLocation(userUuid, locationId);
@@ -353,8 +353,48 @@ public class OrderController {
     })
     @GetMapping("/order-details-test")
     public ResponseEntity<UserPointsAndAllBagsDtoTest> getCurrentUserPointsTest(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
+        @ApiIgnore @CurrentUserUuid String userUuid) throws InterruptedException {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageDataTest(userUuid));
+    }
+
+    /**
+     * Controller saves all entered by user data to database from LiqPay.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @param dto      {@link OrderResponseDto} order data.
+     * @return {@link HttpStatus}.
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Process user order.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/processLiqPayOrder")
+    public ResponseEntity<String> processLiqPayOrder(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Valid @RequestBody OrderResponseDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
+    }
+
+    /**
+     * Controller checks if received data is valid and stores payment info if is.
+     *
+     * @param dto {@link PaymentResponseDtoLiqPay} - response order data.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Receive payment.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/receiveLiqPayPayment")
+    public ResponseEntity<HttpStatus> receiveLiqPayPayment(
+        @RequestBody @Valid PaymentResponseDtoLiqPay dto,
+        String signature) {
+        ubsClientService.validateLiqPayPayment(dto, signature);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

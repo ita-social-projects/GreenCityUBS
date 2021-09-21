@@ -12,13 +12,12 @@ import java.time.LocalDate;
 public class CertificateDtoForAddingMapper extends AbstractConverter<CertificateDtoForAdding, Certificate> {
     @Override
     protected Certificate convert(CertificateDtoForAdding source) {
-        Certificate certificate = Certificate.builder()
+        return Certificate.builder()
             .code(source.getCode())
             .points(source.getPoints())
             .creationDate(LocalDate.now())
             .expirationDate(LocalDate.now().plusMonths(source.getMonthCount()))
             .certificateStatus(CertificateStatus.ACTIVE)
             .build();
-        return certificate;
     }
 }
