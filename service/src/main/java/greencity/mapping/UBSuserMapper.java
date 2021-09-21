@@ -19,14 +19,12 @@ public class UBSuserMapper extends AbstractConverter<PersonalDataDto, UBSuser> {
      */
     @Override
     protected UBSuser convert(PersonalDataDto personalDataDto) {
-        UBSuser ubsUser = UBSuser.builder()
+        return UBSuser.builder()
             .id(personalDataDto.getId())
             .firstName(personalDataDto.getFirstName())
             .lastName(personalDataDto.getLastName())
             .email(personalDataDto.getEmail())
             .phoneNumber(personalDataDto.getPhoneNumber())
             .build();
-
-        return ubsUser;
     }
 }
