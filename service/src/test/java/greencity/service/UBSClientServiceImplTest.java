@@ -108,8 +108,8 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageData() {
-        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDtoTest(new ArrayList<BagTranslationDto>(), 2l, 600);
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
+            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 2l, 600);
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
@@ -117,22 +117,6 @@ class UBSClientServiceImplTest {
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
-
-        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
-        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
-    }
-
-    @Test
-    void getFirstPageDataTest() throws InterruptedException {
-        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDtoTest(new ArrayList<BagTranslationDto>(), 2l, 600);
-
-        User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(600);
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-
-        UserPointsAndAllBagsDtoTest userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageDataTest("35467585763t4sfgchjfuyetf");
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
