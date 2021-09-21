@@ -64,7 +64,6 @@ public final class ErrorMessage {
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
     public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
 
-
     /**
      * Constructor.
      */

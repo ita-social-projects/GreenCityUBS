@@ -91,9 +91,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         Location lastLocation = user.getLastLocation();
         currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
-                .stream()
-                .map(this::buildBagTranslationDto)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::buildBagTranslationDto)
+            .collect(Collectors.toList());
         return new UserPointsAndAllBagsDto(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
     }
 
@@ -149,7 +149,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(), location.getMinAmountOfBigBags());
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            location.getMinAmountOfBigBags());
 
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
@@ -575,13 +576,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
-            if(bag.getCapacity() >= 120){
+            if (bag.getCapacity() >= 120) {
                 bigBagCounter += temp.getAmount();
             }
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
-        if(minAmountOfBigBags > bigBagCounter){
+        if (minAmountOfBigBags > bigBagCounter) {
             throw new NotEnoughBagsException(NOT_ENOUGH_BIG_BAGS_EXCEPTION + minAmountOfBigBags);
         }
         return sumToPay;
@@ -762,7 +763,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
         User currentUser = userRepository.findByUuid(userUuid);
         Location location = locationRepository.findById(locationIdDto.getLocationId())
-            .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
+            .orElseThrow(() -> new LocationNotFoundException(LOCATION_DOESNT_FOUND));
         currentUser.setLastLocation(location);
 
         userRepository.save(currentUser);

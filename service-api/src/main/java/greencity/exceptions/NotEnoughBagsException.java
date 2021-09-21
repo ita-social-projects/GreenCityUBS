@@ -1,13 +1,15 @@
 package greencity.exceptions;
 
 /**
- * Exception is shown when amount of big bags is not enough
+ * Exception is thrown when there are not enough big bags.
  *
  * @author Denys Kisliak
  */
-public class NotEnoughBagsException extends RuntimeException{
+public class NotEnoughBagsException extends RuntimeException {
     /**
-     * Constructor.
+     * Constructor for NotFoundException.
+     *
+     * @param message - giving message.
      */
     public NotEnoughBagsException(String message) {
         super(message);
