@@ -62,6 +62,11 @@ public final class ErrorMessage {
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
+    public static final String EMPLOYEE_ALREADY_ASSIGNED = "Manager already assigned with id: ";
+    public static final String EMPLOYEE_DOESNT_EXIST = "Employee doesn't exist";
+    public static final String EMPLOYEE_ALREADY_EXIST = "Employee already exist";
+    public static final String EMPLOYEE_IS_NOT_ASSIGN = "Employee service could not be assign for order ";
+    public static final String USER_COUlD_NOT_FIND = "User with current id could not find";
 
     /**
      * Constructor.

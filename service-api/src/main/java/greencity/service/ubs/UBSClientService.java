@@ -228,9 +228,9 @@ public interface UBSClientService {
      *
      * @param orderId {@link Long} id.
      * @return {@link List} that contains list of EventsDTOS.
-     * @author Yuriy Bahly.
+     * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrderById(Long orderId);
+    List<EventDto> getAllEventsForOrder(Long orderId);
 
     /**
      * Methods for converting UserProfileDTO to PersonalDataDTO.

@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
@@ -337,9 +338,10 @@ public class ManagementOrderController {
     })
     @PutMapping("/set-order-detail")
     public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
-        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto) {
+        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.setOrderDetail(dto, language));
+            .body(ubsManagementService.setOrderDetail(dto, language, uuid));
     }
 
     /**
@@ -448,9 +450,10 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
-        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto) {
+        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderDetailStatus(id, dto));
+            .body(ubsManagementService.updateOrderDetailStatus(id, dto, uuid));
     }
 
     /**
@@ -716,6 +719,29 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updateByOrder(
         @RequestBody @Valid EmployeePositionDtoResponse dto) {
         ubsManagementService.updatePositions(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for assigning Employee for some order by orderId.
+     *
+     * @param dto     {@link AssignEmployeeForOrderDto}.
+     * @param orderId {@link Long}.
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "Assign employee for some order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/assign-employee-to-order")
+    public ResponseEntity<HttpStatus> assignEmployeeToOrder(
+        @RequestBody @Valid AssignEmployeeForOrderDto dto, Long orderId) {
+        ubsManagementService.assignEmployeeWithThePositionToTheOrder(dto, orderId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

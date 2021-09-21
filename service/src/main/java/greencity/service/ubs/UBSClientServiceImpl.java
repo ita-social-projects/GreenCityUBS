@@ -52,6 +52,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
+    private final EventService eventService;
     private final EventRepository eventRepository;
     @PersistenceContext
     private final EntityManager entityManager;
@@ -78,6 +79,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
+            eventService.save("Замовлення Оплачено", "Система", order);
         }
     }
 
@@ -465,7 +467,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
         order.setUser(currentUser);
-
         Payment payment = Payment.builder()
             .amount((long) (sumToPay * 100))
             .orderStatus("created")
@@ -480,6 +481,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(arrayOfPayments);
         }
         orderRepository.save(order);
+        eventService.save("Сформовано замовлення", "Клієнт", order);
         return order;
     }
 
@@ -631,7 +633,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrderById(Long orderId) {
+    public List<EventDto> getAllEventsForOrder(Long orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);

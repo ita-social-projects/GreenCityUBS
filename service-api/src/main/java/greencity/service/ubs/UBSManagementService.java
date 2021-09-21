@@ -100,9 +100,7 @@ public interface UBSManagementService {
      * Method for adding violation for user.
      *
      * @param add            {@link AddingViolationsToUserDto}
-     *
      * @param multipartFiles {@link MultipartFile}
-     *
      * @author Nazar Struk
      */
     void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
@@ -167,7 +165,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid);
 
     /**
      * Method that count sum order.
@@ -204,7 +202,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid);
 
     /**
      * Method that get export details by order id.
@@ -277,6 +275,15 @@ public interface UBSManagementService {
     EmployeePositionDtoRequest getAllEmployeesByPosition(Long id);
 
     /**
+     * This method assign Employee with it's position for current order.
+     *
+     * @param dto     {@link AssignEmployeeForOrderDto}.
+     * @param orderId {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId);
+
+    /**
      * Method that update EmployeePositionDtoResponse.
      */
     void updatePositions(EmployeePositionDtoResponse dto);
@@ -285,9 +292,7 @@ public interface UBSManagementService {
      * Method for adding violation for user.
      *
      * @param add            {@link AddingViolationsToUserDto}
-     *
      * @param multipartFiles {@link MultipartFile}
-     *
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);

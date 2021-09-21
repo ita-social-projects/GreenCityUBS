@@ -288,4 +288,16 @@ class ManagementOrderControllerTest {
                 .content("[{\"latitude\":84.525254,\"longitude\":12.436964}]"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void assignEmployeeToOrder() throws Exception {
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = ModelUtils.assignEmployeeToOrderDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String writeValueAsString = objectMapper.writeValueAsString(assignEmployeeForOrderDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/assign-employee-to-order", 1L)
+            .content(writeValueAsString)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 }
