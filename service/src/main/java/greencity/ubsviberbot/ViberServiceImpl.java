@@ -96,7 +96,7 @@ public class ViberServiceImpl implements ViberService {
             .findViberBotByChatId(receiverId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
         if (viberBot.getChatId().equals(receiverId) && viberBot.getChatId() != null
-                && !viberBot.getIsNotify() && viberBot.getIsNotify() != null) {
+            && !viberBot.getIsNotify() && viberBot.getIsNotify() != null) {
             viberBot.setIsNotify(true);
             viberBotRepository.save(viberBot);
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
