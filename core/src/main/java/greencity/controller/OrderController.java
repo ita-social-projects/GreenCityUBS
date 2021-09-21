@@ -340,25 +340,6 @@ public class OrderController {
     }
 
     /**
-     * Controller sets new last order location.
-     *
-     * @param userUuid {@link UserVO} id.
-     */
-    @ApiOperation(value = "Get current user points and all bags list.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/order-details-test")
-    public ResponseEntity<UserPointsAndAllBagsDtoTest> getCurrentUserPointsTest(
-        @ApiIgnore @CurrentUserUuid String userUuid) throws InterruptedException {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageDataTest(userUuid));
-    }
-
-    /**
      * Controller saves all entered by user data to database from LiqPay.
      *
      * @param userUuid {@link UserVO} id.
