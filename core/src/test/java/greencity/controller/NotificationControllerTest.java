@@ -1,49 +1,72 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.configuration.SecurityConfig;
 import greencity.dto.NotificationDto;
 import greencity.service.ubs.NotificationService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Collections;
+import java.security.Principal;
 import java.util.List;
-import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static greencity.ModelUtils.getNotificationDto;
+import static greencity.ModelUtils.getUuid;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith({MockitoExtension.class})
-public class NotificationControllerTest {
+@ExtendWith(MockitoExtension.class)
+@Import(SecurityConfig.class)
+class NotificationControllerTest {
+    private static final String notificationLink = "/notifications";
+
+    private MockMvc mockMvc;
+
     @Mock
-    private NotificationService notificationService;
+    NotificationService notificationService;
 
-    private NotificationController notificationController;
+    @InjectMocks
+    NotificationController notificationController;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        this.notificationController = new NotificationController(notificationService);
+    private final Principal principal = getUuid();
+
+    @BeforeEach
+    void setup() {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .build();
     }
 
     @Test
-    public void testGetNotificationsForCurrentUser() {
-        when(notificationService.getAllNotificationsForUser("123", "en"))
-            .thenReturn(Collections.singletonList(new NotificationDto("Title", "Body")));
+    void getNotification() throws Exception {
+        NotificationDto dto = getNotificationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(List.of(dto));
 
-        ResponseEntity<List<NotificationDto>> expectedResponse = ResponseEntity.status(HttpStatus.OK)
-            .body(Collections.singletonList(new NotificationDto("Title", "Body")));
+        mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
-        ResponseEntity<List<NotificationDto>> actualResponse =
-            notificationController.getNotificationsForCurrentUser("123", Locale.ENGLISH);
+    }
 
-        assertEquals(expectedResponse, actualResponse);
-        verify(notificationService).getAllNotificationsForUser("123", "en");
+    @Test
+    void getNotificationsForCurrentUser() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

@@ -3,11 +3,12 @@ package greencity.repository;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,7 +18,7 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      *
      * @return list of {@link UserNotification}.
      */
-    List<UserNotification> findAllByUser(User user);
+    Page<UserNotification> findAllByUser(User user, Pageable pageable);
 
     /**
      * The method returns last notification by User and Type.

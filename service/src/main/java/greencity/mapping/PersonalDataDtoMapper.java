@@ -19,7 +19,7 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
      */
     @Override
     protected PersonalDataDto convert(UBSuser ubsUser) {
-        PersonalDataDto personalDataDto = PersonalDataDto.builder()
+        return PersonalDataDto.builder()
             .id(ubsUser.getId())
             .firstName(ubsUser.getFirstName())
             .lastName(ubsUser.getLastName())
@@ -27,7 +27,5 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
             .email(ubsUser.getEmail())
             .addressComment(ubsUser.getAddress().getComment())
             .build();
-
-        return personalDataDto;
     }
 }

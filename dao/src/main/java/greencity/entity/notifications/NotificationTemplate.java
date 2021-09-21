@@ -1,5 +1,6 @@
 package greencity.entity.notifications;
 
+import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.language.Language;
 import lombok.AllArgsConstructor;
@@ -33,4 +34,8 @@ public class NotificationTemplate {
     @ManyToOne
     @JoinColumn(name = "language_id")
     private Language language;
+
+    @Column(nullable = false, name = "notification_receiver_type", length = 50)
+    @Enumerated(EnumType.STRING)
+    private NotificationReceiverType notificationReceiverType;
 }

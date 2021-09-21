@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -93,7 +95,8 @@ public class ViberServiceImpl implements ViberService {
         ViberBot viberBot = viberBotRepository
             .findViberBotByChatId(receiverId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.THE_CHAT_ID_WAS_NOT_FOUND));
-        if (viberBot.getChatId().equals(receiverId) && !viberBot.getIsNotify()) {
+        Boolean check = viberBot.getChatId().equals(receiverId) && !viberBot.getIsNotify();
+        if (Boolean.TRUE.equals(check)) {
             viberBot.setIsNotify(true);
             viberBotRepository.save(viberBot);
             SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
@@ -132,7 +135,7 @@ public class ViberServiceImpl implements ViberService {
         UserVO userVO =
             outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
         if (Objects.nonNull(notification.getUser().getViberBot())
             && Objects.nonNull(notification.getUser().getViberBot().getChatId())) {
