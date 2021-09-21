@@ -1341,7 +1341,7 @@ public class ModelUtils {
             .positionId(1L)
             .build();
     }
-  
+
     private static NotificationShortDto createNotificationShortDto() {
         return NotificationShortDto.builder()
             .id(1L)
