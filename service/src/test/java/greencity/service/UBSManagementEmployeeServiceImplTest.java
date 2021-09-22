@@ -10,6 +10,7 @@ import greencity.exceptions.*;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSManagementEmployeeServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,8 @@ class UBSManagementEmployeeServiceImplTest {
     private ModelMapper modelMapper;
     @Mock
     private PhoneNumberFormatterService phoneFormatter;
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private UBSManagementEmployeeServiceImpl employeeService;
 
@@ -60,11 +63,11 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.save(any())).thenReturn(getEmployee());
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
-
-        EmployeeDto result = employeeService.save(getAddEmployeeDto(), null);
-
+        AddEmployeeDto addEmployeeDto = getAddEmployeeDto();
+        addEmployeeDto.setUserId(UserDto.builder().id(1L).build());
+        when(userRepository.existsById(1L)).thenReturn(true);
+        EmployeeDto result = employeeService.save(addEmployeeDto, null);
         assertEquals(1L, result.getId());
-
         verify(phoneFormatter, times(1))
             .getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber());
         verify(fileService, never()).upload(null);
@@ -74,6 +77,38 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
         verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
+    }
+
+    @Test
+    void saveEmployeeAlreadyExistException() {
+        Employee employee = getEmployee();
+        employee.setId(null);
+        when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
+            .thenReturn(getAddEmployeeDto().getPhoneNumber());
+        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
+        AddEmployeeDto addEmployeeDto = getAddEmployeeDto();
+        addEmployeeDto.setUserId(UserDto.builder().id(1L).build());
+        when(userRepository.existsById(1L)).thenReturn(false);
+        Exception thrown = assertThrows(EmployeeAlreadyExist.class,
+            () -> employeeService.save(addEmployeeDto, null));
+        assertEquals(ErrorMessage.EMPLOYEE_ALREADY_EXIST, thrown.getMessage());
+
+        when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
+            .thenReturn(getAddEmployeeDto().getPhoneNumber());
+        when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
+        when(userRepository.existsById(1L)).thenReturn(true);
+        when(repository.existsByUserId(1L)).thenReturn(true);
+        Exception thrown1 = assertThrows(EmployeeAlreadyExist.class,
+            () -> employeeService.save(addEmployeeDto, null));
+        assertEquals(ErrorMessage.EMPLOYEE_ALREADY_EXIST, thrown1.getMessage());
     }
 
     @Test
@@ -128,6 +163,7 @@ class UBSManagementEmployeeServiceImplTest {
             .thenReturn(null);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(getEmployee()));
 
         employeeService.update(getEmployeeDto(), null);
 

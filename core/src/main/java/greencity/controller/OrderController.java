@@ -235,7 +235,7 @@ public class OrderController {
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrderById(id));
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id));
     }
 
     /**

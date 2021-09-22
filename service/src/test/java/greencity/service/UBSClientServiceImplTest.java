@@ -16,6 +16,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
+import greencity.service.ubs.EventService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
@@ -75,6 +76,8 @@ class UBSClientServiceImplTest {
     @Mock
     private EventRepository eventRepository;
     @Mock
+    private EventService eventService;
+    @Mock
     private LiqPay liqPay;
 
     @Test
@@ -90,6 +93,8 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
         ubsService.validatePayment(dto);
+        verify(eventService, times(1))
+            .save("Замовлення Оплачено", "Система", order);
         verify(paymentRepository, times(1)).save(payment);
 
     }
@@ -710,14 +715,14 @@ class UBSClientServiceImplTest {
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrderById(1L));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getAllEventsForOrderById(1L));
+            () -> ubsService.getAllEventsForOrder(1L));
     }
 
     @Test
@@ -725,7 +730,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
         assertThrows(EventsNotFoundException.class,
-            () -> ubsService.getAllEventsForOrderById(1L));
+            () -> ubsService.getAllEventsForOrder(1L));
     }
 
     @Test
