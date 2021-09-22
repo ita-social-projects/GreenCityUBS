@@ -907,8 +907,9 @@ class UBSManagementServiceImplTest {
     @Test
     void testAssignEmployeeWithThePositionToTheOrderException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = assignEmployeeForOrderDto();
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(ModelUtils.assignEmployeeForOrderDto(),
+            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(assignEmployeeForOrderDto,
                 1L));
     }
 
@@ -917,9 +918,9 @@ class UBSManagementServiceImplTest {
         Order order = getTestUser().getOrders().get(0);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(1L, 1L, 1L)).thenReturn(1);
-
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = assignEmployeeForOrderDto();
         assertThrows(EmployeeAlreadyAssignedForOrder.class,
-            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(ModelUtils.assignEmployeeForOrderDto(),
+            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(assignEmployeeForOrderDto,
                 1L));
     }
 
@@ -929,9 +930,9 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(1L, 1L, 1L)).thenReturn(2);
         when(positionRepository.findById(1L)).thenReturn(Optional.empty());
-
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = assignEmployeeForOrderDto();
         assertThrows(PositionNotFoundException.class,
-            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(ModelUtils.assignEmployeeForOrderDto(),
+            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(assignEmployeeForOrderDto,
                 1L));
     }
 
@@ -942,8 +943,9 @@ class UBSManagementServiceImplTest {
         when(employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(1L, 1L, 1L)).thenReturn(2);
         when(positionRepository.findById(1L)).thenReturn(Optional.of(Position.builder().build()));
         when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = assignEmployeeForOrderDto();
         assertThrows(EmployeeNotFoundException.class,
-            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(ModelUtils.assignEmployeeForOrderDto(),
+            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(assignEmployeeForOrderDto,
                 1L));
     }
 
@@ -954,8 +956,9 @@ class UBSManagementServiceImplTest {
         when(employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(1L, 1L, 1L)).thenReturn(2);
         when(positionRepository.findById(1L)).thenReturn(Optional.of(Position.builder().id(2L).build()));
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        AssignEmployeeForOrderDto assignEmployeeForOrderDto = assignEmployeeForOrderDto();
         assertThrows(EmployeeIsNotAssigned.class,
-            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(ModelUtils.assignEmployeeForOrderDto(),
+            () -> ubsManagementService.assignEmployeeWithThePositionToTheOrder(assignEmployeeForOrderDto,
                 1L));
     }
 

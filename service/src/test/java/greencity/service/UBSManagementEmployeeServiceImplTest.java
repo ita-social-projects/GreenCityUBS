@@ -95,7 +95,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(userRepository.existsById(1L)).thenReturn(false);
         Exception thrown = assertThrows(EmployeeAlreadyExist.class,
             () -> employeeService.save(addEmployeeDto, null));
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_ALREADY_EXIST);
+        assertEquals(ErrorMessage.EMPLOYEE_ALREADY_EXIST, thrown.getMessage());
 
         when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
             .thenReturn(getAddEmployeeDto().getPhoneNumber());
@@ -108,7 +108,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.existsByUserId(1L)).thenReturn(true);
         Exception thrown1 = assertThrows(EmployeeAlreadyExist.class,
             () -> employeeService.save(addEmployeeDto, null));
-        assertEquals(thrown1.getMessage(), ErrorMessage.EMPLOYEE_ALREADY_EXIST);
+        assertEquals(ErrorMessage.EMPLOYEE_ALREADY_EXIST, thrown1.getMessage());
     }
 
     @Test
