@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -19,6 +20,7 @@ import greencity.filters.SearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
@@ -62,6 +64,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private final EventService eventService;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
@@ -740,11 +743,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
-    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language) {
+    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        Employee employee = user.getEmployee();
+        if (employee == null) {
+            throw new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND);
+        }
         OrderDetailDto dto = new OrderDetailDto();
-
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
             updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
                 updateOrderDetailDto.getBagId().longValue());
@@ -755,13 +761,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
                     updateOrderDetailDto.getBagId().longValue());
         }
-
         Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
             .orElseThrow(() -> new UnexistingOrderException(
                 ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
-
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
-
+        orderRepository.save(order);
+        eventService.save("Зміна деталей замовлення",
+            employee.getFirstName() + "  " + employee.getLastName(), order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -902,9 +908,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * {@inheritDoc}
      */
-
     @Override
-    public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto) {
+    public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
@@ -914,10 +919,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setComment(dto.getOrderComment());
         OrderStatus newStatus = OrderStatus.valueOf(dto.getOrderStatus());
         order.setOrderStatus(newStatus);
+        User user = userRepository.findByUuid(uuid);
+        Employee employee = user.getEmployee();
+        if (employee == null) {
+            throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+        }
         if (newStatus == OrderStatus.ADJUSTMENT) {
             notificationService.notifyCourierItineraryFormed(order);
+            eventService.save("Ужзгодженно замовлення",
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else if (newStatus == OrderStatus.CONFIRMED) {
+            eventService.save("Замовлення підтверджено",
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
+            eventService.save("Замовлення не вивезене",
+                employee.getFirstName() + "  " + employee.getLastName(), order);
         }
-
         paymentRepository.paymentInfo(id)
             .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
         orderRepository.save(order);
@@ -1268,6 +1285,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (image != null) {
             payment.setImagePath(fileService.upload(image));
         }
+        eventService.save("Замовлення Оплачено", "Система", order);
         return payment;
     }
 
@@ -1292,8 +1310,40 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .stream().map(e -> e.getFirstName() + " " + e.getLastName()).collect(Collectors.toList()));
         }
         dto.setAllPositionsEmployees(allPositionEmployee);
-
         return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(
+                () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + orderId));
+        int checkIfCurrentEmployeeAlreadyAssigned =
+            employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(orderId,
+                dto.getEmployeeId(), dto.getPositionId());
+        if (checkIfCurrentEmployeeAlreadyAssigned == 1) {
+            throw new EmployeeAlreadyAssignedForOrder(EMPLOYEE_ALREADY_ASSIGNED + " " + dto.getEmployeeId());
+        }
+        Position position = positionRepository.findById(dto.getPositionId()).orElseThrow(
+            (() -> new PositionNotFoundException(POSITION_NOT_FOUND)));
+        Employee employee = employeeRepository.findById(dto.getEmployeeId())
+            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
+        if (position.getId() != 2) {
+            EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
+                .order(order)
+                .employee(employee)
+                .position(position)
+                .build();
+            employeeOrderPositionRepository.save(employeeOrderPositions);
+            eventService.save("Закріплено відповідального менеджера ",
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else {
+            throw new EmployeeIsNotAssigned(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);
+        }
     }
 
     /**
@@ -1311,7 +1361,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(
                 () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
-
         List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
         for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
             String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
