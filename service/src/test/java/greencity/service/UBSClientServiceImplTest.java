@@ -77,6 +77,7 @@ class UBSClientServiceImplTest {
     private EventRepository eventRepository;
     @Mock
     private EventService eventService;
+    @Mock
     private LiqPay liqPay;
 
     @Test

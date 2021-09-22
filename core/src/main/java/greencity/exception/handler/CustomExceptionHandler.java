@@ -493,8 +493,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
+    }
 
-     /** 
+    /**
      * Method interceptor exception {@link NotificationNotFoundException}.
      *
      * @param exception Exception which should be intercepted.
