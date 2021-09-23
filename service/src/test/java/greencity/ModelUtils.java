@@ -6,8 +6,10 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.NotificationTemplate;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
-
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
@@ -17,6 +19,10 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +30,7 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.singletonList;
 
@@ -46,14 +53,25 @@ public class ModelUtils {
         singletonList(createOrderDetailInfoDto());
     public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
     public static final Order GET_ORDER_DETAILS = getOrderDetails();
-
-    public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
-        return DetailsOrderInfoDto.builder()
-            .capacity("One")
-            .sum("Two")
-            .build();
-    }
-
+    public static final Order TEST_ORDER_2 = createTestOrder2();
+    public static final Order TEST_ORDER_3 = createTestOrder3();
+    public static final Order TEST_ORDER_4 = createTestOrder4();
+    public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET = createNotificationParameterSet();
+    public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
+    public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
+    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
+    public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
+    public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
+    public static final Violation TEST_VIOLATION = createTestViolation();
+    public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5);
+    public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
+    public static final Page<UserNotification> TEST_PAGE =
+        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
+    public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
+    public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
+        List.of(TEST_NOTIFICATION_SHORT_DTO);
+    public static final PageableDto<NotificationShortDto> TEST_PAGEABLE_DTO = createPageableDto();
     public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
@@ -70,6 +88,14 @@ public class ModelUtils {
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
     public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
         Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
+    public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
+
+    public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
+        return DetailsOrderInfoDto.builder()
+            .capacity("One")
+            .sum("Two")
+            .build();
+    }
 
     public static Optional<Order> getOrderWithEvents() {
         return Optional.of(Order.builder()
@@ -1281,6 +1307,7 @@ public class ModelUtils {
     private static User createUser() {
         return User.builder()
             .id(1L)
+            .uuid("Test")
             .recipientEmail("test@mail.com")
             .build();
     }
@@ -1302,5 +1329,138 @@ public class ModelUtils {
             .longitude(23.88)
             .build());
         return set;
+    }
+
+    private static NotificationShortDto createNotificationShortDto() {
+        return NotificationShortDto.builder()
+            .id(1L)
+            .orderId(1L)
+            .title("Test")
+            .notificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10))
+            .read(false)
+            .build();
+    }
+
+    private static PageableDto<NotificationShortDto> createPageableDto() {
+        return new PageableDto<>(
+            TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1);
+    }
+
+    private static NotificationTemplate createNotificationTemplate() {
+        NotificationTemplate notificationTemplate = new NotificationTemplate();
+        notificationTemplate.setTitle("Test");
+        notificationTemplate.setNotificationType(NotificationType.UNPAID_ORDER);
+        notificationTemplate.setNotificationReceiverType(SITE);
+        notificationTemplate.setBody("Test");
+        notificationTemplate.setLanguage(Language.builder().id(1L).code("ua").build());
+
+        return notificationTemplate;
+    }
+
+    private static List<UserNotification> createUserNotificationList() {
+        UserNotification notification = new UserNotification();
+        notification.setId(1L);
+        notification.setNotificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10));
+        notification.setRead(false);
+        notification.setUser(TEST_USER);
+        notification.setOrder(Order.builder()
+            .id(1L)
+            .build());
+        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        return List.of(
+            notification);
+    }
+
+    private static Violation createTestViolation() {
+        return Violation.builder().description("violation description").build();
+    }
+
+    private static NotificationParameter createNotificationParameter() {
+        return NotificationParameter.builder()
+            .key("violationDescription")
+            .value("violation description")
+            .build();
+    }
+
+    private static Order createTestOrder4() {
+        return Order.builder().id(46L).user(User.builder().id(42L).build())
+            .orderDate(LocalDateTime.now())
+            .build();
+    }
+
+    private static UserNotification createUserNotification3() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
+        userNotification.setUser(TEST_ORDER_4.getUser());
+        userNotification.setOrder(TEST_ORDER_4);
+
+        return userNotification;
+    }
+
+    private static UserNotification createUserNotification2() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
+        userNotification.setUser(TEST_ORDER_3.getUser());
+        userNotification.setOrder(TEST_ORDER_3);
+        return userNotification;
+    }
+
+    private static Set<NotificationParameter> createNotificationParameterSet() {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder().key("overpayment")
+            .value(String.valueOf(2L)).build());
+        parameters.add(NotificationParameter.builder().key("realPackageNumber")
+            .value(String.valueOf(0)).build());
+        parameters.add(NotificationParameter.builder().key("paidPackageNumber")
+            .value(String.valueOf(0)).build());
+
+        return parameters;
+    }
+
+    private static Order createTestOrder3() {
+        return Order.builder().id(45L).user(User.builder().id(42L).build())
+            .confirmedQuantity(new HashMap<>())
+            .exportedQuantity(new HashMap<>())
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .orderDate(LocalDateTime.now())
+            .build();
+    }
+
+    private static UserNotification createUserNotification() {
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.ORDER_IS_PAID);
+        notification.setUser(TEST_ORDER_2.getUser());
+        notification.setOrder(TEST_ORDER_2);
+
+        return notification;
+    }
+
+    private static Order createTestOrder2() {
+        return Order.builder().id(43L).user(User.builder().id(42L).build())
+            .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
+    }
+
+    private static UserNotification createUserNotification4() {
+        UserNotification notification = new UserNotification();
+        notification.setId(1L);
+        notification.setUser(User.builder()
+            .uuid("test")
+            .build());
+        notification.setRead(false);
+        notification.setParameters(null);
+        notification.setNotificationType(NotificationType.UNPAID_ORDER);
+        return notification;
+    }
+
+    private static NotificationDto createNotificationDto() {
+        return NotificationDto.builder()
+            .title("Test")
+            .body("Test")
+            .build();
     }
 }

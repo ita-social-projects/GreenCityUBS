@@ -15,7 +15,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class TokenServiceImplTest {
+class TokenServiceImplTest {
     @Mock
     private HttpServletResponse httpServletResponse;
     @Mock

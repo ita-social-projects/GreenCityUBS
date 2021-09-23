@@ -40,8 +40,10 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
-import static greencity.entity.enums.NotificationReceiverType.*;
+import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -293,6 +295,10 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationDto getNotification(String uuid, Long id, String language) {
         UserNotification notification = userNotificationRepository.findById(id)
             .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
+
+        if (!notification.getUser().getUuid().equals(uuid)) {
+            throw new NotificationNotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+        }
 
         if (!notification.isRead()) {
             notification.setRead(true);

@@ -19,7 +19,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +53,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
+    private final UBSManagementServiceImpl ubsManagementService;
+    private final LiqPay liqPay;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -64,22 +65,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String publicKey;
     @Value("${liqpay.private.key}")
     private String privateKey;
-    @Autowired
-    LiqPay liqPay;
 
     @Override
     @Transactional
     public void validatePayment(PaymentResponseDto dto) {
-        if (dto.getResponse_status().equals("failure")) {
+        if (dto.getResponseStatus().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (!encryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        String[] ids = dto.getOrder_id().split("_");
+        String[] ids = dto.getOrderId().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getOrder_status().equals("approved")) {
+        if (dto.getOrderStatus().equals("approved")) {
             Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             orderPayment.setOrder(order);
@@ -138,12 +137,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<PersonalDataDto> getSecondPageData(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
-        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-
-        if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().build());
-        }
-        return allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
+        String currentUserEmail = restClient.findUserByUUid(uuid).orElseThrow().getEmail();
+        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId)
+            .stream().filter(x -> x.getEmail().equals(currentUserEmail)).collect(Collectors.toList());
+        return allByUserId.isEmpty()
+            ? List.of(PersonalDataDto.builder().build())
+            : allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
     }
 
     /**
@@ -389,6 +388,18 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderStatusPageDto> getOrdersForUser(String uuid) {
+        List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
+        List<OrderStatusPageDto> dto = new ArrayList<>();
+        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId())));
+        return dto;
+    }
+
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
         List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
         for (BagTranslation bag : bags) {
@@ -616,7 +627,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void createUserInGreenCityUbsDataBase(String uuid) {
-        userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+        UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid).orElseThrow();
+        userRepository
+            .save(User.builder().currentPoints(0).violations(0).uuid(uuid).recipientEmail(ubsCustomersDto.getEmail())
+                .recipientPhone(ubsCustomersDto.getPhoneNumber()).recipientName(ubsCustomersDto.getName()).build());
     }
 
     @Override
@@ -879,16 +893,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             .language("en")
             .paytypes("card")
             .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
+            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/")
             .build();
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, PaymentRequestDtoLiqPay paymentRequestDtoLiqPay) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
         if (dto.getStatus().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
-            .equals(encryptionUtil.formingRequestSignatureLiqPay(paymentRequestDtoLiqPay, privateKey))) {
+            .equals(signature)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
         if (dto.getStatus().equals("error")) {

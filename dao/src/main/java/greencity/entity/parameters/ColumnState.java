@@ -20,4 +20,5 @@ public class ColumnState {
     private EditType editType;
     private Title title;
     private TableParameters tableParameters;
+    private ColumnBelonging columnBelonging;
 }

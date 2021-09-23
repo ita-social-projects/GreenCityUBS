@@ -57,4 +57,5 @@
     <include file="db/changelog/logs/ch-drop-create-table-violation-description-maping-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-table-violation_images-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-drop-column-id-Melnyk.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-to-order-table.xml"/>
 </databaseChangeLog>

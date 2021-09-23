@@ -12,62 +12,62 @@ import org.hibernate.validator.constraints.Length;
 public class PaymentResponseDto {
     // CHECKSTYLE:OFF
     @Length(max = 1024)
-    private String order_id;
-    private Integer merchant_id;
+    private String orderId;
+    private Integer merchantId;
     private Integer amount;
     @Length(max = 3)
     private String currency;
     @Length(max = 50)
-    private String order_status;
+    private String orderStatus;
     @Length(max = 50)
-    private String response_status;
+    private String responseStatus;
     @Length(max = 40)
     private String signature;
     @Length(max = 50)
-    private String tran_type;
+    private String tranType;
     @Length(max = 16)
-    private String sender_cell_phone;
+    private String senderCellPhone;
     @Length(max = 50)
-    private String sender_account;
+    private String senderAccount;
     @Length(max = 19)
-    private String masked_card;
-    private Integer card_bin;
+    private String maskedCard;
+    private Integer cardBin;
     @Length(max = 50)
-    private String card_type;
+    private String cardType;
     @Length(max = 50)
     private String rrn;
     @Length(max = 6)
-    private String approval_code;
-    private Integer response_code;
+    private String approvalCode;
+    private Integer responseCode;
     @Length(max = 1024)
-    private String response_description;
-    private Integer reversal_amount;
-    private Integer settlement_amount;
+    private String responseDescription;
+    private Integer reversalAmount;
+    private Integer settlementAmount;
     @Length(max = 3)
-    private String settlement_currency;
+    private String settlementCurrency;
     @Length(max = 19)
-    private String order_time;
+    private String orderTime;
     @Length(max = 10)
-    private String settlement_date;
+    private String settlementDate;
     private Integer eci;
     private Integer fee;
     @Length(max = 50)
-    private String payment_system;
+    private String paymentSystem;
     @Length(max = 254)
-    private String sender_email;
-    private Integer payment_id;
-    private Integer actual_amount;
+    private String senderEmail;
+    private Integer paymentId;
+    private Integer actualAmount;
     @Length(max = 3)
-    private String actual_currency;
+    private String actualCurrency;
     @Length(max = 1024)
-    private String product_id;
+    private String productId;
     @Length(max = 2048)
-    private String merchant_data;
+    private String merchantData;
     @Length(max = 50)
-    private String verification_status;
+    private String verificationStatus;
     @Length(max = 40)
     private String rectoken;
     @Length(max = 19)
-    private String rectoken_lifetime;
-    private AdditionalPaymentInfoDto additional_info;
+    private String rectokenLifetime;
+    private AdditionalPaymentInfoDto additionalInfo;
 }

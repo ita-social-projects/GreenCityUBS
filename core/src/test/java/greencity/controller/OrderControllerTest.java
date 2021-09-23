@@ -7,9 +7,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
-
-import java.security.Principal;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +18,8 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.security.Principal;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -70,8 +69,7 @@ class OrderControllerTest {
     void checkIfCertificateAvailable() throws Exception {
         mockMvc.perform(get(ubsLink + "/certificate/{code}", "qwefds"))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).checkCertificate(eq("qwefds"));
+        verify(ubsClientService).checkCertificate("qwefds");
     }
 
     @Test
@@ -83,7 +81,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(restClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData(eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -222,4 +220,39 @@ class OrderControllerTest {
         verify(ubsClientService, times(1))
             .getAllEventsForOrderById(1L);
     }
+
+    @Test
+    void processLiqPayOrder() throws Exception {
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processLiqPayOrder")
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(restClient).findUuidByEmail("test@gmail.com");
+
+    }
+
+    @Test
+    void reciveLiqPayOrder() throws Exception {
+        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponce = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
+            .content(jsonResponce)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).validateLiqPayPayment(anyObject(), eq(null));
+    }
+
 }

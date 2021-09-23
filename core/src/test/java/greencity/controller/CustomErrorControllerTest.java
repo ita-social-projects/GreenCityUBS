@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.configuration.SecurityConfig;
-import greencity.exceptions.CertificateNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

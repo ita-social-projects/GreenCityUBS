@@ -10,5 +10,5 @@ import lombok.*;
 @ToString
 @Builder
 public class MinBagAmountDto {
-    public Long minAmountOfBags;
+    private Long minAmountOfBags;
 }

@@ -63,6 +63,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
      * {@inheritDoc}
@@ -590,7 +591,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
@@ -616,7 +618,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            elements,
             pages,
             totalPagesWithCheck);
     }
@@ -636,7 +638,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (allFieldsFromTableDto.getDateOfExport() == null
                     || allFieldsFromTableDto.getTimeOfExport() == null) {
                     allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().toString());
+                    allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+                        + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 List<Map<String, Object>> employees = allValuesFromTableRepo
                     .findAllEmpl(allFieldsFromTableDto.getOrderId());
@@ -662,7 +665,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            numberOfElements1,
             pages,
             totalPagesLast);
     }
@@ -690,6 +693,45 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
         Optional<Address> optionalAddress = addressRepository.findById(address.getId());
         return optionalAddress.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class)).orElse(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public List<OrderInfoDto> getOrdersForUser(String uuid) {
+        List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
+        List<OrderInfoDto> dto = new ArrayList<>();
+        orders.forEach(order -> dto.add(modelMapper.map(order, OrderInfoDto.class)));
+        dto.forEach(data -> data.setOrderPrice(getOrderSumDetails(data.getId()).getTotalSumAmount()));
+        return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderStatusPageDto getOrderStatusData(Long orderId) {
+        CounterOrderDetailsDto prices = getOrderSumDetails(orderId);
+        Optional<Order> order = orderRepository.findById(orderId);
+        List<BagInfoDto> bagInfo = new ArrayList<>();
+        List<Bag> bags = bagRepository.findBagByOrderId(orderId);
+        bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
+        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
+        User user = address.getUser();
+        return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
+            .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
+            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
+            .recipientPhone(user.getRecipientPhone()).recipientEmail(user.getRecipientEmail())
+            .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
+            .addressComment(address.getComment()).bags(bagInfo)
+            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
+            .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
+            .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
+            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .build();
     }
 
     /**
@@ -1337,74 +1379,76 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
         List<ColumnStateDTO> columnStateDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new ColumnStateDTO(new TitleDto("select", "Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX,
-                new ArrayList<>()),
+                new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("orderid", "Номер замовлення", "Order's number"), 20, true, false, 1,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("order_status", "Статус замовлення", "Order's status"), 20, true, true, 2,
-                EditType.SELECT, orderStatusListForDevelopStage()),
-            new ColumnStateDTO(new TitleDto("payment_status", "Статус оплати", "Aaaa"), 20, true, true, 3,
-                EditType.READ_ONLY, new ArrayList<>()),
-            new ColumnStateDTO(new TitleDto("order_date", "Дата замовлення", "Order date"), 20, true, true, 4,
-                EditType.READ_ONLY, new ArrayList<>()),
-            new ColumnStateDTO(new TitleDto("payment_date", "Дата оплати", "Payment date"), 20, true, true, 5,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
+            new ColumnStateDTO(new TitleDto("payment_status", "Статус оплати", "Payment status"), 20, false, true, 3,
+                EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
+            new ColumnStateDTO(new TitleDto("order_date", "Дата замовлення", "Order date"), 20, false, true, 4,
+                EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
+            new ColumnStateDTO(new TitleDto("payment_date", "Дата оплати", "Payment date"), 20, false, true, 5,
+                EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("client_name", "Ім'я замовника", "Client name"), 20, false, true, 6,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("phone_number", "Телефон замовника", "Phone number"), 20, false, true, 7,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("email", "Email замовника", "Email"), 20, false, true, 8,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("sender_name", "Ім'я відправника", "Sender name"), 20, false, true, 9,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("sender_phone", "Телефон відправника", "Sender phone"), 20, false, true, 10,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("sender_email", "Email відправника", "Sender email"), 20, false, true, 11,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("violations", "Кількість порушень клієнта", "Violations"), 20, false, true,
-                12, EditType.READ_ONLY, new ArrayList<>()),
+                12, EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnStateDTO(new TitleDto("location", "Локація", "Location"), 20, false, true, 13, EditType.READ_ONLY,
-                new ArrayList<>()),
+                new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("district", "Район", "District"), 20, false, true, 14, EditType.READ_ONLY,
-                new ArrayList<>()),
+                new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("address", "Адреса", "Address"), 20, false, true, 15, EditType.READ_ONLY,
-                new ArrayList<>()),
+                new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("comment_to_address_for_client", "Коментар до адреси від клієнта",
-                "Comment to address for client"), 20, false, true, 16, EditType.READ_ONLY, new ArrayList<>()),
+                "Comment to address for client"), 20, false, true, 16, EditType.READ_ONLY, new ArrayList<>(),
+                "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("bags_amount", "К-сть пакетів", "Bags amount"), 20, false, true, 17,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("total_order_sum", "Сума замовлення", "Total order sum"), 20, false, true,
-                18, EditType.READ_ONLY, new ArrayList<>()),
+                18, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("order_certificate_code", "Номер сертифікату", "Order certificate code"),
-                20, false, true, 19, EditType.READ_ONLY, new ArrayList<>()),
+                20, false, true, 19, EditType.READ_ONLY, new ArrayList<>(), "CERTIFICATE"),
             new ColumnStateDTO(new TitleDto("order_certificate_points", "Загальна знижка", "Order certificate points"),
-                20, false, true, 20, EditType.READ_ONLY, new ArrayList<>()),
+                20, false, true, 20, EditType.READ_ONLY, new ArrayList<>(), "CERTIFICATE"),
             new ColumnStateDTO(new TitleDto("amount_due", "Сума до оплати", "Amount due"), 20, false, true, 21,
-                EditType.READ_ONLY, new ArrayList<>()),
+                EditType.READ_ONLY, new ArrayList<>(), "CERTIFICATE"),
             new ColumnStateDTO(new TitleDto("comment_for_order_by_client", "Коментар до замовлення від клієнта",
-                "Comment for order by client"), 20, true, true, 22, EditType.READ_ONLY, new ArrayList<>()),
+                "Comment for order by client"), 20, true, true, 22, EditType.READ_ONLY, new ArrayList<>(),
+                "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("payment", "Оплата", "Payment"), 20, false, true, 23, EditType.READ_ONLY,
-                new ArrayList<>()),
+                new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("date_of_export", "Дата вивезення", "Date of export"), 20, false, true, 24,
-                EditType.DATE, new ArrayList<>()),
+                EditType.DATE, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("time_of_export", "Час вивезення", "Time of export"), 20, false, true, 25,
-                EditType.TIME, new ArrayList<>()),
+                EditType.TIME, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("id_order_from_shop", "Номер замовлення з магазину", "Id order from shop"),
-                20, false, true, 26, EditType.READ_ONLY, new ArrayList<>()),
+                20, false, true, 26, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("receiving_station", "Станція приймання", "Receiving station"), 20, false,
-                true, 27, EditType.SELECT, orderOptionalListForDevelopStage()),
+                true, 27, EditType.SELECT, orderOptionalListForDevelopStage(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("responsible_manager", "Менеджер послуги", "Responsible manager"), 20,
-                false, true, 28, EditType.SELECT, orderOptionalListForDevelopStage()),
+                false, true, 28, EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("responsible_caller", "Менеджер обдзвону", "Responsible caller"), 20, false,
-                true, 29, EditType.SELECT, orderOptionalListForDevelopStage()),
+                true, 29, EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("responsible_logic_man", "Логіст", "Responsible logic man"), 20, false,
-                true, 30, EditType.SELECT, orderOptionalListForDevelopStage()),
+                true, 30, EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("responsible_driver", "Водій", "Responsible driver"), 20, false, true, 31,
-                EditType.SELECT, orderOptionalListForDevelopStage()),
+                EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("responsible_navigator", "Штурман", "Responsible navigator"), 20, false,
-                true, 32, EditType.SELECT, orderOptionalListForDevelopStage()),
+                true, 32, EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("comments_for_order", "Коментарі до замовлення", "Comments for order"), 20,
-                false, true, 33, EditType.READ_ONLY, new ArrayList<>()))));
-        return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC);
+                false, true, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
+        return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC, columnBelongingListForDevelopStage());
     }
 
     @Override
@@ -1458,6 +1502,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             new TitleDto("CANCELLED", "Скасовано", "Canceled"))));
     }
 
+    private List<TitleDto> columnBelongingListForDevelopStage() {
+        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
+            new TitleDto("ORDERS_INFO", "Інформація про замовлення", "order info"),
+            new TitleDto("CUSTOMERS_INFO", "Інформація про клієнта", "customers info"),
+            new TitleDto("ORDERS_DETAILS", "Деталі замовлення", "orders details"),
+            new TitleDto("CERTIFICATE", "Сертифікат", "certificate"),
+            new TitleDto("RESPONSIBLE", "Відповідальні", "responsible persons"))));
+    }
+
     private List<TitleDto> orderOptionalListForDevelopStage() {
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new TitleDto("1", "Щось перше", "Something first"),
@@ -1499,5 +1552,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+    }
+
+    @Override
+    public ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images) {
+        final Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        List<String> pictures = new ArrayList<>();
+        for (MultipartFile image : images) {
+            if (image != null) {
+                pictures.add(fileService.upload(image));
+            } else {
+                pictures.add(defaultImagePath);
+            }
+        }
+        ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();
+        dto.setImages(pictures);
+        dto.setDescription(description);
+        dto.setTime(LocalDate.now());
+        dto.setCurrentUser(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname());
+        order.setImageReasonNotTakingBags(pictures);
+        order.setReasonNotTakingBagDescription(description);
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        return dto;
     }
 }

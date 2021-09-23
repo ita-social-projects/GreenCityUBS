@@ -18,4 +18,5 @@ public class TableParameters {
     private String sortingByColumn;
     private SortingOrder sortingOrder;
     private List<ColumnState> columnStateDTOList;
+    private List<ColumnBelonging> columnBelongingList;
 }

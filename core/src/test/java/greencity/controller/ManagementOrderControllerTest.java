@@ -205,6 +205,18 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void getAllDataForOrderTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-all-orders" + "/{uuid}", "uuid7"));
+        verify(ubsManagementService).getOrdersForUser("uuid7");
+    }
+
+    @Test
+    void getDataForOrderStatusPageTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-data-for-order" + "/{id}", 1L));
+        verify(ubsManagementService).getOrderStatusData(1L);
+    }
+
+    @Test
     void updateOrderExportedDetail() throws Exception {
         ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
         ObjectMapper objectMapper = new ObjectMapper();
