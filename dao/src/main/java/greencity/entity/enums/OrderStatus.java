@@ -1,4 +1,5 @@
 package greencity.entity.enums;
+
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
     FORMED(1),
@@ -16,6 +17,12 @@ public enum OrderStatus {
         this.statusValue = value;
     }
 
+    /**
+     * Method for getting a value of orderStatus, which is used for translating
+     * order status wo different languages.
+     * 
+     * @return {@link int} orderStatus value.
+     */
     public int getNumValue() {
         return statusValue;
     }
