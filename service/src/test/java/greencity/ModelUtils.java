@@ -168,6 +168,7 @@ public class ModelUtils {
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
             .orders(Lists.newArrayList(getOrder()))
+            .recipientName("Alan Po")
             .build();
     }
 
@@ -845,10 +846,11 @@ public class ModelUtils {
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
-                .id(1L).build())
+                .id(1L).user(ModelUtils.getTestUser()).build())
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
+            .images(new LinkedList<String>())
             .build();
     }
 

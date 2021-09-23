@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Method returns user by user uuid.
      *
@@ -34,8 +35,10 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @param userId {@link Long} - id to connect 2 db.
      * @return number of {@link User} violations.
      */
+
     @Query(nativeQuery = true,
-        value = "SELECT COUNT(user_id) FROM violations_description_mapping as v where v.user_id = :userId")
+        value = "select count(order_id) from violations_description_mapping as v join orders \n"
+            + "on v.order_id = orders.id where users_id = :userId")
     int countTotalUsersViolations(Long userId);
 
     /**
@@ -46,10 +49,12 @@ public interface UserRepository extends CrudRepository<User, Long> {
      * @param orderId {@link Long}
      * @return number of {@link User} violations.
      */
-    @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS "
-        + "(SELECT TRUE FROM violations_description_mapping "
-        + " AS v WHERE v.user_id = :userId and v.order_id = :orderId)\n"
-        + " THEN 1 ELSE 0 END AS INT);")
+
+    @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS \n"
+        + "   (SELECT TRUE FROM violations_description_mapping as v join orders as o\n"
+        + " on v.order_id = o.id\n"
+        + "        WHERE v.order_id = :orderId and o.users_id = :userId)\n"
+        + "        THEN 1 ELSE 0 END AS INT);")
     int checkIfUserHasViolationForCurrentOrder(Long userId, Long orderId);
 
     /**
@@ -93,12 +98,14 @@ public interface UserRepository extends CrudRepository<User, Long> {
     /**
      * Finds list of User who have no orders after {@param localDate}.
      *
-     * @param toDate - date after which user have no orders.
-     * @return a {@link List} of {@link User} - which have no orders after
+     * @param fromDate - date before which user have no orders.
+     * @param toDate   - date after which user have no orders.
+     * @return {@link List} of {@link User} - which have no orders after
      *         {@param localDate}.
+     *
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
+        value = " SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
             + "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate "
             + "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
     List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);

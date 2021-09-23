@@ -98,6 +98,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Method that returns all orders by it's {@link OrderPaymentStatus}.
      */
     List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
-
-    List<Order> findAllByUserId(Long id);
 }

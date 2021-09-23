@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -477,19 +478,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Violation violation = violationBuilder(add, order);
             if (multipartFiles.length > 0) {
                 List<String> images = new LinkedList<>();
-                for (int i = 0; i < multipartFiles.length; i++) {
-                    images.add(fileService.upload(multipartFiles[i]));
-                }
+                setImages(multipartFiles, images);
                 violation.setImages(images);
             }
             violationRepository.save(violation);
-            user.setViolations(countUserViolations(user.getId()));
+            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
             notificationService.notifyAddViolation(order);
         } else {
             throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
         }
-
     }
 
     private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
@@ -501,15 +499,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private int countUserViolations(Long id){
-        Optional<User> user = userRepository.findById(id);
-        List<Order> orders = user.get().getOrders();
+    private int countViolations(Long orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
         int count = 0;
-        for (int i = 0; i < orders.size(); i++){
-            if (violationRepository.findByOrderId(orders.get(i).getId()).isPresent()) {
-                count++;
+        if (order.isPresent()) {
+            User user = order.get().getUser();
+            List<Order> orders = user.getOrders();
+            for (Order o : orders) {
+                if (violationRepository.findByOrderId(o.getId()).isPresent()) {
+                    count++;
+                }
             }
         }
+
         return count;
     }
 
@@ -912,9 +914,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     @Transactional
     public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
+        User user =
+            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
         return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
             .orderId(orderId)
-            .userName(userRepository.findUserByOrderId(orderId).get().getRecipientName())
+            .userName(user.getRecipientName())
             .violationLevel(v.getViolationLevel())
             .description(v.getDescription())
             .violationDate(v.getViolationDate())
@@ -934,7 +938,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
             violationRepository.deleteById(violationOptional.get().getId());
             User user = violationOptional.get().getOrder().getUser();
-            user.setViolations(countUserViolations(user.getId()));
+            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
         } else {
             throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
@@ -1302,28 +1306,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
         violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
         violation.setDescription(add.getViolationDescription());
-//        if (violation.getImage() != null) {
-//            List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
-//            for (int i = 0; i < images.size(); i++) {
-//                fileService.delete(images.get(i));
-//            }
-//            violation.setImage(null);
-//            images.clear();
-//            if (multipartFiles.length > 0) {
-//                for (int i = 0; i < multipartFiles.length; i++) {
-//                    images.add(fileService.upload(multipartFiles[i]));
-//                }
-//                violation.setImage(String.join("; ", images));
-//            }
-//        } else {
-//            if (multipartFiles.length > 0) {
-//                List<String> images = new LinkedList<>();
-//                for (int i = 0; i < multipartFiles.length; i++) {
-//                    images.add(fileService.upload(multipartFiles[i]));
-//                }
-//                violation.setImage(String.join("; ", images));
-//            }
-//        }
+        if (!violation.getImages().isEmpty()) {
+            List<String> images = violation.getImages();
+            for (String image : images) {
+                fileService.delete(image);
+            }
+            violation.setImages(null);
+            images.clear();
+            if (multipartFiles.length > 0) {
+                setImages(multipartFiles, images);
+                violation.setImages(images);
+            }
+        } else {
+            if (multipartFiles.length > 0) {
+                List<String> images = new LinkedList<>();
+                setImages(multipartFiles, images);
+                violation.setImages(images);
+            }
+        }
+    }
+
+    private List<String> setImages(MultipartFile[] multipartFiles, List<String> images) {
+        for (MultipartFile multipartFile : multipartFiles) {
+            images.add(fileService.upload(multipartFile));
+        }
+        return images;
     }
 
     @Override

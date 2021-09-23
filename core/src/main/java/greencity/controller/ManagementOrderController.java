@@ -737,7 +737,7 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @RequestPart(required = false) MultipartFile[] multipartFiles) {
+        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles) {
         ubsManagementService.updateUserViolation(add, multipartFiles);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

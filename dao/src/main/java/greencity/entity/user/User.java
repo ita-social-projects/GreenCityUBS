@@ -54,17 +54,14 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
-    /*
-     * @ElementCollection
-     * 
-     * @CollectionTable(name = "violations_description_mapping", joinColumns =
-     * {@JoinColumn(name = "user_id", referencedColumnName = "id")})
-     * 
-     * @MapKeyColumn(name = "order_id")
-     * 
-     * @Column(name = "description") private Map<Long, String>
-     * violationsDescription;
-     */
+    @ElementCollection
+    @CollectionTable(name = "violations_description_mapping"/*
+                                                             * , joinColumns = {@JoinColumn(name = "user_id",
+                                                             * referencedColumnName = "id")}
+                                                             */)
+    @MapKeyColumn(name = "order_id")
+    @Column(name = "description")
+    private Map<Long, String> violationsDescription;
 
     @Column
     private Integer violations;

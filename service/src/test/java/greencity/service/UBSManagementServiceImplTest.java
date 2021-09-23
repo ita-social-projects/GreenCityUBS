@@ -211,9 +211,9 @@ public class UBSManagementServiceImplTest {
     void returnsViolationDetailsByOrderId() {
         Violation violation = ModelUtils.getViolation();
         Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(violation.getOrder().getUser()));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
         Optional<ViolationDetailInfoDto> actual = ubsManagementService.getViolationDetailsByOrderId(1L);
-        verify(violationRepository, times(1)).findByOrderId(1L);
 
         assertEquals(expected, actual);
     }
@@ -269,8 +269,10 @@ public class UBSManagementServiceImplTest {
     void deleteViolationFromOrderByOrderId() {
         Violation violation = ModelUtils.getViolation();
         Long id = ModelUtils.getViolation().getOrder().getId();
+        Order order = ModelUtils.getOrder();
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
         doNothing().when(violationRepository).deleteById(id);
+//        doNothing().when(userRepository.countTotalUsersViolations(user.getId()));
         ubsManagementService.deleteViolation(id);
 
         verify(violationRepository, times(1)).deleteById(id);
@@ -618,17 +620,17 @@ public class UBSManagementServiceImplTest {
     @Test
     void checkAddUserViolation() {
         User user = ModelUtils.getTestUser();
-        user.setViolations(0);
-        Map<Long, String> map = new HashMap<>();
-        map.put(0L, "String, string, string");
-        /* user.setViolationsDescription(map); */
+//        user.setViolations(0);
+//        Map<Long, String> map = new HashMap<>();
+//        map.put(0L, "String, string, string");
+//        user.setViolationsDescription(map);
         Order order = user.getOrders().get(0);
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-
+        when(userRepository.countTotalUsersViolations(1L)).thenReturn(1);
         ubsManagementService.addUserViolation(add, new MultipartFile[2]);
 
         assertEquals(1, user.getViolations());
