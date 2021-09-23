@@ -690,7 +690,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderInfoDto> dto = new ArrayList<>();
         orders.forEach(order -> dto.add(modelMapper.map(order, OrderInfoDto.class)));
-        dto.forEach(data -> data.setOrderPrice(getOrderSumDetails(data.getId()).getTotalSumAmount()));
+        dto.forEach(data -> data.setOrderPrice(getOrderPriceDetails(data.getId()).getTotalSumAmount()));
         return dto;
     }
 
@@ -699,7 +699,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public OrderStatusPageDto getOrderStatusData(Long orderId) {
-        CounterOrderDetailsDto prices = getOrderSumDetails(orderId);
+        CounterOrderDetailsDto prices = getOrderPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
@@ -719,6 +719,81 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .build();
     }
+
+    private CounterOrderDetailsDto getOrderPriceDetails(Long id) {
+        CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
+        Order order = orderRepository.getOrderDetails(id)
+                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        List<Bag> bag = bagRepository.findBagByOrderId(id);
+        List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
+
+        double sumAmount = 0;
+        double sumConfirmed = 0;
+        double sumExported = 0;
+        double totalSumAmount;
+        double totalSumConfirmed;
+        double totalSumExported;
+
+        List<Integer> amountValues = new ArrayList<>(order.getAmountOfBagsOrdered().values());
+
+        List<Integer> confirmedValues = new ArrayList<>(order.getConfirmedQuantity().values());
+
+        List<Integer> exportedValues = new ArrayList<>(order.getExportedQuantity().values());
+
+        for (int i = 0; i < bag.size(); i++) {
+            sumAmount += amountValues.get(i) * bag.get(i).getPrice();
+            if (!confirmedValues.isEmpty()) {
+                sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+            }
+            if (!exportedValues.isEmpty()) {
+                sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+            }
+        }
+
+        if (!currentCertificate.isEmpty()) {
+            totalSumAmount =
+                    (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
+            totalSumConfirmed =
+                    (sumConfirmed
+                            - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
+            totalSumExported =
+                    (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
+            dto.setCertificateBonus(
+                    currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
+            dto.setCertificate(
+                    currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+        } else {
+            totalSumAmount = sumAmount - order.getPointsToUse();
+            totalSumConfirmed = sumConfirmed - order.getPointsToUse();
+            totalSumExported = sumExported - order.getPointsToUse();
+        }
+        if (confirmedValues.isEmpty()) {
+            sumConfirmed = 0;
+            totalSumConfirmed = 0;
+        }
+        if (exportedValues.isEmpty()){
+            sumExported = 0;
+            totalSumExported = 0;
+        }
+
+        dto.setTotalAmount(
+                order.getAmountOfBagsOrdered().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+        dto.setTotalConfirmed(
+                order.getConfirmedQuantity().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+        dto.setTotalExported(
+                order.getExportedQuantity().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+
+        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
+                order);
+        return dto;
+    }
+
 
     /**
      * {@inheritDoc}
