@@ -723,7 +723,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private CounterOrderDetailsDto getOrderPriceDetails(Long id) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
-                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Bag> bag = bagRepository.findBagByOrderId(id);
         List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
@@ -752,19 +752,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (!currentCertificate.isEmpty()) {
             totalSumAmount =
-                    (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                            + order.getPointsToUse()));
+                (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    + order.getPointsToUse()));
             totalSumConfirmed =
-                    (sumConfirmed
-                            - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                            + order.getPointsToUse()));
+                (sumConfirmed
+                    - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                        + order.getPointsToUse()));
             totalSumExported =
-                    (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                            + order.getPointsToUse()));
+                (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                    + order.getPointsToUse()));
             dto.setCertificateBonus(
-                    currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
+                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
-                    currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
             totalSumAmount = sumAmount - order.getPointsToUse();
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
@@ -774,26 +774,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             sumConfirmed = 0;
             totalSumConfirmed = 0;
         }
-        if (exportedValues.isEmpty()){
+        if (exportedValues.isEmpty()) {
             sumExported = 0;
             totalSumExported = 0;
         }
 
         dto.setTotalAmount(
-                order.getAmountOfBagsOrdered().values()
-                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+            order.getAmountOfBagsOrdered().values()
+                .stream().reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalConfirmed(
-                order.getConfirmedQuantity().values()
-                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+            order.getConfirmedQuantity().values()
+                .stream().reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalExported(
-                order.getExportedQuantity().values()
-                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
+            order.getExportedQuantity().values()
+                .stream().reduce(Integer::sum).orElse(0).doubleValue());
 
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
-                order);
+            order);
         return dto;
     }
-
 
     /**
      * {@inheritDoc}
