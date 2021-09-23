@@ -193,9 +193,7 @@ public class ModelUtils {
             .orders(Lists.newArrayList(getOrder()))
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
-            .employee(getEmployee())
             .orders(Lists.newArrayList(getOrder()))
-            .uuid("abc")
             .build();
     }
 
@@ -656,7 +654,7 @@ public class ModelUtils {
     public static Order getOrderDoneByUser() {
         return Order.builder()
             .id(1L)
-            .orderStatus(OrderStatus.CONFIRMED)
+            .orderStatus(OrderStatus.DONE)
             .payment(singletonList(new Payment().builder()
                 .id(1L)
                 .amount(350L)
@@ -1010,8 +1008,6 @@ public class ModelUtils {
     public static Order getFormedOrder() {
         return Order.builder()
             .id(1L)
-            .events(List.of(new Event(1L, LocalDateTime.now(),
-                "Roman", "Roman", new Order())))
             .orderStatus(OrderStatus.FORMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
@@ -1333,13 +1329,6 @@ public class ModelUtils {
             .longitude(23.88)
             .build());
         return set;
-    }
-
-    public static AssignEmployeeForOrderDto assignEmployeeForOrderDto() {
-        return AssignEmployeeForOrderDto.builder()
-            .employeeId(1L)
-            .positionId(1L)
-            .build();
     }
 
     private static NotificationShortDto createNotificationShortDto() {

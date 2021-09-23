@@ -34,19 +34,13 @@ public final class SwaggerExampleModel {
             + "      \"id\": 0,\n"
             + "      \"name\": \"string\"\n"
             + "    }\n"
-            + "  ]";
-
-    private static final String ADD_NEW_USER_ID =
-        ",\n  \"userId\": {\n"
-            + "\t\"id\": 0\n"
-            + "  }\n"
+            + "  ]\n"
             + "}";
 
     public static final String ADD_NEW_EMPLOYEE =
         BEFORE_EXAMPLE
             + EMPLOYEE_BEGIN
             + EMPLOYEE_END
-            + ADD_NEW_USER_ID
             + AFTER_EXAMPLE;
 
     public static final String EMPLOYEE_DTO =
@@ -55,6 +49,5 @@ public final class SwaggerExampleModel {
             + "  \"id\": 0,\n"
             + "  \"image\": \"string\",\n"
             + EMPLOYEE_END
-            + "\n}"
             + AFTER_EXAMPLE;
 }

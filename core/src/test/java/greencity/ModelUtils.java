@@ -319,11 +319,4 @@ public class ModelUtils {
             .locationId(1l)
             .build();
     }
-
-    public static AssignEmployeeForOrderDto assignEmployeeToOrderDto() {
-        return AssignEmployeeForOrderDto.builder()
-            .positionId(1L)
-            .employeeId(1L)
-            .build();
-    }
 }

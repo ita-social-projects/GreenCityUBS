@@ -212,13 +212,13 @@ class OrderControllerTest {
 
     @Test
     void testGetOrderHistoryByOrderId() throws Exception {
-        when(ubsClientService.getAllEventsForOrder(1L))
+        when(ubsClientService.getAllEventsForOrderById(1L))
             .thenReturn(ModelUtils.getListEventsDTOS());
         mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
-            .getAllEventsForOrder(1L);
+            .getAllEventsForOrderById(1L);
     }
 
     @Test
