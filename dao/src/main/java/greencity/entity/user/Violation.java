@@ -23,12 +23,6 @@ public class Violation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*
-     * @ManyToOne
-     * 
-     * @JoinColumn(name = "user_id") private User user;
-     */
-
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;

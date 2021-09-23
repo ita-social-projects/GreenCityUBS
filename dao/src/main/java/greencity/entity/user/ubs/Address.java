@@ -34,23 +34,23 @@ public class Address {
     private String city;
 
     @Size(min = 1, max = 50)
-    @Column(nullable = false/* , length = 50 */)
+    @Column(nullable = false)
     private String street;
 
     @Size(min = 1, max = 30)
-    @Column(nullable = false/* , length = 30 */)
+    @Column(nullable = false)
     private String district;
 
     @Size(min = 1, max = 5)
-    @Column(name = "house_number", nullable = false/* , length = 5 */)
+    @Column(name = "house_number", nullable = false)
     private String houseNumber;
 
     @Size(min = 1, max = 5, message = "Invalid house corpus")
-    @Column /* (length = 5) */
+    @Column
     private String houseCorpus;
 
     @Size(min = 1, max = 4, message = "Invalid entrance number")
-    @Column(name = "entrance_number", nullable = false/* , length = 4 */)
+    @Column(name = "entrance_number", nullable = false)
     private String entranceNumber;
 
     @Column

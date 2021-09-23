@@ -19,7 +19,6 @@ public class ViolationDetailInfoDto {
     private String userName;
     private ViolationLevel violationLevel;
     private String description;
-    /* private String image; */
     @Nullable
     private List<String> images;
     private LocalDateTime violationDate;
