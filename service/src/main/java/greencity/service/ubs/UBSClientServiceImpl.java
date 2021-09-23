@@ -138,11 +138,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-
-        if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().build());
-        }
-        return allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
+        String currentUserEmail = restClient.findUserByUUid(uuid).get().getEmail();
+        return allByUserId.isEmpty()
+            ? List.of(PersonalDataDto.builder().build())
+            : allByUserId.stream().filter(x -> x.getEmail().equals(currentUserEmail))
+                .map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
     }
 
     /**
@@ -627,7 +627,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void createUserInGreenCityUbsDataBase(String uuid) {
-        userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
+        UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid).get();
+        userRepository
+            .save(User.builder().currentPoints(0).violations(0).uuid(uuid).recipientEmail(ubsCustomersDto.getEmail())
+                .recipientPhone(ubsCustomersDto.getPhoneNumber()).recipientName(ubsCustomersDto.getName()).build());
     }
 
     @Override
