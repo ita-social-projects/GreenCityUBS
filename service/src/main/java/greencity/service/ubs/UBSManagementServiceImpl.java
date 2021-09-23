@@ -733,11 +733,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumAmount;
         double totalSumConfirmed;
         double totalSumExported;
-
         List<Integer> amountValues = new ArrayList<>(order.getAmountOfBagsOrdered().values());
-
         List<Integer> confirmedValues = new ArrayList<>(order.getConfirmedQuantity().values());
-
         List<Integer> exportedValues = new ArrayList<>(order.getExportedQuantity().values());
 
         for (int i = 0; i < bag.size(); i++) {
@@ -779,6 +776,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumExported = 0;
         }
 
+        setPrice(dto, order, sumAmount, sumConfirmed, sumExported, totalSumAmount, totalSumConfirmed, totalSumExported);
+        return dto;
+    }
+
+    private void setPrice(CounterOrderDetailsDto dto, Order order, double sumAmount, double sumConfirmed, double sumExported, double totalSumAmount, double totalSumConfirmed, double totalSumExported) {
         dto.setTotalAmount(
             order.getAmountOfBagsOrdered().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
@@ -788,10 +790,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setTotalExported(
             order.getExportedQuantity().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
-
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
             order);
-        return dto;
     }
 
     /**
@@ -890,18 +890,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumExported = sumExported - order.getPointsToUse();
         }
 
-        dto.setTotalAmount(
-            order.getAmountOfBagsOrdered().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
-        dto.setTotalConfirmed(
-            order.getConfirmedQuantity().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
-        dto.setTotalExported(
-            order.getExportedQuantity().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
-
-        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
-            order);
+        setPrice(dto, order, sumAmount, sumConfirmed, sumExported, totalSumAmount, totalSumConfirmed, totalSumExported);
         updateStatus(payment, order, totalSumConfirmed, totalSumExported);
         return dto;
     }
