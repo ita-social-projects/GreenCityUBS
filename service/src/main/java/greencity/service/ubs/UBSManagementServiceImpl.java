@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -498,22 +497,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .violationDate(order.getOrderDate())
             .order(order)
             .build();
-    }
-
-    private int countViolations(Long orderId) {
-        Optional<Order> order = orderRepository.findById(orderId);
-        int count = 0;
-        if (order.isPresent()) {
-            User user = order.get().getUser();
-            List<Order> orders = user.getOrders();
-            for (Order o : orders) {
-                if (violationRepository.findByOrderId(o.getId()).isPresent()) {
-                    count++;
-                }
-            }
-        }
-
-        return count;
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {

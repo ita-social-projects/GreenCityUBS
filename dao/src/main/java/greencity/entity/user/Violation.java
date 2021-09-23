@@ -3,10 +3,8 @@ package greencity.entity.user;
 import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
