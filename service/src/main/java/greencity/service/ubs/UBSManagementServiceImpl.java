@@ -780,7 +780,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    private void setPrice(CounterOrderDetailsDto dto, Order order, double sumAmount, double sumConfirmed, double sumExported, double totalSumAmount, double totalSumConfirmed, double totalSumExported) {
+    private void setPrice(CounterOrderDetailsDto dto, Order order, double sumAmount, double sumConfirmed,
+        double sumExported, double totalSumAmount, double totalSumConfirmed, double totalSumExported) {
         dto.setTotalAmount(
             order.getAmountOfBagsOrdered().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
