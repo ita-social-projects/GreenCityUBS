@@ -36,15 +36,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
 
     /**
-     * Method checks if {@link Long} employee exits with current userId.
-     *
-     * @param userId {@link Long}.
-     * @return {@link Boolean}.
-     * @author Yuriy Bahlay.
-     */
-    boolean existsByUserId(Long userId);
-
-    /**
      * Method checks if {@link String} email already exist.
      *
      * @param email {@link String}
