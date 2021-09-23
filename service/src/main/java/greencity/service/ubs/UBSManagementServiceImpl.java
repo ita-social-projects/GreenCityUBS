@@ -607,7 +607,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            elements,
             pages,
             totalPagesWithCheck);
     }
@@ -654,7 +654,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            numberOfElements1,
             pages,
             totalPagesLast);
     }
