@@ -60,6 +60,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
     private final FileService fileService;
+    private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
@@ -693,7 +694,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderInfoDto> dto = new ArrayList<>();
         orders.forEach(order -> dto.add(modelMapper.map(order, OrderInfoDto.class)));
-        dto.forEach(data -> data.setOrderPrice(getOrderSumDetails(data.getId()).getTotalSumAmount()));
+        dto.forEach(data -> data.setOrderPrice(getPriceDetails(data.getId()).getTotalSumAmount()));
         return dto;
     }
 
@@ -701,14 +702,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId) {
-        CounterOrderDetailsDto prices = getOrderSumDetails(orderId);
+    public OrderStatusPageDto getOrderStatusData(Long orderId, Long languageId) {
+        CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         User user = address.getUser();
+        int orderStatusId = order.map(value -> value.getOrderStatus().getNumValue()).orElse(0);
+        Optional<OrderStatusTranslation> orderStatusTranslation = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatusId, languageId);
+        String statusTranslation = orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
             .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
@@ -719,7 +723,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
-            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported()).orderStatusName(statusTranslation)
             .build();
     }
 
@@ -772,12 +776,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public CounterOrderDetailsDto getOrderSumDetails(Long id) {
+        CounterOrderDetailsDto dto = getPriceDetails(id);
+        Order order = orderRepository.getOrderDetails(id)
+                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        final List<Payment> payment = paymentRepository.paymentInfo(id);
+        double totalSumConfirmed = dto.getTotalSumConfirmed();
+        double totalSumExported = dto.getTotalSumExported();
+        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
+        return dto;
+    }
+
+    private CounterOrderDetailsDto getPriceDetails(Long id){
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Bag> bag = bagRepository.findBagByOrderId(id);
         List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
-        final List<Payment> payment = paymentRepository.paymentInfo(id);
 
         double sumAmount = 0;
         double sumConfirmed = 0;
@@ -804,19 +818,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (!currentCertificate.isEmpty()) {
             totalSumAmount =
-                (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    + order.getPointsToUse()));
+                    (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
             totalSumConfirmed =
-                (sumConfirmed
-                    - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                        + order.getPointsToUse()));
+                    (sumConfirmed
+                            - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
             totalSumExported =
-                (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    + order.getPointsToUse()));
+                    (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                            + order.getPointsToUse()));
             dto.setCertificateBonus(
-                currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
+                    currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
-                currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
+                    currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
             totalSumAmount = sumAmount - order.getPointsToUse();
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
@@ -829,18 +843,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumExported = 0;
         }
         dto.setTotalAmount(
-            order.getAmountOfBagsOrdered().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
+                order.getAmountOfBagsOrdered().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalConfirmed(
-            order.getConfirmedQuantity().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
+                order.getConfirmedQuantity().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
         dto.setTotalExported(
-            order.getExportedQuantity().values()
-                .stream().reduce(Integer::sum).orElse(0).doubleValue());
+                order.getExportedQuantity().values()
+                        .stream().reduce(Integer::sum).orElse(0).doubleValue());
 
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
-            order);
-        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
+                order);
         return dto;
     }
 
