@@ -247,13 +247,16 @@ class UBSClientServiceImplTest {
         PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
         User user = new User();
         user.setId(13L);
+        Optional<UbsCustomersDto> ubsCustomersDto = Optional.of(UbsCustomersDto.builder()
+            .email("mail@mail.ua").name("oleh").phoneNumber("067894522").build());
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(ubsUserRepository.getAllByUserId(anyLong()))
             .thenReturn(Collections.singletonList(ModelUtils.getUBSuser()));
         when(modelMapper.map(ModelUtils.getUBSuser(), PersonalDataDto.class)).thenReturn(expected);
-
-        assertEquals(expected, ubsService.getSecondPageData("35467585763t4sfgchjfuyetf").get(0));
+        when(restClient.findUserByUUid("35467585763t4sfgchjfuyetf")).thenReturn(ubsCustomersDto);
+        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf").get(0);
+        assertEquals(expected, actual);
     }
 
     @Test
