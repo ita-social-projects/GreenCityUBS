@@ -794,21 +794,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         for (int i = 0; i < bag.size(); i++) {
             sumAmount += amountValues.get(i) * bag.get(i).getPrice();
-            sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
-            sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+            if (!confirmedValues.isEmpty()) {
+                sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+            }
+            if (!exportedValues.isEmpty()) {
+                sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+            }
         }
 
         if (!currentCertificate.isEmpty()) {
             totalSumAmount =
                 (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse()));
+                    + order.getPointsToUse()));
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                        - order.getPointsToUse()));
+                        + order.getPointsToUse()));
             totalSumExported =
                 (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse()));
+                    + order.getPointsToUse()));
             dto.setCertificateBonus(
                 currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
@@ -818,7 +822,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
             totalSumExported = sumExported - order.getPointsToUse();
         }
-
+        if (!confirmedValues.isEmpty()) {
+            totalSumConfirmed = 0;
+        }
+        if (!exportedValues.isEmpty()) {
+            totalSumExported = 0;
+        }
         dto.setTotalAmount(
             order.getAmountOfBagsOrdered().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
