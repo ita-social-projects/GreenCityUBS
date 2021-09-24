@@ -738,8 +738,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (userRepository.findByUuid(uuid) == null) {
             UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
-            userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
+            User user = userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName()).build());
+            UBSuser ubSuser = UBSuser.builder().user(user).email(user.getRecipientEmail()).firstName(user.getRecipientName()).build();
+            ubsUserRepository.save(ubSuser);
         }
     }
 
