@@ -539,12 +539,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             mappedFromDtoUser.setId(null);
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
-            if (dto.getEmail() != null){
-                if (dto.getEmail().equals(currentUser.getRecipientEmail())){
-                    if (currentUser.getRecipientSurname() == null){
+            if (dto.getEmail() != null) {
+                if (dto.getEmail().equals(currentUser.getRecipientEmail())) {
+                    if (currentUser.getRecipientSurname() == null) {
                         currentUser.setRecipientSurname(dto.getLastName());
                     }
-                    if (currentUser.getRecipientPhone() == null){
+                    if (currentUser.getRecipientPhone() == null) {
                         currentUser.setRecipientPhone(dto.getPhoneNumber());
                     }
                 }
