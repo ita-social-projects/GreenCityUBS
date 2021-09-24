@@ -62,10 +62,10 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all-orders-data/{lang}")
+    @GetMapping("/get-all-orders-data")
     public ResponseEntity<List<OrderStatusPageDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang));
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid));
     }
 
     /**
