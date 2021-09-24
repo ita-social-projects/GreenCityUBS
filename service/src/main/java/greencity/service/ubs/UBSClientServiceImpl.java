@@ -539,6 +539,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             mappedFromDtoUser.setId(null);
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
+            if (dto.getEmail() != null && dto.getEmail().equals(currentUser.getRecipientEmail())) {
+                if (currentUser.getRecipientSurname() == null) {
+                    currentUser.setRecipientSurname(dto.getLastName());
+                }
+                if (currentUser.getRecipientPhone() == null) {
+                    currentUser.setRecipientPhone(dto.getPhoneNumber());
+                }
+            }
+            userRepository.save(currentUser);
             return mappedFromDtoUser;
         } else {
             return ubsUserFromDatabaseById;
@@ -636,7 +645,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
         userRepository
             .save(User.builder().currentPoints(0).violations(0).uuid(uuid).recipientEmail(ubsCustomersDto.getEmail())
-                .recipientPhone(ubsCustomersDto.getPhoneNumber()).recipientName(ubsCustomersDto.getName()).build());
+                .recipientName(ubsCustomersDto.getName()).build());
     }
 
     @Override
