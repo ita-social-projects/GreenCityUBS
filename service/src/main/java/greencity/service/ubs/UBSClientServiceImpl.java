@@ -640,14 +640,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void createUserInGreenCityUbsDataBase(String uuid) {
-        UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
-        userRepository
-            .save(User.builder().currentPoints(0).violations(0).uuid(uuid).recipientEmail(ubsCustomersDto.getEmail())
-                .recipientName(ubsCustomersDto.getName()).build());
-    }
-
     @Override
     public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
         List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
@@ -744,9 +736,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createUserByUuidIfUserDoesNotExist(String uuid) {
         if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createUserInGreenCityUbsDataBase(uuid);
+            UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
+            userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
+                .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName()).build());
         }
     }
 
