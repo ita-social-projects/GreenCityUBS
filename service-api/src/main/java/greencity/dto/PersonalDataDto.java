@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "email")
 @ToString
 public class PersonalDataDto implements Serializable {
     @NotBlank
