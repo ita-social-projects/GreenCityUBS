@@ -704,9 +704,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         User user = address.getUser();
-        int orderStatusId = order.map(value -> value.getOrderStatus().getNumValue()).orElse(0);
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatusId, languageId);
+            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
+                languageId);
         String statusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
@@ -833,10 +834,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
             totalSumExported = sumExported - order.getPointsToUse();
         }
-        if (!confirmedValues.isEmpty()) {
+        if (confirmedValues.isEmpty()) {
             totalSumConfirmed = 0;
         }
-        if (!exportedValues.isEmpty()) {
+        if (exportedValues.isEmpty()) {
             totalSumExported = 0;
         }
         dto.setTotalAmount(

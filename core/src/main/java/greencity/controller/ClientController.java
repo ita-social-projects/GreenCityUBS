@@ -64,8 +64,8 @@ public class ClientController {
     })
     @GetMapping("/get-all-orders-data/{lang}")
     public ResponseEntity<List<OrderStatusPageDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable(name = "lang") Long languageId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, languageId));
+        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang));
     }
 
     /**
