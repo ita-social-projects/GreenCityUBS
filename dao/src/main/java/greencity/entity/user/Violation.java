@@ -3,10 +3,10 @@ package greencity.entity.user;
 import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,16 +14,12 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Table(name = "violations_description_mapping")
-@EqualsAndHashCode(exclude = {"description", "violation_level", "violation_date",})
+@EqualsAndHashCode(exclude = {"description", "violationLevel", "violationDate",})
 @Entity
 public class Violation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 
     @OneToOne
     @JoinColumn(name = "order_id")
@@ -35,9 +31,11 @@ public class Violation {
     @Column(name = "violation_date")
     private LocalDateTime violationDate;
 
-    @Nullable
-    @Column(name = "image_path")
-    private String image;
+    @ElementCollection
+    @CollectionTable(name = "violation_images",
+        joinColumns = {@JoinColumn(name = "violation_id", referencedColumnName = "id")})
+    @Column(name = "image")
+    private List<String> images;
 
     @Column(nullable = false, name = "violation_level", length = 15)
     @Enumerated(EnumType.STRING)

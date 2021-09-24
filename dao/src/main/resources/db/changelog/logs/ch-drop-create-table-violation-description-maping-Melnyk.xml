@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Melnyk-1" author="Bohdan Melnyk">
+        <dropTable  cascadeConstraints="true"
+                    catalogName="greencityubs"
+                    schemaName="public"
+                    tableName="violations_description_mapping"/>
+    </changeSet>
+    <changeSet id="Melnyk-2" author="Bohdan Melnyk">
+        <createTable tableName="violations_description_mapping">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="violation_level" type="varchar(15)"/>
+            <column name="violation_date" type="timestamp(6)"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="order_id" type="BIGINT" />
+        </createTable>
+    </changeSet>
+    <changeSet id="Melnyk-4" author="Bohdan Melnyk">
+        <addForeignKeyConstraint baseColumnNames="order_id"
+                                 baseTableName="violations_description_mapping"
+                                 constraintName="fk5d5vb0bsddsipw5kdyd5bhfx"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="orders"/>
+    </changeSet>
+</databaseChangeLog>
