@@ -11,7 +11,7 @@ public enum OrderStatus {
     NOT_TAKEN_OUT(7),
     CANCELLED(8);
 
-    private final int statusValue;
+    private int statusValue;
 
     OrderStatus(final int value) {
         this.statusValue = value;
