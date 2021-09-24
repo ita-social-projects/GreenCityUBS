@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -137,12 +138,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<PersonalDataDto> getSecondPageData(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
-        String currentUserEmail = restClient.findUserByUUid(uuid).orElseThrow().getEmail();
-        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId)
-            .stream().filter(x -> x.getEmail().equals(currentUserEmail)).collect(Collectors.toList());
+        String currentUserEmail = restClient.findUserByUUid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
+        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
         return allByUserId.isEmpty()
             ? List.of(PersonalDataDto.builder().build())
-            : allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
+            : allByUserId.stream()
+                .map(u -> modelMapper.map(u, PersonalDataDto.class))
+                .filter(x -> x.getEmail().equals(currentUserEmail))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -627,7 +632,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void createUserInGreenCityUbsDataBase(String uuid) {
-        UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid).orElseThrow();
+        UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
         userRepository
             .save(User.builder().currentPoints(0).violations(0).uuid(uuid).recipientEmail(ubsCustomersDto.getEmail())
                 .recipientPhone(ubsCustomersDto.getPhoneNumber()).recipientName(ubsCustomersDto.getName()).build());
