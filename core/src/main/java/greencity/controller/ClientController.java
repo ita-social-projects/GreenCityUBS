@@ -51,21 +51,21 @@ public class ClientController {
     /**
      * Controller for getting all user orders.
      *
-     * @return {@link List OrderInfoDto}.
+     * @return {@link List OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for logged user")
     @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderInfoDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all-orders-data")
+    @GetMapping("/get-all-orders-data/{lang}")
     public ResponseEntity<List<OrderStatusPageDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid));
+        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable(name = "lang") Long languageId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, languageId));
     }
 
     /**
