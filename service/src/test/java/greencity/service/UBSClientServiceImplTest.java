@@ -130,6 +130,10 @@ class UBSClientServiceImplTest {
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
+        Location location = new Location();
+        location.setId(1l);
+        location.setMinAmountOfBigBags(2l);
+        user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);
@@ -139,7 +143,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = new Bag();
-        bag.setCapacity(100);
+        bag.setCapacity(120);
         bag.setPrice(400);
 
         UBSuser ubSuser = getUBSuser();
@@ -170,6 +174,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(locationRepository.getOne(1l)).thenReturn(location);
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
@@ -187,7 +192,6 @@ class UBSClientServiceImplTest {
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
-//        dto.setMinAmountOfBigBags(10000l);
         dto.getBags().get(0).setAmount(35);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
@@ -221,7 +225,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        when(locationRepository.getOne(1l)).thenReturn(location);
+        Assertions.assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -725,7 +730,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = new Bag();
-        bag.setCapacity(100);
+        bag.setCapacity(120);
         bag.setPrice(400);
 
         UBSuser ubSuser = getUBSuser();
@@ -808,7 +813,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        assertThrows(IncorrectValueException.class, () -> {
+        assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -826,7 +831,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = new Bag();
-        bag.setCapacity(100);
+        bag.setCapacity(120);
         bag.setPrice(400);
 
         UBSuser ubSuser = getUBSuser();

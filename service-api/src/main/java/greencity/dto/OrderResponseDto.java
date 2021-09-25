@@ -39,4 +39,5 @@ public class OrderResponseDto implements Serializable {
 
     @Valid
     private PersonalDataDto personalData;
+
 }

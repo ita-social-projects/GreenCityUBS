@@ -824,6 +824,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
+        Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
 
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
