@@ -1191,13 +1191,15 @@ public class ModelUtils {
     }
 
     public static User getUserWithLastLocation() {
+        Location location = new Location();
+        location.setMinAmountOfBigBags(10l);
         return User.builder()
             .id(1L)
             .addresses(singletonList(address()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .lastLocation(new Location())
+            .lastLocation(location)
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .build();
