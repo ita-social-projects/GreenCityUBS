@@ -214,7 +214,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
+
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
         return links.attr("href");
     }
 
