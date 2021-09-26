@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
@@ -85,7 +86,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
-            eventService.save("Замовлення Оплачено", "Система", order);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         }
     }
 
@@ -213,6 +214,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         return links.attr("href");
     }
 
@@ -500,7 +502,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(arrayOfPayments);
         }
         orderRepository.save(order);
-        eventService.save("Сформовано замовлення", "Клієнт", order);
         return order;
     }
 
@@ -874,6 +875,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
 
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
         return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
     }
 
@@ -917,6 +920,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         }
     }
 }

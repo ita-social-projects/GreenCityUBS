@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -766,7 +767,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
         orderRepository.save(order);
-        eventService.save("Зміна деталей замовлення",
+        eventService.save(OrderHistory.CHANGING_THE_DETAILS_OF_ORDER,
             employee.getFirstName() + "  " + employee.getLastName(), order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
@@ -926,13 +927,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (newStatus == OrderStatus.ADJUSTMENT) {
             notificationService.notifyCourierItineraryFormed(order);
-            eventService.save("Ужзгодженно замовлення",
+            eventService.save(OrderHistory.ORDER_ADJUSTMENT,
                 employee.getFirstName() + "  " + employee.getLastName(), order);
         } else if (newStatus == OrderStatus.CONFIRMED) {
-            eventService.save("Замовлення підтверджено",
+            eventService.save(OrderHistory.ORDER_CONFIRMED,
                 employee.getFirstName() + "  " + employee.getLastName(), order);
         } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
-            eventService.save("Замовлення не вивезене",
+            eventService.save(OrderHistory.ORDER_NOT_TAKEN_OUT,
                 employee.getFirstName() + "  " + employee.getLastName(), order);
         }
         paymentRepository.paymentInfo(id)
@@ -1285,7 +1286,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (image != null) {
             payment.setImagePath(fileService.upload(image));
         }
-        eventService.save("Замовлення Оплачено", "Система", order);
+        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         return payment;
     }
 
@@ -1339,7 +1340,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .position(position)
                 .build();
             employeeOrderPositionRepository.save(employeeOrderPositions);
-            eventService.save("Закріплено відповідального менеджера ",
+            eventService.save(OrderHistory.ASSIGN_EMPLOYEE_FOR_ORDER,
                 employee.getFirstName() + "  " + employee.getLastName(), order);
         } else {
             throw new EmployeeIsNotAssigned(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);

@@ -28,10 +28,12 @@ public class EventServiceImpl implements EventService {
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);
         event.setAuthorName(eventAuthor);
-        List<Event> events = new ArrayList<>(order.getEvents());
-        events.add(event);
+        if (order.getEvents() != null) {
+            List<Event> events = new ArrayList<>(order.getEvents());
+            events.add(event);
+            order.setEvents(events);
+        }
         event.setOrder(order);
-        order.setEvents(events);
         eventRepository.save(event);
     }
 }
