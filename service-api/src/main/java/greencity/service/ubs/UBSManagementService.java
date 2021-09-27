@@ -168,7 +168,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid);
 
     /**
      * Method that count sum order.
@@ -220,7 +220,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid);
 
     /**
      * Method that get export details by order id.
@@ -329,4 +329,13 @@ public interface UBSManagementService {
      * Method that save ReasonNotTakeBagDto.
      */
     ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
+
+    /**
+     * This method assign Employee with it's position for current order.
+     *
+     * @param dto     {@link AssignEmployeeForOrderDto}.
+     * @param orderId {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId, String uuid);
 }

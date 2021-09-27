@@ -462,4 +462,52 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
+
+    /**
+     * Method interceptor exception {@link EmployeeAlreadyAssignedForOrder}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EmployeeAlreadyAssignedForOrder.class})
+    public final ResponseEntity<Object> handleEmployeeAlreadyExistForOrder(EmployeeAlreadyAssignedForOrder ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link EmployeeAlreadyExist}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EmployeeAlreadyExist.class})
+    public final ResponseEntity<Object> handleEmployeeAlreadyExist(EmployeeAlreadyExist ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link EmployeeIsNotAssigned}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({EmployeeIsNotAssigned.class})
+    public final ResponseEntity<Object> handleEmployeeIsNotAssign(EmployeeIsNotAssigned ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FOUND).body(exceptionResponce);
+    }
 }
