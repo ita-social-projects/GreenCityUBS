@@ -153,12 +153,72 @@ public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on response.
      * 
-     * @param gettedData {@link String} gettedDataFromLiqPay
+     * @param dto        {@link PaymentResponseDtoLiqPay}
      * @param privateKey - key from liqpay personal kabinet
      * @return {@link String} - ecnrypted signature;
      */
-    public String formingResponseSignatureLiqPay(PaymentResponseDtoLiqPay dto, String gettedData, String privateKey) {
-        return strToSignLiqPay(privateKey + gettedData + privateKey);
+    public String formingResponseSignatureLiqPay(PaymentResponseDtoLiqPay dto, String privateKey) {
+        JSONObject data = new JSONObject();
+        data.put("acq_id", dto.getAcqId());
+        data.put("action", dto.getAction());
+        data.put("agent_commission", dto.getAgentCommission());
+        data.put("amount", dto.getAmount());
+        data.put("amount_bonus", dto.getAmountBonus());
+        data.put("amount_credit", dto.getAmountCredit());
+        data.put("amount_debit", dto.getAmountDebit());
+        data.put("bonus_procent", dto.getBonusProcent());
+        data.put("bonus_type", dto.getBonusType());
+        data.put("card_token", dto.getCardToken());
+        data.put("commission_credit", dto.getCommissionCredit());
+        data.put("commission_debit", dto.getCommissionDebit());
+        data.put("completion_date", dto.getCompletionDate());
+        data.put("create_date", dto.getCreateDate());
+        data.put("currency", dto.getCurrency());
+        data.put("currency_credit", dto.getCurrencyCredit());
+        data.put("currency_debit", dto.getCurrencyDebit());
+        data.put("customer", dto.getCustomer());
+        data.put("description", dto.getDescription());
+        data.put("end_date", dto.getEndDate());
+        data.put("err_code", dto.getErrCode());
+        data.put("err_description", dto.getErrDescription());
+        data.put("info", dto.getInfo());
+        data.put("ip", dto.getIp());
+        data.put("is_3ds", dto.getIs3Ds());
+        data.put("liqpay_order_id", dto.getLiqpayOrderId());
+        data.put("mpi_eci", dto.getMpiEci());
+        data.put("order_id", dto.getOrderId());
+        data.put("payment_id", dto.getPaymentId());
+        data.put("paytype", dto.getPaytype());
+        data.put("public_key", dto.getPublicKey());
+        data.put("receiver_commission", dto.getReceiverCommission());
+        data.put("redirect_to", dto.getRedirectTo());
+        data.put("refund_date_last", dto.getRefundDateLast());
+        data.put("rrn_credit", dto.getRrnCredit());
+        data.put("rrn_debit", dto.getRrnDebit());
+        data.put("sender_bonus", dto.getSenderBonus());
+        data.put("sender_card_bank", dto.getSenderCardBank());
+        data.put("sender_card_country", dto.getSenderCardCountry());
+        data.put("sender_card_mask2", dto.getSenderCardMask2());
+        data.put("sender_card_type", dto.getSenderCardType());
+        data.put("sender_commission", dto.getSenderCommission());
+        data.put("sender_first_name", dto.getSenderFirstName());
+        data.put("sender_last_name", dto.getSenderLastName());
+        data.put("sender_phone", dto.getSenderPhone());
+        data.put("status", dto.getStatus());
+        data.put("token", dto.getToken());
+        data.put("type", dto.getType());
+        data.put("version", dto.getVersion());
+        data.put("err_erc", dto.getErrErc());
+        data.put("product_category", dto.getProductCategory());
+        data.put("product_description", dto.getProductDescription());
+        data.put("product_name", dto.getProductName());
+        data.put("product_url", dto.getProductUrl());
+        data.put("refund_amount", dto.getRefundAmount());
+        data.put("verifycode", dto.getVerifycode());
+
+        String dataCoddedByBase64 = Base64.encodeBase64String(data.toString().getBytes(StandardCharsets.UTF_8));
+
+        return strToSignLiqPay(privateKey + dataCoddedByBase64 + privateKey);
     }
 
     private String strToSignLiqPay(String str) {
