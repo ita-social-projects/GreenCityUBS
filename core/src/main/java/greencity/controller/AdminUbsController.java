@@ -48,18 +48,12 @@ public class AdminUbsController {
     @GetMapping("/ordersNew")
     @ApiPageable
     public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-        @ApiIgnore int page,
-        @ApiIgnore int size,
+        @ApiIgnore int page, @ApiIgnore int size,
         @RequestParam(value = "columnName", required = false) String columnName,
         @RequestParam(value = "sortingType", required = false) String sortingType,
         SearchCriteria searchCriteria) {
-        if (columnName == null || sortingType == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
     }
 
     /**
