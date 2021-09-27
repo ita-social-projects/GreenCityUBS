@@ -284,8 +284,7 @@ public class NotificationServiceImpl implements NotificationService {
             .map(n -> createNotificationShortDto(n, language))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        long unreadenNotification = notificationShortDtoList.stream()
-            .filter(n -> !n.isRead()).mapToLong(NotificationShortDto::getId).count();
+        long unreadenNotification = userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
 
         return new PageableWithUnreadenNotificationsDto<>(
             notificationShortDtoList,

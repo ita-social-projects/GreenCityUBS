@@ -69,7 +69,7 @@ public class ModelUtils {
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableWithUnreadenNotificationsDto<NotificationShortDto> TEST_UNREADENNOTIFIC_DTO =
-        createUnreadenNotificDto();
+        createUnreadenNotificationDto();
     public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
@@ -1349,13 +1349,13 @@ public class ModelUtils {
             1);
     }
 
-    private static PageableWithUnreadenNotificationsDto<NotificationShortDto> createUnreadenNotificDto() {
+    private static PageableWithUnreadenNotificationsDto<NotificationShortDto> createUnreadenNotificationDto() {
         return new PageableWithUnreadenNotificationsDto<>(
             TEST_NOTIFICATION_SHORT_DTO_LIST,
             1,
             0,
             1,
-            1);
+            0);
     }
 
     private static NotificationTemplate createNotificationTemplate() {
