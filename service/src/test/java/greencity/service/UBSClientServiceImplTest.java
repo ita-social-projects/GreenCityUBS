@@ -870,11 +870,11 @@ class UBSClientServiceImplTest {
         dto.setStatus("success");
         Payment payment = getPayment();
 
-        when(encryptionUtil.formingResponseSignatureLiqPay(dto, "sadsadsa", null)).thenReturn("TestSignature");
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("TestSignature");
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
 
-        ubsService.validateLiqPayPayment(dto, "sadsadsa", signature);
+        ubsService.validateLiqPayPayment(dto, signature);
 
         verify(paymentRepository).save(payment);
         ;
@@ -886,9 +886,9 @@ class UBSClientServiceImplTest {
         PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
         dto.setStatus("success");
 
-        when(encryptionUtil.formingResponseSignatureLiqPay(dto, "fdsfd", null)).thenReturn("fdf");
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("fdf");
 
-        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, "fdsfd", signature));
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
     }
 
     @Test
@@ -897,7 +897,7 @@ class UBSClientServiceImplTest {
         PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
         dto.setStatus("failure");
 
-        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, "fdsfd", signature));
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
     }
 
     @Test
@@ -906,9 +906,9 @@ class UBSClientServiceImplTest {
         PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
         dto.setStatus("error");
 
-        when(encryptionUtil.formingResponseSignatureLiqPay(dto, "fdsfd", null)).thenReturn("signature");
+        when(encryptionUtil.formingResponseSignatureLiqPay(dto, null)).thenReturn("signature");
 
-        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, "fdsfd", signature));
+        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto, signature));
     }
 
 }

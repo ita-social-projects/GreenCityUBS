@@ -894,16 +894,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             .language("en")
             .paytypes("card")
             .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/receiveLiqPayPayment")
+            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/")
             .build();
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String gettedData, String signature) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
         if (dto.getStatus().equals("failure")) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, gettedData, privateKey)
+        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
             .equals(signature)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
@@ -913,8 +913,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         String[] ids = dto.getOrderId().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (encryptionUtil.formingResponseSignatureLiqPay(dto, gettedData, privateKey)
-            .equals(signature)) {
+        if (dto.getStatus().equals("success")) {
             Payment orderPayment = modelMapper.map(dto, Payment.class);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             orderPayment.setOrder(order);
