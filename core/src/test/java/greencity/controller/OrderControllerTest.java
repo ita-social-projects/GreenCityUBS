@@ -252,7 +252,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).validateLiqPayPayment(anyObject(), any(), eq(null));
+        verify(ubsClientService).validateLiqPayPayment(anyObject(), eq(null));
     }
 
 }
