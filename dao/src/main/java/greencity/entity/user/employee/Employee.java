@@ -1,6 +1,7 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
@@ -34,6 +35,10 @@ public class Employee {
 
     @Column
     private String imagePath;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @ManyToMany
     @JoinTable(

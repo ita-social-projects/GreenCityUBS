@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -10,6 +11,7 @@ import greencity.exceptions.*;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
+import greencity.repository.UserRepository;
 import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,6 +34,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ModelMapper modelMapper;
     private final PhoneNumberFormatterService phoneFormatter;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    private final UserRepository userRepository;
 
     /**
      * {@inheritDoc}
@@ -54,6 +57,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             employee.setImagePath(defaultImagePath);
         }
+        User user = User.builder()
+            .id(dto.getUserId().getId())
+            .build();
+        checkIfUserExist(user);
+        checkIfCurrentEmployeeAlreadyExist(user);
+        employee.setUser(user);
         return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
     }
 
@@ -85,14 +94,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
-        Employee employee = modelMapper.map(dto, Employee.class);
+        Employee employee = employeeRepository.findById(dto.getId())
+            .orElseThrow(() -> new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+        Employee employeeUpdate = modelMapper.map(dto, Employee.class);
+        employeeUpdate.setUser(employee.getUser());
         if (image != null) {
-            if (!employee.getImagePath().equals(defaultImagePath)) {
-                fileService.delete(employee.getImagePath());
+            if (!employeeUpdate.getImagePath().equals(defaultImagePath)) {
+                fileService.delete(employeeUpdate.getImagePath());
             }
-            employee.setImagePath(fileService.upload(image));
+            employeeUpdate.setImagePath(fileService.upload(image));
         }
-        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(employeeUpdate), EmployeeDto.class);
     }
 
     /**
@@ -278,5 +290,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employeePage.hasNext(),
             employeePage.isFirst(),
             employeePage.isLast());
+    }
+
+    private void checkIfCurrentEmployeeAlreadyExist(User user) {
+        if (employeeRepository.existsByUserId(user.getId())) {
+            throw new EmployeeAlreadyExist(ErrorMessage.EMPLOYEE_ALREADY_EXIST);
+        }
+    }
+
+    private void checkIfUserExist(User user) {
+        if (!userRepository.existsById(user.getId())) {
+            throw new EmployeeAlreadyExist(ErrorMessage.EMPLOYEE_ALREADY_EXIST);
+        }
     }
 }

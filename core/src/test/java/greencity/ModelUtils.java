@@ -330,4 +330,11 @@ public class ModelUtils {
             .price(100)
             .build();
     }
+
+    public static AssignEmployeeForOrderDto assignEmployeeToOrderDto() {
+        return AssignEmployeeForOrderDto.builder()
+            .positionId(1L)
+            .employeeId(1L)
+            .build();
+    }
 }

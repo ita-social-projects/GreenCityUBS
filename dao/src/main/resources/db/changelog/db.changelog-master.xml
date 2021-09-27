@@ -61,4 +61,6 @@
     <include file="db/changelog/logs/ch-add-table-order-status-translations.xml"/>
     <include file="db/changelog/logs/ch-add-column-description-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-column-commission-fullPrice-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-constraint-events-Bahlay.xml"/>
+    <include file="db/changelog/logs/ch-add-column-userId-to-employee-Bahlay.xml"/>
 </databaseChangeLog>
