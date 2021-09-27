@@ -2,7 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
+import greencity.dto.PageableWithUnreadenNotificationsDto;
 import greencity.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
@@ -68,7 +68,8 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid, String language, Pageable pageable);
+    PageableWithUnreadenNotificationsDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+        String language, Pageable pageable);
 
     /**
      * Method that return notification and set status - is read.

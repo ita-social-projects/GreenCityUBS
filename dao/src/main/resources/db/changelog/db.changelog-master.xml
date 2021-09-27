@@ -54,7 +54,11 @@
     <include file="db/changelog/logs/ch-add-table-events-Bratakh.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-user-notifications-Volianskyi.xml"/>
     <include file="db/changelog/logs/ch-add-column-to-notification-template-Volianskyi.xml"/>
+    <include file="db/changelog/logs/ch-drop-create-table-violation-description-maping-Melnyk.xml"/>
+    <include file="db/changelog/logs/ch-add-table-violation_images-Melnyk.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-id-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-order-table.xml"/>
+    <include file="db/changelog/logs/ch-add-table-order-status-translations.xml"/>
     <include file="db/changelog/logs/ch-add-column-description-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-column-commission-fullPrice-Makitra.xml"/>
 </databaseChangeLog>

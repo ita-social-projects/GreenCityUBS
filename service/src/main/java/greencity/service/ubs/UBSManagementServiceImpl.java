@@ -60,6 +60,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
     private final FileService fileService;
+    private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
@@ -473,35 +474,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
         Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User user = order.getUser();
-        Violation violation = violationBuilder(add, order, user);
-        if (multipartFiles.length > 0) {
-            List<String> images = new LinkedList<>();
-            for (int i = 0; i < multipartFiles.length; i++) {
-                images.add(fileService.upload(multipartFiles[i]));
-            }
-            violation.setImage(String.join("; ", images));
-        }
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
-            if (user.getViolations() < 0) {
-                user.setViolations(0);
+            User user = order.getUser();
+            Violation violation = violationBuilder(add, order);
+            if (multipartFiles.length > 0) {
+                List<String> images = new LinkedList<>();
+                setImages(multipartFiles, images);
+                violation.setImages(images);
             }
-            user.setViolations(user.getViolations() + 1);
             violationRepository.save(violation);
+            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
+            notificationService.notifyAddViolation(order);
         } else {
             throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
         }
-        notificationService.notifyAddViolation(order);
     }
 
-    private Violation violationBuilder(AddingViolationsToUserDto add, Order order, User user) {
+    private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
         return Violation.builder()
             .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
             .description(add.getViolationDescription())
             .violationDate(order.getOrderDate())
             .order(order)
-            .user(user)
             .build();
     }
 
@@ -607,7 +602,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            elements,
             pages,
             totalPagesWithCheck);
     }
@@ -654,7 +649,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         return new PageableDto<>(
             ourDtos,
-            size,
+            numberOfElements1,
             pages,
             totalPagesLast);
     }
@@ -693,7 +688,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderInfoDto> dto = new ArrayList<>();
         orders.forEach(order -> dto.add(modelMapper.map(order, OrderInfoDto.class)));
-        dto.forEach(data -> data.setOrderPrice(getOrderSumDetails(data.getId()).getTotalSumAmount()));
+        dto.forEach(data -> data.setOrderPrice(getPriceDetails(data.getId()).getTotalSumAmount()));
         return dto;
     }
 
@@ -702,7 +697,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public OrderStatusPageDto getOrderStatusData(Long orderId) {
-        CounterOrderDetailsDto prices = getOrderSumDetails(orderId);
+        CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
@@ -772,12 +767,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public CounterOrderDetailsDto getOrderSumDetails(Long id) {
+        CounterOrderDetailsDto dto = getPriceDetails(id);
+        Order order = orderRepository.getOrderDetails(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        final List<Payment> payment = paymentRepository.paymentInfo(id);
+        double totalSumConfirmed = dto.getTotalSumConfirmed();
+        double totalSumExported = dto.getTotalSumExported();
+        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
+        return dto;
+    }
+
+    private CounterOrderDetailsDto getPriceDetails(Long id) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Bag> bag = bagRepository.findBagByOrderId(id);
         List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
-        final List<Payment> payment = paymentRepository.paymentInfo(id);
 
         double sumAmount = 0;
         double sumConfirmed = 0;
@@ -794,21 +799,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         for (int i = 0; i < bag.size(); i++) {
             sumAmount += amountValues.get(i) * bag.get(i).getPrice();
-            sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
-            sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+            if (!confirmedValues.isEmpty()) {
+                sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+            }
+            if (!exportedValues.isEmpty()) {
+                sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+            }
         }
 
         if (!currentCertificate.isEmpty()) {
             totalSumAmount =
                 (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse()));
+                    + order.getPointsToUse()));
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                        - order.getPointsToUse()));
+                        + order.getPointsToUse()));
             totalSumExported =
                 (sumExported - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                    - order.getPointsToUse()));
+                    + order.getPointsToUse()));
             dto.setCertificateBonus(
                 currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0).doubleValue());
             dto.setCertificate(
@@ -818,7 +827,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
             totalSumExported = sumExported - order.getPointsToUse();
         }
-
+        if (confirmedValues.isEmpty()) {
+            totalSumConfirmed = 0;
+        }
+        if (exportedValues.isEmpty()) {
+            totalSumExported = 0;
+        }
         dto.setTotalAmount(
             order.getAmountOfBagsOrdered().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
@@ -831,7 +845,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
             order);
-        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
         return dto;
     }
 
@@ -945,9 +958,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     @Transactional
     public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
+        User user =
+            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
         return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
             .orderId(orderId)
-            .userName(v.getUser().getRecipientName())
+            .userName(user.getRecipientName())
             .violationLevel(v.getViolationLevel())
             .description(v.getDescription())
             .violationDate(v.getViolationDate())
@@ -959,19 +974,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void deleteViolation(Long id) {
         Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
         if (violationOptional.isPresent()) {
-            if (violationOptional.get().getImage() != null) {
-                List<String> images = new LinkedList<>(Arrays.asList(violationOptional.get().getImage().split("; ")));
+            List<String> images = violationOptional.get().getImages();
+            if (!images.isEmpty()) {
                 for (int i = 0; i < images.size(); i++) {
                     fileService.delete(images.get(i));
                 }
             }
             violationRepository.deleteById(violationOptional.get().getId());
-            User user = violationOptional.get().getUser();
-            if (user.getViolations() <= 0) {
-                user.setViolations(0);
-            } else {
-                user.setViolations(user.getViolations() - 1);
-            }
+            User user = violationOptional.get().getOrder().getUser();
+            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
         } else {
             throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
@@ -1339,28 +1350,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
         violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
         violation.setDescription(add.getViolationDescription());
-        if (violation.getImage() != null) {
-            List<String> images = new LinkedList<>(Arrays.asList(violation.getImage().split("; ")));
+        if (!violation.getImages().isEmpty()) {
+            List<String> images = violation.getImages();
             for (String image : images) {
                 fileService.delete(image);
             }
-            violation.setImage(null);
+            violation.setImages(null);
             images.clear();
             if (multipartFiles.length > 0) {
-                for (MultipartFile multipartFile : multipartFiles) {
-                    images.add(fileService.upload(multipartFile));
-                }
-                violation.setImage(String.join("; ", images));
+                setImages(multipartFiles, images);
+                violation.setImages(images);
             }
-        } else if (multipartFiles.length > 0) {
-            List<String> images = new LinkedList<>();
-            for (MultipartFile multipartFile : multipartFiles) {
-                images.add(fileService.upload(multipartFile));
-            }
-            violation.setImage(String.join("; ", images));
         } else {
-            throw new NullPointerException("Nothing here");
+            if (multipartFiles.length > 0) {
+                List<String> images = new LinkedList<>();
+                setImages(multipartFiles, images);
+                violation.setImages(images);
+            }
         }
+    }
+
+    private List<String> setImages(MultipartFile[] multipartFiles, List<String> images) {
+        for (MultipartFile multipartFile : multipartFiles) {
+            images.add(fileService.upload(multipartFile));
+        }
+        return images;
     }
 
     @Override

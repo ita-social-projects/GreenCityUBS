@@ -8,5 +8,5 @@ public enum OrderStatus {
     ON_THE_ROUTE,
     DONE,
     NOT_TAKEN_OUT,
-    CANCELLED
+    CANCELLED;
 }

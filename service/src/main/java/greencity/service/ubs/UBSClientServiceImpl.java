@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -94,29 +95,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
-        currentUserPoints = user.getCurrentPoints();
-        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
-            .stream()
-            .map(this::buildBagTranslationDto)
-            .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public UserPointsAndAllBagsDtoTest getFirstPageDataTest(String uuid) throws InterruptedException {
-        Thread.sleep(20);
-        int currentUserPoints = 0;
-        User user = userRepository.findByUuid(uuid);
         Location lastLocation = user.getLastLocation();
         currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDtoTest(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
+        return new UserPointsAndAllBagsDto(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -137,12 +122,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<PersonalDataDto> getSecondPageData(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
+        String currentUserEmail = restClient.findUserByUUid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-
-        if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().build());
-        }
-        return allByUserId.stream().map(u -> modelMapper.map(u, PersonalDataDto.class)).collect(Collectors.toList());
+        return allByUserId.isEmpty()
+            ? List.of(PersonalDataDto.builder().build())
+            : allByUserId.stream()
+                .map(u -> modelMapper.map(u, PersonalDataDto.class))
+                .filter(x -> x.getEmail().equals(currentUserEmail))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -166,12 +155,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-
+        Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            location.getMinAmountOfBigBags());
 
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
@@ -534,6 +524,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             mappedFromDtoUser.setId(null);
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
+            if (dto.getEmail() != null && dto.getEmail().equals(currentUser.getRecipientEmail())) {
+                if (currentUser.getRecipientSurname() == null) {
+                    currentUser.setRecipientSurname(dto.getLastName());
+                }
+                if (currentUser.getRecipientPhone() == null) {
+                    currentUser.setRecipientPhone(dto.getPhoneNumber());
+                }
+            }
+            userRepository.save(currentUser);
             return mappedFromDtoUser;
         } else {
             return ubsUserFromDatabaseById;
@@ -603,13 +602,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags) {
+        Map<Integer, Integer> map, List<BagDto> bags, Long minAmountOfBigBags) {
         int sumToPay = 0;
+        int bigBagCounter = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
+            if (bag.getCapacity() >= 120) {
+                bigBagCounter += temp.getAmount();
+            }
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
+        }
+        if (minAmountOfBigBags > bigBagCounter) {
+            throw new NotEnoughBagsException(NOT_ENOUGH_BIG_BAGS_EXCEPTION + minAmountOfBigBags);
         }
         return sumToPay;
     }
@@ -624,10 +630,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 throw new CertificateExpiredException(CERTIFICATE_EXPIRED + certificate.getCode());
             }
         }
-    }
-
-    private void createUserInGreenCityUbsDataBase(String uuid) {
-        userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid).build());
     }
 
     @Override
@@ -726,9 +728,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void createUserByUuidIfUserDoesNotExist(String uuid) {
         if (userRepository.findByUuid(uuid) == null) {
-            UbsTableCreationDto dto = restClient.getDataForUbsTableRecordCreation();
-            uuid = dto.getUuid();
-            createUserInGreenCityUbsDataBase(uuid);
+            UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
+            userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
+                .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName()).build());
         }
     }
 
@@ -789,7 +792,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
         User currentUser = userRepository.findByUuid(userUuid);
         Location location = locationRepository.findById(locationIdDto.getLocationId())
-            .orElseThrow(() -> new OrderNotFoundException(LOCATION_DOESNT_FOUND));
+            .orElseThrow(() -> new LocationNotFoundException(LOCATION_DOESNT_FOUND));
         currentUser.setLastLocation(location);
 
         userRepository.save(currentUser);
@@ -837,7 +840,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags());
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            currentUser.getLastLocation().getMinAmountOfBigBags());
 
         if (sumToPay < dto.getPointsToUse()) {
             throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);

@@ -1,10 +1,7 @@
 package greencity.service;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.dto.NotificationDto;
-import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
-import greencity.dto.UserVO;
+import greencity.dto.*;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -28,7 +25,9 @@ import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -271,21 +270,29 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid, String language,
+    public PageableWithUnreadenNotificationsDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+        String language,
         Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
-        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageable);
+
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+            Sort.by("notificationTime").descending());
+
+        Page<UserNotification> notifications = userNotificationRepository.findAllByUser(user, pageRequest);
 
         List<NotificationShortDto> notificationShortDtoList = notifications.stream()
             .map(n -> createNotificationShortDto(n, language))
-            .sorted(Comparator.comparing(NotificationShortDto::getNotificationTime).reversed())
             .collect(Collectors.toCollection(LinkedList::new));
 
-        return new PageableDto<>(
+        long unreadenNotification = notificationShortDtoList.stream()
+            .filter(n -> !n.isRead()).mapToLong(NotificationShortDto::getId).count();
+
+        return new PageableWithUnreadenNotificationsDto<>(
             notificationShortDtoList,
             notifications.getTotalElements(),
             notifications.getPageable().getPageNumber(),
-            notifications.getTotalPages());
+            notifications.getTotalPages(),
+            unreadenNotification);
     }
 
     /**
