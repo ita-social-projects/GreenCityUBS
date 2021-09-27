@@ -14,6 +14,6 @@ public final class OrderHistory {
     /**
      * Constructor.
      */
-    public OrderHistory() {
+    private OrderHistory() {
     }
 }
