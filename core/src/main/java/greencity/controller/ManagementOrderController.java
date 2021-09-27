@@ -7,9 +7,7 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -207,9 +205,10 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for getting User violations.
+     * The method returns information related to orders.
      *
-     * @author Nazar Struk
+     * @return {@link PageableDto} with order's information
+     * @author Ihor Volianskyi
      */
     @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
@@ -220,19 +219,13 @@ public class ManagementOrderController {
     })
     @GetMapping("/orders")
     @ApiPageable
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-        @ApiIgnore int page,
-        @ApiIgnore int size,
-        @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType,
+    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable2(
+        @ApiIgnore int page, @ApiIgnore int size,
+        @RequestParam(value = "columnName", defaultValue = "orderId") String columnName,
+        @RequestParam(value = "sortingType", defaultValue = "desc") String sortingType,
         SearchCriteria searchCriteria) {
-        if (columnName == null || sortingType == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
     }
 
     /**

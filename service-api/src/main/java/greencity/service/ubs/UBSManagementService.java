@@ -121,15 +121,8 @@ public interface UBSManagementService {
      *
      * @author Nazar Struk
      */
-    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size);
-
-    /**
-     * Method for getting all sorted values from table .
-     *
-     * @author Nazar Struk
-     */
-    PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
-        int size);
+    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size,
+        String column, String sortingType);
 
     /**
      * Method that read user address by order id.
@@ -148,13 +141,6 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
-
-    /**
-     * Method that gets all order payments.
-     *
-     * @return {@link PaymentTableInfoDto};
-     * @author Struk Nazar
-     */
 
     /**
      * Method for getting order detail by language and order id.
