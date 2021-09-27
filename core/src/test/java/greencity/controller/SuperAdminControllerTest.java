@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 
 import static greencity.ModelUtils.getUuid;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,6 +63,10 @@ class SuperAdminControllerTest {
             .content(ServiceResponceDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
 
+    @Test
+    void getTariffService() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getTariffService")).andExpect(status().isOk());
     }
 }
