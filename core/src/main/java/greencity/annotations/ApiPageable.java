@@ -11,16 +11,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @ApiImplicitParams({
-    @ApiImplicitParam(name = "page", dataType = "int", paramType = "query", defaultValue = "0",
+    @ApiImplicitParam(name = "page", type = "int", paramType = "query", defaultValue = "0",
         value = "Page index you want to retrieve [0..N]. "
             + "If page index is less than 0 or not specified then default value is used!"),
-    @ApiImplicitParam(name = "size", dataType = "int", paramType = "query", defaultValue = "5",
+    @ApiImplicitParam(name = "size", type = "int", paramType = "query", defaultValue = "5",
         value = "Number of records per page [1..100]. "
             + "If size is less than 1 or not specified then default value is used!"
-            + "If size is bigger than 100, size becomes 100."),
-    @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
-        value = "Sorting criteria in the format: property(,asc|desc). "
-            + "Default sort order is ascending. " + "Multiple sort criteria are supported.")
+            + "If size is bigger than 100, size becomes 100.")
 })
 
 public @interface ApiPageable {
