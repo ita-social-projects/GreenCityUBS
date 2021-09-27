@@ -17,6 +17,9 @@ public class BagTranslation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String description;
+
     @Column(nullable = false, length = 60)
     private String name;
 

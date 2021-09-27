@@ -59,4 +59,6 @@
     <include file="db/changelog/logs/ch-drop-column-id-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-order-table.xml"/>
     <include file="db/changelog/logs/ch-add-table-order-status-translations.xml"/>
+    <include file="db/changelog/logs/ch-add-column-description-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-column-commission-fullPrice-Makitra.xml"/>
 </databaseChangeLog>
