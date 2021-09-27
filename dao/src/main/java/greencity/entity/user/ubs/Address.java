@@ -6,6 +6,7 @@ import greencity.entity.user.User;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity
@@ -28,22 +29,28 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "varchar(12) default 'Kyiv'", nullable = false, length = 20)
+    @Size(min = 1, max = 20, message = "Invalid city name")
+    @Column(columnDefinition = "varchar(12) default 'Kyiv'", nullable = false/* , length = 20 */)
     private String city;
 
-    @Column(nullable = false, length = 50)
+    @Size(min = 1, max = 50)
+    @Column(nullable = false)
     private String street;
 
-    @Column(nullable = false, length = 30)
+    @Size(min = 1, max = 30)
+    @Column(nullable = false)
     private String district;
 
-    @Column(name = "house_number", nullable = false, length = 5)
+    @Size(min = 1, max = 5)
+    @Column(name = "house_number", nullable = false)
     private String houseNumber;
 
-    @Column(length = 5)
+    @Size(min = 1, max = 5, message = "Invalid house corpus")
+    @Column
     private String houseCorpus;
 
-    @Column(name = "entrance_number", nullable = false, length = 4)
+    @Size(min = 1, max = 4, message = "Invalid entrance number")
+    @Column(name = "entrance_number", nullable = false)
     private String entranceNumber;
 
     @Column

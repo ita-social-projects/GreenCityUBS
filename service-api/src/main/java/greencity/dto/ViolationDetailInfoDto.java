@@ -2,8 +2,10 @@ package greencity.dto;
 
 import greencity.entity.enums.ViolationLevel;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,6 +19,7 @@ public class ViolationDetailInfoDto {
     private String userName;
     private ViolationLevel violationLevel;
     private String description;
-    private String image;
+    @Nullable
+    private List<String> images;
     private LocalDateTime violationDate;
 }

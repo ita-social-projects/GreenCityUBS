@@ -194,6 +194,7 @@ public class ModelUtils {
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
             .orders(Lists.newArrayList(getOrder()))
+            .recipientName("Alan Po")
             .build();
     }
 
@@ -870,13 +871,12 @@ public class ModelUtils {
             16, 13, 00, 00);
         return Violation.builder()
             .id(1L)
-            .user(User.builder()
-                .recipientName("Alan Po").violations(1).build())
             .order(Order.builder()
-                .id(1L).build())
+                .id(1L).user(ModelUtils.getTestUser()).build())
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
+            .images(new LinkedList<String>())
             .build();
     }
 
@@ -1191,13 +1191,15 @@ public class ModelUtils {
     }
 
     public static User getUserWithLastLocation() {
+        Location location = new Location();
+        location.setMinAmountOfBigBags(10l);
         return User.builder()
             .id(1L)
             .addresses(singletonList(address()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .lastLocation(new Location())
+            .lastLocation(location)
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .build();
