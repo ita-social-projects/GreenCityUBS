@@ -269,5 +269,5 @@ public interface UBSClientService {
      * @param signature {@link String} signature that we get from LiqPay
      * @author Vadym Makitra
      */
-    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature);
+    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String gettedData, String signature);
 }
