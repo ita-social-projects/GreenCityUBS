@@ -19,10 +19,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,14 +61,15 @@ public class ModelUtils {
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
-    public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5);
+    public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
         new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
-    public static final PageableDto<NotificationShortDto> TEST_PAGEABLE_DTO = createPageableDto();
+    public static final PageableWithUnreadenNotificationsDto<NotificationShortDto> TEST_UNREADENNOTIFIC_DTO =
+        createUnreadenNotificDto();
     public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
@@ -1355,6 +1353,15 @@ public class ModelUtils {
             1);
     }
 
+    private static PageableWithUnreadenNotificationsDto<NotificationShortDto> createUnreadenNotificDto() {
+        return new PageableWithUnreadenNotificationsDto<>(
+            TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1,
+            1);
+    }
+
     private static NotificationTemplate createNotificationTemplate() {
         NotificationTemplate notificationTemplate = new NotificationTemplate();
         notificationTemplate.setTitle("Test");
@@ -1467,6 +1474,17 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
+            .build();
+    }
+
+    public static AddServiceDto addServiceDto() {
+        return AddServiceDto.builder()
+            .commission(50)
+            .capacity(100)
+            .name("fff")
+            .price(100)
+            .languageId(1L)
+            .description("asd")
             .build();
     }
 

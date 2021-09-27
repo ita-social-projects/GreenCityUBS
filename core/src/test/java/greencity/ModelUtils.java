@@ -320,6 +320,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static AddServiceDto getAddServiceDto() {
+        return AddServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .description("sadas")
+            .languageId(1l)
+            .name("dsasda")
+            .price(100)
+            .build();
+    }
+
     public static AssignEmployeeForOrderDto assignEmployeeToOrderDto() {
         return AssignEmployeeForOrderDto.builder()
             .positionId(1L)

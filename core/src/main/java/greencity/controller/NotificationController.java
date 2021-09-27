@@ -7,7 +7,7 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
+import greencity.dto.PageableWithUnreadenNotificationsDto;
 import greencity.service.ubs.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -73,7 +73,7 @@ public class NotificationController {
     })
     @GetMapping
     @ApiPageableWithLocale
-    public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
+    public ResponseEntity<PageableWithUnreadenNotificationsDto<NotificationShortDto>> getNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @ApiIgnore @ValidLanguage Locale locale, @ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
