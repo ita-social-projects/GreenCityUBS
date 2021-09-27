@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-public class SuperAdminControllerTest {
+class SuperAdminControllerTest {
     private MockMvc mockMvc;
     @Mock
     RestClient restClient;

@@ -18,7 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/ubs/superAdmin")
-public class SuperAdminController {
+class SuperAdminController {
     private final SuperAdminService superAdminService;
 
     /**
