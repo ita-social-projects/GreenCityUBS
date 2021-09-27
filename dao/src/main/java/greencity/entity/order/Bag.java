@@ -3,6 +3,7 @@ package greencity.entity.order;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -26,6 +27,18 @@ public class Bag {
 
     @Column(nullable = false)
     private Integer price;
+
+    @Column
+    private Integer commission;
+
+    @Column(nullable = false)
+    private Integer fullPrice;
+
+    @Column(nullable = false)
+    private LocalDate createdAt;
+
+    @Column(nullable = false)
+    private String createdBy;
 
     @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BagTranslation> bagTranslations;

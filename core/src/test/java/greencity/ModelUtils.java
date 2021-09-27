@@ -319,4 +319,15 @@ public class ModelUtils {
             .locationId(1l)
             .build();
     }
+
+    public static AddServiceDto getAddServiceDto() {
+        return AddServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .description("sadas")
+            .languageId(1l)
+            .name("dsasda")
+            .price(100)
+            .build();
+    }
 }

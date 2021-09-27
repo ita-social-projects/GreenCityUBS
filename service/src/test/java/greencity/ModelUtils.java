@@ -1463,4 +1463,15 @@ public class ModelUtils {
             .body("Test")
             .build();
     }
+
+    public static AddServiceDto addServiceDto() {
+        return AddServiceDto.builder()
+            .commission(50)
+            .capacity(100)
+            .name("fff")
+            .price(100)
+            .languageId(1L)
+            .description("asd")
+            .build();
+    }
 }

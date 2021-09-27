@@ -55,4 +55,6 @@
     <include file="db/changelog/logs/ch-add-columns-to-user-notifications-Volianskyi.xml"/>
     <include file="db/changelog/logs/ch-add-column-to-notification-template-Volianskyi.xml"/>
     <include file="db/changelog/logs/ch-add-columns-to-order-table.xml"/>
+    <include file="db/changelog/logs/ch-add-column-description-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-column-commission-fullPrice-Makitra.xml"/>
 </databaseChangeLog>
