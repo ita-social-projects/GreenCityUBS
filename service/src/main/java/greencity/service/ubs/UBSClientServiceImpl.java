@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
@@ -66,6 +67,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String publicKey;
     @Value("${liqpay.private.key}")
     private String privateKey;
+    private final EventService eventService;
 
     @Override
     @Transactional
@@ -85,6 +87,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         }
     }
 
@@ -201,6 +204,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         return links.attr("href");
     }
 
@@ -652,7 +656,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrderById(Long orderId) {
+    public List<EventDto> getAllEventsForOrder(Long orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
@@ -876,6 +880,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
 
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
         return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
     }
 
@@ -919,6 +925,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         }
     }
 }

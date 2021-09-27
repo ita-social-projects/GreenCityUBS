@@ -3,6 +3,8 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -64,6 +66,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    private final EventService eventService;
 
     /**
      * {@inheritDoc}
@@ -737,9 +740,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language) {
+    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        Employee employee = user.getEmployee();
+        if (employee == null) {
+            throw new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND);
+        }
         OrderDetailDto dto = new OrderDetailDto();
-
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
             updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
                 updateOrderDetailDto.getBagId().longValue());
@@ -756,7 +763,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
 
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
-
+        orderRepository.save(order);
+        eventService.save(OrderHistory.CHANGE_ORDER_DETAILS,
+            employee.getFirstName() + "  " + employee.getLastName(), order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -917,7 +926,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto) {
+    public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Payment> payment = paymentRepository.paymentInfo(id);
@@ -927,10 +936,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setComment(dto.getOrderComment());
         OrderStatus newStatus = OrderStatus.valueOf(dto.getOrderStatus());
         order.setOrderStatus(newStatus);
+        User user = userRepository.findByUuid(uuid);
+        Employee employee = user.getEmployee();
+        if (employee == null) {
+            throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+        }
         if (newStatus == OrderStatus.ADJUSTMENT) {
             notificationService.notifyCourierItineraryFormed(order);
+            eventService.save(OrderHistory.ORDER_ADJUSTMENT,
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else if (newStatus == OrderStatus.CONFIRMED) {
+            eventService.save(OrderHistory.ORDER_CONFIRMED,
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
+            eventService.save(OrderHistory.ORDER_NOT_TAKEN_OUT,
+                employee.getFirstName() + "  " + employee.getLastName(), order);
         }
-
         paymentRepository.paymentInfo(id)
             .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
         orderRepository.save(order);
@@ -1279,6 +1300,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (image != null) {
             payment.setImagePath(fileService.upload(image));
         }
+        eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         return payment;
     }
 
@@ -1578,5 +1600,43 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setOrderStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
         return dto;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId, String uuid) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(
+                () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + orderId));
+        int checkIfCurrentEmployeeAlreadyAssigned =
+            employeeOrderPositionRepository.countEmployeeByIdAndOrderIdAndPositionId(orderId,
+                dto.getEmployeeId(), dto.getPositionId());
+        if (checkIfCurrentEmployeeAlreadyAssigned == 1) {
+            throw new EmployeeAlreadyAssignedForOrder(EMPLOYEE_ALREADY_ASSIGNED + " " + dto.getEmployeeId());
+        }
+        Position position = positionRepository.findById(dto.getPositionId()).orElseThrow(
+            (() -> new PositionNotFoundException(POSITION_NOT_FOUND)));
+        User user = userRepository.findByUuid(uuid);
+        Employee employee = user.getEmployee();
+        if (employee == null) {
+            throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+        }
+        Employee employeeForAssigned = employeeRepository.findById(dto.getEmployeeId())
+            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
+        if (position.getId() != 2) {
+            EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
+                .order(order)
+                .employee(employeeForAssigned)
+                .position(position)
+                .build();
+            employeeOrderPositionRepository.save(employeeOrderPositions);
+            eventService.save(OrderHistory.ASSIGN_EMPLOYEE,
+                employee.getFirstName() + "  " + employee.getLastName(), order);
+        } else {
+            throw new EmployeeIsNotAssigned(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);
+        }
     }
 }
