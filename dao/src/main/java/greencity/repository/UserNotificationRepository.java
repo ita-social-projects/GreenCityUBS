@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface UserNotificationRepository extends JpaRepository<UserNotification, Long> {
     /**
-     * The method returns all orders for user.
+     * The method returns all notifications for user.
      *
      * @return list of {@link UserNotification}.
      */
@@ -41,4 +41,11 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         + "order by notification_time desc "
         + "limit 1;")
     Optional<UserNotification> findLastNotificationByNotificationTypeAndOrderNumber(String type, String orderNumber);
+
+    /**
+     * Method that returns amount unread notifications.
+     *
+     * @author Ihor Volianskyi
+     */
+    long countUserNotificationByUserAndReadIsFalse(User user);
 }
