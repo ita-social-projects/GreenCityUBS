@@ -1,20 +1,28 @@
 package greencity.repository;
 
+import greencity.entity.enums.SortingOrder;
 import greencity.filters.SearchCriteria;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @AllArgsConstructor
 public class AllValuesFromTableRepo {
-    private static final String WHERE_ORDERS_ORDER_STATUS_LIKE = " where orders.order_status like CONCAT( '%',?,'%') ";
-    private static final String AND_PAYMENT_SYSTEM_LIKE = "and payment_system like CONCAT( '%',?,'%') ";
-    private static final String AND_RECEIVING_STATION_LIKE = "and receiving_station like CONCAT( '%',?,'%') ";
-    private static final String AND_DISTRICT_LIKE = " and district like CONCAT( '%',?,'%') ";
+    private static final String WHERE_ORDER_STATUS = "orders.order_status in (%s)";
+    private static final String WHERE_PAYMENT_SYSTEM = "payment_system in (%s)";
+    private static final String WHERE_RECEIVING_STATION = "receiving_station in (%s)";
+    private static final String WHERE_DISTRICT = "district in (%s)";
+    private static final String WHERE_ORDER_PAYMENT_STATUS = "order_payment_status in (%s)";
+    private static final String WHERE_DATE_BETWEEN = "order_date::date between %s and %s";
+    private static final String WHERE_DATE = "order_date::date = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private static final String QUERY =
@@ -56,85 +64,127 @@ public class AllValuesFromTableRepo {
             + "left join payment on payment.order_id = orders.id\n"
             + "left join certificate on orders.id = certificate.order_id";
 
-    private static final String EMPLOYEEQUERY = "select concat_ws(' ', first_name, "
+    private static final String EMPLOYEE_QUERY = "select concat_ws(' ', first_name, "
         + "last_name) as name,position_id from employees\n"
         + "left join employee_position on employees.id = employee_position.employee_id\n"
         + "left join order_employee on employees.id = order_employee.employee_id\n"
-        + "where order_id =";
+        + "where order_id = ";
 
     /**
-     * Method for finding elements from Order Table without employee.
+     * Method returns all orders with additional information.
      */
-    public List<Map<String, Object>> findAlL(SearchCriteria searchCriteria, int pages, int size) {
+    public List<Map<String, Object>> findAll(SearchCriteria searchCriteria, int pages, int size,
+        String column, String sortingType) {
         int offset = pages * size;
-        if (searchCriteria.getViolationsAmount() != null && searchCriteria.getOrderDate() != null) {
-            return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
-                    + AND_PAYMENT_SYSTEM_LIKE
-                    + AND_RECEIVING_STATION_LIKE
-                    + "and violations = ? "
-                    + AND_DISTRICT_LIKE
-                    + "and order_date :: date = ?",
-                    searchCriteria.getOrderStatus(),
-                    searchCriteria.getPayment(),
-                    searchCriteria.getReceivingStation(),
-                    searchCriteria.getViolationsAmount(),
-                    searchCriteria.getDistrict(),
-                    searchCriteria.getOrderDate());
-        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() == null) {
-            return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
-                    + AND_PAYMENT_SYSTEM_LIKE
-                    + AND_RECEIVING_STATION_LIKE
-                    + AND_DISTRICT_LIKE
-                    + " limit ? offset ?",
-                    searchCriteria.getOrderStatus(),
-                    searchCriteria.getPayment(),
-                    searchCriteria.getReceivingStation(),
-                    searchCriteria.getDistrict(),
-                    size,
-                    offset);
-        } else if (searchCriteria.getViolationsAmount() == null && searchCriteria.getOrderDate() != null) {
-            return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
-                    + AND_PAYMENT_SYSTEM_LIKE
-                    + AND_RECEIVING_STATION_LIKE
-                    + AND_DISTRICT_LIKE
-                    + "and order_date :: date = ?",
-                    searchCriteria.getOrderStatus(),
-                    searchCriteria.getPayment(),
-                    searchCriteria.getReceivingStation(),
-                    searchCriteria.getDistrict(),
-                    searchCriteria.getOrderDate());
-        } else {
-            return jdbcTemplate
-                .queryForList(QUERY + WHERE_ORDERS_ORDER_STATUS_LIKE
-                    + AND_PAYMENT_SYSTEM_LIKE
-                    + AND_RECEIVING_STATION_LIKE
-                    + "and violations = ? "
-                    + AND_DISTRICT_LIKE,
-                    searchCriteria.getOrderStatus(),
-                    searchCriteria.getPayment(),
-                    searchCriteria.getReceivingStation(),
-                    searchCriteria.getViolationsAmount(),
-                    searchCriteria.getDistrict());
+        List<Object> preparedValues = new ArrayList<>();
+
+        String subQuery = formSQLFilter(searchCriteria, column, sortingType, preparedValues);
+
+        preparedValues.add(size);
+        preparedValues.add(offset);
+
+        return jdbcTemplate.queryForList(QUERY + subQuery, preparedValues.toArray());
+    }
+
+    /**
+     * Method returns all employee for current order.
+     */
+    public List<Map<String, Object>> findAllEmployee(Long orderId) {
+        return jdbcTemplate.queryForList(EMPLOYEE_QUERY + "?", orderId);
+    }
+
+    private String formSQLFilter(SearchCriteria searchCriteria, String column, String sortingType,
+        List<Object> preparedValues) {
+        String subQuery = "";
+
+        if (searchCriteria.getOrderStatuses() != null
+            || searchCriteria.getPaymentSystems() != null
+            || searchCriteria.getOrderPaymentStatuses() != null
+            || searchCriteria.getReceivingStations() != null
+            || searchCriteria.getDateFrom() != null
+            || searchCriteria.getDateTo() != null
+            || searchCriteria.getOrderDate() != null
+            || searchCriteria.getDistricts() != null) {
+            subQuery += " where ";
+
+            String sqlCondition;
+            final String and = "and";
+            boolean requireAnd = false;
+
+            if (searchCriteria.getOrderStatuses() != null) {
+                subQuery +=
+                    formSubQueryAndPrepareValues(searchCriteria.getOrderStatuses(), preparedValues,
+                        WHERE_ORDER_STATUS);
+                requireAnd = true;
+            }
+            if (searchCriteria.getPaymentSystems() != null) {
+                sqlCondition =
+                    formSubQueryAndPrepareValues(searchCriteria.getPaymentSystems(), preparedValues,
+                        WHERE_PAYMENT_SYSTEM);
+                subQuery += requireAnd ? and + sqlCondition : sqlCondition;
+            }
+            if (searchCriteria.getReceivingStations() != null) {
+                sqlCondition =
+                    formSubQueryAndPrepareValues(searchCriteria.getPaymentSystems(), preparedValues,
+                        WHERE_RECEIVING_STATION);
+                subQuery += requireAnd ? and + sqlCondition : sqlCondition;
+            }
+            if (searchCriteria.getDistricts() != null) {
+                sqlCondition =
+                    formSubQueryAndPrepareValues(searchCriteria.getPaymentSystems(), preparedValues,
+                        WHERE_DISTRICT);
+                subQuery += requireAnd ? and + sqlCondition : sqlCondition;
+            }
+            if (searchCriteria.getOrderPaymentStatuses() != null) {
+                sqlCondition =
+                    formSubQueryAndPrepareValues(searchCriteria.getOrderPaymentStatuses(), preparedValues,
+                        WHERE_ORDER_PAYMENT_STATUS);
+                subQuery += requireAnd ? and + sqlCondition : sqlCondition;
+            }
+            if ((searchCriteria.getDateFrom() != null && searchCriteria.getDateTo() != null)
+                && searchCriteria.getOrderDate() == null) {
+                sqlCondition =
+                    String.format(WHERE_DATE_BETWEEN, "?", "?");
+
+                preparedValues.add(Date.valueOf(searchCriteria.getDateFrom()));
+                preparedValues.add(Date.valueOf(searchCriteria.getDateTo()));
+
+                subQuery += requireAnd ? and + sqlCondition : sqlCondition;
+            }
+            if (searchCriteria.getOrderDate() != null
+                && (searchCriteria.getDateFrom() == null && searchCriteria.getDateTo() == null)) {
+                subQuery += requireAnd ? and + WHERE_DATE : WHERE_DATE;
+                preparedValues.add(Date.valueOf(searchCriteria.getOrderDate()));
+            }
         }
+
+        return addSortingAndOrderToSubQuery(subQuery, column, sortingType);
     }
 
-    /**
-     * Method for finding all employee.
-     */
-    public List<Map<String, Object>> findAllEmpl(Long orderId) {
-        return jdbcTemplate.queryForList(EMPLOYEEQUERY + "?", orderId);
+    private String formSubQueryAndPrepareValues(Object[] array, List<Object> preparedValues, String whereClause) {
+        String args = Arrays.stream(array)
+            .map(s -> "?")
+            .collect(Collectors.joining(", "));
+
+        Arrays.stream(array)
+            .map(Object::toString)
+            .forEach(preparedValues::add);
+
+        return String.format(whereClause, args);
     }
 
-    /**
-     * Method for finding elements from Order Table without employee with the
-     * sorting possibility.
-     */
-    public List<Map<String, Object>> findAllWithSorting(String column, String sortingType, int pages, int size) {
-        int offset = pages * size;
-        return jdbcTemplate
-            .queryForList(QUERY + " order by " + column + " " + sortingType + " limit " + size + " offset " + offset);
+    private String addSortingAndOrderToSubQuery(String subQuery, String column, String sortingType) {
+        if (!sortingType.equalsIgnoreCase(SortingOrder.ASC.name())
+            && !sortingType.equalsIgnoreCase(SortingOrder.DESC.name())) {
+            throw new IllegalArgumentException("Invalid sorting type");
+        }
+
+        StringBuilder query = new StringBuilder();
+
+        query.append(subQuery).append(" order by ").append(column)
+            .append(" ").append(sortingType).append(" limit ? offset ?");
+
+        subQuery = String.valueOf(query);
+        return subQuery;
     }
 }
