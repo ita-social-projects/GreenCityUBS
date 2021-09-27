@@ -702,7 +702,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId) {
+    public OrderStatusPageDto getOrderStatusData(Long orderId, Long languageId) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
@@ -710,6 +710,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         User user = address.getUser();
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
+        Optional<OrderStatusTranslation> orderStatusTranslation =
+            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
+                languageId);
+        String statusTranslation =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
             .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
@@ -721,6 +727,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .orderStatusName(statusTranslation)
             .build();
     }
 
