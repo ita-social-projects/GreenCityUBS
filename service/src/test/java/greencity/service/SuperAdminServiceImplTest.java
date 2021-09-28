@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import java.util.ArrayList;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,12 +50,20 @@ class SuperAdminServiceImplTest {
         when(bagRepository.save(bag)).thenReturn(bag);
         when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
-        superAdminService.addService(dto, "123233");
+        superAdminService.addTariffService(dto, "123233");
 
         verify(modelMapper).map(dto, Bag.class);
         verify(modelMapper).map(dto, BagTranslation.class);
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).save(bagTranslation);
+    }
 
+    @Test
+    void getTariffServiceTest() {
+        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<BagTranslation>());
+
+        superAdminService.getTariffService();
+
+        verify(bagTranslationRepository).findAll();
     }
 }

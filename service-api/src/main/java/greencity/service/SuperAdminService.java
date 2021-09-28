@@ -1,7 +1,10 @@
 package greencity.service;
 
 import greencity.dto.AddServiceDto;
+import greencity.dto.GetTariffServiceDto;
 import greencity.entity.order.Bag;
+
+import java.util.List;
 
 public interface SuperAdminService {
     /**
@@ -12,5 +15,13 @@ public interface SuperAdminService {
      * @return {@link Bag}
      * @author Vadym Makitra
      */
-    Bag addService(AddServiceDto dto, String uuid);
+    Bag addTariffService(AddServiceDto dto, String uuid);
+
+    /**
+     * Method return All Tariff Service.
+     * 
+     * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
+     * @author Vadym Makitra.
+     */
+    List<GetTariffServiceDto> getTariffService();
 }
