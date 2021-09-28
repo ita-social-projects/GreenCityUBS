@@ -709,7 +709,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        User user = address.getUser();
+        User user = order.map(Order::getUser).orElse(new User());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
