@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -62,5 +63,24 @@ class SuperAdminController {
     @GetMapping("/getTariffService")
     public ResponseEntity<List<GetTariffServiceDto>> createService() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService());
+    }
+
+    /**
+     * Controller for delete tariff service by Id.
+     *
+     * @return {@link HttpStatuses}
+     * @author Vadym Makitra.
+     */
+
+    @ApiOperation(value = "Delete tariff service")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @DeleteMapping("/deleteTariffService/{id}")
+    public ResponseEntity<HttpStatus> deleteTariffService(
+        @Valid @PathVariable Long id) {
+        superAdminService.deleteTariffService(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
