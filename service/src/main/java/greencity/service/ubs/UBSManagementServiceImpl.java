@@ -16,6 +16,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.filters.SearchCriteria;
 import greencity.repository.*;
@@ -650,7 +651,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        User user = order.map(Order::getUser).orElse(new User());
+        UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
@@ -660,8 +661,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
             .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
-            .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
-            .recipientPhone(user.getRecipientPhone()).recipientEmail(user.getRecipientEmail())
+            .recipientName(user.getFirstName()).recipientSurname(user.getLastName())
+            .recipientPhone(user.getPhoneNumber()).recipientEmail(user.getEmail())
             .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
             .addressComment(address.getComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
