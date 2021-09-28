@@ -62,6 +62,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .commission(bagTranslation.getBag().getCommission())
             .languageCode(bagTranslation.getLanguage().getCode())
             .fullPrice(bagTranslation.getBag().getFullPrice())
+            .id(bagTranslation.getBag().getId())
             .build();
     }
 
