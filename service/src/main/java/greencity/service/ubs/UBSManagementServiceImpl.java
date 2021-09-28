@@ -592,7 +592,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderList.add(allFieldsFromTableDto);
         }
 
-        int listSize = ordersInfo.size();
+        int listSize = userRepository.orderCounter();
         int totalPages = (listSize % size) == 0 ? (listSize / size) : (listSize / size) + 1;
 
         return new PageableDto<>(
