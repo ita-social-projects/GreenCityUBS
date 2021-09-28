@@ -318,6 +318,11 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void getUnreadenNotificationsTest(){
+        assertEquals(0, notificationService.getUnreadenNotifications("Test"));
+    }
+
+    @Test
     void testGetNotification() {
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(TEST_USER_NOTIFICATION_4));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
