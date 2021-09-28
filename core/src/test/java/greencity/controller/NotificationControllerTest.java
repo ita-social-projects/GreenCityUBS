@@ -72,9 +72,9 @@ class NotificationControllerTest {
 
     @Test
     void getUnreadenNotificationsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink +"/quantityUnreadenNotifications")
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

@@ -318,7 +318,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getUnreadenNotificationsTest(){
+    void getUnreadenNotificationsTest() {
         assertEquals(0, notificationService.getUnreadenNotifications("Test"));
     }
 
