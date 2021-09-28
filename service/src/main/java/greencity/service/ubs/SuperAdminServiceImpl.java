@@ -1,11 +1,13 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.AddServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.user.User;
+import greencity.exceptions.BagNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BagTranslationRepository;
 import greencity.repository.UserRepository;
@@ -61,5 +63,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .languageCode(bagTranslation.getLanguage().getCode())
             .fullPrice(bagTranslation.getBag().getFullPrice())
             .build();
+    }
+
+    public void deleteTariffService(long id) {
+        try {
+            Bag bag = new Bag();
+            bag.setId((int) id);
+            BagTranslation bagTranslation = new BagTranslation();
+            bagTranslation.setBag(bag);
+            bagRepository.deleteById(bag.getId());
+            translationRepository.delete(bagTranslation);
+        } catch (Exception e) {
+            throw new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + id);
+        }
     }
 }

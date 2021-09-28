@@ -21,7 +21,15 @@ public interface SuperAdminService {
      * Method return All Tariff Service.
      * 
      * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
-     * @author Vadym Makitra.
+     * @author Vadym Makitra
      */
     List<GetTariffServiceDto> getTariffService();
+
+    /**
+     * Method for delete tariff service by Id.
+     * 
+     * @param id - Tariff Service Id.
+     * @author Vadym Makitra
+     */
+    void deleteTariffService(long id);
 }

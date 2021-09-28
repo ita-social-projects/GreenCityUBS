@@ -1494,4 +1494,16 @@ public class ModelUtils {
             .positionId(1L)
             .build();
     }
+
+    public static GetTariffServiceDto getTariffServiceDto() {
+        return GetTariffServiceDto.builder()
+            .fullPrice(300)
+            .languageCode("ua")
+            .capacity(120)
+            .commission(50)
+            .description("description")
+            .name("name")
+            .price(250)
+            .build();
+    }
 }
