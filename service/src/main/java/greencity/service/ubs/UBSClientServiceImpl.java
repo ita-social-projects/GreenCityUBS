@@ -128,9 +128,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         String currentUserEmail = restClient.findUserByUUid(uuid)
             .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-        if (allByUserId.isEmpty()){
+        if (allByUserId.isEmpty()) {
             return List.of(PersonalDataDto.builder().email(currentUserEmail).build());
-        }else {
+        } else {
             List<PersonalDataDto> result = allByUserId.stream()
                 .map(u -> modelMapper.map(u, PersonalDataDto.class))
                 .filter(x -> x.getEmail().equals(currentUserEmail))
