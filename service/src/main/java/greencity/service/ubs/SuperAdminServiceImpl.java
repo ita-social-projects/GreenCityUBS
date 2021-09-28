@@ -65,6 +65,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .build();
     }
 
+    /**
+     * This method delete tariff service by Id.
+     * @param id - Tariff Service Id.
+     */
     public void deleteTariffService(long id) {
         try {
             Bag bag = new Bag();
