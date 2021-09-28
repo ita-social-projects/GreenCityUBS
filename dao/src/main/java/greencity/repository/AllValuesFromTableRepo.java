@@ -108,7 +108,7 @@ public class AllValuesFromTableRepo {
             subQuery += " where ";
 
             String sqlCondition;
-            final String and = "and";
+            final String and = " and ";
             boolean requireAnd = false;
 
             if (searchCriteria.getOrderStatuses() != null) {
