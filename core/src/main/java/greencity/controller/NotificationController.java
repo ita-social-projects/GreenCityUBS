@@ -7,7 +7,7 @@ import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableWithUnreadenNotificationsDto;
+import greencity.dto.PageableDto;
 import greencity.service.ubs.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -73,10 +73,31 @@ public class NotificationController {
     })
     @GetMapping
     @ApiPageableWithLocale
-    public ResponseEntity<PageableWithUnreadenNotificationsDto<NotificationShortDto>> getNotificationsForCurrentUser(
+    public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @ApiIgnore @ValidLanguage Locale locale, @ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getAllNotificationsForUser(userUuid, locale.getLanguage(), pageable));
+    }
+
+    /**
+     * Controller return quantity of unreaden notifications for current user.
+     *
+     * @return quantity of unreaden notifications.
+     * @author Igor Boykov
+     */
+    @ApiOperation(value = "get all unreaden notifications")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping(value = "quantity")
+    public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(notificationService.getUnreadenNotifications(userUuid));
     }
 }

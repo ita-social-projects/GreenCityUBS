@@ -3,7 +3,6 @@ package greencity.service;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
-import greencity.dto.PageableWithUnreadenNotificationsDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
@@ -312,10 +311,10 @@ class NotificationServiceImplTest {
             "ua",
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
-        PageableWithUnreadenNotificationsDto<NotificationShortDto> actual = notificationService
+        PageableDto<NotificationShortDto> actual = notificationService
             .getAllNotificationsForUser("Test", "ua", TEST_PAGEABLE);
 
-        assertEquals(TEST_UNREADENNOTIFIC_DTO, actual);
+        assertEquals(TEST_DTO, actual);
     }
 
     @Test
