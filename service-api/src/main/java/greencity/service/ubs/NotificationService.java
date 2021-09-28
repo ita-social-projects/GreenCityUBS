@@ -2,7 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableWithUnreadenNotificationsDto;
+import greencity.dto.PageableDto;
 import greencity.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
@@ -68,7 +68,7 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    PageableWithUnreadenNotificationsDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
         String language, Pageable pageable);
 
     /**
@@ -77,4 +77,11 @@ public interface NotificationService {
      * @author Ihor Volianskyi
      */
     NotificationDto getNotification(String uuid, Long id, String language);
+
+    /**
+     * Method that return all quantity of unreaden notification.
+     *
+     * @author Igor Boykov
+     */
+    long getUnreadenNotifications(String userUuid);
 }

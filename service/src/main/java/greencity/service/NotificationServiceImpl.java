@@ -270,7 +270,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableWithUnreadenNotificationsDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    public PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
         String language,
         Pageable pageable) {
         User user = userRepository.findByUuid(userUuid);
@@ -284,14 +284,19 @@ public class NotificationServiceImpl implements NotificationService {
             .map(n -> createNotificationShortDto(n, language))
             .collect(Collectors.toCollection(LinkedList::new));
 
-        long unreadenNotification = userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
-
-        return new PageableWithUnreadenNotificationsDto<>(
+        return new PageableDto<>(
             notificationShortDtoList,
             notifications.getTotalElements(),
             notifications.getPageable().getPageNumber(),
-            notifications.getTotalPages(),
-            unreadenNotification);
+            notifications.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getUnreadenNotifications(String userUuid) {
+        User user = userRepository.findByUuid(userUuid);
+        return userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
     }
 
     /**
