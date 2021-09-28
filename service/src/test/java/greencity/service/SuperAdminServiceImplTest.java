@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
     @InjectMocks
-    private SuperAdminServiceImp superAdminService;
+    private SuperAdminServiceImpl superAdminService;
     @Mock
     private UserRepository userRepository;
     @Mock
