@@ -16,6 +16,7 @@ import java.util.Set;
 public class OrderStatusPageDto {
     private Long id;
     private OrderStatus orderStatus;
+    private String orderStatusName;
     private double orderFullPrice;
     private double orderDiscountedPrice;
     private double orderCertificateTotalDiscount;

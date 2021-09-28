@@ -117,7 +117,7 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Oleksandr Khomiakov
      */
-    List<OrderStatusPageDto> getOrdersForUser(String uuid);
+    List<OrderStatusPageDto> getOrdersForUser(String uuid, Long languageId);
 
     /**
      * Method returns list all bonuses of user.
