@@ -2,14 +2,13 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -207,9 +206,10 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for getting User violations.
+     * The method returns information related to orders.
      *
-     * @author Nazar Struk
+     * @return {@link PageableDto} with order's information
+     * @author Ihor Volianskyi
      */
     @ApiOperation("Get all info from Table orders")
     @ApiResponses(value = {
@@ -220,19 +220,13 @@ public class ManagementOrderController {
     })
     @GetMapping("/orders")
     @ApiPageable
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-        @ApiIgnore int page,
-        @ApiIgnore int size,
-        @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType,
+    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable2(
+        @ApiIgnore int page, @ApiIgnore int size,
+        @RequestParam(value = "columnName", defaultValue = "orderId") String columnName,
+        @RequestParam(value = "sortingType", defaultValue = "desc") String sortingType,
         SearchCriteria searchCriteria) {
-        if (columnName == null || sortingType == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsManagementService.getAllSortedValuesFromTable(columnName, sortingType, page, size));
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
     }
 
     /**
@@ -335,9 +329,10 @@ public class ManagementOrderController {
     })
     @PutMapping("/set-order-detail")
     public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
-        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto) {
+        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.setOrderDetail(dto, language));
+            .body(ubsManagementService.setOrderDetail(dto, language, uuid));
     }
 
     /**
@@ -446,9 +441,10 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
-        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto) {
+        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderDetailStatus(id, dto));
+            .body(ubsManagementService.updateOrderDetailStatus(id, dto, uuid));
     }
 
     /**
@@ -797,5 +793,29 @@ public class ManagementOrderController {
         @RequestParam String description,
         @RequestPart(required = false) List<MultipartFile> images) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
+    }
+
+    /**
+     * Controller for assigning Employee for some order by orderId.
+     *
+     * @param dto     {@link AssignEmployeeForOrderDto}.
+     * @param orderId {@link Long}.
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "Assign employee for some order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/assign-employee-to-order")
+    public ResponseEntity<HttpStatus> assignEmployeeToOrder(
+        @RequestBody @Valid AssignEmployeeForOrderDto dto, Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.assignEmployeeWithThePositionToTheOrder(dto, orderId, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

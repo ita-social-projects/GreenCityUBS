@@ -121,15 +121,8 @@ public interface UBSManagementService {
      *
      * @author Nazar Struk
      */
-    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size);
-
-    /**
-     * Method for getting all sorted values from table .
-     *
-     * @author Nazar Struk
-     */
-    PageableDto<AllFieldsFromTableDto> getAllSortedValuesFromTable(String column, String sortingType, int pages,
-        int size);
+    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size,
+        String column, String sortingType);
 
     /**
      * Method that read user address by order id.
@@ -150,13 +143,6 @@ public interface UBSManagementService {
     OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
 
     /**
-     * Method that gets all order payments.
-     *
-     * @return {@link PaymentTableInfoDto};
-     * @author Struk Nazar
-     */
-
-    /**
      * Method for getting order detail by language and order id.
      *
      * @author Mahdziak Orest
@@ -168,7 +154,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language);
+    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid);
 
     /**
      * Method that count sum order.
@@ -220,7 +206,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto);
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid);
 
     /**
      * Method that get export details by order id.
@@ -329,4 +315,13 @@ public interface UBSManagementService {
      * Method that save ReasonNotTakeBagDto.
      */
     ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
+
+    /**
+     * This method assign Employee with it's position for current order.
+     *
+     * @param dto     {@link AssignEmployeeForOrderDto}.
+     * @param orderId {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId, String uuid);
 }

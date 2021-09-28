@@ -223,6 +223,7 @@ public class OrderController {
      *
      * @param id {@link Long}.
      * @return {@link HttpStatus} - http status.
+     * @author Yuriy Bahlay.
      */
     @ApiOperation(value = "Get events history from order by Id")
     @ApiResponses(value = {
@@ -235,7 +236,7 @@ public class OrderController {
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrderById(id));
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id));
     }
 
     /**

@@ -65,6 +65,11 @@ public final class ErrorMessage {
     public static final String NOT_ENOUGH_BIG_BAGS_EXCEPTION = "Not enough big bags, minimal amount is:";
     public static final String NOTIFICATION_DOES_NOT_EXIST = "Notification does not exist";
     public static final String NOTIFICATION_DOES_NOT_BELONG_TO_USER = "This notification does not belong to user";
+    public static final String EMPLOYEE_ALREADY_ASSIGNED = "Manager already assigned with id: ";
+    public static final String EMPLOYEE_DOESNT_EXIST = "Employee doesn't exist";
+    public static final String EMPLOYEE_ALREADY_EXIST = "Employee already exist";
+    public static final String EMPLOYEE_IS_NOT_ASSIGN =
+        "Employee service could not be assign for order or this is manager which assign managers";
 
     /**
      * Constructor.
