@@ -309,7 +309,8 @@ public interface UBSManagementService {
      * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
      * @author Liubomyr Pater
      */
-    HttpStatus chooseOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+    ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
+        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 
     /**
      * Method that save ReasonNotTakeBagDto.

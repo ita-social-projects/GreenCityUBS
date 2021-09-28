@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1429,42 +1430,40 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public HttpStatus chooseOrdersDataSwitcher(String userUuid,
+    public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
         RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
         switch (columnName) {
             case "order_status":
-                orderStatusForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value));
             case "date_of_export":
-                dateOfExportForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value));
             case "time_of_export":
-                timeOfExportForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value));
             case "receiving_station":
-                receivingStationForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value));
             case "responsible_manager":
-                responsibleManagerForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(responsibleManagerForDevelopStage(ordersId, value));
             case "responsible_caller":
-                responsibleCallerForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(responsibleCallerForDevelopStage(ordersId, value));
             case "responsible_logic_man":
-                responsibleLogicManForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(responsibleLogicManForDevelopStage(ordersId, value));
             case "responsible_driver":
-                responsibleDriverForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(responsibleDriverForDevelopStage(ordersId, value));
             case "responsible_navigator":
-                responsibleNavigatorForDevelopStage(ordersId, value);
-                return HttpStatus.ACCEPTED;
+                return createReturnForSwitchChangeOrder(responsibleNavigatorForDevelopStage(ordersId, value));
             default:
-                return HttpStatus.BAD_REQUEST;
+                return createReturnForSwitchChangeOrder(new ArrayList<>());
         }
+    }
+
+    private ChangeOrderResponseDTO createReturnForSwitchChangeOrder(List<Long> ordersId) {
+        HttpStatus httpStatus = ordersId.isEmpty()
+            ? HttpStatus.ACCEPTED
+            : HttpStatus.BAD_REQUEST;
+        return ChangeOrderResponseDTO.builder().httpStatus(httpStatus).unresolvedGoalsOrderId(ordersId).build();
     }
 
     private List<TitleDto> orderStatusListForDevelopStage() {
@@ -1495,40 +1494,68 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             new TitleDto("3", "Третій варіант", "Thirst variant"))));
     }
 
-    private void orderStatusForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
+    private List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
+        OrderStatus orderStatus = OrderStatus.valueOf(value);
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderStatus(orderId, orderStatus)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
-    private void dateOfExportForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
+    private boolean changeOrderStatus(Long oderId, OrderStatus orderStatus) {
+        orderRepository.findById(oderId)
+            .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST))
+            .setOrderStatus(orderStatus);
+        return true;
     }
 
-    private void timeOfExportForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
+    private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+        LocalDate date = LocalDate.parse(value);
+        for (Long l : ordersId) {
+            System.out.println(l + " " + date);
+        }
+        return new ArrayList<>();
     }
 
-    private void receivingStationForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
+    private List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+        LocalTime time = LocalTime.parse(value);
+        for (Long l : ordersId) {
+            System.out.println(l + " " + time);
+        }
+        return new ArrayList<>();
     }
 
-    private void responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
+    private List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+        return new ArrayList<>();
     }
 
-    private void responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
+    private List<Long> responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+        return new ArrayList<>();
     }
 
-    private void responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
+    private List<Long> responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+        return new ArrayList<>();
     }
 
-    private void responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
+    private List<Long> responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+        return new ArrayList<>();
     }
 
-    private void responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
+    private List<Long> responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
         System.out.println(ordersId + value);
+        return new ArrayList<>();
+    }
+
+    private List<Long> responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
+        System.out.println(ordersId + value);
+        return new ArrayList<>();
     }
 
     @Override

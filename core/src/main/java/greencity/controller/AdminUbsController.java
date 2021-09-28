@@ -3,10 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.AllFieldsFromTableDto;
-import greencity.dto.PageableDto;
-import greencity.dto.RequestToChangeOrdersDataDTO;
-import greencity.dto.TableParamsDTO;
+import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/management")
@@ -85,10 +83,12 @@ public class AdminUbsController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping("/changingOrder")
-    public ResponseEntity<HttpStatus> saveNewValueFromOrdersTable(
+    public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        ubsManagementService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ubsManagementService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
+        return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
+            .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
     }
 }
