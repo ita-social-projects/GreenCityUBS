@@ -836,6 +836,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             dto.setCertificate(
                 currentCertificate.stream().map(Certificate::getCode).collect(Collectors.toList()));
         } else {
+            dto.setCertificateBonus((double) 0);
             totalSumAmount = sumAmount - order.getPointsToUse();
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
             totalSumExported = sumExported - order.getPointsToUse();
