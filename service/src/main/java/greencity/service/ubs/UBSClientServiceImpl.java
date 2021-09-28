@@ -392,10 +392,10 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
 
     @Override
-    public List<OrderStatusPageDto> getOrdersForUser(String uuid) {
+    public List<OrderStatusPageDto> getOrdersForUser(String uuid, Long languageId) {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderStatusPageDto> dto = new ArrayList<>();
-        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId())));
+        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId(), languageId)));
         return dto;
     }
 
