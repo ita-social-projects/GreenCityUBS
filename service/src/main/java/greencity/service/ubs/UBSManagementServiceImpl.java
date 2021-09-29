@@ -1505,57 +1505,192 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return unresolvedGoals;
     }
 
-    private boolean changeOrderStatus(Long oderId, OrderStatus orderStatus) {
-        orderRepository.findById(oderId)
-            .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST))
-            .setOrderStatus(orderStatus);
-        return true;
-    }
-
     private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
-        LocalDate date = LocalDate.parse(value);
-        for (Long l : ordersId) {
-            System.out.println(l + " " + date);
+        LocalDateTime date = LocalDateTime.parse(value);
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderDate(orderId, date)) {
+                unresolvedGoals.add(orderId);
+            }
         }
-        return new ArrayList<>();
+        return unresolvedGoals;
     }
 
     private List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
-        LocalTime time = LocalTime.parse(value);
-        for (Long l : ordersId) {
-            System.out.println(l + " " + time);
+        LocalDateTime time = LocalDateTime.parse(value);
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderTime(orderId, time)) {
+                unresolvedGoals.add(orderId);
+            }
         }
-        return new ArrayList<>();
+        return unresolvedGoals;
     }
 
     private List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String station = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderStation(orderId, station)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     private List<Long> responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String manager = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderManager(orderId, manager)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     private List<Long> responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String caller = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderCaller(orderId, caller)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     private List<Long> responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String logicMan = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderLogicMan(orderId, logicMan)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     private List<Long> responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String driver = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderDriver(orderId, driver)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     private List<Long> responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
-        System.out.println(ordersId + value);
-        return new ArrayList<>();
+        String navigator = value;
+        List<Long> unresolvedGoals = new ArrayList<>();
+        for (Long orderId : ordersId) {
+            if (!changeOrderNavigator(orderId, navigator)) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    private boolean changeOrderStatus(Long oderId, OrderStatus orderStatus) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.setOrderStatus(orderStatus);
+            orderRepository.save(existedOrder);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderDate(Long oderId, LocalDateTime value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.setOrderDate(value);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderTime(Long oderId, LocalDateTime value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.setOrderDate(value);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderStation(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.setReceivingStation(value);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderManager(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderCaller(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderLogicMan(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderDriver(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changeOrderNavigator(Long oderId, String value) {
+        try {
+            Order existedOrder = orderRepository.findById(oderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     @Override
