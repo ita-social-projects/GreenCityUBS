@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
