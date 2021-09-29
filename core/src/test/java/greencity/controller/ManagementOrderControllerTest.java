@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
+import greencity.entity.enums.SortingOrder;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -97,12 +99,13 @@ class ManagementOrderControllerTest {
 
     @Test
     void getAllCertificates() throws Exception {
-        int pageNumber = 0;
-        int pageSize = 20;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        mockMvc.perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates"))
+        Pageable pageable = PageRequest.of(0, 20);
+        mockMvc
+            .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates")
+                .param("sortingOrder", SortingOrder.DESC.toString())
+                .param("columnName", "points").param("pageable", pageable.toString()))
             .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(ubsManagementService).getAllCertificates(pageable);
+        verify(ubsManagementService).getAllCertificates(pageable, "points", SortingOrder.DESC);
     }
 
     @Test
