@@ -5,6 +5,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.filters.SearchCriteria;
+import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -22,13 +23,15 @@ import java.util.List;
 @RequestMapping("/ubs/management")
 public class AdminUbsController {
     private final UBSManagementService ubsManagementService;
+    private final OrdersAdminsPageService ordersAdminsPageService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(UBSManagementService ubsManagementService) {
+    public AdminUbsController(UBSManagementService ubsManagementService, OrdersAdminsPageService ordersAdminsPageService) {
         this.ubsManagementService = ubsManagementService;
+        this.ordersAdminsPageService = ordersAdminsPageService;
     }
 
     /**
@@ -68,7 +71,7 @@ public class AdminUbsController {
     })
     @GetMapping("/tableParams/{userId}")
     public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getParametersForOrdersTable(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userId));
     }
 
     /**
@@ -87,7 +90,7 @@ public class AdminUbsController {
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
         ChangeOrderResponseDTO changeOrderResponseDTO =
-            ubsManagementService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
+            ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
             .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
     }
