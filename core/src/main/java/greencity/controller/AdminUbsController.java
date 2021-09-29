@@ -29,7 +29,8 @@ public class AdminUbsController {
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(UBSManagementService ubsManagementService, OrdersAdminsPageService ordersAdminsPageService) {
+    public AdminUbsController(UBSManagementService ubsManagementService,
+        OrdersAdminsPageService ordersAdminsPageService) {
         this.ubsManagementService = ubsManagementService;
         this.ordersAdminsPageService = ordersAdminsPageService;
     }

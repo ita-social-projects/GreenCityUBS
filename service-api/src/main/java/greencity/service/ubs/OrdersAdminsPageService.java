@@ -5,7 +5,6 @@ import greencity.dto.RequestToChangeOrdersDataDTO;
 import greencity.dto.TableParamsDTO;
 
 public interface OrdersAdminsPageService {
-
     /**
      * Method that return parameters for building table on admin's page.
      *
