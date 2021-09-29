@@ -558,8 +558,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String column, String sortingType) {
         List<AllFieldsFromTableDto> orderList = new ArrayList<>();
 
+        SortingOrder resultSortingOrder = Arrays.stream(SortingOrder.values())
+            .filter(s -> s.name().equalsIgnoreCase(sortingType))
+            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
+
+        String resultColumn = allValuesFromTableRepo.getColumns().stream()
+            .filter(c -> c.equalsIgnoreCase(column))
+            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
+
         List<Map<String, Object>> ordersInfo = allValuesFromTableRepo
-            .findAll(searchCriteria, page, size, column, sortingType);
+            .findAll(searchCriteria, page, size, resultColumn, resultSortingOrder);
 
         for (Map<String, Object> map : ordersInfo) {
             AllFieldsFromTableDto allFieldsFromTableDto =

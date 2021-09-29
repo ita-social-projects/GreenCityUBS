@@ -7,10 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -25,6 +22,7 @@ public class AllValuesFromTableRepo {
     private static final String WHERE_DATE = "order_date::date = ?";
 
     private final JdbcTemplate jdbcTemplate;
+
     private static final String QUERY =
         "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
             + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
@@ -73,9 +71,9 @@ public class AllValuesFromTableRepo {
     /**
      * Method returns all orders with additional information.
      */
-    public List<Map<String, Object>> findAll(SearchCriteria searchCriteria, int pages, int size,
-        String column, String sortingType) {
-        int offset = pages * size;
+    public List<Map<String, Object>> findAll(SearchCriteria searchCriteria, int page, int size,
+        String column, SortingOrder sortingType) {
+        int offset = page * size;
         List<Object> preparedValues = new ArrayList<>();
 
         String subQuery = formSQLFilter(searchCriteria, column, sortingType, preparedValues);
@@ -93,7 +91,7 @@ public class AllValuesFromTableRepo {
         return jdbcTemplate.queryForList(EMPLOYEE_QUERY + "?", orderId);
     }
 
-    private String formSQLFilter(SearchCriteria searchCriteria, String column, String sortingType,
+    private String formSQLFilter(SearchCriteria searchCriteria, String column, SortingOrder sortingOrder,
         List<Object> preparedValues) {
         String subQuery = "";
 
@@ -158,7 +156,9 @@ public class AllValuesFromTableRepo {
             }
         }
 
-        return addSortingAndOrderToSubQuery(subQuery, column, sortingType);
+        subQuery += String.format(" order by %s %s limit ? offset ?", column, sortingOrder);
+
+        return subQuery;
     }
 
     private String formSubQueryAndPrepareValues(Object[] array, List<Object> preparedValues, String whereClause) {
@@ -173,18 +173,31 @@ public class AllValuesFromTableRepo {
         return String.format(whereClause, args);
     }
 
-    private String addSortingAndOrderToSubQuery(String subQuery, String column, String sortingType) {
-        if (!sortingType.equalsIgnoreCase(SortingOrder.ASC.name())
-            && !sortingType.equalsIgnoreCase(SortingOrder.DESC.name())) {
-            throw new IllegalArgumentException("Invalid sorting type");
-        }
+    /**
+     * Method returns all columns from our custom table.
+     */
+    public List<String> getColumns() {
+        List<String> columns = jdbcTemplate.queryForList("select distinct column_name\n"
+            + "from information_schema.columns\n"
+            + "where table_name in ('orders', 'ubs_user', 'users', 'address', 'payment', 'certificate')", String.class);
 
-        StringBuilder query = new StringBuilder();
+        columns.add("orderId");
+        columns.add("clientName");
+        columns.add("address");
+        columns.add("comment_To_Address_For_Client");
+        columns.add("garbage_Bags_120_Amount");
+        columns.add("bo_Bags_120_Amount");
+        columns.add("bo_Bags_20_Amount");
+        columns.add("total_Order_Sum");
+        columns.add("order_certificate_code");
+        columns.add("order_certificate_points");
+        columns.add("amount_Due");
+        columns.add("comment_For_Order_By_Client");
+        columns.add("date_Of_Export");
+        columns.add("time_Of_Export");
+        columns.add("id_Order_From_Shop");
+        columns.add("comments_for_order");
 
-        query.append(subQuery).append(" order by ").append(column)
-            .append(" ").append(sortingType).append(" limit ? offset ?");
-
-        subQuery = String.valueOf(query);
-        return subQuery;
+        return columns;
     }
 }
