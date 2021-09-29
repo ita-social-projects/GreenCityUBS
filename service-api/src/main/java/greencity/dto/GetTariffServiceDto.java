@@ -22,4 +22,5 @@ public class GetTariffServiceDto {
     String description;
     String languageCode;
     Integer fullPrice;
+    Integer id;
 }

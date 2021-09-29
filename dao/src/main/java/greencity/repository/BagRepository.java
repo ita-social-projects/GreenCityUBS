@@ -1,15 +1,15 @@
 package greencity.repository;
 
 import greencity.entity.order.Bag;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface BagRepository extends CrudRepository<Bag, Integer> {
+public interface BagRepository extends JpaRepository<Bag, Integer> {
     /**
      * method, that returns {@link List}of{@link Bag} that have bags by order id.
      *
