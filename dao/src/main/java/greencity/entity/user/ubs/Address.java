@@ -46,7 +46,7 @@ public class Address {
     private String houseNumber;
 
     @Size(min = 1, max = 5, message = "Invalid house corpus")
-    @Column
+    @Column(name = "house_corpus")
     private String houseCorpus;
 
     @Size(min = 1, max = 4, message = "Invalid entrance number")

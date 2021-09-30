@@ -36,13 +36,13 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private List<Address> addresses;
 
-    @Column(columnDefinition = "int default 0")
+    @Column(name = "current_points", columnDefinition = "int default 0")
     private Integer currentPoints;
 
     @Column(name = "recipient_name")
     private String recipientName;
 
-    @Column
+    @Column(name = "recipient_surname")
     private String recipientSurname;
 
     @Column(name = "recipient_email")
