@@ -110,7 +110,7 @@ public class AdminUbsController {
     @PostMapping("/blockOrders")
     public ResponseEntity<List<BlockedOrderDTO>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody List<Long> listOfOrdersId) {
+        @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
         HttpStatus httpStatus = blockedOrderDTOS.isEmpty() ? HttpStatus.ACCEPTED : HttpStatus.FORBIDDEN;
         return ResponseEntity.status(httpStatus).body(blockedOrderDTOS);
