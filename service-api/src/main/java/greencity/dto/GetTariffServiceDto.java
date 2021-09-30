@@ -3,6 +3,7 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -23,4 +24,6 @@ public class GetTariffServiceDto {
     String languageCode;
     Integer fullPrice;
     Integer id;
+    LocalDate createdAt;
+    String createdBy;
 }
