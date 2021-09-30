@@ -101,7 +101,7 @@ public class AdminUbsController {
      *
      * @author Liubomyr Pater
      */
-    @ApiOperation(value = "Change order's properties over request from admin's table")
+    @ApiOperation(value = "Block orders for changing by another users")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
