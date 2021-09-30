@@ -95,4 +95,24 @@ public class AdminUbsController {
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
             .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
     }
+
+    /**
+     * Controller.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation(value = "Change order's properties over request from admin's table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PostMapping("/blockOrders")
+    public ResponseEntity<List<BlockedOrderDTO>> saveNewValueFromOrdersTable(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Valid @RequestBody List<Long> listOfOrdersId) {
+        List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
+        HttpStatus httpStatus = blockedOrderDTOS.isEmpty() ? HttpStatus.ACCEPTED : HttpStatus.FORBIDDEN;
+        return ResponseEntity.status(httpStatus).body(blockedOrderDTOS);
+    }
 }

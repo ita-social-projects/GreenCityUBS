@@ -1,8 +1,11 @@
 package greencity.service.ubs;
 
+import greencity.dto.BlockedOrderDTO;
 import greencity.dto.ChangeOrderResponseDTO;
 import greencity.dto.RequestToChangeOrdersDataDTO;
 import greencity.dto.TableParamsDTO;
+
+import java.util.List;
 
 public interface OrdersAdminsPageService {
     /**
@@ -22,4 +25,13 @@ public interface OrdersAdminsPageService {
      */
     ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
         RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+
+    /**
+     * Method that return.
+     *
+     * @param userUuid of {@link String}
+     * @param orders   of {@link List}
+     * @author Liubomyr Pater
+     */
+    List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders);
 }

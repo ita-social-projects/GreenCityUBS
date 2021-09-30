@@ -5,6 +5,7 @@ import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXI
 @AllArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -363,5 +365,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
+        User user = userRepository.findByUuid(userUuid);
+        String userName = String.format("%s %s", user.getRecipientName(), user.getRecipientSurname());
+        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
+        for (Long orderId : orders) {
+            blockedOrderDTOS.add(new BlockedOrderDTO(orderId, userName));
+        }
+        return blockedOrderDTOS;
     }
 }
