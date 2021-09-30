@@ -111,7 +111,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return BagTranslationDto.builder()
             .id(bt.getBag().getId())
             .capacity(bt.getBag().getCapacity())
-            .price(bt.getBag().getPrice())
+            .price(bt.getBag().getFullPrice())
             .name(bt.getName())
             .code(bt.getLanguage().getCode())
             .build();
