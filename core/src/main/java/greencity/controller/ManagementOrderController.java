@@ -6,6 +6,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.entity.enums.SortingOrder;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.*;
@@ -56,8 +57,9 @@ public class ManagementOrderController {
     @GetMapping("/getAllCertificates")
     @ApiPageable
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
-        @ApiIgnore Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllCertificates(pageable));
+        @ApiIgnore Pageable pageable, @RequestParam String columnName, @RequestParam SortingOrder sortingOrder) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllCertificates(pageable, columnName, sortingOrder));
     }
 
     /**

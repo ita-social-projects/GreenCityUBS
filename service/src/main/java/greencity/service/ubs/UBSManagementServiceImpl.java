@@ -25,7 +25,9 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -455,8 +457,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page) {
-        Page<Certificate> certificates = certificateRepository.getAll(page);
+    public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
+        SortingOrder sortingOrder) {
+        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+            Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
+        Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
         return getAllCertificatesTranslationDto(certificates);
     }
 

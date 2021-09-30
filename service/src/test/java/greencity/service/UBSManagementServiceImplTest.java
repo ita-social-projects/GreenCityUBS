@@ -7,6 +7,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
@@ -38,6 +39,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -184,7 +186,8 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getAllCertificates() {
-        Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable =
+            PageRequest.of(0, 5, Sort.by(Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         CertificateDtoForSearching certificateDtoForSearching = ModelUtils.getCertificateDtoForSearching();
         List<Certificate> certificates =
             Collections.singletonList(ModelUtils.getCertificate());
@@ -196,7 +199,8 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
             .thenReturn(certificateDtoForSearching);
         when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
-        PageableDto<CertificateDtoForSearching> actual = ubsManagementService.getAllCertificates(pageable);
+        PageableDto<CertificateDtoForSearching> actual =
+            ubsManagementService.getAllCertificates(pageable, "points", SortingOrder.DESC);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
     }
 

@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.entity.enums.SortingOrder;
 import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -72,7 +73,8 @@ public interface UBSManagementService {
      * @return List of {@link greencity.entity.order.Certificate} lists.
      * @author Nazar Struk
      */
-    PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page);
+    PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
+        SortingOrder sortingOrder);
 
     /**
      * Method add a certificates.

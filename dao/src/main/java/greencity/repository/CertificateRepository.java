@@ -3,9 +3,9 @@ package greencity.repository;
 import greencity.entity.order.Certificate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ import java.util.List;
  * @return list of {@link Certificate}.
  * @author Nazar Struk
  */
-public interface CertificateRepository extends CrudRepository<Certificate, String> {
+public interface CertificateRepository extends JpaRepository<Certificate, String> {
     /**
      * Method update status to expired for all {@link Certificate} in which
      * expiration date is off.
@@ -35,7 +35,7 @@ public interface CertificateRepository extends CrudRepository<Certificate, Strin
      * @return list of {@link Certificate}.
      * @author Nazar Struk
      */
-    @Query(value = "SELECT c from Certificate c order by c.creationDate DESC")
+    @Query(value = "SELECT c from Certificate c")
     Page<Certificate> getAll(Pageable page);
 
     /**
