@@ -7,10 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -25,6 +22,7 @@ public class AllValuesFromTableRepo {
     private static final String WHERE_DATE = "order_date::date = ?";
 
     private final JdbcTemplate jdbcTemplate;
+
     private static final String QUERY =
         "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
             + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
@@ -64,6 +62,17 @@ public class AllValuesFromTableRepo {
             + "left join payment on payment.order_id = orders.id\n"
             + "left join certificate on orders.id = certificate.order_id";
 
+    private static final String SEARCH = "lower (concat(orders.id, orders.order_status, orders.order_date, \n"
+        + "ubs_user.first_name, ubs_user.last_name, ubs_user.phone_number, \n"
+        + "ubs_user.email, users.violations, address.district, address.city, \n"
+        + "address.street, address.house_number,address.house_corpus, \n"
+        + "address.entrance_number, users.recipient_name, users.recipient_email, \n"
+        + "users.recipient_phone, address.comment, payment.amount,\n"
+        + "certificate.code, certificate.points::text, payment.amount-certificate.points, \n"
+        + "orders.comment, payment.payment_system, orders.deliver_from,\n"
+        + "orders.deliver_to, payment.id::text, orders.receiving_station, orders.note)) "
+        + "like lower(concat( '%',?,'%'))";
+
     private static final String EMPLOYEE_QUERY = "select concat_ws(' ', first_name, "
         + "last_name) as name,position_id from employees\n"
         + "left join employee_position on employees.id = employee_position.employee_id\n"
@@ -73,9 +82,9 @@ public class AllValuesFromTableRepo {
     /**
      * Method returns all orders with additional information.
      */
-    public List<Map<String, Object>> findAll(SearchCriteria searchCriteria, int pages, int size,
-        String column, String sortingType) {
-        int offset = pages * size;
+    public List<Map<String, Object>> findAll(SearchCriteria searchCriteria, int page, int size,
+        String column, SortingOrder sortingType) {
+        int offset = page * size;
         List<Object> preparedValues = new ArrayList<>();
 
         String subQuery = formSQLFilter(searchCriteria, column, sortingType, preparedValues);
@@ -93,9 +102,11 @@ public class AllValuesFromTableRepo {
         return jdbcTemplate.queryForList(EMPLOYEE_QUERY + "?", orderId);
     }
 
-    private String formSQLFilter(SearchCriteria searchCriteria, String column, String sortingType,
+    private String formSQLFilter(SearchCriteria searchCriteria, String column, SortingOrder sortingOrder,
         List<Object> preparedValues) {
         String subQuery = "";
+        boolean requireAnd = false;
+        final String and = " and ";
 
         if (searchCriteria.getOrderStatuses() != null
             || searchCriteria.getPaymentSystems() != null
@@ -108,8 +119,6 @@ public class AllValuesFromTableRepo {
             subQuery += " where ";
 
             String sqlCondition;
-            final String and = " and ";
-            boolean requireAnd = false;
 
             if (searchCriteria.getOrderStatuses() != null) {
                 subQuery +=
@@ -157,8 +166,14 @@ public class AllValuesFromTableRepo {
                 preparedValues.add(Date.valueOf(searchCriteria.getOrderDate()));
             }
         }
+        if (searchCriteria.getSearchValue() != null) {
+            subQuery += requireAnd ? and + SEARCH : " where " + SEARCH;
+            preparedValues.add(searchCriteria.getSearchValue());
+        }
 
-        return addSortingAndOrderToSubQuery(subQuery, column, sortingType);
+        subQuery += String.format(" order by %s %s limit ? offset ?", column, sortingOrder);
+
+        return subQuery;
     }
 
     private String formSubQueryAndPrepareValues(Object[] array, List<Object> preparedValues, String whereClause) {
@@ -173,18 +188,37 @@ public class AllValuesFromTableRepo {
         return String.format(whereClause, args);
     }
 
-    private String addSortingAndOrderToSubQuery(String subQuery, String column, String sortingType) {
-        if (!sortingType.equalsIgnoreCase(SortingOrder.ASC.name())
-            && !sortingType.equalsIgnoreCase(SortingOrder.DESC.name())) {
-            throw new IllegalArgumentException("Invalid sorting type");
-        }
+    private List<String> getColumns() {
+        return jdbcTemplate.queryForList(
+            "select distinct column_name "
+                + "from information_schema.columns "
+                + "where table_name in ('orders', 'ubs_user', 'users', 'address', 'payment', 'certificate')",
+            String.class);
+    }
 
-        StringBuilder query = new StringBuilder();
+    /**
+     * Method returns all columns from our custom table.
+     */
+    public List<String> getCustomColumns() {
+        List<String> columns = new ArrayList<>(getColumns());
 
-        query.append(subQuery).append(" order by ").append(column)
-            .append(" ").append(sortingType).append(" limit ? offset ?");
+        columns.add("orderId");
+        columns.add("clientName");
+        columns.add("address");
+        columns.add("comment_To_Address_For_Client");
+        columns.add("garbage_Bags_120_Amount");
+        columns.add("bo_Bags_120_Amount");
+        columns.add("bo_Bags_20_Amount");
+        columns.add("total_Order_Sum");
+        columns.add("order_certificate_code");
+        columns.add("order_certificate_points");
+        columns.add("amount_Due");
+        columns.add("comment_For_Order_By_Client");
+        columns.add("date_Of_Export");
+        columns.add("time_Of_Export");
+        columns.add("id_Order_From_Shop");
+        columns.add("comments_for_order");
 
-        subQuery = String.valueOf(query);
-        return subQuery;
+        return columns;
     }
 }
