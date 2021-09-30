@@ -62,6 +62,17 @@ public class AllValuesFromTableRepo {
             + "left join payment on payment.order_id = orders.id\n"
             + "left join certificate on orders.id = certificate.order_id";
 
+    private static final String SEARCH = "lower (concat(orders.id, orders.order_status, orders.order_date, \n"
+        + "ubs_user.first_name, ubs_user.last_name, ubs_user.phone_number, \n"
+        + "ubs_user.email, users.violations, address.district, address.city, \n"
+        + "address.street, address.house_number,address.house_corpus, \n"
+        + "address.entrance_number, users.recipient_name, users.recipient_email, \n"
+        + "users.recipient_phone, address.comment, payment.amount,\n"
+        + "certificate.code, certificate.points::text, payment.amount-certificate.points, \n"
+        + "orders.comment, payment.payment_system, orders.deliver_from,\n"
+        + "orders.deliver_to, payment.id::text, orders.receiving_station, orders.note)) "
+        + "like lower(concat( '%',?,'%'))";
+
     private static final String EMPLOYEE_QUERY = "select concat_ws(' ', first_name, "
         + "last_name) as name,position_id from employees\n"
         + "left join employee_position on employees.id = employee_position.employee_id\n"
@@ -94,6 +105,8 @@ public class AllValuesFromTableRepo {
     private String formSQLFilter(SearchCriteria searchCriteria, String column, SortingOrder sortingOrder,
         List<Object> preparedValues) {
         String subQuery = "";
+        boolean requireAnd = false;
+        final String and = " and ";
 
         if (searchCriteria.getOrderStatuses() != null
             || searchCriteria.getPaymentSystems() != null
@@ -106,8 +119,6 @@ public class AllValuesFromTableRepo {
             subQuery += " where ";
 
             String sqlCondition;
-            final String and = " and ";
-            boolean requireAnd = false;
 
             if (searchCriteria.getOrderStatuses() != null) {
                 subQuery +=
@@ -155,6 +166,10 @@ public class AllValuesFromTableRepo {
                 preparedValues.add(Date.valueOf(searchCriteria.getOrderDate()));
             }
         }
+        if (searchCriteria.getSearchValue() != null) {
+            subQuery += requireAnd ? and + SEARCH : " where " + SEARCH;
+            preparedValues.add(searchCriteria.getSearchValue());
+        }
 
         subQuery += String.format(" order by %s %s limit ? offset ?", column, sortingOrder);
 
@@ -173,13 +188,19 @@ public class AllValuesFromTableRepo {
         return String.format(whereClause, args);
     }
 
+    private List<String> getColumns() {
+        return jdbcTemplate.queryForList(
+            "select distinct column_name "
+                + "from information_schema.columns "
+                + "where table_name in ('orders', 'ubs_user', 'users', 'address', 'payment', 'certificate')",
+            String.class);
+    }
+
     /**
      * Method returns all columns from our custom table.
      */
-    public List<String> getColumns() {
-        List<String> columns = jdbcTemplate.queryForList("select distinct column_name\n"
-            + "from information_schema.columns\n"
-            + "where table_name in ('orders', 'ubs_user', 'users', 'address', 'payment', 'certificate')", String.class);
+    public List<String> getCustomColumns() {
+        List<String> columns = new ArrayList<>(getColumns());
 
         columns.add("orderId");
         columns.add("clientName");

@@ -562,7 +562,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .filter(s -> s.name().equalsIgnoreCase(sortingType))
             .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
 
-        String resultColumn = allValuesFromTableRepo.getColumns().stream()
+        String resultColumn = allValuesFromTableRepo.getCustomColumns().stream()
             .filter(c -> c.equalsIgnoreCase(column))
             .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
 

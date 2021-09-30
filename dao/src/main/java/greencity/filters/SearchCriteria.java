@@ -21,4 +21,5 @@ public class SearchCriteria {
     private String orderDate;
     private String dateFrom;
     private String dateTo;
+    private String searchValue;
 }
