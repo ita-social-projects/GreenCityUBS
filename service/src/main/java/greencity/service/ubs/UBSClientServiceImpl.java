@@ -122,23 +122,20 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public List<PersonalDataDto> getSecondPageData(String uuid) {
+    public PersonalDataDto getSecondPageData(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long userId = userRepository.findByUuid(uuid).getId();
         String currentUserEmail = restClient.findUserByUUid(uuid)
             .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
         List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
         if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().email(currentUserEmail).build());
+            return PersonalDataDto.builder().email(currentUserEmail).build();
         } else {
-            List<PersonalDataDto> result = allByUserId.stream()
+            Optional<PersonalDataDto> result = allByUserId.stream()
                 .map(u -> modelMapper.map(u, PersonalDataDto.class))
                 .filter(x -> x.getEmail().equals(currentUserEmail))
-                .distinct()
-                .collect(Collectors.toList());
-            return result.isEmpty()
-                ? List.of(PersonalDataDto.builder().email(currentUserEmail).build())
-                : result;
+                .distinct().findAny();
+            return result.orElseGet(() -> PersonalDataDto.builder().email(currentUserEmail).build());
         }
     }
 
