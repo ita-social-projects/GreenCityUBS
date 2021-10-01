@@ -22,8 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 
 import static greencity.ModelUtils.getUuid;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +67,11 @@ class SuperAdminControllerTest {
     @Test
     void getTariffService() throws Exception {
         mockMvc.perform(get(ubsLink + "/getTariffService")).andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteTariffService() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
+            .andExpect(status().isOk());
     }
 }
