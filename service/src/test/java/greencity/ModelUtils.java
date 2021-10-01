@@ -1496,4 +1496,16 @@ public class ModelUtils {
             .price(250)
             .build();
     }
+
+    public static Optional<Bag> getBag() {
+        return Optional.of(Bag.builder()
+            .id(1)
+            .capacity(120)
+            .commission(50)
+            .price(120)
+            .fullPrice(170)
+            .createdAt(LocalDate.now())
+            .createdBy("User")
+            .build());
+    }
 }

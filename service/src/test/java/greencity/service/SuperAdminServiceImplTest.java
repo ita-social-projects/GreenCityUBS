@@ -11,7 +11,6 @@ import greencity.repository.BagRepository;
 import greencity.repository.BagTranslationRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.SuperAdminServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +20,9 @@ import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -70,18 +71,15 @@ class SuperAdminServiceImplTest {
 
     @Test
     void deleteTariffServiceTest() {
-        BagTranslation bagTranslation = new BagTranslation();
-        Bag bag = new Bag();
-        bag.setId(1);
-        bagTranslation.setBag(bag);
-        superAdminService.deleteTariffService(1L);
-        verify(bagRepository).deleteById(1);
-        verify(bagTranslationRepository).delete(bagTranslation);
+        when(bagRepository.findById(1)).thenReturn(ModelUtils.getBag());
+
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).delete(ModelUtils.getBag().get());
     }
 
     @Test
     void deleteTariffServiceThrowException() {
-        doThrow(new BagNotFoundException("rewrewr")).when(bagRepository).deleteById(1);
-        Assertions.assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1L));
+        assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
 }

@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,4 +41,14 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
             + "JOIN LANGUAGES AS L ON BT.LANGUAGE_ID = L.ID "
             + "WHERE L.CODE = :language AND OBM.ORDER_ID = :orderId")
     List<BagTranslation> findAllByLanguageOrder(String language, @Param("orderId") Long orderId);
+
+    /**
+     * Metgod,that return Bag translation by {@link Bag} and {@link String} -
+     * language code.
+     * 
+     * @param bag  - current Bag.
+     * @param code - code of the language.
+     * @return BagTranslation with current bag and current lang code.
+     */
+    BagTranslation findBagTranslationByBagAndLanguageCode(Bag bag, String code);
 }
