@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
@@ -73,16 +74,25 @@ public class SuperAdminServiceImpl implements SuperAdminService {
      * 
      * @param id - Tariff Service Id.
      */
-    public void deleteTariffService(long id) {
-        try {
-            Bag bag = new Bag();
-            bag.setId((int) id);
-            BagTranslation bagTranslation = new BagTranslation();
-            bagTranslation.setBag(bag);
-            bagRepository.deleteById(bag.getId());
-            translationRepository.delete(bagTranslation);
-        } catch (Exception e) {
-            throw new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + id);
-        }
+    public void deleteTariffService(Integer id) {
+        Bag bag = bagRepository.findById(id).orElseThrow(
+            () -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
+        bagRepository.delete(bag);
+    }
+
+    @Override
+    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id) {
+        Bag bag = bagRepository.findById(id).orElseThrow(() -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND));
+        bag.setPrice(dto.getPrice());
+        bag.setCapacity(dto.getCapacity());
+        bag.setCommission(dto.getCommission());
+        bag.setFullPrice(dto.getPrice() + dto.getCommission());
+        bagRepository.save(bag);
+        BagTranslation bagTranslation =
+            translationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
+        bagTranslation.setName(dto.getName());
+        bagTranslation.setDescription(dto.getDescription());
+        translationRepository.save(bagTranslation);
+        return getTariffService(bagTranslation);
     }
 }
