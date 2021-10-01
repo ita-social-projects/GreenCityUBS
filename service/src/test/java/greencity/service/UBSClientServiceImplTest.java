@@ -249,7 +249,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Collections.singletonList(ModelUtils.getUBSuser()));
         when(modelMapper.map(ModelUtils.getUBSuser(), PersonalDataDto.class)).thenReturn(expected);
         when(restClient.findUserByUUid("35467585763t4sfgchjfuyetf")).thenReturn(ubsCustomersDto);
-        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf").get(0);
+        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
         assertEquals(expected, actual);
     }
 

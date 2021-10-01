@@ -29,10 +29,10 @@ public interface UBSClientService {
      * Methods returns all saved user data.
      *
      * @param uuid current {@link User}'s uuid.
-     * @return list of {@link PersonalDataDto}.
+     * @return instance of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
-    List<PersonalDataDto> getSecondPageData(String uuid);
+    PersonalDataDto getSecondPageData(String uuid);
 
     /**
      * Methods return status of entered certificate, empty string if absent.
