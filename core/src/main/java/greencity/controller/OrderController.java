@@ -94,7 +94,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/personal-data")
-    public ResponseEntity<List<PersonalDataDto>> getUBSusers(
+    public ResponseEntity<PersonalDataDto> getUBSusers(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getSecondPageData(userUuid));
