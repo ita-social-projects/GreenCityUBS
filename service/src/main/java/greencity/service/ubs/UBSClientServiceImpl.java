@@ -123,20 +123,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
-        Long userId = userRepository.findByUuid(uuid).getId();
-        String currentUserEmail = restClient.findUserByUUid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
-        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-        if (allByUserId.isEmpty()) {
-            return PersonalDataDto.builder().email(currentUserEmail).build();
-        } else {
-            Optional<PersonalDataDto> result = allByUserId.stream()
-                .map(u -> modelMapper.map(u, PersonalDataDto.class))
-                .filter(x -> x.getEmail().equals(currentUserEmail))
-                .distinct().findAny();
-            return result.orElseGet(() -> PersonalDataDto.builder().email(currentUserEmail).build());
-        }
+        User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
+        return modelMapper.map(currentUser, PersonalDataDto.class);
     }
 
     /**
@@ -732,13 +720,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return address;
     }
 
-    private void createUserByUuidIfUserDoesNotExist(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
+    private User createUserByUuidIfUserDoesNotExist(String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        if (user == null) {
             UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
-            userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
+            return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName()).build());
         }
+        return user;
     }
 
     @Override
