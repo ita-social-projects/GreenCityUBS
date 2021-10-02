@@ -32,7 +32,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<ColumnStateDTO> columnStateDTOS = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new ColumnStateDTO(new TitleDto("select", "Вибір", "Select"), 20, true, true, 0, EditType.CHECKBOX,
                 new ArrayList<>(), "ORDERS_INFO"),
-            new ColumnStateDTO(new TitleDto("orderid", "Номер замовлення", "Order's number"), 20, true, false, 1,
+            new ColumnStateDTO(new TitleDto("order_id", "Номер замовлення", "Order's number"), 20, true, false, 1,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnStateDTO(new TitleDto("order_status", "Статус замовлення", "Order's status"), 20, true, true, 2,
                 EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
@@ -100,7 +100,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, 32, EditType.SELECT, orderOptionalListForDevelopStage(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("comments_for_order", "Коментарі до замовлення", "Comments for order"), 20,
                 false, true, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
-        return new TableParamsDTO(columnStateDTOS, "orderid", SortingOrder.ASC, columnBelongingListForDevelopStage());
+        return new TableParamsDTO(columnStateDTOS, "order_id", SortingOrder.DESC, columnBelongingListForDevelopStage());
     }
 
     @Override

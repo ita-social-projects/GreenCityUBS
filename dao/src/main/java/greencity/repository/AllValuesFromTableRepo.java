@@ -24,43 +24,41 @@ public class AllValuesFromTableRepo {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String QUERY =
-        "select distinct orders.id as orderId, orders.order_status , orders.order_date,\n"
-            + "concat_ws(' ',ubs_user.first_name,ubs_user.last_name) as clientName,"
-            + "ubs_user.phone_number ,ubs_user.email,"
-            + "users.violations,"
-            + "address.district,concat_WS(', ',address.city,address.street,address.house_number,"
-            + "address.house_corpus,address.entrance_number) as address,\n"
-            + "users.recipient_name,"
-            + "users.recipient_email,"
-            + "users.recipient_phone,"
-            + "address.comment as comment_To_Address_For_Client,\n"
-            + "(select amount from order_bag_mapping where  bag_id = 1 "
-            + "and order_bag_mapping.order_id = orders.id) as garbage_Bags_120_Amount,\n"
-            + "(select amount from order_bag_mapping where  bag_id = 2 "
-            + "and order_bag_mapping.order_id = orders.id)as bo_Bags_120_Amount,\n"
-            + "(select amount from order_bag_mapping where  bag_id = 3 "
-            + "and order_bag_mapping.order_id = orders.id)as bo_Bags_20_Amount,\n"
-            + "(select sum(payment.amount)\n"
-            + "as total_Order_Sum from payment where payment.order_id = orders.id),\n"
-            + "(select string_agg(certificate.code,',')\n"
-            + "as order_certificate_code from certificate where order_id = orders.id),\n"
-            + "(select string_agg(certificate.points::text,',')\n"
-            + "as order_certificate_points from certificate where order_id = orders.id),\n"
-            + "(payment.amount-certificate.points)as amount_Due,\n"
-            + "orders.comment as comment_For_Order_By_Client,\n"
-            + "payment.payment_system,\n"
-            + "cast(orders.deliver_from as date) as date_Of_Export,\n"
-            + "concat_Ws('-',cast(orders.deliver_from as time), cast(orders.deliver_to as time)) as time_Of_Export,\n"
-            + "(select string_agg(payment.id::text,',')\n"
-            + "as id_Order_From_Shop from payment where payment.order_id = orders.id) ,\n"
-            + "orders.receiving_station,\n"
+        "select distinct (orders.id) as order_id, \n"
+            + "orders.order_status as order_status, \n"
+            + "orders.order_payment_status as payment_status,\n"
+            + "orders.order_date as order_date, payment.order_time as payment_date,\n"
+            + "concat_ws(' ', users.recipient_name, users.recipient_surname) as client_name,\n"
+            + "users.recipient_phone as phone_number, users.recipient_email as email,\n"
+            + "concat_ws(' ', ubs_user.first_name, ubs_user.last_name) as sender_name,\n"
+            + "ubs_user.phone_number as sender_phone, ubs_user.email as sender_email,\n"
+            + "users.violations, address.district,\n"
+            + "concat_ws(', ', address.street, address.house_number,\n"
+            + "address.house_corpus, address.entrance_number) as address,\n"
+            + "address.comment as comment_to_address_for_client,\n"
+            + "(select sum(order_bag_mapping.amount) as bags_amount\n"
+            + "from order_bag_mapping where order_bag_mapping.order_id = orders.id),\n"
+            + "(select sum(payment.amount) as total_order_sum\n"
+            + "from payment where payment.order_id = orders.id),\n"
+            + "(select string_agg(certificate.code,', ') as order_certificate_code \n"
+            + "from certificate where order_id = orders.id),\n"
+            + "(select string_agg(certificate.points::text,', ') as order_certificate_points \n"
+            + "from certificate where order_id = orders.id),\n"
+            + "(payment.amount-certificate.points) as amount_due,\n"
+            + "orders.comment as comment_for_order_by_client,\n"
+            + "cast(orders.deliver_from as date) as date_of_export,\n"
+            + "concat_ws('-', cast(orders.deliver_from as time), \n"
+            + "cast(orders.deliver_to as time)) as time_of_export,\n"
+            + "(select string_agg(payment.id::text,', ') as id_order_from_shop \n"
+            + "from payment where payment.order_id = orders.id), \n"
+            + "orders.receiving_station as receiving_station,\n"
             + "orders.note as comments_for_order\n"
             + "from orders\n"
             + "left join ubs_user on orders.ubs_user_id = ubs_user.id\n"
             + "left join users on orders.users_id = users.id\n"
             + "left join address on ubs_user.address_id = address.id\n"
             + "left join payment on payment.order_id = orders.id\n"
-            + "left join certificate on orders.id = certificate.order_id";
+            + "left join certificate on certificate.order_id = orders.id";
 
     private static final String SEARCH = "lower (concat(orders.id, orders.order_status, orders.order_date, \n"
         + "ubs_user.first_name, ubs_user.last_name, ubs_user.phone_number, \n"
@@ -188,35 +186,43 @@ public class AllValuesFromTableRepo {
         return String.format(whereClause, args);
     }
 
-    private List<String> getColumns() {
-        return jdbcTemplate.queryForList(
-            "select distinct column_name "
-                + "from information_schema.columns "
-                + "where table_name in ('orders', 'ubs_user', 'users', 'address', 'payment', 'certificate')",
-            String.class);
-    }
-
     /**
      * Method returns all columns from our custom table.
      */
     public List<String> getCustomColumns() {
-        List<String> columns = new ArrayList<>(getColumns());
+        List<String> columns = new ArrayList<>();
 
-        columns.add("orderId");
-        columns.add("clientName");
+        columns.add("order_id");
+        columns.add("order_status");
+        columns.add("payment_status");
+        columns.add("order_date");
+        columns.add("payment_date");
+        columns.add("client_name");
+        columns.add("phone_number");
+        columns.add("email");
+        columns.add("sender_name");
+        columns.add("sender_phone");
+        columns.add("sender_email");
+        columns.add("violations");
+        columns.add("location");
+        columns.add("district");
         columns.add("address");
-        columns.add("comment_To_Address_For_Client");
-        columns.add("garbage_Bags_120_Amount");
-        columns.add("bo_Bags_120_Amount");
-        columns.add("bo_Bags_20_Amount");
-        columns.add("total_Order_Sum");
+        columns.add("comment_to_address_for_client");
+        columns.add("bags_amount");
+        columns.add("total_order_sum");
         columns.add("order_certificate_code");
         columns.add("order_certificate_points");
-        columns.add("amount_Due");
-        columns.add("comment_For_Order_By_Client");
-        columns.add("date_Of_Export");
-        columns.add("time_Of_Export");
-        columns.add("id_Order_From_Shop");
+        columns.add("amount_due");
+        columns.add("comment_for_order_by_client");
+        columns.add("payment");
+        columns.add("date_of_export");
+        columns.add("time_of_export");
+        columns.add("id_order_from_shop");
+        columns.add("receiving_station");
+        columns.add("responsible_manager");
+        columns.add("responsible_logic_man");
+        columns.add("responsible_driver");
+        columns.add("responsible_navigator");
         columns.add("comments_for_order");
 
         return columns;

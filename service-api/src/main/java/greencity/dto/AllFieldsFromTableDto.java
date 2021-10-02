@@ -16,49 +16,51 @@ import lombok.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllFieldsFromTableDto {
-    @JsonProperty("orderid")
+    @JsonProperty("order_id")
     private Long orderId;
     @JsonProperty("order_status")
     private String orderStatus;
+    @JsonProperty("payment_status")
+    private String paymentStatus;
     @JsonProperty("order_date")
     private String orderDate;
+    @JsonProperty("payment_date")
+    private String paymentDate;
     @JsonProperty("client_name")
     private String clientName;
     @JsonProperty("phone_number")
     private String phoneNumber;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("sender_name")
+    private String senderName;
+    @JsonProperty("sender_phone")
+    private String senderPhone;
+    @JsonProperty("sender_email")
+    private String senderEmail;
     @JsonProperty("violations")
     private Integer violationsAmount;
+    @JsonProperty("location")
+    private String location;
     @JsonProperty("district")
     private String district;
     @JsonProperty("address")
     private String address;
-    @JsonProperty("recipient_name")
-    private String recipientName;
-    @JsonProperty("recipient_phone")
-    private String phoneNumberRecipient;
-    @JsonProperty("recipient_email")
-    private String emailRecipient;
     @JsonProperty("comment_to_address_for_client")
     private String commentToAddressForClient;
-    @JsonProperty("garbage_bags_120_amount")
-    private Integer garbageBags120Amount;
-    @JsonProperty("bo_bags_120_amount")
-    private Integer boBags120Amount;
-    @JsonProperty("bo_bags_20_amount")
-    private Integer boBags20Amount;
+    @JsonProperty("bags_amount")
+    private Integer bagsAmount;
     @JsonProperty("total_order_sum")
-    private Long totalSumOrder;
+    private Long totalOrderSum;
     @JsonProperty("order_certificate_code")
-    private String certificateCode;
+    private String orderCertificateCode;
     @JsonProperty("order_certificate_points")
-    private String certificatePoints;
+    private String orderCertificatePoints;
     @JsonProperty("amount_due")
     private Long amountDue;
     @JsonProperty("comment_for_order_by_client")
     private String commentForOrderByClient;
-    @JsonProperty("payment_system")
+    @JsonProperty("payment")
     private String payment;
     @JsonProperty("date_of_export")
     private String dateOfExport;
