@@ -270,4 +270,12 @@ public interface UBSClientService {
      * @author Vadym Makitra
      */
     void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature);
+
+    /**
+     * Method that returns order info for surcharge.
+     *
+     * @return {@link OrderStatusPageDto}.
+     * @author Igor Boykov
+     */
+    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId);
 }

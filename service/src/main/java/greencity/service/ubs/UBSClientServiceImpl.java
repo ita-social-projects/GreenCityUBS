@@ -930,4 +930,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         }
     }
+
+    @Override
+    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
+        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, languageId);
+        Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
+        Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
+        amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
+        orderStatusPageDto.setAmountOfBagsExported(amountBagsOrderExported);
+        Double exportedPrice = orderStatusPageDto.getOrderExportedDiscountedPrice();
+        Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
+        orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
+        return orderStatusPageDto;
+    }
 }

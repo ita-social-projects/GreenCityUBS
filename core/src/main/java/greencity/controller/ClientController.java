@@ -148,4 +148,25 @@ public class ClientController {
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
     }
+
+    /**
+     * Controller for getting order info data about surcharge.
+     *
+     * @return {@link OrderStatusPageDto}.
+     * @author Igor Boykov
+     */
+    @ApiOperation(value = "Controller for getting order info data about surcharge")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-data-for-order-surchargeскуф/{id}/{langId}")
+    public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
+        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
+    }
 }
