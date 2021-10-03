@@ -112,7 +112,6 @@ public class AdminUbsController {
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
-        HttpStatus httpStatus = blockedOrderDTOS.isEmpty() ? HttpStatus.ACCEPTED : HttpStatus.FORBIDDEN;
-        return ResponseEntity.status(httpStatus).body(blockedOrderDTOS);
+        return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
     }
 }
