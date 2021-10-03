@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 
@@ -134,10 +135,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private ChangeOrderResponseDTO createReturnForSwitchChangeOrder(List<Long> ordersId) {
-        HttpStatus httpStatus = ordersId.isEmpty()
-            ? HttpStatus.ACCEPTED
-            : HttpStatus.BAD_REQUEST;
-        return ChangeOrderResponseDTO.builder().httpStatus(httpStatus).unresolvedGoalsOrderId(ordersId).build();
+        return ChangeOrderResponseDTO.builder().httpStatus(HttpStatus.OK).unresolvedGoalsOrderId(ordersId).build();
     }
 
     private List<TitleDto> orderStatusListForDevelopStage() {
@@ -372,7 +370,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         User user = userRepository.findByUuid(userUuid);
         String userName = String.format("%s %s", user.getRecipientName(), user.getRecipientSurname());
         List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
-        for (Long orderId : orders) {
+        List<Long> afterFiltering = orders.stream().filter(x -> (x % 2 == 0)).collect(Collectors.toList());
+        for (Long orderId : afterFiltering) {
             blockedOrderDTOS.add(new BlockedOrderDTO(orderId, userName));
         }
         return blockedOrderDTOS;
