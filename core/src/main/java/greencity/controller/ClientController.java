@@ -163,7 +163,7 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-data-for-order-surchargeскуф/{id}/{langId}")
+    @GetMapping("/get-data-for-order-surcharge/{id}/{langId}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
         @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
         return ResponseEntity.status(HttpStatus.OK)
