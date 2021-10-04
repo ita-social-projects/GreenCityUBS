@@ -46,10 +46,10 @@ class SuperAdminControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
-                .setCustomArgumentResolvers(
-                        new PageableHandlerMethodArgumentResolver(),
-                        new UserArgumentResolver(restClient))
-                .build();
+            .setCustomArgumentResolvers(
+                new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(restClient))
+            .build();
     }
 
     @Test
@@ -59,10 +59,10 @@ class SuperAdminControllerTest {
         String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/createTariffService")
-                .principal(principal)
-                .content(ServiceResponceDtoJSON)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -73,7 +73,7 @@ class SuperAdminControllerTest {
     @Test
     void deleteTariffService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -84,8 +84,8 @@ class SuperAdminControllerTest {
         String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
-                .content(ServiceResponseDtoJSON)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .content(ServiceResponseDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }

@@ -47,7 +47,7 @@ public class ModelUtils {
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
-            singletonList(createOrderDetailInfoDto());
+        singletonList(createOrderDetailInfoDto());
     public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
     public static final Order GET_ORDER_DETAILS = getOrderDetails();
     public static final Order TEST_ORDER_2 = createTestOrder2();
@@ -64,16 +64,16 @@ public class ModelUtils {
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
-            new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
+        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
-            List.of(TEST_NOTIFICATION_SHORT_DTO);
+        List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableDto<NotificationShortDto> TEST_DTO = createPageableDto();
     public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
     public static final EmployeePositionDtoResponse TEST_EMPLOYEE_POSITION_DTO_RESPONSE =
-            createEmployeePositionDtoResponse();
+        createEmployeePositionDtoResponse();
     public static final Position TEST_POSITION = createPosition();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
@@ -81,263 +81,263 @@ public class ModelUtils {
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
     public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
-            Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
+        Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
     public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
-            Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
+        Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
-                .capacity("One")
-                .sum("Two")
-                .build();
+            .capacity("One")
+            .sum("Two")
+            .build();
     }
 
     public static Optional<Order> getOrderWithEvents() {
         return Optional.of(Order.builder()
+            .id(1L)
+            .events(List.of(Event.builder()
                 .id(1L)
-                .events(List.of(Event.builder()
-                                .id(1L)
-                                .authorName("Igor")
-                                .eventDate(LocalDateTime.now())
-                                .authorName("Igor")
-                                .build(),
-                        Event.builder()
-                                .id(1L)
-                                .authorName("Igor")
-                                .eventDate(LocalDateTime.now())
-                                .authorName("Igor")
-                                .build(),
-                        Event.builder()
-                                .id(1L)
-                                .authorName("Igor")
-                                .eventDate(LocalDateTime.now())
-                                .authorName("Igor")
-                                .build()))
-                .build());
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build(),
+                Event.builder()
+                    .id(1L)
+                    .authorName("Igor")
+                    .eventDate(LocalDateTime.now())
+                    .authorName("Igor")
+                    .build()))
+            .build());
     }
 
     public static List<Event> getListOfEvents() {
         return List.of(Event.builder()
-                        .id(1L)
-                        .authorName("Igor")
-                        .eventDate(LocalDateTime.now())
-                        .authorName("Igor")
-                        .order(new Order())
-                        .build(),
-                Event.builder()
-                        .id(1L)
-                        .authorName("Igor")
-                        .eventDate(LocalDateTime.now())
-                        .authorName("Igor")
-                        .order(new Order())
-                        .build(),
-                Event.builder()
-                        .id(1L)
-                        .authorName("Igor")
-                        .eventDate(LocalDateTime.now())
-                        .authorName("Igor")
-                        .order(new Order())
-                        .build());
+            .id(1L)
+            .authorName("Igor")
+            .eventDate(LocalDateTime.now())
+            .authorName("Igor")
+            .order(new Order())
+            .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build(),
+            Event.builder()
+                .id(1L)
+                .authorName("Igor")
+                .eventDate(LocalDateTime.now())
+                .authorName("Igor")
+                .order(new Order())
+                .build());
     }
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
-                .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
-                .bags(Collections.singletonList(new BagDto(3, 999)))
-                .orderComment("comment")
-                .certificates(Collections.emptySet())
-                .pointsToUse(700)
-                .personalData(PersonalDataDto.builder()
-                        .firstName("oleh")
-                        .lastName("ivanov")
-                        .id(13L)
-                        .email("mail@mail.ua")
-                        .phoneNumber("067894522")
-                        .build())
-                .build();
+            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
+            .bags(Collections.singletonList(new BagDto(3, 999)))
+            .orderComment("comment")
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .personalData(PersonalDataDto.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .id(13L)
+                .email("mail@mail.ua")
+                .phoneNumber("067894522")
+                .build())
+            .build();
     }
 
     public static UBSuser getUBSuser() {
         return UBSuser.builder()
+            .firstName("oleh")
+            .lastName("ivanov")
+            .email("mail@mail.ua")
+            .id(1L)
+            .phoneNumber("067894522")
+            .address(Address.builder()
+                .id(1L)
+                .user(null)
+                .houseNumber("1a")
+                .actual(true)
+                .entranceNumber("str")
+                .district("3a")
+                .houseCorpus("2a")
+                .city("Kiev")
+                .street("Gorodotska")
+                .coordinates(Coordinates.builder()
+                    .longitude(2.2)
+                    .latitude(3.2)
+                    .build())
+                .comment(null).build())
+            .build();
+    }
+
+    public static User getTestUser() {
+        return User.builder()
+            .id(1L)
+            .orders(Lists.newArrayList(getOrder()))
+            .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
+            .currentPoints(getChangeOfPoints().getAmount())
+            .employee(getEmployee())
+            .orders(Lists.newArrayList(getOrder()))
+            .recipientName("Alan Po")
+            .uuid("abc")
+            .build();
+    }
+
+    public static ChangeOfPoints getChangeOfPoints() {
+        return ChangeOfPoints.builder()
+            .id(1L)
+            .amount(0)
+            .order(getOrder())
+            .date(LocalDateTime.now())
+            .build();
+    }
+
+    public static Order getOrder() {
+        return Order.builder()
+            .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId(1L)
+                .amount(200L)
+                .currency("UAH")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
                 .address(Address.builder()
-                        .id(1L)
-                        .user(null)
-                        .houseNumber("1a")
-                        .actual(true)
-                        .entranceNumber("str")
-                        .district("3a")
-                        .houseCorpus("2a")
-                        .city("Kiev")
-                        .street("Gorodotska")
-                        .coordinates(Coordinates.builder()
-                                .longitude(2.2)
-                                .latitude(3.2)
-                                .build())
-                        .comment(null).build())
-                .build();
-    }
-
-    public static User getTestUser() {
-        return User.builder()
-                .id(1L)
-                .orders(Lists.newArrayList(getOrder()))
-                .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
-                .currentPoints(getChangeOfPoints().getAmount())
-                .employee(getEmployee())
-                .orders(Lists.newArrayList(getOrder()))
-                .recipientName("Alan Po")
-                .uuid("abc")
-                .build();
-    }
-
-    public static ChangeOfPoints getChangeOfPoints() {
-        return ChangeOfPoints.builder()
-                .id(1L)
-                .amount(0)
-                .order(getOrder())
-                .date(LocalDateTime.now())
-                .build();
-    }
-
-    public static Order getOrder() {
-        return Order.builder()
-                .id(1L)
-                .payment(Lists.newArrayList(Payment.builder()
-                        .paymentId(1L)
-                        .amount(200L)
-                        .currency("UAH")
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build()))
-                .ubsUser(UBSuser.builder()
-                        .firstName("oleh")
-                        .lastName("ivanov")
-                        .email("mail@mail.ua")
-                        .id(1L)
-                        .phoneNumber("067894522")
-                        .address(Address.builder()
-                                .id(1L)
-                                .city("Lviv")
-                                .street("Levaya")
-                                .district("frankivskiy")
-                                .entranceNumber("5")
-                                .comment("near mall")
-                                .houseCorpus(null)
-                                .houseNumber("4R")
-                                .coordinates(Coordinates.builder()
-                                        .latitude(49.83)
-                                        .longitude(23.88)
-                                        .build())
-                                .user(User.builder().id(1L).build())
-                                .build())
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .comment("near mall")
+                    .houseCorpus(null)
+                    .houseNumber("4R")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
                         .build())
-                .certificates(Collections.emptySet())
-                .pointsToUse(700)
-                .build();
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .build();
     }
 
     public static Order getOrderExportDetails() {
         return Order.builder()
-                .id(1L)
-                .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
-                .receivingStation("Petrivka")
-                .build();
+            .id(1L)
+            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .receivingStation("Petrivka")
+            .build();
     }
 
     public static OrderDto getOrderDto() {
         return OrderDto.builder()
-                .firstName("oleh")
-                .lastName("ivanov")
-                .address("frankivskiy Levaya 4R")
-                .addressComment("near mall")
-                .phoneNumber("067894522")
-                .latitude(49.83)
-                .longitude(23.88)
-                .build();
+            .firstName("oleh")
+            .lastName("ivanov")
+            .address("frankivskiy Levaya 4R")
+            .addressComment("near mall")
+            .phoneNumber("067894522")
+            .latitude(49.83)
+            .longitude(23.88)
+            .build();
     }
 
     public static Coordinates getCoordinates() {
         return Coordinates.builder()
-                .latitude(49.83)
-                .longitude(23.88)
-                .build();
+            .latitude(49.83)
+            .longitude(23.88)
+            .build();
     }
 
     public static CoordinatesDto getCoordinatesDto() {
         return CoordinatesDto.builder()
-                .latitude(49.83)
-                .longitude(23.88)
-                .build();
+            .latitude(49.83)
+            .longitude(23.88)
+            .build();
     }
 
     public static ExportDetailsDto getExportDetails() {
         return ExportDetailsDto.builder()
-                .exportedDate("30-06-2012")
-                .exportedTime("14:15:12")
-                .receivingStation("Petrivka")
-                .build();
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
+            .build();
     }
 
     public static ExportDetailsDtoRequest getExportDetailsRequest() {
         return ExportDetailsDtoRequest.builder()
-                .exportedDate("30-06-2012")
-                .exportedTime("14:15:12")
-                .receivingStation("Petrivka")
-                .build();
+            .exportedDate("30-06-2012")
+            .exportedTime("14:15:12")
+            .receivingStation("Petrivka")
+            .build();
     }
 
     public static Set<Coordinates> getCoordinatesSet() {
         Set<Coordinates> set = new HashSet<>();
         set.add(Coordinates.builder()
-                .latitude(49.894)
-                .longitude(24.107)
-                .build());
+            .latitude(49.894)
+            .longitude(24.107)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.771)
-                .longitude(23.909)
-                .build());
+            .latitude(49.771)
+            .longitude(23.909)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.801)
-                .longitude(24.164)
-                .build());
+            .latitude(49.801)
+            .longitude(24.164)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.854)
-                .longitude(24.069)
-                .build());
+            .latitude(49.854)
+            .longitude(24.069)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.796)
-                .longitude(24.931)
-                .build());
+            .latitude(49.796)
+            .longitude(24.931)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.812)
-                .longitude(24.035)
-                .build());
+            .latitude(49.812)
+            .longitude(24.035)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.871)
-                .longitude(24.029)
-                .build());
+            .latitude(49.871)
+            .longitude(24.029)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.666)
-                .longitude(24.013)
-                .build());
+            .latitude(49.666)
+            .longitude(24.013)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.795)
-                .longitude(24.052)
-                .build());
+            .latitude(49.795)
+            .longitude(24.052)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.856)
-                .longitude(24.049)
-                .build());
+            .latitude(49.856)
+            .longitude(24.049)
+            .build());
         set.add(Coordinates.builder()
-                .latitude(49.862)
-                .longitude(24.039)
-                .build());
+            .latitude(49.862)
+            .longitude(24.039)
+            .build());
         return set;
     }
 
@@ -347,14 +347,14 @@ public class ModelUtils {
         long userId = 10L;
         for (Coordinates coordinates : getCoordinatesSet()) {
             orders.add(Order.builder()
-                    .id(++id)
-                    .ubsUser(UBSuser.builder()
-                            .id(++userId)
-                            .address(Address.builder()
-                                    .coordinates(coordinates)
-                                    .build())
-                            .build())
-                    .build());
+                .id(++id)
+                .ubsUser(UBSuser.builder()
+                    .id(++userId)
+                    .address(Address.builder()
+                        .coordinates(coordinates)
+                        .build())
+                    .build())
+                .build());
         }
         return orders;
     }
@@ -362,502 +362,502 @@ public class ModelUtils {
     public static List<GroupedOrderDto> getGroupedOrders() {
         List<GroupedOrderDto> list = new ArrayList<>();
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(75)
-                .groupOfOrders(List.of(OrderDto.builder()
-                                .latitude(49.854)
-                                .longitude(24.069)
-                                .build(),
-                        OrderDto.builder()
-                                .latitude(49.856)
-                                .longitude(24.049)
-                                .build(),
-                        OrderDto.builder()
-                                .latitude(49.862)
-                                .longitude(24.039)
-                                .build()))
-                .build());
+            .amountOfLitres(75)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.854)
+                .longitude(24.069)
+                .build(),
+                OrderDto.builder()
+                    .latitude(49.856)
+                    .longitude(24.049)
+                    .build(),
+                OrderDto.builder()
+                    .latitude(49.862)
+                    .longitude(24.039)
+                    .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.812)
-                        .longitude(24.035)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.795)
-                        .longitude(24.052)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.796)
-                        .longitude(24.931)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.871)
-                        .longitude(24.029)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.894)
-                        .longitude(24.107)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.666)
-                        .longitude(24.013)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.771)
-                        .longitude(23.909)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.801)
-                        .longitude(24.164)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
         return list;
     }
 
     public static List<GroupedOrderDto> getGroupedOrdersWithLiters() {
         List<GroupedOrderDto> list = new ArrayList<>();
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(75)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.854)
-                        .longitude(24.069)
-                        .build()))
-                .build());
+            .amountOfLitres(75)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.854)
+                .longitude(24.069)
+                .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.812)
-                        .longitude(24.035)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.795)
-                        .longitude(24.052)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.796)
-                        .longitude(24.931)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.871)
-                        .longitude(24.029)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.894)
-                        .longitude(24.107)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.666)
-                        .longitude(24.013)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.856)
-                        .longitude(24.049)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.856)
+                .longitude(24.049)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.862)
-                        .longitude(24.039)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.862)
+                .longitude(24.039)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.771)
-                        .longitude(23.909)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.801)
-                        .longitude(24.164)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
         return list;
     }
 
     public static List<GroupedOrderDto> getGroupedOrdersFor60LitresLimit() {
         List<GroupedOrderDto> list = new ArrayList<>();
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(50)
-                .groupOfOrders(List.of(
-                        OrderDto.builder()
-                                .latitude(49.856)
-                                .longitude(24.049)
-                                .build(),
-                        OrderDto.builder()
-                                .latitude(49.862)
-                                .longitude(24.039)
-                                .build()))
-                .build());
+            .amountOfLitres(50)
+            .groupOfOrders(List.of(
+                OrderDto.builder()
+                    .latitude(49.856)
+                    .longitude(24.049)
+                    .build(),
+                OrderDto.builder()
+                    .latitude(49.862)
+                    .longitude(24.039)
+                    .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.854)
-                        .longitude(24.069)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.854)
+                .longitude(24.069)
+                .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.812)
-                        .longitude(24.035)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.812)
+                .longitude(24.035)
+                .build()))
+            .build());
 
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.795)
-                        .longitude(24.052)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.795)
+                .longitude(24.052)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.796)
-                        .longitude(24.931)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.796)
+                .longitude(24.931)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.871)
-                        .longitude(24.029)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.871)
+                .longitude(24.029)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.894)
-                        .longitude(24.107)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.894)
+                .longitude(24.107)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.666)
-                        .longitude(24.013)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.666)
+                .longitude(24.013)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.771)
-                        .longitude(23.909)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.771)
+                .longitude(23.909)
+                .build()))
+            .build());
         list.add(GroupedOrderDto.builder()
-                .amountOfLitres(25)
-                .groupOfOrders(List.of(OrderDto.builder()
-                        .latitude(49.801)
-                        .longitude(24.164)
-                        .build()))
-                .build());
+            .amountOfLitres(25)
+            .groupOfOrders(List.of(OrderDto.builder()
+                .latitude(49.801)
+                .longitude(24.164)
+                .build()))
+            .build());
         return list;
     }
 
     public static CertificateDtoForSearching getCertificateDtoForSearching() {
         return CertificateDtoForSearching.builder()
-                .code("1111-1234")
-                .certificateStatus(CertificateStatus.ACTIVE)
-                .points(10)
-                .expirationDate(LocalDate.now().plusMonths(1))
-                .creationDate(LocalDate.now())
-                .orderId(1L)
-                .build();
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(10)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .orderId(1L)
+            .build();
     }
 
     public static Certificate getCertificate() {
         return Certificate.builder()
-                .code("1111-1234")
-                .certificateStatus(CertificateStatus.ACTIVE)
-                .points(10)
-                .expirationDate(LocalDate.now().plusMonths(1))
-                .creationDate(LocalDate.now())
-                .order(null)
-                .build();
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(10)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .order(null)
+            .build();
     }
 
     public static UserViolationMailDto getUserViolationMailDto() {
         return UserViolationMailDto.builder()
-                .email("string@gmail.com")
-                .name("string")
-                .language("en")
-                .violationDescription("String Description")
-                .build();
+            .email("string@gmail.com")
+            .name("string")
+            .language("en")
+            .violationDescription("String Description")
+            .build();
     }
 
     public static AddingViolationsToUserDto getAddingViolationsToUserDto() {
         return AddingViolationsToUserDto.builder()
-                .orderID(1L)
-                .violationDescription("String string string")
-                .violationLevel("low")
-                .build();
+            .orderID(1L)
+            .violationDescription("String string string")
+            .violationLevel("low")
+            .build();
     }
 
     public static OrderClientDto getOrderClientDto() {
         return OrderClientDto.builder()
-                .id(1L)
-                .orderStatus(OrderStatus.DONE)
-                .amount(350L)
-                .build();
+            .id(1L)
+            .orderStatus(OrderStatus.DONE)
+            .amount(350L)
+            .build();
     }
 
     public static Order getOrderDoneByUser() {
         return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.CONFIRMED)
+            .payment(singletonList(new Payment().builder()
                 .id(1L)
-                .orderStatus(OrderStatus.CONFIRMED)
-                .payment(singletonList(new Payment().builder()
-                        .id(1L)
-                        .amount(350L)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .build();
+                .amount(350L)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .build();
     }
 
     public static OrderBagDto getOrderBagDto() {
         return OrderBagDto.builder()
-                .id(1)
-                .amount(3)
-                .build();
+            .id(1)
+            .amount(3)
+            .build();
     }
 
     public static AllPointsUserDto allPointsUserDto() {
         return AllPointsUserDto.builder()
-                .userBonuses(100)
-                .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
-                                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-                                .amount(50)
-                                .numberOfOrder(36874L).build(),
-                        PointsForUbsUserDto.builder()
-                                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-                                .amount(50)
-                                .numberOfOrder(35478L).build()))
-                .build();
+            .userBonuses(100)
+            .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
+                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                .amount(50)
+                .numberOfOrder(36874L).build(),
+                PointsForUbsUserDto.builder()
+                    .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                    .amount(50)
+                    .numberOfOrder(35478L).build()))
+            .build();
 
     }
 
     public static PointsForUbsUserDto pointsForUbsUserDto() {
         return PointsForUbsUserDto.builder()
-                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-                .amount(700)
-                .numberOfOrder(35478L).build();
+            .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+            .amount(700)
+            .numberOfOrder(35478L).build();
     }
 
     public static AddEmployeeDto getAddEmployeeDto() {
         return AddEmployeeDto.builder()
-                .firstName("Петро")
-                .lastName("Петренко")
-                .phoneNumber("+380935577455")
-                .email("test@gmail.com")
-                .employeePositions(List.of(PositionDto.builder()
-                        .id(1L)
-                        .name("Водій")
-                        .build()))
-                .receivingStations(List.of(ReceivingStationDto.builder()
-                        .id(1L)
-                        .name("Петрівка")
-                        .build()))
-                .build();
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
     }
 
     public static EmployeeDto getEmployeeDto() {
         return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
-                .firstName("Петро")
-                .lastName("Петренко")
-                .phoneNumber("+380935577455")
-                .email("test@gmail.com")
-                .employeePositions(List.of(PositionDto.builder()
-                        .id(1L)
-                        .name("Водій")
-                        .build()))
-                .receivingStations(List.of(ReceivingStationDto.builder()
-                        .id(1L)
-                        .name("Петрівка")
-                        .build()))
-                .build();
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
     }
 
     public static Employee getEmployee() {
         return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePosition(Set.of(Position.builder()
                 .id(1L)
-                .firstName("Петро")
-                .lastName("Петренко")
-                .phoneNumber("+380935577455")
-                .email("test@gmail.com")
-                .employeePosition(Set.of(Position.builder()
-                        .id(1L)
-                        .name("Водій")
-                        .build()))
-                .receivingStation(Set.of(ReceivingStation.builder()
-                        .id(1L)
-                        .name("Петрівка")
-                        .build()))
-                .build();
+                .name("Водій")
+                .build()))
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
     }
 
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
-                .customerName("Alan Wayn")
-                .customerPhoneNumber("091546745")
-                .customerEmail("wayn@email.com")
-                .recipientName("Anatolii Petyrov")
-                .recipientPhoneNumber("095123456")
-                .recipientEmail("anatolii.andr@gmail.com")
-                .totalUserViolations(4)
-                .userViolationForCurrentOrder(1)
-                .build();
+            .customerName("Alan Wayn")
+            .customerPhoneNumber("091546745")
+            .customerEmail("wayn@email.com")
+            .recipientName("Anatolii Petyrov")
+            .recipientPhoneNumber("095123456")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .totalUserViolations(4)
+            .userViolationForCurrentOrder(1)
+            .build();
     }
 
     public static Order getOrderDetails() {
         return Order.builder()
+            .id(1L)
+            .user(User.builder()
                 .id(1L)
-                .user(User.builder()
-                        .id(1L)
-                        .recipientName("Alan Wayn")
-                        .recipientPhone("091546745")
-                        .recipientEmail("wayn@email.com")
-                        .violations(4).build())
-                .ubsUser(UBSuser.builder()
-                        .id(1l)
-                        .firstName("Anatolii")
-                        .lastName("Petyrov")
-                        .phoneNumber("095123456")
-                        .email("anatolii.andr@gmail.com")
-                        .build())
-                .build();
+                .recipientName("Alan Wayn")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(4).build())
+            .ubsUser(UBSuser.builder()
+                .id(1l)
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
+                .build())
+            .build();
     }
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-                .id(1L)
-                .recipientName("Anatolii Petyrov")
-                .recipientEmail("anatolii.andr@gmail.com")
-                .recipientPhoneNumber("095123456").build();
+            .id(1L)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
     }
 
     public static AddressDto addressDto() {
         return AddressDto.builder()
-                .id(1L)
-                .entranceNumber("7a")
-                .houseCorpus("2")
-                .houseNumber("7")
-                .street("Gorodotska")
-                .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-                .district("Zaliznuchnuy")
-                .city("Lviv")
-                .actual(false)
-                .build();
+            .id(1L)
+            .entranceNumber("7a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Gorodotska")
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build();
     }
 
     public static UserProfileDto userProfileDto() {
         return UserProfileDto.builder()
-                .recipientName("Dima")
-                .recipientSurname("Petrov")
-                .recipientPhone("0666051373")
-                .recipientEmail("petrov@gmail.com")
-                .build();
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("0666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
     }
 
     public static Address address() {
         return Address.builder()
-                .id(addressDto().getId())
-                .city(addressDto().getCity())
-                .district(addressDto().getDistrict())
-                .street(addressDto().getStreet())
-                .coordinates(addressDto().getCoordinates())
-                .entranceNumber(addressDto().getEntranceNumber())
-                .houseNumber(addressDto().getHouseNumber())
-                .houseCorpus(addressDto().getHouseCorpus())
-                .actual(addressDto().getActual())
-                .addressStatus(AddressStatus.DELETED)
-                .build();
+            .id(addressDto().getId())
+            .city(addressDto().getCity())
+            .district(addressDto().getDistrict())
+            .street(addressDto().getStreet())
+            .coordinates(addressDto().getCoordinates())
+            .entranceNumber(addressDto().getEntranceNumber())
+            .houseNumber(addressDto().getHouseNumber())
+            .houseCorpus(addressDto().getHouseCorpus())
+            .actual(addressDto().getActual())
+            .addressStatus(AddressStatus.DELETED)
+            .build();
     }
 
     public static UbsCustomersDto getUbsCustomersDto() {
         return UbsCustomersDto.builder()
-                .name("Ivan Michalov")
-                .email("michalov@gmail.com")
-                .phoneNumber("095531111")
-                .build();
+            .name("Ivan Michalov")
+            .email("michalov@gmail.com")
+            .phoneNumber("095531111")
+            .build();
     }
 
     public static Position getPosition() {
         return Position.builder()
-                .id(1L)
-                .name("Водій")
-                .build();
+            .id(1L)
+            .name("Водій")
+            .build();
     }
 
     public static PositionDto getPositionDto() {
         return PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build();
+            .id(1L)
+            .name("Водій")
+            .build();
     }
 
     public static ReceivingStation getReceivingStation() {
         return ReceivingStation.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build();
+            .id(1L)
+            .name("Петрівка")
+            .build();
     }
 
     public static ReceivingStationDto getReceivingStationDto() {
         return ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build();
+            .id(1L)
+            .name("Петрівка")
+            .build();
     }
 
     public static UbsTableCreationDto getUbsTableCreationDto() {
@@ -866,183 +866,183 @@ public class ModelUtils {
 
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
-                2021, Month.MARCH,
-                16, 13, 00, 00);
+            2021, Month.MARCH,
+            16, 13, 00, 00);
         return Violation.builder()
-                .id(1L)
-                .order(Order.builder()
-                        .id(1L).user(ModelUtils.getTestUser()).build())
-                .violationLevel(MAJOR)
-                .description("violation1")
-                .violationDate(localdatetime)
-                .images(new LinkedList<String>())
-                .build();
+            .id(1L)
+            .order(Order.builder()
+                .id(1L).user(ModelUtils.getTestUser()).build())
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .images(new LinkedList<String>())
+            .build();
     }
 
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         LocalDateTime localdatetime = LocalDateTime.of(
-                2021, Month.MARCH,
-                16, 13, 00, 00);
+            2021, Month.MARCH,
+            16, 13, 00, 00);
         return ViolationDetailInfoDto.builder()
-                .orderId(1L)
-                .userName("Alan Po")
-                .violationLevel(MAJOR)
-                .description("violation1")
-                .violationDate(localdatetime)
-                .build();
+            .orderId(1L)
+            .userName("Alan Po")
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .build();
     }
 
     public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
         return OverpaymentInfoRequestDto.builder()
-                .overpayment(200L)
-                .bonuses(300L)
-                .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
-                .build();
+            .overpayment(200L)
+            .bonuses(300L)
+            .comment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)
+            .build();
     }
 
     public static OrderPaymentDetailDto getOrderPaymentDetailDto() {
         return OrderPaymentDetailDto.builder()
-                .amount(95000L + 1000 + 70000)
-                .certificates(-1000)
-                .pointsToUse(-70000)
-                .amountToPay(95000L)
-                .currency("UAH")
-                .build();
+            .amount(95000L + 1000 + 70000)
+            .certificates(-1000)
+            .pointsToUse(-70000)
+            .amountToPay(95000L)
+            .currency("UAH")
+            .build();
     }
 
     public static Payment getPayment() {
         return Payment.builder()
-                .id(1L)
-                .paymentStatus(PaymentStatus.UNPAID)
-                .amount(95000L)
-                .currency("UAH")
-                .build();
+            .id(1L)
+            .paymentStatus(PaymentStatus.UNPAID)
+            .amount(95000L)
+            .currency("UAH")
+            .build();
     }
 
     public static User getUser() {
         return User.builder()
-                .id(1L)
-                .addresses(singletonList(address()))
-                .recipientEmail("someUser@gmail.com")
-                .recipientPhone("962473289")
-                .recipientSurname("Ivanov")
-                .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
-                .recipientName("Taras")
-                .build();
+            .id(1L)
+            .addresses(singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .build();
     }
 
     public static Payment getManualPayment() {
         return Payment.builder()
-                .settlementDate("02-08-2021")
-                .amount(500l)
-                .paymentStatus(PaymentStatus.PAID)
-                .paymentId(1l)
-                .receiptLink("somelink.com")
-                .currency("UAH")
-                .imagePath("")
-                .build();
+            .settlementDate("02-08-2021")
+            .amount(500l)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId(1l)
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .imagePath("")
+            .build();
     }
 
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
-                .paymentDate("02-08-2021")
-                .amount(500l)
-                .receiptLink("link")
-                .paymentId(1l)
-                .build();
+            .paymentDate("02-08-2021")
+            .amount(500l)
+            .receiptLink("link")
+            .paymentId(1l)
+            .build();
     }
 
     public static Order getOrderTest() {
         return Order.builder()
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
                 .id(1L)
-                .orderStatus(OrderStatus.FORMED)
-                .ubsUser(UBSuser.builder()
-                        .firstName("oleh")
-                        .lastName("ivanov")
-                        .email("mail@mail.ua")
-                        .id(1L)
-                        .phoneNumber("067894522")
-                        .address(Address.builder()
-                                .id(1L)
-                                .city("Lviv")
-                                .street("Levaya")
-                                .district("frankivskiy")
-                                .entranceNumber("5")
-                                .comment("near mall")
-                                .houseCorpus(null)
-                                .houseNumber("4R")
-                                .coordinates(Coordinates.builder()
-                                        .latitude(49.83)
-                                        .longitude(23.88)
-                                        .build())
-                                .user(User.builder().id(1L).build())
-                                .build())
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .comment("near mall")
+                    .houseCorpus(null)
+                    .houseNumber("4R")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
                         .build())
-                .certificates(Collections.emptySet())
-                .cancellationComment("Garbage disappeared")
-                .cancellationReason(CancellationReason.OTHER)
-                .pointsToUse(700)
-                .build();
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .certificates(Collections.emptySet())
+            .cancellationComment("Garbage disappeared")
+            .cancellationReason(CancellationReason.OTHER)
+            .pointsToUse(700)
+            .build();
     }
 
     public static BagTranslation getBagTranslation() {
         return BagTranslation.builder()
-                .id(1L)
-                .bag(Bag.builder().id(1).capacity(120).price(350).build())
-                .language(Language.builder().id(1L).code("en").build())
-                .name("Useless paper")
-                .build();
+            .id(1L)
+            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .build();
     }
 
     public static BagOrderDto getBagOrderDto() {
         return BagOrderDto.builder()
-                .bagId(1)
-                .price(350)
-                .capacity(120)
-                .bagAmount(1)
-                .name("Useless paper")
-                .build();
+            .bagId(1)
+            .price(350)
+            .capacity(120)
+            .bagAmount(1)
+            .name("Useless paper")
+            .build();
     }
 
     public static Order getFormedOrder() {
         return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
                 .id(1L)
-                .events(List.of(new Event(1L, LocalDateTime.now(),
-                        "Roman", "Roman", new Order())))
-                .orderStatus(OrderStatus.FORMED)
-                .payment(singletonList(Payment.builder()
-                        .id(1L)
-                        .amount(350L)
-                        .build()))
-                .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .pointsToUse(100)
-                .user(User.builder().id(1L).currentPoints(100).build())
-                .build();
+                .amount(350L)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
     }
 
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
-                .orderStatus("FORMED")
-                .orderComment("all good")
-                .paymentStatus("PAID").build();
+            .orderStatus("FORMED")
+            .orderComment("all good")
+            .paymentStatus("PAID").build();
     }
 
     public static OrderDetailStatusDto getTestOrderDetailStatusDto() {
         return OrderDetailStatusDto.builder()
-                .orderStatus("FORMED")
-                .paymentStatus("PAID")
-                .date("15-05-2021")
-                .build();
+            .orderStatus("FORMED")
+            .paymentStatus("PAID")
+            .date("15-05-2021")
+            .build();
     }
 
     public static EmployeeOrderPosition getEmployeeOrderPosition() {
         return EmployeeOrderPosition.builder()
-                .id(1L)
-                .order(getOrder())
-                .position(getPosition())
-                .employee(getEmployee())
-                .build();
+            .id(1L)
+            .order(getOrder())
+            .position(getPosition())
+            .employee(getEmployee())
+            .build();
     }
 
     public static EmployeePositionDtoRequest getEmployeePositionDtoRequest() {
@@ -1054,76 +1054,76 @@ public class ModelUtils {
         allPositionsEmployees.put(getPositionDto(), valueList);
         currentPositionEmployees.put(getPositionDto(), value);
         return EmployeePositionDtoRequest.builder()
-                .orderId(1L)
-                .allPositionsEmployees(allPositionsEmployees)
-                .currentPositionEmployees(currentPositionEmployees)
-                .build();
+            .orderId(1L)
+            .allPositionsEmployees(allPositionsEmployees)
+            .currentPositionEmployees(currentPositionEmployees)
+            .build();
     }
 
     private static Order createOrder() {
         return Order.builder()
-                .id(1L)
-                .orderStatus(OrderStatus.FORMED)
-                .ubsUser(createUbsUser())
-                .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5))
-                .build();
+            .id(1L)
+            .orderStatus(OrderStatus.FORMED)
+            .ubsUser(createUbsUser())
+            .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5))
+            .build();
     }
 
     private static UBSuser createUbsUser() {
         return UBSuser.builder()
-                .id(10L)
-                .address(createAddress())
-                .build();
+            .id(10L)
+            .address(createAddress())
+            .build();
     }
 
     private static Address createAddress() {
         return Address.builder()
-                .id(2L)
-                .build();
+            .id(2L)
+            .build();
     }
 
     private static Address createAddress2() {
         return Address.builder()
-                .id(2L)
-                .houseNumber("1")
-                .entranceNumber("3")
-                .district("Syhiv")
-                .street("Stys")
-                .houseCorpus("2")
-                .build();
+            .id(2L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
     }
 
     private static OrderAddressDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressDtoUpdate.builder()
-                .id(1L)
-                .houseNumber("1")
-                .entranceNumber("3")
-                .district("Syhiv")
-                .street("Stys")
-                .houseCorpus("2")
-                .build();
+            .id(1L)
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
     }
 
     private static OrderAddressDtoResponse createOrderAddressDtoResponse() {
         return OrderAddressDtoResponse.builder()
-                .houseNumber("1")
-                .entranceNumber("3")
-                .district("Syhiv")
-                .street("Stys")
-                .houseCorpus("2")
-                .build();
+            .houseNumber("1")
+            .entranceNumber("3")
+            .district("Syhiv")
+            .street("Stys")
+            .houseCorpus("2")
+            .build();
     }
 
     private static List<Payment> createPaymentList() {
         return List.of(
-                Payment.builder()
-                        .id(1L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build(),
-                Payment.builder()
-                        .id(2L)
-                        .paymentStatus(PaymentStatus.PAID)
-                        .build());
+            Payment.builder()
+                .id(1L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build(),
+            Payment.builder()
+                .id(2L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build());
     }
 
     private static OrderDetailStatusDto createOrderDetailStatusDto() {
@@ -1131,96 +1131,96 @@ public class ModelUtils {
         String orderDate = TEST_ORDER.getOrderDate().toLocalDate().format(formatter);
 
         return OrderDetailStatusDto.builder()
-                .orderStatus(TEST_ORDER.getOrderStatus().name())
-                .paymentStatus(TEST_PAYMENT_LIST.get(0).getPaymentStatus().name())
-                .date(orderDate)
-                .build();
+            .orderStatus(TEST_ORDER.getOrderStatus().name())
+            .paymentStatus(TEST_PAYMENT_LIST.get(0).getPaymentStatus().name())
+            .date(orderDate)
+            .build();
     }
 
     private static BagInfoDto createBagInfoDto() {
         return BagInfoDto.builder()
-                .id(1)
-                .capacity(4)
-                .build();
+            .id(1)
+            .capacity(4)
+            .build();
     }
 
     private static BagTransDto createBagTransDto() {
         return BagTransDto.builder()
-                .name("test")
-                .build();
+            .name("test")
+            .build();
     }
 
     private static List<BagMappingDto> createBagMappingDtoList() {
         return Collections.singletonList(
-                BagMappingDto.builder()
-                        .amount(4)
-                        .build());
+            BagMappingDto.builder()
+                .amount(4)
+                .build());
     }
 
     private static Bag createBag() {
         return Bag.builder()
-                .id(2)
-                .build();
+            .id(2)
+            .build();
     }
 
     private static OrderDetailInfoDto createOrderDetailInfoDto() {
         return OrderDetailInfoDto.builder()
-                .amount(5)
-                .capacity(4)
-                .build();
+            .amount(5)
+            .capacity(4)
+            .build();
     }
 
     private static BagTranslation createBagTranslation() {
         return BagTranslation.builder()
-                .id(4L)
-                .build();
+            .id(4L)
+            .build();
     }
 
     public static OrderCancellationReasonDto getCancellationDto() {
         return OrderCancellationReasonDto.builder()
-                .cancellationReason(CancellationReason.OTHER)
-                .cancellationComment("Garbage disappeared")
-                .build();
+            .cancellationReason(CancellationReason.OTHER)
+            .cancellationComment("Garbage disappeared")
+            .build();
     }
 
     private static OrderAddressDtoRequest createOrderDtoRequest() {
         return OrderAddressDtoRequest.builder()
-                .id(13L).city("Kyiv").district("Svyatoshyn")
-                .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
-                .actual(true).coordinates(new Coordinates(12.5, 34.5))
-                .build();
+            .id(13L).city("Kyiv").district("Svyatoshyn")
+            .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
+            .actual(true).coordinates(new Coordinates(12.5, 34.5))
+            .build();
     }
 
     public static User getUserWithLastLocation() {
         Location location = new Location();
         location.setMinAmountOfBigBags(10l);
         return User.builder()
-                .id(1L)
-                .addresses(singletonList(address()))
-                .recipientEmail("someUser@gmail.com")
-                .recipientPhone("962473289")
-                .recipientSurname("Ivanov")
-                .lastLocation(location)
-                .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
-                .recipientName("Taras")
-                .build();
+            .id(1L)
+            .addresses(singletonList(address()))
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .lastLocation(location)
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .build();
     }
 
     public static Location getLastLocation() {
         return Location.builder()
-                .id(1l)
-                .locationName("Name1")
-                .minAmountOfBigBags(10l)
-                .build();
+            .id(1l)
+            .locationName("Name1")
+            .minAmountOfBigBags(10l)
+            .build();
     }
 
     public static List<Location> getLocationList() {
         List list = new ArrayList();
         Location location = Location.builder()
-                .id(2l)
-                .locationName("Name2")
-                .minAmountOfBigBags(20l)
-                .build();
+            .id(2l)
+            .locationName("Name2")
+            .minAmountOfBigBags(20l)
+            .build();
         list.add(getLastLocation());
         list.add(location);
         return list;
@@ -1230,13 +1230,13 @@ public class ModelUtils {
         List<LocationResponseDto> list = new ArrayList<>();
 
         LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
-                .id(1l)
-                .name("Name1")
-                .build();
+            .id(1l)
+            .name("Name1")
+            .build();
         LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
-                .id(2l)
-                .name("Name2")
-                .build();
+            .id(2l)
+            .name("Name2")
+            .build();
         list.add(locationResponseDto1);
         list.add(locationResponseDto2);
         return list;
@@ -1248,47 +1248,47 @@ public class ModelUtils {
 
     private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
         return EmployeePositionDtoResponse.builder()
-                .orderId(1L)
-                .employeeOrderPositionDTOS(createEmployeePositionDto())
-                .build();
+            .orderId(1L)
+            .employeeOrderPositionDTOS(createEmployeePositionDto())
+            .build();
     }
 
     private static List<EmployeeOrderPositionDTO> createEmployeePositionDto() {
         return List.of(
-                EmployeeOrderPositionDTO.builder()
-                        .name("Test Test")
-                        .positionId(2L)
-                        .build());
+            EmployeeOrderPositionDTO.builder()
+                .name("Test Test")
+                .positionId(2L)
+                .build());
     }
 
     private static List<EmployeeOrderPosition> createEmployeeOrderPositionList() {
         return List.of(
-                EmployeeOrderPosition.builder()
-                        .id(1L)
-                        .employee(createEmployee())
-                        .position(createPosition())
-                        .order(createOrder2())
-                        .build());
+            EmployeeOrderPosition.builder()
+                .id(1L)
+                .employee(createEmployee())
+                .position(createPosition())
+                .order(createOrder2())
+                .build());
     }
 
     private static Position createPosition() {
         return Position.builder()
-                .id(2L)
-                .build();
+            .id(2L)
+            .build();
     }
 
     private static Order createOrder2() {
         return Order.builder()
-                .id(2L)
-                .build();
+            .id(2L)
+            .build();
     }
 
     private static Employee createEmployee() {
         return Employee.builder()
-                .id(1L)
-                .firstName("Test")
-                .lastName("Test")
-                .build();
+            .id(1L)
+            .firstName("Test")
+            .lastName("Test")
+            .build();
     }
 
     private static Map<String, Object> createMap() {
@@ -1303,53 +1303,53 @@ public class ModelUtils {
 
     private static AdditionalBagInfoDto createAdditionalBagInfoDto() {
         return AdditionalBagInfoDto.builder()
-                .recipientEmail("test@mail.com")
-                .build();
+            .recipientEmail("test@mail.com")
+            .build();
     }
 
     private static User createUser() {
         return User.builder()
-                .id(1L)
-                .uuid("Test")
-                .recipientEmail("test@mail.com")
-                .build();
+            .id(1L)
+            .uuid("Test")
+            .recipientEmail("test@mail.com")
+            .build();
     }
 
     private static UpdateOrderDetailDto createUpdateOrderDetailDto() {
         return UpdateOrderDetailDto.builder()
-                .amount(5)
-                .orderId(1L)
-                .bagId(1)
-                .exportedQuantity(10)
-                .confirmedQuantity(10)
-                .build();
+            .amount(5)
+            .orderId(1L)
+            .bagId(1)
+            .exportedQuantity(10)
+            .confirmedQuantity(10)
+            .build();
     }
 
     public static Set<CoordinatesDto> getCoordinatesDtoSet() {
         Set<CoordinatesDto> set = new HashSet<>();
         set.add(CoordinatesDto.builder()
-                .latitude(49.83)
-                .longitude(23.88)
-                .build());
+            .latitude(49.83)
+            .longitude(23.88)
+            .build());
         return set;
     }
 
     private static NotificationShortDto createNotificationShortDto() {
         return NotificationShortDto.builder()
-                .id(1L)
-                .orderId(1L)
-                .title("Test")
-                .notificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10))
-                .read(false)
-                .build();
+            .id(1L)
+            .orderId(1L)
+            .title("Test")
+            .notificationTime(LocalDateTime.of(2021, 9, 17, 20, 26, 10))
+            .read(false)
+            .build();
     }
 
     private static PageableDto<NotificationShortDto> createPageableDto() {
         return new PageableDto<>(
-                TEST_NOTIFICATION_SHORT_DTO_LIST,
-                1,
-                0,
-                1);
+            TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1);
     }
 
     private static NotificationTemplate createNotificationTemplate() {
@@ -1370,11 +1370,11 @@ public class ModelUtils {
         notification.setRead(false);
         notification.setUser(TEST_USER);
         notification.setOrder(Order.builder()
-                .id(1L)
-                .build());
+            .id(1L)
+            .build());
         notification.setNotificationType(NotificationType.UNPAID_ORDER);
         return List.of(
-                notification);
+            notification);
     }
 
     private static Violation createTestViolation() {
@@ -1383,15 +1383,15 @@ public class ModelUtils {
 
     private static NotificationParameter createNotificationParameter() {
         return NotificationParameter.builder()
-                .key("violationDescription")
-                .value("violation description")
-                .build();
+            .key("violationDescription")
+            .value("violation description")
+            .build();
     }
 
     private static Order createTestOrder4() {
         return Order.builder().id(46L).user(User.builder().id(42L).build())
-                .orderDate(LocalDateTime.now())
-                .build();
+            .orderDate(LocalDateTime.now())
+            .build();
     }
 
     private static UserNotification createUserNotification3() {
@@ -1415,23 +1415,23 @@ public class ModelUtils {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder().key("overpayment")
-                .value(String.valueOf(2L)).build());
+            .value(String.valueOf(2L)).build());
         parameters.add(NotificationParameter.builder().key("realPackageNumber")
-                .value(String.valueOf(0)).build());
+            .value(String.valueOf(0)).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
-                .value(String.valueOf(0)).build());
+            .value(String.valueOf(0)).build());
 
         return parameters;
     }
 
     private static Order createTestOrder3() {
         return Order.builder().id(45L).user(User.builder().id(42L).build())
-                .confirmedQuantity(new HashMap<>())
-                .exportedQuantity(new HashMap<>())
-                .orderStatus(OrderStatus.ADJUSTMENT)
-                .orderPaymentStatus(OrderPaymentStatus.PAID)
-                .orderDate(LocalDateTime.now())
-                .build();
+            .confirmedQuantity(new HashMap<>())
+            .exportedQuantity(new HashMap<>())
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .orderDate(LocalDateTime.now())
+            .build();
     }
 
     private static UserNotification createUserNotification() {
@@ -1445,15 +1445,15 @@ public class ModelUtils {
 
     private static Order createTestOrder2() {
         return Order.builder().id(43L).user(User.builder().id(42L).build())
-                .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
+            .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
     }
 
     private static UserNotification createUserNotification4() {
         UserNotification notification = new UserNotification();
         notification.setId(1L);
         notification.setUser(User.builder()
-                .uuid("test")
-                .build());
+            .uuid("test")
+            .build());
         notification.setRead(false);
         notification.setParameters(null);
         notification.setNotificationType(NotificationType.UNPAID_ORDER);
@@ -1462,73 +1462,73 @@ public class ModelUtils {
 
     private static NotificationDto createNotificationDto() {
         return NotificationDto.builder()
-                .title("Test")
-                .body("Test")
-                .build();
+            .title("Test")
+            .body("Test")
+            .build();
     }
 
     public static AddServiceDto addServiceDto() {
         return AddServiceDto.builder()
-                .commission(50)
-                .capacity(100)
-                .name("fff")
-                .price(100)
-                .languageId(1L)
-                .description("asd")
-                .build();
+            .commission(50)
+            .capacity(100)
+            .name("fff")
+            .price(100)
+            .languageId(1L)
+            .description("asd")
+            .build();
     }
 
     public static AssignEmployeeForOrderDto assignEmployeeForOrderDto() {
         return AssignEmployeeForOrderDto.builder()
-                .employeeId(1L)
-                .positionId(1L)
-                .build();
+            .employeeId(1L)
+            .positionId(1L)
+            .build();
     }
 
     public static GetTariffServiceDto getTariffServiceDto() {
         return GetTariffServiceDto.builder()
-                .fullPrice(300)
-                .languageCode("ua")
-                .capacity(120)
-                .commission(50)
-                .description("description")
-                .name("name")
-                .price(250)
-                .build();
+            .fullPrice(300)
+            .languageCode("ua")
+            .capacity(120)
+            .commission(50)
+            .description("description")
+            .name("name")
+            .price(250)
+            .build();
     }
 
     public static Optional<Bag> getBag() {
         return Optional.of(Bag.builder()
-                .id(1)
-                .capacity(120)
-                .commission(50)
-                .price(120)
-                .fullPrice(170)
-                .createdAt(LocalDate.now())
-                .createdBy("User")
-                .build());
+            .id(1)
+            .capacity(120)
+            .commission(50)
+            .price(120)
+            .fullPrice(170)
+            .createdAt(LocalDate.now())
+            .createdBy("User")
+            .build());
     }
 
     public static EditTariffServiceDto getEditTariffServiceDto() {
         return EditTariffServiceDto.builder()
-                .name("Бавовняна сумка")
-                .capacity(120)
-                .price(120)
-                .commission(50)
-                .description("Description")
-                .langCode("ua")
-                .build();
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
+            .langCode("ua")
+            .build();
 
     }
 
     public static BagTranslation getBagTranslationForEditMethod() {
         return BagTranslation.builder()
-                .id(1L)
-                .bag(getBag().get())
-                .language(Language.builder().id(1L).code("ua").build())
-                .name("Бавовняна сумка")
-                .description("Description")
-                .build();
+            .id(1L)
+            .bag(getBag().get())
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("Бавовняна сумка")
+            .description("Description")
+            .build();
     }
 
 }

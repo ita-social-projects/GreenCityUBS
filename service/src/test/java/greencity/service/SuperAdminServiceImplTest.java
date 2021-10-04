@@ -85,7 +85,6 @@ class SuperAdminServiceImplTest {
         assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
 
-
     @Test
     void editTariffService_Throw_Exception() {
         EditTariffServiceDto dto = new EditTariffServiceDto();
@@ -99,7 +98,8 @@ class SuperAdminServiceImplTest {
         Bag bag = ModelUtils.getBag().get();
 
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode())).thenReturn(bagTranslation);
+        when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode()))
+            .thenReturn(bagTranslation);
         when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
         superAdminService.editTariffService(dto, 1);
@@ -108,7 +108,6 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
         verify(bagTranslationRepository).save(bagTranslation);
-
 
     }
 
