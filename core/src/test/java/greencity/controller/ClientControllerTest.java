@@ -114,4 +114,10 @@ class ClientControllerTest {
 
         verify(ubsClientService, times(1)).getOrderPaymentDetail(1L);
     }
+
+    @Test
+    void getDataForOrderStatusPageTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}/{langId}", 1L, 2L));
+        verify(ubsClientService).getOrderInfoForSurcharge(1L, 2L);
+    }
 }
