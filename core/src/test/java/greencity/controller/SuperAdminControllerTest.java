@@ -6,6 +6,7 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.service.SuperAdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +73,19 @@ class SuperAdminControllerTest {
     @Test
     void deleteTariffService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void editTariffService() throws Exception {
+
+        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
+            .content(ServiceResponseDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 }
