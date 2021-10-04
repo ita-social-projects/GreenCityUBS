@@ -2,7 +2,10 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.filters.SearchCriteria;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -308,4 +311,11 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId, String uuid);
+
+    /**
+     * Method returns all order's data from big order table.
+     *
+     * @author Ihor Volianskyi
+     */
+    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria);
 }
