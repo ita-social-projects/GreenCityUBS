@@ -22,8 +22,8 @@ public class ReceivingStationToTitleDtoMapper extends AbstractConverter<Receivin
     protected TitleDto convert(ReceivingStationDto receivingStationDto) {
         return TitleDto.builder()
             .key(receivingStationDto.getId().toString())
-            .ua(String.format("%s %s", receivingStationDto.getName()))
-            .en(String.format("%s %s", receivingStationDto.getName()))
+            .ua(receivingStationDto.getName())
+            .en(receivingStationDto.getName())
             .build();
     }
 }
