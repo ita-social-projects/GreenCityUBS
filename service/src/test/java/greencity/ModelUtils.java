@@ -1508,4 +1508,27 @@ public class ModelUtils {
             .createdBy("User")
             .build());
     }
+
+    public static EditTariffServiceDto getEditTariffServiceDto() {
+        return EditTariffServiceDto.builder()
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
+            .langCode("ua")
+            .build();
+
+    }
+
+    public static BagTranslation getBagTranslationForEditMethod() {
+        return BagTranslation.builder()
+            .id(1L)
+            .bag(getBag().get())
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("Бавовняна сумка")
+            .description("Description")
+            .build();
+    }
+
 }
