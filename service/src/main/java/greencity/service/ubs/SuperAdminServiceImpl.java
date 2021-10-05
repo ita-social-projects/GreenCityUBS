@@ -70,7 +70,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     /**
-     * This method delete tariff service by Id.
+     * This method delete tariff service by Id..
      * 
      * @param id - Tariff Service Id.
      */
