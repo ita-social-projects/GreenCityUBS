@@ -149,10 +149,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return ChangeOrderResponseDTO.builder().httpStatus(HttpStatus.OK).unresolvedGoalsOrderId(ordersId).build();
     }
 
-    private void test(){
-
-    }
-
     private List<TitleDto> orderStatusListForDevelopStage() {
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new TitleDto("FORMED", "Сформовано", "Formed"),
