@@ -86,7 +86,7 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/changingOrder")
+    @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
@@ -107,8 +107,8 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/blockOrders")
-    public ResponseEntity<List<BlockedOrderDTO>> saveNewValueFromOrdersTable(
+    @PutMapping("/blockOrders")
+    public ResponseEntity<List<BlockedOrderDTO>> blockOrders(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
