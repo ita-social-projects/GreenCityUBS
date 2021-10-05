@@ -7,8 +7,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 /**
- * Class that used by {@link ModelMapper} to map
- * {@link ReceivingStationDto} into {@link TitleDto}.
+ * Class that used by {@link ModelMapper} to map {@link ReceivingStationDto}
+ * into {@link TitleDto}.
  */
 @Component
 public class ReceivingStationToTitleDtoMapper extends AbstractConverter<ReceivingStationDto, TitleDto> {
