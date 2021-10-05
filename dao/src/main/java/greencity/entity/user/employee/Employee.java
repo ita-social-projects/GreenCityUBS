@@ -21,19 +21,19 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "first_name", length = 30, nullable = false)
     private String firstName;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "last_name", length = 30, nullable = false)
     private String lastName;
 
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(name = "phone_number", length = 30, nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(length = 170, unique = true)
     private String email;
 
-    @Column
+    @Column(name = "image_path")
     private String imagePath;
 
     @OneToOne

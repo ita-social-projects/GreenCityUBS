@@ -6,10 +6,16 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.entity.enums.SortingOrder;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.UBSManagementService;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,8 +62,9 @@ public class ManagementOrderController {
     @GetMapping("/getAllCertificates")
     @ApiPageable
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
-        @ApiIgnore Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllCertificates(pageable));
+        @ApiIgnore Pageable pageable, @RequestParam String columnName, @RequestParam SortingOrder sortingOrder) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getAllCertificates(pageable, columnName, sortingOrder));
     }
 
     /**
@@ -227,6 +234,25 @@ public class ManagementOrderController {
         SearchCriteria searchCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
+    }
+
+    /**
+     * The method returns page with all order's data from big order table.
+     *
+     * @return {@link Page} with order's information
+     * @author Ihor Volianskyi
+     */
+    @ApiOperation("Get all order's data from big order table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/bigOrderTable")
+    public ResponseEntity<Page<BigOrderTableDTO>> gerOrders(OrderPage page, OrderSearchCriteria criteria) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrders(page, criteria));
     }
 
     /**

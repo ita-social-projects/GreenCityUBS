@@ -30,13 +30,13 @@ public class UBSuser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "first_name", length = 30, nullable = false)
     private String firstName;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "last_name", length = 30, nullable = false)
     private String lastName;
 
-    @Column(length = 15, nullable = false)
+    @Column(name = "phone_number", length = 15, nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false, length = 50)

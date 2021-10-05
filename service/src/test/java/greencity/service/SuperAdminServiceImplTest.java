@@ -2,10 +2,12 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.user.User;
+import greencity.exceptions.BagNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BagTranslationRepository;
 import greencity.repository.UserRepository;
@@ -18,7 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,4 +70,45 @@ class SuperAdminServiceImplTest {
 
         verify(bagTranslationRepository).findAll();
     }
+
+    @Test
+    void deleteTariffServiceTest() {
+        when(bagRepository.findById(1)).thenReturn(ModelUtils.getBag());
+
+        superAdminService.deleteTariffService(1);
+
+        verify(bagRepository).delete(ModelUtils.getBag().get());
+    }
+
+    @Test
+    void deleteTariffServiceThrowException() {
+        assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
+    }
+
+    @Test
+    void editTariffService_Throw_Exception() {
+        EditTariffServiceDto dto = new EditTariffServiceDto();
+        assertThrows(BagNotFoundException.class, () -> superAdminService.editTariffService(dto, 1));
+    }
+
+    @Test
+    void editTariffService() {
+        BagTranslation bagTranslation = ModelUtils.getBagTranslationForEditMethod();
+        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
+        Bag bag = ModelUtils.getBag().get();
+
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode()))
+            .thenReturn(bagTranslation);
+        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
+
+        superAdminService.editTariffService(dto, 1);
+
+        verify(bagRepository).findById(1);
+        verify(bagRepository).save(bag);
+        verify(bagTranslationRepository).findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
+        verify(bagTranslationRepository).save(bagTranslation);
+
+    }
+
 }

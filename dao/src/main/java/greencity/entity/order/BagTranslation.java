@@ -8,6 +8,8 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"bag", "language"})
+@ToString(exclude = {"bag", "language"})
 @Getter
 @Setter
 @Builder

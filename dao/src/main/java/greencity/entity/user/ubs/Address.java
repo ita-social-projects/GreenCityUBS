@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUsers", "user"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "user", "comment"})
 @Getter
 @Setter
 @Builder
@@ -45,11 +45,11 @@ public class Address {
     @Column(name = "house_number", nullable = false)
     private String houseNumber;
 
-    @Size(min = 1, max = 5, message = "Invalid house corpus")
-    @Column
+    @Size(max = 5, message = "Invalid house corpus")
+    @Column(name = "house_corpus")
     private String houseCorpus;
 
-    @Size(min = 1, max = 4, message = "Invalid entrance number")
+    @Size(max = 4, message = "Invalid entrance number")
     @Column(name = "entrance_number", nullable = false)
     private String entranceNumber;
 

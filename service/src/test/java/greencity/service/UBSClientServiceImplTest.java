@@ -238,18 +238,21 @@ class UBSClientServiceImplTest {
 
     @Test
     void getSecondPageData() {
+        String uuid = "35467585763t4sfgchjfuyetf";
         PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
-        User user = new User();
-        user.setId(13L);
-        Optional<UbsCustomersDto> ubsCustomersDto = Optional.of(UbsCustomersDto.builder()
-            .email("mail@mail.ua").name("oleh").phoneNumber("067894522").build());
 
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(ubsUserRepository.getAllByUserId(anyLong()))
-            .thenReturn(Collections.singletonList(ModelUtils.getUBSuser()));
-        when(modelMapper.map(ModelUtils.getUBSuser(), PersonalDataDto.class)).thenReturn(expected);
-        when(restClient.findUserByUUid("35467585763t4sfgchjfuyetf")).thenReturn(ubsCustomersDto);
-        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf").get(0);
+        User user = User.builder()
+            .uuid(uuid)
+            .recipientName("oleh")
+            .recipientSurname("ivanov")
+            .id(13L).recipientEmail("mail@mail.ua")
+            .recipientPhone("067894522")
+            .build();
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
+        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
+
         assertEquals(expected, actual);
     }
 

@@ -18,14 +18,15 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.filters.SearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.*;
 
 @Service
 @AllArgsConstructor
@@ -59,6 +62,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
+    private final BigOrderTableRepository bigOrderTableRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
@@ -455,8 +459,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page) {
-        Page<Certificate> certificates = certificateRepository.getAll(page);
+    public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
+        SortingOrder sortingOrder) {
+        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+            Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
+        Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
         return getAllCertificatesTranslationDto(certificates);
     }
 
@@ -558,8 +565,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String column, String sortingType) {
         List<AllFieldsFromTableDto> orderList = new ArrayList<>();
 
+        SortingOrder resultSortingOrder = Arrays.stream(SortingOrder.values())
+            .filter(s -> s.name().equalsIgnoreCase(sortingType))
+            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
+
+        String resultColumn = allValuesFromTableRepo.getCustomColumns().stream()
+            .filter(c -> c.equalsIgnoreCase(column))
+            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
+
         List<Map<String, Object>> ordersInfo = allValuesFromTableRepo
-            .findAll(searchCriteria, page, size, column, sortingType);
+            .findAll(searchCriteria, page, size, resultColumn, resultSortingOrder);
 
         for (Map<String, Object> map : ordersInfo) {
             AllFieldsFromTableDto allFieldsFromTableDto =
@@ -600,6 +615,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             listSize,
             page,
             totalPages);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria) {
+        Page<Order> orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
+        List<BigOrderTableDTO> orderList = new ArrayList<>();
+
+        orders.forEach(o -> orderList.add(buildBigOrderTableDTO(o)));
+
+        return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());
     }
 
     /**
@@ -1412,5 +1440,50 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else {
             throw new EmployeeIsNotAssigned(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);
         }
+    }
+
+    private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
+        long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).sum();
+        int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
+        Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
+        return BigOrderTableDTO.builder()
+            .id(order.getId())
+            .orderStatus(order.getOrderStatus().name())
+            .paymentStatus(nonNull(order.getOrderPaymentStatus()) ? order.getOrderPaymentStatus().name() : "-")
+            .orderDate(order.getOrderDate().toString())
+            .paymentDate(nonNull(order.getPayment()) ? order.getPayment().stream()
+                .map(Payment::getOrderTime).collect(joining(", ")) : "-")
+            .clientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
+            .phoneNumber(order.getUbsUser().getPhoneNumber())
+            .email(order.getUbsUser().getEmail())
+            .senderName(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname())
+            .senderPhone(order.getUser().getRecipientPhone())
+            .senderEmail(order.getUser().getRecipientEmail())
+            .violationsAmount(order.getUser().getViolations())
+            .location("Need to implement!!!")
+            .district(address.getDistrict())
+            .address(address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
+                + address.getEntranceNumber())
+            .commentToAddressForClient(address.getComment())
+            .bagsAmount(order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum))
+            .totalOrderSum(paymentSum)
+            .orderCertificateCode(order.getCertificates().stream().map(Certificate::getCode)
+                .collect(joining(", ")))
+            .orderCertificatePoints(order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString)
+                .collect(joining(", ")))
+            .amountDue(paymentSum - certificateSum)
+            .commentForOrderByClient(order.getComment())
+            .payment("Need to implement!!!")
+            .dateOfExport("Need to implement!!!")
+            .timeOfExport("Need to implement!!!")
+            .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
+                .collect(joining(", ")))
+            .receivingStation(order.getReceivingStation())
+            .responsibleManager("Need to implement!!!")
+            .responsibleLogicMan("Need to implement!!!")
+            .responsibleDriver("Need to implement!!!")
+            .responsibleNavigator("Need to implement!!!")
+            .commentsForOrder(order.getNote())
+            .build();
     }
 }

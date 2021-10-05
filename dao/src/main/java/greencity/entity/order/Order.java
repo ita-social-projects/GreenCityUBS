@@ -12,6 +12,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -66,14 +67,14 @@ public class Order {
     @Column
     private String comment;
 
-    @Column
+    @Column(name = "cancellation_comment")
     private String cancellationComment;
 
-    @Column
+    @Column(name = "cancellation_reason")
     @Enumerated(EnumType.STRING)
     private CancellationReason cancellationReason;
 
-    @Column(columnDefinition = "int default 0")
+    @Column(name = "points_to_use", columnDefinition = "int default 0")
     private Integer pointsToUse;
 
     @OneToMany(mappedBy = "order")
@@ -84,18 +85,23 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @Column
+    @Column(name = "order_payment_status")
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 
-    @Column(length = 50)
+    @Column(name = "receiving_station", length = 50)
     private String receivingStation;
 
     private String note;
 
+    @Column(name = "deliver_from")
     private LocalDateTime deliverFrom;
 
+    @Column(name = "deliver_to")
     private LocalDateTime deliverTo;
+
+    @Column(name = "date_of_export")
+    private LocalDate dateOfExport;
 
     @ManyToMany(mappedBy = "attachedOrders")
     private Set<Employee> attachedEmployees;
@@ -117,8 +123,10 @@ public class Order {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<Event> events;
 
+    @Column(name = "reason_not_taking_bag_description")
     private String reasonNotTakingBagDescription;
 
+    @Column(name = "image_reason_not_taking_bags")
     @Convert(converter = StringListConverter.class)
     private List<String> imageReasonNotTakingBags;
 }

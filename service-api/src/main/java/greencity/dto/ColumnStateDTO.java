@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class ColumnStateDTO {
     private TitleDto title;
+    private String titleForSorting;
     private int weight;
     private boolean sticky;
     private boolean visible;

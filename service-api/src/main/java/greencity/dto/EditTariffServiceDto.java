@@ -3,7 +3,6 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -12,7 +11,7 @@ import java.time.LocalDate;
 @ToString
 @Builder
 @EqualsAndHashCode
-public class GetTariffServiceDto {
+public class EditTariffServiceDto {
     @NotNull
     String name;
     @NotNull
@@ -21,9 +20,6 @@ public class GetTariffServiceDto {
     Integer price;
     Integer commission;
     String description;
-    String languageCode;
-    Integer fullPrice;
-    Integer id;
-    LocalDate createdAt;
-    String createdBy;
+    @NotNull
+    String langCode;
 }

@@ -86,7 +86,7 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/changingOrder")
+    @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
@@ -94,5 +94,24 @@ public class AdminUbsController {
             ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
             .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
+    }
+
+    /**
+     * Controller.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation(value = "Block orders for changing by another users")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PutMapping("/blockOrders")
+    public ResponseEntity<List<BlockedOrderDTO>> blockOrders(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody List<Long> listOfOrdersId) {
+        List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
+        return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
     }
 }
