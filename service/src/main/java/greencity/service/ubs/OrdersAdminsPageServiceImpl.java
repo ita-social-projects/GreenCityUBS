@@ -242,7 +242,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
-        LocalDate date = LocalDate.parse(value);
+        LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             if (!changeOrderDate(orderId, date)) {
@@ -254,9 +254,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
         String from = value.substring(0, 5);
-        String to = value.substring(8);
-        LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ofPattern("HH:mm"));
-        LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ofPattern("HH:mm"));
+        String to = value.substring(6);
+        LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
+        LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ISO_LOCAL_TIME);
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             if (!changeOrderTime(orderId, timeFrom, timeTo)) {
