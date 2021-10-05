@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Pater-2" author="Liubomyr Pater">
         <addColumn tableName="orders">
-            <column name="date_of_export" type="timestamp">
+            <column name="date_of_export" type="date">
             </column>
         </addColumn>
     </changeSet>
