@@ -7,6 +7,9 @@ import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -14,11 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
@@ -31,6 +33,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EmployeeRepository employeeRepository;
     private final UBSManagementEmployeeService employeeService;
     private final ModelMapper modelMapper;
+    private final ReceivingStationRepository receivingStationRepository;
+    private final PositionRepository positionRepository;
+    private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -126,15 +131,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receiving_station":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value));
             case "responsible_manager":
-                return createReturnForSwitchChangeOrder(responsibleManagerForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L));
             case "responsible_caller":
-                return createReturnForSwitchChangeOrder(responsibleCallerForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L));
             case "responsible_logic_man":
-                return createReturnForSwitchChangeOrder(responsibleLogicManForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L));
             case "responsible_driver":
-                return createReturnForSwitchChangeOrder(responsibleDriverForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L));
             case "responsible_navigator":
-                return createReturnForSwitchChangeOrder(responsibleNavigatorForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L));
             default:
                 return createReturnForSwitchChangeOrder(new ArrayList<>());
         }
@@ -219,6 +224,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return titleDtoList;
     }
 
+    /* methods for changing order */
     private List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
@@ -234,7 +240,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
-        LocalDateTime date = LocalDateTime.parse(value);
+        LocalDate date = LocalDate.parse(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             if (!changeOrderDate(orderId, date)) {
@@ -245,10 +251,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
-        LocalDateTime time = LocalDateTime.parse(value);
+        String from = value.substring(0, 5);
+        String to = value.substring(8);
+        LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ofPattern("HH:mm"));
+        LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ofPattern("HH:mm"));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
-            if (!changeOrderTime(orderId, time)) {
+            if (!changeOrderTime(orderId, timeFrom, timeTo)) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -256,7 +265,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
-        String station = value;
+        ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             if (!changeOrderStation(orderId, station)) {
@@ -266,55 +275,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> responsibleManagerForDevelopStage(List<Long> ordersId, String value) {
-        String manager = value;
+    private List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
+        Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee)).get();
+        Position existedPosition = positionRepository.findById(position).get();
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
-            if (!changeOrderManager(orderId, manager)) {
-                unresolvedGoals.add(orderId);
-            }
-        }
-        return unresolvedGoals;
-    }
-
-    private List<Long> responsibleCallerForDevelopStage(List<Long> ordersId, String value) {
-        String caller = value;
-        List<Long> unresolvedGoals = new ArrayList<>();
-        for (Long orderId : ordersId) {
-            if (!changeOrderCaller(orderId, caller)) {
-                unresolvedGoals.add(orderId);
-            }
-        }
-        return unresolvedGoals;
-    }
-
-    private List<Long> responsibleLogicManForDevelopStage(List<Long> ordersId, String value) {
-        String logicMan = value;
-        List<Long> unresolvedGoals = new ArrayList<>();
-        for (Long orderId : ordersId) {
-            if (!changeOrderLogicMan(orderId, logicMan)) {
-                unresolvedGoals.add(orderId);
-            }
-        }
-        return unresolvedGoals;
-    }
-
-    private List<Long> responsibleDriverForDevelopStage(List<Long> ordersId, String value) {
-        String driver = value;
-        List<Long> unresolvedGoals = new ArrayList<>();
-        for (Long orderId : ordersId) {
-            if (!changeOrderDriver(orderId, driver)) {
-                unresolvedGoals.add(orderId);
-            }
-        }
-        return unresolvedGoals;
-    }
-
-    private List<Long> responsibleNavigatorForDevelopStage(List<Long> ordersId, String value) {
-        String navigator = value;
-        List<Long> unresolvedGoals = new ArrayList<>();
-        for (Long orderId : ordersId) {
-            if (!changeOrderNavigator(orderId, navigator)) {
+            if (!changeOrderEmployee(orderId, existedEmployee, existedPosition)) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -333,88 +299,55 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return true;
     }
 
-    private boolean changeOrderDate(Long oderId, LocalDateTime value) {
+    private boolean changeOrderDate(Long oderId, LocalDate value) {
         try {
             Order existedOrder = orderRepository.findById(oderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setOrderDate(value);
+            existedOrder.setDateOfExport(value);
+            orderRepository.save(existedOrder);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private boolean changeOrderTime(Long oderId, LocalDateTime value) {
+    private boolean changeOrderTime(Long oderId, LocalDateTime from, LocalDateTime to) {
         try {
             Order existedOrder = orderRepository.findById(oderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setOrderDate(value);
+            existedOrder.setDeliverFrom(from);
+            existedOrder.setDeliverFrom(to);
+            orderRepository.save(existedOrder);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private boolean changeOrderStation(Long oderId, String value) {
+    private boolean changeOrderStation(Long oderId, ReceivingStation station) {
         try {
             Order existedOrder = orderRepository.findById(oderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setReceivingStation(value);
+            existedOrder.setReceivingStation(station.getName());
+            orderRepository.save(existedOrder);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private boolean changeOrderManager(Long oderId, String value) {
+    private boolean changeOrderEmployee(Long orderId, Employee employee, Position position) {
         try {
-            Order existedOrder = orderRepository.findById(oderId)
+            Order existedOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderCaller(Long oderId, String value) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderLogicMan(Long oderId, String value) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderDriver(Long oderId, String value) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderNavigator(Long oderId, String value) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.getAttachedEmployees().add(Employee.builder().firstName(value).build());
+            List<EmployeeOrderPosition> employeeOrderPositions =
+                employeeOrderPositionRepository.findAllByOrderId(orderId);
+            EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
+                EmployeeOrderPosition.builder().employee(employee).position(position).order(existedOrder).build());
+            employeeOrderPositions.add(newEmployeeOrderPosition);
+            Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
+            existedOrder.setEmployeeOrderPositions(positionSet);
+            orderRepository.save(existedOrder);
         } catch (Exception e) {
             return false;
         }
