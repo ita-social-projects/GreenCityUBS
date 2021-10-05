@@ -94,7 +94,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnStateDTO(new TitleDto("id_order_from_shop", "Номер замовлення з магазину", "Id order from shop"),
                 "", 20, false, true, 26, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("receiving_station", "Станція приймання", "Receiving station"), "", 20,
-                false, true, 27, EditType.SELECT, recivingStationList(), "ORDERS_DETAILS"),
+                false, true, 27, EditType.SELECT, receivingStationList(), "ORDERS_DETAILS"),
             new ColumnStateDTO(new TitleDto("responsible_manager", "Менеджер послуги", "Responsible manager"), "", 20,
                 false, true, 28, EditType.SELECT, managerList(), "RESPONSIBLE"),
             new ColumnStateDTO(new TitleDto("responsible_caller", "Менеджер обдзвону", "Responsible caller"), "", 20,
@@ -165,7 +165,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new TitleDto("RESPONSIBLE", "Відповідальні", "responsible persons"))));
     }
 
-    private List<TitleDto> recivingStationList() {
+    private List<TitleDto> receivingStationList() {
         List<ReceivingStationDto> receivingStations = employeeService.getAllReceivingStation();
         List<TitleDto> titleDtoList = new ArrayList<>();
         for (ReceivingStationDto r : receivingStations) {
