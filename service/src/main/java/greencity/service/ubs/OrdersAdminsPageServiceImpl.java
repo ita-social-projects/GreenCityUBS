@@ -23,7 +23,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
 @AllArgsConstructor
@@ -276,8 +278,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
-        Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee)).get();
-        Position existedPosition = positionRepository.findById(position).get();
+        Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
+        Position existedPosition = positionRepository.findById(position)
+            .orElseThrow(() -> new EntityNotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             if (!changeOrderEmployee(orderId, existedEmployee, existedPosition)) {
