@@ -1475,7 +1475,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .commentForOrderByClient(order.getComment())
             .payment("Need to implement!!!")
             .dateOfExport(order.getDateOfExport().toString())
-            .timeOfExport(String.format("%s-%s", order.getDeliverFrom().toString(), order.getDeliverTo().toString()))
+            .timeOfExport(String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+                order.getDeliverTo().toLocalTime().toString()))
             .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
                 .collect(joining(", ")))
             .receivingStation(order.getReceivingStation())
