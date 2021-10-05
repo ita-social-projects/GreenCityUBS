@@ -12,7 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id"})
+@EqualsAndHashCode(exclude = {"id", "comment"})
 @ToString
 @Builder
 public class OrderAddressDtoRequest {
@@ -38,6 +38,8 @@ public class OrderAddressDtoRequest {
     @Length(max = 50)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-\\s',]{3,40}")
     private String street;
+
+    private String comment;
 
     private Coordinates coordinates;
 
