@@ -40,6 +40,12 @@ public class Bag {
     @Column(nullable = false)
     private String createdBy;
 
+    @Column(nullable = false)
+    private LocalDate editedAt;
+
+    @Column(nullable = false)
+    private String editedBy;
+
     @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BagTranslation> bagTranslations;
 }
