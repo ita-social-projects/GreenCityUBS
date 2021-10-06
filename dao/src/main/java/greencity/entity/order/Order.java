@@ -12,6 +12,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,9 @@ public class Order {
 
     @Column(name = "deliver_to")
     private LocalDateTime deliverTo;
+
+    @Column(name = "date_of_export")
+    private LocalDate dateOfExport;
 
     @ManyToMany(mappedBy = "attachedOrders")
     private Set<Employee> attachedEmployees;

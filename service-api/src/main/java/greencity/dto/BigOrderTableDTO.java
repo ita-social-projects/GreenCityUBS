@@ -40,6 +40,7 @@ public class BigOrderTableDTO {
     private String responsibleManager;
     private String responsibleLogicMan;
     private String responsibleDriver;
+    private String responsibleCaller;
     private String responsibleNavigator;
     private String commentsForOrder;
 }
