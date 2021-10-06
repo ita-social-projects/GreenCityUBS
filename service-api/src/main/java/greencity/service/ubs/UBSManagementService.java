@@ -8,7 +8,6 @@ import greencity.filters.SearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,8 +57,7 @@ public interface UBSManagementService {
      *
      * @author Ostap Mykhailivskyi
      */
-    void returnOverpayment(Long orderId,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto);
+    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto);
 
     /**
      * Method returns overpayment to user.
@@ -105,9 +103,7 @@ public interface UBSManagementService {
      * Method for adding violation for user.
      *
      * @param add            {@link AddingViolationsToUserDto}
-     *
      * @param multipartFiles {@link MultipartFile}
-     *
      * @author Nazar Struk
      */
     void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
@@ -144,7 +140,7 @@ public interface UBSManagementService {
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
-    OrderAddressDtoResponse updateAddress(OrderAddressDtoUpdate dtoUpdate);
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate);
 
     /**
      * Method for getting order detail by language and order id.
@@ -291,9 +287,7 @@ public interface UBSManagementService {
      * Method for adding violation for user.
      *
      * @param add            {@link AddingViolationsToUserDto}
-     *
      * @param multipartFiles {@link MultipartFile}
-     *
      * @author Bohdan Melnyk
      */
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
@@ -306,11 +300,10 @@ public interface UBSManagementService {
     /**
      * This method assign Employee with it's position for current order.
      *
-     * @param dto     {@link AssignEmployeeForOrderDto}.
-     * @param orderId {@link Long}.
+     * @param dto {@link AssignEmployeesForOrderDto}.
      * @author Yuriy Bahlay.
      */
-    void assignEmployeeWithThePositionToTheOrder(AssignEmployeeForOrderDto dto, Long orderId, String uuid);
+    void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
 
     /**
      * Method returns all order's data from big order table.

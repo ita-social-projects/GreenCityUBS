@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -306,11 +305,11 @@ class ManagementOrderControllerTest {
 
     @Test
     void assignEmployeeToOrder() throws Exception {
-        AssignEmployeeForOrderDto assignEmployeeForOrderDto = ModelUtils.assignEmployeeToOrderDto();
+        AssignEmployeesForOrderDto assignEmployeesForOrderDto = ModelUtils.assignEmployeeToOrderDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String writeValueAsString = objectMapper.writeValueAsString(assignEmployeeForOrderDto);
+        String writeValueAsString = objectMapper.writeValueAsString(assignEmployeesForOrderDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/assign-employee-to-order", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/assign-employees-to-order", 1L)
             .content(writeValueAsString)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());

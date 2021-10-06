@@ -22,20 +22,25 @@ public interface EmployeeOrderPositionRepository extends CrudRepository<Employee
     List<EmployeeOrderPosition> findAllByOrderId(Long orderId);
 
     /**
-     * Method count if Employee already assigned for current Order.
+     * Method find current position for Employee in EmployeeOrderPosition table.
+     *
+     * @param employeeId {@link Long}.
+     * @return {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(" SELECT eop.position.id "
+        + " FROM EmployeeOrderPosition eop "
+        + " WHERE eop.employee.id = :employeeId ")
+    Long findPositionOfEmployeeAssignedForOrder(@Param("employeeId") Long employeeId);
+
+    /**
+     * Method verify if Employee already assigned for current Order.
      *
      * @param orderId    {@link Long}.
      * @param employeeId {@link Long}.
-     * @param positionId {@link Long}.
-     * @return {@link List}of{@link EmployeeOrderPosition}
+     * @return {@link Boolean}.
      * @author Yuriy Bahlay.
      */
-    @Query(" SELECT COUNT(eop.id) "
-        + " FROM EmployeeOrderPosition eop "
-        + " WHERE eop.order.id = :orderId "
-        + " AND eop.employee.id = :employeeId "
-        + " AND eop.position.id = :positionId")
-    int countEmployeeByIdAndOrderIdAndPositionId(@Param("orderId") Long orderId,
-        @Param("employeeId") Long employeeId,
-        @Param("positionId") Long positionId);
+    boolean existsByOrderIdAndEmployeeId(@Param("orderId") Long orderId,
+        @Param("employeeId") Long employeeId);
 }
