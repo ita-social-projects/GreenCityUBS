@@ -39,8 +39,9 @@ public interface SuperAdminService {
      * 
      * @param dto {@link EditTariffServiceDto}
      * @param id  {@link Long} - selected tariff id.
+     * @param uuid {@link String} - current user;
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id);
+    GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id,String uuid);
 }

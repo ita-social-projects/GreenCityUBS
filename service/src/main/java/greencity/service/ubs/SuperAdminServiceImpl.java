@@ -81,12 +81,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id) {
+    public GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id,String uuid) {
+        User user = userRepository.findByUuid(uuid);
         Bag bag = bagRepository.findById(id).orElseThrow(() -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND));
         bag.setPrice(dto.getPrice());
         bag.setCapacity(dto.getCapacity());
         bag.setCommission(dto.getCommission());
         bag.setFullPrice(dto.getPrice() + dto.getCommission());
+        bag.setEditedAt(LocalDate.now());
+        bag.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         bagRepository.save(bag);
         BagTranslation bagTranslation =
             translationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
