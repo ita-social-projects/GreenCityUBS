@@ -99,8 +99,8 @@ class SuperAdminController {
     })
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
-        @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id) {
-        superAdminService.editTariffService(editTariff, id);
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff, id));
+        @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff, id, uuid));
     }
 }
