@@ -1483,6 +1483,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .responsibleManager("Need to implement!!!")
             .responsibleLogicMan("Need to implement!!!")
             .responsibleDriver("Need to implement!!!")
+            .responsibleCaller("Need to implement!!!")
             .responsibleNavigator("Need to implement!!!")
             .commentsForOrder(order.getNote())
             .build();
