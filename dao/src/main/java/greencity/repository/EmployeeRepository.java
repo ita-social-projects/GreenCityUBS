@@ -106,4 +106,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @author Yuriy Bahlay.
      */
     boolean existsByUserId(Long userId);
+
+    /**
+     * Method find current position for Employee.
+     *
+     * @param employeeId {@link Long}.
+     * @return {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(value = "SELECT EMPLOYEE_POSITION.POSITION_ID FROM EMPLOYEE_POSITION "
+        + "WHERE EMPLOYEE_ID = :employeeId", nativeQuery = true)
+    Optional<Long> findPositionForEmployee(Long employeeId);
 }

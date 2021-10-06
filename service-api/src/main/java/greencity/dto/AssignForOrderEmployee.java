@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class AssignEmployeeForOrderDto {
-    private Long positionId;
+public class AssignForOrderEmployee {
     private Long employeeId;
 }
