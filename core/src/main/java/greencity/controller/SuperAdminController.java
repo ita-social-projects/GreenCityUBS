@@ -101,6 +101,6 @@ class SuperAdminController {
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff,id,uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff, id, uuid));
     }
 }

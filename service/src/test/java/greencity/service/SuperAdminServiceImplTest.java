@@ -88,7 +88,7 @@ class SuperAdminServiceImplTest {
     @Test
     void editTariffService_Throw_Exception() {
         EditTariffServiceDto dto = new EditTariffServiceDto();
-        assertThrows(BagNotFoundException.class, () -> superAdminService.editTariffService(dto, 1,"testUUid"));
+        assertThrows(BagNotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
     }
 
     @Test
@@ -107,7 +107,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(bagTranslation);
         when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
-        superAdminService.editTariffService(dto, 1,uuid);
+        superAdminService.editTariffService(dto, 1, uuid);
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
