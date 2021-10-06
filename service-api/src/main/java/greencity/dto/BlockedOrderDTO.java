@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @Builder
-public class ColumnBelongingDTO {
-    private String key;
+public class BlockedOrderDTO {
+    private Long orderId;
+    private String userName;
 }

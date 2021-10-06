@@ -3,11 +3,9 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.AllFieldsFromTableDto;
-import greencity.dto.PageableDto;
-import greencity.dto.RequestToChangeOrdersDataDTO;
-import greencity.dto.TableParamsDTO;
+import greencity.dto.*;
 import greencity.filters.SearchCriteria;
+import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -19,18 +17,22 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/management")
 public class AdminUbsController {
     private final UBSManagementService ubsManagementService;
+    private final OrdersAdminsPageService ordersAdminsPageService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(UBSManagementService ubsManagementService) {
+    public AdminUbsController(UBSManagementService ubsManagementService,
+        OrdersAdminsPageService ordersAdminsPageService) {
         this.ubsManagementService = ubsManagementService;
+        this.ordersAdminsPageService = ordersAdminsPageService;
     }
 
     /**
@@ -70,7 +72,7 @@ public class AdminUbsController {
     })
     @GetMapping("/tableParams/{userId}")
     public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getParametersForOrdersTable(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userId));
     }
 
     /**
@@ -84,11 +86,32 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/changingOrder")
-    public ResponseEntity<HttpStatus> saveNewValueFromOrdersTable(
+    @PutMapping("/changingOrder")
+    public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
-        ubsManagementService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+        ChangeOrderResponseDTO changeOrderResponseDTO =
+            ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
+        return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
+            .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
+    }
+
+    /**
+     * Controller.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation(value = "Block orders for changing by another users")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PutMapping("/blockOrders")
+    public ResponseEntity<List<BlockedOrderDTO>> blockOrders(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody List<Long> listOfOrdersId) {
+        List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
+        return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
     }
 }

@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.order.Bag;
 import greencity.service.SuperAdminService;
@@ -79,8 +80,27 @@ class SuperAdminController {
     })
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
-        @Valid @PathVariable Long id) {
+        @Valid @PathVariable Integer id) {
         superAdminService.deleteTariffService(id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller for edit tariff service by Id.
+     *
+     * @return {@link Bag}
+     * @author Vadym Makitra.
+     */
+
+    @ApiOperation(value = "Edit tariff service")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PutMapping("/editTariffService/{id}")
+    public ResponseEntity<GetTariffServiceDto> editTariffService(
+        @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff, id, uuid));
     }
 }

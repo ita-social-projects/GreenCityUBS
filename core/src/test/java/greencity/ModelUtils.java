@@ -345,4 +345,16 @@ public class ModelUtils {
                     .build()))
             .build();
     }
+
+    public static EditTariffServiceDto getEditTariffServiceDto() {
+        return EditTariffServiceDto.builder()
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
+            .langCode("ua")
+            .build();
+    }
+
 }

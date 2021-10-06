@@ -13,6 +13,7 @@ import lombok.*;
 public class ColumnState {
     private long id;
     private String name;
+    private String titleForSorting;
     private int weight;
     private boolean sticky;
     private boolean visible;

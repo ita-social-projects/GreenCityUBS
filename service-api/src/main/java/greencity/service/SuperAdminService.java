@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.order.Bag;
 
@@ -31,5 +32,16 @@ public interface SuperAdminService {
      * @param id - Tariff Service Id.
      * @author Vadym Makitra
      */
-    void deleteTariffService(long id);
+    void deleteTariffService(Integer id);
+
+    /**
+     * Method for edit tariff service by Id.
+     * 
+     * @param dto  {@link EditTariffServiceDto}
+     * @param id   {@link Long} - selected tariff id.
+     * @param uuid {@link String} - current user;
+     * @return {@link GetTariffServiceDto}
+     * @author Vadym Makitra
+     */
+    GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
 }

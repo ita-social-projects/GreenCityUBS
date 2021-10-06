@@ -124,24 +124,9 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public List<PersonalDataDto> getSecondPageData(String uuid) {
-        createUserByUuidIfUserDoesNotExist(uuid);
-        Long userId = userRepository.findByUuid(uuid).getId();
-        String currentUserEmail = restClient.findUserByUUid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found")).getEmail();
-        List<UBSuser> allByUserId = ubsUserRepository.getAllByUserId(userId);
-        if (allByUserId.isEmpty()) {
-            return List.of(PersonalDataDto.builder().email(currentUserEmail).build());
-        } else {
-            List<PersonalDataDto> result = allByUserId.stream()
-                .map(u -> modelMapper.map(u, PersonalDataDto.class))
-                .filter(x -> x.getEmail().equals(currentUserEmail))
-                .distinct()
-                .collect(Collectors.toList());
-            return result.isEmpty()
-                ? List.of(PersonalDataDto.builder().email(currentUserEmail).build())
-                : result;
-        }
+    public PersonalDataDto getSecondPageData(String uuid) {
+        User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
+        return modelMapper.map(currentUser, PersonalDataDto.class);
     }
 
     /**
@@ -737,13 +722,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return address;
     }
 
-    private void createUserByUuidIfUserDoesNotExist(String uuid) {
-        if (userRepository.findByUuid(uuid) == null) {
+    private User createUserByUuidIfUserDoesNotExist(String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        if (user == null) {
             UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
-            userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
+            return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName()).build());
         }
+        return user;
     }
 
     @Override
@@ -936,5 +923,18 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
         }
+    }
+
+    @Override
+    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
+        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, languageId);
+        Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
+        Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
+        amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
+        orderStatusPageDto.setAmountOfBagsExported(amountBagsOrderExported);
+        Double exportedPrice = orderStatusPageDto.getOrderExportedDiscountedPrice();
+        Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
+        orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
+        return orderStatusPageDto;
     }
 }

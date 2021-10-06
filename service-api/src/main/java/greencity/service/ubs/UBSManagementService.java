@@ -2,9 +2,11 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.filters.SearchCriteria;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
@@ -291,23 +293,6 @@ public interface UBSManagementService {
     void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
 
     /**
-     * Method that return parameters for building table on admin's page.
-     *
-     * @param userId of {@link Long} administrator's user id;
-     * @author Liubomyr Pater
-     */
-    TableParamsDTO getParametersForOrdersTable(Long userId);
-
-    /**
-     * Method that return.
-     *
-     * @param userUuid                     of {@link String}
-     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
-     * @author Liubomyr Pater
-     */
-    HttpStatus chooseOrdersDataSwitcher(String userUuid, RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
-
-    /**
      * Method that save ReasonNotTakeBagDto.
      */
     ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
@@ -319,4 +304,11 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
+
+    /**
+     * Method returns all order's data from big order table.
+     *
+     * @author Ihor Volianskyi
+     */
+    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria);
 }
