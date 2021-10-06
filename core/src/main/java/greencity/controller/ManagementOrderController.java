@@ -267,7 +267,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/update-address")
-    public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
+    public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
         @Valid @RequestBody OrderAddressDtoUpdate dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateAddress(dto));
@@ -798,10 +798,10 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for assigning Employee for some order by orderId.
+     * Controller for assigning Employees with their positions for some order by
+     * orderId.
      *
-     * @param dto     {@link AssignEmployeeForOrderDto}.
-     * @param orderId {@link Long}.
+     * @param dto {@link AssignEmployeesForOrderDto}.
      * @author Bahlay Yuriy.
      */
     @ApiOperation(value = "Assign employee for some order")
@@ -813,11 +813,11 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PostMapping("/assign-employee-to-order")
-    public ResponseEntity<HttpStatus> assignEmployeeToOrder(
-        @RequestBody @Valid AssignEmployeeForOrderDto dto, Long orderId,
+    @PostMapping("/assign-employees-to-order")
+    public ResponseEntity<HttpStatus> assignEmployeesToOrder(
+        @RequestBody @Valid AssignEmployeesForOrderDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.assignEmployeeWithThePositionToTheOrder(dto, orderId, uuid);
+        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(dto, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

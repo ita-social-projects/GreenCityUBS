@@ -88,6 +88,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
+                OrderHistory.SYSTEM, order);
         }
     }
 
@@ -931,6 +933,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
+                OrderHistory.SYSTEM, order);
         }
     }
 }
