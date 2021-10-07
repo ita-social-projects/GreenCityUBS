@@ -25,7 +25,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"employeeOrderPositions"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -115,6 +115,7 @@ public class Order {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OneToMany(mappedBy = "order")
     private List<Payment> payment;
+
 
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
