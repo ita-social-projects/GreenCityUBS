@@ -8,6 +8,7 @@ import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Service;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.ServiceNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BagTranslationRepository;
 import greencity.repository.ServiceRepository;
@@ -129,5 +130,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .editedAt(service.getEditedAt())
             .editedBy(service.getEditedBy())
             .build();
+    }
+
+    @Override
+    public void deleteService(long id) {
+        Service service = serviceRepository.findById(id).orElseThrow(
+            () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        serviceRepository.delete(service);
     }
 }
