@@ -1616,7 +1616,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .responsibleNavigator(getEmployeeNameByIdPosition(order, 4L))
             .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
             .build();
-        System.out.println(order.getEmployeeOrderPositions().size());
         return build;
     }
 
