@@ -69,4 +69,15 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     void deleteService(long id);
+
+    /**
+     * Method for editing service by Id.
+     *
+     * @param id   - id of current service.
+     * @param dto  - entered info about field that need to edit.
+     * @param uuid - user uuid.
+     * @return {@link GetServiceDto} - info about edited service.
+     * @author Vadym Makitra
+     */
+    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
 }

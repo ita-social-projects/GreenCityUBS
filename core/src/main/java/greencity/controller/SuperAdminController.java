@@ -158,4 +158,23 @@ class SuperAdminController {
         superAdminService.deleteService(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    /**
+     * Controller for edit service by Id.
+     *
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Edit service by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/editService/{id}")
+    public ResponseEntity<GetServiceDto> deleteService(
+        @Valid @PathVariable Long id,
+        @RequestBody @Valid CreateServiceDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
+    }
 }
