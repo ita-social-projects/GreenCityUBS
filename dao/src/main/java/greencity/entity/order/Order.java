@@ -122,7 +122,6 @@ public class Order {
     @OneToMany(mappedBy = "order")
     private List<Payment> payment;
 
-
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
