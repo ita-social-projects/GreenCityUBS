@@ -48,7 +48,7 @@ public interface SuperAdminService {
     GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
 
     /**
-     * Controller for add new Service.
+     * Method for add new Service.
      * 
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
