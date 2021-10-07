@@ -2,10 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.AddServiceDto;
-import greencity.dto.CreateServiceDto;
-import greencity.dto.EditTariffServiceDto;
-import greencity.dto.GetTariffServiceDto;
+import greencity.dto.*;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
@@ -107,23 +104,40 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for creating new tariff.
+     * Controller for creating new service.
      *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
      * @return {@link Service}
-     * @author Vadym Makitra
+     * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Add new tariff")
+    @ApiOperation(value = "Add new Service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CreateServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/createTariff")
-    public ResponseEntity<Service> createTariff(
+    @PostMapping("/createService")
+    public ResponseEntity<Service> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
+    }
+
+    /**
+     * Controller for getting all info about tariff.
+     * 
+     * @return {@link GetServiceDto}
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Get all info about tariff")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/getService")
+    public ResponseEntity<List<GetServiceDto>> getService() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService());
     }
 }

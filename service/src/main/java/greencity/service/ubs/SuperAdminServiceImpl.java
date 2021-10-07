@@ -1,13 +1,11 @@
 package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.AddServiceDto;
-import greencity.dto.CreateServiceDto;
-import greencity.dto.EditTariffServiceDto;
-import greencity.dto.GetTariffServiceDto;
+import greencity.dto.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Service;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
 import greencity.repository.BagRepository;
@@ -17,13 +15,12 @@ import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
@@ -69,14 +66,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .id(bagTranslation.getBag().getId())
             .createdAt(bagTranslation.getBag().getCreatedAt())
             .createdBy(bagTranslation.getBag().getCreatedBy())
+            .editedAt(bagTranslation.getBag().getEditedAt())
+            .editedBy(bagTranslation.getBag().getEditedBy())
             .build();
     }
 
-    /**
-     * This method delete tariff service by Id.
-     * 
-     * @param id - Tariff Service Id.
-     */
+    @Override
     public void deleteTariffService(Integer id) {
         Bag bag = bagRepository.findById(id).orElseThrow(
             () -> new BagNotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
@@ -103,12 +98,36 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public greencity.entity.order.Service addService(CreateServiceDto dto, String uuid) {
-        greencity.entity.order.Service service = modelMapper.map(dto, greencity.entity.order.Service.class);
+    public Service addService(CreateServiceDto dto, String uuid) {
+        Service service = modelMapper.map(dto, greencity.entity.order.Service.class);
         User user = userRepository.findByUuid(uuid);
         service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         service.setCreatedAt(LocalDate.now());
-        service.setFullPrice(dto.getBasePrice() + dto.getCommission());
+        service.setFullPrice(dto.getPrice() + dto.getCommission());
         return serviceRepository.save(service);
+    }
+
+    @Override
+    public List<GetServiceDto> getService() {
+        return serviceRepository.findAll()
+            .stream()
+            .map(this::getService)
+            .collect(Collectors.toList());
+    }
+
+    private GetServiceDto getService(Service service) {
+        return GetServiceDto.builder()
+            .description(service.getDescription())
+            .price(service.getBasePrice())
+            .capacity(service.getCapacity())
+            .name(service.getName())
+            .commission(service.getCommission())
+            .fullPrice(service.getFullPrice())
+            .id(service.getId())
+            .createdAt(service.getCreatedAt())
+            .createdBy(service.getCreatedBy())
+            .editedAt(service.getEditedAt())
+            .editedBy(service.getEditedBy())
+            .build();
     }
 }
