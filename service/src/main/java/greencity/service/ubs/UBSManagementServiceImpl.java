@@ -1564,65 +1564,66 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
         Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
         BigOrderTableDTO build = BigOrderTableDTO.builder()
-                .id(order.getId())
-                .orderStatus(order.getOrderStatus().name())
-                .paymentStatus(nonNull(order.getOrderPaymentStatus()) ? order.getOrderPaymentStatus().name() : "-")
-                .orderDate(order.getOrderDate().toString())
-                .paymentDate(nonNull(order.getPayment()) ? order.getPayment().stream()
-                        .map(Payment::getOrderTime).collect(joining(", ")) : "-")
-                .clientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
-                .phoneNumber(order.getUbsUser().getPhoneNumber())
-                .email(order.getUbsUser().getEmail())
-                .senderName(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname())
-                .senderPhone(order.getUser().getRecipientPhone())
-                .senderEmail(order.getUser().getRecipientEmail())
-                .violationsAmount(order.getUser().getViolations())
-                .district(address.getDistrict())
-                //область
-                //населений пункт
-                .address(address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
-                        + address.getEntranceNumber())
-                .commentToAddressForClient(address.getComment())
-                .bagsAmount(order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum))
-                .totalOrderSum(paymentSum)
-                .orderCertificateCode(order.getCertificates().stream().map(Certificate::getCode)
-                        .collect(joining(", ")))
-                .orderCertificatePoints(order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString)
-                        .collect(joining(", ")))
-                .amountDue(paymentSum - certificateSum)
-                .commentForOrderByClient(order.getComment())
+            .id(order.getId())
+            .orderStatus(order.getOrderStatus().name())
+            .paymentStatus(nonNull(order.getOrderPaymentStatus()) ? order.getOrderPaymentStatus().name() : "-")
+            .orderDate(order.getOrderDate().toString())
+            .paymentDate(nonNull(order.getPayment()) ? order.getPayment().stream()
+                .map(Payment::getOrderTime).collect(joining(", ")) : "-")
+            .clientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
+            .phoneNumber(order.getUbsUser().getPhoneNumber())
+            .email(order.getUbsUser().getEmail())
+            .senderName(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname())
+            .senderPhone(order.getUser().getRecipientPhone())
+            .senderEmail(order.getUser().getRecipientEmail())
+            .violationsAmount(order.getUser().getViolations())
+            .district(address.getDistrict())
+            // область
+            // населений пункт
+            .address(address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
+                + address.getEntranceNumber())
+            .commentToAddressForClient(address.getComment())
+            .bagsAmount(order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum))
+            .totalOrderSum(paymentSum)
+            .orderCertificateCode(order.getCertificates().stream().map(Certificate::getCode)
+                .collect(joining(", ")))
+            .orderCertificatePoints(order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString)
+                .collect(joining(", ")))
+            .amountDue(paymentSum - certificateSum)
+            .commentForOrderByClient(order.getComment())
 
-                .payment(nonNull(order.getPayment()) ? order.getPayment().stream()
-                        .map(Payment::getAmount)
-                        .map(Objects::toString)
-                        .collect(joining(", ")) : "-")
-                .dateOfExport(nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-")
-                .timeOfExport(nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo()) ?
-                        String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
-                                order.getDeliverTo().toLocalTime().toString()) : "-")
-                .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
-                        .collect(joining(", ")))
-                .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-")
+            .payment(nonNull(order.getPayment()) ? order.getPayment().stream()
+                .map(Payment::getAmount)
+                .map(Objects::toString)
+                .collect(joining(", ")) : "-")
+            .dateOfExport(nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-")
+            .timeOfExport(nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
+                ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+                    order.getDeliverTo().toLocalTime().toString())
+                : "-")
+            .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
+                .collect(joining(", ")))
+            .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-")
 
-                .responsibleManager("-")
-                .responsibleLogicMan("-")
-                .responsibleDriver("-")
-                .responsibleCaller("-")
-                .responsibleNavigator("-")
-                .commentsForOrder(order.getNote())
-                .build();
+            .responsibleManager(" Not implement ")
+            .responsibleLogicMan("Not implement")
+            .responsibleDriver("Not implement")
+            .responsibleCaller("Not implement")
+            .responsibleNavigator("Not implement")
+            .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
+            .build();
 
         return build;
 
     }
 
-    private String getEmployeeNameByIdPosition(Order order, Long idPosition){
-        String  name = nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
-                .filter(EmployeeOrderPosition -> EmployeeOrderPosition.getPosition().getId().equals(idPosition))
-                .map(EmployeeOrderPosition::getEmployee)
-                .map(e -> e.getFirstName() + " " + e.getLastName())
-                .reduce("", String::concat) : "-";
-        return  name ;
+    private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
+        String name = nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
+            .filter(EmployeeOrderPosition -> EmployeeOrderPosition.getPosition().getId().equals(idPosition))
+            .map(EmployeeOrderPosition::getEmployee)
+            .map(e -> e.getFirstName() + " " + e.getLastName())
+            .reduce("", String::concat) : "-";
+        return name;
 
     }
 }
