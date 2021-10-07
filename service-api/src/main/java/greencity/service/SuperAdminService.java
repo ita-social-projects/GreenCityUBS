@@ -61,4 +61,12 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     List<GetServiceDto> getService();
+
+    /**
+     * Method for delete service by Id.
+     *
+     * @param id - Service Id.
+     * @author Vadym Makitra
+     */
+    void deleteService(long id);
 }
