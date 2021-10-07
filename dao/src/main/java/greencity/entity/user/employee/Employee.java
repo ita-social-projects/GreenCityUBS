@@ -64,4 +64,7 @@ public class Employee {
     @OneToMany(mappedBy = "employee")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "blockedByEmployee")
+    private Set<Order> orders;
 }
