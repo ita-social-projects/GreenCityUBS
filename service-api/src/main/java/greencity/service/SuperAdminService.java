@@ -1,9 +1,6 @@
 package greencity.service;
 
-import greencity.dto.AddServiceDto;
-import greencity.dto.CreateServiceDto;
-import greencity.dto.EditTariffServiceDto;
-import greencity.dto.GetTariffServiceDto;
+import greencity.dto.*;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 
@@ -56,4 +53,31 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     Service addService(CreateServiceDto dto, String uuid);
+
+    /**
+     * Method for get All service.
+     * 
+     * @return {@link GetServiceDto}
+     * @author Vadym Makitra
+     */
+    List<GetServiceDto> getService();
+
+    /**
+     * Method for delete service by Id.
+     *
+     * @param id - Service Id.
+     * @author Vadym Makitra
+     */
+    void deleteService(long id);
+
+    /**
+     * Method for editing service by Id.
+     *
+     * @param id   - id of current service.
+     * @param dto  - entered info about field that need to edit.
+     * @param uuid - user uuid.
+     * @return {@link GetServiceDto} - info about edited service.
+     * @author Vadym Makitra
+     */
+    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
 }

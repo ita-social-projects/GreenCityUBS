@@ -45,6 +45,12 @@ public class Order {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
+    private boolean blocked;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee blockedByEmployee;
+
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",
         joinColumns = {@JoinColumn(name = "order_id", referencedColumnName = "id")})

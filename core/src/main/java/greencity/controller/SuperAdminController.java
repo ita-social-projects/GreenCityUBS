@@ -2,10 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.AddServiceDto;
-import greencity.dto.CreateServiceDto;
-import greencity.dto.EditTariffServiceDto;
-import greencity.dto.GetTariffServiceDto;
+import greencity.dto.*;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
@@ -39,7 +36,7 @@ class SuperAdminController {
      * @return {@link Bag}
      * @author Vadym Makitra.
      */
-    @ApiOperation(value = "Create tariff service")
+    @ApiOperation(value = "Create new tariff")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto[].class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
@@ -58,7 +55,7 @@ class SuperAdminController {
      * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Get tariff service")
+    @ApiOperation(value = "Get all info about tariff")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto[].class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
@@ -94,7 +91,7 @@ class SuperAdminController {
      * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Edit tariff service")
+    @ApiOperation(value = "Edit tariff by id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
@@ -107,23 +104,77 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for creating new tariff.
+     * Controller for creating new service.
      *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
      * @return {@link Service}
-     * @author Vadym Makitra
+     * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Add new tariff")
+    @ApiOperation(value = "Add new service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CreateServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/createTariff")
-    public ResponseEntity<Service> createTariff(
+    @PostMapping("/createService")
+    public ResponseEntity<Service> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
+    }
+
+    /**
+     * Controller for getting all info about service.
+     * 
+     * @return {@link GetServiceDto}
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Get all info about service")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping("/getService")
+    public ResponseEntity<List<GetServiceDto>> getService() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService());
+    }
+
+    /**
+     * Controller for delete service by Id.
+     *
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Delete service by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @DeleteMapping("/deleteService/{id}")
+    public ResponseEntity<HttpStatus> deleteService(
+        @Valid @PathVariable Long id) {
+        superAdminService.deleteService(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller for edit service by Id.
+     *
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Edit service by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/editService/{id}")
+    public ResponseEntity<GetServiceDto> deleteService(
+        @Valid @PathVariable Long id,
+        @RequestBody @Valid CreateServiceDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
     }
 }
