@@ -1604,7 +1604,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
                 .collect(joining(", ")))
             .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-")
-
             .responsibleManager(" Not implement ")
             .responsibleLogicMan("Not implement")
             .responsibleDriver("Not implement")
@@ -1612,18 +1611,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .responsibleNavigator("Not implement")
             .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
             .build();
-
         return build;
-
     }
 
     private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
         String name = nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
-            .filter(EmployeeOrderPosition -> EmployeeOrderPosition.getPosition().getId().equals(idPosition))
+            .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
             .map(EmployeeOrderPosition::getEmployee)
-            .map(e -> e.getFirstName() + " " + e.getLastName())
+            .map(e -> e.getFirstName() + ", " + e.getLastName())
             .reduce("", String::concat) : "-";
         return name;
-
     }
 }
