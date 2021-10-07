@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -807,14 +808,18 @@ class UBSManagementServiceImplTest {
         assertEquals(2L, user.getChangeOfPointsList().size());
     }
 
-    @Test
-    void testUpdatePositionManagerCallTest() {
+    @ParameterizedTest
+    @CsvSource({"1, Змінено менеджера обдзвону",
+            "3, Змінено логіста",
+            "4, Змінено штурмана",
+            "5, Змінено водія"})
+    void testUpdatePositionTest(long diffParam, String eventName) {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
         when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
         when(employeeOrderPositionRepository.saveAll(anyIterable()))
             .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(1L)).thenReturn(1L);
+        when(employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(1L)).thenReturn(diffParam);
         when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
         ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE);
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
@@ -822,40 +827,9 @@ class UBSManagementServiceImplTest {
         verify(positionRepository).findById(2L);
         verify(employeeRepository).findByName(anyString(), anyString());
         verify(employeeOrderPositionRepository).saveAll(anyIterable());
-    }
-
-    @Test
-    void testUpdatePositionLogiestTest() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
-        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
-        when(employeeOrderPositionRepository.saveAll(anyIterable()))
-            .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(1L)).thenReturn(3L);
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE);
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(orderRepository).findById(1L);
-        verify(positionRepository).findById(2L);
-        verify(employeeRepository).findByName(anyString(), anyString());
-        verify(employeeOrderPositionRepository).saveAll(anyIterable());
-    }
-
-    @Test
-    void testUpdatePositionCallPilotTest() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
-        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
-        when(employeeOrderPositionRepository.saveAll(anyIterable()))
-            .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(1L)).thenReturn(4L);
-        when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE);
-        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
-        verify(orderRepository).findById(1L);
-        verify(positionRepository).findById(2L);
-        verify(employeeRepository).findByName(anyString(), anyString());
-        verify(employeeOrderPositionRepository).saveAll(anyIterable());
+        Order order = TEST_ORDER_UPDATE_POSITION;
+        verify(eventService, times(1)).save(eventName,
+                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
     }
 
     @Test
@@ -1038,8 +1012,12 @@ class UBSManagementServiceImplTest {
             () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
     }
 
-    @Test
-    void testAssignEmployeesWithThePositionsCallManagerToTheOrder() {
+    @ParameterizedTest
+    @CsvSource({"1, Закріплено менеджера обдзвону",
+                "3, Закріплено логіста",
+                "4, Закріплено штурмана",
+                "5, Закріплено водія"})
+    void testAssignEmployeesWithThePositionsToTheOrderParams(long diffParam, String eventName) {
         User user = ModelUtils.getTestUser();
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         Order order = getTestUser().getOrders().get(0);
@@ -1047,58 +1025,10 @@ class UBSManagementServiceImplTest {
         when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
         Employee employee = getEmployee();
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(1L));
+        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(diffParam));
         ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
         verify(employeeOrderPositionRepository, times(1)).save(any());
-        verify(eventService, times(1)).save("Закріплено менеджера обдзвону",
-            employee.getFirstName() + "  " + employee.getLastName(), order);
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionsLogiestToTheOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        Order order = getTestUser().getOrders().get(0);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        Employee employee = getEmployee();
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(3L));
-        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
-        verify(employeeOrderPositionRepository, times(1)).save(any());
-        verify(eventService, times(1)).save("Закріплено логіста",
-            employee.getFirstName() + "  " + employee.getLastName(), order);
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionsCallPilotToTheOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        Order order = getTestUser().getOrders().get(0);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        Employee employee = getEmployee();
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(4L));
-        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
-        verify(employeeOrderPositionRepository, times(1)).save(any());
-        verify(eventService, times(1)).save("Закріплено штурмана",
-            employee.getFirstName() + "  " + employee.getLastName(), order);
-    }
-
-    @Test
-    void testAssignEmployeesWithThePositionsDriverToTheOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        Order order = getTestUser().getOrders().get(0);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
-        Employee employee = getEmployee();
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(5L));
-        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
-        verify(employeeOrderPositionRepository, times(1)).save(any());
-        verify(eventService, times(1)).save("Закріплено водія",
+        verify(eventService, times(1)).save(eventName,
             employee.getFirstName() + "  " + employee.getLastName(), order);
     }
 }
