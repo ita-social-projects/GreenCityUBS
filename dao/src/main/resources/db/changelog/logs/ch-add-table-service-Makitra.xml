@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-4" author="Vadym Makitra">
+        <createTable tableName="service">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="capacity" type="Integer"/>
+            <column name="description" type="VARCHAR"/>
+            <column name="base_price" type="Integer"/>
+            <column name="commission" type="Integer"/>
+            <column name="full_price" type="Integer"/>
+            <column name="created_at" type="Date"/>
+            <column name="created_by" type="VARCHAR"/>
+            <column name="edited_at" type="Date"/>
+            <column name="edited_by" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
