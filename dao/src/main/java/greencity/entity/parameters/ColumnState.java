@@ -17,6 +17,7 @@ public class ColumnState {
     private int weight;
     private boolean sticky;
     private boolean visible;
+    private boolean filtered;
     private int index;
     private EditType editType;
     private Title title;
