@@ -1320,7 +1320,7 @@ public class ModelUtils {
             .id(1L)
             .firstName("Test")
             .lastName("Test")
-                .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 

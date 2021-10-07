@@ -810,9 +810,9 @@ class UBSManagementServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({"1, Змінено менеджера обдзвону",
-            "3, Змінено логіста",
-            "4, Змінено штурмана",
-            "5, Змінено водія"})
+        "3, Змінено логіста",
+        "4, Змінено штурмана",
+        "5, Змінено водія"})
     void testUpdatePositionTest(long diffParam, String eventName) {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
@@ -829,7 +829,7 @@ class UBSManagementServiceImplTest {
         verify(employeeOrderPositionRepository).saveAll(anyIterable());
         Order order = TEST_ORDER_UPDATE_POSITION;
         verify(eventService, times(1)).save(eventName,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+            order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
     }
 
     @Test
@@ -1014,9 +1014,9 @@ class UBSManagementServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({"1, Закріплено менеджера обдзвону",
-                "3, Закріплено логіста",
-                "4, Закріплено штурмана",
-                "5, Закріплено водія"})
+        "3, Закріплено логіста",
+        "4, Закріплено штурмана",
+        "5, Закріплено водія"})
     void testAssignEmployeesWithThePositionsToTheOrderParams(long diffParam, String eventName) {
         User user = ModelUtils.getTestUser();
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
