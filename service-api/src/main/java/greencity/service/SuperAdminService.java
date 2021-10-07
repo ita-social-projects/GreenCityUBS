@@ -1,9 +1,11 @@
 package greencity.service;
 
 import greencity.dto.AddServiceDto;
+import greencity.dto.CreateServiceDto;
 import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Service;
 
 import java.util.List;
 
@@ -44,4 +46,14 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
+
+    /**
+     * Method for add new Service.
+     * 
+     * @param dto  {@link CreateServiceDto}
+     * @param uuid {@link String} - user uuid.
+     * @return {@link Service}
+     * @author Vadym Makitra
+     */
+    Service addService(CreateServiceDto dto, String uuid);
 }

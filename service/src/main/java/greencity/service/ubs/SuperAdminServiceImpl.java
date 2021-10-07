@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddServiceDto;
+import greencity.dto.CreateServiceDto;
 import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.language.Language;
@@ -11,6 +12,7 @@ import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BagTranslationRepository;
+import greencity.repository.ServiceRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
+    private final ServiceRepository serviceRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -97,5 +100,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bagTranslation.setDescription(dto.getDescription());
         translationRepository.save(bagTranslation);
         return getTariffService(bagTranslation);
+    }
+
+    @Override
+    public greencity.entity.order.Service addService(CreateServiceDto dto, String uuid) {
+        greencity.entity.order.Service service = modelMapper.map(dto, greencity.entity.order.Service.class);
+        User user = userRepository.findByUuid(uuid);
+        service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        service.setCreatedAt(LocalDate.now());
+        service.setFullPrice(dto.getBasePrice() + dto.getCommission());
+        return serviceRepository.save(service);
     }
 }
