@@ -1563,7 +1563,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).sum();
         int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
         Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
-        return BigOrderTableDTO.builder()
+        BigOrderTableDTO build = BigOrderTableDTO.builder()
             .id(order.getId())
             .orderStatus(order.getOrderStatus().name())
             .paymentStatus(nonNull(order.getOrderPaymentStatus()) ? order.getOrderPaymentStatus().name() : "-")
@@ -1577,8 +1577,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .senderPhone(order.getUser().getRecipientPhone())
             .senderEmail(order.getUser().getRecipientEmail())
             .violationsAmount(order.getUser().getViolations())
-            .location("Need to implement!!!")
             .district(address.getDistrict())
+            // область
+            // населений пункт
             .address(address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
                 + address.getEntranceNumber())
             .commentToAddressForClient(address.getComment())
@@ -1590,19 +1591,35 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .collect(joining(", ")))
             .amountDue(paymentSum - certificateSum)
             .commentForOrderByClient(order.getComment())
-            .payment("Need to implement!!!")
-            .dateOfExport(order.getDateOfExport().toString())
-            .timeOfExport(String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
-                order.getDeliverTo().toLocalTime().toString()))
+
+            .payment(nonNull(order.getPayment()) ? order.getPayment().stream()
+                .map(Payment::getAmount)
+                .map(Objects::toString)
+                .collect(joining(", ")) : "-")
+            .dateOfExport(nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-")
+            .timeOfExport(nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
+                ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+                    order.getDeliverTo().toLocalTime().toString())
+                : "-")
             .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
                 .collect(joining(", ")))
-            .receivingStation(order.getReceivingStation())
-            .responsibleManager("Need to implement!!!")
-            .responsibleLogicMan("Need to implement!!!")
-            .responsibleDriver("Need to implement!!!")
-            .responsibleCaller("Need to implement!!!")
-            .responsibleNavigator("Need to implement!!!")
-            .commentsForOrder(order.getNote())
+            .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-")
+            .responsibleManager(" Not implement ")
+            .responsibleLogicMan("Not implement")
+            .responsibleDriver("Not implement")
+            .responsibleCaller("Not implement")
+            .responsibleNavigator("Not implement")
+            .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
             .build();
+        return build;
+    }
+
+    private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
+        String name = nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
+            .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
+            .map(EmployeeOrderPosition::getEmployee)
+            .map(e -> e.getFirstName() + ", " + e.getLastName())
+            .reduce("", String::concat) : "-";
+        return name;
     }
 }
