@@ -3,9 +3,11 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddServiceDto;
+import greencity.dto.CreateServiceDto;
 import greencity.dto.EditTariffServiceDto;
 import greencity.dto.GetTariffServiceDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,7 +33,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller created Service.
+     * Controller created tariff Service.
      *
      * @param dto {@link AddServiceDto} dto for service.
      * @return {@link Bag}
@@ -43,7 +45,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createTariffService")
-    public ResponseEntity<Bag> createService(
+    public ResponseEntity<Bag> createTariffService(
         @RequestBody AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
@@ -88,7 +90,7 @@ class SuperAdminController {
     /**
      * Controller for edit tariff service by Id.
      *
-     * @return {@link Bag}
+     * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra.
      */
 
@@ -102,5 +104,26 @@ class SuperAdminController {
         @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(editTariff, id, uuid));
+    }
+
+    /**
+     * Controller for creating new tariff.
+     *
+     * @param dto  {@link CreateServiceDto}
+     * @param uuid {@link String} - user uuid.
+     * @return {@link Service}
+     * @author Vadym Makitra
+     */
+
+    @ApiOperation(value = "Add new tariff")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/createTariff")
+    public ResponseEntity<Service> createTariff(
+        @RequestBody CreateServiceDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
     }
 }
