@@ -331,10 +331,18 @@ public class ModelUtils {
             .build();
     }
 
-    public static AssignEmployeeForOrderDto assignEmployeeToOrderDto() {
-        return AssignEmployeeForOrderDto.builder()
-            .positionId(1L)
-            .employeeId(1L)
+    public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
+        return AssignEmployeesForOrderDto.builder()
+            .orderId(1L)
+            .employeesList(List.of(AssignForOrderEmployee.builder()
+                .employeeId(1L)
+                .build(),
+                AssignForOrderEmployee.builder()
+                    .employeeId(1L)
+                    .build(),
+                AssignForOrderEmployee.builder()
+                    .employeeId(1L)
+                    .build()))
             .build();
     }
 

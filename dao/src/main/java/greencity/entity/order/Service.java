@@ -4,29 +4,30 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(
-    exclude = {"bagTranslations"})
-@ToString(
-    exclude = {"bagTranslations"})
 @Builder
-@Table(name = "bag")
-public class Bag {
+@Table(name = "service")
+public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column
     private Integer capacity;
 
     @Column(nullable = false)
-    private Integer price;
+    private String description;
+
+    @Column(nullable = false)
+    private Integer basePrice;
 
     @Column
     private Integer commission;
@@ -45,7 +46,4 @@ public class Bag {
 
     @Column(nullable = false)
     private String editedBy;
-
-    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<BagTranslation> bagTranslations;
 }
