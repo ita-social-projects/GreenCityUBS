@@ -126,7 +126,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("responsibleNavigator", "Штурман", "Responsible navigator"), "", 20, false,
                 true, true, 32, EditType.SELECT, navigatorList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"), "",
-                20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
+                20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
+            new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "",
+                20, false, true, true, 34, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
         return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -137,23 +139,23 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
         switch (columnName) {
-            case "order_status":
+            case "orderStatus":
                 return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value));
-            case "date_of_export":
+            case "dateOfExport":
                 return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value));
-            case "time_of_export":
+            case "timeOfExport":
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value));
-            case "receiving_station":
+            case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value));
-            case "responsible_manager":
+            case "responsibleManager":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L));
-            case "responsible_caller":
+            case "responsibleCaller":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L));
-            case "responsible_logic_man":
+            case "responsibleLogicMan":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L));
-            case "responsible_driver":
+            case "responsibleDriver":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L));
-            case "responsible_navigator":
+            case "responsibleNavigator":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L));
             default:
                 return createReturnForSwitchChangeOrder(new ArrayList<>());
