@@ -1,6 +1,7 @@
 package greencity.dto;
 
-import greencity.entity.enums.SortingOrder;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import lombok.*;
 
 import java.util.List;
@@ -12,8 +13,8 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class TableParamsDTO {
-    private List<ColumnStateDTO> columnStateDTOList;
-    private String sortingByColumn;
-    private SortingOrder sortingOrder;
+    private OrderPage page;
+    private OrderSearchCriteria orderSearchCriteria;
+    private List<ColumnDTO> columnDTOList;
     private List<TitleDto> columnBelongingList;
 }
