@@ -1615,6 +1615,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .responsibleCaller(getEmployeeNameByIdPosition(order, 1L))
             .responsibleNavigator(getEmployeeNameByIdPosition(order, 4L))
             .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
+            .isBlocked(order.isBlocked())
+            .blockedBy(nonNull(order.getBlockedByEmployee())
+                ? String.format("%s %s", order.getBlockedByEmployee().getFirstName(),
+                    order.getBlockedByEmployee().getLastName())
+                : "-")
             .build();
         return build;
     }
