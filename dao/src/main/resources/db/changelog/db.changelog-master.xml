@@ -67,4 +67,5 @@
     <include file="db/changelog/logs/ch-add-column-employee_id-into-order-table-Pater.xml"/>
     <include file="db/changelog/logs/ch-add-column-edditedBy-edditedAt-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-service-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-servicetransaltion-Makitra.xml"/>
 </databaseChangeLog>

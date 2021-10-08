@@ -71,6 +71,7 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_IS_NOT_ASSIGN =
         "Employee service could not be assign for order or this is manager which assign managers";
     public static final String SERVICE_IS_NOT_FOUND_BY_ID = "couldn't found service with id: ";
+    public static final String LANGUAGE_IS_NOT_FOUND_BY_CODE = "couldn't found language with code: ";
 
     /**
      * Constructor.
