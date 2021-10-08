@@ -1,12 +1,10 @@
 package greencity.entity.parameters;
 
-import greencity.dto.TitleDto;
 import greencity.entity.enums.EditType;
 import greencity.entity.language.Title;
 import greencity.entity.user.User;
 import lombok.*;
 
-import javax.persistence.OneToOne;
 import java.util.List;
 
 //@Entity
@@ -22,16 +20,14 @@ public class Column {
     private String titleForSorting;
     private boolean filtered;
     private EditType editType;
-
-    //@OneToOne
+    // @OneToOne
     private Title title;
-    //@ManyToOne
+    // @ManyToOne
     private TableParameters tableParameters;
-    //@ManyToOne
+    // @ManyToOne
     private ColumnBelonging columnBelonging;
-    //@ManyToMany
+    // @ManyToMany
     private List<User> abilityToChange;
-    //@OneToOne
+    // @OneToOne
     private ColumnStateByUser columnStateByUser;
-
 }

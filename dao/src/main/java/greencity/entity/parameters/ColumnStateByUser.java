@@ -18,10 +18,10 @@ public class ColumnStateByUser {
     private boolean sticky;
     private boolean visible;
     private int index;
-    //@ManyToOne
+    // @ManyToOne
     private User user;
-    //@OneToMany
+    // @OneToMany
     private Column column;
-    //@OneToMany
+    // @OneToMany
     private List<OptionForColumnDTO> optional;
 }

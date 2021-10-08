@@ -167,7 +167,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> orderStatusListForDevelopStage() {
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new OptionForColumnDTO("FORMED", "Сформовано", "Formed", false),
-            new OptionForColumnDTO("ADJUSTMENT", "На узгодженні", "Adjustment",false),
+            new OptionForColumnDTO("ADJUSTMENT", "На узгодженні", "Adjustment", false),
             new OptionForColumnDTO("BROUGHT_IT_HIMSELF", "Заберуть самостійно", "Brought it himself", false),
             new OptionForColumnDTO("CONFIRMED", "Підтверджено", "Confirmed", true),
             new OptionForColumnDTO("ON_THE_ROUTE", "В дорозі", "On the route", false),
