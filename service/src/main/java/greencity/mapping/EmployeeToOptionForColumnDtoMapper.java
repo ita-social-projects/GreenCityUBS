@@ -1,5 +1,6 @@
 package greencity.mapping;
 
+import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
@@ -8,18 +9,18 @@ import org.springframework.stereotype.Component;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link Employee} into
- * {@link TitleDto}.
+ * {@link OptionForColumnDTO}.
  */
 @Component
-public class EmployeeToTitleDtoMapper extends AbstractConverter<Employee, TitleDto> {
+public class EmployeeToOptionForColumnDtoMapper extends AbstractConverter<Employee, OptionForColumnDTO> {
     /**
-     * Method convert {@link Employee} to {@link TitleDto}.
+     * Method convert {@link Employee} to {@link OptionForColumnDTO}.
      *
-     * @return {@link TitleDto}
+     * @return {@link OptionForColumnDTO}
      */
     @Override
-    protected TitleDto convert(Employee employee) {
-        return TitleDto.builder()
+    protected OptionForColumnDTO convert(Employee employee) {
+        return OptionForColumnDTO.builder()
             .key(employee.getId().toString())
             .ua(String.format("%s %s", employee.getFirstName(), employee.getLastName()))
             .en(String.format("%s %s", employee.getFirstName(), employee.getLastName()))
