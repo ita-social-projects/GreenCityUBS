@@ -190,10 +190,10 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveToDBThrowsException() throws InvocationTargetException, IllegalAccessException {
-
+        Service service = new Service();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, List.of(user));
+        Location location = new Location(1l, "Name", 100l, List.of(user), List.of(service));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
@@ -792,10 +792,10 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
-
+        Service service = new Service();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, List.of(user));
+        Location location = new Location(1l, "Name", 100l, List.of(user), List.of(service));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
