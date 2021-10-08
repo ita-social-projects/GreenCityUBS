@@ -1,7 +1,6 @@
 package greencity.mapping;
 
 import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TitleDto;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

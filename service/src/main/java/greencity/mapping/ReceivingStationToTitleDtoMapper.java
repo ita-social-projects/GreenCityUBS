@@ -2,7 +2,6 @@ package greencity.mapping;
 
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.ReceivingStationDto;
-import greencity.dto.TitleDto;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
