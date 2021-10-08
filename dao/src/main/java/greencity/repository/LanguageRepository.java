@@ -32,6 +32,7 @@ public interface LanguageRepository extends JpaRepository<Language, Long> {
 
     /**
      * Methods, that returns {@link Language} by language code.
+     * 
      * @param langCode - lenguage code.
      * @return {@link Language}
      * @author Vadym Makitra
