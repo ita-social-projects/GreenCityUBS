@@ -100,10 +100,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public Service addService(CreateServiceDto dto, String uuid) {
-        Service service = modelMapper.map(dto, greencity.entity.order.Service.class);
+        Service service = modelMapper.map(dto, Service.class);
         User user = userRepository.findByUuid(uuid);
         service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         service.setCreatedAt(LocalDate.now());
+        service.setBasePrice(dto.getPrice());
         service.setFullPrice(dto.getPrice() + dto.getCommission());
         return serviceRepository.save(service);
     }
@@ -137,5 +138,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = serviceRepository.findById(id).orElseThrow(
             () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         serviceRepository.delete(service);
+    }
+
+    @Override
+    public GetServiceDto editService(long id, CreateServiceDto dto, String uuid) {
+        Service service = serviceRepository.findById(id).orElseThrow(
+            () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        User user = userRepository.findByUuid(uuid);
+        service.setCapacity(dto.getCapacity());
+        service.setCommission(dto.getCommission());
+        service.setBasePrice(dto.getPrice());
+        service.setEditedAt(LocalDate.now());
+        service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        service.setName(dto.getName());
+        service.setDescription(dto.getDescription());
+        service.setFullPrice(dto.getPrice() + dto.getCommission());
+        serviceRepository.save(service);
+        return getService(service);
     }
 }
