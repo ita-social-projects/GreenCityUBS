@@ -144,7 +144,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(serviceTranslation.getService().getCreatedBy())
             .editedAt(serviceTranslation.getService().getEditedAt())
             .editedBy(serviceTranslation.getService().getEditedBy())
-            .locationName(serviceTranslation.getService().getLocation().getLocationName())
+            .locationId(serviceTranslation.getService().getLocation().getId())
             .languageCode(serviceTranslation.getLanguage().getCode())
             .build();
     }
