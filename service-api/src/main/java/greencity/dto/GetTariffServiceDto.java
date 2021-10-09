@@ -28,5 +28,4 @@ public class GetTariffServiceDto {
     String createdBy;
     LocalDate editedAt;
     String editedBy;
-    Integer locationId;
 }

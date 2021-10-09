@@ -18,8 +18,4 @@ public class CreateServiceDto {
     Integer price;
     Integer commission;
     String description;
-    @NotNull
-    Long locationId;
-    @NotNull
-    String languageCode;
 }

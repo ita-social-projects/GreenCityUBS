@@ -52,7 +52,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    GetServiceDto addService(CreateServiceDto dto, String uuid);
+    Service addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get All service.

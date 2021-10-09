@@ -118,7 +118,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createService")
-    public ResponseEntity<GetServiceDto> createServices(
+    public ResponseEntity<Service> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
@@ -170,7 +170,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PutMapping("/editService/{id}")
+    @PostMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> deleteService(
         @Valid @PathVariable Long id,
         @RequestBody @Valid CreateServiceDto dto,

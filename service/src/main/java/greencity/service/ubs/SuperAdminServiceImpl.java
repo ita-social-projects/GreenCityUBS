@@ -6,14 +6,13 @@ import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.LanguageNotFoundException;
-import greencity.exceptions.LocationNotFoundException;
 import greencity.exceptions.ServiceNotFoundException;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,9 +28,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
     private final ServiceRepository serviceRepository;
-    private final ServiceTranslationRepository serviceTranslationRepository;
-    private final LocationRepository locationRepository;
-    private final LanguageRepository languageRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -103,49 +99,37 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto addService(CreateServiceDto dto, String uuid) {
+    public Service addService(CreateServiceDto dto, String uuid) {
         Service service = modelMapper.map(dto, Service.class);
-        Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         User user = userRepository.findByUuid(uuid);
-        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
-        service.setCreatedAt(LocalDate.now());
-        service.setLocation(location);
         service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        service.setCreatedAt(LocalDate.now());
         service.setBasePrice(dto.getPrice());
         service.setFullPrice(dto.getPrice() + dto.getCommission());
-        ServiceTranslation serviceTranslation = modelMapper.map(dto, ServiceTranslation.class);
-        serviceTranslation.setLanguage(language);
-        serviceRepository.save(service);
-        serviceTranslation.setService(service);
-        serviceTranslationRepository.save(serviceTranslation);
-        return getService(serviceTranslation);
+        return serviceRepository.save(service);
     }
 
     @Override
     public List<GetServiceDto> getService() {
-        return serviceTranslationRepository.findAll()
+        return serviceRepository.findAll()
             .stream()
             .map(this::getService)
             .collect(Collectors.toList());
     }
 
-    private GetServiceDto getService(ServiceTranslation serviceTranslation) {
+    private GetServiceDto getService(Service service) {
         return GetServiceDto.builder()
-            .description(serviceTranslation.getDescription())
-            .price(serviceTranslation.getService().getBasePrice())
-            .capacity(serviceTranslation.getService().getCapacity())
-            .name(serviceTranslation.getName())
-            .commission(serviceTranslation.getService().getCommission())
-            .fullPrice(serviceTranslation.getService().getFullPrice())
-            .id(serviceTranslation.getService().getId())
-            .createdAt(serviceTranslation.getService().getCreatedAt())
-            .createdBy(serviceTranslation.getService().getCreatedBy())
-            .editedAt(serviceTranslation.getService().getEditedAt())
-            .editedBy(serviceTranslation.getService().getEditedBy())
-            .locationName(serviceTranslation.getService().getLocation().getLocationName())
-            .languageCode(serviceTranslation.getLanguage().getCode())
+            .description(service.getDescription())
+            .price(service.getBasePrice())
+            .capacity(service.getCapacity())
+            .name(service.getName())
+            .commission(service.getCommission())
+            .fullPrice(service.getFullPrice())
+            .id(service.getId())
+            .createdAt(service.getCreatedAt())
+            .createdBy(service.getCreatedBy())
+            .editedAt(service.getEditedAt())
+            .editedBy(service.getEditedBy())
             .build();
     }
 
@@ -166,12 +150,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setBasePrice(dto.getPrice());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        ServiceTranslation serviceTranslation = serviceTranslationRepository.getOne(1L);
-        serviceTranslation.setService(service);
-        serviceTranslation.setName(dto.getName());
-        serviceTranslation.setDescription(dto.getDescription());
+        service.setName(dto.getName());
+        service.setDescription(dto.getDescription());
         service.setFullPrice(dto.getPrice() + dto.getCommission());
         serviceRepository.save(service);
-        return getService(serviceTranslation);
+        return getService(service);
     }
 }

@@ -26,6 +26,4 @@ public class GetServiceDto {
     String createdBy;
     LocalDate editedAt;
     String editedBy;
-    String locationName;
-    String languageCode;
 }

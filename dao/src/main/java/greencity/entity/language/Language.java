@@ -1,7 +1,6 @@
 package greencity.entity.language;
 
 import greencity.entity.order.BagTranslation;
-import greencity.entity.order.ServiceTranslation;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,7 +25,4 @@ public class Language {
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<BagTranslation> bagTranslations;
-
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    private List<ServiceTranslation> serviceTranslations;
 }
