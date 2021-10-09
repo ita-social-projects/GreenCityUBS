@@ -161,16 +161,24 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = serviceRepository.findById(id).orElseThrow(
             () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         User user = userRepository.findByUuid(uuid);
+        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         service.setCapacity(dto.getCapacity());
         service.setCommission(dto.getCommission());
         service.setBasePrice(dto.getPrice());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        ServiceTranslation serviceTranslation = serviceTranslationRepository.getOne(1L);
+        ServiceTranslation serviceTranslation = serviceTranslationRepository
+            .findServiceTranslationsByServiceAndLanguageCode(service, dto.getLanguageCode());
         serviceTranslation.setService(service);
         serviceTranslation.setName(dto.getName());
         serviceTranslation.setDescription(dto.getDescription());
+        serviceTranslation.setLanguage(language);
         service.setFullPrice(dto.getPrice() + dto.getCommission());
+        service.setBasePrice(dto.getPrice());
+        service.setLocation(location);
         serviceRepository.save(service);
         return getService(serviceTranslation);
     }
