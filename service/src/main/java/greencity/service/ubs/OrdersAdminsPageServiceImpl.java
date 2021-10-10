@@ -128,7 +128,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"), "",
                 20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "",
-                20, false, true, true, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(), "ORDERS_DETAILS"))));
+                20, false, true, true, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
+                "ORDERS_DETAILS"))));
         return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -168,18 +169,21 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private List<OptionForColumnDTO> orderStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        OrderStatus [] orderStatuses = OrderStatus.values();
+        OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
-            String ua = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 1L).get().getName();
-            String en = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 2L).get().getName();
-            optionForColumnDTOS.add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
+            String ua = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 1L)
+                .get().getName();
+            String en = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 2L)
+                .get().getName();
+            optionForColumnDTOS
+                .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }
         return optionForColumnDTOS;
     }
 
     private List<OptionForColumnDTO> orderPaymentStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        PaymentStatus [] paymentStatuses = PaymentStatus.values();
+        PaymentStatus[] paymentStatuses = PaymentStatus.values();
         for (PaymentStatus p : paymentStatuses) {
             optionForColumnDTOS.add(OptionForColumnDTO.builder().key(p.name()).ua(p.name()).en(p.name()).build());
         }
@@ -189,7 +193,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
-        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
+        optionForColumnDTOS
+            .add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
         return optionForColumnDTOS;
     }
 
