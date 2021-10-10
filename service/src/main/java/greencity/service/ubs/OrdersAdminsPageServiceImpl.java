@@ -249,7 +249,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setOrderStatus(orderStatus);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
@@ -268,7 +268,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setDateOfExport(date);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
@@ -290,7 +290,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setDeliverFrom(timeFrom);
                 existedOrder.setDeliverFrom(timeTo);
                 orderRepository.save(existedOrder);
@@ -310,7 +310,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setReceivingStation(station.getName());
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
@@ -332,11 +332,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 List<EmployeeOrderPosition> employeeOrderPositions =
-                        employeeOrderPositionRepository.findAllByOrderId(orderId);
+                    employeeOrderPositionRepository.findAllByOrderId(orderId);
                 EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
-                        EmployeeOrderPosition.builder().employee(existedEmployee).position(existedPosition).order(existedOrder).build());
+                    EmployeeOrderPosition.builder().employee(existedEmployee).position(existedPosition)
+                        .order(existedOrder).build());
                 employeeOrderPositions.add(newEmployeeOrderPosition);
                 Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
                 existedOrder.setEmployeeOrderPositions(positionSet);
@@ -352,17 +353,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Transactional
     public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
         User user = userRepository.findByUuid(userUuid);
-        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail()).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail())
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
             /* block all */
-            /* probably using query in repo*/
+            /* probably using query in repo */
         }
         List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         for (Long orderId : orders) {
-            Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            if (order.isBlocked()){
-                blockedOrderDTOS.add(BlockedOrderDTO.builder().orderId(orderId).userName(String.format("%s %s", order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName())).build());
-            }else {
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            if (order.isBlocked()) {
+                blockedOrderDTOS.add(BlockedOrderDTO
+                    .builder().orderId(orderId).userName(String.format("%s %s",
+                        order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
+                    .build());
+            } else {
                 order.setBlocked(true);
                 order.setBlockedByEmployee(employee);
                 orderRepository.save(order);
@@ -374,15 +380,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public List<Long> unblockOrder(String userUuid, List<Long> orders) {
         User user = userRepository.findByUuid(userUuid);
-        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail()).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail())
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
             /* unblock all */
-            /* probably using query in repo*/
+            /* probably using query in repo */
         }
         List<Long> unblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
-            Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)){
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)) {
                 order.setBlocked(false);
                 order.setBlockedByEmployee(null);
                 orderRepository.save(order);

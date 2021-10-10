@@ -30,7 +30,8 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller which return necessary parameters for building the table of orders.
+     * Controller which return necessary parameters for building the table of
+     * orders.
      *
      * @author Liubomyr Pater
      */
@@ -93,14 +94,14 @@ public class AdminUbsController {
      */
     @ApiOperation(value = "Block orders for changing by another users")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PutMapping("/unblockOrders")
     public ResponseEntity<List<Long>> unblockOrders(
-            @ApiIgnore @CurrentUserUuid String userUuid,
-            @RequestBody List<Long> listOfOrdersId) {
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody List<Long> listOfOrdersId) {
         List<Long> unblockedOrdersId = ordersAdminsPageService.unblockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(unblockedOrdersId);
     }
