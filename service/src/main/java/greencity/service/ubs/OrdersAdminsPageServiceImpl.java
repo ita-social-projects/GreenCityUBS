@@ -6,7 +6,6 @@ import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
