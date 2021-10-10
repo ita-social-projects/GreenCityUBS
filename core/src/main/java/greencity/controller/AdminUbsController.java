@@ -1,12 +1,9 @@
 package greencity.controller;
 
-import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.filters.SearchCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
-import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -22,44 +19,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/ubs/management")
 public class AdminUbsController {
-    private final UBSManagementService ubsManagementService;
     private final OrdersAdminsPageService ordersAdminsPageService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(UBSManagementService ubsManagementService,
-        OrdersAdminsPageService ordersAdminsPageService) {
-        this.ubsManagementService = ubsManagementService;
+    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService) {
         this.ordersAdminsPageService = ordersAdminsPageService;
     }
 
     /**
-     * Controller.
-     *
-     * @author Liubomyr Pater
-     */
-    @ApiOperation("Get all info from Table orders")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/ordersNew")
-    @ApiPageable
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-        @ApiIgnore int page, @ApiIgnore int size,
-        @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType,
-        SearchCriteria searchCriteria) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
-    }
-
-    /**
-     * Controller.
+     * Controller which return necessary parameters for building the table of
+     * orders.
      *
      * @author Liubomyr Pater
      */
@@ -76,7 +48,7 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller.
+     * Controller for any changes in orders.
      *
      * @author Liubomyr Pater
      */
@@ -97,7 +69,7 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller.
+     * Controller for blocking orders for changes.
      *
      * @author Liubomyr Pater
      */
@@ -113,5 +85,24 @@ public class AdminUbsController {
         @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
+    }
+
+    /**
+     * Controller for unblocking orders for changes.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation(value = "Block orders for changing by another users")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PutMapping("/unblockOrders")
+    public ResponseEntity<List<Long>> unblockOrders(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody List<Long> listOfOrdersId) {
+        List<Long> unblockedOrdersId = ordersAdminsPageService.unblockOrder(userUuid, listOfOrdersId);
+        return ResponseEntity.status(HttpStatus.OK).body(unblockedOrdersId);
     }
 }

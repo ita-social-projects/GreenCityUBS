@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -117,4 +118,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query(value = "SELECT EMPLOYEE_POSITION.POSITION_ID FROM EMPLOYEE_POSITION "
         + "WHERE EMPLOYEE_ID = :employeeId", nativeQuery = true)
     Optional<Long> findPositionForEmployee(Long employeeId);
+
+    /**
+     * Method find employee by his email.
+     *
+     * @param email {@link String}.
+     * @return {@link Optional}of{@link Employee}.
+     * @author Liubomyr Pater.
+     */
+    @Query(value = "SELECT * FROM EMPLOYEES WHERE EMPLOYEES.EMAIL = :email", nativeQuery = true)
+    Optional<Employee> findByEmail(@Param(value = "email") String email);
 }
