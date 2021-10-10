@@ -2,6 +2,7 @@ package greencity.entity.language;
 
 import lombok.*;
 
+//@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -10,6 +11,7 @@ import lombok.*;
 @Builder
 public class Title {
     private long id;
+    private String belonging;
     private String ua;
     private String en;
 }

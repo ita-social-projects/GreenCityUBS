@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -37,6 +38,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final ReceivingStationRepository receivingStationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private final OrderStatusTranslationRepository orderStatusTranslationRepository;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -53,12 +55,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("orderStatus", "Статус замовлення", "Order's status"), "orderStatus", 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
-                false, true, true, 3, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
+                false, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
                 false,
                 4, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentDate", "Дата оплати", "Payment date"), "need to implement", 20,
-                false, true, false, 5, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
+                false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("clientName", "Ім'я замовника", "Client name"), "need to implement", 20,
                 false, true, false, 6, EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnDTO(new TitleDto("phoneNumber", "Телефон замовника", "Phone number"), "user.recipientPhone",
@@ -75,12 +77,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "user.violations", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnDTO(new TitleDto("location", "Локація", "Location"), "user.lastLocation", 20, false, true,
-                false,
+                true,
                 13, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "ubsUser.address.district", 20, false,
-                true, false, 14, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
+                true, true, 14, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "need to implement", 20, false, true,
-                false, 15,
+                true, 15,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(
                 new TitleDto("commentToAddressForClient", "Коментар до адреси від клієнта",
@@ -105,28 +107,29 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("dateOfExport", "Дата вивезення", "Date of export"), "dateOfExport", 20,
-                false, true, false, 24, EditType.DATE, new ArrayList<>(), "ORDERS_DETAILS"),
+                false, true, true, 24, EditType.DATE, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("timeOfExport", "Час вивезення", "Time of export"), "need to implement", 20,
                 false, true, false, 25, EditType.TIME, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("idOrderFromShop", "Номер замовлення з магазину", "Id order from shop"), "",
                 20, false, true, false, 26, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("receivingStation", "Станція приймання", "Receiving station"),
-                "receivingStation", 20, false, true, false, 27, EditType.SELECT, receivingStationList(),
+                "receivingStation", 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("responsibleManager", "Менеджер послуги", "Responsible manager"), "", 20,
-                false, true, false, 28, EditType.SELECT, managerList(), "RESPONSIBLE"),
+                false, true, true, 28, EditType.SELECT, managerList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleCaller", "Менеджер обдзвону", "Responsible caller"), "", 20,
-                false, true, false, 29, EditType.SELECT, callerList(), "RESPONSIBLE"),
+                false, true, true, 29, EditType.SELECT, callerList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleLogicMan", "Логіст", "Responsible logic man"), "", 20, false,
-                true, false, 30, EditType.SELECT, logicManList(), "RESPONSIBLE"),
+                true, true, 30, EditType.SELECT, logicManList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleDriver", "Водій", "Responsible driver"), "", 20, false, true,
-                false, 31, EditType.SELECT, driverList(), "RESPONSIBLE"),
+                true, 31, EditType.SELECT, driverList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleNavigator", "Штурман", "Responsible navigator"), "", 20, false,
                 true, true, 32, EditType.SELECT, navigatorList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"), "",
                 20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "",
-                20, false, true, true, 34, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
+                20, false, true, true, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
+                "ORDERS_DETAILS"))));
         return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -165,15 +168,34 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> orderStatusListForDevelopStage() {
-        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
-            new OptionForColumnDTO("FORMED", "Сформовано", "Formed", false),
-            new OptionForColumnDTO("ADJUSTMENT", "На узгодженні", "Adjustment", false),
-            new OptionForColumnDTO("BROUGHT_IT_HIMSELF", "Заберуть самостійно", "Brought it himself", false),
-            new OptionForColumnDTO("CONFIRMED", "Підтверджено", "Confirmed", true),
-            new OptionForColumnDTO("ON_THE_ROUTE", "В дорозі", "On the route", false),
-            new OptionForColumnDTO("DONE", "Виконано", "Done", true),
-            new OptionForColumnDTO("NOT_TAKEN_OUT", "Не вивезено", "Not taken out", false),
-            new OptionForColumnDTO("CANCELLED", "Скасовано", "Canceled", false))));
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        OrderStatus[] orderStatuses = OrderStatus.values();
+        for (OrderStatus o : orderStatuses) {
+            String ua = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 1L)
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getName();
+            String en = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 2L)
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getName();
+            optionForColumnDTOS
+                .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
+        }
+        return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> orderPaymentStatusListForDevelopStage() {
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        PaymentStatus[] paymentStatuses = PaymentStatus.values();
+        for (PaymentStatus p : paymentStatuses) {
+            optionForColumnDTOS.add(OptionForColumnDTO.builder().key(p.name()).ua(p.name()).en(p.name()).build());
+        }
+        return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
+        optionForColumnDTOS
+            .add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
+        return optionForColumnDTOS;
     }
 
     private List<TitleDto> columnBelongingListForDevelopStage() {
@@ -251,6 +273,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setOrderStatus(orderStatus);
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -270,6 +294,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setDateOfExport(date);
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -293,6 +319,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setDeliverFrom(timeFrom);
                 existedOrder.setDeliverFrom(timeTo);
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -312,6 +340,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setReceivingStation(station.getName());
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
@@ -341,6 +371,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 employeeOrderPositions.add(newEmployeeOrderPosition);
                 Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
                 existedOrder.setEmployeeOrderPositions(positionSet);
+                existedOrder.setBlocked(false);
+                existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
