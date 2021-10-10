@@ -6,11 +6,10 @@ import greencity.dto.EditTariffServiceDto;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +37,10 @@ class SuperAdminServiceImplTest {
     @Mock
     private BagTranslationRepository bagTranslationRepository;
     @Mock
+    private LanguageRepository languageRepository;
+    @Mock
+    private LocationRepository locationRepository;
+    @Mock
     private ModelMapper modelMapper;
 
     @Test
@@ -45,9 +49,11 @@ class SuperAdminServiceImplTest {
         Bag bag = new Bag();
         AddServiceDto dto = ModelUtils.addServiceDto();
         Language language = new Language();
-        language.setId(dto.getLanguageId());
         BagTranslation bagTranslation = new BagTranslation();
+        Location location = new Location();
 
+        when(languageRepository.findById(1L)).thenReturn(Optional.of(language));
+        when(locationRepository.findById(any())).thenReturn(Optional.of(location));
         when(modelMapper.map(dto, Bag.class)).thenReturn(bag);
         when(modelMapper.map(dto, BagTranslation.class)).thenReturn(bagTranslation);
         when(userRepository.findByUuid("123233")).thenReturn(user);
@@ -100,7 +106,11 @@ class SuperAdminServiceImplTest {
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
+        Location location = new Location();
+        Language language = new Language();
 
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(languageRepository.findById(any())).thenReturn(Optional.of(language));
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
         when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode()))
