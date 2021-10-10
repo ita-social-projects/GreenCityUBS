@@ -1,9 +1,11 @@
 package greencity.entity.order;
 
+import greencity.entity.user.Location;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -17,14 +19,8 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
     @Column
     private Integer capacity;
-
-    @Column(nullable = false)
-    private String description;
 
     @Column(nullable = false)
     private Integer basePrice;
@@ -46,4 +42,10 @@ public class Service {
 
     @Column(nullable = false)
     private String editedBy;
+
+    @ManyToOne
+    Location location;
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<ServiceTranslation> serviceTranslations;
 }
