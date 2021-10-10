@@ -569,7 +569,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({LocationStatusAlreadyExistException.class})
     public final ResponseEntity<Object> handleLocationExist(LocationStatusAlreadyExistException ex,
-                                                               WebRequest webRequest) {
+        WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);

@@ -34,7 +34,6 @@ public class Courier {
     @ManyToOne
     private Location location;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "courier",fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslationList;
-
 }

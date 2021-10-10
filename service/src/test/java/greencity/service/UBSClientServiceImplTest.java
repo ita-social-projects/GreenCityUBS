@@ -199,7 +199,8 @@ class UBSClientServiceImplTest {
         Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, locationStatus,language,List.of(user), List.of(service),List.of(courier),List.of(bags));
+        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
+            List.of(courier), List.of(bags));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
@@ -805,7 +806,8 @@ class UBSClientServiceImplTest {
         Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l,locationStatus,language, List.of(user), List.of(service), List.of(courier),List.of(bags));
+        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
+            List.of(courier), List.of(bags));
         user.setLastLocation(location);
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);

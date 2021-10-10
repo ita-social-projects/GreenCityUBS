@@ -32,9 +32,9 @@ public class Language {
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<ServiceTranslation> serviceTranslations;
 
-    @OneToMany(mappedBy = "language",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<Location> locations;
 
-    @OneToMany(mappedBy = "language",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslations;
 }

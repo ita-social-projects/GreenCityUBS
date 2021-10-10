@@ -42,9 +42,9 @@ public class Location {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Service> service;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location",fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Courier> courier;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "location",fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Bag> bags;
 }

@@ -1,10 +1,10 @@
 package greencity.exceptions;
 
 /**
- * Exception, that is throw if user try to save status that's already
- * exist in database.
+ * Exception, that is throw if user try to save status that's already exist in
+ * database.
  */
-public class LocationStatusAlreadyExistException extends RuntimeException{
+public class LocationStatusAlreadyExistException extends RuntimeException {
     /**
      * Constructor with message.
      *

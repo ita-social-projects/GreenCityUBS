@@ -1,7 +1,6 @@
 package greencity.service;
 
 import greencity.dto.*;
-import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 
 import java.util.List;
@@ -83,20 +82,34 @@ public interface SuperAdminService {
 
     /**
      * Method for get all info about location.
+     * 
      * @return {@link GetLocationDto}
      * @author Vadym Makitra
      */
     List<GetLocationDto> getAllLocation();
 
     /**
-     * Method for adding location {@link greencity.entity.user.Location}
+     * Method for adding location.
+     * 
      * @param dto {@link AddLocationDto}
      * @return {@link GetLocationDto}
      * @author Vadym Makitra
      */
     GetLocationDto addLocation(AddLocationDto dto);
 
+    /**
+     * Method for deactivate location.
+     *
+     * @param id - if of location
+     * @return {@link GetLocationDto}
+     */
     GetLocationDto deactivateLocation(Long id);
 
+    /**
+     * Method for activate location.
+     *
+     * @param id - id of Location
+     * @return {@link GetLocationDto}
+     */
     GetLocationDto activateLocation(Long id);
 }

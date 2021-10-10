@@ -31,12 +31,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid) {
-        Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
-                ()->new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
-        Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-                ()->new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
+        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         Bag bag = modelMapper.map(dto, Bag.class);
-        BagTranslation translation = modelMapper.map(dto, BagTranslation.class);
+        final BagTranslation translation = modelMapper.map(dto, BagTranslation.class);
         bag.setFullPrice(dto.getPrice() + dto.getCommission());
         bag.setCreatedAt(LocalDate.now());
         bag.setLocation(location);
@@ -184,25 +184,25 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public List<GetLocationDto> getAllLocation() {
-        return locationRepository.findAll() .stream()
-                .map(this::getAllLocation)
-                .collect(Collectors.toList());
+        return locationRepository.findAll().stream()
+            .map(this::getAllLocation)
+            .collect(Collectors.toList());
     }
 
-    private GetLocationDto getAllLocation(Location location){
+    private GetLocationDto getAllLocation(Location location) {
         return GetLocationDto.builder()
-                .name(location.getLocationName())
-                .id(location.getId())
-                .locationStatus(location.getLocationStatus().toString())
-                .languageCode(location.getLanguage().getCode())
-                .build();
+            .name(location.getLocationName())
+            .id(location.getId())
+            .locationStatus(location.getLocationStatus().toString())
+            .languageCode(location.getLanguage().getCode())
+            .build();
     }
 
     @Override
     public GetLocationDto addLocation(AddLocationDto dto) {
-        Location location = modelMapper.map(dto,Location.class);
+        Location location = modelMapper.map(dto, Location.class);
         Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
-                ()->new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         location.setLanguage(language);
         location.setLocationStatus(LocationStatus.ACTIVE);
         locationRepository.save(location);
@@ -212,8 +212,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetLocationDto deactivateLocation(Long id) {
         Location location = locationRepository.findById(id).orElseThrow(
-                ()->new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        if(location.getLocationStatus().equals(LocationStatus.DEACTIVATED)){
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        if (location.getLocationStatus().equals(LocationStatus.DEACTIVATED)) {
             throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
         }
         location.setLocationStatus(LocationStatus.DEACTIVATED);
@@ -224,8 +224,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetLocationDto activateLocation(Long id) {
         Location location = locationRepository.findById(id).orElseThrow(
-                ()->new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        if(location.getLocationStatus().equals(LocationStatus.ACTIVE)){
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        if (location.getLocationStatus().equals(LocationStatus.ACTIVE)) {
             throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
         }
         location.setLocationStatus(LocationStatus.ACTIVE);
