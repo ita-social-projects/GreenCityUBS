@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 public class Column {
     private long id;
-    private String name;
+    private String key;
     private String titleForSorting;
     private boolean filtered;
     private EditType editType;
