@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -54,7 +55,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("orderStatus", "Статус замовлення", "Order's status"), "orderStatus", 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
-                false, true, true, 3, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
+                false, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
                 false,
                 4, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
@@ -127,7 +128,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"), "",
                 20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "",
-                20, false, true, true, 34, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"))));
+                20, false, true, true, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(), "ORDERS_DETAILS"))));
         return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
@@ -173,6 +174,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             String en = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 2L).get().getName();
             optionForColumnDTOS.add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }
+        return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> orderPaymentStatusListForDevelopStage() {
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        PaymentStatus [] paymentStatuses = PaymentStatus.values();
+        for (PaymentStatus p : paymentStatuses) {
+            optionForColumnDTOS.add(OptionForColumnDTO.builder().key(p.name()).ua(p.name()).en(p.name()).build());
+        }
+        return optionForColumnDTOS;
+    }
+
+    private List<OptionForColumnDTO> blockingStatusListForDevelopStage() {
+        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("blocked").ua("Заблоковано").en("Blocked").build());
+        optionForColumnDTOS.add(OptionForColumnDTO.builder().key("notBlocked").ua("Не заблоковано").en("Not blocked").build());
         return optionForColumnDTOS;
     }
 
