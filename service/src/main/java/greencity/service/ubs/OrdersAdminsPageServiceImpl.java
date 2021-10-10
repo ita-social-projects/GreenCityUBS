@@ -18,15 +18,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.*;
 
 @Service
 @AllArgsConstructor
@@ -249,7 +247,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             /* update all */
         }
         for (Long orderId : ordersId) {
-            if (!changeOrderStatus(orderId, orderStatus)) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                existedOrder.setOrderStatus(orderStatus);
+                orderRepository.save(existedOrder);
+            } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -259,8 +262,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
+        if (ordersId.isEmpty()) {
+            /* update all */
+        }
         for (Long orderId : ordersId) {
-            if (!changeOrderDate(orderId, date)) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                existedOrder.setDateOfExport(date);
+                orderRepository.save(existedOrder);
+            } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -273,8 +284,17 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
         LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ISO_LOCAL_TIME);
         List<Long> unresolvedGoals = new ArrayList<>();
+        if (ordersId.isEmpty()) {
+            /* update all */
+        }
         for (Long orderId : ordersId) {
-            if (!changeOrderTime(orderId, timeFrom, timeTo)) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                existedOrder.setDeliverFrom(timeFrom);
+                existedOrder.setDeliverFrom(timeTo);
+                orderRepository.save(existedOrder);
+            } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -284,8 +304,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
+        if (ordersId.isEmpty()) {
+            /* update all */
+        }
         for (Long orderId : ordersId) {
-            if (!changeOrderStation(orderId, station)) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                existedOrder.setReceivingStation(station.getName());
+                orderRepository.save(existedOrder);
+            } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
@@ -298,93 +326,69 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Position existedPosition = positionRepository.findById(position)
             .orElseThrow(() -> new EntityNotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
+        if (ordersId.isEmpty()) {
+            /* update all */
+        }
         for (Long orderId : ordersId) {
-            if (!changeOrderEmployee(orderId, existedEmployee, existedPosition)) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                List<EmployeeOrderPosition> employeeOrderPositions =
+                        employeeOrderPositionRepository.findAllByOrderId(orderId);
+                EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
+                        EmployeeOrderPosition.builder().employee(existedEmployee).position(existedPosition).order(existedOrder).build());
+                employeeOrderPositions.add(newEmployeeOrderPosition);
+                Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
+                existedOrder.setEmployeeOrderPositions(positionSet);
+                orderRepository.save(existedOrder);
+            } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
         }
         return unresolvedGoals;
     }
 
-    private boolean changeOrderStatus(Long oderId, OrderStatus orderStatus) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setOrderStatus(orderStatus);
-            orderRepository.save(existedOrder);
-        } catch (Exception e) {
-            return false;
+    @Override
+    @Transactional
+    public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
+        User user = userRepository.findByUuid(userUuid);
+        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail()).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        if (orders.isEmpty()) {
+            /* block all */
+            /* probably using query in repo*/
         }
-        return true;
-    }
-
-    private boolean changeOrderDate(Long oderId, LocalDate value) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setDateOfExport(value);
-            orderRepository.save(existedOrder);
-        } catch (Exception e) {
-            return false;
+        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
+        for (Long orderId : orders) {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            if (order.isBlocked()){
+                blockedOrderDTOS.add(BlockedOrderDTO.builder().orderId(orderId).userName(String.format("%s %s", order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName())).build());
+            }else {
+                order.setBlocked(true);
+                order.setBlockedByEmployee(employee);
+                orderRepository.save(order);
+            }
         }
-        return true;
-    }
-
-    private boolean changeOrderTime(Long oderId, LocalDateTime from, LocalDateTime to) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setDeliverFrom(from);
-            existedOrder.setDeliverFrom(to);
-            orderRepository.save(existedOrder);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderStation(Long oderId, ReceivingStation station) {
-        try {
-            Order existedOrder = orderRepository.findById(oderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            existedOrder.setReceivingStation(station.getName());
-            orderRepository.save(existedOrder);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean changeOrderEmployee(Long orderId, Employee employee, Position position) {
-        try {
-            Order existedOrder = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            List<EmployeeOrderPosition> employeeOrderPositions =
-                employeeOrderPositionRepository.findAllByOrderId(orderId);
-            EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
-                EmployeeOrderPosition.builder().employee(employee).position(position).order(existedOrder).build());
-            employeeOrderPositions.add(newEmployeeOrderPosition);
-            Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
-            existedOrder.setEmployeeOrderPositions(positionSet);
-            orderRepository.save(existedOrder);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
+        return blockedOrderDTOS;
     }
 
     @Override
-    public List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
+    public List<Long> unblockOrder(String userUuid, List<Long> orders) {
         User user = userRepository.findByUuid(userUuid);
-        String userName = String.format("%s %s", user.getRecipientName(), user.getRecipientSurname());
+        Employee employee = employeeRepository.findByEmail(user.getRecipientEmail()).orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            /* update all */
+            /* unblock all */
+            /* probably using query in repo*/
         }
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
-        List<Long> afterFiltering = orders.stream().filter(x -> (x % 2 == 0)).collect(Collectors.toList());
-        for (Long orderId : afterFiltering) {
-            blockedOrderDTOS.add(new BlockedOrderDTO(orderId, userName));
+        List<Long> unblockedOrdersId = new ArrayList<>();
+        for (Long orderId : orders) {
+            Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)){
+                order.setBlocked(false);
+                order.setBlockedByEmployee(null);
+                orderRepository.save(order);
+                unblockedOrdersId.add(order.getId());
+            }
         }
-        return blockedOrderDTOS;
+        return unblockedOrdersId;
     }
 }
