@@ -27,11 +27,20 @@ public interface OrdersAdminsPageService {
         RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
 
     /**
-     * Method that return.
+     * Method that return a list of orders which are block already.
      *
      * @param userUuid of {@link String}
      * @param orders   of {@link List}
      * @author Liubomyr Pater
      */
     List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders);
+
+    /**
+     * Method that return list of unblocked orders.
+     *
+     * @param userUuid of {@link String}
+     * @param orders   of {@link List}
+     * @author Liubomyr Pater
+     */
+    List<Long> unblockOrder(String userUuid, List<Long> orders);
 }
