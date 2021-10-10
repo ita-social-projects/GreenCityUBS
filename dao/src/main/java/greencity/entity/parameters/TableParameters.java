@@ -1,11 +1,13 @@
 package greencity.entity.parameters;
 
-import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import lombok.*;
 
 import java.util.List;
 
+//@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,8 +17,8 @@ import java.util.List;
 public class TableParameters {
     private long id;
     private User user;
-    private String sortingByColumn;
-    private SortingOrder sortingOrder;
-    private List<ColumnState> columnStateDTOList;
+    private OrderPage page;
+    private OrderSearchCriteria orderSearchCriteria;
+    private List<Column> columnList;
     private List<ColumnBelonging> columnBelongingList;
 }

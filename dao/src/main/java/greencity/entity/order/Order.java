@@ -25,7 +25,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"employeeOrderPositions"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +44,12 @@ public class Order {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
+
+    private boolean blocked;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee blockedByEmployee;
 
     @ElementCollection
     @CollectionTable(name = "order_bag_mapping",

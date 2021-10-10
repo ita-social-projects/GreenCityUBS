@@ -43,4 +43,6 @@ public class BigOrderTableDTO {
     private String responsibleCaller;
     private String responsibleNavigator;
     private String commentsForOrder;
+    private Boolean isBlocked;
+    private String blockedBy;
 }

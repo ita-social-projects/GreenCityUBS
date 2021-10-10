@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders", "employeeOrderPositions"})
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -64,4 +64,7 @@ public class Employee {
     @OneToMany(mappedBy = "employee")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "blockedByEmployee")
+    private Set<Order> orders;
 }
