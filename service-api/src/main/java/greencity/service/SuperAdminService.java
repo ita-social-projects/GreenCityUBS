@@ -12,10 +12,10 @@ public interface SuperAdminService {
      * 
      * @param dto  {@link AddServiceDto}
      * @param uuid {@link String} - uuid current user.
-     * @return {@link Bag}
+     * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    Bag addTariffService(AddServiceDto dto, String uuid);
+    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -80,4 +80,23 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+
+    /**
+     * Method for get all info about location.
+     * @return {@link GetLocationDto}
+     * @author Vadym Makitra
+     */
+    List<GetLocationDto> getAllLocation();
+
+    /**
+     * Method for adding location {@link greencity.entity.user.Location}
+     * @param dto {@link AddLocationDto}
+     * @return {@link GetLocationDto}
+     * @author Vadym Makitra
+     */
+    GetLocationDto addLocation(AddLocationDto dto);
+
+    GetLocationDto deactivateLocation(Long id);
+
+    GetLocationDto activateLocation(Long id);
 }

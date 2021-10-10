@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.user.Location;
 import lombok.*;
 
 import javax.persistence.*;
@@ -45,6 +46,9 @@ public class Bag {
 
     @Column(nullable = false)
     private String editedBy;
+
+    @ManyToOne
+    private Location location;
 
     @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BagTranslation> bagTranslations;
