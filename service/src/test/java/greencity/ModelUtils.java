@@ -1554,6 +1554,8 @@ public class ModelUtils {
             .commission(50)
             .price(120)
             .fullPrice(170)
+            .location(Location.builder().id(1L).locationName("Test")
+                .language(Language.builder().id(1L).code("ua").build()).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
             .build());
@@ -1578,6 +1580,14 @@ public class ModelUtils {
             .language(Language.builder().id(1L).code("ua").build())
             .name("Бавовняна сумка")
             .description("Description")
+            .build();
+    }
+
+    public static Location getLocation() {
+        return Location.builder()
+            .id(1L)
+            .locationName("Test")
+            .locationStatus(LocationStatus.ACTIVE)
             .build();
     }
 

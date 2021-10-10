@@ -106,11 +106,7 @@ class SuperAdminServiceImplTest {
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
-        Location location = new Location();
-        Language language = new Language();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(languageRepository.findById(any())).thenReturn(Optional.of(language));
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
         when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode()))
@@ -123,7 +119,6 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
         verify(bagTranslationRepository).save(bagTranslation);
-
     }
 
 }
