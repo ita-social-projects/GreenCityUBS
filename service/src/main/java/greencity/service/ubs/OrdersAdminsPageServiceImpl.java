@@ -172,9 +172,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
             String ua = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 1L)
-                .get().getName();
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getName();
             String en = orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(o.getNumValue(), 2L)
-                .get().getName();
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getName();
             optionForColumnDTOS
                 .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }
