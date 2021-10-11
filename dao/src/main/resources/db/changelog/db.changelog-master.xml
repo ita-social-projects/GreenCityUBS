@@ -68,4 +68,5 @@
     <include file="db/changelog/logs/ch-add-column-edditedBy-edditedAt-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-service-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-servicetransaltion-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-courier-Makitra.xml"/>
 </databaseChangeLog>
