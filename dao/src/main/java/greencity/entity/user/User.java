@@ -10,6 +10,7 @@ import greencity.entity.viber.ViberBot;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -72,4 +73,7 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Employee employee;
+
+    @Column(name = "date_of_registration")
+    private LocalDate dateOfRegistration;
 }

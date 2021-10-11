@@ -7,6 +7,7 @@ import greencity.dto.*;
 import greencity.filters.SearchCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -24,15 +25,17 @@ import java.util.List;
 public class AdminUbsController {
     private final UBSManagementService ubsManagementService;
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private final ValuesForUserTableService valuesForUserTable;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public AdminUbsController(UBSManagementService ubsManagementService,
-        OrdersAdminsPageService ordersAdminsPageService) {
+        OrdersAdminsPageService ordersAdminsPageService, ValuesForUserTableService valuesForUserTable) {
         this.ubsManagementService = ubsManagementService;
         this.ordersAdminsPageService = ordersAdminsPageService;
+        this.valuesForUserTable = valuesForUserTable;
     }
 
     /**
@@ -56,6 +59,25 @@ public class AdminUbsController {
         SearchCriteria searchCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
+    }
+
+    /**
+     * Controller for obtaining all users that made at least one order.
+     *
+     * @author Stepan Tehlivets.
+     */
+    @ApiOperation("Get users for the table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/usersAll")
+    @ApiPageable
+    public ResponseEntity<FieldsForUsersTableDto> getAllValuesForUserTable() {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(valuesForUserTable.getAllFields());
     }
 
     /**
