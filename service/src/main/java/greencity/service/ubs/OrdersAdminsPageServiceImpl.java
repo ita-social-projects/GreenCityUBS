@@ -31,7 +31,6 @@ import static greencity.constant.ErrorMessage.*;
 @AllArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final UBSManagementEmployeeService employeeService;
     private final ModelMapper modelMapper;
@@ -263,7 +262,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     /* methods for changing order */
-    private List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
+    @Transactional
+    private synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
@@ -284,7 +284,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+    @Transactional
+    private synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
@@ -305,7 +306,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+    @Transactional
+    private synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
         LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
@@ -330,7 +332,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
+    @Transactional
+    private synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
@@ -351,7 +354,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
+    @Transactional
+    private synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -412,7 +416,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public List<Long> unblockOrder(String userUuid, List<Long> orders) {
+    @Transactional
+    public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
         String email = restClient.findUserByUUid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
