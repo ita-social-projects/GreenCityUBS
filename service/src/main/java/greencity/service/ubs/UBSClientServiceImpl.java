@@ -118,6 +118,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .price(bt.getBag().getFullPrice())
             .name(bt.getName())
             .code(bt.getLanguage().getCode())
+            .locationId(bt.getBag().getLocation().getId())
             .build();
     }
 
