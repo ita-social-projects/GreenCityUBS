@@ -57,7 +57,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
                 false, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
-                false,
+                true,
                 4, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentDate", "Дата оплати", "Payment date"), "need to implement", 20,
                 false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
@@ -77,12 +77,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "user.violations", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), "CUSTOMERS_INFO"),
             new ColumnDTO(new TitleDto("location", "Локація", "Location"), "user.lastLocation", 20, false, true,
-                true,
+                false,
                 13, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "ubsUser.address.district", 20, false,
-                true, true, 14, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
+                true, false, 14, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "need to implement", 20, false, true,
-                true, 15,
+                false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(
                 new TitleDto("commentToAddressForClient", "Коментар до адреси від клієнта",
@@ -116,7 +116,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "receivingStation", 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("responsibleManager", "Менеджер послуги", "Responsible manager"), "", 20,
-                false, true, true, 28, EditType.SELECT, managerList(), "RESPONSIBLE"),
+                false, true, false, 28, EditType.SELECT, managerList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleCaller", "Менеджер обдзвону", "Responsible caller"), "", 20,
                 false, true, true, 29, EditType.SELECT, callerList(), "RESPONSIBLE"),
             new ColumnDTO(new TitleDto("responsibleLogicMan", "Логіст", "Responsible logic man"), "", 20, false,
@@ -128,7 +128,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"), "",
                 20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "",
-                20, false, true, true, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
+                20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
                 "ORDERS_DETAILS"))));
         return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
