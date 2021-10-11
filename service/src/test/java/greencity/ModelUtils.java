@@ -1242,6 +1242,7 @@ public class ModelUtils {
             .id(1l)
             .locationName("Name1")
             .minAmountOfBigBags(10l)
+            .language(Language.builder().code("ua").build())
             .build();
     }
 
@@ -1251,6 +1252,7 @@ public class ModelUtils {
             .id(2l)
             .locationName("Name2")
             .minAmountOfBigBags(20l)
+            .language(Language.builder().code("ua").build())
             .build();
         list.add(getLastLocation());
         list.add(location);
@@ -1263,10 +1265,12 @@ public class ModelUtils {
         LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
             .id(1l)
             .name("Name1")
+            .languageCode("ua")
             .build();
         LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
             .id(2l)
             .name("Name2")
+            .languageCode("ua")
             .build();
         list.add(locationResponseDto1);
         list.add(locationResponseDto2);
