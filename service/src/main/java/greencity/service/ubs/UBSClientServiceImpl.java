@@ -800,6 +800,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return LocationResponseDto.builder()
             .id(location.getId())
             .name(location.getLocationName())
+            .languageCode(location.getLanguage().getCode())
             .build();
     }
 
