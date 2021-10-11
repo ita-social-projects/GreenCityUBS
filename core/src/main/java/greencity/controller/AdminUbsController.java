@@ -1,10 +1,8 @@
 package greencity.controller;
 
-import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.filters.SearchCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ValuesForUserTableService;
@@ -23,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/ubs/management")
 public class AdminUbsController {
-    private final UBSManagementService ubsManagementService;
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
 
@@ -31,14 +28,14 @@ public class AdminUbsController {
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(UBSManagementService ubsManagementService,
-        OrdersAdminsPageService ordersAdminsPageService, ValuesForUserTableService valuesForUserTable) {
-        this.ubsManagementService = ubsManagementService;
+    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,ValuesForUserTableService valuesForUserTable) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
     }
 
     /**
+     * Controller which return necessary parameters for building the table of
+     * orders.
      * Controller.
      *
      * @author Liubomyr Pater
@@ -98,7 +95,7 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller.
+     * Controller for any changes in orders.
      *
      * @author Liubomyr Pater
      */
@@ -119,7 +116,7 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller.
+     * Controller for blocking orders for changes.
      *
      * @author Liubomyr Pater
      */
@@ -135,5 +132,24 @@ public class AdminUbsController {
         @RequestBody List<Long> listOfOrdersId) {
         List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
+    }
+
+    /**
+     * Controller for unblocking orders for changes.
+     *
+     * @author Liubomyr Pater
+     */
+    @ApiOperation(value = "Block orders for changing by another users")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+    })
+    @PutMapping("/unblockOrders")
+    public ResponseEntity<List<Long>> unblockOrders(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestBody List<Long> listOfOrdersId) {
+        List<Long> unblockedOrdersId = ordersAdminsPageService.unblockOrder(userUuid, listOfOrdersId);
+        return ResponseEntity.status(HttpStatus.OK).body(unblockedOrdersId);
     }
 }

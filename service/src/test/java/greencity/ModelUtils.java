@@ -237,8 +237,23 @@ public class ModelUtils {
                     .user(User.builder().id(1L).build())
                     .build())
                 .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .build();
+    }
+
+    public static Order getOrderWithoutAddress() {
+        return Order.builder()
+            .id(1L)
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 
@@ -247,6 +262,14 @@ public class ModelUtils {
             .id(1L)
             .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
             .receivingStation("Petrivka")
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .build();
+    }
+
+    public static Order getOrderExportDetailsWithNullValues() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 
@@ -928,6 +951,7 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
+            .employee(Employee.builder().id(1L).build())
             .build();
     }
 
@@ -940,6 +964,7 @@ public class ModelUtils {
             .receiptLink("somelink.com")
             .currency("UAH")
             .imagePath("")
+            .order(getOrder())
             .build();
     }
 
@@ -982,6 +1007,11 @@ public class ModelUtils {
             .cancellationComment("Garbage disappeared")
             .cancellationReason(CancellationReason.OTHER)
             .pointsToUse(700)
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Yuriy")
+                .recipientSurname("Gerasum")
+                .build())
             .build();
     }
 
@@ -1065,6 +1095,7 @@ public class ModelUtils {
             .id(1L)
             .orderStatus(OrderStatus.FORMED)
             .ubsUser(createUbsUser())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5))
             .build();
     }
@@ -1211,6 +1242,7 @@ public class ModelUtils {
             .id(1l)
             .locationName("Name1")
             .minAmountOfBigBags(10l)
+            .language(Language.builder().code("ua").build())
             .build();
     }
 
@@ -1220,6 +1252,7 @@ public class ModelUtils {
             .id(2l)
             .locationName("Name2")
             .minAmountOfBigBags(20l)
+            .language(Language.builder().code("ua").build())
             .build();
         list.add(getLastLocation());
         list.add(location);
@@ -1232,10 +1265,12 @@ public class ModelUtils {
         LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
             .id(1l)
             .name("Name1")
+            .languageCode("ua")
             .build();
         LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
             .id(2l)
             .name("Name2")
+            .languageCode("ua")
             .build();
         list.add(locationResponseDto1);
         list.add(locationResponseDto2);
@@ -1280,6 +1315,7 @@ public class ModelUtils {
     private static Order createOrder2() {
         return Order.builder()
             .id(2L)
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 
@@ -1288,6 +1324,7 @@ public class ModelUtils {
             .id(1L)
             .firstName("Test")
             .lastName("Test")
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 
@@ -1478,10 +1515,27 @@ public class ModelUtils {
             .build();
     }
 
-    public static AssignEmployeeForOrderDto assignEmployeeForOrderDto() {
-        return AssignEmployeeForOrderDto.builder()
-            .employeeId(1L)
-            .positionId(1L)
+    public static AssignEmployeesForOrderDto assignEmployeesForOrderDto() {
+        return AssignEmployeesForOrderDto.builder()
+            .orderId(1L)
+            .employeesList(List.of(AssignForOrderEmployee.builder()
+                .employeeId(1L)
+                .build(),
+                AssignForOrderEmployee.builder()
+                    .employeeId(1L)
+                    .build(),
+                AssignForOrderEmployee.builder()
+                    .employeeId(1L)
+                    .build()))
+            .build();
+    }
+
+    public static AssignEmployeesForOrderDto assignEmployeeForOrderDto() {
+        return AssignEmployeesForOrderDto.builder()
+            .orderId(1L)
+            .employeesList(List.of(AssignForOrderEmployee.builder()
+                .employeeId(1L)
+                .build()))
             .build();
     }
 
@@ -1504,6 +1558,8 @@ public class ModelUtils {
             .commission(50)
             .price(120)
             .fullPrice(170)
+            .location(Location.builder().id(1L).locationName("Test")
+                .language(Language.builder().id(1L).code("ua").build()).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
             .build());
@@ -1528,6 +1584,14 @@ public class ModelUtils {
             .language(Language.builder().id(1L).code("ua").build())
             .name("Бавовняна сумка")
             .description("Description")
+            .build();
+    }
+
+    public static Location getLocation() {
+        return Location.builder()
+            .id(1L)
+            .locationName("Test")
+            .locationStatus(LocationStatus.ACTIVE)
             .build();
     }
 

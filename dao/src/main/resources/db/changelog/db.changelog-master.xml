@@ -64,6 +64,10 @@
     <include file="db/changelog/logs/ch-add-constraint-events-Bahlay.xml"/>
     <include file="db/changelog/logs/ch-add-column-userId-to-employee-Bahlay.xml"/>
     <include file="db/changelog/logs/ch-add-column-date_of_export-into-order-table-Pater.xml"/>
+    <include file="db/changelog/logs/ch-add-column-employee_id-into-order-table-Pater.xml"/>
     <include file="db/changelog/logs/ch-add-column-edditedBy-edditedAt-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-service-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-servicetransaltion-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-courier-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-column-date_of_registration-User-table-Tehlivets.xml"/>
 </databaseChangeLog>

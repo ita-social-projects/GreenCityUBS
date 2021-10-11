@@ -12,22 +12,18 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(
-    exclude = {"bagTranslations"})
-@ToString(
-    exclude = {"bagTranslations"})
 @Builder
-@Table(name = "bag")
-public class Bag {
+@Table(name = "service")
+public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(nullable = false)
+    @Column
     private Integer capacity;
 
     @Column(nullable = false)
-    private Integer price;
+    private Integer basePrice;
 
     @Column
     private Integer commission;
@@ -48,8 +44,8 @@ public class Bag {
     private String editedBy;
 
     @ManyToOne
-    private Location location;
+    Location location;
 
-    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<BagTranslation> bagTranslations;
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<ServiceTranslation> serviceTranslations;
 }

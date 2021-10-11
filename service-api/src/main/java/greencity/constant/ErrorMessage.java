@@ -29,7 +29,7 @@ public final class ErrorMessage {
     public static final String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
-    public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist.";
+    public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
@@ -70,6 +70,11 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_ALREADY_EXIST = "Employee already exist";
     public static final String EMPLOYEE_IS_NOT_ASSIGN =
         "Employee service could not be assign for order or this is manager which assign managers";
+    public static final String SERVICE_IS_NOT_FOUND_BY_ID = "couldn't found service with id: ";
+    public static final String LANGUAGE_IS_NOT_FOUND_BY_CODE = "couldn't found language with code: ";
+    public static final String LANGUAGE_IS_NOT_FOUND_BY_ID = "couldn't found language with id: ";
+    public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
+        "Current location already has status that's you wanna chose";
 
     /**
      * Constructor.

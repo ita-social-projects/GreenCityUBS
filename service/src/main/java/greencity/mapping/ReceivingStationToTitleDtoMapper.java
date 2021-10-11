@@ -1,25 +1,25 @@
 package greencity.mapping;
 
+import greencity.dto.OptionForColumnDTO;
 import greencity.dto.ReceivingStationDto;
-import greencity.dto.TitleDto;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link ReceivingStationDto}
- * into {@link TitleDto}.
+ * into {@link OptionForColumnDTO}.
  */
 @Component
-public class ReceivingStationToTitleDtoMapper extends AbstractConverter<ReceivingStationDto, TitleDto> {
+public class ReceivingStationToTitleDtoMapper extends AbstractConverter<ReceivingStationDto, OptionForColumnDTO> {
     /**
-     * Method convert {@link ReceivingStationDto} to {@link TitleDto}.
+     * Method convert {@link ReceivingStationDto} to {@link OptionForColumnDTO}.
      *
-     * @return {@link TitleDto}
+     * @return {@link OptionForColumnDTO}
      */
     @Override
-    protected TitleDto convert(ReceivingStationDto receivingStationDto) {
-        return TitleDto.builder()
+    protected OptionForColumnDTO convert(ReceivingStationDto receivingStationDto) {
+        return OptionForColumnDTO.builder()
             .key(receivingStationDto.getId().toString())
             .ua(receivingStationDto.getName())
             .en(receivingStationDto.getName())

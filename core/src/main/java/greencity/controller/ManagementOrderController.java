@@ -192,7 +192,7 @@ public class ManagementOrderController {
      *
      * @return {@link AddingViolationsToUserDto} count of Users violations with
      *         order id descriptions.
-     * @author Nazar Struk
+     * @author Bohdan Melnyk
      */
     @ApiOperation("Add Violation to User")
     @ApiResponses(value = {
@@ -204,7 +204,8 @@ public class ManagementOrderController {
     })
     @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping(value = "/addViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/addViolationToUser",
+        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files) {
         ubsManagementService.addUserViolation(add, files);
@@ -291,7 +292,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping("/update-address")
-    public ResponseEntity<OrderAddressDtoResponse> updateAddressByOrderId(
+    public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
         @Valid @RequestBody OrderAddressDtoUpdate dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateAddress(dto));
@@ -822,10 +823,10 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for assigning Employee for some order by orderId.
+     * Controller for assigning Employees with their positions for some order by
+     * orderId.
      *
-     * @param dto     {@link AssignEmployeeForOrderDto}.
-     * @param orderId {@link Long}.
+     * @param dto {@link AssignEmployeesForOrderDto}.
      * @author Bahlay Yuriy.
      */
     @ApiOperation(value = "Assign employee for some order")
@@ -837,11 +838,11 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PostMapping("/assign-employee-to-order")
-    public ResponseEntity<HttpStatus> assignEmployeeToOrder(
-        @RequestBody @Valid AssignEmployeeForOrderDto dto, Long orderId,
+    @PostMapping("/assign-employees-to-order")
+    public ResponseEntity<HttpStatus> assignEmployeesToOrder(
+        @RequestBody @Valid AssignEmployeesForOrderDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.assignEmployeeWithThePositionToTheOrder(dto, orderId, uuid);
+        ubsManagementService.assignEmployeesWithThePositionsToTheOrder(dto, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

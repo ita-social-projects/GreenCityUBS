@@ -8,7 +8,9 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
+import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
@@ -190,10 +192,15 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveToDBThrowsException() throws InvocationTargetException, IllegalAccessException {
-
+        Service service = new Service();
+        Courier courier = new Courier();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Language language = new Language();
+        Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, List.of(user));
+        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
+            List.of(courier), List.of(bags));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
@@ -792,14 +799,17 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
-
+        Service service = new Service();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Language language = new Language();
+        Courier courier = new Courier();
+        Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, List.of(user));
+        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
+            List.of(courier), List.of(bags));
         user.setLastLocation(location);
-
         OrderResponseDto dto = getOrderResponseDto();
-        ;
         dto.getBags().get(0).setAmount(35);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());

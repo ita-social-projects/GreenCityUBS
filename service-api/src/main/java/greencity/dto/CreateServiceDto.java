@@ -8,19 +8,18 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
-@EqualsAndHashCode
-public class AddServiceDto {
+@ToString
+public class CreateServiceDto {
     @NotNull
     String name;
-    @NotNull
     Integer capacity;
     @NotNull
     Integer price;
     Integer commission;
     String description;
-    Long languageId;
     @NotNull
     Long locationId;
+    @NotNull
+    String languageCode;
 }

@@ -1,9 +1,7 @@
 package greencity.service;
 
-import greencity.dto.AddServiceDto;
-import greencity.dto.EditTariffServiceDto;
-import greencity.dto.GetTariffServiceDto;
-import greencity.entity.order.Bag;
+import greencity.dto.*;
+import greencity.entity.order.Service;
 
 import java.util.List;
 
@@ -13,10 +11,10 @@ public interface SuperAdminService {
      * 
      * @param dto  {@link AddServiceDto}
      * @param uuid {@link String} - uuid current user.
-     * @return {@link Bag}
+     * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    Bag addTariffService(AddServiceDto dto, String uuid);
+    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -44,4 +42,74 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetTariffServiceDto editTariffService(EditTariffServiceDto dto, Integer id, String uuid);
+
+    /**
+     * Method for add new Service.
+     * 
+     * @param dto  {@link CreateServiceDto}
+     * @param uuid {@link String} - user uuid.
+     * @return {@link Service}
+     * @author Vadym Makitra
+     */
+    GetServiceDto addService(CreateServiceDto dto, String uuid);
+
+    /**
+     * Method for get All service.
+     * 
+     * @return {@link GetServiceDto}
+     * @author Vadym Makitra
+     */
+    List<GetServiceDto> getService();
+
+    /**
+     * Method for delete service by Id.
+     *
+     * @param id - Service Id.
+     * @author Vadym Makitra
+     */
+    void deleteService(long id);
+
+    /**
+     * Method for editing service by Id.
+     *
+     * @param id   - id of current service.
+     * @param dto  - entered info about field that need to edit.
+     * @param uuid - user uuid.
+     * @return {@link GetServiceDto} - info about edited service.
+     * @author Vadym Makitra
+     */
+    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+
+    /**
+     * Method for get all info about location.
+     * 
+     * @return {@link GetLocationDto}
+     * @author Vadym Makitra
+     */
+    List<GetLocationDto> getAllLocation();
+
+    /**
+     * Method for adding location.
+     * 
+     * @param dto {@link AddLocationDto}
+     * @return {@link GetLocationDto}
+     * @author Vadym Makitra
+     */
+    GetLocationDto addLocation(AddLocationDto dto);
+
+    /**
+     * Method for deactivate location.
+     *
+     * @param id - if of location
+     * @return {@link GetLocationDto}
+     */
+    GetLocationDto deactivateLocation(Long id);
+
+    /**
+     * Method for activate location.
+     *
+     * @param id - id of Location
+     * @return {@link GetLocationDto}
+     */
+    GetLocationDto activateLocation(Long id);
 }
