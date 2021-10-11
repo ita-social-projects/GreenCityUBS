@@ -69,4 +69,5 @@
     <include file="db/changelog/logs/ch-add-table-service-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-servicetransaltion-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-courier-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-locationName-Makitra.xml"/>
 </databaseChangeLog>
