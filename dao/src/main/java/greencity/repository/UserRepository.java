@@ -100,11 +100,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param toDate   - date after which user have no orders.
      * @return {@link List} of {@link User} - which have no orders after
      *         {@param localDate}.
-     *
      */
     @Query(nativeQuery = true,
         value = " SELECT * FROM users as u INNER JOIN orders as o ON u.id = o.users_id "
             + "WHERE (SELECT COUNT(id) FROM orders WHERE CAST(o.order_date AS DATE) < :toDate "
             + "AND CAST(o.order_date AS DATE) > :fromDate)!=0")
     List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);
+
+    /**
+     * Finds list of User who have made at least one order.
+     *
+     * @return {@link List} of {@link User}.
+     * @author - Stepan Tehlivets.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM users INNER JOIN orders o on users.id = o.users_id "
+            + "WHERE order_date IN(SELECT max(order_date) FROM ORDERS "
+            + "INNER JOIN users u on orders.users_id = u.id "
+            + "group by u.id)")
+    List<User> findAllUsersWhoMadeAtLeastOneOrder();
 }
