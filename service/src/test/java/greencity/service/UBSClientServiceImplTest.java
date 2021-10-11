@@ -10,9 +10,9 @@ import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -81,6 +81,8 @@ class UBSClientServiceImplTest {
     private LiqPay liqPay;
     @Mock
     private EventService eventService;
+    @Mock
+    private LocationTranslationRepository locationTranslationRepository;
 
     @Test
     @Transactional
@@ -195,12 +197,12 @@ class UBSClientServiceImplTest {
         Service service = new Service();
         Courier courier = new Courier();
         LocationStatus locationStatus = LocationStatus.ACTIVE;
-        Language language = new Language();
         Bag bags = new Bag();
+        LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
-            List.of(courier), List.of(bags));
+        Location location = new Location(1l, 100l, locationStatus, List.of(user), List.of(service),
+            List.of(courier), List.of(bags), List.of(locationTranslation));
         user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
@@ -684,6 +686,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("uuid")).thenReturn(user);
         when(locationRepository.findAll()).thenReturn(getLocationList());
+        when(locationTranslationRepository.findAll()).thenReturn(getLocationTranslationList());
         assertEquals(getLocationResponseDtoList(), ubsService.getAllLocations("uuid"));
     }
 
@@ -694,6 +697,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("uuid")).thenReturn(user);
         when(locationRepository.findAll()).thenReturn(getLocationList());
+        when(locationTranslationRepository.findAll()).thenReturn(getLocationTranslationList());
         assertEquals(getLocationResponseDtoList(), ubsService.getAllLocations("uuid"));
     }
 
@@ -801,13 +805,13 @@ class UBSClientServiceImplTest {
     void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
         LocationStatus locationStatus = LocationStatus.ACTIVE;
-        Language language = new Language();
+        LocationTranslation locationTranslation = new LocationTranslation();
         Courier courier = new Courier();
         Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, "Name", 100l, locationStatus, language, List.of(user), List.of(service),
-            List.of(courier), List.of(bags));
+        Location location = new Location(1l, 100l, locationStatus, List.of(user), List.of(service),
+            List.of(courier), List.of(bags), List.of(locationTranslation));
         user.setLastLocation(location);
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);

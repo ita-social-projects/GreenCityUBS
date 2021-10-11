@@ -4,8 +4,12 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.language.Language;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.exceptions.*;
 import greencity.repository.*;
@@ -27,6 +31,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
     private final LanguageRepository languageRepository;
+    private final LocationTranslationRepository locationTranslationRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -183,53 +188,61 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetLocationDto> getAllLocation() {
-        return locationRepository.findAll().stream()
+    public List<GetLocationTranslationDto> getAllLocation() {
+        return locationTranslationRepository.findAll()
+            .stream()
             .map(this::getAllLocation)
             .collect(Collectors.toList());
     }
 
-    private GetLocationDto getAllLocation(Location location) {
-        return GetLocationDto.builder()
-            .name(location.getLocationName())
-            .id(location.getId())
-            .locationStatus(location.getLocationStatus().toString())
-            .languageCode(location.getLanguage().getCode())
+    private GetLocationTranslationDto getAllLocation(LocationTranslation locationTranslation) {
+        return GetLocationTranslationDto.builder()
+            .locationStatus(locationTranslation.getLocation().getLocationStatus().toString())
+            .languageCode(locationTranslation.getLanguage().getCode())
+            .name(locationTranslation.getLocationName())
+            .id(locationTranslation.getLocation().getId())
             .build();
     }
 
     @Override
-    public GetLocationDto addLocation(AddLocationDto dto) {
+    public GetLocationTranslationDto addLocation(AddLocationDto dto) {
         Location location = modelMapper.map(dto, Location.class);
         Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
             () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
-        location.setLanguage(language);
+        LocationTranslation locationTranslation = modelMapper.map(dto, LocationTranslation.class);
+        locationTranslation.setLanguage(language);
         location.setLocationStatus(LocationStatus.ACTIVE);
         locationRepository.save(location);
-        return getAllLocation(location);
+        return getAllLocation(locationTranslation);
     }
 
     @Override
-    public GetLocationDto deactivateLocation(Long id) {
+    public GetLocationTranslationDto deactivateLocation(Long id, String code) {
         Location location = locationRepository.findById(id).orElseThrow(
             () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final LocationTranslation locationTranslation =
+            locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, code)
+                .orElseThrow(() -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         if (location.getLocationStatus().equals(LocationStatus.DEACTIVATED)) {
             throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
         }
         location.setLocationStatus(LocationStatus.DEACTIVATED);
         locationRepository.save(location);
-        return getAllLocation(location);
+        return getAllLocation(locationTranslation);
     }
 
     @Override
-    public GetLocationDto activateLocation(Long id) {
+    public GetLocationTranslationDto activateLocation(Long id, String code) {
         Location location = locationRepository.findById(id).orElseThrow(
             () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final LocationTranslation locationTranslation =
+            locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, code)
+                .orElseThrow(() -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         if (location.getLocationStatus().equals(LocationStatus.ACTIVE)) {
             throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
         }
         location.setLocationStatus(LocationStatus.ACTIVE);
         locationRepository.save(location);
-        return getAllLocation(location);
+        return getAllLocation(locationTranslation);
     }
 }

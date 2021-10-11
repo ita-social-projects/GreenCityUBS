@@ -10,6 +10,5 @@ import lombok.*;
 @ToString
 public class AddLocationDto {
     private String locationName;
-    private Long minAmountOfBag;
     private String languageCode;
 }
