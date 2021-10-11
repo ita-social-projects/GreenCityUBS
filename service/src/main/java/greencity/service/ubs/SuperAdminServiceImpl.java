@@ -210,6 +210,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
             () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         LocationTranslation locationTranslation = modelMapper.map(dto, LocationTranslation.class);
+        locationTranslation.setLocation(location);
         locationTranslation.setLanguage(language);
         location.setLocationStatus(LocationStatus.ACTIVE);
         locationRepository.save(location);
