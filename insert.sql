@@ -55,7 +55,7 @@ VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01'),
        ('1243-1243','EXPIRED','2021-05-04',100,7,'2021-04-04');
 
 INSERT INTO locations(id,location_status)
-VALUES (5,'ACTIVE');
+VALUES (1,'ACTIVE');
 
 INSERT INTO bag (id,capacity,price,location_id)
  VALUES (1,100,400,1),
