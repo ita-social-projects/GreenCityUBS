@@ -1,7 +1,6 @@
 package greencity.entity.user;
 
 import greencity.entity.enums.LocationStatus;
-import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
@@ -23,18 +22,12 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "location_name")
-    private String locationName;
-
     @Column(name = "min_amount_of_big_bags")
     private Long minAmountOfBigBags;
 
     @Column(name = "location_status")
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
-
-    @ManyToOne
-    private Language language;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
     private List<User> user;
@@ -47,4 +40,7 @@ public class Location {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Bag> bags;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    List<LocationTranslation> locationTranslations;
 }
