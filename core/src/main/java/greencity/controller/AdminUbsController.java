@@ -4,7 +4,6 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.service.ubs.OrdersAdminsPageService;
-import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -28,34 +27,10 @@ public class AdminUbsController {
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,ValuesForUserTableService valuesForUserTable) {
+    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
+        ValuesForUserTableService valuesForUserTable) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
-    }
-
-    /**
-     * Controller which return necessary parameters for building the table of
-     * orders.
-     * Controller.
-     *
-     * @author Liubomyr Pater
-     */
-    @ApiOperation("Get all info from Table orders")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/ordersNew")
-    @ApiPageable
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable(
-        @ApiIgnore int page, @ApiIgnore int size,
-        @RequestParam(value = "columnName", required = false) String columnName,
-        @RequestParam(value = "sortingType", required = false) String sortingType,
-        SearchCriteria searchCriteria) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
     }
 
     /**
@@ -71,7 +46,6 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/usersAll")
-    @ApiPageable
     public ResponseEntity<FieldsForUsersTableDto> getAllValuesForUserTable() {
         return ResponseEntity.status(HttpStatus.OK)
             .body(valuesForUserTable.getAllFields());
