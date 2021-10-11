@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.service.ubs.OrdersAdminsPageService;
+import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -20,18 +21,38 @@ import java.util.List;
 @RequestMapping("/ubs/management")
 public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private final ValuesForUserTableService valuesForUserTable;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService) {
+    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
+        ValuesForUserTableService valuesForUserTable) {
         this.ordersAdminsPageService = ordersAdminsPageService;
+        this.valuesForUserTable = valuesForUserTable;
     }
 
     /**
-     * Controller which return necessary parameters for building the table of
-     * orders.
+     * Controller for obtaining all users that made at least one order.
+     *
+     * @author Stepan Tehlivets.
+     */
+    @ApiOperation("Get users for the table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/usersAll")
+    public ResponseEntity<FieldsForUsersTableDto> getAllValuesForUserTable() {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(valuesForUserTable.getAllFields());
+    }
+
+    /**
+     * Controller.
      *
      * @author Liubomyr Pater
      */
