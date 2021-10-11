@@ -21,4 +21,6 @@ public class AddServiceDto {
     Integer commission;
     String description;
     Long languageId;
+    @NotNull
+    Long locationId;
 }

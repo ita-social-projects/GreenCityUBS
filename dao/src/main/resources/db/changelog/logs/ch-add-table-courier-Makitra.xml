@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-6" author="Vadym Makitra">
+        <createTable tableName="courier">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="min_amount_of_big_bags" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_amount_of_big_bags" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_price_of_order" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_price_of_order" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="courier_translations">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addColumn tableName="locations">
+            <column name="location_status" type="VARCHAR" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="bag">
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="courier_translations"
+                                 baseColumnNames="language_id"
+                                 constraintName="fk_courier_translations_to_language"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="locations"
+                                 baseColumnNames="language_id"
+                                 constraintName="fk_locations_to_languages"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="courier_translations"
+                                 baseColumnNames="courier_id"
+                                 constraintName="fk_courier_translations_to_courier"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="courier"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_courier_to_location"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="bag"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_bag_to_location"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint columnNames="courier_id,language_id" constraintName="UK_courier_id_and_languages_id" tableName="courier_translations"/>
+        <addUniqueConstraint columnNames="id,language_id" constraintName="UK_id_and_languages_id" tableName="locations"/>
+    </changeSet>
+</databaseChangeLog>
