@@ -9,7 +9,7 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class GetLocationDto {
+public class GetLocationTranslationDto {
     private Long id;
     private String name;
     private String locationStatus;
