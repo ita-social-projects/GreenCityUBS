@@ -261,11 +261,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param orderId                   of {@link Long} order id;
      * @param overpaymentInfoRequestDto {@link OverpaymentInfoRequestDto}
+     * @param uuid                      {@link String}.
      * @author Ostap Mykhailivskyi
      */
     @Override
     public void returnOverpayment(Long orderId,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         User user = userRepository.findUserByOrderId(orderId)
@@ -278,12 +281,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (order.getOrderStatus() == OrderStatus.CANCELLED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
             returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
-            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order);
+            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
         }
         if (order.getOrderStatus() == OrderStatus.CANCELLED && overpaymentInfoRequestDto.getComment()
             .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
-            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order);
+            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
         }
         order.getPayment().add(payment);
         userRepository.save(user);
@@ -294,15 +297,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @param commentStatus {@link String} comments status.
      * @param order         {@link Order}.
+     * @param currentUser   {@link User}.
      * @author Yuriy Bahlay.
      */
-    private void collectEventsAboutOverpayment(String commentStatus, Order order) {
+    private void collectEventsAboutOverpayment(String commentStatus, Order order, User currentUser) {
         if (commentStatus.equals(AppConstant.PAYMENT_REFUND)) {
-            eventService.save(OrderHistory.RETURN_OVERPAYMENT_TO_CLIENT, order.getUser().getRecipientName()
-                + "  " + order.getUser().getRecipientSurname(), order);
+            eventService.save(OrderHistory.RETURN_OVERPAYMENT_TO_CLIENT, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
         } else if (commentStatus.equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             eventService.save(OrderHistory.RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
     }
 
@@ -500,9 +504,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
+    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
         Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
             Violation violation = violationBuilder(add, order);
@@ -514,8 +520,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             violationRepository.save(violation);
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.ADD_VIOLATION, user.getRecipientName()
-                + "  " + user.getRecipientSurname(), order);
+            eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
             notificationService.notifyAddViolation(order);
         } else {
             throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
@@ -666,14 +672,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Address address = order.getUbsUser().getAddress();
         if (address != null) {
             addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
-            eventService.save(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, order.getUser().getRecipientName()
-                + "  " + order.getUser().getRecipientSurname(), order);
+            eventService.save(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
             Optional<Address> optionalAddress = addressRepository.findById(address.getId());
             return optionalAddress.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
@@ -747,11 +755,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
-        User user = userRepository.findByUuid(uuid);
-        Employee employee = user.getEmployee();
-        if (employee == null) {
-            throw new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND);
-        }
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
             updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
@@ -771,7 +776,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
         orderRepository.save(order);
         eventService.save(OrderHistory.CHANGE_ORDER_DETAILS,
-            employee.getFirstName() + "  " + employee.getLastName(), order);
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -943,21 +948,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setComment(dto.getOrderComment());
         OrderStatus newStatus = OrderStatus.valueOf(dto.getOrderStatus());
         order.setOrderStatus(newStatus);
-        User user = userRepository.findByUuid(uuid);
-        Employee employee = user.getEmployee();
-        if (employee == null) {
-            throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
-        }
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (newStatus == OrderStatus.ADJUSTMENT) {
             notificationService.notifyCourierItineraryFormed(order);
             eventService.save(OrderHistory.ORDER_ADJUSTMENT,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (newStatus == OrderStatus.CONFIRMED) {
             eventService.save(OrderHistory.ORDER_CONFIRMED,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
             eventService.save(OrderHistory.ORDER_NOT_TAKEN_OUT,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
         paymentRepository.paymentInfo(id)
             .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
@@ -999,7 +1001,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     @Transactional
-    public void deleteViolation(Long id) {
+    public void deleteViolation(Long id, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
         if (violationOptional.isPresent()) {
             List<String> images = violationOptional.get().getImages();
@@ -1012,8 +1016,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, user.getRecipientName()
-                + "  " + user.getRecipientSurname(), violationOptional.get().getOrder());
+            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
         } else {
             throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
         }
@@ -1089,7 +1093,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Orest Mahdziak
      */
     @Override
-    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto) {
+    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto, String uuid) {
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
@@ -1104,7 +1110,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.setDeliverFrom(dateTime);
         order.setReceivingStation(dto.getReceivingStation());
         orderRepository.save(order);
-        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order);
+        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
         return buildExportDto(order, receivingStation);
     }
 
@@ -1117,13 +1123,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private void collectEventsAboutOrderExportDetails(String receivingStationValue, LocalDateTime deliverFrom,
-        Order order) {
+        Order order, User currentUser) {
         if (receivingStationValue != null || deliverFrom != null) {
-            eventService.save(OrderHistory.UPDATE_EXPORT_DETAILS, order.getUser().getRecipientName()
-                + "  " + order.getUser().getRecipientSurname(), order);
+            eventService.save(OrderHistory.UPDATE_EXPORT_DETAILS, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
         } else {
-            eventService.save(OrderHistory.SET_EXPORT_DETAILS, order.getUser().getRecipientName()
-                + "  " + order.getUser().getRecipientSurname(), order);
+            eventService.save(OrderHistory.SET_EXPORT_DETAILS, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
         }
     }
 
@@ -1251,10 +1257,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image) {
+        MultipartFile image, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        return buildPaymentResponseDto(paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image)));
+        return buildPaymentResponseDto(
+            paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, currentUser)));
     }
 
     /**
@@ -1262,7 +1271,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     @Transactional
-    public void deleteManualPayment(Long paymentId) {
+    public void deleteManualPayment(Long paymentId, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
@@ -1270,9 +1281,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + paymentId,
-            payment.getOrder().getUser().getRecipientName()
-                + "  " + payment.getOrder().getUser().getRecipientSurname(),
-            payment.getOrder());
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
     }
 
     /**
@@ -1281,14 +1290,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public ManualPaymentResponseDto updateManualPayment(Long paymentId,
         ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image) {
+        MultipartFile image, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
             () -> new PaymentNotFoundException(PAYMENT_NOT_FOUND + paymentId));
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
-            payment.getOrder().getUser().getRecipientName()
-                + "  " + payment.getOrder().getUser().getRecipientSurname(),
-            payment.getOrder());
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
         return buildPaymentResponseDto(paymentUpdated);
     }
 
@@ -1323,7 +1332,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image) {
+    private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
+        User currentUser) {
         Payment payment = Payment.builder()
             .settlementDate(paymentRequestDto.getPaymentDate())
             .amount(paymentRequestDto.getAmount())
@@ -1339,7 +1349,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payment.setImagePath(fileService.upload(image));
         }
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
-            order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
         return payment;
     }
@@ -1375,7 +1385,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     @Transactional
-    public void updatePositions(EmployeePositionDtoResponse dto) {
+    public void updatePositions(EmployeePositionDtoResponse dto, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(
                 () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
@@ -1389,7 +1401,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
             if (oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
-                collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order);
+                collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
                 .employee(employee)
@@ -1412,30 +1424,32 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param order    {@link Order}.
      * @author Yuriy Bahlay.
      */
-    private void collectEventsAboutUpdatingEmployeesAssignedForOrder(Long position, Order order) {
+    private void collectEventsAboutUpdatingEmployeesAssignedForOrder(Long position, Order order, User currentUser) {
         if (position == 1) {
             eventService.save(OrderHistory.UPDATE_MANAGER_CALL,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {
             eventService.save(OrderHistory.UPDATE_MANAGER_LOGIEST,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 4) {
             eventService.save(OrderHistory.UPDATE_MANAGER_CALL_PILOT,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 5) {
             eventService.save(OrderHistory.UPDATE_MANAGER_DRIVER,
-                order.getUser().getRecipientName() + "  " + order.getUser().getRecipientSurname(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
     }
 
     @Override
-    public void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
+    public void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
             .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.save(OrderHistory.CHANGES_VIOLATION, violation.getOrder().getUser().getRecipientName()
-            + "  " + violation.getOrder().getUser().getRecipientSurname(), violation.getOrder());
+        eventService.save(OrderHistory.CHANGES_VIOLATION,
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
     }
 
     private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
@@ -1498,6 +1512,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     @Transactional
     public void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         if (dto.getEmployeesList() != null) {
@@ -1508,11 +1524,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 if (isExistEmployee) {
                     throw new EmployeeAlreadyAssignedForOrder(
                         EMPLOYEE_ALREADY_ASSIGNED + assignForOrderEmployee.getEmployeeId());
-                }
-                User user = userRepository.findByUuid(uuid);
-                Employee employee = user.getEmployee();
-                if (employee == null) {
-                    throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
                 }
                 Employee employeeForAssigning = employeeRepository.findById(assignForOrderEmployee.getEmployeeId())
                     .orElseThrow(() -> new EmployeeNotFoundException(
@@ -1527,7 +1538,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         .position(Position.builder().id(positionForEmployee).build())
                         .build();
                     employeeOrderPositionRepository.save(employeeOrderPositions);
-                    collectsEventsAboutAssigningEmployees(positionForEmployee, employee, order);
+                    collectsEventsAboutAssigningEmployees(positionForEmployee, currentUser, order);
                 } else {
                     throw new EmployeeIsNotAssigned(ErrorMessage.EMPLOYEE_IS_NOT_ASSIGN);
                 }
@@ -1538,24 +1549,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * This is private method which collect's event when managers will assign.
      *
-     * @param position {@link Long}.
-     * @param employee {@link Employee}
-     * @param order    {@link Order}.
+     * @param position    {@link Long}.
+     * @param currentUser {@link User}
+     * @param order       {@link Order}.
      * @author Yuriy Bahlay.
      */
-    private void collectsEventsAboutAssigningEmployees(Long position, Employee employee, Order order) {
+    private void collectsEventsAboutAssigningEmployees(Long position, User currentUser, Order order) {
         if (position == 1) {
             eventService.save(OrderHistory.ASSIGN_CALL_MANAGER,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {
             eventService.save(OrderHistory.ASSIGN_LOGIEST,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 4) {
             eventService.save(OrderHistory.ASSIGN_CALL_PILOT,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 5) {
             eventService.save(OrderHistory.ASSIGN_DRIVER,
-                employee.getFirstName() + "  " + employee.getLastName(), order);
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
     }
 

@@ -2,8 +2,6 @@ package greencity.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.Min;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -11,7 +9,7 @@ import javax.validation.constraints.Min;
 @Builder
 @EqualsAndHashCode
 @ToString
-public class UserDto {
-    @Min(1)
-    private Long id;
+public class AdminCommentDto {
+    private Long orderId;
+    private String adminComment;
 }

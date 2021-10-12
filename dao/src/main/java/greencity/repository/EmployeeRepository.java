@@ -99,15 +99,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Optional<Employee> findByName(String firstName, String lastName);
 
     /**
-     * Method checks if {@link Long} employee exits with current userId.
-     *
-     * @param userId {@link Long}.
-     * @return {@link Boolean}.
-     * @author Yuriy Bahlay.
-     */
-    boolean existsByUserId(Long userId);
-
-    /**
      * Method find current position for Employee.
      *
      * @param employeeId {@link Long}.
