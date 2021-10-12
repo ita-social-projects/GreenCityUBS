@@ -294,9 +294,9 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-address")
     public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
-        @Valid @RequestBody OrderAddressDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
+        @Valid @RequestBody OrderAddressDtoUpdate dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateAddress(dto, uuid));
+            .body(ubsManagementService.updateAddress(dto));
     }
 
     /**
@@ -552,10 +552,9 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
-        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderExportDetails(id, dto, uuid));
+            .body(ubsManagementService.updateOrderExportDetails(id, dto));
     }
 
     /**
@@ -593,9 +592,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-violation-from-order/{orderId}")
-    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteViolation(orderId, uuid);
+    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId) {
+        ubsManagementService.deleteViolation(orderId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -663,9 +661,8 @@ public class ManagementOrderController {
     })
     @PostMapping("/return-overpayment")
     public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
-        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, uuid);
+        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
+        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -690,9 +687,9 @@ public class ManagementOrderController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
+        @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, uuid));
+            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image));
     }
 
     /**
@@ -711,9 +708,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-manual-payment/{id}")
-    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteManualPayment(paymentId, uuid);
+    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId) {
+        ubsManagementService.deleteManualPayment(paymentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -737,9 +733,9 @@ public class ManagementOrderController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
+        @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
+            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image));
     }
 
     /**
@@ -780,8 +776,8 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-position-by-order")
     public ResponseEntity<HttpStatus> updateByOrder(
-        @RequestBody @Valid EmployeePositionDtoResponse dto, @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updatePositions(dto, uuid);
+        @RequestBody @Valid EmployeePositionDtoResponse dto) {
+        ubsManagementService.updatePositions(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -802,9 +798,8 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateUserViolation(add, multipartFiles, uuid);
+        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles) {
+        ubsManagementService.updateUserViolation(add, multipartFiles);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
