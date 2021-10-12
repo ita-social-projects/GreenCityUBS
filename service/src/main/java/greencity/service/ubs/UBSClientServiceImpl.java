@@ -8,6 +8,7 @@ import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -56,6 +57,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
     private final UBSManagementServiceImpl ubsManagementService;
+    private final LocationTranslationRepository locationTranslationRepository;
     private final LiqPay liqPay;
     @PersistenceContext
     private final EntityManager entityManager;
@@ -116,6 +118,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .price(bt.getBag().getFullPrice())
             .name(bt.getName())
             .code(bt.getLanguage().getCode())
+            .locationId(bt.getBag().getLocation().getId())
             .build();
     }
 
@@ -768,16 +771,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<LocationResponseDto> getAllLocations(String userUuid) {
         User user = userRepository.findByUuid(userUuid);
         List<Location> locations = locationRepository.findAll();
+        List<LocationTranslation> locationTranslations = locationTranslationRepository.findAll();
         Location lastOrderLocation = user.getLastLocation();
 
         if (lastOrderLocation != null) {
             locations.remove(lastOrderLocation);
             locations.add(0, lastOrderLocation);
         }
-        return buildLocationResponseList(locations);
+        return buildLocationResponseList(locationTranslations);
     }
 
-    private List<LocationResponseDto> buildLocationResponseList(List<Location> locations) {
+    private List<LocationResponseDto> buildLocationResponseList(List<LocationTranslation> locations) {
         return locations.stream()
             .map(a -> buildLocationResponseDto(a))
             .collect(Collectors.toList());
@@ -796,10 +800,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         userRepository.save(currentUser);
     }
 
-    private LocationResponseDto buildLocationResponseDto(Location location) {
+    private LocationResponseDto buildLocationResponseDto(LocationTranslation locationTranslation) {
         return LocationResponseDto.builder()
-            .id(location.getId())
-            .name(location.getLocationName())
+            .id(locationTranslation.getLocation().getId())
+            .name(locationTranslation.getLocationName())
+            .languageCode(locationTranslation.getLanguage().getCode())
             .build();
     }
 

@@ -68,4 +68,9 @@
     <include file="db/changelog/logs/ch-add-column-edditedBy-edditedAt-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-service-Makitra.xml"/>
     <include file="db/changelog/logs/ch-drop-column-user-id-Bahlay.xml"/>
+    <include file="db/changelog/logs/ch-add-table-servicetransaltion-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-courier-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-column-date_of_registration-User-table-Tehlivets.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-locationName-Makitra.xml"/>
 </databaseChangeLog>
+

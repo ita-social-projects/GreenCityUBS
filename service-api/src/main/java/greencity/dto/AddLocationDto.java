@@ -6,11 +6,9 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 @Builder
-public class LocationResponseDto {
-    private Long id;
-    private String name;
+@ToString
+public class AddLocationDto {
+    private String locationName;
     private String languageCode;
 }

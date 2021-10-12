@@ -2,17 +2,17 @@ package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.enums.LocationStatus;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
+import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
-import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.ServiceNotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.UserRepository;
+import greencity.exceptions.*;
+import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -28,23 +28,30 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
     private final ServiceRepository serviceRepository;
+    private final ServiceTranslationRepository serviceTranslationRepository;
+    private final LocationRepository locationRepository;
+    private final LanguageRepository languageRepository;
+    private final LocationTranslationRepository locationTranslationRepository;
     private final ModelMapper modelMapper;
 
     @Override
-    public Bag addTariffService(AddServiceDto dto, String uuid) {
-        Language language = new Language();
-        language.setId(dto.getLanguageId());
+    public GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid) {
+        final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
+        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         Bag bag = modelMapper.map(dto, Bag.class);
-        BagTranslation translation = modelMapper.map(dto, BagTranslation.class);
+        final BagTranslation translation = modelMapper.map(dto, BagTranslation.class);
         bag.setFullPrice(dto.getPrice() + dto.getCommission());
         bag.setCreatedAt(LocalDate.now());
+        bag.setLocation(location);
         translation.setBag(bag);
         translation.setLanguage(language);
         User user = userRepository.findByUuid(uuid);
         bag.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         bagRepository.save(bag);
         translationRepository.save(translation);
-        return bag;
+        return getTariffService(translation);
     }
 
     @Override
@@ -69,6 +76,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(bagTranslation.getBag().getCreatedBy())
             .editedAt(bagTranslation.getBag().getEditedAt())
             .editedBy(bagTranslation.getBag().getEditedBy())
+            .locationId(bagTranslation.getBag().getLocation().getId())
             .build();
     }
 
@@ -99,37 +107,49 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public Service addService(CreateServiceDto dto, String uuid) {
+    public GetServiceDto addService(CreateServiceDto dto, String uuid) {
         Service service = modelMapper.map(dto, Service.class);
+        Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         User user = userRepository.findByUuid(uuid);
-        service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         service.setCreatedAt(LocalDate.now());
+        service.setLocation(location);
+        service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         service.setBasePrice(dto.getPrice());
         service.setFullPrice(dto.getPrice() + dto.getCommission());
-        return serviceRepository.save(service);
+        ServiceTranslation serviceTranslation = modelMapper.map(dto, ServiceTranslation.class);
+        serviceTranslation.setLanguage(language);
+        serviceRepository.save(service);
+        serviceTranslation.setService(service);
+        serviceTranslationRepository.save(serviceTranslation);
+        return getService(serviceTranslation);
     }
 
     @Override
     public List<GetServiceDto> getService() {
-        return serviceRepository.findAll()
+        return serviceTranslationRepository.findAll()
             .stream()
             .map(this::getService)
             .collect(Collectors.toList());
     }
 
-    private GetServiceDto getService(Service service) {
+    private GetServiceDto getService(ServiceTranslation serviceTranslation) {
         return GetServiceDto.builder()
-            .description(service.getDescription())
-            .price(service.getBasePrice())
-            .capacity(service.getCapacity())
-            .name(service.getName())
-            .commission(service.getCommission())
-            .fullPrice(service.getFullPrice())
-            .id(service.getId())
-            .createdAt(service.getCreatedAt())
-            .createdBy(service.getCreatedBy())
-            .editedAt(service.getEditedAt())
-            .editedBy(service.getEditedBy())
+            .description(serviceTranslation.getDescription())
+            .price(serviceTranslation.getService().getBasePrice())
+            .capacity(serviceTranslation.getService().getCapacity())
+            .name(serviceTranslation.getName())
+            .commission(serviceTranslation.getService().getCommission())
+            .fullPrice(serviceTranslation.getService().getFullPrice())
+            .id(serviceTranslation.getService().getId())
+            .createdAt(serviceTranslation.getService().getCreatedAt())
+            .createdBy(serviceTranslation.getService().getCreatedBy())
+            .editedAt(serviceTranslation.getService().getEditedAt())
+            .editedBy(serviceTranslation.getService().getEditedBy())
+            .locationId(serviceTranslation.getService().getLocation().getId())
+            .languageCode(serviceTranslation.getLanguage().getCode())
             .build();
     }
 
@@ -145,15 +165,85 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = serviceRepository.findById(id).orElseThrow(
             () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         User user = userRepository.findByUuid(uuid);
+        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         service.setCapacity(dto.getCapacity());
         service.setCommission(dto.getCommission());
         service.setBasePrice(dto.getPrice());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        service.setName(dto.getName());
-        service.setDescription(dto.getDescription());
+        ServiceTranslation serviceTranslation = serviceTranslationRepository
+            .findServiceTranslationsByServiceAndLanguageCode(service, dto.getLanguageCode());
+        serviceTranslation.setService(service);
+        serviceTranslation.setName(dto.getName());
+        serviceTranslation.setDescription(dto.getDescription());
+        serviceTranslation.setLanguage(language);
         service.setFullPrice(dto.getPrice() + dto.getCommission());
+        service.setBasePrice(dto.getPrice());
+        service.setLocation(location);
         serviceRepository.save(service);
-        return getService(service);
+        return getService(serviceTranslation);
+    }
+
+    @Override
+    public List<GetLocationTranslationDto> getAllLocation() {
+        return locationTranslationRepository.findAll()
+            .stream()
+            .map(this::getAllLocation)
+            .collect(Collectors.toList());
+    }
+
+    private GetLocationTranslationDto getAllLocation(LocationTranslation locationTranslation) {
+        return GetLocationTranslationDto.builder()
+            .locationStatus(locationTranslation.getLocation().getLocationStatus().toString())
+            .languageCode(locationTranslation.getLanguage().getCode())
+            .name(locationTranslation.getLocationName())
+            .id(locationTranslation.getLocation().getId())
+            .build();
+    }
+
+    @Override
+    public GetLocationTranslationDto addLocation(AddLocationDto dto) {
+        Location location = modelMapper.map(dto, Location.class);
+        Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
+        LocationTranslation locationTranslation = modelMapper.map(dto, LocationTranslation.class);
+        locationTranslation.setLocation(location);
+        locationTranslation.setLanguage(language);
+        location.setLocationStatus(LocationStatus.ACTIVE);
+        locationRepository.save(location);
+        return getAllLocation(locationTranslation);
+    }
+
+    @Override
+    public GetLocationTranslationDto deactivateLocation(Long id, String code) {
+        Location location = locationRepository.findById(id).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final LocationTranslation locationTranslation =
+            locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, code)
+                .orElseThrow(() -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        if (location.getLocationStatus().equals(LocationStatus.DEACTIVATED)) {
+            throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
+        }
+        location.setLocationStatus(LocationStatus.DEACTIVATED);
+        locationRepository.save(location);
+        return getAllLocation(locationTranslation);
+    }
+
+    @Override
+    public GetLocationTranslationDto activateLocation(Long id, String code) {
+        Location location = locationRepository.findById(id).orElseThrow(
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        final LocationTranslation locationTranslation =
+            locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, code)
+                .orElseThrow(() -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        if (location.getLocationStatus().equals(LocationStatus.ACTIVE)) {
+            throw new LocationStatusAlreadyExistException(ErrorMessage.LOCATION_STATUS_IS_ALREADY_EXIST);
+        }
+        location.setLocationStatus(LocationStatus.ACTIVE);
+        locationRepository.save(location);
+        return getAllLocation(locationTranslation);
     }
 }

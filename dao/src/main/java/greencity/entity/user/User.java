@@ -9,6 +9,7 @@ import greencity.entity.viber.ViberBot;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -68,4 +69,7 @@ public class User {
     @ManyToOne()
     @JoinColumn(name = "last_order_location", referencedColumnName = "id")
     private Location lastLocation;
+
+    @Column(name = "date_of_registration")
+    private LocalDate dateOfRegistration;
 }

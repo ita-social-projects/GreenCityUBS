@@ -54,10 +54,13 @@ VALUES ('1234-1234','ACTIVE','2021-05-01',100,1,'2021-04-01'),
        ('1242-1242','EXPIRED','2021-05-03',900,5,'2021-04-03'),
        ('1243-1243','EXPIRED','2021-05-04',100,7,'2021-04-04');
 
-INSERT INTO bag (id,capacity,price)
- VALUES (1,100,400),
-        (2,100,600),
-        (3,100,400);
+INSERT INTO locations(id,location_status)
+VALUES (1,'ACTIVE');
+
+INSERT INTO bag (id,capacity,price,location_id)
+ VALUES (1,100,400,1),
+        (2,100,600,1),
+        (3,100,400,1);
 
 INSERT INTO bag_translations(id,name, bag_id, language_id)
 VALUES (1,'Бавовняна сумка',1,1),

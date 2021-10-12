@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @Builder
-public class ColumnStateDTO {
+public class ColumnDTO {
     private TitleDto title;
     private String titleForSorting;
     private int weight;
@@ -20,6 +20,6 @@ public class ColumnStateDTO {
     private boolean filtered;
     private int index;
     private EditType editType;
-    private List<TitleDto> optional;
+    private List<OptionForColumnDTO> optional;
     private String columnBelonging;
 }

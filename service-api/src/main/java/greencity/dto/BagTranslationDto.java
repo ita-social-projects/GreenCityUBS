@@ -23,4 +23,6 @@ public class BagTranslationDto implements Serializable {
     private Integer price;
     @NotNull
     private String code;
+    @NotNull
+    private Long locationId;
 }

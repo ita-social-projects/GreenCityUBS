@@ -1,7 +1,6 @@
 package greencity.service;
 
 import greencity.dto.*;
-import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 
 import java.util.List;
@@ -12,10 +11,10 @@ public interface SuperAdminService {
      * 
      * @param dto  {@link AddServiceDto}
      * @param uuid {@link String} - uuid current user.
-     * @return {@link Bag}
+     * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    Bag addTariffService(AddServiceDto dto, String uuid);
+    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -52,7 +51,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    Service addService(CreateServiceDto dto, String uuid);
+    GetServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get All service.
@@ -80,4 +79,37 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+
+    /**
+     * Method for get all info about location.
+     *
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    List<GetLocationTranslationDto> getAllLocation();
+
+    /**
+     * Method for adding location.
+     *
+     * @param dto {@link AddLocationDto}
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    GetLocationTranslationDto addLocation(AddLocationDto dto);
+
+    /**
+     * Method for deactivate location.
+     *
+     * @param id - if of location
+     * @return {@link GetLocationTranslationDto}
+     */
+    GetLocationTranslationDto deactivateLocation(Long id, String code);
+
+    /**
+     * Method for activate location.
+     *
+     * @param id - id of Location
+     * @return {@link GetLocationTranslationDto}
+     */
+    GetLocationTranslationDto activateLocation(Long id, String code);
 }

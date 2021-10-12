@@ -11,6 +11,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -1238,8 +1239,12 @@ public class ModelUtils {
 
     public static Location getLastLocation() {
         return Location.builder()
-            .id(1l)
-            .locationName("Name1")
+            .id(1l).locationTranslations(List.of(LocationTranslation.builder()
+                .location(getLocation())
+                .locationName("Name1")
+                .language(Language.builder()
+                    .code("ua").build())
+                .build()))
             .minAmountOfBigBags(10l)
             .build();
     }
@@ -1248,12 +1253,31 @@ public class ModelUtils {
         List list = new ArrayList();
         Location location = Location.builder()
             .id(2l)
-            .locationName("Name2")
+            .locationTranslations(List.of(LocationTranslation.builder()
+                .locationName("Name2").location(getLocation())
+                .language(Language.builder().code("ua")
+                    .build())
+                .build()))
             .minAmountOfBigBags(20l)
             .build();
         list.add(getLastLocation());
         list.add(location);
         return list;
+    }
+
+    public static List<LocationTranslation> getLocationTranslationList() {
+        List<LocationTranslation> locationTranslations = new ArrayList<>();
+        locationTranslations.add(LocationTranslation.builder()
+            .location(Location.builder().id(1L).build())
+            .locationName("Name1")
+            .language(Language.builder().code("ua").build())
+            .build());
+        locationTranslations.add(LocationTranslation.builder()
+            .language(Language.builder().code("ua").build())
+            .locationName("Name2")
+            .location(Location.builder().id(2L).build())
+            .build());
+        return locationTranslations;
     }
 
     public static List<LocationResponseDto> getLocationResponseDtoList() {
@@ -1262,10 +1286,12 @@ public class ModelUtils {
         LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
             .id(1l)
             .name("Name1")
+            .languageCode("ua")
             .build();
         LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
             .id(2l)
             .name("Name2")
+            .languageCode("ua")
             .build();
         list.add(locationResponseDto1);
         list.add(locationResponseDto2);
@@ -1552,6 +1578,7 @@ public class ModelUtils {
             .commission(50)
             .price(120)
             .fullPrice(170)
+            .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
             .build());
@@ -1576,6 +1603,13 @@ public class ModelUtils {
             .language(Language.builder().id(1L).code("ua").build())
             .name("Бавовняна сумка")
             .description("Description")
+            .build();
+    }
+
+    public static Location getLocation() {
+        return Location.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.ACTIVE)
             .build();
     }
 

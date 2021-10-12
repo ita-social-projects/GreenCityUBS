@@ -1,17 +1,16 @@
-package greencity.entity.language;
+package greencity.entity.parameters;
 
 import lombok.*;
 
-//@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
 @Builder
-public class Title {
+public class OptionForColumn {
     private long id;
-    private String belonging;
     private String ua;
     private String en;
+    private boolean filtered;
 }

@@ -3,7 +3,6 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.entity.order.Bag;
 import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
@@ -30,10 +29,10 @@ class SuperAdminController {
     }
 
     /**
-     * Controller created tariff Service.
+     * Controller for create new tariff.
      *
      * @param dto {@link AddServiceDto} dto for service.
-     * @return {@link Bag}
+     * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra.
      */
     @ApiOperation(value = "Create new tariff")
@@ -42,14 +41,14 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createTariffService")
-    public ResponseEntity<Bag> createTariffService(
+    public ResponseEntity<GetTariffServiceDto> createTariffService(
         @RequestBody AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
     }
 
     /**
-     * Controller got all tariff service and return List of this tariff.
+     * Controller for get all info about tariff.
      * 
      * @return {@link GetTariffServiceDto} list of all tariff service.
      * @author Vadym Makitra.
@@ -72,7 +71,7 @@ class SuperAdminController {
      * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Delete tariff service")
+    @ApiOperation(value = "Delete tariff by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
@@ -118,7 +117,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createService")
-    public ResponseEntity<Service> createServices(
+    public ResponseEntity<GetServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
@@ -170,11 +169,81 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/editService/{id}")
+    @PutMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> deleteService(
         @Valid @PathVariable Long id,
         @RequestBody @Valid CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
+    }
+
+    /**
+     * Get all info about locations, and min amount of bag for locations.
+     * 
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Get info about location and min amount of bag for this location")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping("/getLocations")
+    public ResponseEntity<List<GetLocationTranslationDto>> getLocations() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllLocation());
+    }
+
+    /**
+     * Create new Location.
+     * 
+     * @param dto {@link AddLocationDto}
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Create new location")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddLocationDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/addLocations")
+    public ResponseEntity<GetLocationTranslationDto> addLocation(
+        @RequestBody AddLocationDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addLocation(dto));
+    }
+
+    /**
+     * Controller for deactivating location byb Id.
+     * 
+     * @param id - id of location
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Deactivate location by Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/deactivateLocations")
+    public ResponseEntity<GetLocationTranslationDto> deactivateLocation(
+        Long id, String languageCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateLocation(id, languageCode));
+    }
+
+    /**
+     * Controller for activating location by Id.
+     * 
+     * @param id - id location
+     * @return {@link GetLocationTranslationDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Active location Id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/activeLocations")
+    public ResponseEntity<GetLocationTranslationDto> activeLocation(
+        Long id, String languageCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.activateLocation(id, languageCode));
     }
 }

@@ -1,5 +1,9 @@
 package greencity.entity.user;
 
+import greencity.entity.enums.LocationStatus;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Courier;
+import greencity.entity.order.Service;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,14 +19,28 @@ import java.util.List;
 @Table(name = "locations")
 public class Location {
     @Id
-    Long id;
-
-    @Column(name = "location_name")
-    String locationName;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "min_amount_of_big_bags")
-    Long minAmountOfBigBags;
+    private Long minAmountOfBigBags;
+
+    @Column(name = "location_status")
+    @Enumerated(EnumType.STRING)
+    private LocationStatus locationStatus;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
-    List<User> user;
+    private List<User> user;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    List<Service> service;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    List<Courier> courier;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    List<Bag> bags;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    List<LocationTranslation> locationTranslations;
 }

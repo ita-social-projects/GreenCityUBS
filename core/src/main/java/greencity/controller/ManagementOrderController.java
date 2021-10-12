@@ -192,7 +192,7 @@ public class ManagementOrderController {
      *
      * @return {@link AddingViolationsToUserDto} count of Users violations with
      *         order id descriptions.
-     * @author Nazar Struk
+     * @author Bohdan Melnyk
      */
     @ApiOperation("Add Violation to User")
     @ApiResponses(value = {
@@ -202,15 +202,14 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @ApiLocale
-    @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping(value = "/addViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/addViolationToUser",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         ubsManagementService.addUserViolation(add, files, uuid);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
