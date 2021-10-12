@@ -45,7 +45,7 @@ public class Order {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
-    private Boolean blocked;
+    private boolean blocked;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")

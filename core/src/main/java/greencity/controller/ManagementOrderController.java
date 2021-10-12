@@ -205,12 +205,12 @@ public class ManagementOrderController {
     @ApiLocale
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser",
-        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files) {
+        @ValidLanguage @ApiIgnore Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files) {
         ubsManagementService.addUserViolation(add, files);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
