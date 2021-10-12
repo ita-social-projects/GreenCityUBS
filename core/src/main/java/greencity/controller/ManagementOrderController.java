@@ -202,8 +202,6 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @ApiLocale
-    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
