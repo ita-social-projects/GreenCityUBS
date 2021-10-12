@@ -3,7 +3,6 @@ package greencity.entity.user;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramBot;
-import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
@@ -21,7 +20,7 @@ import java.util.Set;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot",
-    "viberBot", "employee"})
+    "viberBot"})
 @Entity
 public class User {
     @Id
@@ -71,8 +70,6 @@ public class User {
     @JoinColumn(name = "last_order_location", referencedColumnName = "id")
     private Location lastLocation;
 
-    @OneToOne(mappedBy = "user")
-    private Employee employee;
 
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;

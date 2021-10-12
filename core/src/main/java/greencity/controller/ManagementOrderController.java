@@ -207,8 +207,9 @@ public class ManagementOrderController {
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files) {
-        ubsManagementService.addUserViolation(add, files);
+        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.addUserViolation(add, files, uuid);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -293,9 +294,9 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-address")
     public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
-        @Valid @RequestBody OrderAddressDtoUpdate dto) {
+        @Valid @RequestBody OrderAddressDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateAddress(dto));
+            .body(ubsManagementService.updateAddress(dto, uuid));
     }
 
     /**
@@ -551,9 +552,10 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
-        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto) {
+        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderExportDetails(id, dto));
+            .body(ubsManagementService.updateOrderExportDetails(id, dto, uuid));
     }
 
     /**
@@ -591,8 +593,9 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-violation-from-order/{orderId}")
-    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId) {
-        ubsManagementService.deleteViolation(orderId);
+    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.deleteViolation(orderId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -660,8 +663,9 @@ public class ManagementOrderController {
     })
     @PostMapping("/return-overpayment")
     public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
-        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto);
+        @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -686,9 +690,9 @@ public class ManagementOrderController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) MultipartFile image) {
+        @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image));
+            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, uuid));
     }
 
     /**
@@ -707,8 +711,9 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/delete-manual-payment/{id}")
-    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId) {
-        ubsManagementService.deleteManualPayment(paymentId);
+    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.deleteManualPayment(paymentId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -732,9 +737,9 @@ public class ManagementOrderController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) MultipartFile image) {
+        @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image));
+            .body(ubsManagementService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
     }
 
     /**
@@ -775,8 +780,8 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-position-by-order")
     public ResponseEntity<HttpStatus> updateByOrder(
-        @RequestBody @Valid EmployeePositionDtoResponse dto) {
-        ubsManagementService.updatePositions(dto);
+        @RequestBody @Valid EmployeePositionDtoResponse dto, @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updatePositions(dto, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -797,8 +802,9 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles) {
-        ubsManagementService.updateUserViolation(add, multipartFiles);
+        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updateUserViolation(add, multipartFiles, uuid);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

@@ -71,4 +71,5 @@
     <include file="db/changelog/logs/ch-add-table-courier-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-column-date_of_registration-User-table-Tehlivets.xml"/>
     <include file="db/changelog/logs/ch-drop-column-locationName-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-user-id-Bahlay.xml"/>
 </databaseChangeLog>

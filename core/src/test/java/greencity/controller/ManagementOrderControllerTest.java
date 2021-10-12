@@ -235,7 +235,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).deleteViolation(1L);
+        verify(ubsManagementService).deleteViolation(1L, null);
     }
 
     @Test
