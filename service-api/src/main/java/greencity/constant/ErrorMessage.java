@@ -75,6 +75,8 @@ public final class ErrorMessage {
     public static final String LANGUAGE_IS_NOT_FOUND_BY_ID = "couldn't found language with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
+    public static final String COURIER_IS_NOT_FOUND_BY_ID = "couldn't found courier by id";
+    public static final String BAG_WITH_THIS_STATUS_ALREADY_SET = "Bag with this status already set.";
 
     /**
      * Constructor.
