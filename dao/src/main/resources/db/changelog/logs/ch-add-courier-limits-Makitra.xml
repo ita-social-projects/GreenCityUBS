@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-8" author="Vadym Makitra">
+        <addColumn tableName="bag">
+            <column name="min_amount_of_bags" type="varchar" defaultValue="INCLUDE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="courier">
+            <column name="courier_limits" defaultValue="LIMIT_BY_AMOUNT_OF_BAG" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="courier_translations">
+            <column name = "limit_description" type="VARCHAR"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

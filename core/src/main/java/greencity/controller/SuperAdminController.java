@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
@@ -223,9 +224,9 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/deactivateLocations")
+    @PostMapping("/deactivateLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> deactivateLocation(
-        Long id, String languageCode) {
+        @PathVariable Long id, String languageCode) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateLocation(id, languageCode));
     }
 
@@ -241,9 +242,130 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/activeLocations")
+    @PostMapping("/activeLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> activeLocation(
-        Long id, String languageCode) {
+        @PathVariable Long id, String languageCode) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.activateLocation(id, languageCode));
+    }
+
+    /**
+     * Controller for creating new courier.
+     *
+     * @param dto {@link CreateCourierDto}
+     * @return {@link Courier}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Create new Courier")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = Courier.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/createCourier")
+    public ResponseEntity<GetCourierTranslationsDto> addService(
+        @RequestBody CreateCourierDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.createCourier(dto));
+    }
+
+    /**
+     * Controller for get all info about couriers.
+     *
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Get all info about couriers")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/getCouriers")
+    public ResponseEntity<List<GetCourierTranslationsDto>> getAllCouriers() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
+    }
+
+    /**
+     * Controller for set amount of sum.
+     *
+     * @param id  - id of courier.
+     * @param dto {@link EditPriceOfOrder} - entered info about new Price.
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Set amount of sum")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/setAmountOfSum/{id}")
+    public ResponseEntity<GetCourierTranslationsDto> setAmountOfBag(
+        @PathVariable Long id, @RequestBody EditPriceOfOrder dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitBySumOfOrder(id, dto));
+    }
+
+    /**
+     * Controller for set amount of bag.
+     *
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Set amount of bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/setAmountOfBag/{id}")
+    public ResponseEntity<GetCourierTranslationsDto> setAmountOfSum(
+        @PathVariable Long id, @RequestBody EditAmountOfBagDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitByAmountOfBag(id, dto));
+    }
+
+    /**
+     * Controller for set limit description.
+     *
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Set new Limit Description")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PatchMapping("/setLimitDescription/{id}")
+    public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
+        @PathVariable Long id, String limitDescription) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setLimitDescription(id, limitDescription));
+    }
+
+    /**
+     * Controller for include Bag.
+     *
+     * @return {@link GetTariffServiceDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Include bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/includeBag/{id}")
+    public ResponseEntity<GetTariffServiceDto> includeBag(
+        @PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeBag(id));
+    }
+
+    /**
+     * Controller for include Bag.
+     *
+     * @return {@link GetTariffServiceDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Exclude bag")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/excludeBag/{id}")
+    public ResponseEntity<GetTariffServiceDto> excludeBag(
+        @PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeBag(id));
     }
 }

@@ -73,4 +73,3 @@
     <include file="db/changelog/logs/ch-add-column-date_of_registration-User-table-Tehlivets.xml"/>
     <include file="db/changelog/logs/ch-drop-column-locationName-Makitra.xml"/>
 </databaseChangeLog>
-
