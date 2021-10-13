@@ -57,7 +57,7 @@ public interface UBSManagementService {
      *
      * @author Ostap Mykhailivskyi
      */
-    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto);
+    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid);
 
     /**
      * Method returns overpayment to user.
@@ -104,9 +104,10 @@ public interface UBSManagementService {
      *
      * @param add            {@link AddingViolationsToUserDto}
      * @param multipartFiles {@link MultipartFile}
+     * @param uuid           {@link String}.
      * @author Nazar Struk
      */
-    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid);
 
     /**
      * Method for send email with description to user.
@@ -137,10 +138,11 @@ public interface UBSManagementService {
      * Method that update address.
      *
      * @param dtoUpdate of {@link OrderAddressDtoUpdate} order id;
+     * @param uuid      {@link String}.
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate);
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate, String uuid);
 
     /**
      * Method for getting order detail by language and order id.
@@ -220,7 +222,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto);
+    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto, String uuid);
 
     /**
      * Method that gets bags additional information.
@@ -233,9 +235,10 @@ public interface UBSManagementService {
      * Method deletes violation from database by orderId.
      *
      * @param orderId {@link Long}
+     * @param uuid    {@link String}.
      * @author Nadia Rusanovscaia
      */
-    void deleteViolation(Long orderId);
+    void deleteViolation(Long orderId, String uuid);
 
     /**
      * Method that saves manual payment and returns response with required fields.
@@ -244,19 +247,21 @@ public interface UBSManagementService {
      * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
      *                          request dto;
      * @param image             {@link MultipartFile} image of receipt.
+     * @param uuid              {@link String}.
      * @return {@link ManualPaymentResponseDto }
      * @author Denys Kisliak
      */
     ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image);
+        MultipartFile image, String uuid);
 
     /**
      * Method that deletes manual payment.
      *
      * @param paymentId of {@link Long} payment id;
+     * @param uuid      {@link String}.
      * @author Denys Kisliak
      */
-    void deleteManualPayment(Long paymentId);
+    void deleteManualPayment(Long paymentId, String uuid);
 
     /**
      * Method that updates manual payment and returns response with required fields.
@@ -265,11 +270,12 @@ public interface UBSManagementService {
      * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
      *                          request dto;
      * @param image             {@link MultipartFile} image of receipt.
+     * @param uuid              {@link String}.
      * @return {@link ManualPaymentResponseDto }
      * @author Denys Kisliak
      */
     ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image);
+        MultipartFile image, String uuid);
 
     /**
      * Method that return all employees by position.
@@ -281,7 +287,7 @@ public interface UBSManagementService {
     /**
      * Method that update EmployeePositionDtoResponse.
      */
-    void updatePositions(EmployeePositionDtoResponse dto);
+    void updatePositions(EmployeePositionDtoResponse dto, String uuid);
 
     /**
      * Method for adding violation for user.
@@ -290,7 +296,7 @@ public interface UBSManagementService {
      * @param multipartFiles {@link MultipartFile}
      * @author Bohdan Melnyk
      */
-    void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles);
+    void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid);
 
     /**
      * Method that save ReasonNotTakeBagDto.

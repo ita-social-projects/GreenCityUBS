@@ -191,7 +191,6 @@ public class ModelUtils {
             .orders(Lists.newArrayList(getOrder()))
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
-            .employee(getEmployee())
             .orders(Lists.newArrayList(getOrder()))
             .recipientName("Alan Po")
             .uuid("abc")
@@ -952,7 +951,7 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .employee(Employee.builder().id(1L).build())
+            .uuid("abc")
             .build();
     }
 
@@ -1346,7 +1345,6 @@ public class ModelUtils {
             .id(1L)
             .firstName("Test")
             .lastName("Test")
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
 

@@ -30,6 +30,4 @@ public class AddEmployeeDto {
     private List<PositionDto> employeePositions;
     @NotEmpty
     private List<ReceivingStationDto> receivingStations;
-    @NotNull
-    private UserDto userId;
 }
