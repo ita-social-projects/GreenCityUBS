@@ -16,20 +16,20 @@ import lombok.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserWithSomeOrderDetailDto {
-    @JsonProperty("client_name")
+    @JsonProperty("clientName")
     private String clientName;
-    @JsonProperty("phone_number")
+    @JsonProperty("recipientPhone")
     private String phone;
-    @JsonProperty("email")
+    @JsonProperty("recipientEmail")
     private String email;
-    @JsonProperty("registration_date")
+    @JsonProperty("dateOfRegistration")
     private String registrationDate;
-    @JsonProperty("last_order_date")
+    @JsonProperty("orderDate")
     private String lastOrderDate;
     @JsonProperty("number_of_orders")
     private int numberOfOrders;
-    @JsonProperty("user_violation")
+    @JsonProperty("violations")
     private int violation;
-    @JsonProperty("user_bonus_count")
+    @JsonProperty("currentPoints")
     private String userBonuses;
 }
