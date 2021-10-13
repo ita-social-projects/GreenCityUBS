@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.CourierLimit;
 import greencity.entity.user.Location;
 import lombok.*;
 
@@ -30,6 +31,10 @@ public class Courier {
 
     @Column(name = "max_price_of_order")
     private Long maxPriceOfOrder;
+
+    @Column(name = "courier_limits")
+    @Enumerated(EnumType.STRING)
+    private CourierLimit courierLimit;
 
     @ManyToOne
     private Location location;

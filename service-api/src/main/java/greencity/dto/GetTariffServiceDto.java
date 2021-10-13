@@ -14,19 +14,20 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 public class GetTariffServiceDto {
     @NotNull
-    String name;
+    private String name;
     @NotNull
-    Integer capacity;
+    private Integer capacity;
     @NotNull
-    Integer price;
-    Integer commission;
-    String description;
-    String languageCode;
-    Integer fullPrice;
-    Integer id;
-    LocalDate createdAt;
-    String createdBy;
-    LocalDate editedAt;
-    String editedBy;
-    Long locationId;
+    private Integer price;
+    private Integer commission;
+    private String description;
+    private String languageCode;
+    private Integer fullPrice;
+    private Integer id;
+    private LocalDate createdAt;
+    private String createdBy;
+    private LocalDate editedAt;
+    private String editedBy;
+    private Long locationId;
+    private String minAmountOfBag;
 }
