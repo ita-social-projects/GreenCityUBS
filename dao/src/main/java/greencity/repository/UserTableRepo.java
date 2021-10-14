@@ -45,6 +45,7 @@ public class UserTableRepo {
         userRoot.join(ORDERS, JoinType.INNER);
 
         Predicate predicate = getPredicate(userSearchCriteria, userRoot);
+        criteriaQuery.distinct(true);
         criteriaQuery.where(predicate);
         setOrder(column, sortingOrder, criteriaQuery, userRoot);
 
