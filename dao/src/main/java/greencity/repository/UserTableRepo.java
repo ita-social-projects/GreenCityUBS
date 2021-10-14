@@ -55,10 +55,9 @@ public class UserTableRepo {
 
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         Pageable pageable = PageRequest.of(page.getPageNumber(), 10, sort);
-        long userCount = getUsersCount(predicate);
         List<User> resultList = typedQuery.getResultList();
 
-        return new PageImpl<>(resultList, pageable, userCount);
+        return new PageImpl<>(resultList, pageable, resultList.size());
     }
 
     private Predicate getPredicate(UserSearchCriteria us, Root<User> userRoot) {
@@ -94,12 +93,5 @@ public class UserTableRepo {
         } else {
             criteriaQuery.orderBy(criteriaBuilder.asc(sortBy));
         }
-    }
-
-    private long getUsersCount(Predicate predicate) {
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<User> countUserRoot = countQuery.from(User.class);
-        countQuery.select(criteriaBuilder.count(countUserRoot)).where(predicate);
-        return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
