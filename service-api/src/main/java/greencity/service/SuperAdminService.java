@@ -15,7 +15,7 @@ public interface SuperAdminService {
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
+    AddServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -52,7 +52,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    GetServiceDto addService(CreateServiceDto dto, String uuid);
+    CreateServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get All service.
@@ -79,7 +79,7 @@ public interface SuperAdminService {
      * @return {@link GetServiceDto} - info about edited service.
      * @author Vadym Makitra
      */
-    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.
@@ -96,7 +96,7 @@ public interface SuperAdminService {
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    GetLocationTranslationDto addLocation(AddLocationDto dto);
+    AddLocationDto addLocation(AddLocationDto dto);
 
     /**
      * Method for deactivate location.
@@ -121,7 +121,7 @@ public interface SuperAdminService {
      * @return {@link Courier}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto createCourier(CreateCourierDto dto);
+    CreateCourierDto createCourier(CreateCourierDto dto);
 
     /**
      * Method for getting all info about couriers.
