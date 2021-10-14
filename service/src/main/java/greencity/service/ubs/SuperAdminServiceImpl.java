@@ -36,24 +36,37 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ModelMapper modelMapper;
 
     @Override
-    public GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid) {
-        final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
+    public AddServiceDto addTariffService(AddServiceDto dto, String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        Bag bag = createBagWithFewTranslation(dto, user);
+        bagRepository.save(bag);
+        translationRepository.saveAll(bag.getBagTranslations());
+        return modelMapper.map(bag, AddServiceDto.class);
+    }
+
+    private Bag createBagWithFewTranslation(AddServiceDto dto, User user) {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        Bag bag = modelMapper.map(dto, Bag.class);
-        final BagTranslation translation = modelMapper.map(dto, BagTranslation.class);
-        bag.setFullPrice(dto.getPrice() + dto.getCommission());
-        bag.setCreatedAt(LocalDate.now());
-        bag.setLocation(location);
-        bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
-        translation.setBag(bag);
-        translation.setLanguage(language);
-        User user = userRepository.findByUuid(uuid);
-        bag.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        bagRepository.save(bag);
-        translationRepository.save(translation);
-        return getTariffService(translation);
+        Bag bag = Bag.builder().price(dto.getPrice())
+            .capacity(dto.getCapacity())
+            .location(location)
+            .commission(dto.getCommission())
+            .fullPrice(dto.getPrice() + dto.getCommission())
+            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .createdAt(LocalDate.now())
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .bagTranslations(dto.getTariffTranslationDtoList().stream()
+                .map(tariffTranslationDto -> BagTranslation.builder()
+                    .name(tariffTranslationDto.getName())
+                    .language(languageRepository.findById(tariffTranslationDto.getLanguageId()).orElseThrow(
+                        () -> new LanguageNotFoundException(
+                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + tariffTranslationDto.getLanguageId())))
+                    .description(tariffTranslationDto.getDescription())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+        bag.getBagTranslations().forEach(bagTranslation -> bagTranslation.setBag(bag));
+        return bag;
     }
 
     @Override
@@ -110,24 +123,37 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto addService(CreateServiceDto dto, String uuid) {
-        Service service = modelMapper.map(dto, Service.class);
+    public CreateServiceDto addService(CreateServiceDto dto, String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        Service service = createServiceWithTranslation(dto, user);
+        serviceRepository.save(service);
+        serviceTranslationRepository.saveAll(service.getServiceTranslations());
+        return modelMapper.map(service, CreateServiceDto.class);
+    }
+
+    private Service createServiceWithTranslation(CreateServiceDto dto, User user) {
         Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        User user = userRepository.findByUuid(uuid);
-        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
-        service.setCreatedAt(LocalDate.now());
-        service.setLocation(location);
-        service.setCreatedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        service.setBasePrice(dto.getPrice());
-        service.setFullPrice(dto.getPrice() + dto.getCommission());
-        ServiceTranslation serviceTranslation = modelMapper.map(dto, ServiceTranslation.class);
-        serviceTranslation.setLanguage(language);
-        serviceRepository.save(service);
-        serviceTranslation.setService(service);
-        serviceTranslationRepository.save(serviceTranslation);
-        return getService(serviceTranslation);
+        Service service = Service.builder()
+            .basePrice(dto.getPrice())
+            .commission(dto.getCommission())
+            .fullPrice(dto.getPrice() + dto.getCommission())
+            .capacity(dto.getCapacity())
+            .createdAt(LocalDate.now())
+            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .location(location)
+            .serviceTranslations(dto.getServiceTranslationDtoList()
+                .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
+                    .description(serviceTranslationDto.getDescription())
+                    .language(languageRepository.findById(serviceTranslationDto.getLanguageId()).orElseThrow(
+                        () -> new LanguageNotFoundException(
+                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + serviceTranslationDto.getLanguageId())))
+                    .name(serviceTranslationDto.getName())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+        service.getServiceTranslations().forEach(serviceTranslation -> serviceTranslation.setService(service));
+        return service;
     }
 
     @Override
@@ -164,7 +190,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto editService(long id, CreateServiceDto dto, String uuid) {
+    public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
         Service service = serviceRepository.findById(id).orElseThrow(
             () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         User user = userRepository.findByUuid(uuid);
@@ -208,16 +234,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetLocationTranslationDto addLocation(AddLocationDto dto) {
-        Location location = modelMapper.map(dto, Location.class);
-        Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
-        LocationTranslation locationTranslation = modelMapper.map(dto, LocationTranslation.class);
-        locationTranslation.setLocation(location);
-        locationTranslation.setLanguage(language);
-        location.setLocationStatus(LocationStatus.ACTIVE);
+    public AddLocationDto addLocation(AddLocationDto dto) {
+        Location location = createLocationWithTranslation(dto);
         locationRepository.save(location);
-        return getAllLocation(locationTranslation);
+        locationTranslationRepository.saveAll(location.getLocationTranslations());
+        return modelMapper.map(location, AddLocationDto.class);
+    }
+
+    private Location createLocationWithTranslation(AddLocationDto dto) {
+        Location location = Location.builder()
+            .locationStatus(LocationStatus.ACTIVE)
+            .locationTranslations(dto.getAddLocationDtoList()
+                .stream()
+                .map(locationTranslationDto -> LocationTranslation.builder()
+                    .locationName(locationTranslationDto.getLocationName())
+                    .language(languageRepository.findById(locationTranslationDto.getLanguageId()).orElseThrow(
+                        () -> new LanguageNotFoundException(
+                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + locationTranslationDto.getLanguageId())))
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+        location.getLocationTranslations().forEach(locationTranslation -> locationTranslation.setLocation(location));
+        return location;
     }
 
     @Override
@@ -251,23 +289,35 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetCourierTranslationsDto createCourier(CreateCourierDto dto) {
-        Courier courier = modelMapper.map(dto, Courier.class);
+    public CreateCourierDto createCourier(CreateCourierDto dto) {
+        Courier courier = createCourierWithTranslation(dto);
+        courierRepository.save(courier);
+        courierTranslationRepository.saveAll(courier.getCourierTranslationList());
+        return modelMapper.map(courier, CreateCourierDto.class);
+    }
+
+    private Courier createCourierWithTranslation(CreateCourierDto dto) {
         Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        final Language language = languageRepository.findLanguageByLanguageCode(
-            dto.getLanguageCode())
-            .orElseThrow(() -> new LanguageNotFoundException(
-                ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
-        courier.setLocation(location);
-        courier.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        CourierTranslation courierTranslation = modelMapper.map(dto, CourierTranslation.class);
-        courierTranslation.setCourier(courier);
-        courierTranslation.setLanguage(language);
-        courierTranslation.setLimitDescription(dto.getLimitDescription());
-        courierRepository.save(courier);
-        courierTranslationRepository.save(courierTranslation);
-        return getAllCouriers(courierTranslation);
+        Courier courier = Courier.builder()
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .location(location)
+            .maxAmountOfBigBags(dto.getMaxAmountOfBigBags())
+            .minAmountOfBigBags(dto.getMinAmountOfBigBags())
+            .maxPriceOfOrder(dto.getMaxPriceOfOrder())
+            .minPriceOfOrder(dto.getMinPriceOfOrder())
+            .courierTranslationList(dto.getCreateCourierTranslationDtos().stream()
+                .map(courierTranslationDtos -> CourierTranslation.builder()
+                    .language(languageRepository.findById(courierTranslationDtos.getLanguageId()).orElseThrow(
+                        () -> new LocationNotFoundException(
+                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + courierTranslationDtos.getLanguageId())))
+                    .name(courierTranslationDtos.getName())
+                    .limitDescription(courierTranslationDtos.getLimitDescription())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+        courier.getCourierTranslationList().forEach(courierTranslation -> courierTranslation.setCourier(courier));
+        return courier;
     }
 
     @Override
