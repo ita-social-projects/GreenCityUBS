@@ -3,10 +3,8 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.AddServiceDto;
 import greencity.dto.EditTariffServiceDto;
-import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
 import greencity.repository.*;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,26 +43,21 @@ class SuperAdminServiceImplTest {
     @Test
     void addServiceTest() {
         User user = ModelUtils.getUser();
-        Bag bag = new Bag();
+        Bag bag = ModelUtils.getTariffBag();
         AddServiceDto dto = ModelUtils.addServiceDto();
-        Language language = new Language();
-        BagTranslation bagTranslation = new BagTranslation();
-        Location location = new Location();
 
-        when(languageRepository.findById(1L)).thenReturn(Optional.of(language));
-        when(locationRepository.findById(any())).thenReturn(Optional.of(location));
-        when(modelMapper.map(dto, Bag.class)).thenReturn(bag);
-        when(modelMapper.map(dto, BagTranslation.class)).thenReturn(bagTranslation);
         when(userRepository.findByUuid("123233")).thenReturn(user);
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(bagRepository.save(bag)).thenReturn(bag);
-        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
+        when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
-        verify(modelMapper).map(dto, Bag.class);
-        verify(modelMapper).map(dto, BagTranslation.class);
+        verify(locationRepository).findById(1L);
+        verify(languageRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).save(bagTranslation);
+        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
 
     @Test

@@ -3,6 +3,7 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,15 +12,11 @@ import javax.validation.constraints.NotNull;
 @Builder
 @ToString
 public class CreateServiceDto {
-    @NotNull
-    String name;
     Integer capacity;
     @NotNull
     Integer price;
     Integer commission;
-    String description;
     @NotNull
     Long locationId;
-    @NotNull
-    String languageCode;
+    List<ServiceTranslationDto> serviceTranslationDtoList;
 }
