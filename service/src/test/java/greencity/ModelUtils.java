@@ -1581,6 +1581,7 @@ public class ModelUtils {
             .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
 

@@ -43,7 +43,7 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
     List<BagTranslation> findAllByLanguageOrder(String language, @Param("orderId") Long orderId);
 
     /**
-     * Metgod,that return Bag translation by {@link Bag} and {@link String} -
+     * Method,that return Bag translation by {@link Bag} and {@link String} -
      * language code.
      * 
      * @param bag  - current Bag.
@@ -51,4 +51,12 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * @return BagTranslation with current bag and current lang code.
      */
     BagTranslation findBagTranslationByBagAndLanguageCode(Bag bag, String code);
+
+    /**
+     * Method for get bag translation from bag.
+     * 
+     * @param bag {@link Bag}
+     * @return {@link BagTranslation}
+     */
+    BagTranslation findBagTranslationByBag(Bag bag);
 }
