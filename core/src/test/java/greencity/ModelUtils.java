@@ -320,12 +320,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<TariffTranslationDto> getTariffTranslationDto(){
+    public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
-                .name("Test")
-                .languageId(1L)
-                .description("Test")
-                .build());
+            .name("Test")
+            .languageId(1L)
+            .description("Test")
+            .build());
     }
 
     public static AddServiceDto getAddServiceDto() {
