@@ -51,8 +51,12 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         }
         allFieldsFromTableDto.setClientName(name.toString());
         allFieldsFromTableDto.setEmail(u.getRecipientEmail());
-        if (u.getRecipientEmail() != null) {
-            allFieldsFromTableDto.setPhone(u.getRecipientPhone());
+        if (u.getRecipientPhone() != null) {
+            if (!u.getRecipientPhone().contains("+380")) {
+                allFieldsFromTableDto.setPhone("+380" + u.getRecipientPhone());
+            } else {
+                allFieldsFromTableDto.setPhone(u.getRecipientPhone());
+            }
         } else {
             allFieldsFromTableDto.setPhone("");
         }
