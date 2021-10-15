@@ -72,6 +72,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
+    private final LanguageRepository languageRepository;
 
     /**
      * {@inheritDoc}
@@ -757,6 +758,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        collectEventsAboutSetOrderDetails(request, currentUser, language);
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
             updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
@@ -775,10 +777,51 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
         orderRepository.save(order);
-        eventService.save(OrderHistory.CHANGE_ORDER_DETAILS,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
+    }
+
+    private void collectEventsAboutSetOrderDetails(List<UpdateOrderDetailDto> dto, User currentUser, String language) {
+        Order order = orderRepository.findById(dto.get(0).getOrderId()).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Long languageId = languageRepository.findIdByCode(language);
+        StringBuilder values = new StringBuilder();
+        for (int i = 0; i < dto.size(); i++) {
+            Integer capacity = bagRepository.findCapacityById(dto.get(i).getBagId());
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(dto.get(i).getBagId(), languageId);
+
+            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
+                || order.getOrderStatus() == OrderStatus.CONFIRMED
+                || order.getOrderStatus() == OrderStatus.FORMED
+                || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                Long confirmWasteWas =
+                    updateOrderRepository.getConfirmWaste(dto.get(i).getOrderId(), Long.valueOf(dto.get(i).getBagId()));
+                if (!confirmWasteWas.equals(Long.valueOf(dto.get(i).getConfirmedQuantity()))) {
+                    if (i == 0) {
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                    }
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(confirmWasteWas)
+                        .append(" шт на ").append(dto.get(i).getConfirmedQuantity()).append(" шт.");
+                }
+            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                || order.getOrderStatus() == OrderStatus.DONE
+                || order.getOrderStatus() == OrderStatus.CANCELLED) {
+                Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
+                    Long.valueOf(dto.get(i).getBagId()));
+                if (!exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
+                    if (i == 0) {
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                    }
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(exporterWasteWas)
+                        .append(" шт на ").append(dto.get(i).getExportedQuantity()).append(" шт.");
+                }
+            }
+        }
+        if (dto.size() != 0) {
+            eventService.save(values.toString(),
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        }
     }
 
     /**
@@ -958,7 +1001,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             eventService.save(OrderHistory.ORDER_CONFIRMED,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
-            eventService.save(OrderHistory.ORDER_NOT_TAKEN_OUT,
+            eventService.save(
+                OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
+                    + order.getImageReasonNotTakingBags(),
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        } else if (newStatus == OrderStatus.CANCELLED) {
+            eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
         paymentRepository.paymentInfo(id)
@@ -1642,5 +1690,78 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(e -> e.getFirstName() + " " + e.getLastName())
             .reduce("", String::concat) : "-";
         return name;
+    }
+
+    /**
+     * This is service method which is save adminComment.
+     *
+     * @param adminCommentDto {@link AdminCommentDto}.
+     * @param uuid            {@link String}.
+     * @author Yuriy Bahlay.
+     */
+    @Override
+    public void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String uuid) {
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
+        order.setAdminComment(adminCommentDto.getAdminComment());
+        orderRepository.save(order);
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT, user.getRecipientName()
+            + "  " + user.getRecipientSurname(), order);
+    }
+
+    /**
+     * This is method updates eco id from the shop for order.
+     *
+     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @param orderId      {@link Long}.
+     * @param uuid         {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    @Transactional
+    @Override
+    public void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        if (ecoNumberDto != null) {
+            StringBuilder collectedValue = new StringBuilder();
+            for (int i = 0; i < ecoNumberDto.size(); i++) {
+                EcoNumberDto ecoNumber = ecoNumberDto.get(i);
+                String oldNumber = orderRepository.findEcoNumberFromShop(ecoNumber.getOldEcoNumber(), orderId);
+                if (oldNumber != null) {
+                    orderRepository.setOrderAdditionalNumber(ecoNumber.getNewEcoNumber(), oldNumber, orderId);
+                    collectedValue.append(
+                        collectInfoAboutEcoNumberEventHistory(i, oldNumber, ecoNumber.getNewEcoNumber()));
+                }
+            }
+            if (collectedValue.length() > 1) {
+                eventService.save(collectedValue.toString(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            }
+        }
+    }
+
+    /**
+     * This is method which collects info about eco number for event history.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private String collectInfoAboutEcoNumberEventHistory(int i, String oldNumber, String newEcoNumber) {
+        StringBuilder values = new StringBuilder();
+        if (i == 0) {
+            values.append(OrderHistory.CHANGES_ECO_NUMBER);
+        }
+        if (i > 0) {
+            values.append(";");
+        }
+        values.append(OrderHistory.FROM);
+        values.append(oldNumber);
+        values.append(OrderHistory.TO);
+        values.append(newEcoNumber);
+        return values.toString();
     }
 }

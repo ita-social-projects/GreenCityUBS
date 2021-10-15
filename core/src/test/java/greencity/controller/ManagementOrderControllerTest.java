@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 import static greencity.ModelUtils.*;
@@ -310,6 +311,30 @@ class ManagementOrderControllerTest {
         String writeValueAsString = objectMapper.writeValueAsString(assignEmployeesForOrderDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/assign-employees-to-order", 1L)
+            .content(writeValueAsString)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void saveAdminCommentToOrder() throws Exception {
+        AdminCommentDto adminCommentDto = ModelUtils.getAdminComment();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String writeValueAsString = objectMapper.writeValueAsString(adminCommentDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/save-admin-comment", 1L)
+            .content(writeValueAsString)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void updateEcoNumberForOrder() throws Exception {
+        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/update-eco-store{id}", 1L)
             .content(writeValueAsString)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());

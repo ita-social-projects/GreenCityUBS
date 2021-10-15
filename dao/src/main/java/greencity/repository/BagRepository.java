@@ -21,4 +21,14 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN BAG AS B ON OBM.ORDER_ID = :orderId and OBM.BAG_ID = B.ID "
         + "ORDER BY B.ID", nativeQuery = true)
     List<Bag> findBagByOrderId(@Param("orderId") Long id);
+
+    /**
+     * This is method which find capacity by id.
+     * 
+     * @param bagId {@link Integer}.
+     * @return {@link Integer}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(value = "SELECT b.capacity FROM Bag AS b WHERE b.id =:bagId")
+    Integer findCapacityById(@Param("bagId") Integer bagId);
 }

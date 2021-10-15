@@ -357,4 +357,21 @@ public class ModelUtils {
             .build();
     }
 
+    public static AdminCommentDto getAdminComment() {
+        return AdminCommentDto.builder()
+            .orderId(1L)
+            .adminComment("Admin").build();
+    }
+
+    public static List<EcoNumberDto> getEcoNumberDto() {
+        return List.of(EcoNumberDto.builder()
+            .newEcoNumber("123456")
+            .oldEcoNumber("22222")
+            .build(),
+            EcoNumberDto.builder()
+                .newEcoNumber("123456")
+                .oldEcoNumber("22222")
+                .build());
+    }
+
 }

@@ -125,6 +125,9 @@ class UBSManagementServiceImplTest {
     @Mock
     private EventService eventService;
 
+    @Mock
+    LanguageRepository languageRepository;
+
     private void getMocksBehavior() {
 
         when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(25);
@@ -527,14 +530,28 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELLED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELLED.toString());
+        OrderDetailStatusDto producedObjectCancelled = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
+
         verify(eventService, times(1))
-            .save("Ужзгодженно замовлення",
+            .save("Статус Замовлення - Ужзгодженно",
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
-            .save("Замовлення підтверджено",
+            .save("Статус Замовлення - Підтверджено",
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
-            .save("Замовлення не вивезене",
+            .save(
+                "Статус Замовлення - Не вивезено" + "  " + order.getComment() + "  "
+                    + order.getImageReasonNotTakingBags(),
+                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+        verify(eventService, times(1))
+            .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
     }
 
@@ -915,6 +932,9 @@ class UBSManagementServiceImplTest {
         User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -930,10 +950,7 @@ class UBSManagementServiceImplTest {
 
         List<OrderDetailInfoDto> actual =
             ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc");
-
         assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
-        verify(eventService, times(1)).save("Зміна деталей замовлення",
-            ModelUtils.getEmployee().getFirstName() + "  " + ModelUtils.getEmployee().getLastName(), TEST_ORDER);
         verify(updateOrderRepository).updateAmount(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -951,6 +968,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testSetOrderDetailThrowsException() {
         User user = User.builder().uuid("abc").id(42L).build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -1057,5 +1075,23 @@ class UBSManagementServiceImplTest {
         verify(employeeOrderPositionRepository, times(1)).save(any());
         verify(eventService, times(1)).save(eventName,
             employee.getFirstName() + "  " + employee.getLastName(), order);
+    }
+
+    @Test
+    void testSaveAdminToOrder() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
+        ubsManagementService.saveAdminCommentToOrder(ModelUtils.getAdminCommentDto(), "abc");
+        verify(orderRepository, times(1)).save(ModelUtils.getOrder());
+        verify(eventService, times(1)).save(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateEcoNumberForOrder() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
+        when(orderRepository.findEcoNumberFromShop("22222", 1L)).thenReturn("123456");
+        ubsManagementService.updateEcoNumberForOrder(ModelUtils.getEcoNumberDto(), 1L, "abc");
+        verify(eventService, times(1)).save(any(), any(), any());
     }
 }

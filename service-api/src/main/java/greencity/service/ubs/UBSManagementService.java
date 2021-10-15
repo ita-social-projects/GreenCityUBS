@@ -317,4 +317,25 @@ public interface UBSManagementService {
      * @author Ihor Volianskyi
      */
     Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria);
+
+    /**
+     * This is method which is save Admin comment.
+     *
+     * @param adminCommentDto {@link AdminCommentDto}.
+     * @param uuid            {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String uuid);
+
+    /**
+     * This is method updates eco id from the shop for order.
+     *
+     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @param orderId      {@link Long}.
+     * @param uuid         {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid);
 }

@@ -51,4 +51,15 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * @return BagTranslation with current bag and current lang code.
      */
     BagTranslation findBagTranslationByBagAndLanguageCode(Bag bag, String code);
+
+    /**
+     * This is method which type of bag.
+     * 
+     * @param bagId    {@link Integer}.
+     * @param language {@link String}.
+     * @return {@link StringBuilder}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(value = "SELECT b.name FROM BagTranslation AS b WHERE b.bag.id =:bagId AND b.language.id =:language")
+    StringBuilder findNameByBagId(@Param("bagId") Integer bagId, @Param("language") Long language);
 }
