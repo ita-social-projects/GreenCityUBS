@@ -21,5 +21,5 @@ public class FieldsForUsersTableDto {
     @JsonProperty("number_of_results")
     private int resultNumber;
     @JsonProperty("user")
-    private List<UserWithSomeOrderDetailDto> userList;
+    private PageableDto<List<UserWithSomeOrderDetailDto>> userList;
 }

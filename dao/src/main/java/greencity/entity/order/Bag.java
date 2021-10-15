@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import lombok.*;
 
@@ -46,6 +47,10 @@ public class Bag {
 
     @Column(nullable = false)
     private String editedBy;
+
+    @Column(nullable = false, name = "min_amount_of_bags")
+    @Enumerated(EnumType.STRING)
+    private MinAmountOfBag minAmountOfBags;
 
     @ManyToOne
     private Location location;

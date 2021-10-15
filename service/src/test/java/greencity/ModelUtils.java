@@ -1529,14 +1529,21 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<TariffTranslationDto> getTariffTranslationDto() {
+        return List.of(TariffTranslationDto.builder()
+            .description("Test")
+            .languageId(1L)
+            .name("Test")
+            .build());
+    }
+
     public static AddServiceDto addServiceDto() {
         return AddServiceDto.builder()
             .commission(50)
             .capacity(100)
-            .name("fff")
             .price(100)
-            .languageId(1L)
-            .description("asd")
+            .tariffTranslationDtoList(getTariffTranslationDto())
+            .locationId(1L)
             .build();
     }
 
@@ -1586,6 +1593,7 @@ public class ModelUtils {
             .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
 
@@ -1616,6 +1624,33 @@ public class ModelUtils {
             .id(1L)
             .locationStatus(LocationStatus.ACTIVE)
             .build();
+    }
+
+    public static Language getLanguage() {
+        return Language.builder()
+            .id(1L)
+            .code("ua")
+            .build();
+    }
+
+    public static List<BagTranslation> getBagTransaltion() {
+        return List.of(BagTranslation.builder()
+            .description("Test")
+            .name("Test")
+            .language(getLanguage())
+            .build());
+    }
+
+    public static Bag getTariffBag() {
+        return Bag.builder().price(100)
+            .commission(50)
+            .fullPrice(150)
+            .capacity(100)
+            .createdAt(LocalDate.now())
+            .createdBy("Taras Ivanov")
+            .location(getLocation())
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .bagTranslations(getBagTransaltion()).build();
     }
 
     public static AdminCommentDto getAdminCommentDto() {

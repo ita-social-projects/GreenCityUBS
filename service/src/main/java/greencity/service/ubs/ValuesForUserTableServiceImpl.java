@@ -1,11 +1,15 @@
 package greencity.service.ubs;
 
-import greencity.dto.FieldsForUsersTableDto;
+import greencity.dto.PageableDto;
 import greencity.dto.UserWithSomeOrderDetailDto;
+import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.filters.UserSearchCriteria;
 import greencity.repository.UserRepository;
+import greencity.repository.UserTableRepo;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -17,32 +21,42 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ValuesForUserTableServiceImpl implements ValuesForUserTableService {
     UserRepository userRepository;
+    UserTableRepo userTableRepo;
 
     @Override
-    public FieldsForUsersTableDto getAllFields() {
-        List<User> users = userRepository.findAllUsersWhoMadeAtLeastOneOrder();
+    public PageableDto<UserWithSomeOrderDetailDto> getAllFields(Pageable page, String columnName,
+        SortingOrder sortingOrder, UserSearchCriteria userSearchCriteria) {
+        Page<User> users = userTableRepo.findAll(userSearchCriteria, columnName, sortingOrder, page);
         List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
         for (User u : users) {
             UserWithSomeOrderDetailDto allFieldsFromTableDto = mapToDto(u);
             fields.add(allFieldsFromTableDto);
         }
-        FieldsForUsersTableDto fieldsForUsersTableDto = new FieldsForUsersTableDto();
-        fieldsForUsersTableDto.setUserList(fields);
-        fieldsForUsersTableDto.setResultNumber(fields.size());
 
-        return fieldsForUsersTableDto;
+        return new PageableDto<>(fields, users.getTotalElements(),
+            users.getPageable().getPageNumber(), users.getTotalPages());
     }
 
     private UserWithSomeOrderDetailDto mapToDto(User u) {
-        UserWithSomeOrderDetailDto allFieldsFromTableDto = new UserWithSomeOrderDetailDto();
-        if (u.getRecipientName() != null && u.getRecipientSurname() != null) {
-            allFieldsFromTableDto.setClientName(u.getRecipientName() + " " + u.getRecipientSurname());
-        } else {
-            allFieldsFromTableDto.setClientName("");
+        final UserWithSomeOrderDetailDto allFieldsFromTableDto = new UserWithSomeOrderDetailDto();
+        StringBuilder name = new StringBuilder();
+        if (u.getRecipientName() != null) {
+            name.append(u.getRecipientName());
         }
+        if (name.length() != 0) {
+            name.append(" ");
+        }
+        if (u.getRecipientSurname() != null) {
+            name.append(u.getRecipientSurname());
+        }
+        allFieldsFromTableDto.setClientName(name.toString());
         allFieldsFromTableDto.setEmail(u.getRecipientEmail());
-        if (u.getRecipientEmail() != null) {
-            allFieldsFromTableDto.setPhone(u.getRecipientPhone());
+        if (u.getRecipientPhone() != null) {
+            if (!u.getRecipientPhone().contains("+380")) {
+                allFieldsFromTableDto.setPhone("+380" + u.getRecipientPhone());
+            } else {
+                allFieldsFromTableDto.setPhone(u.getRecipientPhone());
+            }
         } else {
             allFieldsFromTableDto.setPhone("");
         }

@@ -3,12 +3,15 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.entity.enums.SortingOrder;
+import greencity.filters.UserSearchCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,9 +49,12 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/usersAll")
-    public ResponseEntity<FieldsForUsersTableDto> getAllValuesForUserTable() {
+    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(@ApiIgnore Pageable page,
+        @RequestParam String columnName,
+        @RequestParam SortingOrder sortingOrder) {
+        UserSearchCriteria userSearchCriteria = new UserSearchCriteria();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(valuesForUserTable.getAllFields());
+            .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userSearchCriteria));
     }
 
     /**

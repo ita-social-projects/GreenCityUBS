@@ -21,6 +21,9 @@ public class CourierTranslation {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "limit_description")
+    private String limitDescription;
+
     @ManyToOne
     private Courier courier;
 
