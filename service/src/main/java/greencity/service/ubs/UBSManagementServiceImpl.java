@@ -1574,73 +1574,125 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).sum();
         int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
         Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
-        BigOrderTableDTO build = BigOrderTableDTO.builder()
+        return BigOrderTableDTO.builder()
             .id(order.getId())
-            .orderStatus(nonNull(order.getOrderStatus().name()) ? order.getOrderStatus().name() : "-")
+            .orderStatus(nonNull(order.getOrderStatus()) ? order.getOrderStatus().name() : "-")
             .paymentStatus(nonNull(order.getOrderPaymentStatus()) ? order.getOrderPaymentStatus().name() : "-")
-            .orderDate(nonNull(order.getOrderDate().toString()) ? order.getOrderDate().toString() : "-")
-            .paymentDate(nonNull(order.getPayment()) ? order.getPayment().stream()
-                .map(Payment::getOrderTime).collect(joining(", ")) : "-")
-            .clientName(nonNull(order.getUbsUser().getFirstName()) && nonNull(order.getUbsUser().getLastName())
-                ? order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName()
+            .orderDate(getOrderDate(order))
+            .paymentDate(getPaymentDate(order))
+            .clientName(
+                nonNull(order.getUbsUser()) ? order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName()
+                    : "-")
+            .phoneNumber(nonNull(order.getUbsUser()) ? order.getUbsUser().getPhoneNumber() : "-")
+            .email(nonNull(order.getUbsUser()) ? order.getUbsUser().getEmail() : "-")
+            .senderName(nonNull(order.getUser())
+                ? order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname()
                 : "-")
-            .phoneNumber(nonNull(order.getUbsUser().getPhoneNumber()) ? order.getUbsUser().getPhoneNumber() : "-")
-            .email(nonNull(order.getUbsUser().getEmail()) ? order.getUbsUser().getEmail() : "-")
-            .senderName(nonNull(order.getUser().getRecipientName()) ? order.getUser().getRecipientName() + " "
-                + order.getUser().getRecipientSurname() : "-")
-            .senderPhone(nonNull(order.getUser().getRecipientPhone()) ? order.getUser().getRecipientPhone() : "-")
-            .senderEmail(nonNull(order.getUser().getRecipientEmail()) ? order.getUser().getRecipientEmail() : "-")
+            .senderPhone(nonNull(order.getUser()) ? order.getUser().getRecipientPhone() : "-")
+            .senderEmail(nonNull(order.getUser()) ? order.getUser().getRecipientEmail() : "-")
             .violationsAmount(order.getUser().getViolations())
             .district(nonNull(address.getDistrict()) ? address.getDistrict() : "-")
-            // область
-            // населений пункт
-            .address(nonNull(address.getStreet())
-                ? address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
-                    + address.getEntranceNumber()
-                : "-")
+            // need to implement field - область
+            // need to implement field - населений пункт
+            .address(getAddress(address))
             .commentToAddressForClient(nonNull(address.getComment()) ? address.getComment() : "-")
-            .bagsAmount(order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum))
+            .bagsAmount(getBagsAmount(order))
             .totalOrderSum(paymentSum)
-            .orderCertificateCode(order.getCertificates().stream().map(Certificate::getCode)
-                .collect(joining(", ")))
-            .orderCertificatePoints(order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString)
-                .collect(joining(", ")))
+            .orderCertificateCode(getCertificateCode(order))
+            .orderCertificatePoints(getCertificatePoints(order))
             .amountDue(paymentSum - certificateSum)
             .commentForOrderByClient(order.getComment())
-
-            .payment(nonNull(order.getPayment()) ? order.getPayment().stream()
-                .map(Payment::getAmount)
-                .map(Objects::toString)
-                .collect(joining(", ")) : "-")
-            .dateOfExport(nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-")
-            .timeOfExport(nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
-                ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
-                    order.getDeliverTo().toLocalTime().toString())
-                : "-")
-            .idOrderFromShop(order.getPayment().stream().map(Payment::getId).map(Objects::toString)
-                .collect(joining(", ")))
-            .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-")
+            .payment(getPayment(order))
+            .dateOfExport(getDateOfExport(order))
+            .timeOfExport(getTimeOfExport(order))
+            .idOrderFromShop(getIdOrderFromShop(order))
+            .receivingStation(getReceivingStation(order))
             .responsibleManager(getEmployeeNameByIdPosition(order, 2L))
             .responsibleLogicMan(getEmployeeNameByIdPosition(order, 3L))
             .responsibleDriver(getEmployeeNameByIdPosition(order, 5L))
             .responsibleCaller(getEmployeeNameByIdPosition(order, 1L))
             .responsibleNavigator(getEmployeeNameByIdPosition(order, 4L))
-            .commentsForOrder(nonNull(order.getNote()) ? order.getNote() : "-")
+            .commentsForOrder(getCommentsForOrder(order))
             .isBlocked(order.isBlocked())
-            .blockedBy(nonNull(order.getBlockedByEmployee())
-                ? String.format("%s %s", order.getBlockedByEmployee().getFirstName(),
-                    order.getBlockedByEmployee().getLastName())
-                : "-")
+            .blockedBy(getBlockedBy(order))
             .build();
-        return build;
+    }
+
+    private String getOrderDate(Order order) {
+        return nonNull(order.getOrderDate()) ? order.getOrderDate().toString() : "-";
+    }
+
+    private String getPaymentDate(Order order) {
+        return nonNull(order.getPayment())
+            ? order.getPayment().stream().map(Payment::getOrderTime).collect(joining(", "))
+            : "-";
+    }
+
+    private String getAddress(Address address) {
+        return nonNull(address.getStreet())
+            ? address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
+                + address.getEntranceNumber()
+            : "-";
+    }
+
+    private Integer getBagsAmount(Order order) {
+        return order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum);
+    }
+
+    private String getCertificateCode(Order order) {
+        return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
+            .collect(joining(", ")) : "-";
+    }
+
+    private String getCertificatePoints(Order order) {
+        return nonNull(order.getCertificates())
+            ? order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString).collect(joining(", "))
+            : "-";
+    }
+
+    private String getDateOfExport(Order order) {
+        return nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-";
+    }
+
+    private String getTimeOfExport(Order order) {
+        return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
+            ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+                order.getDeliverTo().toLocalTime().toString())
+            : "-";
+    }
+
+    private String getReceivingStation(Order order) {
+        return nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-";
+    }
+
+    private String getPayment(Order order) {
+        return nonNull(order.getPayment()) ? order.getPayment().stream()
+            .map(Payment::getAmount)
+            .map(Objects::toString)
+            .collect(joining(", ")) : "-";
+    }
+
+    private String getIdOrderFromShop(Order order) {
+        return nonNull(order.getPayment()) ? order.getPayment().stream().map(Payment::getId).map(Objects::toString)
+            .collect(joining(", ")) : "-";
     }
 
     private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
-        String name = nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
+        return nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
             .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
             .map(EmployeeOrderPosition::getEmployee)
             .map(e -> e.getFirstName() + " " + e.getLastName())
             .reduce("", String::concat) : "-";
-        return name;
+    }
+
+    private String getCommentsForOrder(Order order) {
+        return nonNull(order.getNote()) ? order.getNote() : "-";
+    }
+
+    private String getBlockedBy(Order order) {
+        return nonNull(order.getBlockedByEmployee())
+            ? String.format("%s %s", order.getBlockedByEmployee().getFirstName(),
+                order.getBlockedByEmployee().getLastName())
+            : "-";
     }
 }
