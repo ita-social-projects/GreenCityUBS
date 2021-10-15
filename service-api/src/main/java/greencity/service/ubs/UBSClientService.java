@@ -144,7 +144,7 @@ public interface UBSClientService {
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
-    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate);
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid);
 
     /**
      * Method that save user for current user.
