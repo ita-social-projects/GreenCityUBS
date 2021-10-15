@@ -818,7 +818,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 }
             }
         }
-        if (dto.size() != 0) {
+        if (!dto.isEmpty()) {
             eventService.save(values.toString(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
