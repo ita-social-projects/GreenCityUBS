@@ -981,12 +981,12 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void setOrderDetailsOrderNotFoundException(){
+    void setOrderDetailsOrderNotFoundException() {
         User user = User.builder().uuid("abc").id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class,
-                () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
+            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
     }
 
     @Test
