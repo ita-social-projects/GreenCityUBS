@@ -182,6 +182,7 @@ public class ModelUtils {
                     .latitude(3.2)
                     .build())
                 .comment(null).build())
+            .orders(List.of(Order.builder().id(1L).build()))
             .build();
     }
 
@@ -240,6 +241,10 @@ public class ModelUtils {
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
             .build();
     }
 
@@ -1646,6 +1651,24 @@ public class ModelUtils {
             .location(getLocation())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .bagTranslations(getBagTransaltion()).build();
+    }
+
+    public static AdminCommentDto getAdminCommentDto() {
+        return AdminCommentDto.builder()
+            .orderId(1L)
+            .adminComment("Admin")
+            .build();
+    }
+
+    public static List<EcoNumberDto> getEcoNumberDto() {
+        return List.of(EcoNumberDto.builder()
+            .newEcoNumber("123456")
+            .oldEcoNumber("22222")
+            .build(),
+            EcoNumberDto.builder()
+                .newEcoNumber("123456")
+                .oldEcoNumber("22222")
+                .build());
     }
 
 }

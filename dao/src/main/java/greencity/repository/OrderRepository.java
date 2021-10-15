@@ -114,4 +114,31 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE WHERE ID = :order_id", nativeQuery = true)
     void setOrderBlockedStatusUnblocked(@Param("order_id") Long orderId);
+
+    /**
+     * Method which is find eco number from shop.
+     *
+     * @param ecoNumber {@link String}.
+     * @param orderId   {@link Long}.
+     * @return {@link String}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(value = " SELECT additional_order FROM ORDER_ADDITIONAL "
+        + "WHERE orders_id = :order_id AND additional_order =:eco_number ", nativeQuery = true)
+    String findEcoNumberFromShop(@Param("eco_number") String ecoNumber, @Param("order_id") Long orderId);
+
+    /**
+     * This is method which is update eco number from shop.
+     *
+     * @param newEcoNumber {@link String}.
+     * @param oldEcoNumber {@link String}.
+     * @param orderId      {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    @Modifying
+    @Query(value = " UPDATE ORDER_ADDITIONAL SET additional_order =:new_eco_number "
+        + " WHERE orders_id = :order_id AND additional_order =:old_eco_number", nativeQuery = true)
+    void setOrderAdditionalNumber(@Param("new_eco_number") String newEcoNumber,
+        @Param("old_eco_number") String oldEcoNumber,
+        @Param("order_id") Long orderId);
 }

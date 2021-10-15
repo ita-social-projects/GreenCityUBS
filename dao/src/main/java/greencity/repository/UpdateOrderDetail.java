@@ -54,4 +54,22 @@ public class UpdateOrderDetail {
             return ps.execute();
         });
     }
+
+    /**
+     * Method for getting Confirm waste value.
+     */
+    public Long getConfirmWaste(Long orderId, Long bagId) {
+        String query = "SELECT CONFIRMED_QUANTITY FROM ORDER_BAG_MAPPING "
+            + " WHERE ORDER_ID = ? AND BAG_ID = ?";
+        return jdbcTemplate.queryForObject(query, new Object[] {orderId, bagId}, Long.class);
+    }
+
+    /**
+     * Method for getting Exporter waste value.
+     */
+    public Long getExporterWaste(Long orderId, Long bagId) {
+        String query = "SELECT EXPORTED_QUANTITY FROM ORDER_BAG_MAPPING "
+            + " WHERE ORDER_ID = ? AND BAG_ID = ?";
+        return jdbcTemplate.queryForObject(query, new Object[] {orderId, bagId}, Long.class);
+    }
 }
