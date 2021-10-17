@@ -262,6 +262,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     /* methods for changing order */
+    @Override
     @Transactional
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
@@ -284,6 +285,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
+    @Override
     @Transactional
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
@@ -306,6 +308,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
+    @Override
     @Transactional
     public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
         String from = value.substring(0, 5);
@@ -333,6 +336,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
+    @Override
     @Transactional
     public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
@@ -355,6 +359,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
+    @Override
     @Transactional
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
