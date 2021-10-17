@@ -5,6 +5,7 @@ import greencity.dto.ChangeOrderResponseDTO;
 import greencity.dto.RequestToChangeOrdersDataDTO;
 import greencity.dto.TableParamsDTO;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public interface OrdersAdminsPageService {

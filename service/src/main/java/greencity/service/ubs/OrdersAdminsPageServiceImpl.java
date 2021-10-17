@@ -263,11 +263,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     /* methods for changing order */
     @Transactional
-    private synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            /* update all */
+            orderRepository.changeStatusForAllOrders(value);
         }
         for (Long orderId : ordersId) {
             try {
@@ -285,11 +285,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Transactional
-    private synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            /* update all */
+            orderRepository.changeDateOfExportForAllOrders(date);
         }
         for (Long orderId : ordersId) {
             try {
@@ -307,14 +307,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Transactional
-    private synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
         LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
         LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ISO_LOCAL_TIME);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            /* update all */
+            orderRepository.changeDeliverFromForAllOrders(timeFrom);
+            orderRepository.changeDeliverToForAllOrders(timeTo);
         }
         for (Long orderId : ordersId) {
             try {
@@ -333,11 +334,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Transactional
-    private synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            /* update all */
+            orderRepository.changeReceivingStationForAllOrders(station.getName());
         }
         for (Long orderId : ordersId) {
             try {
@@ -355,7 +356,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Transactional
-    private synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
+    public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -394,8 +395,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            /* block all */
-            /* probably using query in repo */
+            orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
         List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         for (Long orderId : orders) {
@@ -423,8 +423,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            /* unblock all */
-            /* probably using query in repo */
+            orderRepository.unblockAllOrders();
         }
         List<Long> unblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
