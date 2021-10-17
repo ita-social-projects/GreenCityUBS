@@ -146,6 +146,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes order_status for all not blocked orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -154,6 +155,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes date_of_export for all not blocked orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -162,6 +164,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes deliver_from for all not blocked orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -170,6 +173,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes deliver_to for all not blocked orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -178,6 +182,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes receiving_station for all not blocked orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -187,6 +192,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Method sets employee_id and makes blocked_status 'true' for all not blocked
      * orders.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -196,6 +202,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method unblocks all orders. Needs some improvement.
+     * 
      * @author Liubomyr Pater.
      */
     @Modifying
