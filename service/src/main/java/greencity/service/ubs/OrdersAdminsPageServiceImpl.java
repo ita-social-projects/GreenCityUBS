@@ -263,7 +263,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     /* methods for changing order */
     @Override
-    @Transactional
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
@@ -286,7 +285,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
@@ -309,7 +307,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
@@ -337,7 +334,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
@@ -360,7 +356,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
@@ -393,7 +388,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
         String email = restClient.findUserByUUid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
@@ -421,7 +415,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    @Transactional
     public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
         String email = restClient.findUserByUUid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
