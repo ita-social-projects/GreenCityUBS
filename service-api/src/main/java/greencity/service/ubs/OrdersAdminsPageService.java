@@ -39,7 +39,7 @@ public interface OrdersAdminsPageService {
      * Method that return list of unblocked orders.
      *
      * @param userUuid of {@link String}
-     * @param orders of {@link List}
+     * @param orders   of {@link List}
      * @author Liubomyr Pater
      */
     List<Long> unblockOrder(String userUuid, List<Long> orders);
@@ -47,7 +47,7 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's status.
      *
-     * @param value of {@link String}
+     * @param value    of {@link String}
      * @param ordersId of {@link List}
      * @author Liubomyr Pater
      */
@@ -56,7 +56,7 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's date of export.
      *
-     * @param value of {@link String}
+     * @param value    of {@link String}
      * @param ordersId of {@link List}
      * @author Liubomyr Pater
      */
@@ -65,7 +65,7 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's time of export.
      *
-     * @param value of {@link String}
+     * @param value    of {@link String}
      * @param ordersId of {@link List}
      * @author Liubomyr Pater
      */
@@ -74,7 +74,7 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's receiving station.
      *
-     * @param value of {@link String}
+     * @param value    of {@link String}
      * @param ordersId of {@link List}
      * @author Liubomyr Pater
      */
