@@ -265,11 +265,10 @@ public interface UBSClientService {
     /**
      * Method validates received payment response.
      * 
-     * @param dto       {@link PaymentResponseDtoLiqPay}
-     * @param signature {@link String} signature that we get from LiqPay
+     * @param dto {@link PaymentResponseDtoLiqPay}
      * @author Vadym Makitra
      */
-    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature);
+    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto);
 
     /**
      * Method that returns order info for surcharge.
