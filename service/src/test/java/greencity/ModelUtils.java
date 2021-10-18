@@ -1648,4 +1648,11 @@ public class ModelUtils {
             .bagTranslations(getBagTransaltion()).build();
     }
 
+    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
+        return PaymentResponseDtoLiqPay.builder()
+            .signature("Test Signature")
+            .data("String data")
+            .build();
+    }
+
 }
