@@ -254,9 +254,9 @@ public class OrderController {
     })
     @PutMapping("/update-recipients-data")
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
-        @Valid @RequestBody UbsCustomersDtoUpdate dto) {
+        @Valid @RequestBody UbsCustomersDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateUbsUserInfoInOrder(dto));
+            .body(ubsClientService.updateUbsUserInfoInOrder(dto, uuid));
     }
 
     /**

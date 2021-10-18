@@ -161,9 +161,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay < dto.getPointsToUse()) {
-            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
-        } else {
+        if (sumToPay > dto.getPointsToUse()) {
             sumToPay -= dto.getPointsToUse();
         }
 
@@ -200,7 +198,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        return links.attr("href");
+        if (sumToPay == 0) {
+            return order.getId().toString();
+        } else {
+            return links.attr("href");
+        }
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
@@ -442,13 +444,17 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     @Override
-    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
         if (optionalUbsUser.isEmpty()) {
             throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
+        eventService.save(OrderHistory.CHANGED_SENDER, currentUser.getRecipientName()
+            + "  " + currentUser.getRecipientSurname(), optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
             .name(user.getFirstName() + " " + user.getLastName())
             .email(user.getEmail())
@@ -592,9 +598,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
-            if (orderResponseDto.getPointsToUse() > 0) {
-                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-            }
             return true;
         }
         return false;

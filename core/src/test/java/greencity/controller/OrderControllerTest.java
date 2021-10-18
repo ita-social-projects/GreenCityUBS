@@ -153,14 +153,14 @@ class OrderControllerTest {
     void updatesRecipientsInfo() throws Exception {
         UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
-        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate)).thenReturn(ubsCustomersDto);
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate)))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
+        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 
     @Test

@@ -410,6 +410,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
             .id(1l)
             .recipientName("Anatolii Petyrov")
@@ -419,11 +420,12 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L))
             .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
-            () -> ubsService.updateUbsUserInfoInOrder(request));
+            () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
     }
 
     @Test
     void updatesUbsUserInfoInOrder() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
             .id(1l)
             .recipientName("Anatolii Petyrov")
@@ -440,7 +442,7 @@ class UBSClientServiceImplTest {
             .phoneNumber("095123456")
             .build();
 
-        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request);
+        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
         assertEquals(expected, actual);
     }
 
