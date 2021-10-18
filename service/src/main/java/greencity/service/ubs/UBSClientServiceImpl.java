@@ -859,8 +859,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
@@ -901,35 +900,15 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/")
+            .resultUrl("http://localhost:8050/ubs/receiveLiqPayPayment")
             .build();
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
-        if (dto.getStatus().equals("failure")) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto) {
+        if (!encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), privateKey)
+            .equals(dto.getSignature())) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
-            .equals(signature)) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (dto.getStatus().equals("error")) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        String[] ids = dto.getOrderId().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getStatus().equals("success")) {
-            Payment orderPayment = modelMapper.map(dto, Payment.class);
-            orderPayment.setPaymentStatus(PaymentStatus.PAID);
-            orderPayment.setOrder(order);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
         }
     }
 
