@@ -276,7 +276,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/getCouriers")
+    @GetMapping("/getCouriers")
     public ResponseEntity<List<GetCourierTranslationsDto>> getAllCouriers() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
     }
