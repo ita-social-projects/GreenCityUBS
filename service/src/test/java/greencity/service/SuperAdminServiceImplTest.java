@@ -1,30 +1,36 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.AddServiceDto;
-import greencity.dto.EditTariffServiceDto;
+import greencity.constant.ErrorMessage;
+import greencity.dto.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.ServiceNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -42,9 +48,13 @@ class SuperAdminServiceImplTest {
     private LocationRepository locationRepository;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private ServiceRepository serviceRepository;
+    @Mock
+    private ServiceTranslationRepository serviceTranslationRepository;
 
     @Test
-    void addServiceTest() {
+    void addTariffServiceTest() {
         User user = ModelUtils.getUser();
         Bag bag = new Bag();
         AddServiceDto dto = ModelUtils.addServiceDto();
@@ -119,6 +129,94 @@ class SuperAdminServiceImplTest {
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
         verify(bagTranslationRepository).save(bagTranslation);
+    }
+
+    @Test
+    void deleteService() {
+        Service service = new Service();
+        service.setId(1L);
+
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
+        superAdminService.deleteService(service.getId());
+        verify(serviceRepository, times(1)).findById(service.getId());
+        verify(serviceRepository, times(1)).delete(service);
+    }
+
+    @Test
+    void getService() {
+        when(serviceTranslationRepository.findAll()).thenReturn(Arrays.asList(new ServiceTranslation()));
+        List<ServiceTranslation> serviceTranslations = serviceTranslationRepository.findAll();
+
+        verify(serviceTranslationRepository, times(1)).findAll();
+        assertEquals(1, serviceTranslations.size());
+    }
+
+    @Test
+    void editService() {
+        String uuid = "testUUid";
+        Service service = new Service();
+        service.setId(1L);
+        User user = new User();
+        CreateServiceDto dto = new CreateServiceDto();
+        dto.setPrice(1);
+        dto.setCommission(1);
+        Location location = ModelUtils.getLocation();
+        Language language = new Language();
+        ServiceTranslation serviceTranslation = new ServiceTranslation();
+
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+
+        when(locationRepository.findById(dto.getLocationId())).thenReturn(Optional.ofNullable(location));
+
+        when(languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()))
+            .thenReturn(Optional.ofNullable(language));
+
+        when(serviceTranslationRepository.findServiceTranslationsByServiceAndLanguageCode(service,
+            dto.getLanguageCode())).thenReturn(serviceTranslation);
+
+        when(serviceRepository.save(service)).thenReturn(service);
+
+        superAdminService.editService(service.getId(), dto, uuid);
+
+        verify(userRepository, times(1)).findByUuid(uuid);
+        verify(serviceRepository, times(1)).findById(service.getId());
+        verify(locationRepository, times(1)).findById(dto.getLocationId());
+        verify(languageRepository, times(1)).findLanguageByLanguageCode(dto.getLanguageCode());
+        verify(serviceTranslationRepository, times(1)).findServiceTranslationsByServiceAndLanguageCode(service,
+            dto.getLanguageCode());
+        verify(serviceRepository, times(1)).save(service);
+    }
+
+    @Test
+    void addService() {
+        User user = ModelUtils.getUser();
+        Location location = new Location();
+        Language language = new Language();
+        Service service = new Service();
+        CreateServiceDto dto = new CreateServiceDto();
+        dto.setPrice(1);
+        dto.setCommission(1);
+        ServiceTranslation serviceTranslation = new ServiceTranslation();
+
+        when(modelMapper.map(dto, Service.class)).thenReturn(service);
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(locationRepository.findById(dto.getLocationId())).thenReturn(Optional.of(location));
+        when(languageRepository.findLanguageByLanguageCode(dto.getLanguageCode())).thenReturn(Optional.of(language));
+        when(serviceRepository.save(service)).thenReturn(service);
+        when(modelMapper.map(dto, ServiceTranslation.class)).thenReturn(serviceTranslation);
+        when(serviceTranslationRepository.save(serviceTranslation)).thenReturn(serviceTranslation);
+
+        superAdminService.addService(dto, user.getUuid());
+
+        verify(modelMapper).map(dto, Service.class);
+        verify(modelMapper).map(dto, ServiceTranslation.class);
+        verify(userRepository).findByUuid(user.getUuid());
+        verify(locationRepository).findById(dto.getLocationId());
+        verify(languageRepository).findLanguageByLanguageCode(dto.getLanguageCode());
+        verify(serviceRepository).save(service);
+        verify(serviceTranslationRepository).save(serviceTranslation);
     }
 
 }
