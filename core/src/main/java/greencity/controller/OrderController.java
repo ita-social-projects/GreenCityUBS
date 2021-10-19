@@ -254,9 +254,9 @@ public class OrderController {
     })
     @PutMapping("/update-recipients-data")
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
-        @Valid @RequestBody UbsCustomersDtoUpdate dto) {
+        @Valid @RequestBody UbsCustomersDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateUbsUserInfoInOrder(dto));
+            .body(ubsClientService.updateUbsUserInfoInOrder(dto, uuid));
     }
 
     /**
@@ -372,11 +372,10 @@ public class OrderController {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
-    @PostMapping("/receiveLiqPayPayment")
+    @PostMapping(value = "/receiveLiqPayPayment")
     public ResponseEntity<HttpStatus> receiveLiqPayPayment(
-        @RequestBody @Valid PaymentResponseDtoLiqPay dto,
-        String signature) {
-        ubsClientService.validateLiqPayPayment(dto, signature);
+        PaymentResponseDtoLiqPay dto) {
+        ubsClientService.validateLiqPayPayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

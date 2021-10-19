@@ -1,14 +1,15 @@
 package greencity.constant;
 
 public final class OrderHistory {
+    public static final String ORDER_CANCELLED = "Статус Замовлення - Скасовано";
     public static final String ORDER_PAID = "Замовлення Оплачено";
     public static final String SYSTEM = "Система";
-    public static final String ORDER_FORMED = "Сформовано замовлення";
+    public static final String ORDER_FORMED = "Статус Замовлення - Сформовано";
     public static final String CLIENT = "Клієнт";
-    public static final String CHANGE_ORDER_DETAILS = "Зміна деталей замовлення";
-    public static final String ORDER_ADJUSTMENT = "Ужзгодженно замовлення";
-    public static final String ORDER_CONFIRMED = "Замовлення підтверджено";
-    public static final String ORDER_NOT_TAKEN_OUT = "Замовлення не вивезене";
+    public static final String CHANGE_ORDER_DETAILS = "Змінено деталі замовлення.";
+    public static final String ORDER_ADJUSTMENT = "Статус Замовлення - Ужзгодженно";
+    public static final String ORDER_CONFIRMED = "Статус Замовлення - Підтверджено";
+    public static final String ORDER_NOT_TAKEN_OUT = "Статус Замовлення - Не вивезено";
     public static final String ASSIGN_DRIVER = "Закріплено водія";
     public static final String ASSIGN_LOGIEST = "Закріплено логіста";
     public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера обдзвону";
@@ -29,6 +30,11 @@ public final class OrderHistory {
     public static final String RETURN_OVERPAYMENT_TO_CLIENT = "Повернено кошти клієнту";
     public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
+    public static final String ADD_ADMIN_COMMENT = "Додано коментар";
+    public static final String CHANGES_ECO_NUMBER = "Номер замовлення з магазину змінено";
+    public static final String FROM = " з ";
+    public static final String TO = " на ";
+    public static final String CHANGED_SENDER = "Змінено дані Відправника";
 
     /**
      * Constructor.

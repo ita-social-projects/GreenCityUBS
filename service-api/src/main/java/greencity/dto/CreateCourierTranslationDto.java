@@ -10,9 +10,11 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Builder
 @ToString
-public class PaymentResponseDtoLiqPay {
+public class CreateCourierTranslationDto {
     @NotNull
-    private String data;
+    private String name;
     @NotNull
-    private String signature;
+    private Long languageId;
+    @NotNull
+    private String limitDescription;
 }

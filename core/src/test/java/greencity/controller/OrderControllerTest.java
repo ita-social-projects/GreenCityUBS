@@ -153,14 +153,14 @@ class OrderControllerTest {
     void updatesRecipientsInfo() throws Exception {
         UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
-        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate)).thenReturn(ubsCustomersDto);
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate)))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate);
+        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 
     @Test
@@ -241,18 +241,16 @@ class OrderControllerTest {
     }
 
     @Test
-    void reciveLiqPayOrder() throws Exception {
-        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+    void receiveLiqPayOrder() throws Exception {
+        PaymentResponseDtoLiqPay dto = ModelUtils.getPaymentResponceDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponce = objectMapper.writeValueAsString(dto);
+        String gotInfo = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
-            .content(jsonResponce)
+            .content(gotInfo)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).validateLiqPayPayment(anyObject(), eq(null));
     }
 
 }

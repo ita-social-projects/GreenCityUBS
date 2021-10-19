@@ -2,14 +2,14 @@ package greencity.dto;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 @ToString
-public class AddLocationDto {
-    private List<AddLocationTranslationDto> addLocationDtoList;
+public class EcoNumberDto {
+    private String oldEcoNumber;
+    private String newEcoNumber;
 }

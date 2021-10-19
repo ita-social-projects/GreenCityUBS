@@ -135,4 +135,7 @@ public class Order {
     @Column(name = "image_reason_not_taking_bags")
     @Convert(converter = StringListConverter.class)
     private List<String> imageReasonNotTakingBags;
+
+    @Column(name = "admin_comment")
+    private String adminComment;
 }

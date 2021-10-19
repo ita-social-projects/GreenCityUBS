@@ -4,6 +4,8 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.language.Language;
+import greencity.dto.AddServiceDto;
+import greencity.dto.EditTariffServiceDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Service;
@@ -31,6 +33,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -56,26 +61,21 @@ class SuperAdminServiceImplTest {
     @Test
     void addTariffServiceTest() {
         User user = ModelUtils.getUser();
-        Bag bag = new Bag();
+        Bag bag = ModelUtils.getTariffBag();
         AddServiceDto dto = ModelUtils.addServiceDto();
-        Language language = new Language();
-        BagTranslation bagTranslation = new BagTranslation();
-        Location location = new Location();
 
-        when(languageRepository.findById(1L)).thenReturn(Optional.of(language));
-        when(locationRepository.findById(any())).thenReturn(Optional.of(location));
-        when(modelMapper.map(dto, Bag.class)).thenReturn(bag);
-        when(modelMapper.map(dto, BagTranslation.class)).thenReturn(bagTranslation);
         when(userRepository.findByUuid("123233")).thenReturn(user);
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(bagRepository.save(bag)).thenReturn(bag);
-        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
+        when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
-        verify(modelMapper).map(dto, Bag.class);
-        verify(modelMapper).map(dto, BagTranslation.class);
+        verify(locationRepository).findById(1L);
+        verify(languageRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).save(bagTranslation);
+        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
 
     @Test
@@ -157,9 +157,7 @@ class SuperAdminServiceImplTest {
         Service service = new Service();
         service.setId(1L);
         User user = new User();
-        CreateServiceDto dto = new CreateServiceDto();
-        dto.setPrice(1);
-        dto.setCommission(1);
+        EditServiceDto dto =ModelUtils.getEditServiceDto();
         Location location = ModelUtils.getLocation();
         Language language = new Language();
         ServiceTranslation serviceTranslation = new ServiceTranslation();
@@ -191,32 +189,22 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addService() {
+
         User user = ModelUtils.getUser();
-        Location location = new Location();
-        Language language = new Language();
-        Service service = new Service();
-        CreateServiceDto dto = new CreateServiceDto();
-        dto.setPrice(1);
-        dto.setCommission(1);
-        ServiceTranslation serviceTranslation = new ServiceTranslation();
+        Service service = ModelUtils.getService();
+        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
 
-        when(modelMapper.map(dto, Service.class)).thenReturn(service);
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(locationRepository.findById(dto.getLocationId())).thenReturn(Optional.of(location));
-        when(languageRepository.findLanguageByLanguageCode(dto.getLanguageCode())).thenReturn(Optional.of(language));
+        when(userRepository.findByUuid("123233")).thenReturn(user);
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(serviceRepository.save(service)).thenReturn(service);
-        when(modelMapper.map(dto, ServiceTranslation.class)).thenReturn(serviceTranslation);
-        when(serviceTranslationRepository.save(serviceTranslation)).thenReturn(serviceTranslation);
+        when(serviceTranslationRepository.saveAll(service.getServiceTranslations())).thenReturn(ModelUtils.getServiceTranslation());
 
-        superAdminService.addService(dto, user.getUuid());
+        superAdminService.addService(dto, "123233");
 
-        verify(modelMapper).map(dto, Service.class);
-        verify(modelMapper).map(dto, ServiceTranslation.class);
-        verify(userRepository).findByUuid(user.getUuid());
-        verify(locationRepository).findById(dto.getLocationId());
-        verify(languageRepository).findLanguageByLanguageCode(dto.getLanguageCode());
-        verify(serviceRepository).save(service);
-        verify(serviceTranslationRepository).save(serviceTranslation);
+        verify(locationRepository).findById(1L);
+        verify(languageRepository).findById(1L);
+//        verify(bagRepository).save(bag);
+//        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
-
-}
+    }

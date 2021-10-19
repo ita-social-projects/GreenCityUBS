@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.*;
+import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface SuperAdminService {
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
+    AddServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -51,7 +52,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    GetServiceDto addService(CreateServiceDto dto, String uuid);
+    CreateServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get All service.
@@ -78,7 +79,7 @@ public interface SuperAdminService {
      * @return {@link GetServiceDto} - info about edited service.
      * @author Vadym Makitra
      */
-    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.
@@ -95,7 +96,7 @@ public interface SuperAdminService {
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    GetLocationTranslationDto addLocation(AddLocationDto dto);
+    AddLocationDto addLocation(AddLocationDto dto);
 
     /**
      * Method for deactivate location.
@@ -112,4 +113,68 @@ public interface SuperAdminService {
      * @return {@link GetLocationTranslationDto}
      */
     GetLocationTranslationDto activateLocation(Long id, String code);
+
+    /**
+     * Method for creating courier.
+     *
+     * @param dto {@link CreateCourierDto} - parameters that's user entered.
+     * @return {@link Courier}
+     * @author Vadym Makitra
+     */
+    CreateCourierDto createCourier(CreateCourierDto dto);
+
+    /**
+     * Method for getting all info about couriers.
+     * 
+     * @return {@link GetCourierTranslationsDto}
+     */
+    List<GetCourierTranslationsDto> getAllCouriers();
+
+    /**
+     * Method for set courier limit by sum of order.
+     *
+     * @param id  - id of courier
+     * @param dto {@link EditPriceOfOrder}
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    GetCourierTranslationsDto setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
+
+    /**
+     * Method for set courier limit by amount of bag.
+     *
+     * @param id  - id of courier.
+     * @param dto {@link EditAmountOfBagDto}
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    GetCourierTranslationsDto setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
+
+    /**
+     * Method for edit limit description.
+     *
+     * @param id               - id of courier
+     * @param limitDescription - new limit description.
+     * @return {@link GetCourierTranslationsDto}
+     * @author Vadym Makitra
+     */
+    GetCourierTranslationsDto setLimitDescription(Long id, String limitDescription);
+
+    /**
+     * Method for include bag into minimum set of package.
+     *
+     * @param id - if of bag.
+     * @return {@link GetTariffServiceDto}
+     * @author Vadym Makitra
+     */
+    GetTariffServiceDto includeBag(Integer id);
+
+    /**
+     * Method for exclude bag from minimum set of package.
+     *
+     * @param id - if of bag.
+     * @return {@link GetTariffServiceDto}
+     * @author Vadym Makitra
+     */
+    GetTariffServiceDto excludeBag(Integer id);
 }

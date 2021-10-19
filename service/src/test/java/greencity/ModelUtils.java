@@ -182,6 +182,7 @@ public class ModelUtils {
                     .latitude(3.2)
                     .build())
                 .comment(null).build())
+            .orders(List.of(Order.builder().id(1L).build()))
             .build();
     }
 
@@ -240,6 +241,10 @@ public class ModelUtils {
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
             .build();
     }
 
@@ -1524,14 +1529,21 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<TariffTranslationDto> getTariffTranslationDto() {
+        return List.of(TariffTranslationDto.builder()
+            .description("Test")
+            .languageId(1L)
+            .name("Test")
+            .build());
+    }
+
     public static AddServiceDto addServiceDto() {
         return AddServiceDto.builder()
             .commission(50)
             .capacity(100)
-            .name("fff")
             .price(100)
-            .languageId(1L)
-            .description("asd")
+            .tariffTranslationDtoList(getTariffTranslationDto())
+            .locationId(1L)
             .build();
     }
 
@@ -1581,6 +1593,7 @@ public class ModelUtils {
             .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
 
@@ -1613,4 +1626,110 @@ public class ModelUtils {
             .build();
     }
 
+    public static Language getLanguage() {
+        return Language.builder()
+            .id(1L)
+            .code("ua")
+            .build();
+    }
+
+    public static List<BagTranslation> getBagTransaltion() {
+        return List.of(BagTranslation.builder()
+            .description("Test")
+            .name("Test")
+            .language(getLanguage())
+            .build());
+    }
+
+    public static Bag getTariffBag() {
+        return Bag.builder().price(100)
+            .commission(50)
+            .fullPrice(150)
+            .capacity(100)
+            .createdAt(LocalDate.now())
+            .createdBy("Taras Ivanov")
+            .location(getLocation())
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .bagTranslations(getBagTransaltion()).build();
+    }
+
+    public static AdminCommentDto getAdminCommentDto() {
+        return AdminCommentDto.builder()
+            .orderId(1L)
+            .adminComment("Admin")
+            .build();
+    }
+
+    public static List<EcoNumberDto> getEcoNumberDto() {
+        return List.of(EcoNumberDto.builder()
+            .newEcoNumber("123456")
+            .oldEcoNumber("22222")
+            .build(),
+            EcoNumberDto.builder()
+                .newEcoNumber("123456")
+                .oldEcoNumber("22222")
+                .build());
+    }
+
+    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
+        return PaymentResponseDtoLiqPay.builder()
+            .data("Test Data")
+            .signature("Test Signature").build();
+    }
+
+    public  static  List<ServiceTranslationDto> getServiceTranslationDtoList(){
+        return List.of(ServiceTranslationDto.builder()
+                .description("test")
+                        .languageId(1L)
+                        .name("test")
+                .build());
+    }
+
+    public static CreateServiceDto getCreateServiceDto(){
+
+        return CreateServiceDto.builder()
+                .capacity(120)
+                .commission(50)
+                .locationId(1L)
+                .price(100)
+                .serviceTranslationDtoList(getServiceTranslationDtoList())
+
+                .build();
+    }
+
+    public  static EditServiceDto getEditServiceDto(){
+        return EditServiceDto.builder()
+                .capacity(120)
+                .commission(50)
+                .locationId(1L)
+                .price(100)
+                .description("test")
+                .name("test")
+                .languageCode("ua")
+                .build();
+
+    }
+
+
+    public static Service getService(){
+        return Service.builder()
+                .capacity(120)
+                .basePrice(100)
+                .commission(50)
+                .fullPrice(150)
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .location(getLocation())
+                .serviceTranslations(getServiceTranslation())
+                .build();
+    }
+
+    public  static List<ServiceTranslation> getServiceTranslation(){
+        return List.of(ServiceTranslation.builder()
+                .name("test")
+                .language(getLanguage())
+                .description("test")
+                .build()
+        );
+    }
 }

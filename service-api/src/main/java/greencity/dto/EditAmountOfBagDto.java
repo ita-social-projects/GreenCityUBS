@@ -6,13 +6,12 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@ToString
-public class PaymentResponseDtoLiqPay {
+public class EditAmountOfBagDto {
     @NotNull
-    private String data;
+    private Long minAmountOfBigBags;
     @NotNull
-    private String signature;
+    private Long maxAmountOfBigBags;
 }

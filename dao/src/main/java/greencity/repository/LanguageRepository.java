@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.language.Language;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,4 +40,14 @@ public interface LanguageRepository extends JpaRepository<Language, Long> {
      */
     @Query(value = "SELECT * FROM Languages  where code = :langCode", nativeQuery = true)
     Optional<Language> findLanguageByLanguageCode(String langCode);
+
+    /**
+     * This is method which find id for language.
+     * 
+     * @param language {@link String}.
+     * @return {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    @Query("SELECT l.id FROM Language as l WHERE l.code =:lang")
+    Long findIdByCode(@Param("lang") String language);
 }
