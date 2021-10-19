@@ -1,14 +1,19 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.AddServiceDto;
-import greencity.dto.EditTariffServiceDto;
+import greencity.dto.*;
+import greencity.entity.enums.CourierLimit;
 import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Courier;
+import greencity.entity.order.CourierTranslation;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.CourierNotFoundException;
+import greencity.exceptions.LanguageNotFoundException;
+import greencity.exceptions.LocationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -42,6 +47,10 @@ class SuperAdminServiceImplTest {
     private LocationRepository locationRepository;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private CourierRepository courierRepository;
+    @Mock
+    private CourierTranslationRepository courierTranslationRepository;
 
     @Test
     void addServiceTest() {
@@ -121,4 +130,83 @@ class SuperAdminServiceImplTest {
         verify(bagTranslationRepository).save(bagTranslation);
     }
 
+    @Test
+    void createCourierThrowException_LocationNotFoundException(){
+        assertThrows(LocationNotFoundException.class, () ->
+                superAdminService.createCourier(new CreateCourierDto()));
+    }
+
+    @Test
+    void createCourierThrowException_LanguageNotFoundException(){
+
+        Location location = new Location();
+        when(locationRepository.findById(any())).thenReturn(Optional.of(location));
+        assertThrows(LanguageNotFoundException.class, () ->
+                superAdminService.createCourier(new CreateCourierDto()));
+    }
+
+    @Test
+    void setCourierLimitBySumOfOrderThrowException(){
+        when(courierRepository.findById(any())).thenReturn(Optional.empty());
+        assertThrows(CourierNotFoundException.class, () ->
+                superAdminService.setCourierLimitBySumOfOrder(1L, new EditPriceOfOrder()));
+    }
+
+    @Test
+    void setCourierLimitByAmountOfBagThrowException(){
+        when(courierRepository.findById(any())).thenReturn(Optional.empty());
+        assertThrows(CourierNotFoundException.class, () ->
+                superAdminService.setCourierLimitByAmountOfBag(1L, new EditAmountOfBagDto()));
+    }
+    @Test
+    void getAllCouriers(){
+        when(courierTranslationRepository.findAll()).thenReturn(new ArrayList<CourierTranslation>());
+        superAdminService.getAllCouriers();
+        verify(courierTranslationRepository).findAll();
+    }
+
+    @Test
+    void setCourierLimitBySumOfOrder(){
+        Courier courier = ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        CourierTranslation courierTranslation = ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        when(courierRepository.findById(any())).thenReturn(Optional.of(courier));
+        when(courierTranslationRepository.findCourierTranslationByCourier(courier))
+                .thenReturn(courierTranslation);
+        superAdminService.setCourierLimitBySumOfOrder(1L, new EditPriceOfOrder());
+        verify(courierTranslationRepository).findCourierTranslationByCourier(courier);
+        verify(courierRepository).save(courier);
+    }
+
+    @Test
+    void setCourierLimitByAmountOfBag(){
+        Courier courier = ModelUtils.getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        CourierTranslation courierTranslation = ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        when(courierRepository.findById(any())).thenReturn(Optional.of(courier));
+        when(courierTranslationRepository.findCourierTranslationByCourier(courier))
+                .thenReturn(courierTranslation);
+        superAdminService.setCourierLimitByAmountOfBag(1L, new EditAmountOfBagDto());
+        verify(courierTranslationRepository).findCourierTranslationByCourier(courier);
+        verify(courierRepository).save(courier);
+    }
+
+    @Test
+    void createCourier(){
+        Courier courier = ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        CourierTranslation courierTranslation = ModelUtils.getCourierTranslation(
+                CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
+        Location location = ModelUtils.getLocation();
+        Language language = ModelUtils.getLanguage();
+        when(locationRepository.findById(any())).thenReturn(Optional.of(location));
+        when(languageRepository.findLanguageByLanguageCode(any())).thenReturn(Optional.of(language));
+        when(modelMapper.map(createCourierDto, Courier.class)).thenReturn(courier);
+        when(modelMapper.map(createCourierDto, CourierTranslation.class)).thenReturn(courierTranslation);
+        superAdminService.createCourier(createCourierDto);
+        verify(locationRepository).findById(1L);
+        verify(languageRepository).findLanguageByLanguageCode(any());
+        verify(modelMapper).map(createCourierDto, Courier.class);
+        verify(modelMapper).map(createCourierDto, CourierTranslation.class);
+        verify(courierRepository).save(courier);
+        verify(courierTranslationRepository).save(courierTranslation);
+    }
 }

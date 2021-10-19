@@ -1613,5 +1613,36 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .build();
     }
+    public static Courier getCourier(CourierLimit courierLimit){
+        return Courier.builder()
+                .id(1L)
+                .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
+                .courierLimit(courierLimit)
+                .build();
+    }
+    public static CourierTranslation getCourierTranslation(CourierLimit courierLimit) {
+        return CourierTranslation.builder()
+                .id(1L)
+                .language(Language.builder().id(1L).code("ua").build())
+                .name("name")
+                .limitDescription("limitDescription")
+                .courier(getCourier(courierLimit))
+                .build();
+    }
 
+    public static CreateCourierDto getCreateCourierDto(){
+        return CreateCourierDto.builder()
+                .locationId(1L)
+                .name("name")
+                .limitDescription("limitDescription")
+                .languageCode("ua")
+                .build();
+    }
+
+    public static Language getLanguage(){
+        return Language.builder()
+                .id(1L)
+                .code("ua")
+                .build();
+    }
 }
