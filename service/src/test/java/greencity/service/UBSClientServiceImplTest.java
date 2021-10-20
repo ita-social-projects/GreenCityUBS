@@ -478,7 +478,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
         lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
-        ubsService.saveProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
+        ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
         assertNotNull(address);
