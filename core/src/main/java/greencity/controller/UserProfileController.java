@@ -29,25 +29,24 @@ public class UserProfileController {
     }
 
     /**
-     * Controller returns user`s date of saved or update {@link UserProfileDto}
-     * date.
+     * Controller returns user`s data or update {@link UserProfileDto} date.
      * 
      * @param userUuid       {@link UserProfileDto} id.
      * @param userProfileDto {@link UserProfileDto}
      * @return {@link UserProfileDto}.
      * @author Mykhaolo Berezhinskiy
      */
-    @ApiOperation(value = "Create user profile")
+    @ApiOperation(value = "Update user profile")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UserProfileDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/user/save")
-    public ResponseEntity<UserProfileDto> saveUserDate(@ApiIgnore @CurrentUserUuid String userUuid,
+    @PostMapping("/user/update")
+    public ResponseEntity<UserProfileDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileDto userProfileDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveProfileData(userUuid, userProfileDto));
+            .body(ubsClientService.updateProfileData(userUuid, userProfileDto));
     }
 
     /**

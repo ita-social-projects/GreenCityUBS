@@ -676,9 +676,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
-
     @Override
-    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+    public UserProfileDto updateProfileData(String uuid, UserProfileDto userProfileDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
@@ -691,6 +690,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        UBSuser ubSuserByEmailAndUserId =
+            ubsUserRepository.findUBSuserByEmailAndUserId(user.getRecipientEmail(), user.getId());
+        ubsUserRepository.save(ubSuserByEmailAndUserId);
         return mappedUserProfileDto;
     }
 

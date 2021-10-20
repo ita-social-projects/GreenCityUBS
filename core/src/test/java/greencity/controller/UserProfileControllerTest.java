@@ -61,7 +61,7 @@ class UserProfileControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(userProfileDto);
 
-        mockMvc.perform(post(AppConstant.ubsLink + "/user/save")
+        mockMvc.perform(post(AppConstant.ubsLink + "/user/update")
             .content(responseJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))

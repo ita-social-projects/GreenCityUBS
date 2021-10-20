@@ -147,14 +147,15 @@ public interface UBSClientService {
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid);
 
     /**
-     * Method that save user for current user.
+     * Method that update user.
      *
      * @param uuid current {@link String} user`s uuid;
      * @param dto  user`s date {@link UserProfileDto} user;
-     * @return {@link UserProfileDto} contains all information needed save user;
-     * @author Liubomyr Bratakh
+     * @return {@link UserProfileDto} contains all information needed for updating
+     *         user;
+     * @author Liubomyr Bratakh.
      */
-    UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
+    UserProfileDto updateProfileData(String uuid, UserProfileDto dto);
 
     /**
      * Method that get user profile for current user.
