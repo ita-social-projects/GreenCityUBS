@@ -4,16 +4,17 @@ import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditPriceOfOrder {
+@Getter
+@Setter
+@EqualsAndHashCode
+@Builder
+public class TariffTranslationDto {
     @NotNull
-    private Long minPriceOfOrder;
+    private String name;
     @NotNull
-    private Long maxPriceOfOrder;
+    private String description;
     @NotNull
     private Long languageId;
 }

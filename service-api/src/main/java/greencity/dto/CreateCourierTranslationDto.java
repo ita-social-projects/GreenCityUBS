@@ -6,14 +6,15 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditPriceOfOrder {
+@Builder
+@ToString
+public class CreateCourierTranslationDto {
     @NotNull
-    private Long minPriceOfOrder;
-    @NotNull
-    private Long maxPriceOfOrder;
+    private String name;
     @NotNull
     private Long languageId;
+    @NotNull
+    private String limitDescription;
 }

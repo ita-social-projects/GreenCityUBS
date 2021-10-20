@@ -3,6 +3,7 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,8 +22,5 @@ public class CreateCourierDto {
     @NotNull
     private Long locationId;
     @NotNull
-    private String name;
-    @NotNull
-    private String languageCode;
-    private String limitDescription;
+    List<CreateCourierTranslationDto> createCourierTranslationDtos;
 }

@@ -849,4 +849,52 @@ public class ManagementOrderController {
         ubsManagementService.assignEmployeesWithThePositionsToTheOrder(dto, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    /**
+     * Controller for saving Admin comment.
+     *
+     * @param adminCommentDto {@link AdminCommentDto}.
+     * @param uuid            {@link String}.
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "Save admin comment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/save-admin-comment")
+    public ResponseEntity<HttpStatus> saveAdminCommentToOrder(
+        @RequestBody @Valid AdminCommentDto adminCommentDto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.saveAdminCommentToOrder(adminCommentDto, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating Id From eco-store for order.
+     * 
+     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @param uuid         {@link String}.
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "update eco-store id for order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-eco-store{id}")
+    public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
+        @RequestBody @Valid List<EcoNumberDto> ecoNumberDto, @PathVariable(name = "id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

@@ -4,7 +4,6 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.Service;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,16 +32,16 @@ class SuperAdminController {
      * Controller for create new tariff.
      *
      * @param dto {@link AddServiceDto} dto for service.
-     * @return {@link GetTariffServiceDto}
+     * @return {@link AddServiceDto}
      * @author Vadym Makitra.
      */
     @ApiOperation(value = "Create new tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createTariffService")
-    public ResponseEntity<GetTariffServiceDto> createTariffService(
+    public ResponseEntity<AddServiceDto> createTariffService(
         @RequestBody AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
@@ -57,7 +56,7 @@ class SuperAdminController {
 
     @ApiOperation(value = "Get all info about tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto[].class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/getTariffService")
@@ -108,7 +107,7 @@ class SuperAdminController {
      *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
-     * @return {@link Service}
+     * @return {@link CreateServiceDto}
      * @author Vadym Makitra.
      */
 
@@ -118,7 +117,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createService")
-    public ResponseEntity<GetServiceDto> createServices(
+    public ResponseEntity<CreateServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
@@ -173,7 +172,7 @@ class SuperAdminController {
     @PutMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> deleteService(
         @Valid @PathVariable Long id,
-        @RequestBody @Valid CreateServiceDto dto,
+        @RequestBody @Valid EditServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
     }
@@ -207,7 +206,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/addLocations")
-    public ResponseEntity<GetLocationTranslationDto> addLocation(
+    public ResponseEntity<AddLocationDto> addLocation(
         @RequestBody AddLocationDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addLocation(dto));
     }
@@ -224,7 +223,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/deactivateLocations/{id}")
+    @PatchMapping("/deactivateLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> deactivateLocation(
         @PathVariable Long id, String languageCode) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateLocation(id, languageCode));
@@ -242,7 +241,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/activeLocations/{id}")
+    @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> activeLocation(
         @PathVariable Long id, String languageCode) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.activateLocation(id, languageCode));
@@ -257,11 +256,11 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Create new Courier")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = Courier.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CreateCourierTranslationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PostMapping("/createCourier")
-    public ResponseEntity<GetCourierTranslationsDto> addService(
+    public ResponseEntity<CreateCourierDto> addService(
         @RequestBody CreateCourierDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.createCourier(dto));
     }
@@ -277,7 +276,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/getCouriers")
+    @GetMapping("/getCouriers")
     public ResponseEntity<List<GetCourierTranslationsDto>> getAllCouriers() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
     }
@@ -290,12 +289,12 @@ class SuperAdminController {
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Set amount of sum")
+    @ApiOperation(value = "Set limit by amount of sum")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/setAmountOfSum/{id}")
+    @PatchMapping("/setAmountOfSum/{id}")
     public ResponseEntity<GetCourierTranslationsDto> setAmountOfBag(
         @PathVariable Long id, @RequestBody EditPriceOfOrder dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitBySumOfOrder(id, dto));
@@ -307,12 +306,12 @@ class SuperAdminController {
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Set amount of bag")
+    @ApiOperation(value = "Set limit by amount of bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/setAmountOfBag/{id}")
+    @PatchMapping("/setAmountOfBag/{id}")
     public ResponseEntity<GetCourierTranslationsDto> setAmountOfSum(
         @PathVariable Long id, @RequestBody EditAmountOfBagDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitByAmountOfBag(id, dto));
@@ -329,10 +328,11 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PatchMapping("/setLimitDescription/{id}")
+    @PatchMapping("/setLimitDescription/{courierId}")
     public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
-        @PathVariable Long id, String limitDescription) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setLimitDescription(id, limitDescription));
+        @PathVariable Long courierId, String limitDescription, Long languageId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(superAdminService.setLimitDescription(courierId, limitDescription, languageId));
     }
 
     /**
@@ -346,7 +346,7 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/includeBag/{id}")
+    @PatchMapping("/includeBag/{id}")
     public ResponseEntity<GetTariffServiceDto> includeBag(
         @PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.includeBag(id));
@@ -363,9 +363,25 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PostMapping("/excludeBag/{id}")
+    @PatchMapping("/excludeBag/{id}")
     public ResponseEntity<GetTariffServiceDto> excludeBag(
         @PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeBag(id));
+    }
+
+    /**
+     * Controller for editing info about tariff.
+     *
+     * @param dto {@link EditTariffInfoDto}
+     * @return {@link EditTariffInfoDto} - info about entered value.
+     */
+    @ApiOperation(value = "Edit info About Tariff")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EditTariffInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PatchMapping("/editInfoAboutTariff")
+    public ResponseEntity<EditTariffInfoDto> editInfoInTariff(@RequestBody EditTariffInfoDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editInfoInTariff(dto));
     }
 }

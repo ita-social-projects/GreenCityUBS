@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,4 +116,96 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE WHERE ID = :order_id", nativeQuery = true)
     void setOrderBlockedStatusUnblocked(@Param("order_id") Long orderId);
+
+    /**
+     * Method which is find eco number from shop.
+     *
+     * @param ecoNumber {@link String}.
+     * @param orderId   {@link Long}.
+     * @return {@link String}.
+     * @author Yuriy Bahlay.
+     */
+    @Query(value = " SELECT additional_order FROM ORDER_ADDITIONAL "
+        + "WHERE orders_id = :order_id AND additional_order =:eco_number ", nativeQuery = true)
+    String findEcoNumberFromShop(@Param("eco_number") String ecoNumber, @Param("order_id") Long orderId);
+
+    /**
+     * This is method which is update eco number from shop.
+     *
+     * @param newEcoNumber {@link String}.
+     * @param oldEcoNumber {@link String}.
+     * @param orderId      {@link Long}.
+     * @author Yuriy Bahlay.
+     */
+    @Modifying
+    @Query(value = " UPDATE ORDER_ADDITIONAL SET additional_order =:new_eco_number "
+        + " WHERE orders_id = :order_id AND additional_order =:old_eco_number", nativeQuery = true)
+    void setOrderAdditionalNumber(@Param("new_eco_number") String newEcoNumber,
+        @Param("old_eco_number") String oldEcoNumber,
+        @Param("order_id") Long orderId);
+
+    /**
+     * Method changes order_status for all not blocked orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = :order_status WHERE BLOCKED = FALSE", nativeQuery = true)
+    void changeStatusForAllOrders(@Param("order_status") String status);
+
+    /**
+     * Method changes date_of_export for all not blocked orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DATE_OF_EXPORT = :date_of_export WHERE BLOCKED = FALSE", nativeQuery = true)
+    void changeDateOfExportForAllOrders(@Param("date_of_export") LocalDate date);
+
+    /**
+     * Method changes deliver_from for all not blocked orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DELIVER_FROM = :deliver_from WHERE BLOCKED = FALSE", nativeQuery = true)
+    void changeDeliverFromForAllOrders(@Param("deliver_from") LocalDateTime time);
+
+    /**
+     * Method changes deliver_to for all not blocked orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET DELIVER_TO = :deliver_to WHERE BLOCKED = FALSE", nativeQuery = true)
+    void changeDeliverToForAllOrders(@Param("deliver_to") LocalDateTime time);
+
+    /**
+     * Method changes receiving_station for all not blocked orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION = :receiving_station WHERE BLOCKED = FALSE", nativeQuery = true)
+    void changeReceivingStationForAllOrders(@Param("receiving_station") String station);
+
+    /**
+     * Method sets employee_id and makes blocked_status 'true' for all not blocked
+     * orders.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE",
+        nativeQuery = true)
+    void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id);
+
+    /**
+     * Method unblocks all orders. Needs some improvement.
+     * 
+     * @author Liubomyr Pater.
+     */
+    @Modifying
+    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE WHERE BLOCKED = TRUE", nativeQuery = true)
+    void unblockAllOrders();
 }

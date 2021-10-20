@@ -161,9 +161,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay < dto.getPointsToUse()) {
-            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
-        } else {
+        if (sumToPay > dto.getPointsToUse()) {
             sumToPay -= dto.getPointsToUse();
         }
 
@@ -200,7 +198,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        return links.attr("href");
+        if (sumToPay == 0) {
+            return order.getId().toString();
+        } else {
+            return links.attr("href");
+        }
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
@@ -442,13 +444,17 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     @Override
-    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate) {
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
         if (optionalUbsUser.isEmpty()) {
             throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
+        eventService.save(OrderHistory.CHANGED_SENDER, currentUser.getRecipientName()
+            + "  " + currentUser.getRecipientSurname(), optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
             .name(user.getFirstName() + " " + user.getLastName())
             .email(user.getEmail())
@@ -592,9 +598,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
-            if (orderResponseDto.getPointsToUse() > 0) {
-                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-            }
             return true;
         }
         return false;
@@ -673,9 +676,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
-
     @Override
-    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+    public UserProfileDto updateProfileData(String uuid, UserProfileDto userProfileDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
@@ -688,6 +690,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        UBSuser ubSuserByEmailAndUserId =
+            ubsUserRepository.findUBSuserByEmailAndUserId(user.getRecipientEmail(), user.getId());
+        ubsUserRepository.save(ubSuserByEmailAndUserId);
         return mappedUserProfileDto;
     }
 
@@ -856,8 +861,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
@@ -898,35 +902,15 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/")
+            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
             .build();
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
-        if (dto.getStatus().equals("failure")) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto) {
+        if (!encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), privateKey)
+            .equals(dto.getSignature())) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
-            .equals(signature)) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (dto.getStatus().equals("error")) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        String[] ids = dto.getOrderId().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getStatus().equals("success")) {
-            Payment orderPayment = modelMapper.map(dto, Payment.class);
-            orderPayment.setPaymentStatus(PaymentStatus.PAID);
-            orderPayment.setOrder(order);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
         }
     }
 

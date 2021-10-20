@@ -15,7 +15,7 @@ public interface SuperAdminService {
      * @return {@link GetTariffServiceDto}
      * @author Vadym Makitra
      */
-    GetTariffServiceDto addTariffService(AddServiceDto dto, String uuid);
+    AddServiceDto addTariffService(AddServiceDto dto, String uuid);
 
     /**
      * Method return All Tariff Service.
@@ -52,7 +52,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    GetServiceDto addService(CreateServiceDto dto, String uuid);
+    CreateServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get All service.
@@ -79,7 +79,7 @@ public interface SuperAdminService {
      * @return {@link GetServiceDto} - info about edited service.
      * @author Vadym Makitra
      */
-    GetServiceDto editService(long id, CreateServiceDto dto, String uuid);
+    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.
@@ -96,7 +96,7 @@ public interface SuperAdminService {
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    GetLocationTranslationDto addLocation(AddLocationDto dto);
+    AddLocationDto addLocation(AddLocationDto dto);
 
     /**
      * Method for deactivate location.
@@ -121,7 +121,7 @@ public interface SuperAdminService {
      * @return {@link Courier}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto createCourier(CreateCourierDto dto);
+    CreateCourierDto createCourier(CreateCourierDto dto);
 
     /**
      * Method for getting all info about couriers.
@@ -153,12 +153,13 @@ public interface SuperAdminService {
     /**
      * Method for edit limit description.
      *
-     * @param id               - id of courier
+     * @param courierId        - id of courier
      * @param limitDescription - new limit description.
+     * @param languageId       - id of current language.
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setLimitDescription(Long id, String limitDescription);
+    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription, Long languageId);
 
     /**
      * Method for include bag into minimum set of package.
@@ -177,4 +178,12 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetTariffServiceDto excludeBag(Integer id);
+
+    /**
+     * Method for edit info about tariff.
+     * 
+     * @param dto {@link EditTariffInfoDto}
+     * @return {@link EditTariffInfoDto}
+     */
+    EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
 }

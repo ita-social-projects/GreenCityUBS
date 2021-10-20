@@ -320,14 +320,20 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<TariffTranslationDto> getTariffTranslationDto() {
+        return List.of(TariffTranslationDto.builder()
+            .name("Test")
+            .languageId(1L)
+            .description("Test")
+            .build());
+    }
+
     public static AddServiceDto getAddServiceDto() {
         return AddServiceDto.builder()
             .capacity(120)
             .commission(10)
-            .description("sadas")
-            .languageId(1l)
-            .name("dsasda")
             .price(100)
+            .tariffTranslationDtoList(getTariffTranslationDto())
             .build();
     }
 
@@ -357,4 +363,26 @@ public class ModelUtils {
             .build();
     }
 
+    public static AdminCommentDto getAdminComment() {
+        return AdminCommentDto.builder()
+            .orderId(1L)
+            .adminComment("Admin").build();
+    }
+
+    public static List<EcoNumberDto> getEcoNumberDto() {
+        return List.of(EcoNumberDto.builder()
+            .newEcoNumber("123456")
+            .oldEcoNumber("22222")
+            .build(),
+            EcoNumberDto.builder()
+                .newEcoNumber("123456")
+                .oldEcoNumber("22222")
+                .build());
+    }
+
+    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
+        return PaymentResponseDtoLiqPay.builder()
+            .data("Test Data")
+            .signature("Test Signature").build();
+    }
 }

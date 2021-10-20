@@ -39,4 +39,15 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
      * @return a {@link Optional} of {@link UBSuser}.
      */
     Optional<UBSuser> findByEmail(String email);
+
+    /**
+     * Find UbsUser by email and userId fk key.
+     * 
+     * @param email  {@link String}.
+     * @param userId {@link Long}.
+     * @return {@link UBSuser}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    UBSuser findUBSuserByEmailAndUserId(String email, Long userId);
 }
