@@ -274,4 +274,19 @@ public class RestClient {
         params.put("paytypes", dto.getPaytypes());
         return params;
     }
+
+    /**
+     * Method for getting info about LiqPay Status.
+     * 
+     * @param dto {@link StatusRequestDtoLiqPay}
+     * @return {@link Map}
+     * @author Vadym Makitra
+     */
+    public Map<String, String> getStatusFromLiqPay(StatusRequestDtoLiqPay dto) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("action", dto.getAction());
+        params.put("version", dto.getVersion().toString());
+        params.put("order_id", dto.getOrderId().toString());
+        return params;
+    }
 }

@@ -924,4 +924,23 @@ public class UBSClientServiceImpl implements UBSClientService {
         orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
         return orderStatusPageDto;
     }
+
+    private StatusRequestDtoLiqPay getStatusFromLiqPay(Order order) {
+        Long orderId = order.getId();
+        return StatusRequestDtoLiqPay.builder()
+            .publicKey(publicKey)
+            .action("status")
+            .orderId(orderId + "_" + order.getPayment()
+                .get(order.getPayment().size() - 1).getId().toString())
+            .version(3)
+            .build();
+    }
+
+    @Override
+    public Map<String, Object> getLiqPayStatus(Long orderId) throws Exception {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
+        return liqPay.api("request", restClient.getStatusFromLiqPay(dto));
+    }
 }

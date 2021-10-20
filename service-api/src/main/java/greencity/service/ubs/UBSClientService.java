@@ -7,6 +7,7 @@ import greencity.entity.user.ubs.UBSuser;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public interface UBSClientService {
     /**
@@ -277,4 +278,13 @@ public interface UBSClientService {
      * @author Igor Boykov
      */
     OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId);
+
+    /**
+     * Method for get info about payment status from LiqPay.
+     * 
+     * @param orderId - current order id.
+     * @return {@link Map}
+     * @author Vadym Makitra
+     */
+    Map<String, Object> getLiqPayStatus(Long orderId) throws Exception;
 }

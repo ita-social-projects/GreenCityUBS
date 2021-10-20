@@ -19,6 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/ubs")
@@ -377,5 +378,22 @@ public class OrderController {
         PaymentResponseDtoLiqPay dto) {
         ubsClientService.validateLiqPayPayment(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller for getting status about payment from Liq Pay.
+     * 
+     * @param orderId - current order
+     * @return {@link Map}
+     */
+    @ApiOperation(value = "Get status of Payment from Liq Pay.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping(value = "/getLiqPayStatus/{orderId}")
+    public ResponseEntity<Map<String, Object>> getLiqPayStatusPayment(
+        @Valid @PathVariable Long orderId) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLiqPayStatus(orderId));
     }
 }
