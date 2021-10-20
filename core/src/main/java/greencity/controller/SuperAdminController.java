@@ -328,10 +328,11 @@ class SuperAdminController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PatchMapping("/setLimitDescription/{id}")
+    @PatchMapping("/setLimitDescription/{courierId}")
     public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
-        @PathVariable Long id, String limitDescription) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setLimitDescription(id, limitDescription));
+        @PathVariable Long courierId, String limitDescription, Long languageId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(superAdminService.setLimitDescription(courierId, limitDescription, languageId));
     }
 
     /**
@@ -366,5 +367,21 @@ class SuperAdminController {
     public ResponseEntity<GetTariffServiceDto> excludeBag(
         @PathVariable Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.excludeBag(id));
+    }
+
+    /**
+     * Controller for editing info about tariff.
+     *
+     * @param dto {@link EditTariffInfoDto}
+     * @return {@link EditTariffInfoDto} - info about entered value.
+     */
+    @ApiOperation(value = "Edit info About Tariff")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EditTariffInfoDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @PatchMapping("/editInfoAboutTariff")
+    public ResponseEntity<EditTariffInfoDto> editInfoInTariff(@RequestBody EditTariffInfoDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editInfoInTariff(dto));
     }
 }

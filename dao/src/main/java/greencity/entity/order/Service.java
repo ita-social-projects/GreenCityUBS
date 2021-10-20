@@ -13,7 +13,12 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(
+    exclude = {"serviceTranslations"})
+@ToString(
+    exclude = {"serviceTranslations"})
 @Table(name = "service")
+
 public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
