@@ -349,7 +349,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courier.setMinPriceOfOrder(dto.getMinPriceOfOrder());
         courier.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
         courier.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        CourierTranslation courierTranslation = courierTranslationRepository.findCourierTranslationByCourier(courier);
+        CourierTranslation courierTranslation =
+            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
         courierRepository.save(courier);
         return getAllCouriers(courierTranslation);
     }
@@ -362,15 +363,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courier.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
         courier.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         courierRepository.save(courier);
-        CourierTranslation courierTranslation = courierTranslationRepository.findCourierTranslationByCourier(courier);
+        CourierTranslation courierTranslation =
+            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
         return getAllCouriers(courierTranslation);
     }
 
     @Override
-    public GetCourierTranslationsDto setLimitDescription(Long id, String limitDescription) {
-        Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
-        CourierTranslation courierTranslation = courierTranslationRepository.findCourierTranslationByCourier(courier);
+    public GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription, Long languageId) {
+        Courier courier = courierRepository.findById(courierId).orElseThrow(
+            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
+        CourierTranslation courierTranslation =
+            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, languageId);
         courierTranslation.setLimitDescription(limitDescription);
         courierTranslationRepository.save(courierTranslation);
         return getAllCouriers(courierTranslation);
@@ -400,5 +403,29 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bagRepository.save(bag);
         BagTranslation bagTranslation = translationRepository.findBagTranslationByBag(bag);
         return getTariffService(bagTranslation);
+    }
+
+    @Override
+    public EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto) {
+        Bag bag = bagRepository.findById(dto.getBagId()).orElseThrow(
+            () -> new CourierNotFoundException(ErrorMessage.BAG_NOT_FOUND));
+        bag.setMinAmountOfBags(dto.getMinimalAmountOfBagStatus());
+        Courier courier = courierRepository.findById(dto.getCourierId()).orElseThrow(
+            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
+        final CourierTranslation courierTranslation =
+            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
+        final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
+        courier.setCourierLimit(dto.getCourierLimitsBy());
+        courier.setMinPriceOfOrder(dto.getMinAmountOfOrder());
+        courier.setMaxPriceOfOrder(dto.getMaxAmountOfOrder());
+        courier.setMinAmountOfBigBags(dto.getMinAmountOfBigBag());
+        courier.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBag());
+        courierTranslation.setLanguage(language);
+        courierTranslation.setLimitDescription(dto.getLimitDescription());
+        bagRepository.save(bag);
+        courierRepository.save(courier);
+        courierTranslationRepository.save(courierTranslation);
+        return dto;
     }
 }
