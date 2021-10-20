@@ -157,7 +157,7 @@ class SuperAdminServiceImplTest {
         Service service = new Service();
         service.setId(1L);
         User user = new User();
-        EditServiceDto dto =ModelUtils.getEditServiceDto();
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
         Location location = ModelUtils.getLocation();
         Language language = new Language();
         ServiceTranslation serviceTranslation = new ServiceTranslation();
@@ -198,7 +198,8 @@ class SuperAdminServiceImplTest {
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(serviceRepository.save(service)).thenReturn(service);
-        when(serviceTranslationRepository.saveAll(service.getServiceTranslations())).thenReturn(ModelUtils.getServiceTranslation());
+        when(serviceTranslationRepository.saveAll(service.getServiceTranslations()))
+            .thenReturn(ModelUtils.getServiceTranslation());
 
         superAdminService.addService(dto, "123233");
 
@@ -207,4 +208,4 @@ class SuperAdminServiceImplTest {
 //        verify(bagRepository).save(bag);
 //        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
-    }
+}

@@ -1677,59 +1677,57 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public  static  List<ServiceTranslationDto> getServiceTranslationDtoList(){
+    public static List<ServiceTranslationDto> getServiceTranslationDtoList() {
         return List.of(ServiceTranslationDto.builder()
-                .description("test")
-                        .languageId(1L)
-                        .name("test")
-                .build());
+            .description("test")
+            .languageId(1L)
+            .name("test")
+            .build());
     }
 
-    public static CreateServiceDto getCreateServiceDto(){
+    public static CreateServiceDto getCreateServiceDto() {
 
         return CreateServiceDto.builder()
-                .capacity(120)
-                .commission(50)
-                .locationId(1L)
-                .price(100)
-                .serviceTranslationDtoList(getServiceTranslationDtoList())
+            .capacity(120)
+            .commission(50)
+            .locationId(1L)
+            .price(100)
+            .serviceTranslationDtoList(getServiceTranslationDtoList())
 
-                .build();
+            .build();
     }
 
-    public  static EditServiceDto getEditServiceDto(){
+    public static EditServiceDto getEditServiceDto() {
         return EditServiceDto.builder()
-                .capacity(120)
-                .commission(50)
-                .locationId(1L)
-                .price(100)
-                .description("test")
-                .name("test")
-                .languageCode("ua")
-                .build();
+            .capacity(120)
+            .commission(50)
+            .locationId(1L)
+            .price(100)
+            .description("test")
+            .name("test")
+            .languageCode("ua")
+            .build();
 
     }
 
-
-    public static Service getService(){
+    public static Service getService() {
         return Service.builder()
-                .capacity(120)
-                .basePrice(100)
-                .commission(50)
-                .fullPrice(150)
-                .createdAt(LocalDate.now())
-                .createdBy("Taras Ivanov")
-                .location(getLocation())
-                .serviceTranslations(getServiceTranslation())
-                .build();
+            .capacity(120)
+            .basePrice(100)
+            .commission(50)
+            .fullPrice(150)
+            .createdAt(LocalDate.now())
+            .createdBy("Taras Ivanov")
+            .location(getLocation())
+            .serviceTranslations(getServiceTranslation())
+            .build();
     }
 
-    public  static List<ServiceTranslation> getServiceTranslation(){
+    public static List<ServiceTranslation> getServiceTranslation() {
         return List.of(ServiceTranslation.builder()
-                .name("test")
-                .language(getLanguage())
-                .description("test")
-                .build()
-        );
+            .name("test")
+            .language(getLanguage())
+            .description("test")
+            .build());
     }
 }
