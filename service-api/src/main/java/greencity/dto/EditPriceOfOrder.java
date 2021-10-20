@@ -14,4 +14,6 @@ public class EditPriceOfOrder {
     private Long minPriceOfOrder;
     @NotNull
     private Long maxPriceOfOrder;
+    @NotNull
+    private Long languageId;
 }
