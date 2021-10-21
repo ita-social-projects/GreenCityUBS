@@ -34,7 +34,7 @@ public class RestClient {
     private String viberBotToken;
     @Value("${ubs.viber.bot.url}")
     private String viberBotUrl;
-    private final String orderId = "order_id";
+    private static final String orderId = "order_id";
     private final HttpServletRequest httpServletRequest;
     @Autowired
     LiqPay liqPay;

@@ -24,6 +24,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
@@ -948,9 +949,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
         Map<String, Object> response = liqPay.api("request", restClient.getStatusFromLiqPay(dto));
+        @Nullable
         Payment payment = converterMapToEntity(response, order);
-        paymentRepository.save(payment);
-        orderRepository.save(order);
+        if (payment != null) {
+            paymentRepository.save(payment);
+            orderRepository.save(order);
+        }
         return response;
     }
 
