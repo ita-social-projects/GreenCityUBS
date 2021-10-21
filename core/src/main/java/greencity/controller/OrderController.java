@@ -391,7 +391,7 @@ public class OrderController {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
-    @PostMapping(value = "/getLiqPayStatus/{orderId}")
+    @GetMapping(value = "/getLiqPayStatus/{orderId}")
     public ResponseEntity<Map<String, Object>> getLiqPayStatusPayment(
         @Valid @PathVariable Long orderId) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLiqPayStatus(orderId));
