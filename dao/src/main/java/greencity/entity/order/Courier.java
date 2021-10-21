@@ -13,7 +13,10 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(
+        exclude = {"bagTranslations"})
+@ToString(
+        exclude = {"bagTranslations"})
 @Table(name = "courier")
 public class Courier {
     @Id

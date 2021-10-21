@@ -1,3 +1,7 @@
+INSERT INTO languages(id,code)
+VALUES (1,'ua'),
+       (2,'en'),
+       (3,'ru');
 
 INSERT INTO users(id,current_points, uuid, violations)
 VALUES (1,1000,'uuid1',0),
