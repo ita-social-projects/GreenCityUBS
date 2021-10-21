@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"courier", "language"})
+@ToString(exclude = {"courier", "language"})
 @Table(name = "courier_translations")
 public class CourierTranslation {
     @Id
