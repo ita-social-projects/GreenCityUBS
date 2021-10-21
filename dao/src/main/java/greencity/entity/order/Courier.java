@@ -14,9 +14,9 @@ import java.util.List;
 @Setter
 @Builder
 @EqualsAndHashCode(
-        exclude = {"bagTranslations"})
+    exclude = {"bagTranslations"})
 @ToString(
-        exclude = {"bagTranslations"})
+    exclude = {"bagTranslations"})
 @Table(name = "courier")
 public class Courier {
     @Id

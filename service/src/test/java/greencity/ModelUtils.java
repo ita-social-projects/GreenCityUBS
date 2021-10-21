@@ -1625,23 +1625,24 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .build();
     }
-    public static Courier getCourier(CourierLimit courierLimit){
+
+    public static Courier getCourier(CourierLimit courierLimit) {
         return Courier.builder()
-                .location(getLocation())
-                .courierLimit(courierLimit)
-                .courierTranslationList(getCourierTranslations())
-                .build();
-    }
-    public static CourierTranslation getCourierTranslation(CourierLimit courierLimit) {
-        return CourierTranslation.builder()
-                .id(1L)
-                .language(Language.builder().id(1L).code("ua").build())
-                .name("name")
-                .limitDescription("limitDescription")
-                .courier(getCourier(courierLimit))
-                .build();
+            .location(getLocation())
+            .courierLimit(courierLimit)
+            .courierTranslationList(getCourierTranslations())
+            .build();
     }
 
+    public static CourierTranslation getCourierTranslation(CourierLimit courierLimit) {
+        return CourierTranslation.builder()
+            .id(1L)
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("name")
+            .limitDescription("limitDescription")
+            .courier(getCourier(courierLimit))
+            .build();
+    }
 
     public static List<BagTranslation> getBagTransaltion() {
         return List.of(BagTranslation.builder()
@@ -1740,31 +1741,34 @@ public class ModelUtils {
             .description("test")
             .build());
     }
-    public static CreateCourierDto getCreateCourierDto(){
+
+    public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-                .locationId(1L)
-                .createCourierTranslationDtos(getCreateCourierTranslationDto())
-                .build();
+            .locationId(1L)
+            .createCourierTranslationDtos(getCreateCourierTranslationDto())
+            .build();
     }
 
-    public static Language getLanguage(){
+    public static Language getLanguage() {
         return Language.builder()
-                .id(1L)
-                .code("ua")
-                .build();
+            .id(1L)
+            .code("ua")
+            .build();
     }
+
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-                .limitDescription("Test")
-                .languageId(1L)
-                .name("Test")
-                .build());
+            .limitDescription("Test")
+            .languageId(1L)
+            .name("Test")
+            .build());
     }
+
     public static List<CourierTranslation> getCourierTranslations() {
         return List.of(CourierTranslation.builder()
-                .limitDescription("Test")
-                .name("Test")
-                .build());
+            .limitDescription("Test")
+            .name("Test")
+            .build());
     }
 
 }
