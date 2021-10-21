@@ -4,7 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
-import greencity.filters.UserSearchCriteria;
+import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
@@ -52,9 +52,9 @@ public class AdminUbsController {
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(@ApiIgnore Pageable page,
         @RequestParam String columnName,
         @RequestParam SortingOrder sortingOrder) {
-        UserSearchCriteria userSearchCriteria = new UserSearchCriteria();
+        UserFilterCriteria userFilterCriteria = new UserFilterCriteria();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userSearchCriteria));
+            .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria));
     }
 
     /**

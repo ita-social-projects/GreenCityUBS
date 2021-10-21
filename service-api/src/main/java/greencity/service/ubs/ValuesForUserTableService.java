@@ -4,7 +4,7 @@ import greencity.dto.FieldsForUsersTableDto;
 import greencity.dto.PageableDto;
 import greencity.dto.UserWithSomeOrderDetailDto;
 import greencity.entity.enums.SortingOrder;
-import greencity.filters.UserSearchCriteria;
+import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.Pageable;
 
 public interface ValuesForUserTableService {
@@ -15,5 +15,5 @@ public interface ValuesForUserTableService {
      * @author Stepan Tehlivets.
      */
     PageableDto<UserWithSomeOrderDetailDto> getAllFields(Pageable page, String columnName,
-        SortingOrder sortingOrder, UserSearchCriteria userSearchCriteria);
+        SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria);
 }
