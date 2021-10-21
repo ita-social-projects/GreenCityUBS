@@ -989,6 +989,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         payment.setOrderTime(orderTime);
         String endDate = convertMillisecondToLocalDate((Long) map.get("end_date"));
         payment.setSettlementDate(endDate);
+        double fees = (double) map.get("sender_commission");
+        payment.setFee((long) fees);
+        double amount = (double) map.get("amount");
+        payment.setAmount((long) amount * 100);
         return payment;
     }
 
