@@ -24,11 +24,18 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -925,5 +932,77 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
         orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
         return orderStatusPageDto;
+    }
+
+    private StatusRequestDtoLiqPay getStatusFromLiqPay(Order order) {
+        Long orderId = order.getId();
+        return StatusRequestDtoLiqPay.builder()
+            .publicKey(publicKey)
+            .action("status")
+            .orderId(orderId + "_" + order.getPayment()
+                .get(order.getPayment().size() - 1).getId().toString())
+            .version(3)
+            .build();
+    }
+
+    @Override
+    public Map<String, Object> getLiqPayStatus(Long orderId) throws Exception {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
+        Map<String, Object> response = liqPay.api("request", restClient.getStatusFromLiqPay(dto));
+        @Nullable
+        Payment payment = converterMapToEntity(response, order);
+        if (payment != null) {
+            paymentRepository.save(payment);
+            orderRepository.save(order);
+        }
+        return response;
+    }
+
+    private Payment converterMapToEntity(Map<String, Object> map, Order order) {
+        if (map == null) {
+            return null;
+        }
+        Payment payment = paymentRepository.findPaymentByOrder(order);
+        String status = (String) map.get("status");
+        if (status.equals("success")) {
+            payment.setResponseStatus(status);
+            payment.setPaymentStatus(PaymentStatus.PAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
+                OrderHistory.SYSTEM, order);
+        } else {
+            payment.setResponseStatus(status);
+        }
+        payment.setMaskedCard((String) map.get("sender_card_mask2"));
+        payment.setCurrency((String) map.get("currency"));
+        payment.setPaymentSystem("LiqPay");
+        payment.setCardType((String) map.get("sender_card_type"));
+        payment.setResponseDescription((String) map.get("err_description"));
+        payment.setPaymentId((Long) map.get("payment_id"));
+        payment.setComment((String) map.get("description"));
+        payment.setPaymentType(PaymentType.AUTO);
+        payment.setSenderCellPhone((String) map.get("sender_phone"));
+        String orderTime = convertMillisecondToLocalDateTime((long) map.get("create_date"));
+        payment.setOrderTime(orderTime);
+        String endDate = convertMillisecondToLocalDate((Long) map.get("end_date"));
+        payment.setSettlementDate(endDate);
+        return payment;
+    }
+
+    private String convertMillisecondToLocalDateTime(long millis) {
+        LocalDateTime date =
+            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Timestamp timestamp = Timestamp.valueOf(date);
+        return new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(timestamp);
+    }
+
+    private String convertMillisecondToLocalDate(long millis) {
+        LocalDate date =
+            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return dateFormatter.format(date);
     }
 }
