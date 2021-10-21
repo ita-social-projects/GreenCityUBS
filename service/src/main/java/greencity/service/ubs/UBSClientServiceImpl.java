@@ -961,6 +961,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Payment payment = paymentRepository.findPaymentByOrder(order);
         String status = (String) map.get("status");
         if (status.equals("success")) {
+            payment.setResponseStatus(status);
             payment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
