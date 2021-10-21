@@ -34,6 +34,7 @@ public class RestClient {
     private String viberBotToken;
     @Value("${ubs.viber.bot.url}")
     private String viberBotUrl;
+    private final static String orderId = "order_id";
     private final HttpServletRequest httpServletRequest;
     @Autowired
     LiqPay liqPay;
@@ -49,7 +50,7 @@ public class RestClient {
         request.put("amount", dto.getAmount());
         request.put("currency", dto.getCurrency());
         request.put("order_desc", dto.getOrderDescription());
-        request.put("order_id", dto.getOrderId());
+        request.put(orderId, dto.getOrderId());
         request.put("merchant_id", dto.getMerchantId());
         request.put("signature", dto.getSignature());
 
@@ -266,7 +267,7 @@ public class RestClient {
         params.put("amount", dto.getAmount().toString());
         params.put("currency", dto.getCurrency());
         params.put("description", dto.getDescription());
-        params.put("order_id", dto.getOrderId());
+        params.put(orderId, dto.getOrderId());
         params.put("version", dto.getVersion().toString());
         params.put("public_key", dto.getPublicKey());
         params.put("language", dto.getLanguage());
@@ -283,10 +284,10 @@ public class RestClient {
      * @author Vadym Makitra
      */
     public Map<String, String> getStatusFromLiqPay(StatusRequestDtoLiqPay dto) {
-        HashMap<String, String> params = new HashMap<String, String>();
+        HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("version", dto.getVersion().toString());
-        params.put("order_id", dto.getOrderId().toString());
+        params.put(orderId, dto.getOrderId());
         return params;
     }
 }
