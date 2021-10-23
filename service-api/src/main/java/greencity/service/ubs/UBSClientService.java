@@ -4,6 +4,7 @@ import greencity.dto.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.LiqPayPaymentException;
 
 import java.util.List;
 import java.util.Locale;
