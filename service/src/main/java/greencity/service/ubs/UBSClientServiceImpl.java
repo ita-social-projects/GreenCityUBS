@@ -892,7 +892,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
-        return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
+        return restClient.getDataFromLiqPay(paymentRequestDto);
     }
 
     private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
@@ -936,11 +936,18 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private StatusRequestDtoLiqPay getStatusFromLiqPay(Order order) {
         Long orderId = order.getId();
+
+        Long paymentId = 0L;
+        try {
+            paymentId = order.getPayment().get(order.getPayment().size() - 1).getId();
+        } catch (IndexOutOfBoundsException e) {
+            throw new LiqPayPaymentException(ORDER_WITH_CURRENT_ID_NOT_FOUND);
+        }
+
         return StatusRequestDtoLiqPay.builder()
             .publicKey(publicKey)
             .action("status")
-            .orderId(orderId + "_" + order.getPayment()
-                .get(order.getPayment().size() - 1).getId().toString())
+            .orderId(orderId + "_" + paymentId.toString())
             .version(3)
             .build();
     }
@@ -950,13 +957,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
-        Map<String, Object> response = liqPay.api("request", restClient.getStatusFromLiqPay(dto));
+        Map<String, Object> response = restClient.getStatusFromLiqPay(dto);
         @Nullable
         Payment payment = converterMapToEntity(response, order);
-        if (payment != null) {
-            paymentRepository.save(payment);
-            orderRepository.save(order);
+        if (payment == null) {
+            throw new LiqPayPaymentException(LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND);
         }
+        paymentRepository.save(payment);
+        orderRepository.save(order);
         return response;
     }
 
@@ -970,12 +978,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             payment.setResponseStatus(status);
             payment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            setPaymentInfo(map, payment);
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
-        } else {
+        } else if (status.equals("failure")) {
             payment.setResponseStatus(status);
+            payment.setPaymentStatus(PaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            setPaymentInfo(map, payment);
         }
+        return payment;
+    }
+
+    private void setPaymentInfo(Map<String, Object> map, Payment payment) {
         payment.setMaskedCard((String) map.get("sender_card_mask2"));
         payment.setCurrency((String) map.get("currency"));
         payment.setPaymentSystem("LiqPay");
@@ -993,7 +1009,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         payment.setFee((long) fees);
         double amount = (double) map.get("amount");
         payment.setAmount((long) amount * 100);
-        return payment;
     }
 
     private String convertMillisecondToLocalDateTime(long millis) {
