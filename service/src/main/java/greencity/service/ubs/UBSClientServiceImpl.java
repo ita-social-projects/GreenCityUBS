@@ -892,7 +892,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
-        return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
+        return restClient.getDataFromLiqPay(paymentRequestDto);
     }
 
     private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
@@ -957,7 +957,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
-        Map<String, Object> response = liqPay.api("request", restClient.getStatusFromLiqPay(dto));
+        Map<String, Object> response = restClient.getStatusFromLiqPay(dto);
         @Nullable
         Payment payment = converterMapToEntity(response, order);
         if (payment == null) {

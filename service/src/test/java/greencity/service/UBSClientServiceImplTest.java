@@ -788,8 +788,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(restClient.getDataFromLiqPay(any())).thenReturn(value);
-        when(liqPay.cnb_form(any())).thenReturn("Test Values");
+        when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
@@ -800,7 +799,6 @@ class UBSClientServiceImplTest {
         verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
         verify(restClient).getDataFromLiqPay(any());
-        verify(liqPay).cnb_form(any());
     }
 
     @Test
