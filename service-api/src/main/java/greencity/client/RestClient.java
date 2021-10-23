@@ -261,7 +261,7 @@ public class RestClient {
      * @return {@link String}
      * @author Vadym Makitra.
      */
-    public Map<String, String> getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
+    public String getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
         HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("amount", dto.getAmount().toString());
@@ -273,7 +273,7 @@ public class RestClient {
         params.put("language", dto.getLanguage());
         params.put("result_url", dto.getResultUrl());
         params.put("paytypes", dto.getPaytypes());
-        return params;
+        return liqPay.cnb_form(params);
     }
 
     /**
@@ -283,11 +283,11 @@ public class RestClient {
      * @return {@link Map}
      * @author Vadym Makitra
      */
-    public Map<String, String> getStatusFromLiqPay(StatusRequestDtoLiqPay dto) {
+    public Map<String, Object> getStatusFromLiqPay(StatusRequestDtoLiqPay dto) throws Exception {
         HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("version", dto.getVersion().toString());
         params.put(orderId, dto.getOrderId());
-        return params;
+        return liqPay.api("request", params);
     }
 }
