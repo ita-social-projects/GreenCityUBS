@@ -38,9 +38,9 @@ public interface OrdersAdminsPageService {
     /**
      * Method that return list of unblocked orders.
      *
-     * @param userUuid of {@link String}
-     * @param orders   of {@link List}
-     * @param employeeId   of {@link Long}
+     * @param userUuid   of {@link String}
+     * @param orders     of {@link List}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
     List<Long> unblockOrder(String userUuid, List<Long> orders, Long employeeId);
@@ -48,8 +48,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's status.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
@@ -58,8 +58,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's date of export.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
@@ -68,8 +68,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's time of export.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
@@ -78,8 +78,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's receiving station.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
@@ -88,9 +88,9 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's responsible employee.
      *
-     * @param employee of {@link String}
-     * @param ordersId of {@link List}
-     * @param position of {@link Long}
+     * @param employee   of {@link String}
+     * @param ordersId   of {@link List}
+     * @param position   of {@link Long}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */

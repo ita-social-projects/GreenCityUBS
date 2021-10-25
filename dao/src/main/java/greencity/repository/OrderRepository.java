@@ -150,7 +150,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = :order_status WHERE employee_id = :employee_id", nativeQuery = true)
+    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = :order_status WHERE employee_id = :employee_id",
+        nativeQuery = true)
     void changeStatusForAllOrders(@Param("order_status") String status, @Param("employee_id") Long employeeId);
 
     /**
@@ -159,7 +160,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET DATE_OF_EXPORT = :date_of_export WHERE employee_id = :employee_id", nativeQuery = true)
+    @Query(value = "UPDATE ORDERS SET DATE_OF_EXPORT = :date_of_export WHERE employee_id = :employee_id",
+        nativeQuery = true)
     void changeDateOfExportForAllOrders(@Param("date_of_export") LocalDate date, @Param("employee_id") Long employeeId);
 
     /**
@@ -168,8 +170,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET DELIVER_FROM = :deliver_from WHERE employee_id = :employee_id", nativeQuery = true)
-    void changeDeliverFromForAllOrders(@Param("deliver_from") LocalDateTime time, @Param("employee_id") Long employeeId);
+    @Query(value = "UPDATE ORDERS SET DELIVER_FROM = :deliver_from WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeDeliverFromForAllOrders(@Param("deliver_from") LocalDateTime time,
+        @Param("employee_id") Long employeeId);
 
     /**
      * Method changes deliver_to for all not blocked orders.
@@ -186,8 +190,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION = :receiving_station WHERE employee_id = :employee_id", nativeQuery = true)
-    void changeReceivingStationForAllOrders(@Param("receiving_station") String station, @Param("employee_id") Long employeeId);
+    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION = :receiving_station WHERE employee_id = :employee_id",
+        nativeQuery = true)
+    void changeReceivingStationForAllOrders(@Param("receiving_station") String station,
+        @Param("employee_id") Long employeeId);
 
     /**
      * Method sets employee_id and makes blocked_status 'true' for all not blocked
@@ -196,7 +202,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE", nativeQuery = true)
+    @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE",
+        nativeQuery = true)
     void setBlockedEmployeeForAllOrders(@Param("employee_id") Long id);
 
     /**
@@ -205,6 +212,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id", nativeQuery = true)
+    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id",
+        nativeQuery = true)
     void unblockAllOrders(@Param("employee_id") Long employeeId);
 }

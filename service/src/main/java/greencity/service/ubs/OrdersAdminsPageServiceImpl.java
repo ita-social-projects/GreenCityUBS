@@ -140,7 +140,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
         Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(userUuid).getRecipientEmail())
-                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         switch (columnName) {
             case "orderStatus":
                 return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employeeId));
@@ -149,7 +149,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "timeOfExport":
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
             case "receivingStation":
-                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value,  employeeId));
+                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             case "responsibleManager":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
             case "responsibleCaller":
@@ -358,7 +358,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, Long employeeId) {
+    public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
+        Long employeeId) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
