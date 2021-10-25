@@ -5,7 +5,7 @@ import greencity.dto.UserWithSomeOrderDetailDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.filters.UserSearchCriteria;
+import greencity.filters.UserFilterCriteria;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import lombok.AllArgsConstructor;
@@ -25,8 +25,8 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
 
     @Override
     public PageableDto<UserWithSomeOrderDetailDto> getAllFields(Pageable page, String columnName,
-        SortingOrder sortingOrder, UserSearchCriteria userSearchCriteria) {
-        Page<User> users = userTableRepo.findAll(userSearchCriteria, columnName, sortingOrder, page);
+        SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
+        Page<User> users = userTableRepo.findAll(userFilterCriteria, columnName, sortingOrder, page);
         List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
         for (User u : users) {
             UserWithSomeOrderDetailDto allFieldsFromTableDto = mapToDto(u);

@@ -7,6 +7,7 @@ import greencity.entity.user.ubs.UBSuser;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public interface UBSClientService {
     /**
@@ -147,14 +148,15 @@ public interface UBSClientService {
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid);
 
     /**
-     * Method that save user for current user.
+     * Method that update user.
      *
      * @param uuid current {@link String} user`s uuid;
      * @param dto  user`s date {@link UserProfileDto} user;
-     * @return {@link UserProfileDto} contains all information needed save user;
-     * @author Liubomyr Bratakh
+     * @return {@link UserProfileDto} contains all information needed for updating
+     *         user;
+     * @author Liubomyr Bratakh.
      */
-    UserProfileDto saveProfileData(String uuid, UserProfileDto dto);
+    UserProfileDto updateProfileData(String uuid, UserProfileDto dto);
 
     /**
      * Method that get user profile for current user.
@@ -265,11 +267,10 @@ public interface UBSClientService {
     /**
      * Method validates received payment response.
      * 
-     * @param dto       {@link PaymentResponseDtoLiqPay}
-     * @param signature {@link String} signature that we get from LiqPay
+     * @param dto {@link PaymentResponseDtoLiqPay}
      * @author Vadym Makitra
      */
-    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature);
+    void validateLiqPayPayment(PaymentResponseDtoLiqPay dto);
 
     /**
      * Method that returns order info for surcharge.
@@ -278,4 +279,13 @@ public interface UBSClientService {
      * @author Igor Boykov
      */
     OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId);
+
+    /**
+     * Method for get info about payment status from LiqPay.
+     * 
+     * @param orderId - current order id.
+     * @return {@link Map}
+     * @author Vadym Makitra
+     */
+    Map<String, Object> getLiqPayStatus(Long orderId) throws Exception;
 }

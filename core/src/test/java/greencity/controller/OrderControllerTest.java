@@ -241,18 +241,16 @@ class OrderControllerTest {
     }
 
     @Test
-    void reciveLiqPayOrder() throws Exception {
-        PaymentResponseDtoLiqPay dto = new PaymentResponseDtoLiqPay();
+    void receiveLiqPayOrder() throws Exception {
+        PaymentResponseDtoLiqPay dto = ModelUtils.getPaymentResponceDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponce = objectMapper.writeValueAsString(dto);
+        String gotInfo = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
-            .content(jsonResponce)
+            .content(gotInfo)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).validateLiqPayPayment(anyObject(), eq(null));
     }
 
 }

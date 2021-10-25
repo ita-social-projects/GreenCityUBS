@@ -153,12 +153,13 @@ public interface SuperAdminService {
     /**
      * Method for edit limit description.
      *
-     * @param id               - id of courier
+     * @param courierId        - id of courier
      * @param limitDescription - new limit description.
+     * @param languageId       - id of current language.
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setLimitDescription(Long id, String limitDescription);
+    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription, Long languageId);
 
     /**
      * Method for include bag into minimum set of package.
@@ -177,4 +178,12 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     GetTariffServiceDto excludeBag(Integer id);
+
+    /**
+     * Method for edit info about tariff.
+     * 
+     * @param dto {@link EditTariffInfoDto}
+     * @return {@link EditTariffInfoDto}
+     */
+    EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
 }

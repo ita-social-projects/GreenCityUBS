@@ -380,4 +380,9 @@ public class ModelUtils {
                 .build());
     }
 
+    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
+        return PaymentResponseDtoLiqPay.builder()
+            .data("Test Data")
+            .signature("Test Signature").build();
+    }
 }

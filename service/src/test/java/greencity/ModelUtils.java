@@ -1626,10 +1626,21 @@ public class ModelUtils {
             .build();
     }
 
-    public static Language getLanguage() {
-        return Language.builder()
+    public static Courier getCourier(CourierLimit courierLimit) {
+        return Courier.builder()
+            .location(getLocation())
+            .courierLimit(courierLimit)
+            .courierTranslationList(getCourierTranslations())
+            .build();
+    }
+
+    public static CourierTranslation getCourierTranslation(CourierLimit courierLimit) {
+        return CourierTranslation.builder()
             .id(1L)
-            .code("ua")
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("name")
+            .limitDescription("limitDescription")
+            .courier(getCourier(courierLimit))
             .build();
     }
 
@@ -1669,6 +1680,95 @@ public class ModelUtils {
                 .newEcoNumber("123456")
                 .oldEcoNumber("22222")
                 .build());
+    }
+
+    public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
+        return PaymentResponseDtoLiqPay.builder()
+            .data("Test Data")
+            .signature("Test Signature").build();
+    }
+
+    public static List<ServiceTranslationDto> getServiceTranslationDtoList() {
+        return List.of(ServiceTranslationDto.builder()
+            .description("test")
+            .languageId(1L)
+            .name("test")
+            .build());
+    }
+
+    public static CreateServiceDto getCreateServiceDto() {
+
+        return CreateServiceDto.builder()
+            .capacity(120)
+            .commission(50)
+            .locationId(1L)
+            .price(100)
+            .serviceTranslationDtoList(getServiceTranslationDtoList())
+
+            .build();
+    }
+
+    public static EditServiceDto getEditServiceDto() {
+        return EditServiceDto.builder()
+            .capacity(120)
+            .commission(50)
+            .locationId(1L)
+            .price(100)
+            .description("test")
+            .name("test")
+            .languageCode("ua")
+            .build();
+
+    }
+
+    public static Service getService() {
+        return Service.builder()
+            .capacity(120)
+            .basePrice(100)
+            .commission(50)
+            .fullPrice(150)
+            .createdAt(LocalDate.now())
+            .createdBy("Taras Ivanov")
+            .location(getLocation())
+            .serviceTranslations(getServiceTranslation())
+            .build();
+    }
+
+    public static List<ServiceTranslation> getServiceTranslation() {
+        return List.of(ServiceTranslation.builder()
+            .name("test")
+            .language(getLanguage())
+            .description("test")
+            .build());
+    }
+
+    public static CreateCourierDto getCreateCourierDto() {
+        return CreateCourierDto.builder()
+            .locationId(1L)
+            .createCourierTranslationDtos(getCreateCourierTranslationDto())
+            .build();
+    }
+
+    public static Language getLanguage() {
+        return Language.builder()
+            .id(1L)
+            .code("ua")
+            .build();
+    }
+
+    public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
+        return List.of(CreateCourierTranslationDto.builder()
+            .limitDescription("Test")
+            .languageId(1L)
+            .name("Test")
+            .build());
+    }
+
+    public static List<CourierTranslation> getCourierTranslations() {
+        return List.of(CourierTranslation.builder()
+            .limitDescription("Test")
+            .name("Test")
+            .build());
     }
 
 }

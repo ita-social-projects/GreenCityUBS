@@ -24,11 +24,18 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -161,9 +168,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay < dto.getPointsToUse()) {
-            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
-        } else {
+        if (sumToPay > dto.getPointsToUse()) {
             sumToPay -= dto.getPointsToUse();
         }
 
@@ -200,7 +205,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         Elements links = doc.select("a[href]");
         System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        return links.attr("href");
+        if (sumToPay == 0) {
+            return order.getId().toString();
+        } else {
+            return links.attr("href");
+        }
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
@@ -596,9 +605,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
-            if (orderResponseDto.getPointsToUse() > 0) {
-                throw new IncorrectValueException(SUM_IS_COVERED_BY_CERTIFICATES);
-            }
             return true;
         }
         return false;
@@ -677,9 +683,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
-
     @Override
-    public UserProfileDto saveProfileData(String uuid, UserProfileDto userProfileDto) {
+    public UserProfileDto updateProfileData(String uuid, UserProfileDto userProfileDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
@@ -692,6 +697,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        UBSuser ubSuserByEmailAndUserId =
+            ubsUserRepository.findUBSuserByEmailAndUserId(user.getRecipientEmail(), user.getId());
+        ubsUserRepository.save(ubSuserByEmailAndUserId);
         return mappedUserProfileDto;
     }
 
@@ -860,8 +868,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
@@ -885,7 +892,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
 
-        return liqPay.cnb_form(restClient.getDataFromLiqPay(paymentRequestDto));
+        return restClient.getDataFromLiqPay(paymentRequestDto);
     }
 
     private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
@@ -902,35 +909,15 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .serverUrl("https://ita-social-projects.github.io/GreenCityClient/")
+            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
             .build();
     }
 
     @Override
-    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto, String signature) {
-        if (dto.getStatus().equals("failure")) {
+    public void validateLiqPayPayment(PaymentResponseDtoLiqPay dto) {
+        if (!encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), privateKey)
+            .equals(dto.getSignature())) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (!encryptionUtil.formingResponseSignatureLiqPay(dto, privateKey)
-            .equals(signature)) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        if (dto.getStatus().equals("error")) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
-        }
-        String[] ids = dto.getOrderId().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getStatus().equals("success")) {
-            Payment orderPayment = modelMapper.map(dto, Payment.class);
-            orderPayment.setPaymentStatus(PaymentStatus.PAID);
-            orderPayment.setOrder(order);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM, order);
         }
     }
 
@@ -945,5 +932,96 @@ public class UBSClientServiceImpl implements UBSClientService {
         Double initialPrice = orderStatusPageDto.getOrderDiscountedPrice();
         orderStatusPageDto.setOrderExportedDiscountedPrice(exportedPrice - initialPrice);
         return orderStatusPageDto;
+    }
+
+    private StatusRequestDtoLiqPay getStatusFromLiqPay(Order order) {
+        Long orderId = order.getId();
+
+        Long paymentId = 0L;
+        try {
+            paymentId = order.getPayment().get(order.getPayment().size() - 1).getId();
+        } catch (IndexOutOfBoundsException e) {
+            throw new LiqPayPaymentException(ORDER_WITH_CURRENT_ID_NOT_FOUND);
+        }
+
+        return StatusRequestDtoLiqPay.builder()
+            .publicKey(publicKey)
+            .action("status")
+            .orderId(orderId + "_" + paymentId.toString())
+            .version(3)
+            .build();
+    }
+
+    @Override
+    public Map<String, Object> getLiqPayStatus(Long orderId) throws Exception {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
+        Map<String, Object> response = restClient.getStatusFromLiqPay(dto);
+        @Nullable
+        Payment payment = converterMapToEntity(response, order);
+        if (payment == null) {
+            throw new LiqPayPaymentException(LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND);
+        }
+        paymentRepository.save(payment);
+        orderRepository.save(order);
+        return response;
+    }
+
+    private Payment converterMapToEntity(Map<String, Object> map, Order order) {
+        if (map == null) {
+            return null;
+        }
+        Payment payment = paymentRepository.findPaymentByOrder(order);
+        String status = (String) map.get("status");
+        if (status.equals("success")) {
+            payment.setResponseStatus(status);
+            payment.setPaymentStatus(PaymentStatus.PAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            setPaymentInfo(map, payment);
+            eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
+            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
+                OrderHistory.SYSTEM, order);
+        } else if (status.equals("failure")) {
+            payment.setResponseStatus(status);
+            payment.setPaymentStatus(PaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            setPaymentInfo(map, payment);
+        }
+        return payment;
+    }
+
+    private void setPaymentInfo(Map<String, Object> map, Payment payment) {
+        payment.setMaskedCard((String) map.get("sender_card_mask2"));
+        payment.setCurrency((String) map.get("currency"));
+        payment.setPaymentSystem("LiqPay");
+        payment.setCardType((String) map.get("sender_card_type"));
+        payment.setResponseDescription((String) map.get("err_description"));
+        payment.setPaymentId((Long) map.get("payment_id"));
+        payment.setComment((String) map.get("description"));
+        payment.setPaymentType(PaymentType.AUTO);
+        payment.setSenderCellPhone((String) map.get("sender_phone"));
+        String orderTime = convertMillisecondToLocalDateTime((long) map.get("create_date"));
+        payment.setOrderTime(orderTime);
+        String endDate = convertMillisecondToLocalDate((Long) map.get("end_date"));
+        payment.setSettlementDate(endDate);
+        double fees = (double) map.get("sender_commission");
+        payment.setFee((long) fees);
+        double amount = (double) map.get("amount");
+        payment.setAmount((long) amount * 100);
+    }
+
+    private String convertMillisecondToLocalDateTime(long millis) {
+        LocalDateTime date =
+            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Timestamp timestamp = Timestamp.valueOf(date);
+        return new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(timestamp);
+    }
+
+    private String convertMillisecondToLocalDate(long millis) {
+        LocalDate date =
+            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return dateFormatter.format(date);
     }
 }
