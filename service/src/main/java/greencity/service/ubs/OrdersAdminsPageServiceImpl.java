@@ -38,6 +38,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final RestClient restClient;
+    private final UserRepository userRepository;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -138,25 +139,27 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
+        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(userUuid).getRecipientEmail())
+                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         switch (columnName) {
             case "orderStatus":
-                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employeeId));
             case "dateOfExport":
-                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employeeId));
             case "timeOfExport":
-                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
             case "receivingStation":
-                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value));
+                return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value,  employeeId));
             case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
             case "responsibleCaller":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
             case "responsibleLogicMan":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
             case "responsibleDriver":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L, employeeId));
             case "responsibleNavigator":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L, employeeId));
             default:
                 return createReturnForSwitchChangeOrder(new ArrayList<>());
         }
@@ -262,11 +265,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     /* methods for changing order */
     @Override
-    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            orderRepository.changeStatusForAllOrders(value);
+            orderRepository.changeStatusForAllOrders(value, employeeId);
         }
         for (Long orderId : ordersId) {
             try {
@@ -284,11 +287,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         LocalDate date = LocalDate.parse(value.substring(0, 10), DateTimeFormatter.ISO_LOCAL_DATE);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            orderRepository.changeDateOfExportForAllOrders(date);
+            orderRepository.changeDateOfExportForAllOrders(date, employeeId);
         }
         for (Long orderId : ordersId) {
             try {
@@ -306,15 +309,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
         LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
         LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ISO_LOCAL_TIME);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            orderRepository.changeDeliverFromForAllOrders(timeFrom);
-            orderRepository.changeDeliverToForAllOrders(timeTo);
+            orderRepository.changeDeliverFromForAllOrders(timeFrom, employeeId);
+            orderRepository.changeDeliverToForAllOrders(timeTo, employeeId);
         }
         for (Long orderId : ordersId) {
             try {
@@ -333,11 +336,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value) {
+    public synchronized List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            orderRepository.changeReceivingStationForAllOrders(station.getName());
+            orderRepository.changeReceivingStationForAllOrders(station.getName(), employeeId);
         }
         for (Long orderId : ordersId) {
             try {
@@ -355,7 +358,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position) {
+    public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, Long employeeId) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -414,13 +417,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
+    public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders, Long employeeId) {
         String email = restClient.findUserByUUid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            orderRepository.unblockAllOrders();
+            orderRepository.unblockAllOrders(employeeId);
         }
         List<Long> unblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
