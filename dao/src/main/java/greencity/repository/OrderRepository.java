@@ -102,22 +102,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
 
     /**
-     * Method change block status to 'true' for {@link Order} in order with certain
-     * 'id'.
-     */
-    @Modifying
-    @Query(value = "UPDATE ORDERS SET BLOCKED = TRUE WHERE ID = :order_id", nativeQuery = true)
-    void setOrderBlockedStatusBlocked(@Param("order_id") Long orderId);
-
-    /**
-     * Method change block status to 'false' for {@link Order} in order with certain
-     * 'id'.
-     */
-    @Modifying
-    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE WHERE ID = :order_id", nativeQuery = true)
-    void setOrderBlockedStatusUnblocked(@Param("order_id") Long orderId);
-
-    /**
      * Method which is find eco number from shop.
      *
      * @param ecoNumber {@link String}.

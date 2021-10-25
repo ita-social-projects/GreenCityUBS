@@ -40,10 +40,9 @@ public interface OrdersAdminsPageService {
      *
      * @param userUuid   of {@link String}
      * @param orders     of {@link List}
-     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> unblockOrder(String userUuid, List<Long> orders, Long employeeId);
+    List<Long> unblockOrder(String userUuid, List<Long> orders);
 
     /**
      * Method changing order's status.

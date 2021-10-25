@@ -418,13 +418,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders, Long employeeId) {
+    public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
         String email = restClient.findUserByUUid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            orderRepository.unblockAllOrders(employeeId);
+            orderRepository.unblockAllOrders(employee.getId());
         }
         List<Long> unblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
