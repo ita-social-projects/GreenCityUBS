@@ -38,8 +38,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method that return list of unblocked orders.
      *
-     * @param userUuid   of {@link String}
-     * @param orders     of {@link List}
+     * @param userUuid of {@link String}
+     * @param orders   of {@link List}
      * @author Liubomyr Pater
      */
     List<Long> unblockOrder(String userUuid, List<Long> orders);
