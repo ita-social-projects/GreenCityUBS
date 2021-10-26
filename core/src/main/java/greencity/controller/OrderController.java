@@ -377,9 +377,9 @@ public class OrderController {
     })
     @PostMapping(value = "/receiveLiqPayPayment")
     public ResponseEntity<HttpStatus> receiveLiqPayPayment(
-            PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
+        PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
-        if(HttpStatus.OK.is2xxSuccessful()) {
+        if (HttpStatus.OK.is2xxSuccessful()) {
             response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
         }
         return ResponseEntity.status(HttpStatus.OK).build();
