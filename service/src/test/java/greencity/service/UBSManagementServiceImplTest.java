@@ -412,6 +412,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkGetPaymentInfo() {
         Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getOverpayment());
         assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
@@ -437,6 +438,22 @@ class UBSManagementServiceImplTest {
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), user.getCurrentPoints().longValue());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
+    }
+
+    @Test
+    void returnOverpaymentThrowsException() {
+        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
+        dto.setBonuses(0L);
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderStatus(OrderStatus.DONE);
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.findById(order.getId())).thenReturn(
+            Optional.ofNullable(order));
+        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.empty());
+
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.returnOverpayment(1L, dto, "abc"));
     }
 
     @Test
@@ -1102,5 +1119,39 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findEcoNumberFromShop("22222", 1L)).thenReturn("123456");
         ubsManagementService.updateEcoNumberForOrder(ModelUtils.getEcoNumberDto(), 1L, "abc");
         verify(eventService, times(1)).save(any(), any(), any());
+    }
+
+    @Test
+    void checkAddUserViolationThrowsException() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setUser(user);
+        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
+        add.setOrderID(order.getId());
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
+
+        assertThrows(OrderViolationException.class,
+            () -> ubsManagementService.addUserViolation(add, new MultipartFile[2], "abc"));
+    }
+
+    @Test
+    void updateEcoNumberTrowsException() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
+    }
+
+    @Test
+    void saveAdminCommentThrowsException() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        AdminCommentDto adminCommentDto = getAdminCommentDto();
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
     }
 }
