@@ -1141,16 +1141,17 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
+        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.updateEcoNumberForOrder(ModelUtils.getEcoNumberDto(), 1L, "abc"));
+            () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
     }
 
     @Test
     void saveAdminCommentThrowsException() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
+        AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.saveAdminCommentToOrder(ModelUtils.getAdminCommentDto(), "abc"));
+            () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
     }
 }
