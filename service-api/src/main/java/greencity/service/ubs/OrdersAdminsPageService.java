@@ -47,46 +47,51 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's status.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value);
+    List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId);
 
     /**
      * Method changing order's date of export.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value);
+    List<Long> dateOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId);
 
     /**
      * Method changing order's time of export.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value);
+    List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId);
 
     /**
      * Method changing order's receiving station.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value);
+    List<Long> receivingStationForDevelopStage(List<Long> ordersId, String value, Long employeeId);
 
     /**
      * Method changing order's responsible employee.
      *
-     * @param employee of {@link String}
-     * @param ordersId of {@link List}
-     * @param position of {@link Long}
+     * @param employee   of {@link String}
+     * @param ordersId   of {@link List}
+     * @param position   of {@link Long}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position);
+    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, Long employeeId);
 }

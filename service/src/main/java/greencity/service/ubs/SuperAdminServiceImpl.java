@@ -309,7 +309,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .courierTranslationList(dto.getCreateCourierTranslationDtos().stream()
                 .map(courierTranslationDtos -> CourierTranslation.builder()
                     .language(languageRepository.findById(courierTranslationDtos.getLanguageId()).orElseThrow(
-                        () -> new LocationNotFoundException(
+                        () -> new LanguageNotFoundException(
                             ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + courierTranslationDtos.getLanguageId())))
                     .name(courierTranslationDtos.getName())
                     .limitDescription(courierTranslationDtos.getLimitDescription())

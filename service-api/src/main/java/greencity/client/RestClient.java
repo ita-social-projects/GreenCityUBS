@@ -34,6 +34,7 @@ public class RestClient {
     private String viberBotToken;
     @Value("${ubs.viber.bot.url}")
     private String viberBotUrl;
+    private static final String orderId = "order_id";
     private final HttpServletRequest httpServletRequest;
     @Autowired
     LiqPay liqPay;
@@ -49,7 +50,7 @@ public class RestClient {
         request.put("amount", dto.getAmount());
         request.put("currency", dto.getCurrency());
         request.put("order_desc", dto.getOrderDescription());
-        request.put("order_id", dto.getOrderId());
+        request.put(orderId, dto.getOrderId());
         request.put("merchant_id", dto.getMerchantId());
         request.put("signature", dto.getSignature());
 
@@ -260,18 +261,33 @@ public class RestClient {
      * @return {@link String}
      * @author Vadym Makitra.
      */
-    public Map<String, String> getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
+    public String getDataFromLiqPay(PaymentRequestDtoLiqPay dto) {
         HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("amount", dto.getAmount().toString());
         params.put("currency", dto.getCurrency());
         params.put("description", dto.getDescription());
-        params.put("order_id", dto.getOrderId());
+        params.put(orderId, dto.getOrderId());
         params.put("version", dto.getVersion().toString());
         params.put("public_key", dto.getPublicKey());
         params.put("language", dto.getLanguage());
         params.put("result_url", dto.getResultUrl());
         params.put("paytypes", dto.getPaytypes());
-        return params;
+        return liqPay.cnb_form(params);
+    }
+
+    /**
+     * Method for getting info about LiqPay Status.
+     * 
+     * @param dto {@link StatusRequestDtoLiqPay}
+     * @return {@link Map}
+     * @author Vadym Makitra
+     */
+    public Map<String, Object> getStatusFromLiqPay(StatusRequestDtoLiqPay dto) throws Exception {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("action", dto.getAction());
+        params.put("version", dto.getVersion().toString());
+        params.put(orderId, dto.getOrderId());
+        return liqPay.api("request", params);
     }
 }
