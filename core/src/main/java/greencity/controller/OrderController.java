@@ -16,8 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -375,8 +377,11 @@ public class OrderController {
     })
     @PostMapping(value = "/receiveLiqPayPayment")
     public ResponseEntity<HttpStatus> receiveLiqPayPayment(
-        PaymentResponseDtoLiqPay dto) {
+        PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+        }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
