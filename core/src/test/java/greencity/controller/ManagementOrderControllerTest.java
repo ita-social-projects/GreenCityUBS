@@ -5,6 +5,9 @@ import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.order.Certificate;
+import greencity.filters.CertificateFilterCriteria;
+import greencity.filters.CertificatePage;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -99,13 +103,12 @@ class ManagementOrderControllerTest {
 
     @Test
     void getAllCertificates() throws Exception {
-        Pageable pageable = PageRequest.of(0, 20);
+        CertificateFilterCriteria certificateFilterCriteria = new CertificateFilterCriteria();
+        CertificatePage certificatePage = new CertificatePage();
         mockMvc
-            .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates")
-                .param("sortingOrder", SortingOrder.DESC.toString())
-                .param("columnName", "points").param("pageable", pageable.toString()))
+            .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates"))
             .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(ubsManagementService).getAllCertificates(pageable, "points", SortingOrder.DESC);
+        verify(ubsManagementService).getCertificatesWithFilter(certificatePage,certificateFilterCriteria);
     }
 
     @Test

@@ -15,6 +15,7 @@ public class CertificateDtoForSearchingMapper extends AbstractConverter<Certific
             .creationDate(source.getCreationDate())
             .expirationDate(source.getExpirationDate())
             .points(source.getPoints())
+                .dateOfUse(source.getDateOfUse())
             .build();
         if (source.getOrder() == null) {
             build.setOrderId(null);
