@@ -30,6 +30,7 @@ public class CertificateCriteriaCRepo {
 
     /**
      * Constructor.
+     * 
      * @author Sikhovskiy Rostyslav
      */
     public CertificateCriteriaCRepo(EntityManager entityManager) {
@@ -39,6 +40,7 @@ public class CertificateCriteriaCRepo {
 
     /**
      * Method for finding certificates with some criteria.
+     * 
      * @author Sikhovskiy Rostyslav
      * @return Pages of certificates with filtering and sorting data
      */
@@ -87,19 +89,19 @@ public class CertificateCriteriaCRepo {
         Root<Certificate> certificateRoot) {
         List<Predicate> predicates = new ArrayList<>();
         if (Objects.nonNull(certificateFilterCriteria.getCertificateStatus())
-        && certificateFilterCriteria.getCertificateStatus().length != 0) {
-                CriteriaBuilder.In<CertificateStatus> certificateStatus =
-                    criteriaBuilder.in(certificateRoot.get("certificateStatus"));
-                Arrays.stream(certificateFilterCriteria.getCertificateStatus())
-                    .forEach(certificateStatus::value);
-                predicates.add(certificateStatus);
+            && certificateFilterCriteria.getCertificateStatus().length != 0) {
+            CriteriaBuilder.In<CertificateStatus> certificateStatus =
+                criteriaBuilder.in(certificateRoot.get("certificateStatus"));
+            Arrays.stream(certificateFilterCriteria.getCertificateStatus())
+                .forEach(certificateStatus::value);
+            predicates.add(certificateStatus);
         }
         if (Objects.nonNull(certificateFilterCriteria.getPoints())
-        && certificateFilterCriteria.getPoints().length != 0) {
-                CriteriaBuilder.In<Integer> points = criteriaBuilder.in(certificateRoot.get("points"));
-                Arrays.stream(certificateFilterCriteria.getPoints())
-                    .forEach(points::value);
-                predicates.add(points);
+            && certificateFilterCriteria.getPoints().length != 0) {
+            CriteriaBuilder.In<Integer> points = criteriaBuilder.in(certificateRoot.get("points"));
+            Arrays.stream(certificateFilterCriteria.getPoints())
+                .forEach(points::value);
+            predicates.add(points);
         }
         if (Objects.nonNull(certificateFilterCriteria.getExpirationDateFrom())
             && Objects.nonNull(certificateFilterCriteria.getExpirationDateTo())) {
