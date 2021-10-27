@@ -170,7 +170,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PutMapping("/editService/{id}")
-    public ResponseEntity<GetServiceDto> deleteService(
+    public ResponseEntity<GetServiceDto> editService(
         @Valid @PathVariable Long id,
         @RequestBody @Valid EditServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
