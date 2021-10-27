@@ -3,7 +3,6 @@ package greencity.dto;
 import greencity.entity.enums.CertificateStatus;
 import lombok.*;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
 
 @Getter
