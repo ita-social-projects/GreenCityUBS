@@ -30,7 +30,6 @@ public class CertificateCriteriaCRepo {
 
     /**
      * Constructor.
-     * 
      * @author Sikhovskiy Rostyslav
      */
     public CertificateCriteriaCRepo(EntityManager entityManager) {
@@ -40,7 +39,6 @@ public class CertificateCriteriaCRepo {
 
     /**
      * Method for finding certificates with some criteria.
-     * 
      * @author Sikhovskiy Rostyslav
      * @return Pages of certificates with filtering and sorting data
      */
@@ -88,37 +86,35 @@ public class CertificateCriteriaCRepo {
     private Predicate getPredicate(CertificateFilterCriteria certificateFilterCriteria,
         Root<Certificate> certificateRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        if (Objects.nonNull(certificateFilterCriteria.getCertificateStatus())) {
-            if (certificateFilterCriteria.getCertificateStatus().length != 0) {
+        if (Objects.nonNull(certificateFilterCriteria.getCertificateStatus())
+        && certificateFilterCriteria.getCertificateStatus().length != 0) {
                 CriteriaBuilder.In<CertificateStatus> certificateStatus =
                     criteriaBuilder.in(certificateRoot.get("certificateStatus"));
                 Arrays.stream(certificateFilterCriteria.getCertificateStatus())
                     .forEach(certificateStatus::value);
                 predicates.add(certificateStatus);
-            }
         }
-        if (Objects.nonNull(certificateFilterCriteria.getPoints())) {
-            if (certificateFilterCriteria.getPoints().length != 0) {
+        if (Objects.nonNull(certificateFilterCriteria.getPoints())
+        && certificateFilterCriteria.getPoints().length != 0) {
                 CriteriaBuilder.In<Integer> points = criteriaBuilder.in(certificateRoot.get("points"));
                 Arrays.stream(certificateFilterCriteria.getPoints())
                     .forEach(points::value);
                 predicates.add(points);
-            }
         }
         if (Objects.nonNull(certificateFilterCriteria.getExpirationDateFrom())
-            & Objects.nonNull(certificateFilterCriteria.getExpirationDateTo())) {
+            && Objects.nonNull(certificateFilterCriteria.getExpirationDateTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("expirationDate").as(LocalDateTime.class),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateFrom()), LocalTime.MIN),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateTo()), LocalTime.MAX)));
         }
         if (Objects.nonNull(certificateFilterCriteria.getCreationDateFrom())
-            & Objects.nonNull(certificateFilterCriteria.getCreationDateTo())) {
+            && Objects.nonNull(certificateFilterCriteria.getCreationDateTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("creationDate").as(LocalDateTime.class),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateFrom()), LocalTime.MIN),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateTo()), LocalTime.MAX)));
         }
         if (Objects.nonNull(certificateFilterCriteria.getDateOfUseFrom())
-            & Objects.nonNull(certificateFilterCriteria.getDateOfUseTo())) {
+            && Objects.nonNull(certificateFilterCriteria.getDateOfUseTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("dateOfUse").as(LocalDateTime.class),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseFrom()), LocalTime.MIN),
                 LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseTo()), LocalTime.MAX)));
