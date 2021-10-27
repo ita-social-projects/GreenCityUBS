@@ -6,10 +6,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
-import greencity.entity.enums.SortingOrder;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
-import greencity.filters.SearchCriteria;
+import greencity.filters.*;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -59,12 +56,14 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+
     @GetMapping("/getAllCertificates")
-    @ApiPageable
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
-        @ApiIgnore Pageable pageable, @RequestParam String columnName, @RequestParam SortingOrder sortingOrder) {
+        CertificatePage certificatePage,
+        @ApiIgnore Pageable pageable,
+        CertificateFilterCriteria certificateFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllCertificates(pageable, columnName, sortingOrder));
+            .body(ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria));
     }
 
     /**

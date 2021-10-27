@@ -18,4 +18,5 @@ public class CertificateDtoForSearching {
     private Integer points;
     private LocalDate expirationDate;
     private LocalDate creationDate;
+    private LocalDate dateOfUse;
 }

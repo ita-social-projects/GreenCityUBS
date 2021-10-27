@@ -18,9 +18,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
-import greencity.filters.SearchCriteria;
+import greencity.filters.*;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -73,6 +71,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
+    private final CertificateCriteriaCRepo certificateCriteriaCRepo;
 
     /**
      * {@inheritDoc}
@@ -487,6 +486,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
             Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
         Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
+        return getAllCertificatesTranslationDto(certificates);
+    }
+
+    @Override
+    public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
+        CertificateFilterCriteria certificateFilterCriteria) {
+        Page<Certificate> certificates =
+            certificateCriteriaCRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
         return getAllCertificatesTranslationDto(certificates);
     }
 
