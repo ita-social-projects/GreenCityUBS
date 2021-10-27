@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 
-
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -90,6 +89,7 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+
 //
     @Test
     void editInfoAboutTariff() throws Exception {
@@ -97,10 +97,10 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(patch(ubsLink + "/editInfoAboutTariff")
-                .principal(principal)
-                .content(responseJSON)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -109,20 +109,20 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(patch(ubsLink + "/setAmountOfBag/" + 1L)
-                .principal(principal)
-                .content(responseJSON)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
     void editService() throws Exception {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
-        ObjectMapper objectMapper =  new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(ubsLink + "/editService/" + 1L)
-                .content(ServiceResponseDtoJSON)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .content(ServiceResponseDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }
