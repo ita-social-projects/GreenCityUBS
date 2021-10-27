@@ -59,12 +59,12 @@ public class ManagementOrderController {
 
     @GetMapping("/getAllCertificates")
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
-              CertificatePage certificatePage,
-              @ApiIgnore Pageable pageable,
-              CertificateFilterCriteria certificateFilterCriteria) {
-          return  ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getCertificatesWithFilter(certificatePage,certificateFilterCriteria));
+        CertificatePage certificatePage,
+        @ApiIgnore Pageable pageable,
+        CertificateFilterCriteria certificateFilterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria));
     }
-
 
     /**
      * Controller getting all certificates with sorting possibility.

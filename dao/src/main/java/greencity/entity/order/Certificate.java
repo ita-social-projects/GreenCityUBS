@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "creationDate",
-        "expirationDate","dateOfUse"})
+    "expirationDate", "dateOfUse"})
 @Table(name = "certificate")
 public class Certificate {
     @Id

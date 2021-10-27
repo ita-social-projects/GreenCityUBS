@@ -81,8 +81,7 @@ public interface UBSManagementService {
      * @author Sikhovskiy Rostyslav
      */
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
-                                                                      CertificateFilterCriteria certificateFilterCriteria);
-
+        CertificateFilterCriteria certificateFilterCriteria);
 
     /**
      * Method add a certificates.

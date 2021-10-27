@@ -19,5 +19,4 @@ public class CertificateFilterCriteria {
     private String dateOfUseFrom;
     private String dateOfUseTo;
     private Integer[] points;
-
 }

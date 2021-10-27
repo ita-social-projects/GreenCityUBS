@@ -108,7 +108,7 @@ class ManagementOrderControllerTest {
         mockMvc
             .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates"))
             .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(ubsManagementService).getCertificatesWithFilter(certificatePage,certificateFilterCriteria);
+        verify(ubsManagementService).getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
     }
 
     @Test

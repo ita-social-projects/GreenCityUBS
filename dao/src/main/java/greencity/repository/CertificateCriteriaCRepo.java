@@ -25,22 +25,33 @@ import java.util.Objects;
 @ToString
 @Repository
 public class CertificateCriteriaCRepo {
+    private final EntityManager entityManager;
+    private final CriteriaBuilder criteriaBuilder;
 
-    private  final EntityManager entityManager;
-    private  final CriteriaBuilder criteriaBuilder;
-
+    /**
+     * Constructor.
+     * 
+     * @author Sikhovskiy Rostyslav
+     */
     public CertificateCriteriaCRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
     }
 
+    /**
+     * Method for finding certificates with some criteria.
+     * 
+     * @author Sikhovskiy Rostyslav
+     * @return Pages of certificates with filtering and sorting data
+     */
+
     public Page<Certificate> findAllWithFilter(CertificatePage certificatePage,
-                                               CertificateFilterCriteria certificateFilterCriteria){
+        CertificateFilterCriteria certificateFilterCriteria) {
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
-        Predicate predicate = getPredicate(certificateFilterCriteria, certificateRoot );
+        Predicate predicate = getPredicate(certificateFilterCriteria, certificateRoot);
         criteriaQuery.where(predicate);
-        setOrder(certificatePage, criteriaQuery,certificateRoot);
+        setOrder(certificatePage, criteriaQuery, certificateRoot);
 
         TypedQuery<Certificate> typedQuery = entityManager.createQuery(criteriaQuery);
         typedQuery.setFirstResult(certificatePage.getPageNumber() * certificatePage.getPageSize());
@@ -49,7 +60,7 @@ public class CertificateCriteriaCRepo {
         Pageable pageable = getPageable(certificatePage);
         long certificatesCount = getCertificatesCount(predicate);
 
-        return new PageImpl<>(typedQuery.getResultList(),pageable,certificatesCount);
+        return new PageImpl<>(typedQuery.getResultList(), pageable, certificatesCount);
     }
 
     private long getCertificatesCount(Predicate predicate) {
@@ -60,59 +71,57 @@ public class CertificateCriteriaCRepo {
     }
 
     private Pageable getPageable(CertificatePage certificatePage) {
-        Sort sort = Sort.by(certificatePage.getSortDirection(),certificatePage.getSortBy());
-        return PageRequest.of(certificatePage.getPageNumber(),certificatePage.getPageSize(),sort);
+        Sort sort = Sort.by(certificatePage.getSortDirection(), certificatePage.getSortBy());
+        return PageRequest.of(certificatePage.getPageNumber(), certificatePage.getPageSize(), sort);
     }
 
     private void setOrder(CertificatePage certificatePage,
-                          CriteriaQuery<Certificate> criteriaQuery,
-                          Root<Certificate> certificateRoot) {
-        if(certificatePage.getSortDirection().equals(Sort.Direction.ASC)){
+        CriteriaQuery<Certificate> criteriaQuery,
+        Root<Certificate> certificateRoot) {
+        if (certificatePage.getSortDirection().equals(Sort.Direction.ASC)) {
             criteriaQuery.orderBy(criteriaBuilder.asc(certificateRoot.get(certificatePage.getSortBy())));
-        }
-        else {
+        } else {
             criteriaQuery.orderBy(criteriaBuilder.desc(certificateRoot.get(certificatePage.getSortBy())));
         }
     }
 
     private Predicate getPredicate(CertificateFilterCriteria certificateFilterCriteria,
-                                   Root<Certificate> certificateRoot) {
+        Root<Certificate> certificateRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        if (Objects.nonNull(certificateFilterCriteria.getCertificateStatus())){
-            if (certificateFilterCriteria.getCertificateStatus().length!=0){
-                CriteriaBuilder.In<CertificateStatus> certificateStatus = criteriaBuilder.
-                        in(certificateRoot.get("certificateStatus"));//якщо шо то тут as class string
+        if (Objects.nonNull(certificateFilterCriteria.getCertificateStatus())) {
+            if (certificateFilterCriteria.getCertificateStatus().length != 0) {
+                CriteriaBuilder.In<CertificateStatus> certificateStatus =
+                    criteriaBuilder.in(certificateRoot.get("certificateStatus"));
                 Arrays.stream(certificateFilterCriteria.getCertificateStatus())
-                        .forEach(certificateStatus::value);
+                    .forEach(certificateStatus::value);
                 predicates.add(certificateStatus);
             }
         }
-        if (Objects.nonNull(certificateFilterCriteria.getPoints())){
-            if (certificateFilterCriteria.getPoints().length!=0){
-                CriteriaBuilder.In<Integer> points = criteriaBuilder.
-                        in(certificateRoot.get("points"));//якщо шо то тут as class string
+        if (Objects.nonNull(certificateFilterCriteria.getPoints())) {
+            if (certificateFilterCriteria.getPoints().length != 0) {
+                CriteriaBuilder.In<Integer> points = criteriaBuilder.in(certificateRoot.get("points"));
                 Arrays.stream(certificateFilterCriteria.getPoints())
-                        .forEach(points::value);
+                    .forEach(points::value);
                 predicates.add(points);
             }
         }
-        if (Objects.nonNull(certificateFilterCriteria.getExpirationDateFrom()) &
-                Objects.nonNull(certificateFilterCriteria.getExpirationDateTo())){
+        if (Objects.nonNull(certificateFilterCriteria.getExpirationDateFrom())
+            & Objects.nonNull(certificateFilterCriteria.getExpirationDateTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("expirationDate").as(LocalDateTime.class),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getExpirationDateTo()), LocalTime.MAX)));
         }
-        if (Objects.nonNull(certificateFilterCriteria.getCreationDateFrom()) &
-                Objects.nonNull(certificateFilterCriteria.getCreationDateTo())){
+        if (Objects.nonNull(certificateFilterCriteria.getCreationDateFrom())
+            & Objects.nonNull(certificateFilterCriteria.getCreationDateTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("creationDate").as(LocalDateTime.class),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getCreationDateTo()), LocalTime.MAX)));
         }
-        if (Objects.nonNull(certificateFilterCriteria.getDateOfUseFrom()) &
-                Objects.nonNull(certificateFilterCriteria.getDateOfUseTo())){
+        if (Objects.nonNull(certificateFilterCriteria.getDateOfUseFrom())
+            & Objects.nonNull(certificateFilterCriteria.getDateOfUseTo())) {
             predicates.add(criteriaBuilder.between(certificateRoot.get("dateOfUse").as(LocalDateTime.class),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(certificateFilterCriteria.getDateOfUseTo()), LocalTime.MAX)));
         }
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
