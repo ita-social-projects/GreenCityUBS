@@ -385,4 +385,37 @@ public class ModelUtils {
             .data("Test Data")
             .signature("Test Signature").build();
     }
+
+    public static EditServiceDto getEditServiceDto() {
+        return EditServiceDto.builder()
+                .name("Бавовняна сумка")
+                .capacity(120)
+                .price(120)
+                .commission(50)
+                .description("Description")
+                .locationId(1L)
+                .languageCode("ua")
+                .build();
+    }
+
+    public static EditAmountOfBagDto getAmountOfSum() {
+        return EditAmountOfBagDto.builder()
+                .minAmountOfBigBags(1L)
+                .maxAmountOfBigBags(2L)
+                .languageId(1L)
+                .build();
+    }
+
+    public static EditTariffInfoDto getEditTariffInfoDto() {
+        return EditTariffInfoDto.builder()
+                .minAmountOfBigBag(2L)
+                .maxAmountOfBigBag(3L)
+                .minAmountOfOrder(1L)
+                .maxAmountOfOrder(2L)
+                .courierId(3L)
+                .bagId(2)
+                .limitDescription("dd")
+                .languageId(3L)
+                .build();
+    }
 }
