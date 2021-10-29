@@ -38,7 +38,9 @@ public class AdminUbsController {
 
     /**
      * Controller for obtaining all users that made at least one order.
-     *
+     * 
+     * @param columnName   {@link String}
+     * @param sortingOrder {@link SortingOrder}
      * @author Stepan Tehlivets.
      */
     @ApiOperation("Get users for the table")
@@ -51,8 +53,7 @@ public class AdminUbsController {
     @GetMapping("/usersAll")
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(@ApiIgnore Pageable page,
         @RequestParam String columnName,
-        @RequestParam SortingOrder sortingOrder) {
-        UserFilterCriteria userFilterCriteria = new UserFilterCriteria();
+        @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria));
     }
