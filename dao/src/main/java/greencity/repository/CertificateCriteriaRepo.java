@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @ToString
 @Repository
-public class CertificateCriteriaCRepo {
+public class CertificateCriteriaRepo {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -33,7 +33,7 @@ public class CertificateCriteriaCRepo {
      * 
      * @author Sikhovskiy Rostyslav
      */
-    public CertificateCriteriaCRepo(EntityManager entityManager) {
+    public CertificateCriteriaRepo(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
     }

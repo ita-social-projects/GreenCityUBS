@@ -71,7 +71,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
-    private final CertificateCriteriaCRepo certificateCriteriaCRepo;
+    private final CertificateCriteriaRepo certificateCriteriaRepo;
 
     /**
      * {@inheritDoc}
@@ -493,7 +493,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
         CertificateFilterCriteria certificateFilterCriteria) {
         Page<Certificate> certificates =
-            certificateCriteriaCRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
+            certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
         return getAllCertificatesTranslationDto(certificates);
     }
 
