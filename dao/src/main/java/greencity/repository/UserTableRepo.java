@@ -4,18 +4,17 @@ import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
 import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.*;
-import org.springframework.format.datetime.DateFormatter;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 
@@ -24,6 +23,8 @@ public class UserTableRepo {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private static final String ORDERS = "orders";
+    private static final String ORDER_DATE = "orderDate";
+    private static final String DATE_OF_REGISTRATION = "dateOfRegistration";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -89,12 +90,16 @@ public class UserTableRepo {
     private void setOrder(String column, SortingOrder sortingOrder, CriteriaQuery<User> criteriaQuery,
         Root<User> userRoot) {
         Expression<?> sortBy = userRoot.get("recipientName");
-
+        Optional<Join<User, ?>> first = userRoot.getJoins().stream().findFirst();
         if (nonNull(column)) {
-            if (column.equals("orderDate")) {
-                sortBy = criteriaBuilder.max(userRoot.getJoins().stream().findFirst().get().get("orderDate"));
+            if (column.equals(ORDER_DATE)) {
+                if (first.isPresent()) {
+                    sortBy = criteriaBuilder.max(first.get().get(ORDER_DATE));
+                }
             } else if (column.equals("number_of_orders")) {
-                sortBy = criteriaBuilder.count(userRoot.getJoins().stream().findFirst().get().get("user"));
+                if (first.isPresent()) {
+                    sortBy = criteriaBuilder.count(first.get().get("user"));
+                }
             } else if (column.equals("clientName")) {
                 sortBy = userRoot.get("recipientName");
             } else {
@@ -110,36 +115,42 @@ public class UserTableRepo {
 
     private Predicate orderDateFiltering(String[] dates, Root<User> userRoot) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.getJoins().stream()
-                .findFirst().get().get("orderDate").as(LocalDate.class), number);
+            if (orderJoin.isPresent()) {
+                return criteriaBuilder.greaterThanOrEqualTo(orderJoin.get().get(ORDER_DATE).as(LocalDate.class),
+                    number);
+            }
         } else if (dates[0].equals("0")) {
             LocalDate number = LocalDate.parse(dates[1], df);
-            return criteriaBuilder.lessThanOrEqualTo(userRoot.getJoins().stream()
-                .findFirst().get().get("orderDate").as(LocalDate.class), number);
+            if (orderJoin.isPresent()) {
+                return criteriaBuilder.lessThanOrEqualTo(orderJoin.get().get(ORDER_DATE).as(LocalDate.class), number);
+            }
         } else {
             LocalDate number1 = LocalDate.parse(dates[0], df);
             LocalDate number2 = LocalDate.parse(dates[1], df);
-            return criteriaBuilder.between(userRoot.getJoins().stream()
-                .findFirst().get().get("orderDate").as(LocalDate.class), number1, number2);
+            if (orderJoin.isPresent()) {
+                return criteriaBuilder.between(orderJoin.get().get(ORDER_DATE).as(LocalDate.class), number1, number2);
+            }
         }
+        return null;
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         if (dates.length == 1) {
             LocalDateTime number = LocalDateTime.parse(dates[0], df);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get("dateOfRegistration").as(LocalDateTime.class),
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),
                 number);
         } else if (dates[0].equals("0")) {
             LocalDateTime number = LocalDateTime.parse(dates[1], df);
-            return criteriaBuilder.lessThanOrEqualTo(userRoot.get("dateOfRegistration").as(LocalDateTime.class),
+            return criteriaBuilder.lessThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),
                 number);
         } else {
             LocalDateTime number1 = LocalDateTime.parse(dates[0], df);
             LocalDateTime number2 = LocalDateTime.parse(dates[1], df);
-            return criteriaBuilder.between(userRoot.get("dateOfRegistration").as(LocalDateTime.class), number1,
+            return criteriaBuilder.between(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class), number1,
                 number2);
         }
     }
