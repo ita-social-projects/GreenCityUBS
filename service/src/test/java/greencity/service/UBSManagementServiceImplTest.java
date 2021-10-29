@@ -19,6 +19,8 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
+import greencity.filters.CertificateFilterCriteria;
+import greencity.filters.CertificatePage;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
@@ -127,6 +129,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     LanguageRepository languageRepository;
+
+    @Mock
+    private CertificateCriteriaRepo certificateCriteriaRepo;
 
     private void getMocksBehavior() {
 
@@ -1153,5 +1158,24 @@ class UBSManagementServiceImplTest {
         AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(OrderNotFoundException.class,
             () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
+    }
+
+    @Test
+    void getCertificatesWithFilter() {
+        CertificateFilterCriteria certificateFilterCriteria = new CertificateFilterCriteria();
+        CertificatePage certificatePage = new CertificatePage();
+        List<Certificate> certificateList = Arrays.asList(new Certificate(), new Certificate());
+        Pageable pageable = PageRequest.of(certificatePage.getPageNumber(), certificatePage.getPageSize());
+        Page<Certificate> certificates = new PageImpl<>(certificateList, pageable, 1L);
+
+        when(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria))
+            .thenReturn(certificates);
+
+        ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
+
+        verify(certificateCriteriaRepo).findAllWithFilter(certificatePage, certificateFilterCriteria);
+        assertEquals(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria),
+            certificates);
+
     }
 }
