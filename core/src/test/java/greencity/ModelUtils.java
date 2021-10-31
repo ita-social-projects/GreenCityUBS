@@ -354,7 +354,6 @@ public class ModelUtils {
             .build();
     }
 
-
     public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
         return AssignEmployeesForOrderDto.builder()
             .orderId(1L)

@@ -132,9 +132,9 @@ class SuperAdminControllerTest {
         String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/createService")
-                .principal(principal)
-                .content(ServiceResponceDtoJSON)
-                .contentType(MediaType.APPLICATION_JSON))
+            .principal(principal)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
