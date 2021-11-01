@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.web.client.RestTemplate;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
@@ -390,6 +391,22 @@ class UBSClientServiceImplTest {
             .thenThrow(OrderNotFoundException.class);
         assertThrows(OrderNotFoundException.class,
             () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L));
+    }
+
+    @Test
+    void markUserAsDeactivatedByIdThrowsNotFoundException() {
+        Exception thrown = assertThrows(NotFoundException.class,
+            () -> ubsService.markUserAsDeactivated(1L));
+        assertEquals(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, thrown.getMessage());
+    }
+
+    @Test
+    void markUserAsDeactivatedById() {
+        User user = ModelUtils.getUser();
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
+        ubsService.markUserAsDeactivated(1L);
+        verify(userRepository).findById(1L);
+        verify(restClient).markUserDeactivated(user.getUuid());
     }
 
     @Test
@@ -899,4 +916,5 @@ class UBSClientServiceImplTest {
 
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
+
 }
