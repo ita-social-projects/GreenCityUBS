@@ -1684,10 +1684,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getAddress(Address address) {
-        StringBuilder addressInfo = new StringBuilder();
-
         if (nonNull(address.getStreet())
             && !address.getStreet().isBlank()) {
+            StringBuilder addressInfo = new StringBuilder();
             addressInfo.append(address.getStreet());
             if (nonNull(address.getHouseNumber())
                 && !address.getHouseNumber().isBlank()) {
@@ -1701,9 +1700,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 && !address.getEntranceNumber().isBlank()) {
                 addressInfo.append(", " + address.getEntranceNumber());
             }
+            return addressInfo.toString();
         }
-
-        return addressInfo.toString();
+        return "-";
     }
 
     private Integer getBagsAmount(Order order) {
