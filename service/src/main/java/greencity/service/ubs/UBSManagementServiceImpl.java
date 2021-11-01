@@ -1684,10 +1684,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getAddress(Address address) {
-        return nonNull(address.getStreet())
-            ? address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
-                + address.getEntranceNumber()
-            : "-";
+        if (nonNull(address.getStreet())
+            && !address.getStreet().isBlank()) {
+            StringBuilder addressInfo = new StringBuilder();
+            addressInfo.append(address.getStreet());
+            if (nonNull(address.getHouseNumber())
+                && !address.getHouseNumber().isBlank()) {
+                addressInfo.append(", " + address.getHouseNumber());
+            }
+            if (nonNull(address.getHouseCorpus())
+                && !address.getHouseCorpus().isBlank()) {
+                addressInfo.append(", " + address.getHouseCorpus());
+            }
+            if (nonNull(address.getEntranceNumber())
+                && !address.getEntranceNumber().isBlank()) {
+                addressInfo.append(", " + address.getEntranceNumber());
+            }
+            return addressInfo.toString();
+        }
+        return "-";
     }
 
     private Integer getBagsAmount(Order order) {
