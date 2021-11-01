@@ -54,7 +54,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void createServiceTest() throws Exception {
+    void createTariffServiceTest() throws Exception {
         AddServiceDto dto = ModelUtils.getAddServiceDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
@@ -90,7 +90,6 @@ class SuperAdminControllerTest {
             .andExpect(status().isOk());
     }
 
-//
     @Test
     void editInfoAboutTariff() throws Exception {
         EditTariffInfoDto dto = ModelUtils.getEditTariffInfoDto();
@@ -123,6 +122,30 @@ class SuperAdminControllerTest {
         mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .content(ServiceResponseDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void createService() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getService() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getService")).andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteService() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
             .andExpect(status().isOk());
     }
 }
