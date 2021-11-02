@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
+import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
@@ -26,6 +27,7 @@ public class BigOrderTableRepository {
     private static final String USER = "user";
     private static final String UBS_USER = "ubsUser";
     private static final String ADDRESS = "address";
+    private static final String EMPLOYEE_ORDER_POSITION = "employeeOrderPositions";
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -78,23 +80,23 @@ public class BigOrderTableRepository {
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        if (nonNull(sc.getOrderStatuses())) {
+        if (nonNull(sc.getOrderStatus())) {
             CriteriaBuilder.In<OrderStatus> orderStatus = criteriaBuilder.in(orderRoot.get("orderStatus"));
-            Arrays.stream(sc.getOrderStatuses())
+            Arrays.stream(sc.getOrderStatus())
                 .forEach(orderStatus::value);
             predicates.add(orderStatus);
         }
-        if (nonNull(sc.getOrderPaymentStatuses())) {
+        if (nonNull(sc.getOrderPaymentStatus())) {
             CriteriaBuilder.In<OrderPaymentStatus> orderPaymentStatus =
                 criteriaBuilder.in(orderRoot.get("orderPaymentStatus"));
-            Arrays.stream(sc.getOrderPaymentStatuses())
+            Arrays.stream(sc.getOrderPaymentStatus())
                 .forEach(orderPaymentStatus::value);
             predicates.add(orderPaymentStatus);
         }
-        if (nonNull(sc.getReceivingStations())) {
+        if (nonNull(sc.getReceivingStation())) {
             CriteriaBuilder.In<String> receivingStation = criteriaBuilder.in(
                 criteriaBuilder.upper(orderRoot.get("receivingStation")));
-            Arrays.stream(sc.getReceivingStations())
+            Arrays.stream(sc.getReceivingStation())
                 .map(String::toUpperCase)
                 .forEach(receivingStation::value);
             predicates.add(receivingStation);
@@ -111,6 +113,24 @@ public class BigOrderTableRepository {
             predicates.add(criteriaBuilder.between(orderRoot.get("orderDate"),
                 LocalDateTime.of(LocalDate.parse(sc.getDateFrom()), LocalTime.MIN),
                 LocalDateTime.of(LocalDate.parse(sc.getDateTo()), LocalTime.MAX)));
+        }
+        if (nonNull(sc.getResponsibleCallerFirstName()) && nonNull(sc.getResponsibleCallerLastName())) {
+            CriteriaBuilder.In<String> responsibleCallerLastName =
+                criteriaBuilder
+                    .in(criteriaBuilder.upper(orderRoot.get(EMPLOYEE_ORDER_POSITION).get("employee").get("lastName")));
+            Arrays.stream(sc.getResponsibleCallerLastName())
+                .map(String::toUpperCase)
+                .forEach(responsibleCallerLastName::value);
+            CriteriaBuilder.In<String> responsibleCallerFirstName =
+                criteriaBuilder
+                    .in(criteriaBuilder.upper(orderRoot.get(EMPLOYEE_ORDER_POSITION).get("employee").get("firstName")));
+            Arrays.stream(sc.getResponsibleCallerFirstName())
+                .map(String::toUpperCase)
+                .forEach(responsibleCallerFirstName::value);
+            Predicate position =
+                criteriaBuilder.equal(orderRoot.get(EMPLOYEE_ORDER_POSITION).get("position").get("id"), 1L);
+            Predicate finale = criteriaBuilder.and(responsibleCallerFirstName, responsibleCallerLastName, position);
+            predicates.add(finale);
         }
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates);
