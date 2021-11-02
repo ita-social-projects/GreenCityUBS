@@ -179,7 +179,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser userData;
         userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
-        order = getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
+        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
         PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
         String html = restClient.getDataFromFondy(paymentRequestDto);
@@ -863,12 +863,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
 
         return buildOrderResponse(order, liqPayData
-            .replaceAll("\"", "")
-            .replaceAll("\n", ""));
+            .replace("\"", "")
+            .replace("\n", ""));
     }
 
-    private Order getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
-        int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
+    private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
+                          int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
@@ -886,7 +886,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
-        return order;
     }
 
     private LiqPayOrderResponse buildOrderResponse(Order order, String button) {
