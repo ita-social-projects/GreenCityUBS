@@ -1448,14 +1448,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
         List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
         for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
-            String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            String[] dtoFirstAndLastName = new String[0];
+            try {
+                dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            } catch (IndexOutOfBoundsException e) {
+                throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+            }
             Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
                 .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
             Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
                 .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
-            if (oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
+            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
