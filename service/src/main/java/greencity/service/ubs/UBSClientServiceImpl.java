@@ -868,7 +868,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
-                          int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
+        int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
