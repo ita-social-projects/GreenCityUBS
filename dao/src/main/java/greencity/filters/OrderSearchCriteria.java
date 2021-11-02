@@ -12,9 +12,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderSearchCriteria {
-    private OrderStatus[] orderStatuses;
-    private OrderPaymentStatus[] orderPaymentStatuses;
-    private String[] receivingStations;
+    private OrderStatus[] orderStatus;
+    private OrderPaymentStatus[] orderPaymentStatus;
+    private String[] responsibleCallerFirstName;
+    private String[] responsibleCallerLastName;
+    private String[] receivingStation;
     private String[] districts;
     private String dateFrom;
     private String dateTo;
