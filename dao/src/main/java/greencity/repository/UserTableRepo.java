@@ -82,7 +82,7 @@ public class UserTableRepo {
             predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
         }
         if (nonNull(us.getNumberOfOrders())) {
-            predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
+            predicateList.add(userBonusesFiltering(us.getNumberOfOrders(), userRoot));
         }
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
     }
@@ -114,7 +114,7 @@ public class UserTableRepo {
     }
 
     private Predicate orderDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
@@ -138,7 +138,7 @@ public class UserTableRepo {
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         if (dates.length == 1) {
             LocalDateTime number = LocalDateTime.parse(dates[0], df);
             return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),

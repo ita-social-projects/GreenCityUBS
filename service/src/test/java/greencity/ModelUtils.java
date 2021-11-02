@@ -1771,4 +1771,75 @@ public class ModelUtils {
             .build());
     }
 
+    public static List<OrderInfoDto> getOrderInfoDto() {
+        return List.of(OrderInfoDto.builder()
+            .id(1L)
+            .orderPrice(24.039)
+            .build());
+    }
+
+    public static CounterOrderDetailsDto getcounterOrderDetailsDto() {
+        return CounterOrderDetailsDto.builder()
+            .totalAmount(22.02D)
+            .totalConfirmed(12.34D)
+            .totalExported(32.2D)
+            .sumAmount(35.3D)
+            .sumConfirmed(31.54D)
+            .sumExported(366.44D)
+            .certificateBonus(23.4D)
+            .bonus(54.32D)
+            .totalSumAmount(1.32D)
+            .totalSumConfirmed(32.6D)
+            .totalSumExported(73.1D)
+            .orderComment("test")
+            .certificate(List.of("fds"))
+            .numberOrderFromShop(Set.of("dsd"))
+            .build();
+    }
+
+    public static Order getOrderUserFirst() {
+        return Order.builder()
+            .id(1l)
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(100)
+            .build();
+    }
+
+    public static Order getOrderUserSecond() {
+        return Order.builder()
+            .id(2l)
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(100)
+            .build();
+
+    }
+
+    public static List<Bag> getBaglist() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .build());
+    }
+
+    public static List<Certificate> getCertificateList() {
+        return List.of(Certificate.builder()
+            .code("uuid")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .creationDate(LocalDate.now())
+            .points(999)
+            .build());
+    }
+
+    public static OrderStatusTranslation getStatusTranslation() {
+        return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(1L).name("ds").build();
+    }
+
 }

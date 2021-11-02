@@ -337,6 +337,23 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<ServiceTranslationDto> getServiceTranslationDto() {
+        return List.of(ServiceTranslationDto.builder()
+            .name("Test")
+            .languageId(1L)
+            .description("Test")
+            .build());
+    }
+
+    public static CreateServiceDto createServiceDto() {
+        return CreateServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .price(100)
+            .serviceTranslationDtoList(getServiceTranslationDto())
+            .build();
+    }
+
     public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
         return AssignEmployeesForOrderDto.builder()
             .orderId(1L)
