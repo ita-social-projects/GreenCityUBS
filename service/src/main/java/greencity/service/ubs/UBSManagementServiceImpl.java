@@ -738,7 +738,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
-                .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
             .build();
