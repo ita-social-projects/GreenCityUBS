@@ -52,6 +52,9 @@ public class UserTableRepo {
         if (userFilterCriteria != null) {
             Predicate predicate = getPredicate(userFilterCriteria, userRoot);
             criteriaQuery.where(predicate);
+            if (userFilterCriteria.getNumberOfOrders() != null) {
+                criteriaQuery.having(userOrdersFiltering(userFilterCriteria.getNumberOfOrders(), userRoot));
+            }
         }
 
         TypedQuery<User> typedQuery = entityManager.createQuery(criteriaQuery);
@@ -79,9 +82,6 @@ public class UserTableRepo {
             predicateList.add(userViolationsFiltering(us.getNumberOfViolations(), userRoot));
         }
         if (nonNull(us.getNumberOfBonuses())) {
-            predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
-        }
-        if (nonNull(us.getNumberOfOrders())) {
             predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
         }
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
@@ -114,7 +114,7 @@ public class UserTableRepo {
     }
 
     private Predicate orderDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
@@ -138,7 +138,7 @@ public class UserTableRepo {
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         if (dates.length == 1) {
             LocalDateTime number = LocalDateTime.parse(dates[0], df);
             return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),
@@ -174,6 +174,23 @@ public class UserTableRepo {
             int number1 = Integer.parseInt(bonuses[0]);
             int number2 = Integer.parseInt(bonuses[1]);
             return criteriaBuilder.between(userRoot.get("currentPoints"), number1, number2);
+        }
+    }
+
+    private Predicate userOrdersFiltering(String[] bonuses, Root<User> userRoot) {
+        Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
+        Expression<Long> expression = null;
+        if (orderJoin.isPresent()) {
+            expression = criteriaBuilder.count(orderJoin.get().get("user"));
+        }
+        if (bonuses.length == 1) {
+            long number = Integer.parseInt(bonuses[0]);
+
+            return criteriaBuilder.greaterThan(expression, number);
+        } else {
+            long number1 = Integer.parseInt(bonuses[0]);
+            long number2 = Integer.parseInt(bonuses[1]);
+            return criteriaBuilder.between(expression, number1, number2);
         }
     }
 }
