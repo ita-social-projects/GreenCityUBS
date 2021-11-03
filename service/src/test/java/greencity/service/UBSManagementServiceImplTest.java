@@ -9,6 +9,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -132,6 +134,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private CertificateCriteriaRepo certificateCriteriaRepo;
+
+    @Mock
+    private OrderStatusTranslationRepository orderStatusTranslationRepository;
 
     private void getMocksBehavior() {
 
@@ -1176,6 +1181,65 @@ class UBSManagementServiceImplTest {
         verify(certificateCriteriaRepo).findAllWithFilter(certificatePage, certificateFilterCriteria);
         assertEquals(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria),
             certificates);
+    }
 
+    @Test
+    void getOrdersForUserTest() {
+        Order order1 = ModelUtils.getOrderUserFirst();
+        Order order2 = ModelUtils.getOrderUserSecond();
+        List<Order> orders = List.of(order1, order2);
+        OrderInfoDto info1 = OrderInfoDto.builder().id(1l).orderPrice(10).build();
+        OrderInfoDto info2 = OrderInfoDto.builder().id(2l).orderPrice(20).build();
+        when(orderRepository.getAllOrdersOfUser("uuid")).thenReturn(orders);
+        when(modelMapper.map(order1, OrderInfoDto.class)).thenReturn(info1);
+        when(modelMapper.map(order2, OrderInfoDto.class)).thenReturn(info2);
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order1));
+        when(orderRepository.getOrderDetails(2L)).thenReturn(Optional.ofNullable(order2));
+
+        ubsManagementService.getOrdersForUser("uuid");
+
+        verify(orderRepository).getAllOrdersOfUser("uuid");
+        verify(modelMapper).map(order1, OrderInfoDto.class);
+        verify(modelMapper).map(order2, OrderInfoDto.class);
+        verify(orderRepository).getOrderDetails(1L);
+        verify(orderRepository).getOrderDetails(2L);
+    }
+
+    @Test
+    void getOrderStatusDataTest() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        order.setAmountOfBagsOrdered(hashMap);
+        order.setConfirmedQuantity(hashMap);
+        order.setExportedQuantity(hashMap);
+        order.setPointsToUse(100);
+        Bag bag = ModelUtils.getBag().get();
+        List<Bag> bagArrayList = List.of(bag);
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(bagArrayList);
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
+            .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
+
+        ubsManagementService.getOrderStatusData(1L, 1L);
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository).getOrderDetails(1L);
+        verify(orderRepository).findById(1L);
+        verify(bagRepository, times(2)).findBagByOrderId(1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 1L);
+    }
+
+    @Test
+    void getOrderStatusDataThrowsUnexistingOrderExceptionTest() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderStatusData(100L, 1L);
+        });
     }
 }

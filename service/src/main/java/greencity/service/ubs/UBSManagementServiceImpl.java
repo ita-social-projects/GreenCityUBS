@@ -1448,14 +1448,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
         List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
         for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
-            String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            String[] dtoFirstAndLastName = new String[0];
+            try {
+                dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            } catch (IndexOutOfBoundsException e) {
+                throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+            }
             Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
                 .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
             Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
                 .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
-            if (oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
+            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
@@ -1684,10 +1689,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getAddress(Address address) {
-        return nonNull(address.getStreet())
-            ? address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
-                + address.getEntranceNumber()
-            : "-";
+        if (nonNull(address.getStreet())
+            && !address.getStreet().isBlank()) {
+            StringBuilder addressInfo = new StringBuilder();
+            addressInfo.append(address.getStreet());
+            if (nonNull(address.getHouseNumber())
+                && !address.getHouseNumber().isBlank()) {
+                addressInfo.append(", " + address.getHouseNumber());
+            }
+            if (nonNull(address.getHouseCorpus())
+                && !address.getHouseCorpus().isBlank()) {
+                addressInfo.append(", " + address.getHouseCorpus());
+            }
+            if (nonNull(address.getEntranceNumber())
+                && !address.getEntranceNumber().isBlank()) {
+                addressInfo.append(", " + address.getEntranceNumber());
+            }
+            return addressInfo.toString();
+        }
+        return "-";
     }
 
     private Integer getBagsAmount(Order order) {
