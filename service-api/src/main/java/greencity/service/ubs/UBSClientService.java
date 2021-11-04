@@ -259,10 +259,10 @@ public interface UBSClientService {
      * 
      * @param dto  {@link OrderResponseDto} user entered data;
      * @param uuid current {@link User}'s uuid;
-     * @return {@link PaymentRequestDto} which contains data to pay order out.
+     * @return {@link LiqPayOrderResponse} order id and liqpay payment button.
      * @author Vadym Makitra
      */
-    String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
+    LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
 
     /**
      * Method validates received payment response.
