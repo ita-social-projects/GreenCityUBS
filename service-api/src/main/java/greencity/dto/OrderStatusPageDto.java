@@ -35,4 +35,5 @@ public class OrderStatusPageDto {
     private List<BagInfoDto> bags;
     private Map<Integer, Integer> amountOfBagsExported;
     private Set<String> additionalOrders;
+    private Map<Integer, Integer> amountOfBagsConfirmed;
 }
