@@ -179,23 +179,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser userData;
         userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
-        Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
-            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
-
-        checkIfAddressHasBeenDeleted(address);
-
-        checkAddressUser(address, currentUser);
-        address.setAddressStatus(AddressStatus.IN_ORDER);
-
-        userData.setAddress(address);
-
-        if (userData.getAddress().getComment() == null) {
-            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
-        }
-
-        order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
-
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
         PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
         String html = restClient.getDataFromFondy(paymentRequestDto);
@@ -850,7 +834,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public String saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
+    public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
 
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
@@ -872,6 +856,21 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
+        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
+
+        PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
+
+        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+
+        String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
+
+        return buildOrderResponse(order, liqPayData
+            .replace("\"", "")
+            .replace("\n", ""));
+    }
+
+    private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
+        int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
         Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundOrderAddressException(
             ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
 
@@ -886,15 +885,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
         }
 
-        order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
+        formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+    }
 
-        PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
-
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-
-        return restClient.getDataFromLiqPay(paymentRequestDto);
+    private LiqPayOrderResponse buildOrderResponse(Order order, String button) {
+        return LiqPayOrderResponse.builder()
+            .orderId(order.getId())
+            .liqPayButton(button)
+            .build();
     }
 
     private PaymentRequestDtoLiqPay formLiqPayPaymentRequest(Long orderId, int sumToPay) {
