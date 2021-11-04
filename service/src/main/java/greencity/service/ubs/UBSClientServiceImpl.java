@@ -66,6 +66,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UBSManagementServiceImpl ubsManagementService;
     private final LocationTranslationRepository locationTranslationRepository;
     private final LiqPay liqPay;
+    private final LanguageRepository languageRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -378,7 +379,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     public List<OrderStatusPageDto> getOrdersForUser(String uuid, Long languageId) {
         List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
         List<OrderStatusPageDto> dto = new ArrayList<>();
-        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId(), languageId)));
+        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId(),
+            languageRepository.findById(languageId).get().getCode())));
         return dto;
     }
 
@@ -925,7 +927,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
-        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, languageId);
+        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId,
+            languageRepository.findById(languageId).get().getCode());
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
         amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));

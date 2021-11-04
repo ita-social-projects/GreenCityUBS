@@ -1226,7 +1226,7 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
 
-        ubsManagementService.getOrderStatusData(1L, 1L);
+        ubsManagementService.getOrderStatusData(1L, "ua");
 
         verify(orderRepository).getOrderDetails(1L);
         verify(certificateRepository).findCertificate(1L);
@@ -1239,7 +1239,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderStatusDataThrowsUnexistingOrderExceptionTest() {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
-            ubsManagementService.getOrderStatusData(100L, 1L);
+            ubsManagementService.getOrderStatusData(100L, "ua");
         });
     }
 }
