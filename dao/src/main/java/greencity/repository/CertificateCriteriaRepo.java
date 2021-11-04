@@ -2,10 +2,8 @@ package greencity.repository;
 
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.filters.OrderSearchCriteria;
 import lombok.ToString;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -22,7 +20,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 
