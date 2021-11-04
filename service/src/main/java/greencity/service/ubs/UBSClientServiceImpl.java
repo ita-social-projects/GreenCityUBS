@@ -928,7 +928,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId,
-            languageRepository.findById(languageId).get().getCode());
+            languageRepository.findById(languageId)
+                .orElseThrow(() -> new LanguageNotFoundException(LANGUAGE_IS_NOT_FOUND_BY_ID + languageId)).getCode());
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
         amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));
