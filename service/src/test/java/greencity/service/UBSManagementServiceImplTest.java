@@ -1219,20 +1219,20 @@ class UBSManagementServiceImplTest {
         List<Bag> bagArrayList = List.of(bag);
 
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(bagArrayList);
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
-
+        when(languageRepository.findIdByCode("ua")).thenReturn(1l);
         ubsManagementService.getOrderStatusData(1L, "ua");
 
         verify(orderRepository).getOrderDetails(1L);
         verify(certificateRepository).findCertificate(1L);
         verify(orderRepository).getOrderDetails(1L);
         verify(orderRepository).findById(1L);
-        verify(bagRepository, times(2)).findBagByOrderId(1L);
+        verify(languageRepository).findIdByCode("ua");
+        verify(bagRepository, times(1)).findAll();
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 1L);
     }
 
