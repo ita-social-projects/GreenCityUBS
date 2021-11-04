@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +49,10 @@ public class UserTableRepo {
         criteriaQuery.groupBy(userRoot.get("id"));
         setOrder(column, sortingOrder, criteriaQuery, userRoot);
         if (userFilterCriteria != null) {
-            Predicate predicate = getPredicate(userFilterCriteria, userRoot);
-            criteriaQuery.where(predicate);
-            if (userFilterCriteria.getNumberOfOrders() != null) {
-                criteriaQuery.having(userOrdersFiltering(userFilterCriteria.getNumberOfOrders(), userRoot));
-            }
+            Predicate predicateWhere = getPredicateForWhere(userFilterCriteria, userRoot);
+            Predicate predicateHaving = getPredicateForHaving(userFilterCriteria, userRoot);
+            criteriaQuery.where(predicateWhere);
+            criteriaQuery.having(predicateHaving);
         }
 
         TypedQuery<User> typedQuery = entityManager.createQuery(criteriaQuery);
@@ -69,12 +67,8 @@ public class UserTableRepo {
         return new PageImpl<>(resultList, pageable, resultList.size());
     }
 
-    private Predicate getPredicate(UserFilterCriteria us, Root<User> userRoot) {
+    private Predicate getPredicateForWhere(UserFilterCriteria us, Root<User> userRoot) {
         List<Predicate> predicateList = new ArrayList<>();
-
-        if (nonNull(us.getOrderDate())) {
-            predicateList.add(orderDateFiltering(us.getOrderDate(), userRoot));
-        }
         if (nonNull(us.getUserRegistrationDate())) {
             predicateList.add(userRegistrationDateFiltering(us.getUserRegistrationDate(), userRoot));
         }
@@ -84,6 +78,40 @@ public class UserTableRepo {
         if (nonNull(us.getNumberOfBonuses())) {
             predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
         }
+        return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+    }
+
+    private Predicate getPredicateForHaving(UserFilterCriteria us, Root<User> userRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+
+        if (nonNull(us.getOrderDate())) {
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
+            if (us.getOrderDate().length == 1) {
+                LocalDate number = LocalDate.parse(us.getOrderDate()[0], df);
+                orderJoin.ifPresent(userJoin -> predicateList.add(criteriaBuilder.greaterThanOrEqualTo(
+                    criteriaBuilder.max(userJoin.get(ORDER_DATE)).as(LocalDate.class),
+                    number)));
+            } else if (us.getOrderDate()[0].equals("0")) {
+                LocalDate number = LocalDate.parse(us.getOrderDate()[1], df);
+                orderJoin.ifPresent(userJoin -> predicateList.add(criteriaBuilder
+                    .lessThanOrEqualTo(criteriaBuilder.max(userJoin.get(ORDER_DATE)).as(LocalDate.class), number)));
+            } else {
+                LocalDate number1 = LocalDate.parse(us.getOrderDate()[0], df);
+                LocalDate number2 = LocalDate.parse(us.getOrderDate()[1], df);
+                if (orderJoin.isPresent()) {
+                    orderJoin.ifPresent(userJoin -> predicateList.add(criteriaBuilder.greaterThanOrEqualTo(
+                        criteriaBuilder.max(userJoin.get(ORDER_DATE)).as(LocalDate.class),
+                        number1)));
+                    orderJoin.ifPresent(userJoin -> predicateList.add(criteriaBuilder.lessThanOrEqualTo(
+                        criteriaBuilder.max(userJoin.get(ORDER_DATE)).as(LocalDate.class), number2)));
+                }
+            }
+        }
+        if (nonNull(us.getNumberOfOrders())) {
+            predicateList.add(userOrdersFiltering(us.getNumberOfOrders(), userRoot));
+        }
+
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
     }
 
@@ -113,44 +141,20 @@ public class UserTableRepo {
         }
     }
 
-    private Predicate orderDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
-        if (dates.length == 1) {
-            LocalDate number = LocalDate.parse(dates[0], df);
-            if (orderJoin.isPresent()) {
-                return criteriaBuilder.greaterThanOrEqualTo(orderJoin.get().get(ORDER_DATE).as(LocalDate.class),
-                    number);
-            }
-        } else if (dates[0].equals("0")) {
-            LocalDate number = LocalDate.parse(dates[1], df);
-            if (orderJoin.isPresent()) {
-                return criteriaBuilder.lessThanOrEqualTo(orderJoin.get().get(ORDER_DATE).as(LocalDate.class), number);
-            }
-        } else {
-            LocalDate number1 = LocalDate.parse(dates[0], df);
-            LocalDate number2 = LocalDate.parse(dates[1], df);
-            if (orderJoin.isPresent()) {
-                return criteriaBuilder.between(orderJoin.get().get(ORDER_DATE).as(LocalDate.class), number1, number2);
-            }
-        }
-        return null;
-    }
-
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         if (dates.length == 1) {
-            LocalDateTime number = LocalDateTime.parse(dates[0], df);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),
+            LocalDate number = LocalDate.parse(dates[0], df);
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class),
                 number);
         } else if (dates[0].equals("0")) {
-            LocalDateTime number = LocalDateTime.parse(dates[1], df);
-            return criteriaBuilder.lessThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class),
+            LocalDate number = LocalDate.parse(dates[1], df);
+            return criteriaBuilder.lessThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class),
                 number);
         } else {
-            LocalDateTime number1 = LocalDateTime.parse(dates[0], df);
-            LocalDateTime number2 = LocalDateTime.parse(dates[1], df);
-            return criteriaBuilder.between(userRoot.get(DATE_OF_REGISTRATION).as(LocalDateTime.class), number1,
+            LocalDate number1 = LocalDate.parse(dates[0], df);
+            LocalDate number2 = LocalDate.parse(dates[1], df);
+            return criteriaBuilder.between(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class), number1,
                 number2);
         }
     }
@@ -185,8 +189,7 @@ public class UserTableRepo {
         }
         if (bonuses.length == 1) {
             long number = Integer.parseInt(bonuses[0]);
-
-            return criteriaBuilder.greaterThan(expression, number);
+            return criteriaBuilder.greaterThanOrEqualTo(expression, number);
         } else {
             long number1 = Integer.parseInt(bonuses[0]);
             long number2 = Integer.parseInt(bonuses[1]);
