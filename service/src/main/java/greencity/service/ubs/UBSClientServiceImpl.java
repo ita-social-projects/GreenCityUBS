@@ -274,6 +274,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setUser(userRepository.findByUuid(uuid));
             address.setActual(true);
             address.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(address);
         } else {
             if (address.getAddressStatus().equals(AddressStatus.IN_ORDER)) {
                 forOrderAfterUpdate.setId(null);
@@ -288,8 +289,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             address.setUser(userRepository.findByUuid(uuid));
             address.setActual(true);
             address.setAddressStatus(AddressStatus.NEW);
+            addressRepo.save(address);
         }
-        addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);
     }
 

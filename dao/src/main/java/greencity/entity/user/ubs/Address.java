@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUsers", "user", "comment"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "user"})
 @Getter
 @Setter
 @Builder
