@@ -258,9 +258,9 @@ class UBSClientServiceImplTest {
             .recipientPhone("067894522")
             .build();
         UBSuser ubsUser = UBSuser.builder()
-                .user(user)
-                .id(1l)
-                .build();
+            .user(user)
+            .id(1l)
+            .build();
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
