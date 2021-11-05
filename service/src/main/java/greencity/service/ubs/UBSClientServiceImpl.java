@@ -136,7 +136,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
-        return modelMapper.map(currentUser, PersonalDataDto.class);
+        UBSuser ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+        PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
+        dto.setUbsUserId(ubsUser.getId());
+        return dto;
     }
 
     /**
@@ -524,7 +527,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getId() != null) {
             ubsUserFromDatabaseById =
-                ubsUserRepository.findById(dto.getId())
+                ubsUserRepository.findById(dto.getUbsUserId())
                     .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
                         + dto.getId()));
         }
