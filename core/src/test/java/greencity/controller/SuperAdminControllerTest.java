@@ -5,8 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.AddServiceDto;
-import greencity.dto.EditTariffServiceDto;
+import greencity.dto.*;
 import greencity.service.SuperAdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +22,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 
 import static greencity.ModelUtils.getUuid;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,7 +54,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void createServiceTest() throws Exception {
+    void createTariffServiceTest() throws Exception {
         AddServiceDto dto = ModelUtils.getAddServiceDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
@@ -86,6 +87,65 @@ class SuperAdminControllerTest {
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
             .content(ServiceResponseDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void editInfoAboutTariff() throws Exception {
+        EditTariffInfoDto dto = ModelUtils.getEditTariffInfoDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/editInfoAboutTariff")
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void setAmountOfSum() throws Exception {
+        EditAmountOfBagDto dto = ModelUtils.getAmountOfSum();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/setAmountOfBag/" + 1L)
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void editService() throws Exception {
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(put(ubsLink + "/editService/" + 1L)
+            .content(ServiceResponseDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void createService() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getService() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getService")).andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteService() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
             .andExpect(status().isOk());
     }
 }
