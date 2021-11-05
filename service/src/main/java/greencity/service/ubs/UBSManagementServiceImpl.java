@@ -1717,7 +1717,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
-            .collect(joining(", ")) : "-";
+            .collect(joining("; ")) : "-";
     }
 
     private String getCertificatePoints(Order order) {
