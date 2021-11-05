@@ -35,6 +35,8 @@ public class AddressDto implements Serializable {
     @Length(max = 50)
     private String street;
 
+    private String addressComment;
+
     private Coordinates coordinates;
 
     private Boolean actual;
