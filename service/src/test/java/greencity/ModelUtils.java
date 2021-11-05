@@ -156,6 +156,7 @@ public class ModelUtils {
                 .id(13L)
                 .email("mail@mail.ua")
                 .phoneNumber("067894522")
+                .ubsUserId(1L)
                 .build())
             .build();
     }
