@@ -35,7 +35,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.web.client.RestTemplate;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
@@ -179,7 +178,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
@@ -255,11 +254,15 @@ class UBSClientServiceImplTest {
             .uuid(uuid)
             .recipientName("oleh")
             .recipientSurname("ivanov")
-            .id(13L).recipientEmail("mail@mail.ua")
+            .id(1L).recipientEmail("mail@mail.ua")
             .recipientPhone("067894522")
             .build();
-
+        UBSuser ubsUser = UBSuser.builder()
+                .user(user)
+                .id(1l)
+                .build();
         when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
@@ -492,7 +495,7 @@ class UBSClientServiceImplTest {
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
-        when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
+        when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
         lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
@@ -800,7 +803,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
@@ -810,7 +813,7 @@ class UBSClientServiceImplTest {
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(bagRepository).findById(3);
-        verify(ubsUserRepository).findById(13L);
+        verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
@@ -888,7 +891,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(bag);
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
