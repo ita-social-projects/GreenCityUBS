@@ -495,7 +495,7 @@ class UBSClientServiceImplTest {
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
-        when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
+        lenient().when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
         lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
