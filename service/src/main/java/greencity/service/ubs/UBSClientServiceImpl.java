@@ -136,9 +136,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
-        UBSuser ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+        List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
-        dto.setUbsUserId(ubsUser.getId());
+        dto.setUbsUserId(ubsUser.get(0).getId());
         return dto;
     }
 
