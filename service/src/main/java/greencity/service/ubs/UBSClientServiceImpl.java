@@ -525,11 +525,11 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UBSuser formUserDataToBeSaved(PersonalDataDto dto, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
-        if (dto.getId() != null) {
+        if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
                 ubsUserRepository.findById(dto.getUbsUserId())
                     .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                        + dto.getId()));
+                        + dto.getUbsUserId()));
         }
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
