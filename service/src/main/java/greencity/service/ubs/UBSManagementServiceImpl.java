@@ -1661,7 +1661,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(paymentSum - certificateSum)
+            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : paymentSum - certificateSum)
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
