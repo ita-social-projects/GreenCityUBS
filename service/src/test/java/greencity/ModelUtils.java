@@ -182,7 +182,7 @@ public class ModelUtils {
                     .longitude(2.2)
                     .latitude(3.2)
                     .build())
-                .comment(null).build())
+                .addressComment(null).build())
             .orders(List.of(Order.builder().id(1L).build()))
             .build();
     }
@@ -229,7 +229,7 @@ public class ModelUtils {
                     .street("Levaya")
                     .district("frankivskiy")
                     .entranceNumber("5")
-                    .comment("near mall")
+                    .addressComment("near mall")
                     .houseCorpus(null)
                     .houseNumber("4R")
                     .coordinates(Coordinates.builder()
@@ -1006,7 +1006,7 @@ public class ModelUtils {
                     .street("Levaya")
                     .district("frankivskiy")
                     .entranceNumber("5")
-                    .comment("near mall")
+                    .addressComment("near mall")
                     .houseCorpus(null)
                     .houseNumber("4R")
                     .coordinates(Coordinates.builder()
