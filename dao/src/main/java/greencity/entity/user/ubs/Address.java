@@ -54,7 +54,7 @@ public class Address {
     private String entranceNumber;
 
     @Column
-    private String comment;
+    private String addressComment;
 
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
