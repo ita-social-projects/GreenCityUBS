@@ -714,18 +714,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId, Long languageId) {
+    public OrderStatusPageDto getOrderStatusData(Long orderId, String languageCode) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
-        List<Bag> bags = bagRepository.findBagByOrderId(orderId);
+        List<Bag> bags = bagRepository.findAll();
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
-                languageId);
+                languageRepository.findIdByCode(languageCode));
         String statusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
@@ -738,6 +738,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
             .build();
@@ -1660,7 +1661,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(paymentSum - certificateSum)
+            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : paymentSum - certificateSum)
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -1716,7 +1717,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
-            .collect(joining(", ")) : "-";
+            .collect(joining("; ")) : "-";
     }
 
     private String getCertificatePoints(Order order) {

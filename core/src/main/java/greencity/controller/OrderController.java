@@ -348,7 +348,7 @@ public class OrderController {
      *
      * @param userUuid {@link UserVO} id.
      * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link HttpStatus}.
+     * @return {@link LiqPayOrderResponse}.
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Process user order.")
@@ -358,7 +358,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processLiqPayOrder")
-    public ResponseEntity<String> processLiqPayOrder(
+    public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
@@ -380,7 +380,7 @@ public class OrderController {
         PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect("http://localhost:4200/#/ubs/confirm");
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }

@@ -527,10 +527,11 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-data-for-order/{id}/{langId}")
+    @GetMapping("/get-data-for-order/{id}/{langCode}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrderStatusData(orderId, languageId));
+        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langCode") String languageCode) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderStatusData(orderId, languageCode));
     }
 
     /**
