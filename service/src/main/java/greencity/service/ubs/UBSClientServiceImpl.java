@@ -189,8 +189,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         userData.setAddress(address);
 
-        if (userData.getAddress().getComment() == null) {
-            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
+        if (userData.getAddress().getAddressComment() == null) {
+            userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
         }
 
         order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
@@ -296,7 +296,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 forOrderAfterUpdate.setActual(true);
                 forOrderAfterUpdate.setUser(address.getUser());
                 forOrderAfterUpdate.setAddressStatus(address.getAddressStatus());
-                forOrderAfterUpdate.setComment(address.getComment());
+                forOrderAfterUpdate.setAddressComment(address.getAddressComment());
 
                 address.getUbsUsers().forEach(u -> u.setAddress(addressRepo.save(forOrderAfterUpdate)));
             }
@@ -883,8 +883,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         userData.setAddress(address);
 
-        if (userData.getAddress().getComment() == null) {
-            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
+        if (userData.getAddress().getAddressComment() == null) {
+            userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
         }
 
         order = formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);

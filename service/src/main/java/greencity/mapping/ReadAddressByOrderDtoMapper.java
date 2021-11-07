@@ -25,7 +25,7 @@ public class ReadAddressByOrderDtoMapper extends AbstractConverter<Address, Read
             .houseCorpus(address.getHouseCorpus())
             .street(address.getStreet())
             .houseNumber(address.getHouseNumber())
-            .comment(address.getComment())
+            .comment(address.getAddressComment())
             .build();
     }
 }

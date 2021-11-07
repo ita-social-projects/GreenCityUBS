@@ -734,7 +734,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .recipientName(user.getFirstName()).recipientSurname(user.getLastName())
             .recipientPhone(user.getPhoneNumber()).recipientEmail(user.getEmail())
             .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
-            .addressComment(address.getComment()).bags(bagInfo)
+            .addressComment(address.getAddressComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
@@ -1655,7 +1655,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             // need to implement field - область
             // need to implement field - населений пункт
             .address(getAddress(address))
-            .commentToAddressForClient(nonNull(address.getComment()) ? address.getComment() : "-")
+            .commentToAddressForClient(nonNull(address.getAddressComment()) ? address.getAddressComment() : "-")
             .bagsAmount(getBagsAmount(order))
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
