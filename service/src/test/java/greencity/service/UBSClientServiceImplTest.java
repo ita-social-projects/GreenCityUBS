@@ -20,6 +20,7 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.UBSClientServiceImpl;
+import greencity.service.ubs.UBSManagementServiceImpl;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,8 @@ class UBSClientServiceImplTest {
     private EventService eventService;
     @Mock
     private LocationTranslationRepository locationTranslationRepository;
+    @Mock
+    private UBSManagementServiceImpl ubsManagementService;
 
     @Test
     @Transactional
@@ -917,4 +920,39 @@ class UBSClientServiceImplTest {
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
 
+    @Test
+    void testGetOrdersForUser() {
+        when(orderRepository.getAllOrdersOfUser("uuid1")).thenReturn(TEST_ORDER_LIST);
+        when(ubsManagementService.getOrderStatusData(1L, 1L)).thenReturn(TEST_ORDER_STATUS_PAGE_DTO);
+
+        List<OrderStatusPageDto> actual = ubsService.getOrdersForUser("uuid1", 1L);
+
+        assertEquals(TEST_EXPECTED_ORDER_STATUS_PAGE_DTO_LIST, actual);
+    }
+
+    @Test
+    void testMarkUserAsDeactivated() {
+        when(userRepository.findById(1L)).thenReturn(getDeactivatedUser());
+        ubsService.markUserAsDeactivated(1L);
+        verify(restClient, times(1)).markUserDeactivated("abc");
+    }
+
+    @Test
+    void testGetLiqPayStatus() throws Exception {
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderLiqPayStatus()));
+        StatusRequestDtoLiqPay dto = getStatusFromLiqPay();
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("request", dto);
+        response.put("create_date", 50000L);
+        response.put("end_date", 80000L);
+        response.put("sender_commission", 22D);
+        response.put("amount", 88D);
+
+        when(liqPay.api("request", restClient.getStatusFromLiqPay(dto))).thenReturn(response);
+        when(paymentRepository.findPaymentByOrder(getOrderLiqPayStatus())).thenReturn(getPaymentLiqPayStatus());
+
+        ubsService.getLiqPayStatus(getOrderLiqPayStatus().getId());
+        verify(orderRepository).findById(1L);
+    }
 }

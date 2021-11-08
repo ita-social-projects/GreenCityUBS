@@ -87,6 +87,10 @@ public class ModelUtils {
     public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
         Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
+    public static final List<Order> TEST_ORDER_LIST = createOrderTestList();
+    public static final OrderStatusPageDto TEST_ORDER_STATUS_PAGE_DTO = createOrderStatusPageDto();
+    public static final List<OrderStatusPageDto> TEST_EXPECTED_ORDER_STATUS_PAGE_DTO_LIST =
+        createExpectedOrderStatusPageDtoList();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -957,7 +961,14 @@ public class ModelUtils {
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .uuid("abc")
+            .ubsUsers(getUbsUsers())
             .build();
+    }
+
+    public static Set<UBSuser> getUbsUsers() {
+        Set<UBSuser> ubSusers = new HashSet<>();
+        ubSusers.add(UBSuser.builder().id(1L).build());
+        return ubSusers;
     }
 
     public static Payment getManualPayment() {
@@ -1842,4 +1853,92 @@ public class ModelUtils {
         return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(1L).name("ds").build();
     }
 
+    private static List<OrderStatusPageDto> createExpectedOrderStatusPageDtoList() {
+        return Collections.singletonList(
+            OrderStatusPageDto.builder()
+                .id(1L)
+                .build());
+    }
+
+    private static OrderStatusPageDto createOrderStatusPageDto() {
+        return OrderStatusPageDto.builder()
+            .id(1L)
+            .build();
+    }
+
+    private static List<Order> createOrderTestList() {
+        ArrayList<Order> orders = new ArrayList<>();
+        orders.add(Order.builder().id(1L).build());
+        return orders;
+    }
+
+    public static Optional<User> getDeactivatedUser() {
+        return Optional.of(User.builder()
+            .uuid("abc")
+            .id(1L)
+            .build());
+    }
+
+    public static Payment getPaymentLiqPayStatus() {
+        return Payment.builder()
+            .id(1L)
+            .paymentStatus(PaymentStatus.PAID)
+            .responseStatus("success")
+            .orderTime("2019-06-14")
+            .settlementDate("2019-06-14")
+            .build();
+    }
+
+    public static StatusRequestDtoLiqPay getStatusFromLiqPay() {
+        return StatusRequestDtoLiqPay.builder()
+            .publicKey("liqpay.public.key")
+            .action("status")
+            .orderId("1L")
+            .build();
+    }
+
+    public static Order getOrderLiqPayStatus() {
+        return Order.builder()
+            .id(1L)
+            .payment(Collections.singletonList(Payment.builder()
+                .id(1L)
+                .paymentId(1L)
+                .amount(200L)
+                .currency("UAH")
+                .paymentStatus(PaymentStatus.PAID)
+                .responseStatus("paid")
+                .orderStatus("paid")
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .comment("near mall")
+                    .houseCorpus(null)
+                    .houseNumber("4R")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .imageReasonNotTakingBags(List.of("foto"))
+            .build();
+    }
 }
