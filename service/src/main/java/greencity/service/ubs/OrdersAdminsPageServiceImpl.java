@@ -55,7 +55,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("orderStatus", "Статус замовлення", "Order's status"), "orderStatus", 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
-                false, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
+                true, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
                 true,
                 4, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
@@ -102,7 +102,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment for order by client"),
-                "", 20, true, true, false, 22, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
+                "", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("payment", "Оплата", "Payment"), "need to implement", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
