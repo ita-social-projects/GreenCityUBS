@@ -175,7 +175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay > dto.getPointsToUse()) {
+        if (sumToPay >= dto.getPointsToUse()) {
             sumToPay -= dto.getPointsToUse();
         }
 
@@ -574,7 +574,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
-        if (dto.getCertificates() != null) {
+        if (sumToPay != 0 && dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             for (String temp : dto.getCertificates()) {
                 if (tooManyCertificates) {
