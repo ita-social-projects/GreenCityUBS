@@ -18,9 +18,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
-import greencity.filters.SearchCriteria;
+import greencity.filters.*;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -73,6 +71,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
+    private final CertificateCriteriaRepo certificateCriteriaRepo;
 
     /**
      * {@inheritDoc}
@@ -491,6 +490,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
+    public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
+        CertificateFilterCriteria certificateFilterCriteria) {
+        Page<Certificate> certificates =
+            certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
+        return getAllCertificatesTranslationDto(certificates);
+    }
+
+    @Override
     public void addCertificate(CertificateDtoForAdding add) {
         Certificate certificate = modelMapper.map(add, Certificate.class);
         certificateRepository.save(certificate);
@@ -707,18 +714,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId, Long languageId) {
+    public OrderStatusPageDto getOrderStatusData(Long orderId, String languageCode) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
-        List<Bag> bags = bagRepository.findBagByOrderId(orderId);
+        List<Bag> bags = bagRepository.findAll();
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
-                languageId);
+                languageRepository.findIdByCode(languageCode));
         String statusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
@@ -727,10 +734,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .recipientName(user.getFirstName()).recipientSurname(user.getLastName())
             .recipientPhone(user.getPhoneNumber()).recipientEmail(user.getEmail())
             .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
-            .addressComment(address.getComment()).bags(bagInfo)
+            .addressComment(address.getAddressComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
             .build();
@@ -1441,14 +1449,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + " " + dto.getOrderId()));
         List<EmployeeOrderPosition> employeeOrderPositions = new ArrayList<>();
         for (EmployeeOrderPositionDTO employeeOrderPositionDTO : dto.getEmployeeOrderPositionDTOS()) {
-            String[] dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            String[] dtoFirstAndLastName = new String[0];
+            try {
+                dtoFirstAndLastName = employeeOrderPositionDTO.getName().split(" ");
+            } catch (IndexOutOfBoundsException e) {
+                throw new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST);
+            }
             Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
                 .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
             Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
                 .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
-            if (oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
+            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
@@ -1643,12 +1656,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             // need to implement field - область
             // need to implement field - населений пункт
             .address(getAddress(address))
-            .commentToAddressForClient(nonNull(address.getComment()) ? address.getComment() : "-")
+            .commentToAddressForClient(nonNull(address.getAddressComment()) ? address.getAddressComment() : "-")
             .bagsAmount(getBagsAmount(order))
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(paymentSum - certificateSum)
+            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : paymentSum - certificateSum)
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -1677,10 +1690,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getAddress(Address address) {
-        return nonNull(address.getStreet())
-            ? address.getStreet() + ", " + address.getHouseNumber() + ", " + address.getHouseCorpus() + ", "
-                + address.getEntranceNumber()
-            : "-";
+        if (nonNull(address.getStreet())
+            && !address.getStreet().isBlank()) {
+            StringBuilder addressInfo = new StringBuilder();
+            addressInfo.append(address.getStreet());
+            if (nonNull(address.getHouseNumber())
+                && !address.getHouseNumber().isBlank()) {
+                addressInfo.append(", " + address.getHouseNumber());
+            }
+            if (nonNull(address.getHouseCorpus())
+                && !address.getHouseCorpus().isBlank()) {
+                addressInfo.append(", " + address.getHouseCorpus());
+            }
+            if (nonNull(address.getEntranceNumber())
+                && !address.getEntranceNumber().isBlank()) {
+                addressInfo.append(", " + address.getEntranceNumber());
+            }
+            return addressInfo.toString();
+        }
+        return "-";
     }
 
     private Integer getBagsAmount(Order order) {
@@ -1689,7 +1717,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
-            .collect(joining(", ")) : "-";
+            .collect(joining("; ")) : "-";
     }
 
     private String getCertificatePoints(Order order) {

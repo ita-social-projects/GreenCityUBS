@@ -77,6 +77,9 @@ public final class ErrorMessage {
         "Current location already has status that's you wanna chose";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "couldn't found courier by id";
     public static final String BAG_WITH_THIS_STATUS_ALREADY_SET = "Bag with this status already set.";
+    public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
+        "Payment with selected id does not belong LiqPay.";
+    public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
 
     /**
      * Constructor.

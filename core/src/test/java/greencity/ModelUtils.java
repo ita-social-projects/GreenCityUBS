@@ -337,6 +337,23 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<ServiceTranslationDto> getServiceTranslationDto() {
+        return List.of(ServiceTranslationDto.builder()
+            .name("Test")
+            .languageId(1L)
+            .description("Test")
+            .build());
+    }
+
+    public static CreateServiceDto createServiceDto() {
+        return CreateServiceDto.builder()
+            .capacity(120)
+            .commission(10)
+            .price(100)
+            .serviceTranslationDtoList(getServiceTranslationDto())
+            .build();
+    }
+
     public static AssignEmployeesForOrderDto assignEmployeeToOrderDto() {
         return AssignEmployeesForOrderDto.builder()
             .orderId(1L)
@@ -384,5 +401,38 @@ public class ModelUtils {
         return PaymentResponseDtoLiqPay.builder()
             .data("Test Data")
             .signature("Test Signature").build();
+    }
+
+    public static EditServiceDto getEditServiceDto() {
+        return EditServiceDto.builder()
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
+            .locationId(1L)
+            .languageCode("ua")
+            .build();
+    }
+
+    public static EditAmountOfBagDto getAmountOfSum() {
+        return EditAmountOfBagDto.builder()
+            .minAmountOfBigBags(1L)
+            .maxAmountOfBigBags(2L)
+            .languageId(1L)
+            .build();
+    }
+
+    public static EditTariffInfoDto getEditTariffInfoDto() {
+        return EditTariffInfoDto.builder()
+            .minAmountOfBigBag(2L)
+            .maxAmountOfBigBag(3L)
+            .minAmountOfOrder(1L)
+            .maxAmountOfOrder(2L)
+            .courierId(3L)
+            .bagId(2)
+            .limitDescription("dd")
+            .languageId(3L)
+            .build();
     }
 }

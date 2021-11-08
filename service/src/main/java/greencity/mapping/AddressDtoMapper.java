@@ -20,6 +20,7 @@ public class AddressDtoMapper extends AbstractConverter<AddressDto, Address> {
             .houseCorpus(addressDto.getHouseCorpus())
             .houseNumber(addressDto.getHouseNumber())
             .addressStatus(AddressStatus.NEW)
+            .addressComment(addressDto.getAddressComment())
             .coordinates(Coordinates.builder()
                 .latitude(addressDto.getCoordinates().getLatitude())
                 .longitude(addressDto.getCoordinates().getLongitude())

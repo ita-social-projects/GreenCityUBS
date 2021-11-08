@@ -182,7 +182,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
@@ -258,11 +258,15 @@ class UBSClientServiceImplTest {
             .uuid(uuid)
             .recipientName("oleh")
             .recipientSurname("ivanov")
-            .id(13L).recipientEmail("mail@mail.ua")
+            .id(1L).recipientEmail("mail@mail.ua")
             .recipientPhone("067894522")
             .build();
-
+        List<UBSuser> ubsUser = List.of(UBSuser.builder()
+            .user(user)
+            .id(1l)
+            .build());
         when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
@@ -495,7 +499,7 @@ class UBSClientServiceImplTest {
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
-        when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
+        lenient().when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
         lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
@@ -803,18 +807,17 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(restClient.getDataFromLiqPay(any())).thenReturn(value);
-        when(liqPay.cnb_form(any())).thenReturn("Test Values");
+        when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(bagRepository).findById(3);
-        verify(ubsUserRepository).findById(13L);
+        verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
@@ -892,7 +895,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(bag);
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
@@ -919,41 +922,5 @@ class UBSClientServiceImplTest {
         when(encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), null)).thenReturn("fdf");
 
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
-    }
-
-    @Test
-    void testGetOrdersForUser() {
-        when(orderRepository.getAllOrdersOfUser("uuid1")).thenReturn(TEST_ORDER_LIST);
-        when(ubsManagementService.getOrderStatusData(1L, 1L)).thenReturn(TEST_ORDER_STATUS_PAGE_DTO);
-
-        List<OrderStatusPageDto> actual = ubsService.getOrdersForUser("uuid1", 1L);
-
-        assertEquals(TEST_EXPECTED_ORDER_STATUS_PAGE_DTO_LIST, actual);
-    }
-
-    @Test
-    void testMarkUserAsDeactivated() {
-        when(userRepository.findById(1L)).thenReturn(getDeactivatedUser());
-        ubsService.markUserAsDeactivated(1L);
-        verify(restClient, times(1)).markUserDeactivated("abc");
-    }
-
-    @Test
-    void testGetLiqPayStatus() throws Exception {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderLiqPayStatus()));
-        StatusRequestDtoLiqPay dto = getStatusFromLiqPay();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("request", dto);
-        response.put("create_date", 50000L);
-        response.put("end_date", 80000L);
-        response.put("sender_commission", 22D);
-        response.put("amount", 88D);
-
-        when(liqPay.api("request", restClient.getStatusFromLiqPay(dto))).thenReturn(response);
-        when(paymentRepository.findPaymentByOrder(getOrderLiqPayStatus())).thenReturn(getPaymentLiqPayStatus());
-
-        ubsService.getLiqPayStatus(getOrderLiqPayStatus().getId());
-        verify(orderRepository).findById(1L);
     }
 }

@@ -33,4 +33,6 @@ public class PersonalDataDto implements Serializable {
 
     @Length(max = 200)
     private String addressComment;
+
+    private Long ubsUserId;
 }

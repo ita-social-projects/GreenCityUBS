@@ -20,6 +20,6 @@ public class ColumnDTO {
     private boolean filtered;
     private int index;
     private EditType editType;
-    private List<OptionForColumnDTO> optional;
+    private List<OptionForColumnDTO> checked;
     private String columnBelonging;
 }

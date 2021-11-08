@@ -42,7 +42,7 @@ public class UserProfileController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
-    @PostMapping("/user/update")
+    @PutMapping("/user/update")
     public ResponseEntity<UserProfileDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileDto userProfileDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
