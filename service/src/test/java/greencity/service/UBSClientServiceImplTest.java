@@ -10,6 +10,7 @@ import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.LocationTranslation;
@@ -69,6 +70,8 @@ class UBSClientServiceImplTest {
     private AddressRepository addressRepository;
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private LanguageRepository languageRepository;
     @InjectMocks
     UBSClientServiceImpl ubsService;
     @Mock
@@ -923,4 +926,12 @@ class UBSClientServiceImplTest {
 
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
+
+    @Test
+    void testMarkUserAsDeactivated() {
+        when(userRepository.findById(1L)).thenReturn(getDeactivatedUser());
+        ubsService.markUserAsDeactivated(1L);
+        verify(restClient, times(1)).markUserDeactivated("abc");
+    }
+
 }
