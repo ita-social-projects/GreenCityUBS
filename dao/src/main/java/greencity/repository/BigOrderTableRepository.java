@@ -173,7 +173,9 @@ public class BigOrderTableRepository {
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("comment")),
                 "%" + sc.getSearch().toUpperCase() + "%"),
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("note")),
-                "%" + sc.getSearch().toUpperCase() + "%"));
+                "%" + sc.getSearch().toUpperCase() + "%")
+        );
+
     }
 
     private Predicate formUbsUserLikePredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
@@ -213,4 +215,6 @@ public class BigOrderTableRepository {
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("addressComment")),
                 "%" + sc.getSearch().toUpperCase() + "%"));
     }
+
+
 }
