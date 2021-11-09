@@ -210,7 +210,7 @@ public class BigOrderTableRepository {
                 "%" + sc.getSearch().toUpperCase() + "%"),
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("entranceNumber")),
                 "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("comment")),
+            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("addressComment")),
                 "%" + sc.getSearch().toUpperCase() + "%"));
     }
 }
