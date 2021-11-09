@@ -607,7 +607,6 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
 
-
         assertThrows(NullPointerException.class,
             () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
 
