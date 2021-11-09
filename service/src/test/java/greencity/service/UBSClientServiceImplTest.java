@@ -606,14 +606,14 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
+
 
         assertThrows(NullPointerException.class,
             () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
 
         verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
         verify(addressRepository).findAllByUserId(user.getId());
-        verify(modelMapper).map(any(), eq(OrderAddressDtoRequest.class));
+
     }
 
     @Test

@@ -247,6 +247,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
+
             addresses.forEach(u -> {
                 u.setActual(false);
                 addressRepo.save(u);
