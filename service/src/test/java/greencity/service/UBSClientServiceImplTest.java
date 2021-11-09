@@ -578,8 +578,6 @@ class UBSClientServiceImplTest {
         List<Address> addresses = getTestAddresses(user);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-
         addresses.get(0).setActual(false);
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
 
@@ -610,7 +608,6 @@ class UBSClientServiceImplTest {
         assertThrows(NullPointerException.class,
             () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
 
-        verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
         verify(addressRepository).findAllByUserId(user.getId());
 
     }
