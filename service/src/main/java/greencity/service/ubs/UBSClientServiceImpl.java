@@ -252,10 +252,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
                 .anyMatch(d -> d.equals(dtoRequest));
 
-            if (exist) {
-                throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
-            }
-
             addresses.forEach(u -> {
                 u.setActual(false);
                 addressRepo.save(u);

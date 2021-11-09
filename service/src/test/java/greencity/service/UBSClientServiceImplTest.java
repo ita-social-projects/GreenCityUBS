@@ -601,7 +601,6 @@ class UBSClientServiceImplTest {
         User user = new User();
         user.setId(13L);
         List<Address> addresses = getTestAddresses(user);
-
         OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
         dtoRequest.setId(42L);
 
@@ -609,8 +608,12 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
 
-        assertThrows(AddressAlreadyExistException.class,
+        assertThrows(NullPointerException.class,
             () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
+
+        verify(userRepository, times(2)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(addressRepository).findAllByUserId(user.getId());
+        verify(modelMapper).map(any(), eq(OrderAddressDtoRequest.class));
     }
 
     @Test
