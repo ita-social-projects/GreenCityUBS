@@ -1,8 +1,10 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
@@ -13,6 +15,7 @@ import greencity.exceptions.LanguageNotFoundException;
 import greencity.exceptions.LocationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,6 +57,8 @@ class SuperAdminServiceImplTest {
     private CourierRepository courierRepository;
     @Mock
     private CourierTranslationRepository courierTranslationRepository;
+    @Mock
+    private  BagTranslationRepository translationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -285,5 +290,23 @@ class SuperAdminServiceImplTest {
 
         verify(locationRepository).findById(1L);
         verify(languageRepository).findById(1L);
+    }
+
+    @Test
+    void setLimitDescription(){
+        CourierTranslation courierTranslationTest = ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
+        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId())).thenReturn(courierTranslationTest);
+        Assert.assertEquals("LimitDescription", superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId()).getLimitDescription());
+    }
+
+    @Test
+    void includeBag(){
+        BagTranslation bagTranslationTest = ModelUtils.getBagTranslation();
+        bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
+        bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
+        when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
+        when(translationRepository.findBagTranslationByBag(bagTranslationTest.getBag())).thenReturn(bagTranslationTest);
+        Assert.assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
 }
