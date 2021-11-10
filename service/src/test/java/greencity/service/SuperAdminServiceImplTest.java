@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
@@ -109,7 +110,7 @@ class SuperAdminServiceImplTest {
         String uuid = "testUUid";
         BagTranslation bagTranslation = ModelUtils.getBagTranslationForEditMethod();
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = ModelUtils.getBag().get();
+        Bag bag = bagTranslation.getBag();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
@@ -286,4 +287,37 @@ class SuperAdminServiceImplTest {
         verify(locationRepository).findById(1L);
         verify(languageRepository).findById(1L);
     }
+
+    @Test
+    void setLimitDescription() {
+        CourierTranslation courierTranslationTest =
+            ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
+        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(
+            courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId()))
+                .thenReturn(courierTranslationTest);
+        assertEquals("LimitDescription",
+            superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId())
+                .getLimitDescription());
+    }
+
+    @Test
+    void includeBag() {
+        BagTranslation bagTranslationTest = BagTranslation.builder()
+            .id(2L)
+            .bag(Bag.builder().id(2).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .description("Description")
+            .build();
+        bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
+        bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
+        when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
+
+        when(bagTranslationRepository.findBagTranslationByBag(bagTranslationTest.getBag()))
+            .thenReturn(bagTranslationTest);
+
+        assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
+    }
+
 }
