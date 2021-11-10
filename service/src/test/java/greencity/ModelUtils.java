@@ -150,6 +150,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .shouldBePaid(true)
             .personalData(PersonalDataDto.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
