@@ -55,8 +55,6 @@ class SuperAdminServiceImplTest {
     private CourierRepository courierRepository;
     @Mock
     private CourierTranslationRepository courierTranslationRepository;
-    @Mock
-    private BagTranslationRepository translationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -116,8 +114,6 @@ class SuperAdminServiceImplTest {
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
-
-        when(translationRepository.findBagTranslationByBagAndLanguageCode(bag, "ua")).thenReturn(bagTranslation);
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
@@ -295,30 +291,31 @@ class SuperAdminServiceImplTest {
     @Test
     void setLimitDescription() {
         CourierTranslation courierTranslationTest =
-                ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+            ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
         when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(
-                courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId()))
+            courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId()))
                 .thenReturn(courierTranslationTest);
         assertEquals("LimitDescription",
-                superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId())
-                        .getLimitDescription());
+            superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId())
+                .getLimitDescription());
     }
 
     @Test
     void includeBag() {
         BagTranslation bagTranslationTest = BagTranslation.builder()
-                .id(2L)
-                .bag(Bag.builder().id(2).capacity(120).price(350).build())
-                .language(Language.builder().id(1L).code("en").build())
-                .name("Useless paper")
-                .description("Description")
-                .build();
+            .id(2L)
+            .bag(Bag.builder().id(2).capacity(120).price(350).build())
+            .language(Language.builder().id(1L).code("en").build())
+            .name("Useless paper")
+            .description("Description")
+            .build();
         bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
         when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
 
-        when(translationRepository.findBagTranslationByBag(bagTranslationTest.getBag())).thenReturn(bagTranslationTest);
+        when(bagTranslationRepository.findBagTranslationByBag(bagTranslationTest.getBag()))
+            .thenReturn(bagTranslationTest);
 
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
