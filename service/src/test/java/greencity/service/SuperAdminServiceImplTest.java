@@ -58,7 +58,7 @@ class SuperAdminServiceImplTest {
     @Mock
     private CourierTranslationRepository courierTranslationRepository;
     @Mock
-    private  BagTranslationRepository translationRepository;
+    private BagTranslationRepository translationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -293,15 +293,20 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setLimitDescription(){
-        CourierTranslation courierTranslationTest = ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+    void setLimitDescription() {
+        CourierTranslation courierTranslationTest =
+            ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
-        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId())).thenReturn(courierTranslationTest);
-        Assert.assertEquals("LimitDescription", superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId()).getLimitDescription());
+        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(
+            courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId()))
+                .thenReturn(courierTranslationTest);
+        Assert.assertEquals("LimitDescription",
+            superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId())
+                .getLimitDescription());
     }
 
     @Test
-    void includeBag(){
+    void includeBag() {
         BagTranslation bagTranslationTest = ModelUtils.getBagTranslation();
         bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
