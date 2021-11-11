@@ -31,6 +31,8 @@ public class OrderStatusPageDto {
     private String addressStreet;
     private String addressDistrict;
     private String addressComment;
+    private String orderDate;
+    private String paymentStatus;
     private Map<Integer, Integer> amountOfBagsOrdered;
     private List<BagInfoDto> bags;
     private Map<Integer, Integer> amountOfBagsExported;
