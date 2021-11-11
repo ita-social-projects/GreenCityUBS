@@ -743,7 +743,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
             .orderDate(order.map(Order::getOrderDate).toString())
-            .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message")).getOrderPaymentStatus().toString())
+            .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
+                .getOrderPaymentStatus().toString())
             .build();
     }
 
