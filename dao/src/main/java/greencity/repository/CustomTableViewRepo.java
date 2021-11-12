@@ -1,14 +1,11 @@
 package greencity.repository;
 
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.user.employee.EmployeeOrderPosition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Repository
 public interface CustomTableViewRepo extends JpaRepository<CustomTableView, Integer> {

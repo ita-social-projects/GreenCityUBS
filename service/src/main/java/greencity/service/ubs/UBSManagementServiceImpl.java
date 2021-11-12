@@ -106,7 +106,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public void changeOrderTableView(String uuid, String titles) {
-        if (customTableViewRepo.existsByUuid(uuid)) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             customTableViewRepo.update(uuid, titles);
         } else {
             CustomTableView customTableView = CustomTableView.builder()
@@ -119,7 +119,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public String getCustomTableParameters(String uuid) {
-        if (customTableViewRepo.existsByUuid(uuid)) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
             return customTableViewRepo.findByUuid(uuid).getTitles();
         } else {
             return "";
