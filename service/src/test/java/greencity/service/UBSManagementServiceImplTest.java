@@ -49,6 +49,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1225,7 +1226,9 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
         when(languageRepository.findIdByCode("ua")).thenReturn(1l);
-        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        assertThrows(NullPointerException.class,
+            () -> ubsManagementService.getOrderStatusData(1L, "ua"));
 
         verify(orderRepository).getOrderDetails(1L);
         verify(certificateRepository).findCertificate(1L);

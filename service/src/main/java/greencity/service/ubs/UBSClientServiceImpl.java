@@ -188,17 +188,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-        String html = restClient.getDataFromFondy(paymentRequestDto);
-
-        Document doc = Jsoup.parse(html);
-
-        Elements links = doc.select("a[href]");
-        System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0) {
+        if (sumToPay == 0 || !dto.isShouldBePaid()) {
             return order.getId().toString();
         } else {
+            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
+            String html = restClient.getDataFromFondy(paymentRequestDto);
+
+            Document doc = Jsoup.parse(html);
+            Elements links = doc.select("a[href]");
+            System.out.println(links.attr("href"));
             return links.attr("href");
         }
     }
@@ -247,6 +246,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
+            boolean exist = addresses.stream()
+                .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
+                .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
+                .anyMatch(d -> d.equals(dtoRequest));
+
+            if (exist) {
+                throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
+            }
+
             addresses.forEach(u -> {
                 u.setActual(false);
                 addressRepo.save(u);
