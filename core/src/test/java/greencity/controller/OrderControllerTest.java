@@ -253,4 +253,31 @@ class OrderControllerTest {
             .andExpect(status().is3xxRedirection());
     }
 
+    @Test
+    void receivePaymentTest() throws Exception {
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String paymentResponseJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/receivePayment")
+            .content(paymentResponseJson)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getLiqPayStatusPaymentTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteOrderAddressTest() throws Exception {
+        mockMvc.perform(post("/ubs" + "/{id}" + "/delete-order-address", 1L))
+            .andExpect(status().isOk());
+    }
+
 }

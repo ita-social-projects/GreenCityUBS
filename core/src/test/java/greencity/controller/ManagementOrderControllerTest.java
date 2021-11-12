@@ -8,7 +8,10 @@ import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Certificate;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.service.ubs.UBSManagementService;
+import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -341,5 +344,96 @@ class ManagementOrderControllerTest {
             .content(writeValueAsString)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void getCustomTableParametersTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get(ubsLink + "/getOrdersViewParameters"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void setCustomTableTest() throws Exception {
+        mockMvc.perform(put(ubsLink + "/changeOrdersTableView"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void allUndeliveredCoordsTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/all-undelivered"))
+            .andExpect(status().isOk());
+
+        verify(ubsManagementService).getAllUndeliveredOrdersWithLiters();
+    }
+
+    @Test
+    void addPointsToUserTest() throws Exception {
+        AddingPointsToUserDto dto = ModelUtils.getAddingPointsToUserDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(patch(ubsLink + "/addPointsToUser")
+            .content(dtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void paymentInfoTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getPaymentInfo")
+            .principal(principal)
+            .param("orderId", "1")
+            .param("sumToPay", "1")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void groupCoordsTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/group-undelivered")
+            .param("radius", "2.04")
+            .param("litres", "2")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUserViolationsTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getUsersViolations")
+            .param("email", "max@email.com")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllValuesFromOrderTable2Test() throws Exception {
+        mockMvc.perform(get(ubsLink + "/orders")
+            .param("page", "1")
+            .param("size", "1")
+            .param("columnName", "name")
+            .param("sortingType", "nn")
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+    }
+
+    @Test
+    void returnOverpaymentTest() throws Exception {
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto = ModelUtils.getOverpaymentInfoRequestDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJson = objectMapper.writeValueAsString(overpaymentInfoRequestDto);
+        mockMvc.perform(post(ubsLink + "/return-overpayment")
+            .param("orderId", "1")
+            .content(dtoJson)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void returnOverpaymentAsMoneyInfoTest() throws Exception {
+        mockMvc.perform(get(ubsLink + "/return-overpayment-as-money-info")
+            .param("orderId", "2")
+            .param("sumToPay", "1")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }
