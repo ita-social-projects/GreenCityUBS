@@ -154,8 +154,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
-        return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-            certificate.getExpirationDate());
+        if(certificate.getCertificateStatus().toString().equals("USED")){
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
+                    certificate.getDateOfUse());
+        }else {
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
+                    certificate.getExpirationDate());
+        }
     }
 
     /**
