@@ -9,6 +9,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -73,6 +74,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EventService eventService;
     private final LanguageRepository languageRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
+    private final CustomTableViewRepo customTableViewRepo;
 
     /**
      * {@inheritDoc}
@@ -95,6 +97,33 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         }
         return allOrdersWithLitres;
+    }
+
+    /**
+     * This method save or update view of orders table.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
+    @Override
+    public void changeOrderTableView(String uuid, String titles) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            customTableViewRepo.update(uuid, titles);
+        } else {
+            CustomTableView customTableView = CustomTableView.builder()
+                .uuid(uuid)
+                .titles(titles)
+                .build();
+            customTableViewRepo.save(customTableView);
+        }
+    }
+
+    @Override
+    public String getCustomTableParameters(String uuid) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            return customTableViewRepo.findByUuid(uuid).getTitles();
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -656,7 +685,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria) {
+    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
         Page<Order> orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
         List<BigOrderTableDTO> orderList = new ArrayList<>();
 
