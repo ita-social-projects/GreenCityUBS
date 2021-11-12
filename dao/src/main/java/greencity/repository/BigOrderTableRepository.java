@@ -173,7 +173,15 @@ public class BigOrderTableRepository {
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("comment")),
                 "%" + sc.getSearch().toUpperCase() + "%"),
             criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("note")),
-                "%" + sc.getSearch().toUpperCase() + "%")
+                "%" + sc.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like(orderRoot.get("id").as(String.class),
+                        "%" + sc.getSearch() + "%"),
+                criteriaBuilder.like(orderRoot.get("orderDate").as(String.class),
+                        "%" + sc.getSearch() + "%"),
+                criteriaBuilder.like(orderRoot.get("payment").get("orderTime").as(String.class),
+                        "%" + sc.getSearch() + "%"),
+                criteriaBuilder.like(orderRoot.get("user").get("violations").as(String.class),
+                        "%" + sc.getSearch() + "%")
         );
 
     }
