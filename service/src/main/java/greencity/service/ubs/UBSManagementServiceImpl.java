@@ -117,13 +117,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
+    /**
+     * This method return parameters for orders table view.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
     @Override
-    public String getCustomTableParameters(String uuid) {
+    public CustomTableViewDto getCustomTableParameters(String uuid) {
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
-            return customTableViewRepo.findByUuid(uuid).getTitles();
+            return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
         } else {
-            return "";
+            return CustomTableViewDto.builder()
+                .titles("")
+                .build();
         }
+    }
+
+    private CustomTableViewDto castTableViewToDto(String titles) {
+        return CustomTableViewDto.builder()
+            .titles(titles)
+            .build();
     }
 
     /**

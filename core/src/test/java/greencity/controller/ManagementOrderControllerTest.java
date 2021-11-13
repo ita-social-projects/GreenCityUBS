@@ -436,4 +436,18 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void setCustomTable() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/changeOrdersTableView")
+            .content("titles1,titles2,titles3")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getCustomTableParameters() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/getOrdersViewParameters", "uuid1"))
+            .andExpect(status().isOk());
+    }
 }
