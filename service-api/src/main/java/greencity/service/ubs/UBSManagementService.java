@@ -95,7 +95,7 @@ public interface UBSManagementService {
      *
      * @author Sikhovskiy Rostyslav
      */
-    String getCustomTableParameters(String uuid);
+    CustomTableViewDto getCustomTableParameters(String uuid);
 
     /**
      * Method add a certificates.
