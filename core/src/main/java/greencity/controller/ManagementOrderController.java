@@ -252,7 +252,7 @@ public class ManagementOrderController {
     @GetMapping("/bigOrderTable")
     public ResponseEntity<Page<BigOrderTableDTO>> gerOrders(OrderPage page,
         OrderSearchCriteria criteria,
-        @CurrentUserUuid String uuid) {
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrders(page, criteria, uuid));
     }
@@ -272,7 +272,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PutMapping("/changeOrdersTableView")
-    public ResponseEntity<CustomTableView> setCustomTable(@CurrentUserUuid String uuid,
+    public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
         String titles) {
         ubsManagementService.changeOrderTableView(uuid, titles);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -292,7 +292,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getOrdersViewParameters")
-    public ResponseEntity<String> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
+    public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getCustomTableParameters(uuid));
     }

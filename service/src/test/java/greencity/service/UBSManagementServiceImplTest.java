@@ -13,6 +13,7 @@ import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -138,6 +139,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
+
+    @Mock
+    private CustomTableViewRepo customTableViewRepo;
 
     private void getMocksBehavior() {
 
@@ -1244,5 +1248,27 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderStatusData(100L, "ua");
         });
+    }
+
+    @Test
+    void changeOrderTableView() {
+        String uuid = "uuid1";
+        CustomTableView customTableView = CustomTableView.builder()
+            .titles("titles1,titles2")
+            .uuid(uuid)
+            .build();
+
+        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(customTableViewRepo).existsByUuid(uuid);
+        verify(customTableViewRepo).save(customTableView);
+    }
+
+    @Test
+    void getCustomTableParameters() {
+        String uuid = "uuid1";
+        ubsManagementService.getCustomTableParameters(uuid);
+
+        verify(customTableViewRepo).existsByUuid(uuid);
     }
 }
