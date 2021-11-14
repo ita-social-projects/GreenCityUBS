@@ -14,6 +14,7 @@ import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -50,6 +51,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -138,6 +140,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
+
+    @Mock
+    private CustomTableViewRepo customTableViewRepo;
 
     private void getMocksBehavior() {
 
@@ -1232,6 +1237,9 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         ubsManagementService.getOrderStatusData(1L, "ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+
+        assertThrows(NullPointerException.class,
+            () -> ubsManagementService.getOrderStatusData(1L, "ua"));
         verify(orderRepository).getOrderDetails(1L);
         verify(certificateRepository, times(2)).findCertificate(1L);
 
@@ -1247,5 +1255,27 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderStatusData(100L, "ua");
         });
+    }
+
+    @Test
+    void changeOrderTableView() {
+        String uuid = "uuid1";
+        CustomTableView customTableView = CustomTableView.builder()
+            .titles("titles1,titles2")
+            .uuid(uuid)
+            .build();
+
+        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(customTableViewRepo).existsByUuid(uuid);
+        verify(customTableViewRepo).save(customTableView);
+    }
+
+    @Test
+    void getCustomTableParameters() {
+        String uuid = "uuid1";
+        ubsManagementService.getCustomTableParameters(uuid);
+
+        verify(customTableViewRepo).existsByUuid(uuid);
     }
 }
