@@ -1234,14 +1234,12 @@ class UBSManagementServiceImplTest {
         when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        ubsManagementService.getOrderStatusData(1L, "ua");
-        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
 
-        assertThrows(NullPointerException.class,
-            () -> ubsManagementService.getOrderStatusData(1L, "ua"));
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository).getOrderDetails(1L);
         verify(certificateRepository, times(2)).findCertificate(1L);
-
         verify(orderRepository).getOrderDetails(1L);
         verify(orderRepository).findById(1L);
         verify(languageRepository).findIdByCode("ua");

@@ -247,6 +247,7 @@ public class ModelUtils {
             .cancellationComment("cancelled")
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
+                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .build();
     }
 
