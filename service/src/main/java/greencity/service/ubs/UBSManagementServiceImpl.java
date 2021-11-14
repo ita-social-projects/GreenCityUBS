@@ -799,7 +799,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .comment(order.get().getComment())
             .orderDate(order.map(Order::getOrderDate).toString())
             .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
-            .getOrderPaymentStatus().name())
+                .getOrderPaymentStatus().name())
             .build();
     }
 
