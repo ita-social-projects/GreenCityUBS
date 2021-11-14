@@ -1853,10 +1853,10 @@ public class ModelUtils {
 
     public static BagInfoDto getBagInfoDto() {
         return BagInfoDto.builder()
-                .id(1)
-                .price(100)
-                .capacity(10)
-                .build();
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .build();
     }
 
 }

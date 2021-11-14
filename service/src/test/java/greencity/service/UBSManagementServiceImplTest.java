@@ -1227,8 +1227,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
         when(languageRepository.findIdByCode("ua")).thenReturn(1l);
         when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
-        when(bagTranslationRepository.findNameByBagId(1,1L)).
-                thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         ubsManagementService.getOrderStatusData(1L, "ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);

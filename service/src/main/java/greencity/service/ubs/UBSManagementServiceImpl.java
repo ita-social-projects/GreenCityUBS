@@ -724,14 +724,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(
-                    bagTranslationRepository.findNameByBagId(
-                            bag.getId(), language.getId()).toString()
-            );
+                bagTranslationRepository.findNameByBagId(
+                    bag.getId(), language.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
         Set<CertificateDto> certificates = new HashSet<>();
-        certificateRepository.findCertificate(orderId).forEach(certificate ->
-                certificates.add(modelMapper.map(certificate, CertificateDto.class)));
+        certificateRepository.findCertificate(orderId)
+            .forEach(certificate -> certificates.add(modelMapper.map(certificate, CertificateDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
@@ -753,8 +752,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
-                .certificates(certificates)
-                .comment(order.get().getComment())
+            .certificates(certificates)
+            .comment(order.get().getComment())
             .build();
     }
 
