@@ -10,6 +10,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,6 +75,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EventService eventService;
     private final LanguageRepository languageRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
+    private final CustomTableViewRepo customTableViewRepo;
 
     /**
      * {@inheritDoc}
@@ -95,6 +98,46 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         }
         return allOrdersWithLitres;
+    }
+
+    /**
+     * This method save or update view of orders table.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
+    @Override
+    public void changeOrderTableView(String uuid, String titles) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            customTableViewRepo.update(uuid, titles);
+        } else {
+            CustomTableView customTableView = CustomTableView.builder()
+                .uuid(uuid)
+                .titles(titles)
+                .build();
+            customTableViewRepo.save(customTableView);
+        }
+    }
+
+    /**
+     * This method return parameters for orders table view.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
+    @Override
+    public CustomTableViewDto getCustomTableParameters(String uuid) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
+        } else {
+            return CustomTableViewDto.builder()
+                .titles("")
+                .build();
+        }
+    }
+
+    private CustomTableViewDto castTableViewToDto(String titles) {
+        return CustomTableViewDto.builder()
+            .titles(titles)
+            .build();
     }
 
     /**
@@ -656,7 +699,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria) {
+    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
         Page<Order> orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
         List<BigOrderTableDTO> orderList = new ArrayList<>();
 
@@ -754,6 +797,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderStatusName(statusTranslation)
             .certificates(certificates)
             .comment(order.get().getComment())
+            .orderDate(order.map(Order::getOrderDate).toString())
+            .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
+            .getOrderPaymentStatus().name())
             .build();
     }
 
