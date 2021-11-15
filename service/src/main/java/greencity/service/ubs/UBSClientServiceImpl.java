@@ -1036,4 +1036,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return dateFormatter.format(date);
     }
+
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        orderRepository.delete(order);
+    }
 }
