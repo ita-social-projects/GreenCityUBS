@@ -379,7 +379,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .employee(existedEmployee).position(existedPosition)
                     .order(existedOrder).build();
 
-                if (employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition)) {
+                if (Boolean.TRUE
+                    .equals(employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition))) {
                     employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
                 } else {
                     employeeOrderPositionRepository.save(newEmployeeOrderPosition);
