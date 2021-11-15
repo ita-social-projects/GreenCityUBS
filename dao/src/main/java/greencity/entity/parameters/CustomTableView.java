@@ -20,6 +20,6 @@ public class CustomTableView {
     @Column
     String uuid;
 
-    @Column(columnDefinition = "text", length = 500)
+    @Column(columnDefinition = "text", length = 551)
     String titles;
 }

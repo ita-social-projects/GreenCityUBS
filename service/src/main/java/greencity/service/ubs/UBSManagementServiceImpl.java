@@ -1714,11 +1714,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .timeOfExport(getTimeOfExport(order))
             .idOrderFromShop(getIdOrderFromShop(order))
             .receivingStation(getReceivingStation(order))
-            .responsibleManager(getEmployeeNameByIdPosition(order, 2L))
-            .responsibleLogicMan(getEmployeeNameByIdPosition(order, 3L))
-            .responsibleDriver(getEmployeeNameByIdPosition(order, 5L))
-            .responsibleCaller(getEmployeeNameByIdPosition(order, 1L))
-            .responsibleNavigator(getEmployeeNameByIdPosition(order, 4L))
+            .responsibleManager(getEmployeeIdByIdPosition(order, 2L))
+            .responsibleLogicMan(getEmployeeIdByIdPosition(order, 3L))
+            .responsibleDriver(getEmployeeIdByIdPosition(order, 5L))
+            .responsibleCaller(getEmployeeIdByIdPosition(order, 1L))
+            .responsibleNavigator(getEmployeeIdByIdPosition(order, 4L))
             .commentsForOrder(getCommentsForOrder(order))
             .isBlocked(order.isBlocked())
             .blockedBy(getBlockedBy(order))
@@ -1784,7 +1784,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getReceivingStation(Order order) {
-        return nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-";
+        return nonNull(order.getReceivingStation()) ? getStationId(order.getReceivingStation()) : "-";
+    }
+
+    private String getStationId(String receivingStation) {
+        return receivingStationRepository.findByName(receivingStation).getId().toString();
     }
 
     private String getPayment(Order order) {
@@ -1799,11 +1803,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(joining(", ")) : "-";
     }
 
-    private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
+    private String getEmployeeIdByIdPosition(Order order, Long idPosition) {
         return nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
             .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
             .map(EmployeeOrderPosition::getEmployee)
-            .map(e -> e.getFirstName() + " " + e.getLastName())
+            .map(e -> e.getId().toString())
             .reduce("", String::concat) : "-";
     }
 
