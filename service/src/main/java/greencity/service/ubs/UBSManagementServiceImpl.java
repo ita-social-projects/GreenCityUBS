@@ -8,6 +8,7 @@ import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
@@ -762,7 +763,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
-        bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
+        Language language = languageRepository.findLanguageByCode(languageCode);
+        bags.forEach(bag -> {
+            BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
+            bagInfoDto.setName(
+                bagTranslationRepository.findNameByBagId(
+                    bag.getId(), language.getId()).toString());
+            bagInfo.add(bagInfoDto);
+        });
+        Set<CertificateDto> certificates = new HashSet<>();
+        certificateRepository.findCertificate(orderId)
+            .forEach(certificate -> certificates.add(modelMapper.map(certificate, CertificateDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
@@ -784,6 +795,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
+            .certificates(certificates)
+            .comment(order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST))
+                .getComment())
             .orderDate(order.map(Order::getOrderDate).toString())
             .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
                 .getOrderPaymentStatus().name())

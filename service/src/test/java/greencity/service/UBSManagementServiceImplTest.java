@@ -9,6 +9,7 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
@@ -1221,8 +1222,8 @@ class UBSManagementServiceImplTest {
         order.setExportedQuantity(hashMap);
         order.setPointsToUse(100);
         Bag bag = ModelUtils.getBag().get();
-        List<Bag> bagArrayList = List.of(bag);
-
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
@@ -1230,12 +1231,14 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
         when(languageRepository.findIdByCode("ua")).thenReturn(1l);
+        when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
 
-        assertThrows(NullPointerException.class,
-            () -> ubsManagementService.getOrderStatusData(1L, "ua"));
+        ubsManagementService.getOrderStatusData(1L, "ua");
 
-        verify(orderRepository).getOrderDetails(1L);
-        verify(certificateRepository).findCertificate(1L);
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(certificateRepository, times(2)).findCertificate(1L);
         verify(orderRepository).getOrderDetails(1L);
         verify(orderRepository).findById(1L);
         verify(languageRepository).findIdByCode("ua");
