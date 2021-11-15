@@ -288,4 +288,12 @@ public interface UBSClientService {
      * @author Vadym Makitra
      */
     Map<String, Object> getLiqPayStatus(Long orderId) throws Exception;
+
+    /**
+     * Method for delete user order.
+     *
+     * @param id - current order id.
+     * @author Max Boyarchuk
+     */
+    void deleteOrder(Long id);
 }

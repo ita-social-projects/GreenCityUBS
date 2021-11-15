@@ -69,6 +69,26 @@ public class ClientController {
     }
 
     /**
+     * Controller for delete user order.
+     *
+     * @return {@link HttpStatus http status}.
+     * @author Max Boyarchuk
+     */
+    @ApiOperation(value = "delete user order")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/delete-order/{id}")
+    public ResponseEntity<HttpStatus> deleteOrder(@PathVariable Long id) {
+        ubsClientService.deleteOrder(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
      * Controller cancel order with status FORMED.
      *
      * @param orderId {@link Long} order id.
