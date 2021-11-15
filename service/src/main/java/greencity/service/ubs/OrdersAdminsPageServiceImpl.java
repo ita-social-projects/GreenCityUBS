@@ -152,9 +152,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
-            case "responsibleCaller":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
+            case "responsibleCaller":
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
             case "responsibleLogicMan":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
             case "responsibleDriver":
@@ -375,9 +375,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 List<EmployeeOrderPosition> employeeOrderPositions =
                     employeeOrderPositionRepository.findAllByOrderId(orderId);
-                EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
-                    EmployeeOrderPosition.builder().employee(existedEmployee).position(existedPosition)
-                        .order(existedOrder).build());
+                EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
+                    .employee(existedEmployee).position(existedPosition)
+                    .order(existedOrder).build();
+
+                if (employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition)) {
+                    employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
+                } else {
+                    employeeOrderPositionRepository.save(newEmployeeOrderPosition);
+                }
                 employeeOrderPositions.add(newEmployeeOrderPosition);
                 Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
                 existedOrder.setEmployeeOrderPositions(positionSet);
