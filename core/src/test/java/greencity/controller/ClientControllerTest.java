@@ -140,4 +140,11 @@ class ClientControllerTest {
 
         verify(ubsClientService).getOrdersForUser(null, 1L);
     }
+
+    @Test
+    void deleteOrderTest() throws Exception {
+        this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+    }
 }
