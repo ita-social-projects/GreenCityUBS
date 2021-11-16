@@ -154,6 +154,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
+        if (certificate.getCertificateStatus().toString().equals("USED")) {
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
+                certificate.getDateOfUse());
+        }
         return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
             certificate.getExpirationDate());
     }
@@ -188,17 +192,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-        String html = restClient.getDataFromFondy(paymentRequestDto);
-
-        Document doc = Jsoup.parse(html);
-
-        Elements links = doc.select("a[href]");
-        System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0) {
+        if (sumToPay == 0 || !dto.isShouldBePaid()) {
             return order.getId().toString();
         } else {
+            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
+            String html = restClient.getDataFromFondy(paymentRequestDto);
+
+            Document doc = Jsoup.parse(html);
+            Elements links = doc.select("a[href]");
+            System.out.println(links.attr("href"));
             return links.attr("href");
         }
     }
@@ -247,6 +250,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
         if (addresses != null) {
+            boolean exist = addresses.stream()
+                .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
+                .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
+                .anyMatch(d -> d.equals(dtoRequest));
+
+            if (exist) {
+                throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
+            }
+
             addresses.forEach(u -> {
                 u.setActual(false);
                 addressRepo.save(u);
@@ -1027,5 +1039,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return dateFormatter.format(date);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        orderRepository.delete(order);
     }
 }

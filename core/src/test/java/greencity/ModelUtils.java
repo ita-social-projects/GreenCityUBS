@@ -1,6 +1,9 @@
 package greencity;
 
 import greencity.dto.*;
+import greencity.dto.viber.dto.CallbackDto;
+import greencity.dto.viber.dto.SenderDto;
+import greencity.dto.viber.dto.UserDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
@@ -55,6 +58,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .shouldBePaid(true)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")
@@ -433,6 +437,31 @@ public class ModelUtils {
             .bagId(2)
             .limitDescription("dd")
             .languageId(3L)
+            .build();
+    }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .orderId("1")
+            .merchantId(1)
+            .actualAmount(1)
+            .actualCurrency("1")
+            .amount(1)
+            .build();
+    }
+
+    public static AddingPointsToUserDto getAddingPointsToUserDto() {
+        return AddingPointsToUserDto.builder()
+            .email("ddd@email.com")
+            .additionalPoints(2)
+            .build();
+    }
+
+    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
+        return OverpaymentInfoRequestDto.builder()
+            .bonuses(1L)
+            .overpayment(2L)
+            .comment("ss")
             .build();
     }
 }

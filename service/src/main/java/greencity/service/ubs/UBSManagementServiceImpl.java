@@ -8,7 +8,9 @@ import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -72,6 +75,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EventService eventService;
     private final LanguageRepository languageRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
+    private final CustomTableViewRepo customTableViewRepo;
 
     /**
      * {@inheritDoc}
@@ -94,6 +98,46 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         }
         return allOrdersWithLitres;
+    }
+
+    /**
+     * This method save or update view of orders table.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
+    @Override
+    public void changeOrderTableView(String uuid, String titles) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            customTableViewRepo.update(uuid, titles);
+        } else {
+            CustomTableView customTableView = CustomTableView.builder()
+                .uuid(uuid)
+                .titles(titles)
+                .build();
+            customTableViewRepo.save(customTableView);
+        }
+    }
+
+    /**
+     * This method return parameters for orders table view.
+     *
+     * @author Sikhovskiy Rostyslav.
+     */
+    @Override
+    public CustomTableViewDto getCustomTableParameters(String uuid) {
+        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
+            return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
+        } else {
+            return CustomTableViewDto.builder()
+                .titles("")
+                .build();
+        }
+    }
+
+    private CustomTableViewDto castTableViewToDto(String titles) {
+        return CustomTableViewDto.builder()
+            .titles(titles)
+            .build();
     }
 
     /**
@@ -655,7 +699,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria) {
+    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
         Page<Order> orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
         List<BigOrderTableDTO> orderList = new ArrayList<>();
 
@@ -719,7 +763,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<Order> order = orderRepository.findById(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
-        bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
+        Language language = languageRepository.findLanguageByCode(languageCode);
+        bags.forEach(bag -> {
+            BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
+            bagInfoDto.setName(
+                bagTranslationRepository.findNameByBagId(
+                    bag.getId(), language.getId()).toString());
+            bagInfo.add(bagInfoDto);
+        });
+        Set<CertificateDto> certificates = new HashSet<>();
+        certificateRepository.findCertificate(orderId)
+            .forEach(certificate -> certificates.add(modelMapper.map(certificate, CertificateDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
@@ -741,6 +795,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
+            .certificates(certificates)
+            .comment(order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST))
+                .getComment())
+            .orderDate(order.map(Order::getOrderDate).toString())
+            .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
+                .getOrderPaymentStatus().name())
             .build();
     }
 
@@ -1668,11 +1728,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .timeOfExport(getTimeOfExport(order))
             .idOrderFromShop(getIdOrderFromShop(order))
             .receivingStation(getReceivingStation(order))
-            .responsibleManager(getEmployeeNameByIdPosition(order, 2L))
-            .responsibleLogicMan(getEmployeeNameByIdPosition(order, 3L))
-            .responsibleDriver(getEmployeeNameByIdPosition(order, 5L))
-            .responsibleCaller(getEmployeeNameByIdPosition(order, 1L))
-            .responsibleNavigator(getEmployeeNameByIdPosition(order, 4L))
+            .responsibleManager(getEmployeeIdByIdPosition(order, 2L))
+            .responsibleLogicMan(getEmployeeIdByIdPosition(order, 3L))
+            .responsibleDriver(getEmployeeIdByIdPosition(order, 5L))
+            .responsibleCaller(getEmployeeIdByIdPosition(order, 1L))
+            .responsibleNavigator(getEmployeeIdByIdPosition(order, 4L))
             .commentsForOrder(getCommentsForOrder(order))
             .isBlocked(order.isBlocked())
             .blockedBy(getBlockedBy(order))
@@ -1738,7 +1798,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getReceivingStation(Order order) {
-        return nonNull(order.getReceivingStation()) ? order.getReceivingStation() : "-";
+        return nonNull(order.getReceivingStation()) ? getStationId(order.getReceivingStation()) : "-";
+    }
+
+    private String getStationId(String receivingStation) {
+        return receivingStationRepository.findByName(receivingStation).getId().toString();
     }
 
     private String getPayment(Order order) {
@@ -1753,11 +1817,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(joining(", ")) : "-";
     }
 
-    private String getEmployeeNameByIdPosition(Order order, Long idPosition) {
+    private String getEmployeeIdByIdPosition(Order order, Long idPosition) {
         return nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
             .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
             .map(EmployeeOrderPosition::getEmployee)
-            .map(e -> e.getFirstName() + " " + e.getLastName())
+            .map(e -> e.getId().toString())
             .reduce("", String::concat) : "-";
     }
 
