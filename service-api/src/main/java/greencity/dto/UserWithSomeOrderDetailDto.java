@@ -16,6 +16,8 @@ import lombok.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserWithSomeOrderDetailDto {
+    @JsonProperty("userId")
+    private Long userId;
     @JsonProperty("clientName")
     private String clientName;
     @JsonProperty("recipientPhone")
