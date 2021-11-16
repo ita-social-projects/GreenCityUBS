@@ -141,6 +141,7 @@ public class AdminUbsController {
      * Controller for obtaining all order by user.
      *
      * @param userId {@link Long}
+     *
      * @author Roman Sulymka.
      */
     @ApiOperation("Get users for the table")
