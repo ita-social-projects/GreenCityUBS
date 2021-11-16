@@ -34,8 +34,8 @@ public class AdminUbsControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(adminUbsController)
-                .setCustomArgumentResolvers(new UserArgumentResolver(restClient))
-                .build();
+            .setCustomArgumentResolvers(new UserArgumentResolver(restClient))
+            .build();
     }
 
     @Test
