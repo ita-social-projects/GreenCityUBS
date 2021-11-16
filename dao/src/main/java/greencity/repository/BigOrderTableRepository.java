@@ -138,7 +138,6 @@ public class BigOrderTableRepository {
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates);
         }
-
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
@@ -149,9 +148,7 @@ public class BigOrderTableRepository {
                 formOrderLikePredicate(s, orderRoot),
                 formUserLikePredicate(s, orderRoot),
                 formUbsUserLikePredicate(s, orderRoot),
-                 //fromPaymentLikePredicate(s, orderRoot)
-                formAddressLikePredicate(s, orderRoot)
-                ));
+                formAddressLikePredicate(s, orderRoot)));
         }
     }
 
@@ -180,25 +177,12 @@ public class BigOrderTableRepository {
         Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
         Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
 
-//      SubqueryExpression bagsAmount = ;
-//        Expression<String> bagsAmount = orderRoot.get("bagsAmount").as(String.class);
-//        MapJoin<Order,Integer,Integer> test1 = orderRoot.joinMap("amountOfBagsOrdered");
-//        Path<Integer> test2 = test1.value();
         return criteriaBuilder.or(
             criteriaBuilder.like(id, "%" + s + "%"),
             criteriaBuilder.like(orderDate, "%" + s + "%"),
             criteriaBuilder.like(note, "%" + s.toUpperCase() + "%"),
             criteriaBuilder.like(comment, "%" + s.toUpperCase() + "%"));
     }
-
-//    private Predicate fromPaymentLikePredicate(String s, Root<Order> orderRoot) {
-//        Expression<String> orderTime = orderRoot.joinList(PAYMENT).get("orderTime");
-//      //  Expression<Long> paymentSum = criteriaBuilder.sum(orderRoot.joinList(PAYMENT).get("amount"));//?
-//        return criteriaBuilder.or(
-//            criteriaBuilder.like(orderTime, "%" + s + "%")
-//          //  criteriaBuilder.like(paymentSum.as(String.class),"%" + s + "%" ) //?
-//        );
-//    }
 
     private Predicate formUbsUserLikePredicate(String s, Root<Order> orderRoot) {
         Expression<String> firstName = orderRoot.get(UBS_USER).get("firstName");
