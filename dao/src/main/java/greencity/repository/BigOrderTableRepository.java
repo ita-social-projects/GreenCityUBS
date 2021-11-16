@@ -155,7 +155,6 @@ public class BigOrderTableRepository {
     private void setOrder(OrderPage orderPage, CriteriaQuery<Order> criteriaQuery, Root<Order> orderRoot) {
         Path<Object> sortBy = orderRoot.get("id");
         String[] split = orderPage.getSortBy().split("\\.");
-
         if (split.length == 1) {
             sortBy = orderRoot.get(split[0]);
         } else if (split.length == 2) {
@@ -176,7 +175,6 @@ public class BigOrderTableRepository {
         Expression<String> orderDate = orderRoot.get("orderDate").as(String.class);
         Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
         Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
-
         return criteriaBuilder.or(
             criteriaBuilder.like(id, "%" + s + "%"),
             criteriaBuilder.like(orderDate, "%" + s + "%"),
