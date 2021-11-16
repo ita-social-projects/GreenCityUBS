@@ -3,6 +3,7 @@ package greencity.entity.order;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -30,6 +31,10 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "order")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private List<UserNotification> userNotifications;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
