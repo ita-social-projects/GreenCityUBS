@@ -1,9 +1,16 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.UserOrdersDto;
 import greencity.dto.UserWithOrdersDto;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
+import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.UserNotFoundException;
 import greencity.repository.OrderRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +22,20 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class OrdersForUserServiceImpl implements OrdersForUserService {
     OrderRepository orderRepository;
+    UserRepository userRepository;
+    UBSuserRepository ubSuserRepository;
 
     @Override
     public UserWithOrdersDto getAllOrders(Long userId) {
+        UBSuser ubsUser = ubSuserRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        String username = ubsUser.getFirstName() + " " + ubsUser.getLastName();
         List<UserOrdersDto> userOrdersDtoList = orderRepository.getAllOrdersByUserId(userId)
             .stream()
             .sorted(Comparator.comparing(Order::getOrderDate))
             .map(this::getAllOrders)
             .collect(Collectors.toList());
-        return new UserWithOrdersDto(userOrdersDtoList);
+        return new UserWithOrdersDto(username, userOrdersDtoList);
     }
 
     private UserOrdersDto getAllOrders(Order order) {
