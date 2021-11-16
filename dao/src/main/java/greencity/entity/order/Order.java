@@ -119,7 +119,7 @@ public class Order {
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<Payment> payment;
 
     @OneToMany(mappedBy = "order")
