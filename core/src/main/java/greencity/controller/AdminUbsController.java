@@ -6,6 +6,7 @@ import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
+import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -25,15 +26,17 @@ import java.util.List;
 public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
+    private final OrdersForUserService ordersForUserService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
-        ValuesForUserTableService valuesForUserTable) {
+        ValuesForUserTableService valuesForUserTable, OrdersForUserService ordersForUserService) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
+        this.ordersForUserService = ordersForUserService;
     }
 
     /**
@@ -132,5 +135,23 @@ public class AdminUbsController {
         @RequestBody List<Long> listOfOrdersId) {
         List<Long> unblockedOrdersId = ordersAdminsPageService.unblockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(unblockedOrdersId);
+    }
+
+    /**
+     * Controller for obtaining all order by user.
+     *
+     * @param userId {@link Long}
+     * @author Roman Sulymka.
+     */
+    @ApiOperation("Get users for the table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/{userId}/ordersAll")
+    public ResponseEntity<UserWithOrdersDto> getAllOrdersForUser(@PathVariable Long userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ordersForUserService.getAllOrders(userId));
     }
 }
