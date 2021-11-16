@@ -3,14 +3,11 @@ package greencity.repository;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
-import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import org.hibernate.criterion.SubqueryExpression;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
@@ -20,7 +17,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -30,7 +26,6 @@ public class BigOrderTableRepository {
     private static final String UBS_USER = "ubsUser";
     private static final String ADDRESS = "address";
     private static final String EMPLOYEE_ORDER_POSITION = "employeeOrderPositions";
-    private static final String PAYMENT = "payment";
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
