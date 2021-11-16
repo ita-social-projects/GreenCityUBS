@@ -130,7 +130,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes order_status for all not blocked orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -140,7 +140,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes date_of_export for all not blocked orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -150,7 +150,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes deliver_from for all not blocked orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -161,7 +161,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes deliver_to for all not blocked orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -170,7 +170,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method changes receiving_station for all not blocked orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -182,7 +182,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Method sets employee_id and makes blocked_status 'true' for all not blocked
      * orders.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
@@ -192,11 +192,24 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Method unblocks all orders. Needs some improvement.
-     * 
+     *
      * @author Liubomyr Pater.
      */
     @Modifying
     @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id",
         nativeQuery = true)
     void unblockAllOrders(@Param("employee_id") Long employeeId);
+
+    /**
+     * Method gets all orders for user by Id.
+     *
+     * @author Roman Sulymka
+     */
+
+    @Query(value = "SELECT * FROM orders"
+        + "    INNER JOIN payment p on orders.id = p.order_id"
+        + "    INNER JOIN users ON orders.users_id = users.id"
+        + "    INNER JOIN ubs_user uu on orders.ubs_user_id = uu.id"
+        + "    WHERE orders.users_id = :userId ", nativeQuery = true)
+    List<Order> getAllOrdersByUserId(@Param(value = "userId") Long userId);
 }
