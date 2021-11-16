@@ -7,6 +7,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import org.hibernate.criterion.SubqueryExpression;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +20,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -28,6 +30,7 @@ public class BigOrderTableRepository {
     private static final String UBS_USER = "ubsUser";
     private static final String ADDRESS = "address";
     private static final String EMPLOYEE_ORDER_POSITION = "employeeOrderPositions";
+    private static final String PAYMENT = "payment";
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -140,13 +143,16 @@ public class BigOrderTableRepository {
     }
 
     private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates) {
-        Predicate orderPredicate = formOrderLikePredicate(sc, orderRoot);
-        Predicate userPredicate = formUserLikePredicate(sc, orderRoot);
-        Predicate ubsUserPredicate = formUbsUserLikePredicate(sc, orderRoot);
-        Predicate addressPredicate = formAddressLikePredicate(sc, orderRoot);
-
-        Predicate predicate = criteriaBuilder.or(orderPredicate, userPredicate, ubsUserPredicate, addressPredicate);
-        predicates.add(predicate);
+        String[] searchWord = sc.getSearch().split(" ");
+        for (String s : searchWord) {
+            predicates.add(criteriaBuilder.or(
+                formOrderLikePredicate(s, orderRoot),
+                formUserLikePredicate(s, orderRoot),
+                formUbsUserLikePredicate(s, orderRoot),
+                 //fromPaymentLikePredicate(s, orderRoot)
+                formAddressLikePredicate(s, orderRoot)
+                ));
+        }
     }
 
     private void setOrder(OrderPage orderPage, CriteriaQuery<Order> criteriaQuery, Root<Order> orderRoot) {
@@ -168,68 +174,69 @@ public class BigOrderTableRepository {
         }
     }
 
-    private Predicate formOrderLikePredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
-        return criteriaBuilder.or(
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("comment")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get("note")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-                criteriaBuilder.like(orderRoot.get("id").as(String.class),
-                        "%" + sc.getSearch() + "%"),
-                criteriaBuilder.like(orderRoot.get("orderDate").as(String.class),
-                        "%" + sc.getSearch() + "%"),
-                criteriaBuilder.like(orderRoot.get("payment").get("orderTime").as(String.class),
-                        "%" + sc.getSearch() + "%")
-        );
+    private Predicate formOrderLikePredicate(String s, Root<Order> orderRoot) {
+        Expression<String> id = orderRoot.get("id").as(String.class);
+        Expression<String> orderDate = orderRoot.get("orderDate").as(String.class);
+        Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
+        Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
 
+//      SubqueryExpression bagsAmount = ;
+//        Expression<String> bagsAmount = orderRoot.get("bagsAmount").as(String.class);
+//        MapJoin<Order,Integer,Integer> test1 = orderRoot.joinMap("amountOfBagsOrdered");
+//        Path<Integer> test2 = test1.value();
+        return criteriaBuilder.or(
+            criteriaBuilder.like(id, "%" + s + "%"),
+            criteriaBuilder.like(orderDate, "%" + s + "%"),
+            criteriaBuilder.like(note, "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(comment, "%" + s.toUpperCase() + "%"));
     }
 
-    private Predicate formUbsUserLikePredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
-        Expression<String> firstName = criteriaBuilder.concat(orderRoot.get(UBS_USER).get("firstName"), " ");
+//    private Predicate fromPaymentLikePredicate(String s, Root<Order> orderRoot) {
+//        Expression<String> orderTime = orderRoot.joinList(PAYMENT).get("orderTime");
+//      //  Expression<Long> paymentSum = criteriaBuilder.sum(orderRoot.joinList(PAYMENT).get("amount"));//?
+//        return criteriaBuilder.or(
+//            criteriaBuilder.like(orderTime, "%" + s + "%")
+//          //  criteriaBuilder.like(paymentSum.as(String.class),"%" + s + "%" ) //?
+//        );
+//    }
+
+    private Predicate formUbsUserLikePredicate(String s, Root<Order> orderRoot) {
+        Expression<String> firstName = orderRoot.get(UBS_USER).get("firstName");
         Expression<String> lastName = orderRoot.get(UBS_USER).get("lastName");
-        Expression<String> userName = criteriaBuilder.concat(firstName,lastName);
+        Expression<String> phoneNumber = orderRoot.get(UBS_USER).get("phoneNumber");
+        Expression<String> email = orderRoot.get(UBS_USER).get("email");
         return criteriaBuilder.or(
-            criteriaBuilder.like(criteriaBuilder.upper(firstName),"%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(userName), "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get("phoneNumber")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get("email")),
-                "%" + sc.getSearch().toUpperCase() + "%"));
+            criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(phoneNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(email), "%" + s.toUpperCase() + "%"));
     }
 
-
-
-
-
-    private Predicate formUserLikePredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
+    private Predicate formUserLikePredicate(String s, Root<Order> orderRoot) {
+        Expression<String> firstName = orderRoot.get(USER).get("recipientName");
+        Expression<String> lastName = orderRoot.get(USER).get("recipientSurname");
+        Expression<String> recipientPhone = orderRoot.get(USER).get("recipientPhone");
+        Expression<String> recipientEmail = orderRoot.get(USER).get("recipientEmail");
+        Expression<String> violations = orderRoot.get(USER).get("violations").as(String.class);
         return criteriaBuilder.or(
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(USER).get("recipientName")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(USER).get("recipientSurname")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(USER).get("recipientPhone")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(USER).get("recipientEmail")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-                criteriaBuilder.like(orderRoot.get(USER).get("violations").as(String.class),
-                        "%" + sc.getSearch() + "%")
-        );
+            criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(recipientPhone), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(recipientEmail), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(violations, "%" + s + "%"));
     }
 
-    private Predicate formAddressLikePredicate(OrderSearchCriteria sc, Root<Order> orderRoot) {
+    private Predicate formAddressLikePredicate(String s, Root<Order> orderRoot) {
+        Expression<String> street = orderRoot.get(UBS_USER).get(ADDRESS).get("street");
+        Expression<String> houseNumber = orderRoot.get(UBS_USER).get(ADDRESS).get("houseNumber");
+        Expression<String> houseCorpus = orderRoot.get(UBS_USER).get(ADDRESS).get("houseCorpus");
+        Expression<String> entranceNumber = orderRoot.get(UBS_USER).get(ADDRESS).get("entranceNumber");
+        Expression<String> addressComment = orderRoot.get(UBS_USER).get(ADDRESS).get("addressComment");
         return criteriaBuilder.or(
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("street")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("houseNumber")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("houseCorpus")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("entranceNumber")),
-                "%" + sc.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("addressComment")),
-                "%" + sc.getSearch().toUpperCase() + "%"));
+            criteriaBuilder.like(criteriaBuilder.upper(street), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(houseNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(houseCorpus), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(entranceNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(addressComment), "%" + s.toUpperCase() + "%"));
     }
-
-
 }
