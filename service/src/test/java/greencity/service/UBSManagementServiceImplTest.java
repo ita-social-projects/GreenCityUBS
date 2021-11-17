@@ -9,10 +9,12 @@ import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -49,6 +51,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -137,6 +140,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
+
+    @Mock
+    private CustomTableViewRepo customTableViewRepo;
 
     private void getMocksBehavior() {
 
@@ -1216,8 +1222,8 @@ class UBSManagementServiceImplTest {
         order.setExportedQuantity(hashMap);
         order.setPointsToUse(100);
         Bag bag = ModelUtils.getBag().get();
-        List<Bag> bagArrayList = List.of(bag);
-
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
@@ -1225,10 +1231,14 @@ class UBSManagementServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
         when(languageRepository.findIdByCode("ua")).thenReturn(1l);
+        when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+
         ubsManagementService.getOrderStatusData(1L, "ua");
 
-        verify(orderRepository).getOrderDetails(1L);
-        verify(certificateRepository).findCertificate(1L);
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(certificateRepository, times(2)).findCertificate(1L);
         verify(orderRepository).getOrderDetails(1L);
         verify(orderRepository).findById(1L);
         verify(languageRepository).findIdByCode("ua");
@@ -1241,5 +1251,27 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderStatusData(100L, "ua");
         });
+    }
+
+    @Test
+    void changeOrderTableView() {
+        String uuid = "uuid1";
+        CustomTableView customTableView = CustomTableView.builder()
+            .titles("titles1,titles2")
+            .uuid(uuid)
+            .build();
+
+        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(customTableViewRepo).existsByUuid(uuid);
+        verify(customTableViewRepo).save(customTableView);
+    }
+
+    @Test
+    void getCustomTableParameters() {
+        String uuid = "uuid1";
+        ubsManagementService.getCustomTableParameters(uuid);
+
+        verify(customTableViewRepo).existsByUuid(uuid);
     }
 }

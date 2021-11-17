@@ -31,9 +31,13 @@ public class OrderStatusPageDto {
     private String addressStreet;
     private String addressDistrict;
     private String addressComment;
+    private String orderDate;
+    private String paymentStatus;
     private Map<Integer, Integer> amountOfBagsOrdered;
     private List<BagInfoDto> bags;
     private Map<Integer, Integer> amountOfBagsExported;
     private Set<String> additionalOrders;
     private Map<Integer, Integer> amountOfBagsConfirmed;
+    private Set<CertificateDto> certificates;
+    private String comment;
 }

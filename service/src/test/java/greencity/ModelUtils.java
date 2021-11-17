@@ -150,12 +150,14 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .shouldBePaid(true)
             .personalData(PersonalDataDto.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
                 .id(13L)
                 .email("mail@mail.ua")
                 .phoneNumber("067894522")
+                .ubsUserId(1L)
                 .build())
             .build();
     }
@@ -181,7 +183,7 @@ public class ModelUtils {
                     .longitude(2.2)
                     .latitude(3.2)
                     .build())
-                .comment(null).build())
+                .addressComment(null).build())
             .orders(List.of(Order.builder().id(1L).build()))
             .build();
     }
@@ -228,7 +230,7 @@ public class ModelUtils {
                     .street("Levaya")
                     .district("frankivskiy")
                     .entranceNumber("5")
-                    .comment("near mall")
+                    .addressComment("near mall")
                     .houseCorpus(null)
                     .houseNumber("4R")
                     .coordinates(Coordinates.builder()
@@ -245,6 +247,7 @@ public class ModelUtils {
             .cancellationComment("cancelled")
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .build();
     }
 
@@ -957,7 +960,14 @@ public class ModelUtils {
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .uuid("abc")
+            .ubsUsers(getUbsUsers())
             .build();
+    }
+
+    public static Set<UBSuser> getUbsUsers() {
+        Set<UBSuser> ubSusers = new HashSet<>();
+        ubSusers.add(UBSuser.builder().id(1L).build());
+        return ubSusers;
     }
 
     public static Payment getManualPayment() {
@@ -998,7 +1008,7 @@ public class ModelUtils {
                     .street("Levaya")
                     .district("frankivskiy")
                     .entranceNumber("5")
-                    .comment("near mall")
+                    .addressComment("near mall")
                     .houseCorpus(null)
                     .houseNumber("4R")
                     .coordinates(Coordinates.builder()
@@ -1840,6 +1850,14 @@ public class ModelUtils {
 
     public static OrderStatusTranslation getStatusTranslation() {
         return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(1L).name("ds").build();
+    }
+
+    public static BagInfoDto getBagInfoDto() {
+        return BagInfoDto.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .build();
     }
 
 }

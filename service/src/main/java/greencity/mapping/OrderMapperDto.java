@@ -20,7 +20,7 @@ public class OrderMapperDto extends AbstractConverter<Order, OrderDto> {
             .address(order.getUbsUser().getAddress().getDistrict() + " "
                 + order.getUbsUser().getAddress().getStreet() + " "
                 + order.getUbsUser().getAddress().getHouseNumber())
-            .addressComment(order.getUbsUser().getAddress().getComment())
+            .addressComment(order.getUbsUser().getAddress().getAddressComment())
             .phoneNumber(order.getUbsUser().getPhoneNumber())
             .latitude(order.getUbsUser().getAddress().getCoordinates().getLatitude())
             .longitude(order.getUbsUser().getAddress().getCoordinates().getLongitude())

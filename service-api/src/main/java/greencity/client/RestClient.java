@@ -52,8 +52,9 @@ public class RestClient {
         request.put("order_desc", dto.getOrderDescription());
         request.put(orderId, dto.getOrderId());
         request.put("merchant_id", dto.getMerchantId());
+        request.put("response_url", dto.getResponseUrl());
+        request.put("server_callback_url", dto.getServerCallbackUrl());
         request.put("signature", dto.getSignature());
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);

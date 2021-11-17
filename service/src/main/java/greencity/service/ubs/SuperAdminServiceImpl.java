@@ -228,6 +228,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return GetLocationTranslationDto.builder()
             .locationStatus(locationTranslation.getLocation().getLocationStatus().toString())
             .languageCode(locationTranslation.getLanguage().getCode())
+            .region(locationTranslation.getRegion())
             .name(locationTranslation.getLocationName())
             .id(locationTranslation.getLocation().getId())
             .build();
@@ -248,6 +249,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .stream()
                 .map(locationTranslationDto -> LocationTranslation.builder()
                     .locationName(locationTranslationDto.getLocationName())
+                    .region(locationTranslationDto.getRegion())
                     .language(languageRepository.findById(locationTranslationDto.getLanguageId()).orElseThrow(
                         () -> new LanguageNotFoundException(
                             ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + locationTranslationDto.getLanguageId())))

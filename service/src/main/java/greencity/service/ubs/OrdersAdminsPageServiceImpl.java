@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -55,7 +56,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("orderStatus", "Статус замовлення", "Order's status"), "orderStatus", 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
-                false, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
+                true, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), "ORDERS_INFO"),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
                 true,
                 4, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_INFO"),
@@ -102,7 +103,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment for order by client"),
-                "", 20, true, true, false, 22, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
+                "", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
             new ColumnDTO(new TitleDto("payment", "Оплата", "Payment"), "need to implement", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), "ORDERS_DETAILS"),
@@ -151,9 +152,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
-            case "responsibleCaller":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
+            case "responsibleCaller":
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
             case "responsibleLogicMan":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
             case "responsibleDriver":
@@ -312,8 +313,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public synchronized List<Long> timeOfExportForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         String from = value.substring(0, 5);
         String to = value.substring(6);
-        LocalDateTime timeFrom = LocalDateTime.parse(from, DateTimeFormatter.ISO_LOCAL_TIME);
-        LocalDateTime timeTo = LocalDateTime.parse(to, DateTimeFormatter.ISO_LOCAL_TIME);
+        LocalDateTime timeFrom = LocalDateTime.of(LocalDate.now(), LocalTime.parse(from, DateTimeFormatter.ISO_TIME));
+        LocalDateTime timeTo = LocalDateTime.of(LocalDate.now(), LocalTime.parse(to, DateTimeFormatter.ISO_TIME));
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
             orderRepository.changeDeliverFromForAllOrders(timeFrom, employeeId);
@@ -324,7 +325,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 existedOrder.setDeliverFrom(timeFrom);
-                existedOrder.setDeliverFrom(timeTo);
+                existedOrder.setDeliverTo(timeTo);
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
@@ -374,9 +375,16 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 List<EmployeeOrderPosition> employeeOrderPositions =
                     employeeOrderPositionRepository.findAllByOrderId(orderId);
-                EmployeeOrderPosition newEmployeeOrderPosition = employeeOrderPositionRepository.save(
-                    EmployeeOrderPosition.builder().employee(existedEmployee).position(existedPosition)
-                        .order(existedOrder).build());
+                EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
+                    .employee(existedEmployee).position(existedPosition)
+                    .order(existedOrder).build();
+
+                if (Boolean.TRUE
+                    .equals(employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition))) {
+                    employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
+                } else {
+                    employeeOrderPositionRepository.save(newEmployeeOrderPosition);
+                }
                 employeeOrderPositions.add(newEmployeeOrderPosition);
                 Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
                 existedOrder.setEmployeeOrderPositions(positionSet);

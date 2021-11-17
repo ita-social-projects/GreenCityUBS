@@ -137,7 +137,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PersonalDataDto getSecondPageData(String uuid) {
         User currentUser = createUserByUuidIfUserDoesNotExist(uuid);
-        return modelMapper.map(currentUser, PersonalDataDto.class);
+        List<UBSuser> ubsUser = ubsUserRepository.findUBSuserByUser(currentUser);
+        if (ubsUser.isEmpty()) {
+            ubsUser.add(UBSuser.builder().id(null).build());
+        }
+        PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
+        dto.setUbsUserId(ubsUser.get(0).getId());
+        return dto;
     }
 
     /**
@@ -148,6 +154,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
+        if (certificate.getCertificateStatus().toString().equals("USED")) {
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
+                certificate.getDateOfUse());
+        }
         return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
             certificate.getExpirationDate());
     }
@@ -169,7 +179,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay > dto.getPointsToUse()) {
+        if (sumToPay >= dto.getPointsToUse()) {
             sumToPay -= dto.getPointsToUse();
         }
 
@@ -182,17 +192,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-        String html = restClient.getDataFromFondy(paymentRequestDto);
-
-        Document doc = Jsoup.parse(html);
-
-        Elements links = doc.select("a[href]");
-        System.out.println(links.attr("href"));
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0) {
+        if (sumToPay == 0 || !dto.isShouldBePaid()) {
             return order.getId().toString();
         } else {
+            PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
+            String html = restClient.getDataFromFondy(paymentRequestDto);
+
+            Document doc = Jsoup.parse(html);
+            Elements links = doc.select("a[href]");
+            System.out.println(links.attr("href"));
             return links.attr("href");
         }
     }
@@ -281,7 +290,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 forOrderAfterUpdate.setActual(true);
                 forOrderAfterUpdate.setUser(address.getUser());
                 forOrderAfterUpdate.setAddressStatus(address.getAddressStatus());
-                forOrderAfterUpdate.setComment(address.getComment());
+                forOrderAfterUpdate.setAddressComment(address.getAddressComment());
 
                 address.getUbsUsers().forEach(u -> u.setAddress(addressRepo.save(forOrderAfterUpdate)));
             }
@@ -499,7 +508,10 @@ public class UBSClientServiceImpl implements UBSClientService {
                 + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
-            .amount(sumToPay * 100).build();
+            .amount(sumToPay * 100)
+            .responseUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
+            .serverCallbackUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .build();
 
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -509,11 +521,11 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UBSuser formUserDataToBeSaved(PersonalDataDto dto, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
-        if (dto.getId() != null) {
+        if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
-                ubsUserRepository.findById(dto.getId())
+                ubsUserRepository.findById(dto.getUbsUserId())
                     .orElseThrow(() -> new IncorrectValueException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                        + dto.getId()));
+                        + dto.getUbsUserId()));
         }
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
@@ -568,7 +580,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
-        if (dto.getCertificates() != null) {
+        if (sumToPay != 0 && dto.getCertificates() != null) {
             boolean tooManyCertificates = false;
             for (String temp : dto.getCertificates()) {
                 if (tooManyCertificates) {
@@ -581,6 +593,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
                 certificate.setCertificateStatus(CertificateStatus.USED);
+                certificate.setDateOfUse(LocalDate.now());
                 if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
@@ -884,8 +897,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         userData.setAddress(address);
 
-        if (userData.getAddress().getComment() == null) {
-            userData.getAddress().setComment(dto.getPersonalData().getAddressComment());
+        if (userData.getAddress().getAddressComment() == null) {
+            userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
         }
 
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
@@ -1030,5 +1043,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return dateFormatter.format(date);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        orderRepository.delete(order);
     }
 }

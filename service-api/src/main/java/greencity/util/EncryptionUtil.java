@@ -30,7 +30,8 @@ public class EncryptionUtil {
         stringBuilder.append("|" + merchantId);
         stringBuilder.append("|" + dto.getOrderDescription());
         stringBuilder.append("|" + dto.getOrderId());
-
+        stringBuilder.append("|" + dto.getResponseUrl());
+        stringBuilder.append("|" + dto.getServerCallbackUrl());
         return sha1Hex(stringBuilder.toString());
     }
 

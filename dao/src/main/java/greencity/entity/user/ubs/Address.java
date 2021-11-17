@@ -53,8 +53,8 @@ public class Address {
     @Column(name = "entrance_number", nullable = false)
     private String entranceNumber;
 
-    @Column
-    private String comment;
+    @Column(name = "address_comment", nullable = false)
+    private String addressComment;
 
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;
