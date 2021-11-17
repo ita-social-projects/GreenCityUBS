@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -50,4 +51,14 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
      * @author Yuriy Bahlay.
      */
     UBSuser findUBSuserByEmailAndUserId(String email, Long userId);
+
+    /**
+     * Find UbsUser by userId.
+     *
+     * @param userId {@link Long}.
+     * @return {@link UBSuser}.
+     *
+     * @author Roman Sulymka.
+     */
+    UBSuser findUBSuserByUserId(Long userId);
 }
