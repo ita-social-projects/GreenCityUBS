@@ -590,7 +590,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
                 certificate.setCertificateStatus(CertificateStatus.USED);
-                certificate.setDateOfUse(LocalDate.now());
                 if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
