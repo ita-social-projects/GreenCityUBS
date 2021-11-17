@@ -79,4 +79,5 @@
     <include file="db/changelog/logs/20211106-ch-change-column-address-comment-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-table-custom-table-view-Sikhovskiy.xml"/>
     <include file="db/changelog/logs/ch-changeTitles-capacity-Sikhovskiy.xml"/>
+    <include file="db/changelog/logs/ch-add-column-region-Sikhovskiy.xml"/>
 </databaseChangeLog>

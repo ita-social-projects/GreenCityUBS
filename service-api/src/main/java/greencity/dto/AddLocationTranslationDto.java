@@ -10,5 +10,6 @@ import lombok.*;
 @ToString
 public class AddLocationTranslationDto {
     private String locationName;
+    private String region;
     private Long languageId;
 }

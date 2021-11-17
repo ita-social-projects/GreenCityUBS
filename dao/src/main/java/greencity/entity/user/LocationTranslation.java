@@ -21,6 +21,9 @@ public class LocationTranslation {
     @Column(name = "location_name")
     private String locationName;
 
+    @Column
+    private String region;
+
     @ManyToOne
     private Location location;
 
