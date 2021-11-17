@@ -4,6 +4,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.UserOrdersDto;
 import greencity.dto.UserWithOrdersDto;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.UserNotFoundException;
 import greencity.repository.OrderRepository;
@@ -25,8 +26,9 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
 
     @Override
     public UserWithOrdersDto getAllOrders(Long userId) {
-        UBSuser ubsUser = ubSuserRepository.findById(userId)
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        UBSuser ubsUser = ubSuserRepository.findUBSuserByUserId(user.getId());
         String username = ubsUser.getFirstName() + " " + ubsUser.getLastName();
         List<UserOrdersDto> userOrdersDtoList = orderRepository.getAllOrdersByUserId(userId)
             .stream()
