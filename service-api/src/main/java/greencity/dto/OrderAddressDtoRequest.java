@@ -26,6 +26,10 @@ public class OrderAddressDtoRequest {
     @Length(max = 30)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
     private String district;
+    @NotBlank
+    @Length(max = 30)
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    private String region;
     @Length(max = 4)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-.]{0,2}")
     private String entranceNumber;

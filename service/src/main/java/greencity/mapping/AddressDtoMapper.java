@@ -14,6 +14,7 @@ public class AddressDtoMapper extends AbstractConverter<AddressDto, Address> {
         return Address.builder()
             .id(addressDto.getId())
             .city(addressDto.getCity())
+            .region(addressDto.getRegion())
             .street(addressDto.getStreet())
             .district(addressDto.getDistrict())
             .entranceNumber(addressDto.getEntranceNumber())
