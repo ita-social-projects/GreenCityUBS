@@ -504,7 +504,10 @@ public class UBSClientServiceImpl implements UBSClientService {
                 + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
-            .amount(sumToPay * 100).build();
+            .amount(sumToPay * 100)
+            .responseUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
+            .serverCallbackUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .build();
 
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
