@@ -53,6 +53,14 @@ public interface UBSuserRepository extends CrudRepository<UBSuser, Long> {
     UBSuser findUBSuserByEmailAndUserId(String email, Long userId);
 
     /**
+     * Find UbsUser by current User.
+     *
+     * @param user {@link User}
+     * @return {@link UBSuser}
+     */
+    List<UBSuser> findUBSuserByUser(User user);
+
+    /**
      * Find UbsUser by userId.
      *
      * @param userId {@link Long}.
