@@ -26,8 +26,6 @@ public class AddressDto implements Serializable {
     @NotBlank
     @Length(max = 30)
     private String region;
-    @NotBlank
-    @Length(max = 30)
     private String district;
     @Length(max = 4)
     private String entranceNumber;
