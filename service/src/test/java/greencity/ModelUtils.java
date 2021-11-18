@@ -943,9 +943,14 @@ public class ModelUtils {
     public static Payment getPayment() {
         return Payment.builder()
             .id(1L)
-            .paymentStatus(PaymentStatus.UNPAID)
+            .paymentStatus(PaymentStatus.PAID)
             .amount(95000L)
             .currency("UAH")
+            .orderStatus("approved")
+            .responseStatus("approved")
+            .order(getOrder())
+            .paymentId(1L)
+            .fee(0L)
             .build();
     }
 

@@ -82,18 +82,24 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public void validatePayment(PaymentResponseDto dto) {
-        if (dto.getResponseStatus().equals("failure")) {
-            throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
+        Payment orderPayment = mapPayment(dto);
+        String[] ids = dto.getOrder_id().split("_");
+        Order order = orderRepository.findById(Long.valueOf(ids[0]))
+            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
+        if (dto.getResponse_status().equals("failure")) {
+            orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+            paymentRepository.save(orderPayment);
+            orderRepository.save(order);
         }
         if (!encryptionUtil.checkIfResponseSignatureIsValid(dto, fondyPaymentKey)) {
             throw new PaymentValidationException(PAYMENT_VALIDATION_ERROR);
         }
-        String[] ids = dto.getOrderId().split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
-        if (dto.getOrderStatus().equals("approved")) {
-            Payment orderPayment = modelMapper.map(dto, Payment.class);
+
+        if (dto.getOrder_status().equals("approved")) {
+            orderPayment.setPaymentId(Long.valueOf(dto.getPayment_id()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
@@ -101,6 +107,32 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
         }
+    }
+
+    private Payment mapPayment(PaymentResponseDto dto) {
+        if (dto.getFee() == null) {
+            dto.setFee(0);
+        }
+        return Payment.builder()
+            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
+            .currency(dto.getCurrency())
+            .amount(Long.valueOf(dto.getAmount()))
+            .orderStatus(dto.getOrder_status())
+            .responseStatus(dto.getResponse_status())
+            .senderCellPhone(dto.getSender_cell_phone())
+            .senderAccount(dto.getSender_account())
+            .maskedCard(dto.getMasked_card())
+            .cardType(dto.getCard_type())
+            .responseCode(dto.getResponse_code())
+            .responseDescription(dto.getResponse_description())
+            .orderTime(dto.getOrder_time())
+            .settlementDate(dto.getSettlement_date())
+            .fee(Long.valueOf(dto.getFee()))
+            .paymentSystem(dto.getPayment_system())
+            .senderEmail(dto.getSender_email())
+            .paymentId(Long.valueOf(dto.getPayment_id()))
+            .paymentStatus(PaymentStatus.UNPAID)
+            .build();
     }
 
     /**
@@ -165,7 +197,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public String saveFullOrderToDB(OrderResponseDto dto, String uuid) {
+    public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
@@ -190,7 +222,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         if (sumToPay == 0 || !dto.isShouldBePaid()) {
-            return order.getId().toString();
+            return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
             String html = restClient.getDataFromFondy(paymentRequestDto);
@@ -198,8 +230,29 @@ public class UBSClientServiceImpl implements UBSClientService {
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
             System.out.println(links.attr("href"));
-            return links.attr("href");
+            String link = links.attr("href");
+            return getPaymentRequestDto(order, link);
         }
+    }
+
+    private FondyOrderResponse getPaymentRequestDto(Order order, String link) {
+        return FondyOrderResponse.builder()
+            .orderId(order.getId())
+            .link(link)
+            .build();
+    }
+
+    @Override
+    public FondyPaymentResponse getPaymentResponseFromFondy(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        return getFondyPaymentResponse(order);
+    }
+
+    private FondyPaymentResponse getFondyPaymentResponse(Order order) {
+        return FondyPaymentResponse.builder()
+            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .build();
     }
 
     private void checkIfAddressHasBeenDeleted(Address address) {
@@ -505,8 +558,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm")
-            .serverCallbackUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil

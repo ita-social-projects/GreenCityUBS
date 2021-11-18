@@ -89,13 +89,16 @@ class UBSClientServiceImplTest {
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrderId(order.getId().toString());
-        dto.setResponseStatus("approved");
-        dto.setOrderStatus("approved");
+        dto.setOrder_id(order.getId().toString());
+        dto.setResponse_status("approved");
+        dto.setOrder_status("approved");
+        dto.setAmount(95000);
+        dto.setPayment_id(1);
+        dto.setCurrency("UAH");
+        dto.setFee(0);
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
         ubsService.validatePayment(dto);
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
@@ -106,16 +109,16 @@ class UBSClientServiceImplTest {
     @Test
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        dto.setResponseStatus("approved");
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
+        Order order = getOrder();
+        dto.setOrder_id(order.getId().toString());
+        dto.setResponse_status("approved");
+        dto.setOrder_status("approved");
+        dto.setAmount(95000);
+        dto.setPayment_id(1);
+        dto.setCurrency("UAH");
+        dto.setFee(0);
+        lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
-    }
-
-    @Test
-    void testValidatePaymentFailureResponse() {
-        PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
-        paymentResponseDto.setResponseStatus("failure");
-        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
     }
 
     @Test
@@ -187,7 +190,8 @@ class UBSClientServiceImplTest {
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
-        String result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
 
     }
