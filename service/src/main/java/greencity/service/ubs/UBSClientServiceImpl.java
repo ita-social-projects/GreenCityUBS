@@ -186,6 +186,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
+        if (certificate.getCertificateStatus().toString().equals("USED")) {
+            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
+                certificate.getDateOfUse());
+        }
         return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
             certificate.getExpirationDate());
     }
@@ -641,6 +645,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderCertificates.add(certificate);
                 sumToPay -= certificate.getPoints();
                 certificate.setCertificateStatus(CertificateStatus.USED);
+                certificate.setDateOfUse(LocalDate.now());
                 if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
@@ -865,6 +870,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return LocationResponseDto.builder()
             .id(locationTranslation.getLocation().getId())
             .name(locationTranslation.getLocationName())
+            .region(locationTranslation.getRegion())
             .languageCode(locationTranslation.getLanguage().getCode())
             .build();
     }
@@ -1090,5 +1096,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return dateFormatter.format(date);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        orderRepository.delete(order);
     }
 }

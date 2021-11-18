@@ -38,4 +38,6 @@ public class OrderStatusPageDto {
     private Map<Integer, Integer> amountOfBagsExported;
     private Set<String> additionalOrders;
     private Map<Integer, Integer> amountOfBagsConfirmed;
+    private Set<CertificateDto> certificates;
+    private String comment;
 }

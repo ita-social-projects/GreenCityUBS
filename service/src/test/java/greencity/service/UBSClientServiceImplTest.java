@@ -924,4 +924,10 @@ class UBSClientServiceImplTest {
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
 
+    @Test
+    void deleteOrder() {
+        Order order = ModelUtils.getOrder();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        ubsService.deleteOrder(1L);
+    }
 }

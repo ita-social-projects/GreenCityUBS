@@ -145,6 +145,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.DELETE,
                 UBS_LINK + "/userProfile/**")
             .hasAnyRole("USER", "ADMIN")
+            .antMatchers(UBS_LINK + "/client/delete-order/{id}")
+            .hasAnyRole("USER", "ADMIN")
             .antMatchers(HttpMethod.TRACE,
                 UBS_LINK + "/userProfile/**")
             .hasAnyRole("USER", "ADMIN")

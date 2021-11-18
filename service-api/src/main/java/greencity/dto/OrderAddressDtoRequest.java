@@ -19,6 +19,10 @@ public class OrderAddressDtoRequest {
     @Max(1000000)
     private Long id;
     @NotBlank
+    @Length(max = 30)
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    private String region;
+    @NotBlank
     @Length(max = 12)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
     private String city;

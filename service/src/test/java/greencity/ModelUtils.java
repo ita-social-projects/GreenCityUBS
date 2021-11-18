@@ -247,6 +247,7 @@ public class ModelUtils {
             .cancellationComment("cancelled")
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .build();
     }
 
@@ -1854,6 +1855,14 @@ public class ModelUtils {
 
     public static OrderStatusTranslation getStatusTranslation() {
         return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(1L).name("ds").build();
+    }
+
+    public static BagInfoDto getBagInfoDto() {
+        return BagInfoDto.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .build();
     }
 
 }

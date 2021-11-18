@@ -12,4 +12,5 @@ public class BagInfoDto {
     Integer capacity;
     Integer price;
     Integer id;
+    String name;
 }
