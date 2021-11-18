@@ -263,7 +263,7 @@ class OrderControllerTest {
             .content(paymentResponseJson)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().is3xxRedirection());
     }
 
     @Test
