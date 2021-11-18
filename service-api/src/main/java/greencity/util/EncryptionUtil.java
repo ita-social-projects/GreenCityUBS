@@ -78,7 +78,7 @@ public class EncryptionUtil {
         checkString(dto.getSettlement_date(), stringBuilder);
         checkString(dto.getTran_type(), stringBuilder);
         checkString(dto.getVerification_status(), stringBuilder);
-        checkInteger(dto.getParent_order_id(),stringBuilder);
+        checkInteger(dto.getParent_order_id(), stringBuilder);
         return DigestUtils.sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 

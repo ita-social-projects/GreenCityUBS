@@ -130,7 +130,7 @@ public class OrderController {
      * @param dto {@link PaymentResponseDto} - response order data.
      * @return {@link HttpStatus} - http status.
      */
-    @ApiOperation(value = "Receive payment.")
+    @ApiOperation(value = "Receive payment from Fondy.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
