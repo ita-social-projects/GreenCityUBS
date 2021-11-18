@@ -80,6 +80,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .region("Lvivskiy")
             .actual(false)
             .build();
     }
