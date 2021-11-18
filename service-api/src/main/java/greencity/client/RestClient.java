@@ -98,7 +98,7 @@ public class RestClient {
     public String findUuidByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-            + "/user/findUuidByEmail" + "?email=" + email, HttpMethod.GET, entity, String.class)
+            + "/user/findUuidByEmail" + EMAIL + email, HttpMethod.GET, entity, String.class)
             .getBody();
     }
 
@@ -205,7 +205,7 @@ public class RestClient {
     public Optional<UserVO> findNotDeactivatedByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         UserVO body = restTemplate.exchange(greenCityUserServerAddress
-            + "user/findNotDeactivatedByEmail" + "?email="
+            + "user/findNotDeactivatedByEmail" + EMAIL
             + email, HttpMethod.GET, entity, UserVO.class)
             .getBody();
         assert body != null;

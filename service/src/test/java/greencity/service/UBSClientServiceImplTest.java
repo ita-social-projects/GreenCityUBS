@@ -282,7 +282,7 @@ class UBSClientServiceImplTest {
     @Test
     void checkCertificateWithNoAvailable() {
         Assertions.assertThrows(CertificateNotFoundException.class, () -> {
-            ubsService.checkCertificate("randomstring").getCertificateStatus();
+            ubsService.checkCertificate("randomstring");
         });
     }
 
@@ -324,7 +324,7 @@ class UBSClientServiceImplTest {
     void cancelFormedOrderShouldThrowOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.cancelFormedOrder(1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
@@ -358,9 +358,10 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
+        Locale locale = new Locale("en");
         Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            () -> ubsService.makeOrderAgain(locale, 1L));
+        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
@@ -386,7 +387,7 @@ class UBSClientServiceImplTest {
     void findAllOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        assertEquals(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST, thrown.getMessage());
     }
 
     void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
@@ -669,9 +670,8 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderPaymentDetailShouldThrowOrderNotFoundException() {
         when(orderRepository.findById(any())).thenReturn(Optional.empty());
-
         Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getOrderPaymentDetail(any()));
+            () -> ubsService.getOrderPaymentDetail(null));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 

@@ -201,7 +201,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
-            System.out.println(links.attr("href"));
             return links.attr("href");
         }
     }
