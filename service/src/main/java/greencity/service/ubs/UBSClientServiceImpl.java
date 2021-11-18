@@ -188,10 +188,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         if (certificate.getCertificateStatus().toString().equals("USED")) {
             return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-                certificate.getDateOfUse());
+                certificate.getDateOfUse(), certificate.getCode());
         }
         return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-            certificate.getExpirationDate());
+            certificate.getExpirationDate(), certificate.getCode());
     }
 
     /**
