@@ -12,5 +12,6 @@ import lombok.*;
 public class LocationResponseDto {
     private Long id;
     private String name;
+    private String region;
     private String languageCode;
 }
