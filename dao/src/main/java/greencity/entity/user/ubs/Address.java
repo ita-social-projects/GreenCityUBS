@@ -33,8 +33,8 @@ public class Address {
     @Column(columnDefinition = "varchar(30)", nullable = false)
     private String region;
 
-    @Size(min = 1, max = 20, message = "Invalid city name")
-    @Column(columnDefinition = "varchar(12) default 'Kyiv'", nullable = false/* , length = 20 */)
+    @Size(min = 1, max = 30, message = "Invalid city name")
+    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false)
     private String city;
 
     @Size(min = 1, max = 50)
