@@ -13,4 +13,5 @@ public class CertificateDto {
     private String certificateStatus;
     private Integer certificatePoints;
     private LocalDate certificateDate;
+    private String code;
 }
