@@ -209,7 +209,8 @@ class SuperAdminServiceImplTest {
 
     @Test
     void createCourierThrowException_LocationNotFoundException() {
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.createCourier(new CreateCourierDto()));
+        CreateCourierDto createCourierDto = new CreateCourierDto();
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.createCourier(createCourierDto));
     }
 
     @Test
@@ -218,22 +219,25 @@ class SuperAdminServiceImplTest {
         Location location = new Location();
         when(locationRepository.findById(any())).thenReturn(Optional.of(location));
         when(languageRepository.findById(any())).thenReturn(Optional.empty());
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         assertThrows(LanguageNotFoundException.class,
-            () -> superAdminService.createCourier(ModelUtils.getCreateCourierDto()));
+            () -> superAdminService.createCourier(createCourierDto));
     }
 
     @Test
     void setCourierLimitBySumOfOrderThrowException() {
         when(courierRepository.findById(any())).thenReturn(Optional.empty());
+        EditPriceOfOrder editPriceOfOrder = new EditPriceOfOrder();
         assertThrows(CourierNotFoundException.class,
-            () -> superAdminService.setCourierLimitBySumOfOrder(1L, new EditPriceOfOrder()));
+            () -> superAdminService.setCourierLimitBySumOfOrder(1L, editPriceOfOrder));
     }
 
     @Test
     void setCourierLimitByAmountOfBagThrowException() {
         when(courierRepository.findById(any())).thenReturn(Optional.empty());
+        EditAmountOfBagDto editAmountOfBagDto = new EditAmountOfBagDto();
         assertThrows(CourierNotFoundException.class,
-            () -> superAdminService.setCourierLimitByAmountOfBag(1L, new EditAmountOfBagDto()));
+            () -> superAdminService.setCourierLimitByAmountOfBag(1L, editAmountOfBagDto));
     }
 
     @Test
