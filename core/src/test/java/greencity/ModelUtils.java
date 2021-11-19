@@ -1,9 +1,6 @@
 package greencity;
 
 import greencity.dto.*;
-import greencity.dto.viber.dto.CallbackDto;
-import greencity.dto.viber.dto.SenderDto;
-import greencity.dto.viber.dto.UserDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
@@ -80,6 +77,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .region("Lvivskiy")
             .actual(false)
             .build();
     }
@@ -442,10 +440,10 @@ public class ModelUtils {
 
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
-            .orderId("1")
-            .merchantId(1)
-            .actualAmount(1)
-            .actualCurrency("1")
+            .order_id("1")
+            .merchant_id(1)
+            .actual_amount(1)
+            .actual_currency("1")
             .amount(1)
             .build();
     }

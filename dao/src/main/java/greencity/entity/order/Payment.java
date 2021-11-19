@@ -13,7 +13,8 @@ import javax.persistence.*;
 @Setter
 @Builder
 @Table(name = "payment")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"order"})
+@ToString
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
