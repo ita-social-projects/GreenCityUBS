@@ -278,9 +278,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
         OrderStatus desiredStatus = OrderStatus.valueOf(value);
-
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
+            //need to improve
             orderRepository.changeStatusForAllOrders(value, employeeId);
         }
         for (Long orderId : ordersId) {
