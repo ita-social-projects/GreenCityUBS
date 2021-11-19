@@ -277,7 +277,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /* methods for changing order */
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        OrderStatus orderStatus = OrderStatus.valueOf(value);
+        OrderStatus desiredStatus = OrderStatus.valueOf(value);
+
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
             orderRepository.changeStatusForAllOrders(value, employeeId);
@@ -286,7 +287,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setOrderStatus(orderStatus);
+                OrderStatus currentStatus = existedOrder.getOrderStatus();
+                OrderStatus confirmedStatus = OrderStatus.changeStatusByRules(desiredStatus, currentStatus);
+                existedOrder.setOrderStatus(confirmedStatus);
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
