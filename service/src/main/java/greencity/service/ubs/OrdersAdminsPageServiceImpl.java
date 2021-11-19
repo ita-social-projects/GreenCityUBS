@@ -289,10 +289,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 OrderStatus currentStatus = existedOrder.getOrderStatus();
                 OrderStatus confirmedStatus = OrderStatus.changeStatusByRules(desiredStatus, currentStatus);
-                existedOrder.setOrderStatus(confirmedStatus);
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                if (confirmedStatus.equals(desiredStatus)){
+                    existedOrder.setOrderStatus(confirmedStatus);
+                    existedOrder.setBlocked(false);
+                    existedOrder.setBlockedByEmployee(null);
+                    orderRepository.save(existedOrder);
+                }else throw new Exception();
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
