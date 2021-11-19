@@ -81,4 +81,5 @@
     <include file="db/changelog/logs/ch-changeTitles-capacity-Sikhovskiy.xml"/>
     <include file="db/changelog/logs/ch-add-column-region-Sikhovskiy.xml"/>
     <include file="db/changelog/logs/ch-add-column-region-to-address-Sikhovskiy.xml"/>
+    <include file="db/changelog/logs/ch-change-city-capacity-Sikhovskiy.xml"/>
 </databaseChangeLog>
