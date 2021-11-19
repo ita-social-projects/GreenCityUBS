@@ -857,8 +857,9 @@ class UBSManagementServiceImplTest {
         User user = ModelUtils.getTestUser();
         user.setUuid(null);
 
-        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(
-            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
+        AddingPointsToUserDto addingPointsToUserDto =
+            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build();
+        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(addingPointsToUserDto));
     }
 
     @Test

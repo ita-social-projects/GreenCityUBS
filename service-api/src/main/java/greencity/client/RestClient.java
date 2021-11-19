@@ -204,7 +204,7 @@ public class RestClient {
     public Optional<UserVO> findNotDeactivatedByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         UserVO body = restTemplate.exchange(greenCityUserServerAddress
-            + "user/findNotDeactivatedByEmail" + "?email="
+            + "user/findNotDeactivatedByEmail" + EMAIL
             + email, HttpMethod.GET, entity, UserVO.class)
             .getBody();
         assert body != null;

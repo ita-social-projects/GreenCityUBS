@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-public class AdminUbsControllerTest {
+class AdminUbsControllerTest {
     private static final String ubsLink = "/ubs/management";
     private MockMvc mockMvc;
 

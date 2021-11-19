@@ -3,7 +3,6 @@ package greencity.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Payment;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
