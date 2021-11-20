@@ -9,7 +9,8 @@ import greencity.filters.UserFilterCriteria;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -40,6 +41,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
     private UserWithSomeOrderDetailDto mapToDto(User u) {
         final UserWithSomeOrderDetailDto allFieldsFromTableDto = new UserWithSomeOrderDetailDto();
         StringBuilder name = new StringBuilder();
+        allFieldsFromTableDto.setUserId(u.getId());
         if (u.getRecipientName() != null) {
             name.append(u.getRecipientName());
         }

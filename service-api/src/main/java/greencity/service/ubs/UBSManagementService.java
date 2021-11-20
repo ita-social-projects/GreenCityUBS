@@ -84,6 +84,20 @@ public interface UBSManagementService {
         CertificateFilterCriteria certificateFilterCriteria);
 
     /**
+     * Method save or update view of Orders table.
+     *
+     * @author Sikhovskiy Rostyslav
+     */
+    void changeOrderTableView(String uuid, String titles);
+
+    /**
+     * Method return parameters for custom orders table view.
+     *
+     * @author Sikhovskiy Rostyslav
+     */
+    CustomTableViewDto getCustomTableParameters(String uuid);
+
+    /**
      * Method add a certificates.
      *
      * @author Nazar Struk
@@ -185,7 +199,7 @@ public interface UBSManagementService {
      * @return {@link OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
-    OrderStatusPageDto getOrderStatusData(Long orderId, Long languageId);
+    OrderStatusPageDto getOrderStatusData(Long orderId, String languageCode);
 
     /**
      * Method that gets bags information.
@@ -323,7 +337,7 @@ public interface UBSManagementService {
      *
      * @author Ihor Volianskyi
      */
-    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria);
+    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid);
 
     /**
      * This is method which is save Admin comment.

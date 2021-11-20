@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUsers", "user", "comment"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "user"})
 @Getter
 @Setter
 @Builder
@@ -29,8 +29,12 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(min = 1, max = 20, message = "Invalid city name")
-    @Column(columnDefinition = "varchar(12) default 'Kyiv'", nullable = false/* , length = 20 */)
+    @Size(min = 1, max = 20, message = "Invalid region name")
+    @Column(columnDefinition = "varchar(30)", nullable = false)
+    private String region;
+
+    @Size(min = 1, max = 30, message = "Invalid city name")
+    @Column(columnDefinition = "varchar(30) default 'Kyiv'", nullable = false)
     private String city;
 
     @Size(min = 1, max = 50)
@@ -53,8 +57,8 @@ public class Address {
     @Column(name = "entrance_number", nullable = false)
     private String entranceNumber;
 
-    @Column
-    private String comment;
+    @Column(name = "address_comment", nullable = false)
+    private String addressComment;
 
     @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean actual;

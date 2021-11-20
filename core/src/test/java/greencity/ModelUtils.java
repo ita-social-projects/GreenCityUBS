@@ -55,6 +55,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
+            .shouldBePaid(true)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")
@@ -76,6 +77,7 @@ public class ModelUtils {
             .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
             .district("Zaliznuchnuy")
             .city("Lviv")
+            .region("Lvivskiy")
             .actual(false)
             .build();
     }
@@ -433,6 +435,31 @@ public class ModelUtils {
             .bagId(2)
             .limitDescription("dd")
             .languageId(3L)
+            .build();
+    }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .order_id("1")
+            .merchant_id(1)
+            .actual_amount(1)
+            .actual_currency("1")
+            .amount(1)
+            .build();
+    }
+
+    public static AddingPointsToUserDto getAddingPointsToUserDto() {
+        return AddingPointsToUserDto.builder()
+            .email("ddd@email.com")
+            .additionalPoints(2)
+            .build();
+    }
+
+    public static OverpaymentInfoRequestDto getOverpaymentInfoRequestDto() {
+        return OverpaymentInfoRequestDto.builder()
+            .bonuses(1L)
+            .overpayment(2L)
+            .comment("ss")
             .build();
     }
 }

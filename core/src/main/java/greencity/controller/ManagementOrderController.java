@@ -6,6 +6,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.filters.*;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
@@ -249,9 +250,51 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/bigOrderTable")
-    public ResponseEntity<Page<BigOrderTableDTO>> gerOrders(OrderPage page, OrderSearchCriteria criteria) {
+    public ResponseEntity<Page<BigOrderTableDTO>> gerOrders(OrderPage page,
+        OrderSearchCriteria criteria,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrders(page, criteria));
+            .body(ubsManagementService.getOrders(page, criteria, uuid));
+    }
+
+    /**
+     * The method save or update view of order table. This method only save Uuid of
+     * user and titles of columns in DataBase. All changes actually take place at
+     * the Front-end side.
+     *
+     * @author Sikhovskiy Rostyslav
+     */
+    @ApiOperation("Save or update Parameters for custom orders table view")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PutMapping("/changeOrdersTableView")
+    public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
+        String titles) {
+        ubsManagementService.changeOrderTableView(uuid, titles);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * The method return parameters for custom orders table view. This method only
+     * gets parameters of user and sends it to Front-end.
+     *
+     * @author Sikhovskiy Rostyslav
+     */
+    @ApiOperation("Get parameters for custom orders table view")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getOrdersViewParameters")
+    public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getCustomTableParameters(uuid));
     }
 
     /**
@@ -527,10 +570,11 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-data-for-order/{id}/{langId}")
+    @GetMapping("/get-data-for-order/{id}/{langCode}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getOrderStatusData(orderId, languageId));
+        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langCode") String languageCode) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.getOrderStatusData(orderId, languageCode));
     }
 
     /**

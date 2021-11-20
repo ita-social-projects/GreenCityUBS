@@ -39,6 +39,7 @@ public class OrderStatusPageDto {
     private double orderBonusDiscount;
     private double orderExportedPrice;
     private double orderExportedDiscountedPrice;
+    private String paymentStatus;
     private Map<Integer, Integer> amountOfBagsOrdered;
     private List<BagInfoDto> bags;
     private Map<Integer, Integer> amountOfBagsExported;
@@ -47,4 +48,6 @@ public class OrderStatusPageDto {
     private PaymentTableInfoDto paymentTableInfoDto;
     private ExportDetailsDto exportDetailsDto;
     private EmployeePositionDtoRequest employeePositionDtoRequest;
+    private Map<Integer, Integer> amountOfBagsConfirmed;
+    private String comment;
 }

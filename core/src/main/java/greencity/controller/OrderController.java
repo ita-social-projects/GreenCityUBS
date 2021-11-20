@@ -118,7 +118,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<String> processOrder(
+    public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
@@ -130,15 +130,18 @@ public class OrderController {
      * @param dto {@link PaymentResponseDto} - response order data.
      * @return {@link HttpStatus} - http status.
      */
-    @ApiOperation(value = "Receive payment.")
+    @ApiOperation(value = "Receive payment from Fondy.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
-        @RequestBody @Valid PaymentResponseDto dto) {
+        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            response.sendRedirect("http://localhost:4200/#/ubs/confirm");
+        }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -348,7 +351,7 @@ public class OrderController {
      *
      * @param userUuid {@link UserVO} id.
      * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link HttpStatus}.
+     * @return {@link LiqPayOrderResponse}.
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Process user order.")
@@ -358,7 +361,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processLiqPayOrder")
-    public ResponseEntity<String> processLiqPayOrder(
+    public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
@@ -400,5 +403,22 @@ public class OrderController {
     public ResponseEntity<Map<String, Object>> getLiqPayStatusPayment(
         @Valid @PathVariable Long orderId) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLiqPayStatus(orderId));
+    }
+
+    /**
+     * Controller for getting status about payment from Fondy.
+     *
+     * @param orderId - current order
+     * @return {@link String}
+     */
+    @ApiOperation(value = "Get status of Payment from Fondy")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping(value = "/getFondyStatus/{orderId}")
+    public ResponseEntity<FondyPaymentResponse> getFondyStatusPayment(
+        @Valid @PathVariable Long orderId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPaymentResponseFromFondy(orderId));
     }
 }

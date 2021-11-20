@@ -35,7 +35,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.web.client.RestTemplate;
 
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
@@ -90,13 +89,16 @@ class UBSClientServiceImplTest {
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrderId(order.getId().toString());
-        dto.setResponseStatus("approved");
-        dto.setOrderStatus("approved");
+        dto.setOrder_id(order.getId().toString());
+        dto.setResponse_status("approved");
+        dto.setOrder_status("approved");
+        dto.setAmount(95000);
+        dto.setPayment_id(1);
+        dto.setCurrency("UAH");
+        dto.setFee(0);
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(modelMapper.map(dto, Payment.class)).thenReturn(payment);
         ubsService.validatePayment(dto);
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
@@ -107,16 +109,16 @@ class UBSClientServiceImplTest {
     @Test
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
-        dto.setResponseStatus("approved");
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
+        Order order = getOrder();
+        dto.setOrder_id(order.getId().toString());
+        dto.setResponse_status("approved");
+        dto.setOrder_status("approved");
+        dto.setAmount(95000);
+        dto.setPayment_id(1);
+        dto.setCurrency("UAH");
+        dto.setFee(0);
+        lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
-    }
-
-    @Test
-    void testValidatePaymentFailureResponse() {
-        PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
-        paymentResponseDto.setResponseStatus("failure");
-        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(paymentResponseDto));
     }
 
     @Test
@@ -179,7 +181,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
@@ -188,7 +190,8 @@ class UBSClientServiceImplTest {
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
-        String result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
 
     }
@@ -255,11 +258,15 @@ class UBSClientServiceImplTest {
             .uuid(uuid)
             .recipientName("oleh")
             .recipientSurname("ivanov")
-            .id(13L).recipientEmail("mail@mail.ua")
+            .id(1L).recipientEmail("mail@mail.ua")
             .recipientPhone("067894522")
             .build();
-
+        List<UBSuser> ubsUser = List.of(UBSuser.builder()
+            .user(user)
+            .id(1l)
+            .build());
         when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
@@ -279,7 +286,7 @@ class UBSClientServiceImplTest {
     @Test
     void checkCertificateWithNoAvailable() {
         Assertions.assertThrows(CertificateNotFoundException.class, () -> {
-            ubsService.checkCertificate("randomstring").getCertificateStatus();
+            ubsService.checkCertificate("randomstring");
         });
     }
 
@@ -321,7 +328,7 @@ class UBSClientServiceImplTest {
     void cancelFormedOrderShouldThrowOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.cancelFormedOrder(1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
@@ -355,9 +362,10 @@ class UBSClientServiceImplTest {
 
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
+        Locale locale = new Locale("en");
         Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            () -> ubsService.makeOrderAgain(locale, 1L));
+        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     @Test
@@ -383,7 +391,7 @@ class UBSClientServiceImplTest {
     void findAllOrderNotFoundException() {
         Exception thrown = assertThrows(OrderNotFoundException.class,
             () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        assertEquals(thrown.getMessage(), ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        assertEquals(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST, thrown.getMessage());
     }
 
     void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
@@ -492,7 +500,7 @@ class UBSClientServiceImplTest {
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
-        when(ubsUserRepository.findById(1L)).thenReturn(optionalUBSuser);
+        lenient().when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
         lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
         lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
@@ -666,9 +674,8 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderPaymentDetailShouldThrowOrderNotFoundException() {
         when(orderRepository.findById(any())).thenReturn(Optional.empty());
-
         Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getOrderPaymentDetail(any()));
+            () -> ubsService.getOrderPaymentDetail(null));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
@@ -800,7 +807,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
@@ -810,7 +817,7 @@ class UBSClientServiceImplTest {
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(bagRepository).findById(3);
-        verify(ubsUserRepository).findById(13L);
+        verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
@@ -888,7 +895,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(bag);
-        when(ubsUserRepository.findById(13L)).thenReturn(Optional.of(ubSuser));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
@@ -917,4 +924,10 @@ class UBSClientServiceImplTest {
         assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
 
+    @Test
+    void deleteOrder() {
+        Order order = ModelUtils.getOrder();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        ubsService.deleteOrder(1L);
+    }
 }

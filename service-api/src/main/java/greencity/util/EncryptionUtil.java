@@ -4,6 +4,7 @@ import com.liqpay.LiqPayUtil;
 import greencity.dto.PaymentRequestDto;
 import greencity.dto.PaymentRequestDtoLiqPay;
 import greencity.dto.PaymentResponseDto;
+import lombok.ToString;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @Component
+@ToString
 public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on order details.
@@ -30,7 +32,7 @@ public class EncryptionUtil {
         stringBuilder.append("|" + merchantId);
         stringBuilder.append("|" + dto.getOrderDescription());
         stringBuilder.append("|" + dto.getOrderId());
-
+        stringBuilder.append("|" + dto.getResponseUrl());
         return sha1Hex(stringBuilder.toString());
     }
 
@@ -42,61 +44,41 @@ public class EncryptionUtil {
      * @return {@link Boolean} - whether the data is valid.
      */
     public boolean checkIfResponseSignatureIsValid(PaymentResponseDto dto, String password) {
-        if (dto.getFee() == null) {
-            dto.setFee(0);
-        }
         StringBuilder stringBuilder = new StringBuilder(password);
-        checkInteger(dto.getActualAmount(), stringBuilder);
-        checkString(dto.getActualCurrency(), stringBuilder);
-        if (dto.getAdditionalInfo() != null) {
-            checkString(dto.getAdditionalInfo().getBankName(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getBankCountry(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getBankResponseCode(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getCardProduct(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getCardCategory(), stringBuilder);
-            checkDouble(dto.getAdditionalInfo().getSettlementFee(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getCaptureStatus(), stringBuilder);
-            checkDouble(dto.getAdditionalInfo().getClientFee(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getIpaddressV4(), stringBuilder);
-            checkDouble(dto.getAdditionalInfo().getCaptureAmount(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getCardType(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getReservationData(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getBankResponseDescription(), stringBuilder);
-            checkInteger(dto.getAdditionalInfo().getTransactionId(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getTimeEnd(), stringBuilder);
-            checkString(dto.getAdditionalInfo().getCardNumber(), stringBuilder);
-        }
+        checkInteger(dto.getActual_amount(), stringBuilder);
+        checkString(dto.getActual_currency(), stringBuilder);
         checkInteger(dto.getAmount(), stringBuilder);
-        checkString(dto.getApprovalCode(), stringBuilder);
-        checkInteger(dto.getCardBin(), stringBuilder);
-        checkString(dto.getCardType(), stringBuilder);
+        checkString(dto.getApproval_code(), stringBuilder);
+        checkInteger(dto.getCard_bin(), stringBuilder);
+        checkString(dto.getCard_type(), stringBuilder);
         checkString(dto.getCurrency(), stringBuilder);
         checkInteger(dto.getEci(), stringBuilder);
         checkInteger(dto.getFee(), stringBuilder);
-        checkString(dto.getMaskedCard(), stringBuilder);
-        checkString(dto.getMerchantData(), stringBuilder);
-        checkInteger(dto.getMerchantId(), stringBuilder);
-        checkString(dto.getOrderId(), stringBuilder);
-        checkString(dto.getOrderStatus(), stringBuilder);
-        checkString(dto.getOrderTime(), stringBuilder);
-        checkInteger(dto.getPaymentId(), stringBuilder);
-        checkString(dto.getPaymentSystem(), stringBuilder);
-        checkString(dto.getProductId(), stringBuilder);
+        checkString(dto.getMasked_card(), stringBuilder);
+        checkString(dto.getMerchant_data(), stringBuilder);
+        checkInteger(dto.getMerchant_id(), stringBuilder);
+        checkString(dto.getOrder_id(), stringBuilder);
+        checkString(dto.getOrder_status(), stringBuilder);
+        checkString(dto.getOrder_time(), stringBuilder);
+        checkInteger(dto.getPayment_id(), stringBuilder);
+        checkString(dto.getPayment_system(), stringBuilder);
+        checkString(dto.getProduct_id(), stringBuilder);
         checkString(dto.getRectoken(), stringBuilder);
-        checkString(dto.getRectokenLifetime(), stringBuilder);
-        checkInteger(dto.getResponseCode(), stringBuilder);
-        checkString(dto.getResponseDescription(), stringBuilder);
-        checkString(dto.getResponseStatus(), stringBuilder);
-        checkIntegerInclude0(dto.getReversalAmount(), stringBuilder);
+        checkString(dto.getRectoken_lifetime(), stringBuilder);
+        checkInteger(dto.getResponse_code(), stringBuilder);
+        checkString(dto.getResponse_description(), stringBuilder);
+        checkString(dto.getResponse_status(), stringBuilder);
+        checkIntegerInclude0(dto.getReversal_amount(), stringBuilder);
         checkString(dto.getRrn(), stringBuilder);
-        checkString(dto.getSenderAccount(), stringBuilder);
-        checkString(dto.getSenderCellPhone(), stringBuilder);
-        checkString(dto.getSenderEmail(), stringBuilder);
-        checkIntegerInclude0(dto.getSettlementAmount(), stringBuilder);
-        checkString(dto.getSettlementCurrency(), stringBuilder);
-        checkString(dto.getSettlementDate(), stringBuilder);
-        checkString(dto.getTranType(), stringBuilder);
-        checkString(dto.getVerificationStatus(), stringBuilder);
+        checkString(dto.getSender_account(), stringBuilder);
+        checkString(dto.getSender_cell_phone(), stringBuilder);
+        checkString(dto.getSender_email(), stringBuilder);
+        checkIntegerInclude0(dto.getSettlement_amount(), stringBuilder);
+        checkString(dto.getSettlement_currency(), stringBuilder);
+        checkString(dto.getSettlement_date(), stringBuilder);
+        checkString(dto.getTran_type(), stringBuilder);
+        checkString(dto.getVerification_status(), stringBuilder);
+        checkInteger(dto.getParent_order_id(), stringBuilder);
         return DigestUtils.sha1Hex(stringBuilder.toString()).equals(dto.getSignature());
     }
 

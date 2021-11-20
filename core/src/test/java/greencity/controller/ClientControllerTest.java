@@ -36,7 +36,7 @@ class ClientControllerTest {
     private static final String cancelFormedOrderLink = "/cancel-formed-order";
     private static final String makeOrderAgainLink = "/make-order-again";
     private static final String getOrderPaymentDetailLink = "/order-payment-detail/";
-
+    private static final String getAllPointsForUser = "/users-pointsToUse";
     private MockMvc mockMvc;
 
     @Mock
@@ -119,5 +119,32 @@ class ClientControllerTest {
     void getDataForOrderStatusPageTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}/{langId}", 1L, 2L));
         verify(ubsClientService).getOrderInfoForSurcharge(1L, 2L);
+    }
+
+    @Test
+    void getAllPointsForUserTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).findAllCurrentPointsForUser(any());
+    }
+
+    @Test
+    void getAllDataForOrderTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-all-orders-data/{lang}", 1)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).getOrdersForUser(null, 1L);
+    }
+
+    @Test
+    void deleteOrderTest() throws Exception {
+        this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 }

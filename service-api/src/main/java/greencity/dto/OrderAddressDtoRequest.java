@@ -12,14 +12,18 @@ import javax.validation.constraints.Pattern;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "comment"})
+@EqualsAndHashCode(exclude = "id")
 @ToString
 @Builder
 public class OrderAddressDtoRequest {
     @Max(1000000)
     private Long id;
     @NotBlank
-    @Length(max = 12)
+    @Length(max = 30)
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    private String region;
+    @NotBlank
+    @Length(max = 30)
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
     private String city;
     @NotBlank
@@ -39,7 +43,7 @@ public class OrderAddressDtoRequest {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-\\s',]{3,40}")
     private String street;
 
-    private String comment;
+    private String addressComment;
 
     private Coordinates coordinates;
 

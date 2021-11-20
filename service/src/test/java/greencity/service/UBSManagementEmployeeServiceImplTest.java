@@ -98,10 +98,10 @@ class UBSManagementEmployeeServiceImplTest {
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeDto.getEmail());
         Exception thrown3 = assertThrows(PositionNotFoundException.class,
             () -> employeeService.save(employeeDto, null));
-        assertEquals(thrown3.getMessage(), ErrorMessage.POSITION_NOT_FOUND);
+        assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
         Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
             () -> employeeService.save(employeeDto, null));
-        assertEquals(thrown4.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND);
+        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
     }
 
     @Test
@@ -145,23 +145,27 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
 
+        EmployeeDto employeeDto1 = getEmployeeDto();
         Exception thrown2 = assertThrows(EmployeeNotFoundException.class,
-            () -> employeeService.update(getEmployeeDto(), null));
-        assertEquals(thrown2.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId());
+            () -> employeeService.update(employeeDto1, null));
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId(), thrown2.getMessage());
+        EmployeeDto employeeDto2 = getEmployeeDto();
         Exception thrown = assertThrows(EmployeeValidationException.class,
-            () -> employeeService.update(getEmployeeDto(), null));
-        assertEquals(thrown.getMessage(),
-            ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + getEmployeeDto().getPhoneNumber());
+            () -> employeeService.update(employeeDto2, null));
+        assertEquals(ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + getEmployeeDto().getPhoneNumber(),
+            thrown.getMessage());
+        EmployeeDto employeeDto3 = getEmployeeDto();
         Exception thrown1 = assertThrows(EmployeeValidationException.class,
-            () -> employeeService.update(getEmployeeDto(), null));
-        assertEquals(thrown1.getMessage(),
-            ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + getEmployeeDto().getEmail());
+            () -> employeeService.update(employeeDto3, null));
+        assertEquals(ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + getEmployeeDto().getEmail(), thrown1.getMessage());
+        EmployeeDto employeeDto4 = getEmployeeDto();
         Exception thrown3 = assertThrows(PositionNotFoundException.class,
-            () -> employeeService.update(getEmployeeDto(), null));
-        assertEquals(thrown3.getMessage(), ErrorMessage.POSITION_NOT_FOUND);
+            () -> employeeService.update(employeeDto4, null));
+        assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
+        EmployeeDto employeeDto5 = getEmployeeDto();
         Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
-            () -> employeeService.update(getEmployeeDto(), null));
-        assertEquals(thrown4.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND);
+            () -> employeeService.update(employeeDto5, null));
+        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
     }
 
     @Test
@@ -254,8 +258,8 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(PositionNotFoundException.class,
             () -> employeeService.deletePosition(2L));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + 2L);
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_POSITION);
+        assertEquals(ErrorMessage.POSITION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
+        assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_POSITION, thrown.getMessage());
     }
 
     @Test
@@ -334,8 +338,8 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
             () -> employeeService.deleteReceivingStation(2L));
 
-        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L);
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
+        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
+        assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());
     }
 
     @Test
@@ -365,6 +369,6 @@ class UBSManagementEmployeeServiceImplTest {
 
         Exception thrown2 = assertThrows(EmployeeIllegalOperationException.class,
             () -> employeeService.deleteEmployeeImage(1L));
-        assertEquals(thrown2.getMessage(), ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE);
+        assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
     }
 }
