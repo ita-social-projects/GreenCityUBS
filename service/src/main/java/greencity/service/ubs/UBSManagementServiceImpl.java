@@ -16,7 +16,6 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.filters.*;
 import greencity.repository.*;
@@ -24,6 +23,8 @@ import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,19 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EventService eventService;
     private final LanguageRepository languageRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
+    private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private UBSClientService ubsClientService;
+
+    /**
+     * This is method which inject {@link UBSClientService} in order to avoid
+     * cycling between beans.
+     * 
+     * @param ubsClientService {@link UBSClientServiceImpl}.
+     */
+    @Autowired
+    public void setUbsClientService(@Qualifier("UBSClientServiceImpl") UBSClientService ubsClientService) {
+        this.ubsClientService = ubsClientService;
+    }
 
     /**
      * {@inheritDoc}
@@ -220,12 +234,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return groupedOrderDtos;
     }
 
-    /**
-     * Method gets all order payments and count paid amount and amount which user
-     * should paid.
-     *
-     * @return {@link PaymentTableInfoDto }
-     */
     /**
      * Method gets all order payments, count paid amount, amount which user should
      * paid and overpayment amount.
@@ -721,26 +729,127 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Bag> bags = bagRepository.findBagByOrderId(orderId);
         bags.forEach(bag -> bagInfo.add(modelMapper.map(bag, BagInfoDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
                 languageId);
         String statusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
-        return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
+        String value = null;
+        if (order.isPresent()) {
+            value = orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                (long) order.get().getOrderPaymentStatus().getStatusValue(), languageId);
+        }
+        UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        return OrderStatusPageDto.builder()
+            .id(orderId)
+            .dateFormed(order.map(Order::getOrderDate).orElse(null))
+            .orderFullPrice(prices.getSumAmount())
+            .orderStatusesDto(getOrderStatusesTranslation(order.orElse(null), languageId))
+            .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
+            .orderDiscountedPrice(prices.getTotalSumAmount())
+            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(languageId))
+            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
+            .orderPaymentStatusName(Optional.of(Objects.requireNonNull(value)).orElse(null))
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
-            .recipientName(user.getFirstName()).recipientSurname(user.getLastName())
-            .recipientPhone(user.getPhoneNumber()).recipientEmail(user.getEmail())
-            .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
+            .userInfoDto(userInfoDto)
+            .addressCity(address.getCity())
+            .addressStreet(address.getStreet())
+            .addressDistrict(address.getDistrict())
+            .addressEntranceNumber(Long.valueOf(address.getEntranceNumber()))
+            .addressHouseCorpus(Long.valueOf(address.getHouseCorpus()))
+            .addressHouseNumber(Long.valueOf(address.getHouseNumber()))
             .addressComment(address.getComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
-            .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
+            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
+            .exportDetailsDto(getOrderExportDetails(orderId))
+            .certificates(prices.getCertificate())
+            .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
             .build();
+    }
+
+    /**
+     * This is method which is get order translation statuses in two languages like:
+     * ua and en.
+     *
+     * @param order      {@link Long}.
+     * @param languageId {@link Long}.
+     * @return {@link List}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation(Order order, Long languageId) {
+        List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
+        List<OrderStatusTranslation> orderStatusTranslations =
+            orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(languageId);
+        if (orderStatusTranslations.size() != 0 && order != null) {
+            for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
+                OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
+                if (OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
+                    || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()) {
+                    orderStatusesTranslationDto.setAbleActualChange(true);
+                } else {
+                    orderStatusesTranslationDto.setAbleActualChange(false);
+                }
+                if (languageId == 1) {
+                    orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
+                    if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
+                        orderStatusesTranslationDto.setName(
+                            OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
+                    }
+                    orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
+                } else if (languageId == 2) {
+                    orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
+                    if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
+                        orderStatusesTranslationDto.setName(
+                            OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
+                    }
+                    orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
+                }
+            }
+        }
+        return orderStatusesTranslationDtos;
+    }
+
+    /**
+     * This is method which is get order payment statuses translation.
+     *
+     * @param languageId {@link Long}.
+     * @return {@link List}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation(Long languageId) {
+        List<OrderPaymentStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
+        List<OrderPaymentStatusTranslation> orderStatusPaymentTranslations = orderPaymentStatusTranslationRepository
+            .getOrderStatusPaymentTranslationsByLanguageId(languageId);
+        if (orderStatusPaymentTranslations.size() != 0) {
+            for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
+                OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
+                if (languageId == 1) {
+                    translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
+                    if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
+                        translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
+                    }
+                    orderStatusesTranslationDtos.add(translationDto);
+                } else if (languageId == 2) {
+                    if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
+                        translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
+                    }
+                    translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
+                    orderStatusesTranslationDtos.add(translationDto);
+                }
+            }
+        }
+        return orderStatusesTranslationDtos;
     }
 
     /**

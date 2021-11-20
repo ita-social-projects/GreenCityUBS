@@ -76,4 +76,5 @@
     <include file="db/changelog/logs/ch-add-column-admin-comment-Bahlay.xml"/>
     <include file="db/changelog/logs/ch-modify-column-author-name-events-table-Bahlay.xml"/>
     <include file="db/changelog/logs/ch-add-column-certificate-dateUse-Sikhovskiy.xml"/>
+    <include file="db/changelog/logs/ch-add-table-order-payment-status-translations-Bahlay.xml"/>
 </databaseChangeLog>
