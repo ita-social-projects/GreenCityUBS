@@ -216,8 +216,6 @@ public class ModelUtils {
                 .paymentId(1L)
                 .amount(200L)
                 .currency("UAH")
-                .settlementDate("20.02.1990")
-                .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .ubsUser(UBSuser.builder()
@@ -233,8 +231,8 @@ public class ModelUtils {
                     .district("frankivskiy")
                     .entranceNumber("5")
                     .addressComment("near mall")
-                    .houseCorpus("1")
-                    .houseNumber("4")
+                    .houseCorpus(null)
+                    .houseNumber("4R")
                     .coordinates(Coordinates.builder()
                         .latitude(49.83)
                         .longitude(23.88)
@@ -248,8 +246,6 @@ public class ModelUtils {
             .adminComment("Admin")
             .cancellationComment("cancelled")
             .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .receivingStation("C")
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .build();
@@ -289,7 +285,7 @@ public class ModelUtils {
         return OrderDto.builder()
             .firstName("oleh")
             .lastName("ivanov")
-            .address("frankivskiy Levaya 4")
+            .address("frankivskiy Levaya 4R")
             .addressComment("near mall")
             .phoneNumber("067894522")
             .latitude(49.83)
@@ -316,7 +312,6 @@ public class ModelUtils {
             .exportedDate("30-06-2012")
             .exportedTime("14:15:12")
             .receivingStation("Petrivka")
-            .allReceivingStations(List.of("a", "b"))
             .build();
     }
 
@@ -784,12 +779,10 @@ public class ModelUtils {
 
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
-            .customerName("Alan")
-            .customerSurName("Maym")
+            .customerName("Alan Wayn")
             .customerPhoneNumber("091546745")
             .customerEmail("wayn@email.com")
-            .recipientName("Anatolii")
-            .recipientSurName("Petyrov")
+            .recipientName("Anatolii Petyrov")
             .recipientPhoneNumber("095123456")
             .recipientEmail("anatolii.andr@gmail.com")
             .totalUserViolations(4)
@@ -802,13 +795,12 @@ public class ModelUtils {
             .id(1L)
             .user(User.builder()
                 .id(1L)
-                .recipientName("Alan")
-                .recipientSurname("Maym")
+                .recipientName("Alan Wayn")
                 .recipientPhone("091546745")
                 .recipientEmail("wayn@email.com")
                 .violations(4).build())
             .ubsUser(UBSuser.builder()
-                .id(1L)
+                .id(1l)
                 .firstName("Anatolii")
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
@@ -1870,24 +1862,6 @@ public class ModelUtils {
             .id(1)
             .price(100)
             .capacity(10)
-            .build();
-    }
-
-    public static PaymentTableInfoDto getPaymentTableInfoDto() {
-        return PaymentTableInfoDto.builder()
-            .paidAmount(100L)
-            .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(PaymentInfoDto.builder().build()))
-            .overpayment(200L)
-            .build();
-    }
-
-    public static OrderPaymentStatusTranslation getOrderPaymentStatusTranslation() {
-        return OrderPaymentStatusTranslation.builder()
-            .id(1L)
-            .orderPaymentStatusId(1L)
-            .translationValue("Abc")
-            .languageId(1L)
             .build();
     }
 
