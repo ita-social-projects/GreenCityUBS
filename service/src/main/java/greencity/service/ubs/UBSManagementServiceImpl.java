@@ -844,8 +844,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
                 orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
                 if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
-                    orderStatusesTranslationDto.setName(
-                        OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
+                    String orderStatus =
+                        OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get();
+                    if (!orderStatus.isEmpty()) {
+                        orderStatusesTranslationDto.setName(orderStatus);
+                    }
                 }
                 orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
             }
@@ -854,7 +857,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * This is method which set value as true for orderStatus Cancelled or Done.
+     * This is method which set value as true for orderStatus Cancelled or Done and
+     * false to others order statuses.
      * 
      * @param orderStatusTranslation      {@link OrderStatusTranslation}.
      * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
@@ -863,12 +867,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
         OrderStatusesTranslationDto orderStatusesTranslationDto) {
-        if (OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
-            || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()) {
-            orderStatusesTranslationDto.setAbleActualChange(true);
-        } else {
-            orderStatusesTranslationDto.setAbleActualChange(false);
-        }
+        orderStatusesTranslationDto
+            .setAbleActualChange(OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
     /**
@@ -889,8 +890,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
                 if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
-                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
+                    String orderPaymentStatus =
+                        OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get();
+                    if (!orderPaymentStatus.isEmpty()) {
+                        translationDto.setName(orderPaymentStatus);
+                    }
                 }
                 orderStatusesTranslationDtos.add(translationDto);
             }
