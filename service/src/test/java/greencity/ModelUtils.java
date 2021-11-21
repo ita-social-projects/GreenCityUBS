@@ -232,7 +232,7 @@ public class ModelUtils {
                     .street("Levaya")
                     .district("frankivskiy")
                     .entranceNumber("5")
-                        .addressComment("near mall")
+                    .addressComment("near mall")
                     .houseCorpus("1")
                     .houseNumber("4")
                     .coordinates(Coordinates.builder()

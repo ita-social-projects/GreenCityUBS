@@ -1239,43 +1239,31 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1l);
         when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
                 .thenReturn("Abc");
-
         when(orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(1L))
             .thenReturn(List.of(ModelUtils.getStatusTranslation(), ModelUtils.getStatusTranslation()));
-
         when(orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslationsByLanguageId(1L))
-            .thenReturn(
-                List.of(ModelUtils.getOrderPaymentStatusTranslation(), ModelUtils.getOrderPaymentStatusTranslation()));
-
+            .thenReturn(List.of(ModelUtils.getOrderPaymentStatusTranslation(),
+                ModelUtils.getOrderPaymentStatusTranslation()));
         when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L))
             .thenReturn(ModelUtils.getUserInfoDto());
-
         when(receivingStationRepository.findAll())
             .thenReturn(List.of(ModelUtils.getReceivingStation(), ModelUtils.getReceivingStation()));
-
         lenient().when(ubsManagementServiceMock.getOrderExportDetails(1L))
             .thenReturn(ModelUtils.getExportDetails());
-
         lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
             .thenReturn(ModelUtils.getPaymentTableInfoDto());
-
         ubsManagementService.getOrderStatusData(1L, "ua");
-
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(certificateRepository, times(2)).findCertificate(1L);
         verify(orderRepository).getOrderDetails(1L);
-        verify(orderRepository).findById(1L);
-        verify(languageRepository).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
         verify(orderRepository, times(4)).findById(1L);
-        verify(bagRepository, times(2)).findBagByOrderId(1L);
+        verify(bagRepository, times(1)).findBagByOrderId(1L);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 1L);
     }
 

@@ -28,6 +28,7 @@ public class OrderStatusPageDto {
     private Long addressHouseNumber;
     private Long addressHouseCorpus;
     private Long addressEntranceNumber;
+    private String addressRegion;
     private String addressComment;
     private OrderStatus orderStatus;
     private String orderStatusName;
@@ -39,15 +40,14 @@ public class OrderStatusPageDto {
     private double orderBonusDiscount;
     private double orderExportedPrice;
     private double orderExportedDiscountedPrice;
-    private String paymentStatus;
     private Map<Integer, Integer> amountOfBagsOrdered;
     private List<BagInfoDto> bags;
     private Map<Integer, Integer> amountOfBagsExported;
+    private Map<Integer, Integer> amountOfBagsConfirmed;
     private Set<String> numbersFromShop;
     private List<String> certificates;
     private PaymentTableInfoDto paymentTableInfoDto;
     private ExportDetailsDto exportDetailsDto;
     private EmployeePositionDtoRequest employeePositionDtoRequest;
-    private Map<Integer, Integer> amountOfBagsConfirmed;
     private String comment;
 }
