@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Bahlay-6" author="Yuriy Bahlay">
+        <createTable tableName="order_payment_status_translations">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="translation_value" type="VARCHAR(30)"/>
+            <column name="order_payment_status_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

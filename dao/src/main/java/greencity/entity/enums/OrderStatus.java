@@ -40,4 +40,19 @@ public enum OrderStatus {
     public HashSet<OrderStatus> possibleStatuses() {
         return new HashSet<>(Arrays.asList(possibleStatuses));
     }
+
+     /**
+     * This is method which convert value from num to enum.
+     *
+     * @param value {@link Long}.
+     * @return {@link String}.
+     */
+    public static String getConvertedEnumFromLongToEnum(Long value) {
+        for (OrderStatus orderStatus : OrderStatus.values()) {
+            if (orderStatus.getNumValue() == value) {
+                return orderStatus.toString();
+            }
+        }
+        return "";
+    }
 }
