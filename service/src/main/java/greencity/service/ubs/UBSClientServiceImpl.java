@@ -21,7 +21,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -65,9 +67,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
+
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
+
     private final LocationTranslationRepository locationTranslationRepository;
     private final LiqPay liqPay;
     private final LanguageRepository languageRepository;
@@ -485,12 +489,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return UserInfoDto.builder()
             .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
             .customerPhoneNumber(order.getUser().getRecipientPhone())
             .customerEmail(order.getUser().getRecipientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientName(order.getUbsUser().getFirstName())
-            .recipientSurName(order.getUbsUser().getLastName())
+            .recipientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
             .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
             .recipientEmail(order.getUbsUser().getEmail())
             .userViolationForCurrentOrder(
