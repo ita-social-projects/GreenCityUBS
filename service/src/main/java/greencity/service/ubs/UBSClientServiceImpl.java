@@ -485,12 +485,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         return UserInfoDto.builder()
             .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
             .customerPhoneNumber(order.getUser().getRecipientPhone())
             .customerEmail(order.getUser().getRecipientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientName(order.getUbsUser().getFirstName())
-            .recipientSurName(order.getUbsUser().getLastName())
+            .recipientName(order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName())
             .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
             .recipientEmail(order.getUbsUser().getEmail())
             .userViolationForCurrentOrder(
