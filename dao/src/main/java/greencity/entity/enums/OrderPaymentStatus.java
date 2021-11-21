@@ -1,7 +1,5 @@
 package greencity.entity.enums;
 
-import java.util.Optional;
-
 public enum OrderPaymentStatus {
     PAID(1),
     UNPAID(2),
@@ -27,14 +25,14 @@ public enum OrderPaymentStatus {
      * This is method which convert value from num to enum.
      *
      * @param value {@link Long}.
-     * @return {@link Optional}.
+     * @return {@link String}.
      */
-    public static Optional<String> getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(Long value) {
+    public static String getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(Long value) {
         for (OrderPaymentStatus orderStatus : OrderPaymentStatus.values()) {
             if (orderStatus.getStatusValue() == value) {
-                return Optional.ofNullable(orderStatus.toString());
+                return orderStatus.toString();
             }
         }
-        return Optional.empty();
+        return "";
     }
 }

@@ -1,7 +1,5 @@
 package greencity.entity.enums;
 
-import java.util.Optional;
-
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
     FORMED(1),
@@ -33,14 +31,14 @@ public enum OrderStatus {
      * This is method which convert value from num to enum.
      *
      * @param value {@link Long}.
-     * @return {@link Optional}.
+     * @return {@link String}.
      */
-    public static Optional<String> getConvertedEnumFromLongToEnum(Long value) {
+    public static String getConvertedEnumFromLongToEnum(Long value) {
         for (OrderStatus orderStatus : OrderStatus.values()) {
             if (orderStatus.getNumValue() == value) {
-                return Optional.ofNullable(orderStatus.toString());
+                return orderStatus.toString();
             }
         }
-        return Optional.empty();
+        return "";
     }
 }

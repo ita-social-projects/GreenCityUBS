@@ -843,12 +843,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
                 setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
                 orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
-                if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
-                    String orderStatus =
-                        OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get();
-                    if (!orderStatus.isEmpty()) {
-                        orderStatusesTranslationDto.setName(orderStatus);
-                    }
+                if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
+                    "")) {
+                    OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
+                    orderStatusesTranslationDto
+                        .setName(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
                 }
                 orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
             }
@@ -888,14 +887,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
                 translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
-                if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                    orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
-                    String orderPaymentStatus =
-                        OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get();
-                    if (!orderPaymentStatus.isEmpty()) {
-                        translationDto.setName(orderPaymentStatus);
-                    }
+                if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                    orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
+                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                        orderStatusPaymentTranslation.getOrderPaymentStatusId()));
                 }
                 orderStatusesTranslationDtos.add(translationDto);
             }
