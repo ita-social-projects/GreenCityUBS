@@ -3,7 +3,9 @@ package greencity.repository;
 import greencity.entity.order.OrderStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,4 +27,15 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
         value = "SELECT * FROM order_status_translations OST"
             + " WHERE OST.status_id =:statusId and OST.language_id=:languageId")
     Optional<OrderStatusTranslation> getOrderStatusTranslationByIdAndLanguageId(int statusId, Long languageId);
+
+    /**
+     * This method which is list statuses found by languageId.
+     *
+     * @param languageId {@link Long}.
+     * @return {@link List}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    @Query("SELECT ort FROM OrderStatusTranslation AS ort WHERE ort.languageId = :languageId")
+    List<OrderStatusTranslation> getOrderStatusTranslationsByLanguageId(@Param("languageId") Long languageId);
 }
