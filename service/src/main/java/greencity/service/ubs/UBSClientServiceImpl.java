@@ -22,8 +22,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
@@ -65,7 +65,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
-    private UBSManagementServiceImpl ubsManagementService;
+    @Lazy
+    @Autowired
+    private UBSManagementService ubsManagementService;
     private final LocationTranslationRepository locationTranslationRepository;
     private final LiqPay liqPay;
     private final LanguageRepository languageRepository;
@@ -80,18 +82,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Value("${liqpay.private.key}")
     private String privateKey;
     private final EventService eventService;
-
-    /**
-     * This is method which inject {@link UBSManagementServiceImpl} in order to
-     * avoid cycling between beans.
-     * 
-     * @param ubsManagementService {@link UBSManagementServiceImpl}.
-     */
-    @Autowired
-    public void setUbsMangerServiceImpl(
-        @Qualifier("UBSManagementServiceImpl") UBSManagementServiceImpl ubsManagementService) {
-        this.ubsManagementService = ubsManagementService;
-    }
 
     @Override
     @Transactional

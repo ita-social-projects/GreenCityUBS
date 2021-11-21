@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -77,18 +77,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-    private UBSClientService ubsClientService;
-
-    /**
-     * This is method which inject {@link UBSClientService} in order to avoid
-     * cycling between beans.
-     *
-     * @param ubsClientService {@link UBSClientServiceImpl}.
-     */
+    @Lazy
     @Autowired
-    public void setUbsClientService(@Qualifier("UBSClientServiceImpl") UBSClientService ubsClientService) {
-        this.ubsClientService = ubsClientService;
-    }
+    private UBSClientService ubsClientService;
 
     /**
      * {@inheritDoc}
