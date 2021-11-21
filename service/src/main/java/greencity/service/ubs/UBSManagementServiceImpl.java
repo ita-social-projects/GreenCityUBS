@@ -838,33 +838,37 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderStatusTranslation> orderStatusTranslations =
             orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(languageId);
-        if (orderStatusTranslations.size() != 0 && order != null) {
+        if (!orderStatusTranslations.isEmpty() && order != null) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
-                if (OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
-                    || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()) {
-                    orderStatusesTranslationDto.setAbleActualChange(true);
-                } else {
-                    orderStatusesTranslationDto.setAbleActualChange(false);
+                setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
+                orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
+                if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
+                    orderStatusesTranslationDto.setName(
+                        OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
                 }
-                if (languageId == 1) {
-                    orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
-                    if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
-                        orderStatusesTranslationDto.setName(
-                            OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
-                    }
-                    orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
-                } else if (languageId == 2) {
-                    orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
-                    if (OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).isPresent()) {
-                        orderStatusesTranslationDto.setName(
-                            OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()).get());
-                    }
-                    orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
-                }
+                orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
             }
         }
         return orderStatusesTranslationDtos;
+    }
+
+    /**
+     * This is method which set value as true for orderStatus Cancelled or Done.
+     * 
+     * @param orderStatusTranslation      {@link OrderStatusTranslation}.
+     * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
+        OrderStatusesTranslationDto orderStatusesTranslationDto) {
+        if (OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
+            || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId()) {
+            orderStatusesTranslationDto.setAbleActualChange(true);
+        } else {
+            orderStatusesTranslationDto.setAbleActualChange(false);
+        }
     }
 
     /**
@@ -879,26 +883,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<OrderPaymentStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderPaymentStatusTranslation> orderStatusPaymentTranslations = orderPaymentStatusTranslationRepository
             .getOrderStatusPaymentTranslationsByLanguageId(languageId);
-        if (orderStatusPaymentTranslations.size() != 0) {
+        if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
-                if (languageId == 1) {
-                    translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
-                    if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
-                        translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
-                    }
-                    orderStatusesTranslationDtos.add(translationDto);
-                } else if (languageId == 2) {
-                    if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
-                        translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
-                            orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
-                    }
-                    translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
-                    orderStatusesTranslationDtos.add(translationDto);
+                translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
+                if (OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                    orderStatusPaymentTranslation.getOrderPaymentStatusId()).isPresent()) {
+                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                        orderStatusPaymentTranslation.getOrderPaymentStatusId()).get());
                 }
+                orderStatusesTranslationDtos.add(translationDto);
             }
         }
         return orderStatusesTranslationDtos;
