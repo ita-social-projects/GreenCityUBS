@@ -803,6 +803,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
