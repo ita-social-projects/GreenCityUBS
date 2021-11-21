@@ -10,6 +10,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.ChangeOrderStatusException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -294,8 +295,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     existedOrder.setBlocked(false);
                     existedOrder.setBlockedByEmployee(null);
                     orderRepository.save(existedOrder);
-                }else throw new Exception();
+                }else throw new ChangeOrderStatusException("Such order's status can't be applied.");
             } catch (Exception e) {
+                e.printStackTrace();
                 unresolvedGoals.add(orderId);
             }
         }
