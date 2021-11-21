@@ -11,9 +11,11 @@ import lombok.*;
 @EqualsAndHashCode
 public class UserInfoDto {
     private String customerName;
+    private String customerSurName;
     private String customerPhoneNumber;
     private String customerEmail;
     private String recipientName;
+    private String recipientSurName;
     private String recipientPhoneNumber;
     private String recipientEmail;
     private int totalUserViolations;
