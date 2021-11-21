@@ -281,21 +281,21 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus desiredStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            //need to improve
+            // need to improve
             orderRepository.changeStatusForAllOrders(value, employeeId);
         }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                OrderStatus currentStatus = existedOrder.getOrderStatus();
-                OrderStatus confirmedStatus = OrderStatus.changeStatusByRules(desiredStatus, currentStatus);
-                if (confirmedStatus.equals(desiredStatus)){
-                    existedOrder.setOrderStatus(confirmedStatus);
+                if (existedOrder.getOrderStatus().possibleStatuses().contains(desiredStatus)) {
+                    existedOrder.setOrderStatus(desiredStatus);
                     existedOrder.setBlocked(false);
                     existedOrder.setBlockedByEmployee(null);
                     orderRepository.save(existedOrder);
-                }else throw new ChangeOrderStatusException("Such order's status can't be applied.");
+                } else {
+                    throw new ChangeOrderStatusException("Such order's status can't be applied.");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 unresolvedGoals.add(orderId);
@@ -421,10 +421,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
+            // necessary to change method in repository
             orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));

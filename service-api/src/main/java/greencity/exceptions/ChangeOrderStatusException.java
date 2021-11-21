@@ -5,7 +5,7 @@ package greencity.exceptions;
  *
  * @author Marian Diakiv
  */
-public class ChangeOrderStatusException extends RuntimeException{
+public class ChangeOrderStatusException extends RuntimeException {
     /**
      * Constructor.
      */
