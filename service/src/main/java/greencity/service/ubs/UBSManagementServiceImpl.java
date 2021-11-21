@@ -79,7 +79,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     @Lazy
     @Autowired
-    private UBSClientService ubsClientService;
+    private UBSClientService ubsClientServiceImpl;
 
     /**
      * {@inheritDoc}
@@ -779,7 +779,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             value = orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                 (long) order.get().getOrderPaymentStatus().getStatusValue(), language.getId());
         }
-        UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        UserInfoDto userInfoDto = ubsClientServiceImpl.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
         return OrderStatusPageDto.builder()
             .id(orderId)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
