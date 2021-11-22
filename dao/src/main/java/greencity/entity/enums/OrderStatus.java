@@ -6,13 +6,13 @@ import java.util.Set;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
-    FORMED(1, "CANCELED"),
-    ADJUSTMENT(2, "CANCELED"),
-    BROUGHT_IT_HIMSELF(3, "CANCELED"),
-    CONFIRMED(4, "CANCELED"),
-    ON_THE_ROUTE(5, "CANCELED"),
-    DONE(6, "CANCELED"),
-    NOT_TAKEN_OUT(7, "CANCELED"),
+    FORMED(1, "ADJUSTMENT", "CANCELED", "BROUGHT_IT_HIMSELF"),
+    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", "CANCELED", "CONFIRMED"),
+    BROUGHT_IT_HIMSELF(3, "DONE"),
+    CONFIRMED(4, "CANCELED", "FORMED", "ON_THE_ROUTE"),
+    ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
+    DONE(6, "DONE"),
+    NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
     CANCELED(8, "CANCELED");
 
     private int statusValue;
@@ -49,9 +49,9 @@ public enum OrderStatus {
     }
 
     /**
-     * Method for.
+     * Method for checking if desired status is possible to use with current status.
      *
-     * @return {@link HashSet} orderStatuses.
+     * @return {@link HashSet}.
      */
     public Set<String> getPossibleStatuses() {
         return new HashSet<>(Arrays.asList(possibleStatus));
