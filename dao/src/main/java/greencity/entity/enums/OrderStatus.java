@@ -9,7 +9,7 @@ public enum OrderStatus {
     ON_THE_ROUTE(5),
     DONE(6),
     NOT_TAKEN_OUT(7),
-    CANCELLED(8);
+    CANCELED(8);
 
     private int statusValue;
 

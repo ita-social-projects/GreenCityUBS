@@ -51,7 +51,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -485,7 +484,7 @@ class UBSManagementServiceImplTest {
     void returnOverpaymentAsMoneyForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.PAYMENT_REFUND);
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
@@ -505,7 +504,7 @@ class UBSManagementServiceImplTest {
     void returnOverpaymentAsBonusesForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
@@ -572,8 +571,8 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
-        testOrderDetail.setOrderStatus(OrderStatus.CANCELLED.toString());
-        expectedObject.setOrderStatus(OrderStatus.CANCELLED.toString());
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
             .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
 

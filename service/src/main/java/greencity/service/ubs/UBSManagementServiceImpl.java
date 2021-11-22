@@ -18,7 +18,6 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.filters.*;
 import greencity.repository.*;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -322,12 +320,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
         }
-        if (order.getOrderStatus() == OrderStatus.CANCELLED
+        if (order.getOrderStatus() == OrderStatus.CANCELED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
             returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
             collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
         }
-        if (order.getOrderStatus() == OrderStatus.CANCELLED && overpaymentInfoRequestDto.getComment()
+        if (order.getOrderStatus() == OrderStatus.CANCELED && overpaymentInfoRequestDto.getComment()
             .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
             collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
@@ -770,7 +768,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             bagInfo.add(bagInfoDto);
         });
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
                 languageRepository.findIdByCode(languageCode));
@@ -798,13 +796,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
-            .addressEntranceNumber(Long.valueOf(address.getEntranceNumber()))
-            .addressHouseCorpus(Long.valueOf(address.getHouseCorpus()))
-            .addressHouseNumber(Long.valueOf(address.getHouseNumber()))
+            .addressEntranceNumber(address.getEntranceNumber() != null && !address.getEntranceNumber().equals("")
+                ? Long.parseLong(address.getEntranceNumber())
+                : 0L)
+            .addressHouseCorpus(address.getHouseCorpus() != null && !address.getHouseCorpus().equals("")
+                ? Long.parseLong(address.getHouseCorpus())
+                : 0L)
+            .addressHouseNumber(address.getHouseNumber() != null && !address.getHouseNumber().equals("")
+                ? Long.parseLong(address.getHouseNumber())
+                : 0L)
             .addressRegion(address.getRegion())
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
             .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .orderStatusName(statusTranslation)
@@ -858,7 +863,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
         OrderStatusesTranslationDto orderStatusesTranslationDto) {
         orderStatusesTranslationDto
-            .setAbleActualChange(OrderStatus.CANCELLED.getNumValue() == orderStatusTranslation.getStatusId()
+            .setAbleActualChange(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
                 || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
     }
 
@@ -959,7 +964,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELLED) {
+                || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
                     Long.valueOf(dto.get(i).getBagId()));
                 if (!exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
@@ -1101,7 +1106,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
             || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
+            || currentOrder.getOrderStatus() == OrderStatus.CANCELED) {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
                 notificationService.notifyHalfPaidPackage(currentOrder);
@@ -1158,7 +1163,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                     + order.getImageReasonNotTakingBags(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CANCELLED) {
+        } else if (newStatus == OrderStatus.CANCELED) {
             eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
@@ -1707,7 +1712,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setCurrentUser(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname());
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
         return dto;
     }
