@@ -16,6 +16,8 @@ import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,8 @@ import static greencity.constant.ErrorMessage.*;
 @Service
 @AllArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
+    Logger logger;
+
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final UBSManagementEmployeeService employeeService;
@@ -294,10 +298,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     existedOrder.setBlockedByEmployee(null);
                     orderRepository.save(existedOrder);
                 } else {
-                    throw new ChangeOrderStatusException("Such order's status can't be applied.");
+                    throw new ChangeOrderStatusException(String.format("Such order's status can't be applied: %s -> %s",
+                        existedOrder.getOrderStatus(), desiredStatus));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.info(e.getMessage());
                 unresolvedGoals.add(orderId);
             }
         }
