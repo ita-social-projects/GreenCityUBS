@@ -3,7 +3,7 @@ package greencity.exceptions;
 /**
  * Exception that user enters unexisting bag.
  *
- * @author Marian Diakiv
+ * @author Liubomyr Pater
  */
 public class ChangeOrderStatusException extends RuntimeException {
     /**
