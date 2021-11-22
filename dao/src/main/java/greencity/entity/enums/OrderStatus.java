@@ -41,7 +41,7 @@ public enum OrderStatus {
         return new HashSet<>(Arrays.asList(possibleStatuses));
     }
 
-     /**
+    /**
      * This is method which convert value from num to enum.
      *
      * @param value {@link Long}.
