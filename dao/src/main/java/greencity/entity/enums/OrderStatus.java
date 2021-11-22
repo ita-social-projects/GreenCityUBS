@@ -6,14 +6,14 @@ import java.util.Set;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
-    FORMED(1, "ADJUSTMENT", "CANCELLED", "BROUGHT_IT_HIMSELF"),
-    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", "CANCELLED", "CONFIRMED"),
+    FORMED(1, "ADJUSTMENT", "CANCELED", "BROUGHT_IT_HIMSELF"),
+    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", "CANCELED", "CONFIRMED"),
     BROUGHT_IT_HIMSELF(3, "DONE"),
-    CONFIRMED(4, "CANCELLED", "FORMED", "ON_THE_ROUTE"),
+    CONFIRMED(4, "CANCELED", "FORMED", "ON_THE_ROUTE"),
     ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
     DONE(6, "DONE"),
     NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
-    CANCELLED(8, "CANCELLED");
+    CANCELED(8, "CANCELED");
 
     private int statusValue;
     private String[] possibleStatus;
