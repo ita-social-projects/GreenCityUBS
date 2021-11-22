@@ -408,7 +408,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
-            order.setOrderStatus(OrderStatus.CANCELLED);
+            order.setOrderStatus(OrderStatus.CANCELED);
             order.getUser().setCurrentPoints(order.getUser().getCurrentPoints() + order.getPointsToUse());
             order.setPointsToUse(0);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
