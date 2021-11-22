@@ -185,8 +185,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      *
      * @author Liubomyr Pater.
      */
-    // this method has to return list of orders which already are
-    // blocked!!!!!!!!!!!!!!!!
     @Modifying
     @Query(value = "UPDATE ORDERS SET EMPLOYEE_ID = :employee_id, BLOCKED = TRUE WHERE BLOCKED = FALSE",
         nativeQuery = true)
