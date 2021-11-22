@@ -208,16 +208,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             location.getMinAmountOfBigBags());
 
-        if (sumToPay >= dto.getPointsToUse()) {
-            sumToPay -= dto.getPointsToUse();
-        }
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
@@ -912,18 +910,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
 
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             currentUser.getLastLocation().getMinAmountOfBigBags());
 
-        if (sumToPay < dto.getPointsToUse()) {
-            throw new IncorrectValueException(AMOUNT_OF_POINTS_BIGGER_THAN_SUM);
-        } else {
-            sumToPay -= dto.getPointsToUse();
-        }
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
         Set<Certificate> orderCertificates = new HashSet<>();
@@ -933,15 +926,23 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
-
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
+        if (sumToPay == 0 || !dto.isShouldBePaid()) {
+            return buildOrderResponseWithoutButton(order);
+        } else {
+            PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
+            String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
+            return buildOrderResponse(order, liqPayData
+                .replace("\"", "")
+                .replace("\n", ""));
+        }
+    }
 
-        String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
-
-        return buildOrderResponse(order, liqPayData
-            .replace("\"", "")
-            .replace("\n", ""));
+    private int reduceOrderSumDueToUsedPoints(int sumToPay, int pointsToUse) {
+        if (sumToPay >= pointsToUse) {
+            sumToPay -= pointsToUse;
+        }
+        return sumToPay;
     }
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
@@ -969,6 +970,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         return LiqPayOrderResponse.builder()
             .orderId(order.getId())
             .liqPayButton(button)
+            .build();
+    }
+
+    private LiqPayOrderResponse buildOrderResponseWithoutButton(Order order) {
+        return LiqPayOrderResponse.builder()
+            .orderId(order.getId())
             .build();
     }
 
