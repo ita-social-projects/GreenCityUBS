@@ -5,19 +5,19 @@ import java.util.HashSet;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
-    FORMED(1, OrderStatus.ADJUSTMENT, OrderStatus.CANCELLED, OrderStatus.BROUGHT_IT_HIMSELF),
-    ADJUSTMENT(2, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELLED, OrderStatus.CONFIRMED),
-    BROUGHT_IT_HIMSELF(3, OrderStatus.DONE),
-    CONFIRMED(4, OrderStatus.CANCELLED, OrderStatus.FORMED, OrderStatus.ON_THE_ROUTE),
-    ON_THE_ROUTE(5, OrderStatus.DONE, OrderStatus.NOT_TAKEN_OUT),
-    DONE(6, OrderStatus.DONE),
-    NOT_TAKEN_OUT(7, OrderStatus.ADJUSTMENT, OrderStatus.NOT_TAKEN_OUT),
-    CANCELLED(8, OrderStatus.CANCELLED);
+    FORMED(1, "ADJUSTMENT", "CANCELLED", "BROUGHT_IT_HIMSELF"),
+    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", "CANCELLED", "CONFIRMED"),
+    BROUGHT_IT_HIMSELF(3, "DONE"),
+    CONFIRMED(4, "CANCELLED", "FORMED", "ON_THE_ROUTE"),
+    ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
+    DONE(6, "DONE"),
+    NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
+    CANCELLED(8, "CANCELLED");
 
     private int statusValue;
-    private OrderStatus[] possibleStatuses;
+    private String[] possibleStatuses;
 
-    OrderStatus(final int value, OrderStatus... possibleStatuses) {
+    OrderStatus(final int value, String... possibleStatuses) {
         this.statusValue = value;
         this.possibleStatuses = possibleStatuses;
     }
@@ -37,7 +37,7 @@ public enum OrderStatus {
      *
      * @return {@link HashSet} possible statuses.
      */
-    public HashSet<OrderStatus> possibleStatuses() {
+    public HashSet<String> possibleStatuses() {
         return new HashSet<>(Arrays.asList(possibleStatuses));
     }
 
