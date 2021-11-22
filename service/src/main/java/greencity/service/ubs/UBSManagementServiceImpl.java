@@ -11,6 +11,7 @@ import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -77,6 +78,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final LocationRepository locationRepository;
+    private final ServiceRepository serviceRepository;
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -762,6 +765,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
+        Location location = locationRepository.findByOrderId(orderId);
+        greencity.entity.order.Service service = serviceRepository.findByLocation(location);
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
@@ -771,7 +776,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
-                languageRepository.findIdByCode(languageCode));
+                language.getId());
         String statusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
         String value = null;
@@ -818,6 +823,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
+            .minAmountOfBigBags(location.getMinAmountOfBigBags())
+            .courierPricePerPackage(service.getBasePrice())
             .build();
     }
 

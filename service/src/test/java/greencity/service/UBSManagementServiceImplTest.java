@@ -15,6 +15,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -151,6 +152,11 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private UBSManagementServiceImpl ubsManagementServiceMock;
+
+    @Mock
+    private LocationRepository locationRepository;
+    @Mock
+    private ServiceRepository serviceRepository;
 
     private void getMocksBehavior() {
 
@@ -1226,6 +1232,7 @@ class UBSManagementServiceImplTest {
         order.setOrderStatus(OrderStatus.CONFIRMED);
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
+        Location location = ModelUtils.getLocation();
         order.setAmountOfBagsOrdered(hashMap);
         order.setConfirmedQuantity(hashMap);
         order.setExportedQuantity(hashMap);
@@ -1236,7 +1243,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 0L))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
         when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
@@ -1257,14 +1264,17 @@ class UBSManagementServiceImplTest {
             .thenReturn(ModelUtils.getExportDetails());
         lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
             .thenReturn(ModelUtils.getPaymentTableInfoDto());
+        when(locationRepository.findByOrderId(any())).thenReturn(location);
+        when(serviceRepository.findByLocation(location)).thenReturn(ModelUtils.getService());
         ubsManagementService.getOrderStatusData(1L, "ua");
 
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
         verify(orderRepository, times(4)).findById(1L);
-        verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 1L);
+        verify(locationRepository).findByOrderId(1L);
+        verify(serviceRepository).findByLocation(location);
     }
 
     @Test
