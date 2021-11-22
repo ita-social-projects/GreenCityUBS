@@ -310,7 +310,7 @@ class UBSClientServiceImplTest {
     void cancelFormedOrder() {
         Order order = getFormedOrder();
         OrderClientDto expected = getOrderClientDto();
-        expected.setOrderStatus(OrderStatus.CANCELLED);
+        expected.setOrderStatus(OrderStatus.CANCELED);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
@@ -371,7 +371,7 @@ class UBSClientServiceImplTest {
     @Test
     void makeOrderAgainShouldThrowBadOrderStatusException() {
         Order order = getOrderDoneByUser();
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
             () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
