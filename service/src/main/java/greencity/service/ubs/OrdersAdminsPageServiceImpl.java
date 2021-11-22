@@ -32,8 +32,6 @@ import static greencity.constant.ErrorMessage.*;
 @Service
 @AllArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
-    Logger logger;
-
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final UBSManagementEmployeeService employeeService;
@@ -301,7 +299,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                         existedOrder.getOrderStatus(), desiredStatus));
                 }
             } catch (Exception e) {
-                logger.info(e.getMessage());
                 unresolvedGoals.add(orderId);
             }
         }
