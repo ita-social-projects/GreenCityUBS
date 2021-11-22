@@ -49,9 +49,9 @@ public enum OrderStatus {
     }
 
     /**
-     * Method for.
+     * Method for checking if desired status is possible to use with current status.
      *
-     * @return {@link HashSet} orderStatuses.
+     * @return {@link HashSet}.
      */
     public Set<String> getPossibleStatuses() {
         return new HashSet<>(Arrays.asList(possibleStatus));

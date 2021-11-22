@@ -287,9 +287,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (existedOrder.getOrderStatus().getPossibleStatuses().contains(value)){
+                if (existedOrder.getOrderStatus().getPossibleStatuses().contains(value)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
-                }else {
+                } else {
                     throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + value);
                 }
                 existedOrder.setBlocked(false);
