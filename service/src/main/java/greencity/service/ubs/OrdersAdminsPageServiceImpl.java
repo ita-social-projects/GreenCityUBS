@@ -10,11 +10,13 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.ChangeOrderStatusException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ import static greencity.constant.ErrorMessage.*;
 @Service
 @AllArgsConstructor
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
+    Logger logger;
+
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final UBSManagementEmployeeService employeeService;
@@ -277,20 +281,27 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /* methods for changing order */
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        OrderStatus orderStatus = OrderStatus.valueOf(value);
+        OrderStatus desiredStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
+            // need to improve
             orderRepository.changeStatusForAllOrders(value, employeeId);
         }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setOrderStatus(orderStatus);
-                existedOrder.setBlocked(false);
-                existedOrder.setBlockedByEmployee(null);
-                orderRepository.save(existedOrder);
+                if (existedOrder.getOrderStatus().possibleStatuses().contains(desiredStatus.toString())) {
+                    existedOrder.setOrderStatus(desiredStatus);
+                    existedOrder.setBlocked(false);
+                    existedOrder.setBlockedByEmployee(null);
+                    orderRepository.save(existedOrder);
+                } else {
+                    throw new ChangeOrderStatusException(String.format("Such order's status can't be applied: %s -> %s",
+                        existedOrder.getOrderStatus(), desiredStatus));
+                }
             } catch (Exception e) {
+                logger.info(e.getMessage());
                 unresolvedGoals.add(orderId);
             }
         }
@@ -414,10 +425,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
+            // necessary to change method in repository
             orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
