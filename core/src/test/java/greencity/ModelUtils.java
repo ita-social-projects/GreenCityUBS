@@ -462,4 +462,11 @@ public class ModelUtils {
             .comment("ss")
             .build();
     }
+
+    public static OrderFondyClientDto getOrderFondyClientDto() {
+        return OrderFondyClientDto.builder()
+            .orderId(1L)
+            .sum(2)
+            .build();
+    }
 }

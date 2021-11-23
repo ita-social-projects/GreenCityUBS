@@ -1891,4 +1891,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static OrderFondyClientDto getOrderFondyClientDto() {
+        return OrderFondyClientDto.builder()
+            .orderId(1L)
+            .sum(1)
+            .build();
+    }
+
+    public static Order getOrderCount() {
+        return Order.builder()
+            .id(1L)
+            .counterOrderPaymentId(2L)
+            .build();
+    }
 }
