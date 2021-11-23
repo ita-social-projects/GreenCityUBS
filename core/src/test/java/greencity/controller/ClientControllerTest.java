@@ -168,7 +168,7 @@ class ClientControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String dtoJson = objectMapper.writeValueAsString(dto);
 
-        this.mockMvc.perform(post(ubsLink + "/processOrderLigpay")
+        this.mockMvc.perform(post(ubsLink + "/processOrderLiqpay")
             .contentType(MediaType.APPLICATION_JSON)
             .content(dtoJson))
             .andExpect(status().isOk());
