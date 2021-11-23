@@ -12,7 +12,7 @@ import java.util.Map;
 public class AdditionalBagsInfoRepo {
     private final JdbcTemplate jdbcTemplate;
     private static final String QUERY2 = "select distinct u.recipient_name , u.recipient_phone , "
-        + "u.recipient_email, a.city , a.street , a.house_number , a.district , a.comment, ";
+        + "u.recipient_email, a.city , a.street , a.house_number , a.district , a.address_comment, ";
 
     /**
      * method, that returns Bags additional info.
