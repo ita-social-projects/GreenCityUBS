@@ -768,31 +768,44 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             bagInfo.add(bagInfoDto);
         });
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
-        Optional<OrderStatusTranslation> orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
-                languageRepository.findIdByCode(languageCode));
-        String statusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
-        String value = null;
-        if (order.isPresent()) {
-            value = orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                (long) order.get().getOrderPaymentStatus().getStatusValue(), language.getId());
-        }
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        GeneralOrderInfo infoAboutStatusesAndDateFormed =
+            getInfoAboutStatusesAndDateFormed(order, language);
+        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
         return OrderStatusPageDto.builder()
-            .id(orderId)
-            .dateFormed(order.map(Order::getOrderDate).orElse(null))
-            .orderFullPrice(prices.getSumAmount())
-            .orderStatusesDto(getOrderStatusesTranslation(order.orElse(null), language.getId()))
-            .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
-            .orderDiscountedPrice(prices.getTotalSumAmount())
-            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
-            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(language.getId()))
-            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
-            .orderPaymentStatusName(Optional.of(Objects.requireNonNull(value)).orElse(null))
-            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
+            .addressExportDetailsDto(addressDtoForAdminPage)
+            .addressComment(address.getAddressComment()).bags(bagInfo)
+            .orderFullPrice(prices.getSumAmount())
+            .orderDiscountedPrice(prices.getTotalSumAmount())
+            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
+            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
+            .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
+            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
+            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .certificates(prices.getCertificate())
+            .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
+            .exportDetailsDto(getOrderExportDetails(orderId))
+            .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
+            .comment(
+                order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .build();
+    }
+
+    /**
+     * This is private method which formed {@link AddressExportDetailsDto} in order
+     * to collect information about Address and order formed data and order id.
+     * 
+     * @param address {@link Address}.
+     * @return {@link AddressExportDetailsDto}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
+        return AddressExportDetailsDto.builder()
+            .id(address.getId())
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
@@ -806,18 +819,45 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 ? Long.parseLong(address.getHouseNumber())
                 : 0L)
             .addressRegion(address.getRegion())
-            .addressComment(address.getAddressComment()).bags(bagInfo)
-            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
-            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
-            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
-            .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
-            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
-            .orderStatusName(statusTranslation)
-            .exportDetailsDto(getOrderExportDetails(orderId))
-            .certificates(prices.getCertificate())
-            .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
-            .comment(
-                order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .build();
+    }
+
+    /**
+     * This is private method which is form {@link GeneralOrderInfo} and set info
+     * about order data formed and about current order status and order payment
+     * status with some translation with some language and arrays with orderStatuses
+     * and OrderPaymentStatuses with translation.
+     * 
+     * @param order    {@link Order}.
+     * @param language {@link Language}.
+     * @return {@link GeneralOrderInfo}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order, Language language) {
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
+        Optional<OrderStatusTranslation> orderStatusTranslation =
+            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
+                languageRepository.findIdByCode(language.getCode()));
+        String currentOrderStatusTranslation =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
+        String currentOrderStatusPaymentTranslation = null;
+        if (order.isPresent()) {
+            currentOrderStatusPaymentTranslation =
+                orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                    (long) order.get().getOrderPaymentStatus().getStatusValue(), language.getId());
+        }
+        return GeneralOrderInfo.builder()
+            .id(order.isPresent() ? order.get().getId() : 0)
+            .dateFormed(order.map(Order::getOrderDate).orElse(null))
+            .orderStatusesDtos(getOrderStatusesTranslation(order.orElse(null), language.getId()))
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(language.getId()))
+            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
+            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
+            .orderPaymentStatusName(
+                Optional.of(Objects.requireNonNull(currentOrderStatusPaymentTranslation)).orElse(null))
+            .orderStatusName(currentOrderStatusTranslation)
+            .adminComment(order.get().getAdminComment())
             .build();
     }
 
