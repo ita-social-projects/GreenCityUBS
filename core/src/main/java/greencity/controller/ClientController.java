@@ -110,26 +110,6 @@ public class ClientController {
     }
 
     /**
-     * Controller return link liqpay payment .
-     *
-     * @return {@link OrderLiqpayClientDto} dto.
-     * @author Max Boiarchuk
-     */
-    @ApiOperation(value = "return the link for liqpay payment")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/processOrderLiqpay")
-    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(@Valid @RequestBody OrderLiqpayClientDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto));
-    }
-
-    /**
      * Controller cancel order with status FORMED.
      *
      * @param orderId {@link Long} - order id.
