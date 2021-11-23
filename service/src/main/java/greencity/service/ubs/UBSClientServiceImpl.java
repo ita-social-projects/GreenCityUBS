@@ -1170,7 +1170,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .action("pay")
             .amount(sumToPay)
             .currency("UAH")
-            .description("ubs courier")
+            .description("сourier")
             .orderId(
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
