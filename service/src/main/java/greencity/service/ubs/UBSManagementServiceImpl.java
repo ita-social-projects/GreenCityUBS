@@ -769,11 +769,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         });
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
-        OrderStatusesDto infoAboutStatusesAndDateFormed =
+        GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(order, language);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
         return OrderStatusPageDto.builder()
-            .orderStatusesDto(infoAboutStatusesAndDateFormed)
+            .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
@@ -823,18 +823,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * This is private method which is form {@link OrderStatusesDto} and set info
+     * This is private method which is form {@link GeneralOrderInfo} and set info
      * about order data formed and about current order status and order payment
      * status with some translation with some language and arrays with orderStatuses
      * and OrderPaymentStatuses with translation.
      * 
      * @param order    {@link Order}.
      * @param language {@link Language}.
-     * @return {@link OrderStatusesDto}.
+     * @return {@link GeneralOrderInfo}.
      *
      * @author Yuriy Bahlay.
      */
-    private OrderStatusesDto getInfoAboutStatusesAndDateFormed(Optional<Order> order, Language language) {
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order, Language language) {
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
@@ -847,7 +847,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                     (long) order.get().getOrderPaymentStatus().getStatusValue(), language.getId());
         }
-        return OrderStatusesDto.builder()
+        return GeneralOrderInfo.builder()
             .id(order.isPresent() ? order.get().getId() : 0)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
             .orderStatusesDtos(getOrderStatusesTranslation(order.orElse(null), language.getId()))

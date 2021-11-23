@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @EqualsAndHashCode
-public class OrderStatusesDto {
+public class GeneralOrderInfo {
     private Long id;
     private LocalDateTime dateFormed;
     private List<OrderStatusesTranslationDto> orderStatusesDtos;

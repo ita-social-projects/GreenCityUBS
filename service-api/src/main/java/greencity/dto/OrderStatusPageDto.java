@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class OrderStatusPageDto {
-    private OrderStatusesDto orderStatusesDto;
+    private GeneralOrderInfo generalOrderInfo;
     private UserInfoDto userInfoDto;
     private AddressExportDetailsDto addressExportDetailsDto;
     private String addressComment;
