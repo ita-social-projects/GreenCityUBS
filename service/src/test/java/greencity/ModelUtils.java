@@ -927,6 +927,7 @@ public class ModelUtils {
             .userName("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
+            .images(new ArrayList<>())
             .violationDate(localdatetime)
             .build();
     }
@@ -1902,6 +1903,22 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .counterOrderPaymentId(2L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId(1L)
+                .amount(200L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .build();
+    }
+
+    public static OrderLiqpayClientDto getOrderLiqpayClientDto() {
+        return OrderLiqpayClientDto
+            .builder()
+            .orderId(1l)
+            .sum(1)
             .build();
     }
 }
