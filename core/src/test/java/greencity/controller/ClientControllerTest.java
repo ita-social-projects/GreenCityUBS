@@ -1,11 +1,13 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.OrderBagDto;
 import greencity.dto.OrderClientDto;
+import greencity.dto.OrderFondyClientDto;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -146,5 +148,18 @@ class ClientControllerTest {
         this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+    }
+
+    @Test
+    void processOrderFondy() throws Exception {
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJson = objectMapper.writeValueAsString(dto);
+
+        this.mockMvc.perform(post(ubsLink + "/processOrderFondy")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(dtoJson))
+            .andExpect(status().isOk());
+
     }
 }
