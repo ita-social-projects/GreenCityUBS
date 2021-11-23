@@ -312,4 +312,12 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+
+    /**
+     * Method return link with liqpay payment .
+     *
+     * @param dto - current OrderLiqpayClientDto dto.
+     * @author Max Boiarchuk
+     */
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
 }
