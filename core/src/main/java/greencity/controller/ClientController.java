@@ -123,7 +123,7 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/processOrderLigpay")
+    @PostMapping("/processOrderLiqpay")
     public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(@Valid @RequestBody OrderLiqpayClientDto dto)
         throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto));
