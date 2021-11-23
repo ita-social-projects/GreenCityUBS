@@ -927,6 +927,7 @@ public class ModelUtils {
             .userName("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
+            .images(new ArrayList<>())
             .violationDate(localdatetime)
             .build();
     }
