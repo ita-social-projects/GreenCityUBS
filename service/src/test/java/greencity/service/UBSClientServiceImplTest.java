@@ -930,4 +930,27 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ubsService.deleteOrder(1L);
     }
+
+    @Test
+    void processOrderFondyClient() throws Exception {
+        Order order = ModelUtils.getOrderCount();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
+        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+
+        ubsService.processOrderFondyClient(dto);
+
+        verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
+        verify(restClient).getDataFromFondy(any());
+
+    }
 }

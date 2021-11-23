@@ -1117,4 +1117,37 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         orderRepository.delete(order);
     }
+
+    @Override
+    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception {
+        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        Order increment = incrementCounter(order);
+        PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), dto.getSum());
+        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
+        Elements links = doc.select("a[href]");
+        String link = links.attr("href");
+        return getPaymentRequestDto(order, link);
+    }
+
+    private Order incrementCounter(Order order) {
+        order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
+        orderRepository.save(order);
+        return order;
+    }
+
+    private PaymentRequestDto formPayment(Long orderId, int sumToPay) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+            .merchantId(Integer.parseInt(merchantId))
+            .orderId(order.getCounterOrderPaymentId().toString())
+            .orderDescription("courier")
+            .currency("UAH")
+            .amount(sumToPay * 100)
+            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .build();
+        paymentRequestDto.setSignature(encryptionUtil
+            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
+        return paymentRequestDto;
+    }
 }
