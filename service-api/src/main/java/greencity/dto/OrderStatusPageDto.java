@@ -49,6 +49,4 @@ public class OrderStatusPageDto {
     private ExportDetailsDto exportDetailsDto;
     private EmployeePositionDtoRequest employeePositionDtoRequest;
     private String comment;
-    private Long minAmountOfBigBags;
-    private Integer courierPricePerPackage;
 }
