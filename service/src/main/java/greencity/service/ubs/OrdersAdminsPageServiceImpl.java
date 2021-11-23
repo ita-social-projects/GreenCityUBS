@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
-import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
@@ -11,7 +10,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -287,11 +285,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (existedOrder.getOrderStatus().getPossibleStatuses().contains(value)) {
-                    existedOrder.setOrderStatus(OrderStatus.valueOf(value));
-                } else {
-                    throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + value);
-                }
+                existedOrder.setOrderStatus(existedOrder.getOrderStatus().checkPossibleStatuses(value));
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
