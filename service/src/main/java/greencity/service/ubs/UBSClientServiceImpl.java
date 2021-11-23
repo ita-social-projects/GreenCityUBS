@@ -989,7 +989,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .amount(sumToPay)
             .currency("UAH")
             .description("ubs courier")
-            .orderId(orderId + "_" + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
+            .orderId(orderId + "_" + order.getPayment()
+                .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
             .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
@@ -1148,34 +1149,5 @@ public class UBSClientServiceImpl implements UBSClientService {
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
         return paymentRequestDto;
-    }
-
-    @Override
-    public LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClientDto dto) {
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
-        Order increment = incrementCounter(order);
-        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
-
-        return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
-            .replace("\"", "")
-            .replace("\n", ""));
-    }
-
-    private PaymentRequestDtoLiqPay formLiqPayPayment(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("сourier")
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
-            .language("en")
-            .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
-            .build();
     }
 }
