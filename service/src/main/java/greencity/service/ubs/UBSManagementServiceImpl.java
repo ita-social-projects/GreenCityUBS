@@ -1241,6 +1241,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .userName(user.getRecipientName())
             .violationLevel(v.getViolationLevel())
             .description(v.getDescription())
+            .images(v.getImages())
             .violationDate(v.getViolationDate())
             .build());
     }
