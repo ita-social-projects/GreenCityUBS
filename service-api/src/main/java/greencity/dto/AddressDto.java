@@ -21,11 +21,14 @@ public class AddressDto implements Serializable {
     @Min(1)
     private Long id;
     @NotBlank
-    @Length(max = 12)
+    @Length(max = 30)
     private String city;
     @NotBlank
     @Length(max = 30)
     private String district;
+    @NotBlank
+    @Length(max = 30)
+    private String region;
     @Length(max = 4)
     private String entranceNumber;
     @Length(max = 5)

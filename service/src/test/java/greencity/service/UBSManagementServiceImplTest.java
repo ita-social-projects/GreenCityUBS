@@ -27,6 +27,7 @@ import greencity.filters.CertificatePage;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
+import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -51,7 +51,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -143,6 +142,15 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private CustomTableViewRepo customTableViewRepo;
+
+    @Mock
+    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+
+    @Mock
+    private UBSClientServiceImpl ubsClientService;
+
+    @Mock
+    private UBSManagementServiceImpl ubsManagementServiceMock;
 
     private void getMocksBehavior() {
 
@@ -476,7 +484,7 @@ class UBSManagementServiceImplTest {
     void returnOverpaymentAsMoneyForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.PAYMENT_REFUND);
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
@@ -496,7 +504,7 @@ class UBSManagementServiceImplTest {
     void returnOverpaymentAsBonusesForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
         dto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
@@ -563,8 +571,8 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectNotTakenOut.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectNotTakenOut.getDate());
 
-        testOrderDetail.setOrderStatus(OrderStatus.CANCELLED.toString());
-        expectedObject.setOrderStatus(OrderStatus.CANCELLED.toString());
+        testOrderDetail.setOrderStatus(OrderStatus.CANCELED.toString());
+        expectedObject.setOrderStatus(OrderStatus.CANCELED.toString());
         OrderDetailStatusDto producedObjectCancelled = ubsManagementService
             .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
 
@@ -857,8 +865,9 @@ class UBSManagementServiceImplTest {
         User user = ModelUtils.getTestUser();
         user.setUuid(null);
 
-        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(
-            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build()));
+        AddingPointsToUserDto addingPointsToUserDto =
+            AddingPointsToUserDto.builder().additionalPoints(anyInt()).build();
+        assertThrows(UnexistingUuidExeption.class, () -> ubsManagementService.addPointsToUser(addingPointsToUserDto));
     }
 
     @Test
@@ -1226,24 +1235,36 @@ class UBSManagementServiceImplTest {
         Language language = ModelUtils.getLanguage();
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
-        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 1L))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 0L))
             .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1l);
         when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("Abc");
+        when(orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(1L))
+            .thenReturn(List.of(ModelUtils.getStatusTranslation(), ModelUtils.getStatusTranslation()));
+        when(orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslationsByLanguageId(1L))
+            .thenReturn(
+                List.of(ModelUtils.getOrderPaymentStatusTranslation(), ModelUtils.getOrderPaymentStatusTranslation()));
+        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L))
+            .thenReturn(ModelUtils.getUserInfoDto());
+        when(receivingStationRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getReceivingStation(), ModelUtils.getReceivingStation()));
+        lenient().when(ubsManagementServiceMock.getOrderExportDetails(1L))
+            .thenReturn(ModelUtils.getExportDetails());
+        lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
+            .thenReturn(ModelUtils.getPaymentTableInfoDto());
         ubsManagementService.getOrderStatusData(1L, "ua");
 
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(certificateRepository, times(2)).findCertificate(1L);
-        verify(orderRepository).getOrderDetails(1L);
-        verify(orderRepository).findById(1L);
-        verify(languageRepository).findIdByCode("ua");
+        verify(orderRepository, times(1)).getOrderDetails(1L);
+        verify(orderRepository, times(4)).findById(1L);
+        verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
     }
 
     @Test

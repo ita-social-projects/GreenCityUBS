@@ -1,6 +1,9 @@
 package greencity.constants;
 
 public final class SwaggerExampleModel {
+    private SwaggerExampleModel() {
+    }
+
     private static final String BEFORE_EXAMPLE = "<div>\n"
         + "\t<ul class=\"tab\">\n"
         + "\t\t<li class=\"tabitem active\">\n"

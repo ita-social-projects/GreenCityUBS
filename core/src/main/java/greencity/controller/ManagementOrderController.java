@@ -1,13 +1,15 @@
 package greencity.controller;
 
 import greencity.annotations.ApiLocale;
-import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.entity.parameters.CustomTableView;
-import greencity.filters.*;
+import greencity.filters.CertificateFilterCriteria;
+import greencity.filters.CertificatePage;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -213,30 +215,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * The method returns information related to orders.
-     *
-     * @return {@link PageableDto} with order's information
-     * @author Ihor Volianskyi
-     */
-    @ApiOperation("Get all info from Table orders")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/orders")
-    @ApiPageable
-    public ResponseEntity<PageableDto<AllFieldsFromTableDto>> getAllValuesFromOrderTable2(
-        @ApiIgnore int page, @ApiIgnore int size,
-        @RequestParam(value = "columnName", defaultValue = "orderId") String columnName,
-        @RequestParam(value = "sortingType", defaultValue = "desc") String sortingType,
-        SearchCriteria searchCriteria) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllValuesFromTable(searchCriteria, page, size, columnName, sortingType));
-    }
-
-    /**
      * The method returns page with all order's data from big order table.
      *
      * @return {@link Page} with order's information
@@ -250,7 +228,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/bigOrderTable")
-    public ResponseEntity<Page<BigOrderTableDTO>> gerOrders(OrderPage page,
+    public ResponseEntity<Page<BigOrderTableDTO>> getOrders(OrderPage page,
         OrderSearchCriteria criteria,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
