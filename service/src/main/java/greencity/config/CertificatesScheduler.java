@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Slf4j
 public class CertificatesScheduler {
     @Autowired
-    CertificatesActualityServiceImpl certificatesActualityService;
+    private CertificatesActualityServiceImpl certificatesActualityService;
 
     /**
      * Method checks all certificates id DB and change status those whose expiration
