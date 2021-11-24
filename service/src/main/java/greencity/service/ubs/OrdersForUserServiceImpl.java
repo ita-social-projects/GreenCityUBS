@@ -30,6 +30,8 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     UBSuserRepository ubSuserRepository;
     OrdersForUserRepository ordersForUserRepository;
 
+    private String columnAmount = "amount";
+
     @Override
     public UserWithOrdersDto getAllOrders(Pageable page, Long userId, SortingOrder sortingOrder, String column) {
         User user = userRepository.findById(userId)
@@ -39,19 +41,19 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
 
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         List<UserOrdersDto> userOrdersDtoList = new ArrayList<>();
-        if (!column.equals("amount")) {
+        if (!column.equals(columnAmount)) {
             userOrdersDtoList = ordersForUserRepository
                 .getAllOrdersByUserId(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
                 .stream()
                 .map(this::getAllOrders)
                 .collect(Collectors.toList());
-        } else if (column.equals("amount") & sortingOrder.toString().equals("DESC")) {
+        } else if (column.equals(columnAmount) && sortingOrder.toString().equals("DESC")) {
             userOrdersDtoList = ordersForUserRepository
                 .getAllOrdersByUserIdAndAmountDesc(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
                 .stream()
                 .map(this::getAllOrders)
                 .collect(Collectors.toList());
-        } else if (column.equals("amount") & sortingOrder.toString().equals("ASC")) {
+        } else if (column.equals(columnAmount) && sortingOrder.toString().equals("ASC")) {
             userOrdersDtoList = ordersForUserRepository
                 .getAllOrdersByUserIdAndAmountASC(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
                 .stream()
