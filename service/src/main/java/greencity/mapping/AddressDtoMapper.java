@@ -13,6 +13,7 @@ public class AddressDtoMapper extends AbstractConverter<AddressDto, Address> {
     protected Address convert(AddressDto addressDto) {
         return Address.builder()
             .id(addressDto.getId())
+            .region(addressDto.getRegion())
             .city(addressDto.getCity())
             .street(addressDto.getStreet())
             .district(addressDto.getDistrict())

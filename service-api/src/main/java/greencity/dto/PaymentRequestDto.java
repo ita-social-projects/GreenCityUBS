@@ -16,5 +16,4 @@ public class PaymentRequestDto {
     private Integer amount;
     private String signature;
     private String responseUrl;
-    private String serverCallbackUrl;
 }

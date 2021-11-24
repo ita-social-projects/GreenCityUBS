@@ -18,25 +18,27 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
-import greencity.filters.*;
+import greencity.filters.CertificateFilterCriteria;
+import greencity.filters.CertificatePage;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +56,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
-    private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
@@ -76,6 +77,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final LanguageRepository languageRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
+    private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    @Lazy
+    @Autowired
+    private UBSClientService ubsClientService;
 
     /**
      * {@inheritDoc}
@@ -265,12 +270,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method gets all order payments and count paid amount and amount which user
-     * should paid.
-     *
-     * @return {@link PaymentTableInfoDto }
-     */
-    /**
      * Method gets all order payments, count paid amount, amount which user should
      * paid and overpayment amount.
      *
@@ -322,12 +321,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
         }
-        if (order.getOrderStatus() == OrderStatus.CANCELLED
+        if (order.getOrderStatus() == OrderStatus.CANCELED
             && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
             returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
             collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
         }
-        if (order.getOrderStatus() == OrderStatus.CANCELLED && overpaymentInfoRequestDto.getComment()
+        if (order.getOrderStatus() == OrderStatus.CANCELED && overpaymentInfoRequestDto.getComment()
             .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
             collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
@@ -638,63 +637,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    @Override
-    public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int page, int size,
-        String column, String sortingType) {
-        List<AllFieldsFromTableDto> orderList = new ArrayList<>();
-
-        SortingOrder resultSortingOrder = Arrays.stream(SortingOrder.values())
-            .filter(s -> s.name().equalsIgnoreCase(sortingType))
-            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
-
-        String resultColumn = allValuesFromTableRepo.getCustomColumns().stream()
-            .filter(c -> c.equalsIgnoreCase(column))
-            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
-
-        List<Map<String, Object>> ordersInfo = allValuesFromTableRepo
-            .findAll(searchCriteria, page, size, resultColumn, resultSortingOrder);
-
-        for (Map<String, Object> map : ordersInfo) {
-            AllFieldsFromTableDto allFieldsFromTableDto =
-                objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
-                    + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-            }
-
-            List<Map<String, Object>> employees =
-                allValuesFromTableRepo.findAllEmployee(allFieldsFromTableDto.getOrderId());
-
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                String employeeName = (String) objectMap.get("name");
-
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager(employeeName);
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan(employeeName);
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver(employeeName);
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator(employeeName);
-                }
-            }
-
-            orderList.add(allFieldsFromTableDto);
-        }
-
-        int listSize = userRepository.orderCounter();
-        int totalPages = (listSize % size) == 0 ? (listSize / size) : (listSize / size) + 1;
-
-        return new PageableDto<>(
-            orderList,
-            listSize,
-            page,
-            totalPages);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -766,42 +708,174 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Language language = languageRepository.findLanguageByCode(languageCode);
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(
-                bagTranslationRepository.findNameByBagId(
-                    bag.getId(), language.getId()).toString());
+            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
-        Set<CertificateDto> certificates = new HashSet<>();
-        certificateRepository.findCertificate(orderId)
-            .forEach(certificate -> certificates.add(modelMapper.map(certificate, CertificateDto.class)));
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
-        UBSuser user = order.map(Order::getUbsUser).orElse(new UBSuser());
-        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELLED;
-        Optional<OrderStatusTranslation> orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
-                languageRepository.findIdByCode(languageCode));
-        String statusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
-        return OrderStatusPageDto.builder().id(orderId).orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(prices.getTotalSumAmount()).orderStatus(order.map(Order::getOrderStatus).orElse(null))
-            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
-            .recipientName(user.getFirstName()).recipientSurname(user.getLastName())
-            .recipientPhone(user.getPhoneNumber()).recipientEmail(user.getEmail())
-            .addressCity(address.getCity()).addressStreet(address.getStreet()).addressDistrict(address.getDistrict())
+        UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        GeneralOrderInfo infoAboutStatusesAndDateFormed =
+            getInfoAboutStatusesAndDateFormed(order, language);
+        AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
+        return OrderStatusPageDto.builder()
+            .generalOrderInfo(infoAboutStatusesAndDateFormed)
+            .userInfoDto(userInfoDto)
+            .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
+            .orderFullPrice(prices.getSumAmount())
+            .orderDiscountedPrice(prices.getTotalSumAmount())
+            .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
+            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
-            .additionalOrders(order.map(Order::getAdditionalOrders).orElse(null))
             .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
             .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
-            .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
-            .orderStatusName(statusTranslation)
-            .certificates(certificates)
-            .comment(order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST))
-                .getComment())
-            .orderDate(order.map(Order::getOrderDate).toString())
-            .paymentStatus(order.orElseThrow(() -> new EntityNotFoundException("message"))
-                .getOrderPaymentStatus().name())
+            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .certificates(prices.getCertificate())
+            .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
+            .exportDetailsDto(getOrderExportDetails(orderId))
+            .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
+            .comment(
+                order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
             .build();
+    }
+
+    /**
+     * This is private method which formed {@link AddressExportDetailsDto} in order
+     * to collect information about Address and order formed data and order id.
+     * 
+     * @param address {@link Address}.
+     * @return {@link AddressExportDetailsDto}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
+        return AddressExportDetailsDto.builder()
+            .id(address.getId())
+            .addressCity(address.getCity())
+            .addressStreet(address.getStreet())
+            .addressDistrict(address.getDistrict())
+            .addressEntranceNumber(address.getEntranceNumber() != null && !address.getEntranceNumber().equals("")
+                ? Long.parseLong(address.getEntranceNumber())
+                : 0L)
+            .addressHouseCorpus(address.getHouseCorpus() != null && !address.getHouseCorpus().equals("")
+                ? Long.parseLong(address.getHouseCorpus())
+                : 0L)
+            .addressHouseNumber(address.getHouseNumber() != null && !address.getHouseNumber().equals("")
+                ? Long.parseLong(address.getHouseNumber())
+                : 0L)
+            .addressRegion(address.getRegion())
+            .build();
+    }
+
+    /**
+     * This is private method which is form {@link GeneralOrderInfo} and set info
+     * about order data formed and about current order status and order payment
+     * status with some translation with some language and arrays with orderStatuses
+     * and OrderPaymentStatuses with translation.
+     * 
+     * @param order    {@link Order}.
+     * @param language {@link Language}.
+     * @return {@link GeneralOrderInfo}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order, Language language) {
+        OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
+        Optional<OrderStatusTranslation> orderStatusTranslation =
+            orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(orderStatus.getNumValue(),
+                languageRepository.findIdByCode(language.getCode()));
+        String currentOrderStatusTranslation =
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
+        String currentOrderStatusPaymentTranslation = null;
+        if (order.isPresent()) {
+            currentOrderStatusPaymentTranslation =
+                orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                    (long) order.get().getOrderPaymentStatus().getStatusValue(), language.getId());
+        }
+        return GeneralOrderInfo.builder()
+            .id(order.isPresent() ? order.get().getId() : 0)
+            .dateFormed(order.map(Order::getOrderDate).orElse(null))
+            .orderStatusesDtos(getOrderStatusesTranslation(order.orElse(null), language.getId()))
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(language.getId()))
+            .orderStatus(order.map(Order::getOrderStatus).orElse(null))
+            .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
+            .orderPaymentStatusName(
+                Optional.of(Objects.requireNonNull(currentOrderStatusPaymentTranslation)).orElse(null))
+            .orderStatusName(currentOrderStatusTranslation)
+            .adminComment(order.get().getAdminComment())
+            .build();
+    }
+
+    /**
+     * This is method which is get order translation statuses in two languages like:
+     * ua and en.
+     *
+     * @param order      {@link Long}.
+     * @param languageId {@link Long}.
+     * @return {@link List}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation(Order order, Long languageId) {
+        List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
+        List<OrderStatusTranslation> orderStatusTranslations =
+            orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(languageId);
+        if (!orderStatusTranslations.isEmpty() && order != null) {
+            for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
+                OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
+                setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
+                orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
+                if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
+                    "")) {
+                    OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
+                    orderStatusesTranslationDto
+                        .setName(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
+                }
+                orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
+            }
+        }
+        return orderStatusesTranslationDtos;
+    }
+
+    /**
+     * This is method which set value as true for orderStatus Cancelled or Done.
+     *
+     * @param orderStatusTranslation      {@link OrderStatusTranslation}.
+     * @param orderStatusesTranslationDto {@link OrderStatusesTranslationDto}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private void setValueForOrderStatusIsCancelledOrDoneAsTrue(OrderStatusTranslation orderStatusTranslation,
+        OrderStatusesTranslationDto orderStatusesTranslationDto) {
+        orderStatusesTranslationDto
+            .setAbleActualChange(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
+                || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId());
+    }
+
+    /**
+     * This is method which is get order payment statuses translation.
+     *
+     * @param languageId {@link Long}.
+     * @return {@link List}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation(Long languageId) {
+        List<OrderPaymentStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
+        List<OrderPaymentStatusTranslation> orderStatusPaymentTranslations = orderPaymentStatusTranslationRepository
+            .getOrderStatusPaymentTranslationsByLanguageId(languageId);
+        if (!orderStatusPaymentTranslations.isEmpty()) {
+            for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
+                OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
+                translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
+                if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                    orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
+                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                        orderStatusPaymentTranslation.getOrderPaymentStatusId()));
+                }
+                orderStatusesTranslationDtos.add(translationDto);
+            }
+        }
+        return orderStatusesTranslationDtos;
     }
 
     /**
@@ -874,7 +948,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELLED) {
+                || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
                     Long.valueOf(dto.get(i).getBagId()));
                 if (!exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
@@ -1016,7 +1090,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || currentOrder.getOrderStatus() == OrderStatus.DONE
             || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            || currentOrder.getOrderStatus() == OrderStatus.CANCELLED) {
+            || currentOrder.getOrderStatus() == OrderStatus.CANCELED) {
             if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
                 currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
                 notificationService.notifyHalfPaidPackage(currentOrder);
@@ -1073,7 +1147,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                     + order.getImageReasonNotTakingBags(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CANCELLED) {
+        } else if (newStatus == OrderStatus.CANCELED) {
             eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
@@ -1111,6 +1185,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .userName(user.getRecipientName())
             .violationLevel(v.getViolationLevel())
             .description(v.getDescription())
+            .images(v.getImages())
             .violationDate(v.getViolationDate())
             .build());
     }
@@ -1622,7 +1697,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setCurrentUser(order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname());
         order.setImageReasonNotTakingBags(pictures);
         order.setReasonNotTakingBagDescription(description);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
         return dto;
     }

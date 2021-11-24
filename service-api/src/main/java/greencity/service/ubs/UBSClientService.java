@@ -52,7 +52,15 @@ public interface UBSClientService {
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    String saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid);
+
+    /**
+     * Method get status of order from db by id.
+     *
+     * @return - payment status
+     * @author Vadym Makitra
+     */
+    FondyPaymentResponse getPaymentResponseFromFondy(Long orderId);
 
     /**
      * Methods return list of all user addresses.
@@ -296,4 +304,20 @@ public interface UBSClientService {
      * @author Max Boyarchuk
      */
     void deleteOrder(Long id);
+
+    /**
+     * Method return link with Fondy payment .
+     * 
+     * @param dto - current OrderFondyClientDto dto.
+     * @author Max Boiarchuk
+     */
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+
+    /**
+     * Method return link with liqpay payment .
+     *
+     * @param dto - current OrderLiqpayClientDto dto.
+     * @author Max Boiarchuk
+     */
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
 }
