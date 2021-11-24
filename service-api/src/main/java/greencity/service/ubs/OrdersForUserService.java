@@ -1,6 +1,8 @@
 package greencity.service.ubs;
 
 import greencity.dto.UserWithOrdersDto;
+import greencity.entity.enums.SortingOrder;
+import org.springframework.data.domain.Pageable;
 
 public interface OrdersForUserService {
     /**
@@ -9,5 +11,5 @@ public interface OrdersForUserService {
      * @param userId of {@link Long} administrator's user id;
      * @author Roman Sulymka
      */
-    UserWithOrdersDto getAllOrders(Long userId);
+    UserWithOrdersDto getAllOrders(Pageable page, Long userId, SortingOrder sortType, String column);
 }
