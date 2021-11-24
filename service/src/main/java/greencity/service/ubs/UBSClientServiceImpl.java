@@ -1117,4 +1117,67 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         orderRepository.delete(order);
     }
+
+    @Override
+    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception {
+        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        Order increment = incrementCounter(order);
+        PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), dto.getSum());
+        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
+        Elements links = doc.select("a[href]");
+        String link = links.attr("href");
+        return getPaymentRequestDto(order, link);
+    }
+
+    private Order incrementCounter(Order order) {
+        order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
+        orderRepository.save(order);
+        return order;
+    }
+
+    private PaymentRequestDto formPayment(Long orderId, int sumToPay) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+            .merchantId(Integer.parseInt(merchantId))
+            .orderId(
+                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
+            .orderDescription("courier")
+            .currency("UAH")
+            .amount(sumToPay * 100)
+            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .build();
+        paymentRequestDto.setSignature(encryptionUtil
+            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
+        return paymentRequestDto;
+    }
+
+    @Override
+    public LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) {
+        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        Order increment = incrementCounter(order);
+        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
+
+        return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
+            .replace("\"", "")
+            .replace("\n", ""));
+    }
+
+    private PaymentRequestDtoLiqPay formLiqPayPayment(Long orderId, int sumToPay) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return PaymentRequestDtoLiqPay.builder()
+            .publicKey(publicKey)
+            .version(3)
+            .action("pay")
+            .amount(sumToPay)
+            .currency("UAH")
+            .description("сourier")
+            .orderId(
+                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
+            .language("en")
+            .paytypes("card")
+            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
+            .build();
+    }
 }
