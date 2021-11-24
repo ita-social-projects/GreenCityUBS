@@ -19,7 +19,10 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.*;
+import greencity.filters.CertificateFilterCriteria;
+import greencity.filters.CertificatePage;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -36,7 +39,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +56,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateRepository certificateRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
-    private final AllValuesFromTableRepo allValuesFromTableRepo;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
@@ -634,63 +635,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build();
             restClient.sendViolationOnMail(mailDto);
         }
-    }
-
-    @Override
-    public PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int page, int size,
-        String column, String sortingType) {
-        List<AllFieldsFromTableDto> orderList = new ArrayList<>();
-
-        SortingOrder resultSortingOrder = Arrays.stream(SortingOrder.values())
-            .filter(s -> s.name().equalsIgnoreCase(sortingType))
-            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
-
-        String resultColumn = allValuesFromTableRepo.getCustomColumns().stream()
-            .filter(c -> c.equalsIgnoreCase(column))
-            .findAny().orElseThrow(() -> new IncorrectValueException("Invalid column name"));
-
-        List<Map<String, Object>> ordersInfo = allValuesFromTableRepo
-            .findAll(searchCriteria, page, size, resultColumn, resultSortingOrder);
-
-        for (Map<String, Object> map : ordersInfo) {
-            AllFieldsFromTableDto allFieldsFromTableDto =
-                objectMapper.convertValue(map, AllFieldsFromTableDto.class);
-
-            if (allFieldsFromTableDto.getDateOfExport() == null || allFieldsFromTableDto.getTimeOfExport() == null) {
-                allFieldsFromTableDto.setDateOfExport(LocalDate.now().toString());
-                allFieldsFromTableDto.setTimeOfExport(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
-                    + "-" + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-            }
-
-            List<Map<String, Object>> employees =
-                allValuesFromTableRepo.findAllEmployee(allFieldsFromTableDto.getOrderId());
-
-            for (Map<String, Object> objectMap : employees) {
-                Long positionId = (Long) objectMap.get("position_id");
-                String employeeName = (String) objectMap.get("name");
-
-                if (positionId == 1) {
-                    allFieldsFromTableDto.setResponsibleManager(employeeName);
-                } else if (positionId == 2) {
-                    allFieldsFromTableDto.setResponsibleLogicMan(employeeName);
-                } else if (positionId == 3) {
-                    allFieldsFromTableDto.setResponsibleDriver(employeeName);
-                } else if (positionId == 4) {
-                    allFieldsFromTableDto.setResponsibleNavigator(employeeName);
-                }
-            }
-
-            orderList.add(allFieldsFromTableDto);
-        }
-
-        int listSize = userRepository.orderCounter();
-        int totalPages = (listSize % size) == 0 ? (listSize / size) : (listSize / size) + 1;
-
-        return new PageableDto<>(
-            orderList,
-            listSize,
-            page,
-            totalPages);
     }
 
     /**
