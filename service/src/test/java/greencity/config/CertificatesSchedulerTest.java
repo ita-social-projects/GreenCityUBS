@@ -19,7 +19,6 @@ public class CertificatesSchedulerTest {
 
     @Test
     void checkCertificatesForActualityTest() {
-        doNothing().when(certificatesScheduler).checkCertificatesForActuality();
         certificatesScheduler.checkCertificatesForActuality();
         verify(certificatesActualityService).checkCertificatesForActuality();
     }
