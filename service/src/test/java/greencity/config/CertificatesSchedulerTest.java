@@ -11,7 +11,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class CertificatesSchedulerTest {
+class CertificatesSchedulerTest {
     @InjectMocks
     CertificatesScheduler certificatesScheduler;
     @Mock
