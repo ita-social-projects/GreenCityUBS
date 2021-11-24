@@ -30,10 +30,9 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     UBSuserRepository ubSuserRepository;
     OrdersForUserRepository ordersForUserRepository;
 
-    private String columnAmount = "amount";
-
     @Override
     public UserWithOrdersDto getAllOrders(Pageable page, Long userId, SortingOrder sortingOrder, String column) {
+        String columnAmount = "amount";
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         UBSuser ubsUser = ubSuserRepository.findUBSuserByUserId(user.getId());
@@ -47,13 +46,13 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
                 .stream()
                 .map(this::getAllOrders)
                 .collect(Collectors.toList());
-        } else if (column.equals(columnAmount) && sortingOrder.toString().equals("DESC")) {
+        } else if (sortingOrder.toString().equals("DESC")) {
             userOrdersDtoList = ordersForUserRepository
                 .getAllOrdersByUserIdAndAmountDesc(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
                 .stream()
                 .map(this::getAllOrders)
                 .collect(Collectors.toList());
-        } else if (column.equals(columnAmount) && sortingOrder.toString().equals("ASC")) {
+        } else if (sortingOrder.toString().equals("ASC")) {
             userOrdersDtoList = ordersForUserRepository
                 .getAllOrdersByUserIdAndAmountASC(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
                 .stream()
