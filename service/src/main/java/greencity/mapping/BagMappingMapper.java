@@ -28,10 +28,10 @@ public class BagMappingMapper extends AbstractConverter<Order, List<BagMappingDt
 
         List<BagMappingDto> build = new ArrayList<>();
         for (int i = 0; i < amountValues.size(); i++) {
-            if (exportedValues.isEmpty() || amountValues.size()>exportedValues.size()) {
+            if (exportedValues.isEmpty() || amountValues.size() > exportedValues.size()) {
                 exportedValues.add(null);
             }
-            if (confirmedValues.isEmpty()||amountValues.size()>confirmedValues.size()) {
+            if (confirmedValues.isEmpty() || amountValues.size() > confirmedValues.size()) {
                 confirmedValues.add(null);
             }
             build.add(BagMappingDto.builder()
