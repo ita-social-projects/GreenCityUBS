@@ -206,10 +206,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Roman Sulymka
      */
 
-    @Query(value = "SELECT * FROM orders"
+    @Query(value = "SELECT distinct * FROM orders"
         + "    INNER JOIN payment p on orders.id = p.order_id"
         + "    INNER JOIN users ON orders.users_id = users.id"
         + "    INNER JOIN ubs_user uu on orders.ubs_user_id = uu.id"
-        + "    WHERE orders.users_id = :userId ", nativeQuery = true)
+        + "    WHERE orders.users_id = :userId", nativeQuery = true)
     List<Order> getAllOrdersByUserId(@Param(value = "userId") Long userId);
 }
