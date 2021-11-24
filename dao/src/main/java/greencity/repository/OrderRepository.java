@@ -212,4 +212,24 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         + "    INNER JOIN ubs_user uu on orders.ubs_user_id = uu.id"
         + "    WHERE orders.users_id = :userId", nativeQuery = true)
     List<Order> getAllOrdersByUserId(@Param(value = "userId") Long userId);
+
+    /**
+     * Method gets user fistname by orderId.
+     *
+     * @author Roman Sulymka
+     */
+    @Query(value = "select distinct first_name from orders"
+        + " Inner Join ubs_user uu on orders.ubs_user_id = uu.id"
+        + " where orders.users_id = :userId limit 1", nativeQuery = true)
+    String getUsersFirstNameByOrderId(@Param(value = "userId") Long userId);
+
+    /**
+     * Method gets user lastname by orderId.
+     *
+     * @author Roman Sulymka
+     */
+    @Query(value = "select distinct last_name from orders"
+        + " Inner Join ubs_user uu on orders.ubs_user_id = uu.id"
+        + " where orders.users_id = :userId limit 1", nativeQuery = true)
+    String getUsersLastNameByOrderId(@Param(value = "userId") Long userId);
 }
