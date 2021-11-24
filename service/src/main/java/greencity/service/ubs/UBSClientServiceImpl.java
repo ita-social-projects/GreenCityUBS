@@ -1140,7 +1140,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(order.getCounterOrderPaymentId().toString())
+            .orderId(
+                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
