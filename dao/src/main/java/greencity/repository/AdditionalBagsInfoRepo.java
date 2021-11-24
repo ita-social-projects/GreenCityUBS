@@ -26,7 +26,8 @@ public class AdditionalBagsInfoRepo {
             + "from payment "
             + "join orders o on o.id = payment.order_id "
             + "join users u on u.id = o.users_id "
-            + "join address a on u.id = a.user_id "
+            + "join ubs_user uu on uu.id = o.ubs_user_id "
+            + "join address a on uu.address_id = a.id "
             + "where order_id =?", recipientEmail, orderId);
     }
 }
