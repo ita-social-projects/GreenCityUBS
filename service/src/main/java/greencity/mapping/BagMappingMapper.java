@@ -25,7 +25,12 @@ public class BagMappingMapper extends AbstractConverter<Order, List<BagMappingDt
         for (Map.Entry<Integer, Integer> pair : order.getConfirmedQuantity().entrySet()) {
             confirmedValues.add(pair.getValue());
         }
-
+        if (exportedValues.isEmpty()) {
+            exportedValues.add(null);
+        }
+        if (confirmedValues.isEmpty()) {
+            confirmedValues.add(null);
+        }
         List<BagMappingDto> build = new ArrayList<>();
         for (int i = 0; i < confirmedValues.size(); i++) {
             build.add(BagMappingDto.builder()
