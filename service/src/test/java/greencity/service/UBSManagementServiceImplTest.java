@@ -7,6 +7,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
@@ -15,6 +16,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -151,6 +154,13 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private UBSManagementServiceImpl ubsManagementServiceMock;
+
+    @Mock
+    private LocationRepository locationRepository;
+    @Mock
+    private ServiceRepository serviceRepository;
+    @Mock
+    private CourierRepository courierRepository;
 
     private void getMocksBehavior() {
 
@@ -1233,6 +1243,7 @@ class UBSManagementServiceImplTest {
         Bag bag = ModelUtils.getBag().get();
         BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
         Language language = ModelUtils.getLanguage();
+        Location location = ModelUtils.getLocation();
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
@@ -1257,13 +1268,21 @@ class UBSManagementServiceImplTest {
             .thenReturn(ModelUtils.getExportDetails());
         lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
             .thenReturn(ModelUtils.getPaymentTableInfoDto());
+        when(locationRepository.findByOrderId(any())).thenReturn(location);
+        when(serviceRepository.findByLocation(location)).thenReturn(ModelUtils.getService());
+        when(courierRepository.findCourierByLocation(location)).thenReturn(
+            ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER));
         ubsManagementService.getOrderStatusData(1L, "ua");
 
+        verify(locationRepository).findByOrderId(1L);
+        verify(serviceRepository).findByLocation(location);
+        verify(modelMapper).map(ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER), CourierInfoDto.class);
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
         verify(orderRepository, times(4)).findById(1L);
         verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
+        verify(courierRepository).findCourierByLocation(location);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
     }
 
