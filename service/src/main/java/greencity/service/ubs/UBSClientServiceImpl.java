@@ -1122,6 +1122,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), dto.getSum());
         Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
@@ -1158,7 +1161,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
         Order increment = incrementCounter(order);
         PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
-
         return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
             .replace("\"", "")
             .replace("\n", ""));
