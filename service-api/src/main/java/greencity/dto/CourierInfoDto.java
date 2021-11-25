@@ -3,7 +3,6 @@ package greencity.dto;
 import greencity.entity.enums.CourierLimit;
 import lombok.*;
 
-
 @Getter
 @Setter
 @AllArgsConstructor
