@@ -32,4 +32,6 @@ public class OrderStatusPageDto {
     private ExportDetailsDto exportDetailsDto;
     private EmployeePositionDtoRequest employeePositionDtoRequest;
     private String comment;
+    private Integer courierPricePerPackage;
+    private CourierInfoDto courierInfo;
 }
