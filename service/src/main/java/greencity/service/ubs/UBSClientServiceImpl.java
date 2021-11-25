@@ -228,6 +228,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         if (sumToPay == 0 || !dto.isShouldBePaid()) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
