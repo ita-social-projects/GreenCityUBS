@@ -1013,9 +1013,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         if (!currentCertificate.isEmpty()) {
-            totalSumAmount =
+            double totalSumAmountToCheck =
                 (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     + order.getPointsToUse()));
+            totalSumAmount = totalSumAmountToCheck <= 0 ? 0 : totalSumAmountToCheck;
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
