@@ -245,7 +245,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
-                                                       List<ReceivingStationDto> stations) {
+        List<ReceivingStationDto> stations) {
         if (!existPositions(positions)) {
             throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
         }

@@ -9,6 +9,7 @@ public enum EmployeeStatus {
     EmployeeStatus(final int value) {
         this.statusValue = value;
     }
+
     /**
      * Method for getting a value of employeeStatus, which is used for translating
      * order status wo different languages.
@@ -33,5 +34,4 @@ public enum EmployeeStatus {
         }
         return "";
     }
-
 }
