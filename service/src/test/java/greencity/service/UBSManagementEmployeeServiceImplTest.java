@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -172,17 +173,15 @@ class UBSManagementEmployeeServiceImplTest {
     void delete() {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
-        when(repository.findById(1L)).thenReturn(Optional.of(employee), Optional.empty());
-        doNothing().when(repository).deleteById(1L);
-
+        System.out.println(employee.getEmployeeStatus());
+        when(repository.findById(1L)).thenReturn(Optional.ofNullable(employee));
         employeeService.deleteEmployee(1L);
-
-        verify(repository, times(1)).deleteById(1L);
-        verify(fileService, times(1)).delete(employee.getImagePath());
-
+        verify(repository).findById(1L);
+        System.out.println(employee.getEmployeeStatus());
+        assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
         Exception thrown = assertThrows(EmployeeNotFoundException.class,
-            () -> employeeService.deleteEmployee(1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 1L);
+            () -> employeeService.deleteEmployee(2L));
+        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.order.Order;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
@@ -34,6 +35,10 @@ public class Employee {
 
     @Column(name = "image_path")
     private String imagePath;
+
+    @Column(nullable = false, name = "status", length = 20)
+    @Enumerated(EnumType.STRING)
+    private EmployeeStatus employeeStatus;
 
     @ManyToMany
     @JoinTable(

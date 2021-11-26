@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
+import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -134,10 +135,10 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     public void deleteEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
-        if (!employee.getImagePath().equals(defaultImagePath)) {
-            fileService.delete(employee.getImagePath());
+        if (employee.getEmployeeStatus().equals(EmployeeStatus.ACTIVE)) {
+            employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
+            employeeRepository.save(employee);
         }
-        employeeRepository.deleteById(id);
     }
 
     /**
@@ -244,7 +245,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void checkValidPositionAndReceivingStation(List<PositionDto> positions,
-        List<ReceivingStationDto> stations) {
+                                                       List<ReceivingStationDto> stations) {
         if (!existPositions(positions)) {
             throw new PositionNotFoundException(ErrorMessage.POSITION_NOT_FOUND);
         }
