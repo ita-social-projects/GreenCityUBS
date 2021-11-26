@@ -1259,12 +1259,13 @@ class UBSManagementServiceImplTest {
             .thenReturn(ModelUtils.getExportDetails());
         lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
             .thenReturn(ModelUtils.getPaymentTableInfoDto());
-        when(serviceRepository.findServiceByOrderIdAndCourierId(order.getId(),courier.getId())).thenReturn(ModelUtils.getService());
+        when(serviceRepository.findServiceByOrderIdAndCourierId(order.getId(), courier.getId()))
+            .thenReturn(ModelUtils.getService());
         when(courierRepository.findCourierByOrderId(order.getId())).thenReturn(
             ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER));
         ubsManagementService.getOrderStatusData(1L, "ua");
 
-        verify(serviceRepository).findServiceByOrderIdAndCourierId(order.getId(),courier.getId());
+        verify(serviceRepository).findServiceByOrderIdAndCourierId(order.getId(), courier.getId());
         verify(modelMapper).map(ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER), CourierInfoDto.class);
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
