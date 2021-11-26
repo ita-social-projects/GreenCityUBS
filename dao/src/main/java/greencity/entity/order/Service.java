@@ -51,6 +51,9 @@ public class Service {
     @ManyToOne
     Location location;
 
+    @ManyToOne
+    Courier courier;
+
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<ServiceTranslation> serviceTranslations;
 }
