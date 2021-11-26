@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class OrderStatusesTranslationDto {
-    private String name;
+    private String key;
     private String translation;
     private Boolean ableActualChange;
 }

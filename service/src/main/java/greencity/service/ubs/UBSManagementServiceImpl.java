@@ -837,7 +837,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     "")) {
                     OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
                     orderStatusesTranslationDto
-                        .setName(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
+                        .setKey(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
                 }
                 orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
             }
@@ -878,7 +878,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
                 if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
-                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                    translationDto.setKey(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                         orderStatusPaymentTranslation.getOrderPaymentStatusId()));
                 }
                 orderStatusesTranslationDtos.add(translationDto);
