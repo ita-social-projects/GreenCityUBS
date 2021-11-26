@@ -14,14 +14,15 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
 
     /**
      * Method that return Service.
-     * @param orderId {@link Long}
+     * 
+     * @param orderId   {@link Long}
      * @param courierId {@link Long}
      * @return {@link Service}
      */
     @Query(nativeQuery = true,
-            value = "select * from service s " +
-            "join courier c on c.id = s.courier_id " +
-            "join orders o on c.id = o.courier_id " +
-            "where o.id = :orderId and c.id = :courierId")
-    Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId,@Param("courierId") Long courierId);
+        value = "select * from service s "
+            + "join courier c on c.id = s.courier_id "
+            + "join orders o on c.id = o.courier_id "
+            + "where o.id = :orderId and c.id = :courierId")
+    Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
 }
