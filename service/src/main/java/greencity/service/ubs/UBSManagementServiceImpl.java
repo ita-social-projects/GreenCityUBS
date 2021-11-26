@@ -11,7 +11,6 @@ import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
@@ -710,15 +709,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
-        Location location = locationRepository.findByOrderId(orderId);
-        Courier courier = courierRepository.findCourierByLocation(location);
-        greencity.entity.order.Service service = serviceRepository.findByLocation(location);
+        Courier courier = courierRepository.findCourierByOrderId(orderId);
+        greencity.entity.order.Service service = serviceRepository.findServiceByOrderIdAndCourierId(orderId,courier.getId());
+        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
-        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(order, language);
