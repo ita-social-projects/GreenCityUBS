@@ -138,10 +138,9 @@ public class AdminUbsController {
     }
 
     /**
-     * Controller for obtaining all order by user.
+     * Controller for obtaining all order by user and sorting by column name.
      *
      * @param userId {@link Long}
-     *
      * @author Roman Sulymka.
      */
     @ApiOperation("Get users for the table")
@@ -152,7 +151,10 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/{userId}/ordersAll")
-    public ResponseEntity<UserWithOrdersDto> getAllOrdersForUser(@PathVariable Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ordersForUserService.getAllOrders(userId));
+    public ResponseEntity<UserWithOrdersDto> getAllOrdersForUser(
+        @ApiIgnore Pageable page, @PathVariable Long userId,
+        @RequestParam SortingOrder sortingType, @RequestParam String column) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ordersForUserService.getAllOrders(page, userId, sortingType, column));
     }
 }

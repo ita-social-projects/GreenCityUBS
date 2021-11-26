@@ -139,14 +139,6 @@ public interface UBSManagementService {
     void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 
     /**
-     * Method for getting all values from order table .
-     *
-     * @author Nazar Struk
-     */
-    PageableDto<AllFieldsFromTableDto> getAllValuesFromTable(SearchCriteria searchCriteria, int pages, int size,
-        String column, String sortingType);
-
-    /**
      * Method that read user address by order id.
      *
      * @param orderId of {@link Long} order id;

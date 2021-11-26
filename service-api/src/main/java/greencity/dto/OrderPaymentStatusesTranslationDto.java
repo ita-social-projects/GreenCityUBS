@@ -9,6 +9,6 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class OrderPaymentStatusesTranslationDto {
-    private String name;
+    private String key;
     private String translation;
 }

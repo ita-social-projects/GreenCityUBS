@@ -4,23 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
-import greencity.entity.enums.SortingOrder;
-import greencity.entity.order.Certificate;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.service.ubs.UBSManagementService;
-import liquibase.pro.packaged.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -403,16 +395,6 @@ class ManagementOrderControllerTest {
             .param("email", "max@email.com")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void getAllValuesFromOrderTable2Test() throws Exception {
-        mockMvc.perform(get(ubsLink + "/orders")
-            .param("page", "1")
-            .param("size", "1")
-            .param("columnName", "name")
-            .param("sortingType", "nn")
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }
 
     @Test

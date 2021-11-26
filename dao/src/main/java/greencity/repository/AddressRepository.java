@@ -70,8 +70,8 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      * @return {@link Address}.
      */
     @Query(value = "SELECT * FROM orders as o "
-        + "JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
-        + "JOIN address as addr ON addr.user_id = ubs.id "
-        + "WHERE o.id = :orderid", nativeQuery = true)
+        + " JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
+        + " JOIN address as addr ON addr.id = ubs.address_id "
+        + " WHERE o.id = :orderid", nativeQuery = true)
     Address getAddressByOrderId(@Param("orderid") Long orderId);
 }

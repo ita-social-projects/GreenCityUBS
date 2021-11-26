@@ -310,7 +310,7 @@ class UBSClientServiceImplTest {
     void cancelFormedOrder() {
         Order order = getFormedOrder();
         OrderClientDto expected = getOrderClientDto();
-        expected.setOrderStatus(OrderStatus.CANCELLED);
+        expected.setOrderStatus(OrderStatus.CANCELED);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
@@ -371,7 +371,7 @@ class UBSClientServiceImplTest {
     @Test
     void makeOrderAgainShouldThrowBadOrderStatusException() {
         Order order = getOrderDoneByUser();
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
             () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
@@ -929,5 +929,43 @@ class UBSClientServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ubsService.deleteOrder(1L);
+    }
+
+    @Test
+    void processOrderFondyClient() throws Exception {
+        Order order = ModelUtils.getOrderCount();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
+        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+
+        ubsService.processOrderFondyClient(dto);
+
+        verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
+        verify(restClient).getDataFromFondy(any());
+
+    }
+
+    @Test
+    void proccessOrderLiqpayClient() {
+        Order order = ModelUtils.getOrderCount();
+        OrderLiqpayClienDto dto = ModelUtils.getOrderLiqpayClientDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(restClient.getDataFromLiqPay(any())).thenReturn("TestValue");
+
+        ubsService.proccessOrderLiqpayClient(dto);
+
+        verify(orderRepository, times(2)).findById(1L);
+        verify(restClient).getDataFromLiqPay(any());
+
     }
 }

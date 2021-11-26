@@ -4,6 +4,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -32,4 +33,15 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
      * @return {@link Payment}
      */
     Payment findPaymentByOrder(Order order);
+
+    /**
+     * This method find amount by orderId.
+     *
+     * @param orderId {@link Long}
+     * @return {@link Payment}
+     * @author Roman Sulymka
+     */
+    @Query(value = "select distinct amount from payment"
+        + " where order_id = :orderId", nativeQuery = true)
+    Long findAmountByOrderId(@Param(value = "orderId") Long orderId);
 }
