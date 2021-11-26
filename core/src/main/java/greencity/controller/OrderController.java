@@ -140,7 +140,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("http://localhost:4200/#/ubs/confirm");
+            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }

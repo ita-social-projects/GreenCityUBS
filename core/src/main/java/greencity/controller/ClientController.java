@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Locale;
 
@@ -72,7 +73,7 @@ public class ClientController {
      * Controller for delete user order.
      *
      * @return {@link HttpStatus http status}.
-     * @author Max Boyarchuk
+     * @author Max Boiarchuk
      */
     @ApiOperation(value = "delete user order")
     @ApiResponses({
@@ -89,9 +90,49 @@ public class ClientController {
     }
 
     /**
+     * Controller return link fondy payment .
+     *
+     * @return {@link OrderFondyClientDto} dto.
+     * @author Max Boiarchuk
+     */
+    @ApiOperation(value = "return the link for payment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/processOrderFondy")
+    public ResponseEntity<FondyOrderResponse> processOrderFondy(@Valid @RequestBody OrderFondyClientDto dto)
+        throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto));
+    }
+
+    /**
+     * Controller return link liqpay payment .
+     *
+     * @return {@link OrderLiqpayClienDto} dto.
+     * @author Max Boiarchuk
+     */
+    @ApiOperation(value = "return the link for liqpay payment")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/processOrderLiqpay")
+    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(@Valid @RequestBody OrderLiqpayClienDto dto)
+        throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto));
+    }
+
+    /**
      * Controller cancel order with status FORMED.
      *
-     * @param orderId {@link Long} order id.
+     * @param orderId {@link Long} - order id.
      * @return {@link HttpStatus} - http status.
      * @author Danylko Mykola
      */

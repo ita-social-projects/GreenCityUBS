@@ -83,5 +83,6 @@
     <include file="db/changelog/logs/ch-add-column-region-to-address-Sikhovskiy.xml"/>
     <include file="db/changelog/logs/ch-change-city-capacity-Sikhovskiy.xml"/>
     <include file="db/changelog/logs/ch-add-table-order-payment-status-translations-Bahlay.xml"/>
+    <include file="db/changelog/logs/ch-add-column-to-orders--table-Boiarchuk.xml"/>
     <include file="db/changelog/logs/ch-add-column-status-into-employees-table-Kuzo.xml"/>
 </databaseChangeLog>

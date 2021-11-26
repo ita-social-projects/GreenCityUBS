@@ -1,10 +1,6 @@
 package greencity.dto;
 
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
 import lombok.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,23 +12,10 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class OrderStatusPageDto {
-    private Long id;
-    private LocalDateTime dateFormed;
-    private List<OrderStatusesTranslationDto> orderStatusesDto;
-    private List<OrderPaymentStatusesTranslationDto> orderPaymentStatusesDto;
+    private GeneralOrderInfo generalOrderInfo;
     private UserInfoDto userInfoDto;
-    private String addressCity;
-    private String addressStreet;
-    private String addressDistrict;
-    private Long addressHouseNumber;
-    private Long addressHouseCorpus;
-    private Long addressEntranceNumber;
-    private String addressRegion;
+    private AddressExportDetailsDto addressExportDetailsDto;
     private String addressComment;
-    private OrderStatus orderStatus;
-    private String orderStatusName;
-    private OrderPaymentStatus orderPaymentStatus;
-    private String orderPaymentStatusName;
     private double orderFullPrice;
     private double orderDiscountedPrice;
     private double orderCertificateTotalDiscount;
@@ -49,4 +32,6 @@ public class OrderStatusPageDto {
     private ExportDetailsDto exportDetailsDto;
     private EmployeePositionDtoRequest employeePositionDtoRequest;
     private String comment;
+    private Integer courierPricePerPackage;
+    private CourierInfoDto courierInfo;
 }

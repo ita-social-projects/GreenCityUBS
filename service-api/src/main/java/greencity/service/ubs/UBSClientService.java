@@ -304,4 +304,20 @@ public interface UBSClientService {
      * @author Max Boyarchuk
      */
     void deleteOrder(Long id);
+
+    /**
+     * Method return link with Fondy payment .
+     * 
+     * @param dto - current OrderFondyClientDto dto.
+     * @author Max Boiarchuk
+     */
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+
+    /**
+     * Method return link with liqpay payment .
+     *
+     * @param dto - current OrderLiqpayClientDto dto.
+     * @author Max Boiarchuk
+     */
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
 }

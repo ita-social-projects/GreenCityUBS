@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
@@ -10,6 +11,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -277,7 +279,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /* methods for changing order */
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
-        OrderStatus orderStatus = OrderStatus.valueOf(value);
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
             orderRepository.changeStatusForAllOrders(value, employeeId);
@@ -286,7 +287,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setOrderStatus(orderStatus);
+                if (existedOrder.getOrderStatus().getPossibleStatuses().contains(value)) {
+                    existedOrder.setOrderStatus(OrderStatus.valueOf(value));
+                } else {
+                    throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + value);
+                }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
@@ -414,10 +419,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
             orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
