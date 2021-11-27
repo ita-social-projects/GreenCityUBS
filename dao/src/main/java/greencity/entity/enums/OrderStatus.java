@@ -53,7 +53,7 @@ public enum OrderStatus {
      * @return {@link OrderStatus}.
      */
     public OrderStatus checkPossibleStatus(String desiredStatus) throws Exception {
-        if (!(new HashSet<>(Arrays.asList(possibleStatus))).contains(desiredStatus)){
+        if (!(new HashSet<>(Arrays.asList(possibleStatus))).contains(desiredStatus)) {
             throw new Exception();
         }
         return OrderStatus.valueOf(desiredStatus);
