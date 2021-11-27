@@ -286,10 +286,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                if (existedOrder.getOrderStatus().checkPossibleStatus(value)){
+                if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
-                }else {
-                    throw new BadOrderStatusRequestException("Such desired status isn't applicable with current status!");
+                } else {
+                    throw new BadOrderStatusRequestException(
+                        "Such desired status isn't applicable with current status!");
                 }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
