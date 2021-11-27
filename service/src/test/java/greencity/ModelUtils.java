@@ -258,6 +258,7 @@ public class ModelUtils {
     public static Order getOrderWithoutAddress() {
         return Order.builder()
             .id(1L)
+            .counterOrderPaymentId(0L)
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
