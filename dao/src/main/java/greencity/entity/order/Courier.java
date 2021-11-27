@@ -44,4 +44,10 @@ public class Courier {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslationList;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courier")
+    List<Order> orders;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courier")
+    List<Service> services;
 }

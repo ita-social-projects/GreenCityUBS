@@ -258,6 +258,7 @@ public class ModelUtils {
     public static Order getOrderWithoutAddress() {
         return Order.builder()
             .id(1L)
+            .counterOrderPaymentId(0L)
             .ubsUser(UBSuser.builder()
                 .firstName("oleh")
                 .lastName("ivanov")
@@ -753,6 +754,7 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
                 .name("Водій")
@@ -771,6 +773,7 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
                 .id(1L)
                 .name("Водій")

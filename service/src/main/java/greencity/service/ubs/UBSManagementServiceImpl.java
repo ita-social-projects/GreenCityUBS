@@ -78,6 +78,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final LocationRepository locationRepository;
+    private final ServiceRepository serviceRepository;
+    private final CourierRepository courierRepository;
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -706,12 +709,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
+        Courier courier = courierRepository.findCourierByOrderId(orderId);
+        greencity.entity.order.Service service =
+            serviceRepository.findServiceByOrderIdAndCourierId(orderId, courier.getId());
+        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
-        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(order, language);
@@ -735,6 +741,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .courierPricePerPackage(service.getFullPrice())
+            .courierInfo(modelMapper.map(courier, CourierInfoDto.class))
             .build();
     }
 
@@ -828,7 +836,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     "")) {
                     OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
                     orderStatusesTranslationDto
-                        .setName(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
+                        .setKey(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()));
                 }
                 orderStatusesTranslationDtos.add(orderStatusesTranslationDto);
             }
@@ -869,7 +877,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
                 if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
-                    translationDto.setName(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
+                    translationDto.setKey(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                         orderStatusPaymentTranslation.getOrderPaymentStatusId()));
                 }
                 orderStatusesTranslationDtos.add(translationDto);
@@ -1013,9 +1021,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         if (!currentCertificate.isEmpty()) {
-            totalSumAmount =
+            double totalSumAmountToCheck =
                 (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     + order.getPointsToUse()));
+            totalSumAmount = totalSumAmountToCheck <= 0 ? 0 : totalSumAmountToCheck;
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))

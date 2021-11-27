@@ -226,6 +226,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        }
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
         if (sumToPay == 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
@@ -1121,6 +1124,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), dto.getSum());
         Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
@@ -1155,9 +1161,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
         Order increment = incrementCounter(order);
         PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
-
         return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
             .replace("\"", "")
             .replace("\n", ""));

@@ -1,6 +1,7 @@
 package greencity.dto;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.entity.enums.EmployeeStatus;
 import lombok.*;
 
 import javax.validation.constraints.Email;
@@ -26,6 +27,8 @@ public class AddEmployeeDto {
     private String phoneNumber;
     @Email
     private String email;
+    @NotNull
+    private EmployeeStatus employeeStatus;
     @NotEmpty
     private List<PositionDto> employeePositions;
     @NotEmpty
