@@ -958,7 +958,6 @@ class UBSClientServiceImplTest {
     void proccessOrderLiqpayClient() {
         Order order = ModelUtils.getOrderCount();
         OrderLiqpayClienDto dto = ModelUtils.getOrderLiqpayClientDto();
-
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         when(restClient.getDataFromLiqPay(any())).thenReturn("TestValue");
 
@@ -966,6 +965,5 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(restClient).getDataFromLiqPay(any());
-
     }
 }
