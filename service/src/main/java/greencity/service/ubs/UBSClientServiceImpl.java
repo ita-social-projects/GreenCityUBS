@@ -1161,6 +1161,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
         Order increment = incrementCounter(order);
         PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
         return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
