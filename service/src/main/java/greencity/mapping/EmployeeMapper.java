@@ -30,6 +30,7 @@ public class EmployeeMapper extends AbstractConverter<Employee, EmployeeDto> {
             .phoneNumber(employee.getPhoneNumber())
             .email(employee.getEmail())
             .image(employee.getImagePath())
+            .employeeStatus(employee.getEmployeeStatus())
             .employeePositions(employee.getEmployeePosition().stream()
                 .map(p -> PositionDto.builder()
                     .id(p.getId())
