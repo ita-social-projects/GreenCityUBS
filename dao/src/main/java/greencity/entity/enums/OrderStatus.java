@@ -1,7 +1,5 @@
 package greencity.entity.enums;
 
-import greencity.exceptions.BadOrderStatusRequestException;
-
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -54,10 +52,7 @@ public enum OrderStatus {
      *
      * @return {@link OrderStatus}.
      */
-    public OrderStatus checkPossibleStatus(String desiredStatus) throws BadOrderStatusRequestException {
-        if (!(new HashSet<>(Arrays.asList(possibleStatus))).contains(desiredStatus)) {
-            throw new BadOrderStatusRequestException("Such desired status isn't applicable with current status!");
-        }
-        return OrderStatus.valueOf(desiredStatus);
+    public boolean checkPossibleStatus(String desiredStatus) {
+        return (new HashSet<>(Arrays.asList(possibleStatus))).contains(desiredStatus);
     }
 }

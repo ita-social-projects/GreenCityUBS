@@ -10,6 +10,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.BadOrderStatusRequestException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -285,7 +286,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setOrderStatus(existedOrder.getOrderStatus().checkPossibleStatus(value));
+                if (existedOrder.getOrderStatus().checkPossibleStatus(value)){
+                    existedOrder.setOrderStatus(OrderStatus.valueOf(value));
+                }else {
+                    throw new BadOrderStatusRequestException("Such desired status isn't applicable with current status!");
+                }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
