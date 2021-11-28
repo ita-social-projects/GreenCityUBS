@@ -281,6 +281,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
             orderRepository.changeStatusForAllOrders(value, employeeId);
+            orderRepository.unblockAllOrders(employeeId);
         }
         for (Long orderId : ordersId) {
             try {
