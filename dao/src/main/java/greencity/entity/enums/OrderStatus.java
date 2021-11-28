@@ -49,8 +49,8 @@ public enum OrderStatus {
 
     /**
      * Method for checking if desired status is possible to use with current status.
-     *
-     * @return {@link OrderStatus}.
+     * @param desiredStatus {@link String}.
+     * @return boolean.
      */
     public boolean checkPossibleStatus(String desiredStatus) {
         return (new HashSet<>(Arrays.asList(possibleStatus))).contains(desiredStatus);
