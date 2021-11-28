@@ -65,6 +65,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
+    private final CourierRepository courierRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -208,7 +209,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
         Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
-
+        Courier courier = courierRepository.findById(1L)
+            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
@@ -218,6 +220,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
+        order.setCourier(courier);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -912,7 +915,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-
+        Courier courier = courierRepository.findById(1L)
+            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
@@ -922,6 +926,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
+        order.setCourier(courier);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
