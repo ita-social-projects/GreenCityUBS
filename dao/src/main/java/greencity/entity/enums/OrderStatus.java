@@ -1,7 +1,6 @@
 package greencity.entity.enums;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
