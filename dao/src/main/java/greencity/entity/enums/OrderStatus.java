@@ -1,8 +1,6 @@
 package greencity.entity.enums;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
@@ -50,10 +48,11 @@ public enum OrderStatus {
 
     /**
      * Method for checking if desired status is possible to use with current status.
-     *
-     * @return {@link HashSet}.
+     * 
+     * @param desiredStatus {@link String}.
+     * @return boolean.
      */
-    public Set<String> getPossibleStatuses() {
-        return new HashSet<>(Arrays.asList(possibleStatus));
+    public boolean checkPossibleStatus(String desiredStatus) {
+        return Arrays.asList(possibleStatus).contains(desiredStatus);
     }
 }
