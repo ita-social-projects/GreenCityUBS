@@ -49,6 +49,7 @@ public enum OrderStatus {
 
     /**
      * Method for checking if desired status is possible to use with current status.
+     * 
      * @param desiredStatus {@link String}.
      * @return boolean.
      */
