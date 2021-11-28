@@ -54,6 +54,6 @@ public enum OrderStatus {
      * @return boolean.
      */
     public boolean checkPossibleStatus(String desiredStatus) {
-        return (Arrays.asList(possibleStatus)).contains(desiredStatus);
+        return Arrays.asList(possibleStatus).contains(desiredStatus);
     }
 }
