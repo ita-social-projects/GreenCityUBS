@@ -761,15 +761,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
-            .addressEntranceNumber(address.getEntranceNumber() != null && !address.getEntranceNumber().equals("")
-                ? Long.parseLong(address.getEntranceNumber())
-                : 0L)
-            .addressHouseCorpus(address.getHouseCorpus() != null && !address.getHouseCorpus().equals("")
-                ? Long.parseLong(address.getHouseCorpus())
-                : 0L)
-            .addressHouseNumber(address.getHouseNumber() != null && !address.getHouseNumber().equals("")
-                ? Long.parseLong(address.getHouseNumber())
-                : 0L)
+            .addressEntranceNumber(address.getEntranceNumber())
+            .addressHouseCorpus(address.getHouseCorpus())
+            .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
             .build();
     }

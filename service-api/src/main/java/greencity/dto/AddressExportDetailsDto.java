@@ -1,7 +1,6 @@
 package greencity.dto;
 
 import lombok.*;
-import java.util.*;
 
 @Getter
 @Setter
@@ -15,8 +14,8 @@ public class AddressExportDetailsDto {
     private String addressCity;
     private String addressDistrict;
     private String addressRegion;
-    private Long addressEntranceNumber;
-    private Long addressHouseCorpus;
-    private Long addressHouseNumber;
+    private String addressEntranceNumber;
+    private String addressHouseCorpus;
+    private String addressHouseNumber;
     private String addressStreet;
 }
