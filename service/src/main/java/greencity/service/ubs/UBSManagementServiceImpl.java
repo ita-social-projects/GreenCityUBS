@@ -1770,7 +1770,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).sum();
+        long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).map(payment -> payment/100).sum();
         int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
         Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
         return BigOrderTableDTO.builder()
@@ -1799,7 +1799,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : paymentSum - certificateSum)
+            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : (paymentSum - certificateSum))
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -1886,6 +1886,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private String getPayment(Order order) {
         return nonNull(order.getPayment()) ? order.getPayment().stream()
             .map(Payment::getAmount)
+            .map(amount -> amount/100)
             .map(Objects::toString)
             .collect(joining(", ")) : "-";
     }
