@@ -19,6 +19,7 @@ public class AddServiceDtoMapper extends AbstractConverter<Bag, AddServiceDto> {
         List<TariffTranslationDto> dto = translations.stream().map(
             i -> new TariffTranslationDto(i.getName(), i.getDescription(), i.getLanguage().getId()))
             .collect(Collectors.toList());
+        source.setFullPrice(source.getPrice() + source.getCommission());
         return AddServiceDto.builder()
             .locationId(source.getLocation().getId())
             .commission(source.getCommission())
