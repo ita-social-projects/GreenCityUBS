@@ -253,6 +253,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .courier(ModelUtils.getCourier())
             .build();
     }
 
@@ -1257,7 +1258,7 @@ public class ModelUtils {
 
     public static User getUserWithLastLocation() {
         Location location = new Location();
-        location.setMinAmountOfBigBags(10l);
+        location.setLocationStatus(LocationStatus.ACTIVE);
         return User.builder()
             .id(1L)
             .addresses(singletonList(address()))
@@ -1278,7 +1279,6 @@ public class ModelUtils {
                 .language(Language.builder()
                     .code("ua").build())
                 .build()))
-            .minAmountOfBigBags(10l)
             .build();
     }
 
@@ -1291,7 +1291,6 @@ public class ModelUtils {
                 .language(Language.builder().code("ua")
                     .build())
                 .build()))
-            .minAmountOfBigBags(20l)
             .build();
         list.add(getLastLocation());
         list.add(location);
@@ -1659,6 +1658,17 @@ public class ModelUtils {
             .location(getLocation())
             .courierLimit(courierLimit)
             .courierTranslationList(getCourierTranslations())
+            .minAmountOfBigBags(2L)
+            .maxAmountOfBigBags(300L)
+            .build();
+    }
+
+    public static Courier getCourier() {
+        return Courier.builder()
+            .location(getLocation())
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .location(getLocation())
+            .courierTranslationList(getCourierTranslations())
             .build();
     }
 
@@ -1747,6 +1757,7 @@ public class ModelUtils {
     }
 
     public static Service getService() {
+        User user = ModelUtils.getUser();
         return Service.builder()
             .capacity(120)
             .basePrice(100)
