@@ -1,0 +1,33 @@
+package greencity.mapping;
+
+import greencity.ModelUtils;
+import greencity.dto.CreateServiceDto;
+import greencity.entity.order.Service;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class CreateServiceDtoMapperTest {
+    @InjectMocks
+    private CreateServiceDtoMapper mapper;
+
+    @Test
+    void convert() {
+        Service service = ModelUtils.getService();
+        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
+
+        Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getName(),
+            mapper.convert(service).getServiceTranslationDtoList().get(0).getName());
+        Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getDescription(),
+            mapper.convert(service).getServiceTranslationDtoList().get(0).getDescription());
+        Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getLanguageId(),
+            mapper.convert(service).getServiceTranslationDtoList().get(0).getLanguageId());
+        Assertions.assertEquals(dto.getCapacity(), mapper.convert(service).getCapacity());
+        Assertions.assertEquals(dto.getCommission(), mapper.convert(service).getCommission());
+        Assertions.assertEquals(dto.getPrice() + dto.getCommission(), mapper.convert(service).getPrice());
+        Assertions.assertEquals(dto.getCourierId(), mapper.convert(service).getCourierId());
+    }
+}

@@ -1822,6 +1822,7 @@ public class ModelUtils {
         return List.of(CourierTranslation.builder()
             .limitDescription("Test")
             .name("Test")
+            .language(ModelUtils.getLanguage())
             .build());
     }
 
@@ -1964,6 +1965,28 @@ public class ModelUtils {
             .fullPrice(150)
             .editedAt(LocalDate.now())
             .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .build();
+    }
+
+    public static AddLocationDto getAddLocationDto() {
+        return AddLocationDto.builder()
+            .addLocationDtoList(List.of(getAddLocationTranslationDto()))
+            .build();
+    }
+
+    public static AddLocationTranslationDto getAddLocationTranslationDto() {
+        return AddLocationTranslationDto.builder()
+            .locationName("Name1")
+            .languageId(null)
+            .region("Name1")
+            .build();
+    }
+
+    public static ServiceTranslationDto getServiceTranslationDto() {
+        return ServiceTranslationDto.builder()
+            .description("Test")
+            .languageId(1L)
+            .name("Test")
             .build();
     }
 }
