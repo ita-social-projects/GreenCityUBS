@@ -648,7 +648,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({NotEnoughBagsException.class})
-    public final ResponseEntity<Object> handleLiqPayPaymentException(NotEnoughBagsException ex,
+    public final ResponseEntity<Object> handleUpdateAdminInfoException(NotEnoughBagsException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
@@ -656,7 +656,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception {@link NotEnoughBagsException}.
+     * Method interceptor exception {@link SumOfOrderException}.
      *
      * @param ex         Exception which should be intercepted.
      * @param webRequest contain detail about occur exception.
@@ -664,7 +664,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({SumOfOrderException.class})
-    public final ResponseEntity<Object> handleLiqPayPaymentException(SumOfOrderException ex,
+    public final ResponseEntity<Object> handleUpdateAdminInfoException(SumOfOrderException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
