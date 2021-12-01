@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 public class UbsCustomersDtoUpdate {
     @NotNull
     @Min(1)
-    private Long id;
+    private Long recipientId;
     @NotBlank
     @NotNull
     @Length(max = 60)

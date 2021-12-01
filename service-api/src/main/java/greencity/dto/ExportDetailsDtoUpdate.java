@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class ExportDetailsDtoRequest {
+public class ExportDetailsDtoUpdate {
     String exportedDate;
     String exportedTime;
     String receivingStation;

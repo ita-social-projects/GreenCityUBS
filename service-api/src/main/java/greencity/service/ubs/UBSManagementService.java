@@ -150,12 +150,12 @@ public interface UBSManagementService {
     /**
      * Method that update address.
      *
-     * @param dtoUpdate of {@link OrderAddressDtoUpdate} order id;
+     * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id;
      * @param uuid      {@link String}.
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate, String uuid);
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid);
 
     /**
      * Method for getting order detail by language and order id.
@@ -235,7 +235,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto, String uuid);
+    ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid);
 
     /**
      * Method that gets bags additional information.

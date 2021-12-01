@@ -188,7 +188,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .recipientId(1l)
             .recipientName("Anatolii")
             .recipientSurName("Petyrov")
             .recipientPhoneNumber("095123456")
@@ -476,26 +476,26 @@ public class ModelUtils {
             .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
-                .paymentStatus(String.valueOf(PaymentStatus.PAID))
+                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
                 .orderComment("aaa")
                 .build())
             .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
-                .id(2L)
+                .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .orderAddressDtoUpdate(OrderAddressDtoUpdate
+            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .id(1L)
-                .district("aaaaaaa")
-                .street("aaaaa")
-                .entranceNumber("12")
-                .houseCorpus("123")
-                .houseNumber("121")
-                .city("dsfsdf")
-                .region("sdfsdfsd")
+                .addressDistrict("aaaaaaa")
+                .addressStreet("aaaaa")
+                .addressEntranceNumber("12")
+                .addressHouseCorpus("123")
+                .addressHouseNumber("121")
+                .addressCity("dsfsdf")
+                .addressRegion("sdfsdfsd")
                 .build())
             .ecoNumberFromShop(List.of(EcoNumberDto
                 .builder()
@@ -507,7 +507,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDtoRequest(ExportDetailsDtoRequest
+            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
                 .builder()
                 .exportedDate("20-12-2001")
                 .exportedTime("20:20:20")
