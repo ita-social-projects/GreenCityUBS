@@ -351,4 +351,15 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid);
+
+    /**
+     * This is method which is updates admin page info for order.
+     * 
+     * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
+     * @param orderId                 {@link Long}.
+     * @param currentUser             {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String currentUser);
 }

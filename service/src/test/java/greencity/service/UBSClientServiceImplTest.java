@@ -420,6 +420,7 @@ class UBSClientServiceImplTest {
     @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
         UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
+        expectedResult.setRecipientId(1L);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
@@ -453,7 +454,8 @@ class UBSClientServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
             .id(1l)
-            .recipientName("Anatolii Petyrov")
+            .recipientName("Anatolii")
+            .recipientSurName("Anatolii")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
 
@@ -462,7 +464,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.save(user.get())).thenReturn(user.get());
 
         UbsCustomersDto expected = UbsCustomersDto.builder()
-            .name("Anatolii Petyrov")
+            .name("Anatolii Anatolii")
             .email("anatolii.andr@gmail.com")
             .phoneNumber("095123456")
             .build();
