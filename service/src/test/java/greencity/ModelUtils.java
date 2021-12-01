@@ -1924,4 +1924,52 @@ public class ModelUtils {
             .sum(1)
             .build();
     }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
+        return UpdateOrderPageAdminDto.builder()
+            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .paymentStatus(String.valueOf(PaymentStatus.PAID))
+                .orderComment("aaa")
+                .build())
+            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+                .builder()
+                .id(2L)
+                .recipientName("aaaaa")
+                .recipientPhoneNumber("085555")
+                .recipientEmail("yura@333gmail.com")
+                .build())
+            .orderAddressDtoUpdate(OrderAddressDtoUpdate
+                .builder()
+                .id(1L)
+                .district("aaaaaaa")
+                .street("aaaaa")
+                .entranceNumber("12")
+                .houseCorpus("123")
+                .houseNumber("121")
+                .city("dsfsdf")
+                .region("sdfsdfsd")
+                .build())
+            .ecoNumberFromShop(List.of(EcoNumberDto
+                .builder()
+                .newEcoNumber("1")
+                .oldEcoNumber("2")
+                .build(),
+                EcoNumberDto
+                    .builder()
+                    .newEcoNumber("1")
+                    .oldEcoNumber("2")
+                    .build()))
+            .exportDetailsDtoRequest(ExportDetailsDtoRequest
+                .builder()
+                .exportedDate("20-12-2001")
+                .exportedTime("20:20:20")
+                .receivingStation(String.valueOf(ReceivingStation
+                    .builder()
+                    .id(1L)
+                    .build()))
+                .build())
+            .build();
+    }
 }
