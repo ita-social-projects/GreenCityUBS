@@ -64,6 +64,7 @@ public class ModelUtils {
                 .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
+            .courierId(1L)
             .build();
     }
 

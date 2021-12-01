@@ -154,31 +154,25 @@ class SuperAdminServiceImplTest {
         String uuid = "testUUid";
         Service service = new Service();
         service.setId(1L);
+        service.setCourier(ModelUtils.getCourier());
         User user = new User();
         EditServiceDto dto = ModelUtils.getEditServiceDto();
-        Location location = ModelUtils.getLocation();
         Language language = new Language();
         ServiceTranslation serviceTranslation = new ServiceTranslation();
 
-        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
-
+        when(serviceRepository.findServiceById(1L)).thenReturn(Optional.of(service));
         when(userRepository.findByUuid(uuid)).thenReturn(user);
-
-        when(locationRepository.findById(dto.getLocationId())).thenReturn(Optional.ofNullable(location));
-
         when(languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()))
             .thenReturn(Optional.ofNullable(language));
-
         when(serviceTranslationRepository.findServiceTranslationsByServiceAndLanguageCode(service,
             dto.getLanguageCode())).thenReturn(serviceTranslation);
-
         when(serviceRepository.save(service)).thenReturn(service);
+        GetServiceDto getTariffServiceDto = ModelUtils.getServiceDto();
 
-        superAdminService.editService(service.getId(), dto, uuid);
+        assertEquals(superAdminService.editService(service.getId(), dto, uuid), getTariffServiceDto);
 
         verify(userRepository, times(1)).findByUuid(uuid);
-        verify(serviceRepository, times(1)).findById(service.getId());
-        verify(locationRepository, times(1)).findById(dto.getLocationId());
+        verify(serviceRepository, times(1)).findServiceById(service.getId());
         verify(languageRepository, times(1)).findLanguageByLanguageCode(dto.getLanguageCode());
         verify(serviceTranslationRepository, times(1)).findServiceTranslationsByServiceAndLanguageCode(service,
             dto.getLanguageCode());
@@ -187,24 +181,21 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addService() {
-
-        User user = ModelUtils.getUser();
         Service service = ModelUtils.getService();
-        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
-
-        when(userRepository.findByUuid("123233")).thenReturn(user);
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+        when(courierRepository.findById(any())).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(userRepository.findByUuid(ModelUtils.getUser().getUuid())).thenReturn(ModelUtils.getUser());
         when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(serviceRepository.save(service)).thenReturn(service);
         when(serviceTranslationRepository.saveAll(service.getServiceTranslations()))
-            .thenReturn(ModelUtils.getServiceTranslation());
+            .thenReturn(ModelUtils.getServiceTranslationList());
 
-        superAdminService.addService(dto, "123233");
+        superAdminService.addService(ModelUtils.getCreateServiceDto(), ModelUtils.getUser().getUuid());
 
-        verify(locationRepository).findById(1L);
+        verify(courierRepository).findById(any());
+        verify(userRepository).findByUuid(ModelUtils.getUser().getUuid());
         verify(languageRepository).findById(1L);
-//        verify(bagRepository).save(bag);
-//        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
+        verify(serviceRepository).save(service);
+        verify(serviceTranslationRepository).saveAll(service.getServiceTranslations());
     }
 
     @Test
@@ -273,12 +264,8 @@ class SuperAdminServiceImplTest {
 
     @Test
     void createCourier() {
-        Courier courier = ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        CourierTranslation courierTranslation = ModelUtils.getCourierTranslation(
-            CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        Courier courier = ModelUtils.getCourier();
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-
-        Service service = ModelUtils.getService();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));

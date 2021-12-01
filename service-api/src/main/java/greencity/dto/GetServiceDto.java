@@ -28,4 +28,5 @@ public class GetServiceDto {
     String editedBy;
     Long locationId;
     String languageCode;
+    Long courierId;
 }

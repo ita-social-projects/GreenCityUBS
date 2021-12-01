@@ -123,7 +123,7 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageData() {
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 2l, 600);
+            new UserPointsAndAllBagsDto(new ArrayList<BagTranslationDto>(), 600);
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
@@ -141,10 +141,6 @@ class UBSClientServiceImplTest {
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location();
-        location.setId(1l);
-        location.setMinAmountOfBigBags(2l);
-        user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);
@@ -185,8 +181,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(locationRepository.getOne(1l)).thenReturn(location);
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+        when(courierRepository.findById(any()))
+            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
@@ -204,9 +200,6 @@ class UBSClientServiceImplTest {
         LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, 100l, locationStatus, List.of(user), List.of(service),
-            List.of(courier), List.of(bags), List.of(locationTranslation));
-        user.setLastLocation(location);
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);
@@ -242,8 +235,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(locationRepository.getOne(1l)).thenReturn(location);
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+        when(courierRepository.findById(any()))
+            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         Assertions.assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
@@ -813,7 +806,9 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+        when(courierRepository.findById(any()))
+            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(bagRepository).findById(3);
@@ -828,15 +823,10 @@ class UBSClientServiceImplTest {
     @Test
     void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
-        LocationStatus locationStatus = LocationStatus.ACTIVE;
-        LocationTranslation locationTranslation = new LocationTranslation();
         Courier courier = new Courier();
         Bag bags = new Bag();
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(900);
-        Location location = new Location(1l, 100l, locationStatus, List.of(user), List.of(service),
-            List.of(courier), List.of(bags), List.of(locationTranslation));
-        user.setLastLocation(location);
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().get(0).setAmount(35);
         Order order = getOrder();
@@ -862,7 +852,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(courierRepository.findById(1l)).thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+        when(courierRepository.findById(any()))
+            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
         });
@@ -900,7 +891,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
+        when(courierRepository.findById(any()))
+            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
 
         assertThrows(NotFoundOrderAddressException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");

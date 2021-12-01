@@ -42,4 +42,7 @@ public class OrderResponseDto implements Serializable {
 
     @NotNull
     private boolean shouldBePaid;
+
+    @NotNull
+    private Long courierId;
 }

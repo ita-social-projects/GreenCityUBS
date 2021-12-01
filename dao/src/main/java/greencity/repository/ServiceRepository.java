@@ -1,23 +1,20 @@
 package greencity.repository;
 
 import greencity.entity.order.Service;
-import greencity.entity.user.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface ServiceRepository extends JpaRepository<Service, Long> {
     /**
-     * {@inheritDoc}
-     */
-    Service findByLocation(Location location);
-
-    /**
-     * Method that return Service.
+     * Method that return Service by order id and courier id.
      * 
      * @param orderId   {@link Long}
      * @param courierId {@link Long}
      * @return {@link Service}
+     * @author Vadym Makitra
      */
     @Query(nativeQuery = true,
         value = "select * from service s "
@@ -25,4 +22,15 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
             + "join orders o on c.id = o.courier_id "
             + "where o.id = :orderId and c.id = :courierId")
     Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
+
+    /**
+     * Method that return service by id.
+     *
+     * @param serviceId {@link Long}
+     * @return {@link Service}
+     * @author Vadym Makitra
+     */
+    @Query(nativeQuery = true,
+        value = "select * from service s where s.id = :serviceId")
+    Optional<Service> findServiceById(@Param("serviceId") Long serviceId);
 }

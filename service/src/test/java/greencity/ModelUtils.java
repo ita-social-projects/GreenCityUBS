@@ -252,6 +252,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .courier(ModelUtils.getCourier())
             .build();
     }
 
@@ -1256,7 +1257,7 @@ public class ModelUtils {
 
     public static User getUserWithLastLocation() {
         Location location = new Location();
-        location.setMinAmountOfBigBags(10l);
+        location.setLocationStatus(LocationStatus.ACTIVE);
         return User.builder()
             .id(1L)
             .addresses(singletonList(address()))
@@ -1277,7 +1278,6 @@ public class ModelUtils {
                 .language(Language.builder()
                     .code("ua").build())
                 .build()))
-            .minAmountOfBigBags(10l)
             .build();
     }
 
@@ -1290,7 +1290,6 @@ public class ModelUtils {
                 .language(Language.builder().code("ua")
                     .build())
                 .build()))
-            .minAmountOfBigBags(20l)
             .build();
         list.add(getLastLocation());
         list.add(location);
@@ -1658,6 +1657,17 @@ public class ModelUtils {
             .location(getLocation())
             .courierLimit(courierLimit)
             .courierTranslationList(getCourierTranslations())
+            .minAmountOfBigBags(2L)
+            .maxAmountOfBigBags(300L)
+            .build();
+    }
+
+    public static Courier getCourier() {
+        return Courier.builder()
+            .location(getLocation())
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .location(getLocation())
+            .courierTranslationList(getCourierTranslations())
             .build();
     }
 
@@ -1724,14 +1734,11 @@ public class ModelUtils {
     }
 
     public static CreateServiceDto getCreateServiceDto() {
-
         return CreateServiceDto.builder()
             .capacity(120)
             .commission(50)
-            .locationId(1L)
             .price(100)
             .serviceTranslationDtoList(getServiceTranslationDtoList())
-
             .build();
     }
 
@@ -1749,24 +1756,44 @@ public class ModelUtils {
     }
 
     public static Service getService() {
+        User user = ModelUtils.getUser();
         return Service.builder()
             .capacity(120)
             .basePrice(100)
             .commission(50)
             .fullPrice(150)
             .createdAt(LocalDate.now())
-            .createdBy("Taras Ivanov")
-            .location(getLocation())
-            .serviceTranslations(getServiceTranslation())
+            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .serviceTranslations(getServiceTranslationList())
+            .courier(getCourier())
             .build();
     }
 
-    public static List<ServiceTranslation> getServiceTranslation() {
+    public static List<ServiceTranslation> getServiceTranslationList() {
         return List.of(ServiceTranslation.builder()
             .name("test")
             .language(getLanguage())
             .description("test")
             .build());
+    }
+
+    public static ServiceTranslation getServiceTranslation() {
+        return ServiceTranslation.builder()
+            .id(1L)
+            .service(Service.builder()
+                .id(1L)
+                .courier(Courier.builder()
+                    .id(1L)
+                    .location(getLocation())
+                    .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                    .minAmountOfBigBags(2L)
+                    .maxAmountOfBigBags(999L)
+                    .build())
+                .build())
+            .name("Test")
+            .description("Test")
+            .language(getLanguage())
+            .build();
     }
 
     public static CreateCourierDto getCreateCourierDto() {
@@ -1922,6 +1949,21 @@ public class ModelUtils {
             .builder()
             .orderId(1l)
             .sum(1)
+            .build();
+    }
+
+    public static GetServiceDto getServiceDto() {
+        User user = new User();
+        return GetServiceDto.builder()
+            .id(1l)
+            .name("test")
+            .capacity(120)
+            .price(100)
+            .commission(50)
+            .description("test")
+            .fullPrice(150)
+            .editedAt(LocalDate.now())
+            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
             .build();
     }
 }

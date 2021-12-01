@@ -44,7 +44,7 @@ class SuperAdminController {
     public ResponseEntity<AddServiceDto> createTariffService(
         @RequestBody AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addTariffService(dto, uuid));
     }
 
     /**
@@ -120,7 +120,7 @@ class SuperAdminController {
     public ResponseEntity<CreateServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addService(dto, uuid));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(dto, uuid));
     }
 
     /**
@@ -208,7 +208,7 @@ class SuperAdminController {
     @PostMapping("/addLocations")
     public ResponseEntity<AddLocationDto> addLocation(
         @RequestBody AddLocationDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addLocation(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addLocation(dto));
     }
 
     /**
@@ -262,7 +262,7 @@ class SuperAdminController {
     @PostMapping("/createCourier")
     public ResponseEntity<CreateCourierDto> addService(
         @RequestBody CreateCourierDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.createCourier(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.createCourier(dto));
     }
 
     /**

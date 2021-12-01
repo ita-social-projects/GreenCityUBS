@@ -147,13 +147,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
-        Location lastLocation = user.getLastLocation();
         currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDto(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
+        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -199,6 +198,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             certificate.getExpirationDate(), certificate.getCode());
     }
 
+    private void checkSumIfCourierLimitBySumOfOrder(Courier courier, Integer sumWithoutDiscount) {
+        if (courier.getCourierLimit().equals(CourierLimit.LIMIT_BY_SUM_OF_ORDER)) {
+            if (sumWithoutDiscount < courier.getMinPriceOfOrder()) {
+                throw new SumOfOrderException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courier.getMinPriceOfOrder());
+            } else if (sumWithoutDiscount > courier.getMaxPriceOfOrder()) {
+                throw new SumOfOrderException(
+                    ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courier.getMaxPriceOfOrder());
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -208,16 +218,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        Courier courier = courierRepository.findById(dto.getCourierId())
+            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            location.getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courier);
+        checkSumIfCourierLimitBySumOfOrder(courier, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
         order.setCourier(courier);
@@ -673,8 +682,18 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
+    private void checkAmountOfBagsIfCourierLimitByAmountOfBag(Courier courier, Integer countOfBigBag) {
+        if (courier.getCourierLimit().equals(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)) {
+            if (courier.getMinAmountOfBigBags() > countOfBigBag) {
+                throw new NotEnoughBagsException(NOT_ENOUGH_BIG_BAGS_EXCEPTION + courier.getMinAmountOfBigBags());
+            } else if (courier.getMaxAmountOfBigBags() < countOfBigBag) {
+                throw new NotEnoughBagsException(TO_MUCH_BIG_BAG_EXCEPTION + courier.getMaxAmountOfBigBags());
+            }
+        }
+    }
+
     private int formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags, Long minAmountOfBigBags) {
+        Map<Integer, Integer> map, List<BagDto> bags, Courier courier) {
         int sumToPay = 0;
         int bigBagCounter = 0;
         for (BagDto temp : bags) {
@@ -683,11 +702,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             if (bag.getCapacity() >= 120) {
                 bigBagCounter += temp.getAmount();
             }
+            checkAmountOfBagsIfCourierLimitByAmountOfBag(courier, bigBagCounter);
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
-        }
-        if (minAmountOfBigBags > bigBagCounter) {
-            throw new NotEnoughBagsException(NOT_ENOUGH_BIG_BAGS_EXCEPTION + minAmountOfBigBags);
         }
         return sumToPay;
     }
@@ -915,15 +932,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        Courier courier = courierRepository.findById(dto.getCourierId())
+            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            currentUser.getLastLocation().getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courier);
+        checkSumIfCourierLimitBySumOfOrder(courier, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
         order.setCourier(courier);

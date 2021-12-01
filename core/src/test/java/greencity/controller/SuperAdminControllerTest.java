@@ -22,8 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 
 import static greencity.ModelUtils.getUuid;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,7 +61,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .content(ServiceResponceDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
     }
 
     @Test
@@ -135,7 +133,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .content(ServiceResponceDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
     }
 
     @Test

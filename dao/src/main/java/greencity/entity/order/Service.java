@@ -1,6 +1,5 @@
 package greencity.entity.order;
 
-import greencity.entity.user.Location;
 import lombok.*;
 
 import javax.persistence.*;
@@ -47,9 +46,6 @@ public class Service {
 
     @Column(nullable = false)
     private String editedBy;
-
-    @ManyToOne
-    Location location;
 
     @ManyToOne
     Courier courier;

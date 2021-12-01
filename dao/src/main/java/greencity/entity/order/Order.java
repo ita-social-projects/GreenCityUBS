@@ -27,6 +27,7 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions"})
+@ToString
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
