@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 public class OrderDetailStatusRequestDto {
     String orderStatus;
-    String paymentStatus;
+    String orderPaymentStatus;
     String orderComment;
 }
