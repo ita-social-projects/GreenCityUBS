@@ -312,7 +312,7 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-address")
     public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
-        @Valid @RequestBody OrderAddressDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
+        @Valid @RequestBody OrderAddressExportDetailsDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateAddress(dto, uuid));
     }
@@ -563,7 +563,7 @@ public class ManagementOrderController {
      */
     @ApiOperation(value = "Update export details")
     @ApiResponses({
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ExportDetailsDtoRequest.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ExportDetailsDtoUpdate.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -571,7 +571,7 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
-        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoRequest dto,
+        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoUpdate dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderExportDetails(id, dto, uuid));
@@ -916,6 +916,32 @@ public class ManagementOrderController {
         @RequestBody @Valid List<EcoNumberDto> ecoNumberDto, @PathVariable(name = "id") Long orderId,
         @ApiIgnore @CurrentUserUuid String uuid) {
         ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating order admin page info.
+     *
+     * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
+     * @param orderId            {@link Long}.
+     * @param uuid               {@link String}.
+     *
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "update order admin page info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PatchMapping("/update-order-page-admin-info/{id}")
+    public ResponseEntity<HttpStatus> updatePageAdminInfo(
+        @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

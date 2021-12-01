@@ -502,6 +502,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .customerPhoneNumber(order.getUser().getRecipientPhone())
             .customerEmail(order.getUser().getRecipientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+            .recipientId(order.getUbsUser().getId())
             .recipientName(order.getUbsUser().getFirstName())
             .recipientSurName(order.getUbsUser().getLastName())
             .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
@@ -522,9 +523,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
+        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
         if (optionalUbsUser.isEmpty()) {
-            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
+            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
@@ -538,8 +539,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
-        ubSuser.setFirstName(dto.getRecipientName().split(" ")[0]);
-        ubSuser.setLastName(dto.getRecipientName().split(" ")[1]);
+        ubSuser.setFirstName(dto.getRecipientName());
+        ubSuser.setLastName(dto.getRecipientSurName());
         ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
         ubSuser.setEmail(dto.getRecipientEmail());
         return ubSuser;

@@ -33,10 +33,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -669,18 +669,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate, String uuid) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Address address = order.getUbsUser().getAddress();
-        if (address != null) {
-            addressRepository.save(updateAddressOrderInfo(address, dtoUpdate));
+        Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getId());
+        if (addressForAdminPage.isPresent()) {
+            addressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
             eventService.save(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
-            Optional<Address> optionalAddress = addressRepository.findById(address.getId());
-            return optionalAddress.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
+            return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
             throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId());
         }
@@ -761,15 +760,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
-            .addressEntranceNumber(address.getEntranceNumber() != null && !address.getEntranceNumber().equals("")
-                ? Long.parseLong(address.getEntranceNumber())
-                : 0L)
-            .addressHouseCorpus(address.getHouseCorpus() != null && !address.getHouseCorpus().equals("")
-                ? Long.parseLong(address.getHouseCorpus())
-                : 0L)
-            .addressHouseNumber(address.getHouseNumber() != null && !address.getHouseNumber().equals("")
-                ? Long.parseLong(address.getHouseNumber())
-                : 0L)
+            .addressEntranceNumber(address.getEntranceNumber())
+            .addressHouseCorpus(address.getHouseCorpus())
+            .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
             .build();
     }
@@ -1161,7 +1154,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
         paymentRepository.paymentInfo(id)
-            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
+            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
         orderRepository.save(order);
         paymentRepository.saveAll(payment);
         return buildStatuses(order, payment.get(0));
@@ -1242,12 +1235,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {
-        address.setHouseNumber(dto.getHouseNumber());
-        address.setEntranceNumber(dto.getEntranceNumber());
-        address.setDistrict(dto.getDistrict());
-        address.setStreet(dto.getStreet());
-        address.setHouseCorpus(dto.getHouseCorpus());
+    private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
+        address.setCity(dto.getAddressCity());
+        address.setRegion(dto.getAddressRegion());
+        address.setHouseNumber(dto.getAddressHouseNumber());
+        address.setEntranceNumber(dto.getAddressEntranceNumber());
+        address.setDistrict(dto.getAddressDistrict());
+        address.setStreet(dto.getAddressStreet());
+        address.setHouseCorpus(dto.getAddressHouseCorpus());
         return address;
     }
 
@@ -1288,12 +1283,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * Method returns update export details by order id.
      *
      * @param id  of {@link Long} order id;
-     * @param dto of{@link ExportDetailsDtoRequest}
+     * @param dto of{@link ExportDetailsDtoUpdate}
      * @return {@link ExportDetailsDto};
      * @author Orest Mahdziak
      */
     @Override
-    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto, String uuid) {
+    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
@@ -1776,7 +1771,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).sum();
+        long paymentSum = order.getPayment().stream().mapToLong(Payment::getAmount).map(payment -> payment / 100).sum();
         int certificateSum = order.getCertificates().stream().mapToInt(Certificate::getPoints).sum();
         Address address = nonNull(order.getUbsUser().getAddress()) ? order.getUbsUser().getAddress() : new Address();
         return BigOrderTableDTO.builder()
@@ -1892,6 +1887,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private String getPayment(Order order) {
         return nonNull(order.getPayment()) ? order.getPayment().stream()
             .map(Payment::getAmount)
+            .map(amount -> amount / 100)
             .map(Objects::toString)
             .collect(joining(", ")) : "-";
     }
@@ -1948,7 +1944,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    @Transactional
     @Override
     public void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
@@ -1991,5 +1986,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         values.append(OrderHistory.TO);
         values.append(newEcoNumber);
         return values.toString();
+    }
+
+    /**
+     * This is method which is updates admin page info for order.
+     * 
+     * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
+     * @param orderId            {@link Long}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    @Override
+    public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String currentUser) {
+        try {
+            updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
+            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
+            updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
+            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
+            updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
+        } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
+            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
+            throw new UpdateAdminPageInfoException(e.getMessage());
+        }
     }
 }

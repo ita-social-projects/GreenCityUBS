@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -122,8 +123,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Yuriy Bahlay.
      */
     @Modifying
-    @Query(value = " UPDATE ORDER_ADDITIONAL SET additional_order =:new_eco_number "
-        + " WHERE orders_id = :order_id AND additional_order =:old_eco_number", nativeQuery = true)
+    @Transactional
+    @Query(value = " UPDATE ORDER_ADDITIONAL SET additional_order = :new_eco_number "
+        + " WHERE orders_id = :order_id AND additional_order = :old_eco_number", nativeQuery = true)
     void setOrderAdditionalNumber(@Param("new_eco_number") String newEcoNumber,
         @Param("old_eco_number") String oldEcoNumber,
         @Param("order_id") Long orderId);

@@ -37,7 +37,8 @@ public class ModelUtils {
     public static final Order TEST_ORDER = createOrder();
     public static final Address TEST_ADDRESS = createAddress2();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
-    public static final OrderAddressDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE = createOrderAddressDtoUpdate();
+    public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
+        createOrderAddressDtoUpdate();
     public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
@@ -252,7 +253,6 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .courier(ModelUtils.getCourier())
             .build();
     }
 
@@ -322,8 +322,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static ExportDetailsDtoRequest getExportDetailsRequest() {
-        return ExportDetailsDtoRequest.builder()
+    public static ExportDetailsDtoUpdate getExportDetailsRequest() {
+        return ExportDetailsDtoUpdate.builder()
             .exportedDate("30-06-2012")
             .exportedTime("14:15:12")
             .receivingStation("Petrivka")
@@ -823,7 +823,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1L)
+            .recipientId(1L)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
@@ -1088,7 +1088,7 @@ public class ModelUtils {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
             .orderComment("all good")
-            .paymentStatus("PAID").build();
+            .orderPaymentStatus("PAID").build();
     }
 
     public static OrderDetailStatusDto getTestOrderDetailStatusDto() {
@@ -1157,14 +1157,14 @@ public class ModelUtils {
             .build();
     }
 
-    private static OrderAddressDtoUpdate createOrderAddressDtoUpdate() {
-        return OrderAddressDtoUpdate.builder()
+    private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
+        return OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
-            .houseNumber("1")
-            .entranceNumber("3")
-            .district("Syhiv")
-            .street("Stys")
-            .houseCorpus("2")
+            .addressHouseNumber("1")
+            .addressEntranceNumber("3")
+            .addressDistrict("Syhiv")
+            .addressStreet("Stys")
+            .addressHouseCorpus("2")
             .build();
     }
 
@@ -1257,7 +1257,7 @@ public class ModelUtils {
 
     public static User getUserWithLastLocation() {
         Location location = new Location();
-        location.setLocationStatus(LocationStatus.ACTIVE);
+        location.setMinAmountOfBigBags(10l);
         return User.builder()
             .id(1L)
             .addresses(singletonList(address()))
@@ -1278,6 +1278,7 @@ public class ModelUtils {
                 .language(Language.builder()
                     .code("ua").build())
                 .build()))
+            .minAmountOfBigBags(10l)
             .build();
     }
 
@@ -1290,6 +1291,7 @@ public class ModelUtils {
                 .language(Language.builder().code("ua")
                     .build())
                 .build()))
+            .minAmountOfBigBags(20l)
             .build();
         list.add(getLastLocation());
         list.add(location);
@@ -1657,17 +1659,6 @@ public class ModelUtils {
             .location(getLocation())
             .courierLimit(courierLimit)
             .courierTranslationList(getCourierTranslations())
-            .minAmountOfBigBags(2L)
-            .maxAmountOfBigBags(300L)
-            .build();
-    }
-
-    public static Courier getCourier() {
-        return Courier.builder()
-            .location(getLocation())
-            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-            .location(getLocation())
-            .courierTranslationList(getCourierTranslations())
             .build();
     }
 
@@ -1756,7 +1747,6 @@ public class ModelUtils {
     }
 
     public static Service getService() {
-        User user = ModelUtils.getUser();
         return Service.builder()
             .capacity(120)
             .basePrice(100)
@@ -1950,6 +1940,54 @@ public class ModelUtils {
             .builder()
             .orderId(1l)
             .sum(1)
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
+        return UpdateOrderPageAdminDto.builder()
+            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
+                .orderComment("aaa")
+                .build())
+            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+                .builder()
+                .recipientId(2L)
+                .recipientName("aaaaa")
+                .recipientPhoneNumber("085555")
+                .recipientEmail("yura@333gmail.com")
+                .build())
+            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
+                .builder()
+                .id(1L)
+                .addressDistrict("aaaaaaa")
+                .addressStreet("aaaaa")
+                .addressEntranceNumber("12")
+                .addressHouseCorpus("123")
+                .addressHouseNumber("121")
+                .addressCity("dsfsdf")
+                .addressRegion("sdfsdfsd")
+                .build())
+            .ecoNumberFromShop(List.of(EcoNumberDto
+                .builder()
+                .newEcoNumber("1")
+                .oldEcoNumber("2")
+                .build(),
+                EcoNumberDto
+                    .builder()
+                    .newEcoNumber("1")
+                    .oldEcoNumber("2")
+                    .build()))
+            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
+                .builder()
+                .exportedDate("20-12-2001")
+                .exportedTime("20:20:20")
+                .receivingStation(String.valueOf(ReceivingStation
+                    .builder()
+                    .id(1L)
+                    .build()))
+                .build())
             .build();
     }
 
