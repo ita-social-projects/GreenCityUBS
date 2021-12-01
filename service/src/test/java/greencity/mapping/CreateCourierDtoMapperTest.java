@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class CreateCourierDtoMapperTest {
+class CreateCourierDtoMapperTest {
     @InjectMocks
     private CreateCourierDtoMapper mapper;
 

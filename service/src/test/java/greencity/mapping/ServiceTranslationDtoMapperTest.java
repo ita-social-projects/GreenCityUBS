@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceTranslationDtoMapperTest {
+class ServiceTranslationDtoMapperTest {
     @InjectMocks
     private SerivceTransaltionDtoMapper mapper;
 
