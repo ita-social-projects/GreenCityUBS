@@ -443,4 +443,11 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
+
+    @Test
+    void getOrders() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1"))
+            .andExpect(status().isOk());
+    }
+
 }

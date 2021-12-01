@@ -280,4 +280,9 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    void getFondyStatusPayment() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)).andExpect(status().isOk());
+    }
+
 }
