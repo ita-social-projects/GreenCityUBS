@@ -1298,6 +1298,16 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void changeOrderTableView2() {
+        String uuid = "uuid1";
+
+        when(customTableViewRepo.existsByUuid(uuid)).thenReturn(Boolean.TRUE);
+        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
+
+        verify(customTableViewRepo).existsByUuid(uuid);
+    }
+
+    @Test
     void getCustomTableParameters() {
         String uuid = "uuid1";
         ubsManagementService.getCustomTableParameters(uuid);
