@@ -132,8 +132,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createServiceWithTranslation(CreateServiceDto dto, User user) {
-        Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+        Courier courier = courierRepository.findById(dto.getCourierId()).orElseThrow(() -> new CourierNotFoundException(
+            ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
         Service service = Service.builder()
             .basePrice(dto.getPrice())
             .commission(dto.getCommission())
@@ -141,7 +141,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .capacity(dto.getCapacity())
             .createdAt(LocalDate.now())
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .location(location)
+            .courier(courier)
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
                     .description(serviceTranslationDto.getDescription())
@@ -177,8 +177,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(serviceTranslation.getService().getCreatedBy())
             .editedAt(serviceTranslation.getService().getEditedAt())
             .editedBy(serviceTranslation.getService().getEditedBy())
-            .locationId(serviceTranslation.getService().getLocation().getId())
             .languageCode(serviceTranslation.getLanguage().getCode())
+            .courierId(serviceTranslation.getService().getCourier().getId())
             .build();
     }
 
@@ -191,11 +191,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
-        Service service = serviceRepository.findById(id).orElseThrow(
+        Service service = serviceRepository.findServiceById(id).orElseThrow(
             () -> new ServiceNotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         User user = userRepository.findByUuid(uuid);
-        final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
             () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         service.setCapacity(dto.getCapacity());
@@ -211,7 +209,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         serviceTranslation.setLanguage(language);
         service.setFullPrice(dto.getPrice() + dto.getCommission());
         service.setBasePrice(dto.getPrice());
-        service.setLocation(location);
         serviceRepository.save(service);
         return getService(serviceTranslation);
     }
