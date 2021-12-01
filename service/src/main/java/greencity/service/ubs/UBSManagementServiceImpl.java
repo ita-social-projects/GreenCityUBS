@@ -1944,7 +1944,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    @Transactional
     @Override
     public void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
