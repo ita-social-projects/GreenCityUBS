@@ -514,9 +514,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getId());
+        Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
         if (optionalUbsUser.isEmpty()) {
-            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getId());
+            throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));

@@ -669,7 +669,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressDtoUpdate dtoUpdate, String uuid) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(dtoUpdate.getId())
@@ -1154,7 +1154,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
         paymentRepository.paymentInfo(id)
-            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getPaymentStatus())));
+            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
         orderRepository.save(order);
         paymentRepository.saveAll(payment);
         return buildStatuses(order, payment.get(0));
@@ -1235,14 +1235,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    private Address updateAddressOrderInfo(Address address, OrderAddressDtoUpdate dto) {
-        address.setCity(dto.getCity());
-        address.setRegion(dto.getRegion());
-        address.setHouseNumber(dto.getHouseNumber());
-        address.setEntranceNumber(dto.getEntranceNumber());
-        address.setDistrict(dto.getDistrict());
-        address.setStreet(dto.getStreet());
-        address.setHouseCorpus(dto.getHouseCorpus());
+    private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
+        address.setCity(dto.getAddressCity());
+        address.setRegion(dto.getAddressRegion());
+        address.setHouseNumber(dto.getAddressHouseNumber());
+        address.setEntranceNumber(dto.getAddressEntranceNumber());
+        address.setDistrict(dto.getAddressDistrict());
+        address.setStreet(dto.getAddressStreet());
+        address.setHouseCorpus(dto.getAddressHouseCorpus());
         return address;
     }
 
@@ -1283,12 +1283,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * Method returns update export details by order id.
      *
      * @param id  of {@link Long} order id;
-     * @param dto of{@link ExportDetailsDtoRequest}
+     * @param dto of{@link ExportDetailsDtoUpdate}
      * @return {@link ExportDetailsDto};
      * @author Orest Mahdziak
      */
     @Override
-    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoRequest dto, String uuid) {
+    public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
@@ -2001,8 +2001,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         try {
             updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
             ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
-            updateAddress(updateOrderPageDto.getOrderAddressDtoUpdate(), currentUser);
-            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoRequest(), currentUser);
+            updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
+            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
             updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
         } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
             | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {

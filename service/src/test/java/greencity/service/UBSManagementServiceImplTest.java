@@ -273,7 +273,7 @@ class UBSManagementServiceImplTest {
     void updateExportDetailsByOrderId() {
         User user = ModelUtils.getTestUser();
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        ExportDetailsDtoRequest dto = ModelUtils.getExportDetailsRequest();
+        ExportDetailsDtoUpdate dto = ModelUtils.getExportDetailsRequest();
         Order order = ModelUtils.getOrderExportDetails();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
@@ -289,7 +289,7 @@ class UBSManagementServiceImplTest {
     void updateExportDetailsNotSuccessfulByOrderId() {
         User user = ModelUtils.getTestUser();
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        ExportDetailsDtoRequest dto = ModelUtils.getExportDetailsRequest();
+        ExportDetailsDtoUpdate dto = ModelUtils.getExportDetailsRequest();
         Order order = ModelUtils.getOrderExportDetailsWithNullValues();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 

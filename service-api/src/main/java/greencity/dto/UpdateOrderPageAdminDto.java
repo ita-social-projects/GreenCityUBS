@@ -13,7 +13,7 @@ import java.util.List;
 public class UpdateOrderPageAdminDto {
     private OrderDetailStatusRequestDto orderDetailStatusRequestDto;
     private UbsCustomersDtoUpdate ubsCustomersDtoUpdate;
-    private OrderAddressDtoUpdate orderAddressDtoUpdate;
+    private OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate;
     private List<EcoNumberDto> ecoNumberFromShop;
-    private ExportDetailsDtoRequest exportDetailsDtoRequest;
+    private ExportDetailsDtoUpdate exportDetailsDtoUpdate;
 }

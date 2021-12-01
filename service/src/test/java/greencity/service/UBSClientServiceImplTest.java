@@ -438,7 +438,7 @@ class UBSClientServiceImplTest {
     void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .recipientId(1l)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
@@ -453,7 +453,7 @@ class UBSClientServiceImplTest {
     void updatesUbsUserInfoInOrder() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .recipientId(1l)
             .recipientName("Anatolii")
             .recipientSurName("Anatolii")
             .recipientEmail("anatolii.andr@gmail.com")
