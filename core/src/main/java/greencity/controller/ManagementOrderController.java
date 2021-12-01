@@ -918,4 +918,30 @@ public class ManagementOrderController {
         ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    /**
+     * Controller for updating order admin page info.
+     *
+     * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
+     * @param orderId            {@link Long}.
+     * @param uuid               {@link String}.
+     *
+     * @author Bahlay Yuriy.
+     */
+    @ApiOperation(value = "update order admin page info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PatchMapping("/update-order-page-admin-info/{id}")
+    public ResponseEntity<HttpStatus> updatePageAdminInfo(
+        @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

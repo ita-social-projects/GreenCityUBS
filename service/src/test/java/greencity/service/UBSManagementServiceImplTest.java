@@ -19,14 +19,12 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.repository.*;
-import greencity.service.ubs.EventService;
-import greencity.service.ubs.FileService;
-import greencity.service.ubs.UBSClientServiceImpl;
-import greencity.service.ubs.UBSManagementServiceImpl;
+import greencity.service.ubs.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -622,7 +620,9 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(TEST_ORDER));
         when(addressRepository.save(TEST_ADDRESS)).thenReturn(TEST_ADDRESS);
-        when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(TEST_ADDRESS));
+        Address address = TEST_ADDRESS;
+        address.setId(1L);
+        when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(address));
         when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
             ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc");
@@ -1303,5 +1303,40 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getCustomTableParameters(uuid);
 
         verify(customTableViewRepo).existsByUuid(uuid);
+    }
+
+    @Test
+    void updateOrderAdminPageInfoTest() {
+        OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
+        Order order = ModelUtils.getOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.paymentInfo(1L))
+            .thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("abc"))
+            .thenReturn(Optional.of(ModelUtils.getUser()));
+        lenient().when(ubsManagementServiceMock.updateOrderDetailStatus(1L, orderDetailStatusRequestDto, "abc"))
+            .thenReturn(ModelUtils.getTestOrderDetailStatusDto());
+        when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
+            "abc")).thenReturn(ModelUtils.getUbsCustomersDto());
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        updateOrderPageAdminDto.setUbsCustomersDtoUpdate(ModelUtils.getUbsCustomersDtoUpdate());
+        when(addressRepository.findById(1L))
+            .thenReturn(Optional.of(TEST_ADDRESS));
+        when(receivingStationRepository.findAll())
+            .thenReturn(List.of(ModelUtils.getReceivingStation()));
+
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "abc");
+
+        verify(ubsClientService, times(1))
+            .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "abc");
+    }
+
+    @Test
+    void updateOrderAdminPageInfoTestThrowsException() {
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
+        assertThrows(UpdateAdminPageInfoException.class,
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "abc"));
     }
 }

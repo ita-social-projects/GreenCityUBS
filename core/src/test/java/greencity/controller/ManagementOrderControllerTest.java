@@ -432,4 +432,15 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/getOrdersViewParameters", "uuid1"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void updatePageAdminInfoTest() throws Exception {
+        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJSON = objectMapper.writeValueAsString(updateOrderPageAdminDto);
+        mockMvc.perform(patch(ubsLink + "/update-order-page-admin-info/{id}", 1L)
+            .content(dtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 }

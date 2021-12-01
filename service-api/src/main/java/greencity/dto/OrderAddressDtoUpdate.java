@@ -30,4 +30,8 @@ public class OrderAddressDtoUpdate implements Serializable {
     private String entranceNumber;
     @Length(max = 5)
     private String houseNumber;
+    @Length(max = 15)
+    private String city;
+    @Length(max = 15)
+    private String region;
 }

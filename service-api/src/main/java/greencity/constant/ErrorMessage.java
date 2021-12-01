@@ -32,7 +32,7 @@ public final class ErrorMessage {
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
-    public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Not found order id : ";
+    public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
     public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
     public static final String ORDERS_FOR_UUID_NOT_EXIST = "Order for uuid does not exist.";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";

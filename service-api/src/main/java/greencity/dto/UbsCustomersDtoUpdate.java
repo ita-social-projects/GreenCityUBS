@@ -24,6 +24,10 @@ public class UbsCustomersDtoUpdate {
     private String recipientName;
     @NotBlank
     @NotNull
+    @Length(max = 60)
+    private String recipientSurName;
+    @NotBlank
+    @NotNull
     @Length(max = 9)
     private String recipientPhoneNumber;
     @NotBlank

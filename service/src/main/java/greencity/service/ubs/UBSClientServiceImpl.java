@@ -493,6 +493,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .customerPhoneNumber(order.getUser().getRecipientPhone())
             .customerEmail(order.getUser().getRecipientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+            .recipientId(order.getUbsUser().getId())
             .recipientName(order.getUbsUser().getFirstName())
             .recipientSurName(order.getUbsUser().getLastName())
             .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
@@ -529,8 +530,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
-        ubSuser.setFirstName(dto.getRecipientName().split(" ")[0]);
-        ubSuser.setLastName(dto.getRecipientName().split(" ")[1]);
+        ubSuser.setFirstName(dto.getRecipientName());
+        ubSuser.setLastName(dto.getRecipientSurName());
         ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
         ubSuser.setEmail(dto.getRecipientEmail());
         return ubSuser;
