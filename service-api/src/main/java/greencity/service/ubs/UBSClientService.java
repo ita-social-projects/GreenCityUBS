@@ -55,6 +55,17 @@ public interface UBSClientService {
     FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid);
 
     /**
+     * Methods saves all entered by user data to database. Version for
+     * Ivano-Frankivsk.
+     *
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentRequestDto} which contains data to pay order out.
+     * @author Sihovskiy Rostyslav
+     */
+    FondyOrderResponse saveFullOrderToDBForIF(OrderResponseDto dto, String uuid);
+
+    /**
      * Method get status of order from db by id.
      *
      * @return - payment status
@@ -273,6 +284,17 @@ public interface UBSClientService {
     LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
 
     /**
+     * Methods saves all entered by user data to database. Version for
+     * Ivano-Frankivsk
+     *
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link LiqPayOrderResponse} order id and liqpay payment button.
+     * @author Sikhovskiy Rostyslav
+     */
+    LiqPayOrderResponse saveFullOrderToDBFromLiqPayForIF(OrderResponseDto dto, String uuid);
+
+    /**
      * Method validates received payment response.
      * 
      * @param dto {@link PaymentResponseDtoLiqPay}
@@ -314,10 +336,26 @@ public interface UBSClientService {
     FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
 
     /**
+     * Method return link with Fondy payment. Version for Ivano-Frankivsk.
+     *
+     * @param dto - current OrderFondyClientDto dto.
+     * @author Sihovskiy Rostyslav
+     */
+    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto) throws Exception;
+
+    /**
      * Method return link with liqpay payment .
      *
      * @param dto - current OrderLiqpayClientDto dto.
      * @author Max Boiarchuk
      */
     LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
+
+    /**
+     * Method return link with liqpay payment. Version for Ivano-Frankivsk.
+     *
+     * @param dto - current OrderLiqpayClientDto dto.
+     * @author Sikhovskiy Rostyslav
+     */
+    LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
 }
