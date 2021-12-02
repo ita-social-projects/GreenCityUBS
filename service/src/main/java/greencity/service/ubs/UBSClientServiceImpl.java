@@ -823,13 +823,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         address.setUser(user);
         Address savedAddress = addressRepo.save(address);
         User savedUser = userRepository.save(user);
-        createUbsUserBasedUserProfileData(userProfileDto, savedUser, savedAddress);
         AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
-        UBSuser ubSuserByEmailAndUserId =
-            ubsUserRepository.findUBSuserByEmailAndUserId(user.getRecipientEmail(), user.getId());
-        ubsUserRepository.save(ubSuserByEmailAndUserId);
         return mappedUserProfileDto;
     }
 
