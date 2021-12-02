@@ -87,6 +87,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
         Employee employee = modelMapper.map(dto, Employee.class);
+        employee.setEmployeeStatus(dto.getEmployeeStatus());
         if (image != null) {
             if (!employee.getImagePath().equals(defaultImagePath)) {
                 fileService.delete(employee.getImagePath());
