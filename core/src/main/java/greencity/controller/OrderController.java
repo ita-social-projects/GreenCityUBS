@@ -125,6 +125,27 @@ public class OrderController {
     }
 
     /**
+     * Controller saves all entered by user data to database.
+     *
+     * @param userUuid {@link UserVO} id.
+     * @param dto      {@link OrderResponseDto} order data.
+     * @return {@link HttpStatus}.
+     * @author Sihovskiy Rostyslav
+     */
+    @ApiOperation(value = "Process user order.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/processOrderIF")
+    public ResponseEntity<FondyOrderResponse> processOrderForIF(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Valid @RequestBody OrderResponseDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBForIF(dto, userUuid));
+    }
+
+    /**
      * Controller checks if received data is valid and stores payment info if is.
      *
      * @param dto {@link PaymentResponseDto} - response order data.
@@ -141,6 +162,28 @@ public class OrderController {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
             response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller checks if received data is valid and stores payment info if is.
+     * Version for Ivano-Frankivsk.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     * @return {@link HttpStatus} - http status .
+     */
+    @ApiOperation(value = "Receive payment from Fondy.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/receivePaymentIF")
+    public ResponseEntity<HttpStatus> receivePaymentForIF(
+        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        ubsClientService.validatePayment(dto);
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            response.sendRedirect("https://if-132.github.io/GreenCityClient/#/ubs/confirm");
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -368,6 +411,29 @@ public class OrderController {
     }
 
     /**
+     * Controller saves all entered by user data to database from LiqPay. Version
+     * for Ivano-Frankivsk
+     *
+     * @param userUuid {@link UserVO} id.
+     * @param dto      {@link OrderResponseDto} order data.
+     * @return {@link LiqPayOrderResponse}.
+     * @author Sihovskiy Rostyslav
+     */
+    @ApiOperation(value = "Process user order.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/processLiqPayOrderIF")
+    public ResponseEntity<LiqPayOrderResponse> processLiqPayOrderForIF(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @Valid @RequestBody OrderResponseDto dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.saveFullOrderToDBFromLiqPayForIF(dto, userUuid));
+    }
+
+    /**
      * Controller checks if received data is valid and stores payment info if is.
      *
      * @param dto {@link PaymentResponseDtoLiqPay} - response order data.
@@ -384,6 +450,28 @@ public class OrderController {
         ubsClientService.validateLiqPayPayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
             response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller checks if received data is valid and stores payment info if is.
+     * Version for Ivano-Frankivsk
+     *
+     * @param dto {@link PaymentResponseDtoLiqPay} - response order data.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Receive payment.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping(value = "/receiveLiqPayPaymentIF")
+    public ResponseEntity<HttpStatus> receiveLiqPayPaymentForIF(
+        PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
+        ubsClientService.validateLiqPayPayment(dto);
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            response.sendRedirect("https://if-132.github.io/GreenCityClient/#/ubs/confirm");
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
