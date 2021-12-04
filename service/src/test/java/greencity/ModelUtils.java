@@ -274,7 +274,9 @@ public class ModelUtils {
     public static Order getOrderExportDetails() {
         return Order.builder()
             .id(1L)
-            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .deliverFrom(LocalDateTime.of(1997, 12, 4, 15, 40, 24))
+            .dateOfExport(LocalDate.of(1997, 12, 4))
+            .deliverTo(LocalDateTime.of(1990, 12, 11, 19, 30, 30))
             .receivingStation("Petrivka")
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
@@ -315,8 +317,9 @@ public class ModelUtils {
 
     public static ExportDetailsDto getExportDetails() {
         return ExportDetailsDto.builder()
-            .exportedDate("30-06-2012")
-            .exportedTime("14:15:12")
+            .dateExport("1997-12-04T15:40:24")
+            .timeDeliveryFrom("1997-12-04T15:40:24")
+            .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStation("Petrivka")
             .allReceivingStations(List.of("a", "b"))
             .build();
@@ -324,8 +327,9 @@ public class ModelUtils {
 
     public static ExportDetailsDtoUpdate getExportDetailsRequest() {
         return ExportDetailsDtoUpdate.builder()
-            .exportedDate("30-06-2012")
-            .exportedTime("14:15:12")
+            .dateExport("1997-12-04T15:40:24")
+            .timeDeliveryFrom("1997-12-04T15:40:24")
+            .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStation("Petrivka")
             .build();
     }
@@ -1964,8 +1968,9 @@ public class ModelUtils {
                     .build()))
             .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
                 .builder()
-                .exportedDate("20-12-2001")
-                .exportedTime("20:20:20")
+                .dateExport("1997-12-04T15:40:24")
+                .timeDeliveryFrom("1997-12-04T15:40:24")
+                .timeDeliveryTo("1990-12-11T19:30:30")
                 .receivingStation(String.valueOf(ReceivingStation
                     .builder()
                     .id(1L)
