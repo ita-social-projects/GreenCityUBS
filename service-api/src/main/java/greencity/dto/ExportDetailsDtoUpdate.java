@@ -8,7 +8,8 @@ import lombok.*;
 @Setter
 @Builder
 public class ExportDetailsDtoUpdate {
-    String exportedDate;
-    String exportedTime;
+    String dateExport;
+    String timeDeliveryFrom;
+    String timeDeliveryTo;
     String receivingStation;
 }

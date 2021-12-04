@@ -119,11 +119,17 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyCourierItineraryFormed(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder().key("date")
-            .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))).build());
+            .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))
+                : null)
+            .build());
         parameters.add(NotificationParameter.builder().key("startTime")
-            .value(order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
+            .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))
+                : null)
+            .build());
         parameters.add(NotificationParameter.builder().key("endTime")
-            .value(order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm"))).build());
+            .value(
+                order.getDeliverTo() != null ? order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm")) : null)
+            .build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
             .value("+380638175035, +380931038987").build());
         UserNotification userNotification = new UserNotification();
