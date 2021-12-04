@@ -672,16 +672,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(dtoUpdate.getId())
+        Order order = orderRepository.findById(dtoUpdate.getOrderId())
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getId());
+        Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
             addressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
             eventService.save(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
-            throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getId());
+            throw new NotFoundOrderAddressException(NOT_FOUND_ADDRESS_BY_ORDER_ID + dtoUpdate.getAddressId());
         }
     }
 
