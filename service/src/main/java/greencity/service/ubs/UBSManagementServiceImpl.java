@@ -1297,15 +1297,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (receivingStation.isEmpty()) {
             throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
         }
-        String str = dto.getExportedDate() + " " + dto.getExportedTime();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
-        final String receivingStationValue = order.getReceivingStation();
-        final LocalDateTime deliverFrom = order.getDeliverFrom();
-        order.setDeliverFrom(dateTime);
-        order.setReceivingStation(dto.getReceivingStation());
-        orderRepository.save(order);
-        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
+        if (dto != null) {
+            String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
+            String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
+            String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
+            if (dateExport != null) {
+                String[] date = dateExport.split("T");
+                order.setDateOfExport(LocalDate.parse(date[0]));
+            }
+            if (timeDeliveryFrom != null) {
+                LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
+                order.setDeliverFrom(dateTime);
+            }
+            if (timeDeliveryTo != null) {
+                LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
+                order.setDeliverTo(dateAndTimeDeliveryTo);
+            }
+            order.setReceivingStation(dto.getReceivingStation());
+            orderRepository.save(order);
+            final String receivingStationValue = order.getReceivingStation();
+            final LocalDateTime deliverFrom = order.getDeliverFrom();
+            collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
+        }
         return buildExportDto(order, receivingStation);
     }
 
@@ -1329,16 +1342,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStation) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String date =
-            order.getDeliverFrom() == null ? "" : order.getDeliverFrom().toLocalDate().format(formatter);
-        String time =
-            order.getDeliverFrom() == null ? "" : order.getDeliverFrom().toLocalTime().format(formatter2);
         return ExportDetailsDto.builder()
             .allReceivingStations(receivingStation.stream().map(ReceivingStation::getName).collect(Collectors.toList()))
-            .exportedDate(date)
-            .exportedTime(time)
+            .dateExport(order.getDateOfExport() != null && order.getDeliverFrom() != null ? order.getDateOfExport()
+                + "T" + order.getDeliverFrom().toLocalTime() : null)
+            .timeDeliveryFrom(order.getDeliverFrom() != null ? order.getDeliverFrom().toString() : null)
+            .timeDeliveryTo(order.getDeliverTo() != null ? order.getDeliverTo().toString() : null)
             .receivingStation(order.getReceivingStation())
             .build();
     }

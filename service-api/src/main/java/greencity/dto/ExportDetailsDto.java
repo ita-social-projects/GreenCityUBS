@@ -11,8 +11,9 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(exclude = {"allReceivingStations"})
 public class ExportDetailsDto {
-    String exportedDate;
-    String exportedTime;
+    String dateExport;
+    String timeDeliveryFrom;
+    String timeDeliveryTo;
     String receivingStation;
     List<String> allReceivingStations;
 }
