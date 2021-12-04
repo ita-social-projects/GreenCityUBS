@@ -1163,7 +1163,8 @@ public class ModelUtils {
 
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
-            .id(1L)
+            .addressId(1L)
+            .orderId(1L)
             .addressHouseNumber("1")
             .addressEntranceNumber("3")
             .addressDistrict("Syhiv")
@@ -1947,7 +1948,8 @@ public class ModelUtils {
                 .build())
             .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .id(1L)
+                .addressId(1L)
+                .orderId(1L)
                 .addressDistrict("aaaaaaa")
                 .addressStreet("aaaaa")
                 .addressEntranceNumber("12")
