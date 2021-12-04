@@ -489,7 +489,7 @@ public class ModelUtils {
                 .build())
             .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .id(1L)
+                .addressId(1L)
                 .addressDistrict("aaaaaaa")
                 .addressStreet("aaaaa")
                 .addressEntranceNumber("12")
