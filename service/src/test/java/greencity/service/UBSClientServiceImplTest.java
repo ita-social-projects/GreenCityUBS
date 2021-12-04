@@ -420,6 +420,7 @@ class UBSClientServiceImplTest {
     @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
         UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
+        expectedResult.setRecipientId(1L);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
@@ -437,7 +438,7 @@ class UBSClientServiceImplTest {
     void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .id(1l)
+            .recipientId(1l)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
@@ -452,8 +453,9 @@ class UBSClientServiceImplTest {
     void updatesUbsUserInfoInOrder() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .id(1l)
-            .recipientName("Anatolii Petyrov")
+            .recipientId(1l)
+            .recipientName("Anatolii")
+            .recipientSurName("Anatolii")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
 
@@ -462,7 +464,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.save(user.get())).thenReturn(user.get());
 
         UbsCustomersDto expected = UbsCustomersDto.builder()
-            .name("Anatolii Petyrov")
+            .name("Anatolii Anatolii")
             .email("anatolii.andr@gmail.com")
             .phoneNumber("095123456")
             .build();
@@ -486,23 +488,12 @@ class UBSClientServiceImplTest {
                 .recipientPhone(user.getRecipientPhone())
                 .build();
 
-        UBSuser ubSuser = new UBSuser(address, user, new ArrayList<>(), 1L, user.getRecipientName(),
-            user.getRecipientSurname(), user.getRecipientPhone(), user.getRecipientEmail());
-
-        Optional<UBSuser> optionalUBSuser = Optional.of(ubSuser);
-
-        PersonalDataDto dto = PersonalDataDto.builder().email(ubSuser.getEmail()).firstName(ubSuser.getFirstName())
-            .lastName(ubSuser.getLastName()).phoneNumber(ubSuser.getPhoneNumber()).id(1L).build();
-
-        lenient().when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
+        when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
         when(userRepository.save(user)).thenReturn(user);
         when(addressRepository.save(address)).thenReturn(address);
-        lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
-        lenient().when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(ubsUserRepository.findByEmail("someUser@gmail.com")).thenReturn(optionalUBSuser);
-        lenient().when(ubsUserRepository.findById(any())).thenReturn(optionalUBSuser);
-        lenient().when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubSuser);
-        lenient().when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);

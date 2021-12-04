@@ -14,6 +14,7 @@ public class UserInfoDto {
     private String customerSurName;
     private String customerPhoneNumber;
     private String customerEmail;
+    private Long recipientId;
     private String recipientName;
     private String recipientSurName;
     private String recipientPhoneNumber;

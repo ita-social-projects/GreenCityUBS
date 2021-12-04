@@ -37,7 +37,8 @@ public class ModelUtils {
     public static final Order TEST_ORDER = createOrder();
     public static final Address TEST_ADDRESS = createAddress2();
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
-    public static final OrderAddressDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE = createOrderAddressDtoUpdate();
+    public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
+        createOrderAddressDtoUpdate();
     public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
@@ -273,7 +274,9 @@ public class ModelUtils {
     public static Order getOrderExportDetails() {
         return Order.builder()
             .id(1L)
-            .deliverFrom(LocalDateTime.of(2012, 6, 30, 14, 15, 12))
+            .deliverFrom(LocalDateTime.of(1997, 12, 4, 15, 40, 24))
+            .dateOfExport(LocalDate.of(1997, 12, 4))
+            .deliverTo(LocalDateTime.of(1990, 12, 11, 19, 30, 30))
             .receivingStation("Petrivka")
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
@@ -314,17 +317,19 @@ public class ModelUtils {
 
     public static ExportDetailsDto getExportDetails() {
         return ExportDetailsDto.builder()
-            .exportedDate("30-06-2012")
-            .exportedTime("14:15:12")
+            .dateExport("1997-12-04T15:40:24")
+            .timeDeliveryFrom("1997-12-04T15:40:24")
+            .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStation("Petrivka")
             .allReceivingStations(List.of("a", "b"))
             .build();
     }
 
-    public static ExportDetailsDtoRequest getExportDetailsRequest() {
-        return ExportDetailsDtoRequest.builder()
-            .exportedDate("30-06-2012")
-            .exportedTime("14:15:12")
+    public static ExportDetailsDtoUpdate getExportDetailsRequest() {
+        return ExportDetailsDtoUpdate.builder()
+            .dateExport("1997-12-04T15:40:24")
+            .timeDeliveryFrom("1997-12-04T15:40:24")
+            .timeDeliveryTo("1990-12-11T19:30:30")
             .receivingStation("Petrivka")
             .build();
     }
@@ -822,7 +827,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .id(1L)
+            .recipientId(1L)
             .recipientName("Anatolii Petyrov")
             .recipientEmail("anatolii.andr@gmail.com")
             .recipientPhoneNumber("095123456").build();
@@ -1087,7 +1092,7 @@ public class ModelUtils {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
             .orderComment("all good")
-            .paymentStatus("PAID").build();
+            .orderPaymentStatus("PAID").build();
     }
 
     public static OrderDetailStatusDto getTestOrderDetailStatusDto() {
@@ -1156,14 +1161,15 @@ public class ModelUtils {
             .build();
     }
 
-    private static OrderAddressDtoUpdate createOrderAddressDtoUpdate() {
-        return OrderAddressDtoUpdate.builder()
-            .id(1L)
-            .houseNumber("1")
-            .entranceNumber("3")
-            .district("Syhiv")
-            .street("Stys")
-            .houseCorpus("2")
+    private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
+        return OrderAddressExportDetailsDtoUpdate.builder()
+            .addressId(1L)
+            .orderId(1L)
+            .addressHouseNumber("1")
+            .addressEntranceNumber("3")
+            .addressDistrict("Syhiv")
+            .addressStreet("Stys")
+            .addressHouseCorpus("2")
             .build();
     }
 
@@ -1922,6 +1928,56 @@ public class ModelUtils {
             .builder()
             .orderId(1l)
             .sum(1)
+            .build();
+    }
+
+    public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
+        return UpdateOrderPageAdminDto.builder()
+            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
+                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
+                .orderComment("aaa")
+                .build())
+            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+                .builder()
+                .recipientId(2L)
+                .recipientName("aaaaa")
+                .recipientPhoneNumber("085555")
+                .recipientEmail("yura@333gmail.com")
+                .build())
+            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
+                .builder()
+                .addressId(1L)
+                .orderId(1L)
+                .addressDistrict("aaaaaaa")
+                .addressStreet("aaaaa")
+                .addressEntranceNumber("12")
+                .addressHouseCorpus("123")
+                .addressHouseNumber("121")
+                .addressCity("dsfsdf")
+                .addressRegion("sdfsdfsd")
+                .build())
+            .ecoNumberFromShop(List.of(EcoNumberDto
+                .builder()
+                .newEcoNumber("1")
+                .oldEcoNumber("2")
+                .build(),
+                EcoNumberDto
+                    .builder()
+                    .newEcoNumber("1")
+                    .oldEcoNumber("2")
+                    .build()))
+            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport("1997-12-04T15:40:24")
+                .timeDeliveryFrom("1997-12-04T15:40:24")
+                .timeDeliveryTo("1990-12-11T19:30:30")
+                .receivingStation(String.valueOf(ReceivingStation
+                    .builder()
+                    .id(1L)
+                    .build()))
+                .build())
             .build();
     }
 }
