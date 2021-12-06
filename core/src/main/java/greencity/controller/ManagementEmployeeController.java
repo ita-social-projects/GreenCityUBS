@@ -4,19 +4,20 @@ import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.*;
+import greencity.filters.EmployeeFilterCriteria;
+import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -72,8 +73,9 @@ public class ManagementEmployeeController {
     })
     @ApiPageable
     @GetMapping("/getAll-employees")
-    public ResponseEntity<PageableAdvancedDto<EmployeeDto>> getAllEmployees(@ApiIgnore Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(pageable));
+    public ResponseEntity<Page<EmployeeDto>> getAllEmployees(EmployeePage employeePage,
+                                                             EmployeeFilterCriteria employeeFilterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(employeePage, employeeFilterCriteria));
     }
 
     /**
