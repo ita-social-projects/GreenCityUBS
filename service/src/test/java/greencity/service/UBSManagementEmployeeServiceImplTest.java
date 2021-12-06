@@ -55,6 +55,7 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
     private EmployeeCriteriaRepository employeeCriteriaRepository;
+
     @Test
     void saveEmployee() {
         Employee employee = getEmployee();
@@ -116,12 +117,12 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeePage employeePage = new EmployeePage();
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
-                Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-                .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1l));
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1l));
         employeeService.findAll(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
-                .findAll(employeePage, employeeFilterCriteria);
+            .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test

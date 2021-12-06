@@ -74,7 +74,7 @@ public class ManagementEmployeeController {
     @ApiPageable
     @GetMapping("/getAll-employees")
     public ResponseEntity<Page<EmployeeDto>> getAllEmployees(EmployeePage employeePage,
-                                                             EmployeeFilterCriteria employeeFilterCriteria) {
+        EmployeeFilterCriteria employeeFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(employeePage, employeeFilterCriteria));
     }
 
