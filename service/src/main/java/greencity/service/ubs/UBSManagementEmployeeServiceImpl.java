@@ -270,21 +270,4 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return stations.stream()
             .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
     }
-
-    private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {
-        List<EmployeeDto> employeeDtos = employeePage.stream()
-            .map(employee -> modelMapper.map(employee, EmployeeDto.class))
-            .collect(Collectors.toList());
-
-        return new PageableAdvancedDto<>(
-            employeeDtos,
-            employeePage.getTotalElements(),
-            employeePage.getPageable().getPageNumber(),
-            employeePage.getTotalPages(),
-            employeePage.getNumber(),
-            employeePage.hasPrevious(),
-            employeePage.hasNext(),
-            employeePage.isFirst(),
-            employeePage.isLast());
-    }
 }
