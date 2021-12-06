@@ -8,6 +8,9 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
+import greencity.filters.EmployeeFilterCriteria;
+import greencity.filters.EmployeePage;
+import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
@@ -15,7 +18,7 @@ import greencity.service.PhoneNumberFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +36,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ModelMapper modelMapper;
     private final PhoneNumberFormatterService phoneFormatter;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    private final EmployeeCriteriaRepository employeeCriteriaRepository;
 
     /**
      * {@inheritDoc}
@@ -62,8 +66,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public PageableAdvancedDto<EmployeeDto> findAll(Pageable pageable) {
-        return buildPageableAdvancedDto(employeeRepository.findAll(pageable));
+    public Page<EmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
+        Page<Employee> employees = employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria);
+        List<EmployeeDto> employeeDtos = employees.stream()
+            .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
+        return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
     }
 
     /**
@@ -263,22 +270,5 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private boolean existReceivingStation(List<ReceivingStationDto> stations) {
         return stations.stream()
             .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
-    }
-
-    private PageableAdvancedDto<EmployeeDto> buildPageableAdvancedDto(Page<Employee> employeePage) {
-        List<EmployeeDto> employeeDtos = employeePage.stream()
-            .map(employee -> modelMapper.map(employee, EmployeeDto.class))
-            .collect(Collectors.toList());
-
-        return new PageableAdvancedDto<>(
-            employeeDtos,
-            employeePage.getTotalElements(),
-            employeePage.getPageable().getPageNumber(),
-            employeePage.getTotalPages(),
-            employeePage.getNumber(),
-            employeePage.hasPrevious(),
-            employeePage.hasNext(),
-            employeePage.isFirst(),
-            employeePage.isLast());
     }
 }
