@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
@@ -70,14 +69,14 @@ public class EmployeeCriteriaRepository {
     private Predicate getPredicate(EmployeeFilterCriteria employeeFilterCriteria,
         Root<Employee> employeeRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        if (nonNullAndSize(employeeFilterCriteria.getReceivingStations())) {
+        if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getReceivingStations()))) {
             CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(
                 employeeRoot.get("receivingStation").get("name")));
             Arrays.stream(employeeFilterCriteria.getReceivingStations()).map(String::toUpperCase)
                 .forEach(stringIn::value);
             predicates.add(stringIn);
         }
-        if (nonNullAndSize(employeeFilterCriteria.getEmployeePositions())) {
+        if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getEmployeePositions()))) {
             CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(
                 employeeRoot.get("employeePosition").get("name")));
             Arrays.stream(employeeFilterCriteria.getEmployeePositions()).map(String::toUpperCase)
