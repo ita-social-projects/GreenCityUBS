@@ -7,6 +7,7 @@ import greencity.entity.enums.SortingOrder;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
+import greencity.service.ubs.UserViolationsService;
 import greencity.service.ubs.ValuesForUserTableService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,21 +28,25 @@ public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
+    private final UserViolationsService userViolationsService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
-        ValuesForUserTableService valuesForUserTable, OrdersForUserService ordersForUserService) {
+        ValuesForUserTableService valuesForUserTable,
+        OrdersForUserService ordersForUserService,
+        UserViolationsService userViolationsService) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
         this.ordersForUserService = ordersForUserService;
+        this.userViolationsService = userViolationsService;
     }
 
     /**
      * Controller for obtaining all users that made at least one order.
-     * 
+     *
      * @param columnName   {@link String}
      * @param sortingOrder {@link SortingOrder}
      * @author Stepan Tehlivets.
@@ -156,5 +161,25 @@ public class AdminUbsController {
         @RequestParam SortingOrder sortingType, @RequestParam String column) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ordersForUserService.getAllOrders(page, userId, sortingType, column));
+    }
+
+    /**
+     * Controller for obtaining all violations by user.
+     *
+     * @param userId {@link Long}
+     * @author Roman Sulymka.
+     */
+    @ApiOperation("Get users for the table")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/{userId}/violationsAll")
+    public ResponseEntity<UserWithViolationsDto> getAllViolationsByUser(
+        @PathVariable Long userId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(userViolationsService.getAllViolations(userId));
     }
 }
