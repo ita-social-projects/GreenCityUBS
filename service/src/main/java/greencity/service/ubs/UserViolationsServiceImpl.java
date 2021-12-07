@@ -9,7 +9,6 @@ import greencity.repository.ViolationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,7 @@ public class UserViolationsServiceImpl implements UserViolationsService {
     public UserWithViolationsDto getAllViolations(Long userId) {
         String username = getUsername(userId).getFirstName() + " " + getUsername(userId).getLastName();
         Long numberOfViolations = violationRepository.getNumberOfViolationsByUser(userId);
-        List<UserViolationsDto> userViolationsList = new ArrayList<>();
+        List<UserViolationsDto> userViolationsList;
         userViolationsList = violationRepository
             .getAllViolationsByUserId(userId)
             .stream()
