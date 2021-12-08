@@ -434,17 +434,6 @@ class ManagementOrderControllerTest {
     }
 
     @Test
-    void updatePageAdminInfoTest() throws Exception {
-        UpdateOrderPageAdminDto updateOrderPageAdminDto = ModelUtils.updateOrderPageAdminDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String dtoJSON = objectMapper.writeValueAsString(updateOrderPageAdminDto);
-        mockMvc.perform(patch(ubsLink + "/update-order-page-admin-info/{id}", 1L)
-            .content(dtoJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
     void getOrders() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1"))
             .andExpect(status().isOk());
