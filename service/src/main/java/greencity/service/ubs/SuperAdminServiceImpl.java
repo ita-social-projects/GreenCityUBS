@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
@@ -33,6 +34,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final LocationTranslationRepository locationTranslationRepository;
     private final CourierRepository courierRepository;
     private final CourierTranslationRepository courierTranslationRepository;
+    private final CourierLocationRepository courierLocationRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -290,21 +292,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public CreateCourierDto createCourier(CreateCourierDto dto) {
         Courier courier = createCourierWithTranslation(dto);
+        courier.setCourierStatus(CourierStatus.ACTIVE);
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
+        courierLocationRepository.saveAll(courier.getCourierLocations());
         return modelMapper.map(courier, CreateCourierDto.class);
     }
 
     private Courier createCourierWithTranslation(CreateCourierDto dto) {
-        Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
-            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         Courier courier = Courier.builder()
-            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-            .location(location)
-            .maxAmountOfBigBags(dto.getMaxAmountOfBigBags())
-            .minAmountOfBigBags(dto.getMinAmountOfBigBags())
-            .maxPriceOfOrder(dto.getMaxPriceOfOrder())
-            .minPriceOfOrder(dto.getMinPriceOfOrder())
             .courierTranslationList(dto.getCreateCourierTranslationDtos().stream()
                 .map(courierTranslationDtos -> CourierTranslation.builder()
                     .language(languageRepository.findById(courierTranslationDtos.getLanguageId()).orElseThrow(
@@ -314,57 +310,58 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                     .limitDescription(courierTranslationDtos.getLimitDescription())
                     .build())
                 .collect(Collectors.toList()))
+            .courierLocations(dto.getCreateCourierLimitsDto().stream().map(i -> CourierLocations.builder()
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .maxAmountOfBigBags(i.getMaxAmountOfBigBags())
+                .minAmountOfBigBags(i.getMinAmountOfBigBags())
+                .maxPriceOfOrder(i.getMaxPriceOfOrder())
+                .minPriceOfOrder(i.getMinPriceOfOrder())
+                .location(locationRepository.findById(i.getLocationId())
+                    .orElseThrow(() -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND)))
+                .build()).collect(Collectors.toList()))
             .build();
         courier.getCourierTranslationList().forEach(courierTranslation -> courierTranslation.setCourier(courier));
+        courier.getCourierLocations().forEach(courierLocations -> {
+            courierLocations.setCourier(courier);
+        });
         return courier;
     }
 
     @Override
-    public List<GetCourierTranslationsDto> getAllCouriers() {
-        return courierTranslationRepository.findAll()
+    public List<GetCourierLocationDto> getAllCouriers() {
+        return courierLocationRepository.findAllInfoAboutCourier()
             .stream()
-            .map(this::getAllCouriers)
+            .map(i -> modelMapper.map(i, GetCourierLocationDto.class))
             .collect(Collectors.toList());
     }
 
     private GetCourierTranslationsDto getAllCouriers(CourierTranslation courierTranslation) {
-        return GetCourierTranslationsDto.builder().id(courierTranslation.getCourier().getId())
+        return GetCourierTranslationsDto.builder()
+            .id(courierTranslation.getCourier().getId())
             .languageCode(courierTranslation.getLanguage().getCode())
-            .courierLimit(courierTranslation.getCourier().getCourierLimit().toString())
-            .locationId(courierTranslation.getCourier().getLocation().getId())
-            .maxAmountOfBigBags(courierTranslation.getCourier().getMaxAmountOfBigBags())
-            .minAmountOfBigBags(courierTranslation.getCourier().getMinAmountOfBigBags())
-            .maxPriceOfOrder(courierTranslation.getCourier().getMaxPriceOfOrder())
-            .minPriceOfOrder(courierTranslation.getCourier().getMinPriceOfOrder())
             .name(courierTranslation.getName())
             .limitDescription(courierTranslation.getLimitDescription())
             .build();
     }
 
     @Override
-    public GetCourierTranslationsDto setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto) {
-        Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
-        courier.setMinPriceOfOrder(dto.getMinPriceOfOrder());
-        courier.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
-        courier.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
-        courierRepository.save(courier);
-        return getAllCouriers(courierTranslation);
+    public void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto) {
+        CourierLocations courierLocations =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(id, dto.getLocationId());
+        courierLocations.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        courierLocations.setMinPriceOfOrder(dto.getMinPriceOfOrder());
+        courierLocations.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
+        courierLocationRepository.save(courierLocations);
     }
 
     @Override
-    public GetCourierTranslationsDto setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto) {
-        Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
-        courier.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
-        courier.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
-        courier.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
-        courierRepository.save(courier);
-        CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
-        return getAllCouriers(courierTranslation);
+    public void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto) {
+        CourierLocations courierLocations =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(id, dto.getLocationId());
+        courierLocations.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        courierLocations.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
+        courierLocations.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
+        courierLocationRepository.save(courierLocations);
     }
 
     @Override
@@ -409,22 +406,23 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Bag bag = bagRepository.findById(dto.getBagId()).orElseThrow(
             () -> new CourierNotFoundException(ErrorMessage.BAG_NOT_FOUND));
         bag.setMinAmountOfBags(dto.getMinimalAmountOfBagStatus());
-        Courier courier = courierRepository.findById(dto.getCourierId()).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
+        CourierLocations courierLocations = courierLocationRepository
+            .findCourierLocationsLimitsByCourierIdAndLocationId(dto.getCourierId(), dto.getLocationId());
         final CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, dto.getLanguageId());
+            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courierLocations.getCourier(),
+                dto.getLanguageId());
         final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
             () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
-        courier.setCourierLimit(dto.getCourierLimitsBy());
-        courier.setMinPriceOfOrder(dto.getMinAmountOfOrder());
-        courier.setMaxPriceOfOrder(dto.getMaxAmountOfOrder());
-        courier.setMinAmountOfBigBags(dto.getMinAmountOfBigBag());
-        courier.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBag());
+        courierLocations.setCourierLimit(dto.getCourierLimitsBy());
+        courierLocations.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBag());
+        courierLocations.setMinAmountOfBigBags(dto.getMinAmountOfBigBag());
+        courierLocations.setMinPriceOfOrder(dto.getMinAmountOfOrder());
+        courierLocations.setMaxPriceOfOrder(dto.getMaxAmountOfOrder());
         courierTranslation.setLanguage(language);
         courierTranslation.setLimitDescription(dto.getLimitDescription());
         bagRepository.save(bag);
-        courierRepository.save(courier);
         courierTranslationRepository.save(courierTranslation);
+        courierLocationRepository.save(courierLocations);
         return dto;
     }
 }

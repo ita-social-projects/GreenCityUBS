@@ -277,7 +277,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/getCouriers")
-    public ResponseEntity<List<GetCourierTranslationsDto>> getAllCouriers() {
+    public ResponseEntity<List<GetCourierLocationDto>> getAllCouriers() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
     }
 
@@ -286,7 +286,6 @@ class SuperAdminController {
      *
      * @param id  - id of courier.
      * @param dto {@link EditPriceOfOrder} - entered info about new Price.
-     * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Set limit by amount of sum")
@@ -295,9 +294,10 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PatchMapping("/setAmountOfSum/{id}")
-    public ResponseEntity<GetCourierTranslationsDto> setAmountOfBag(
+    public ResponseEntity<HttpStatuses> setAmountOfBag(
         @PathVariable Long id, @RequestBody EditPriceOfOrder dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitBySumOfOrder(id, dto));
+        superAdminService.setCourierLimitBySumOfOrder(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -312,9 +312,10 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @PatchMapping("/setAmountOfBag/{id}")
-    public ResponseEntity<GetCourierTranslationsDto> setAmountOfSum(
+    public ResponseEntity<HttpStatus> setAmountOfSum(
         @PathVariable Long id, @RequestBody EditAmountOfBagDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.setCourierLimitByAmountOfBag(id, dto));
+        superAdminService.setCourierLimitByAmountOfBag(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

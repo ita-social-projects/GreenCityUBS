@@ -648,7 +648,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({NotEnoughBagsException.class})
-    public final ResponseEntity<Object> handleUpdateAdminInfoException(NotEnoughBagsException ex,
+    public final ResponseEntity<Object> handleNotEnoughBagsException(NotEnoughBagsException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
@@ -664,7 +664,23 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({SumOfOrderException.class})
-    public final ResponseEntity<Object> handleUpdateAdminInfoException(SumOfOrderException ex,
+    public final ResponseEntity<Object> handleSumOfOrderException(SumOfOrderException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Method interceptor exception {@link CourierLocationException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({CourierLocationException.class})
+    public final ResponseEntity<Object> handleCourierLocationException(CourierLocationException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);

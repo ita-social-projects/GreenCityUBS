@@ -85,6 +85,7 @@ public final class ErrorMessage {
         "The price of you're order without discount is greater than allowable limit: ";
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =
         "The price of you're order without discount is lower than allowable limit: ";
+    public static final String COURIER_LOCATION_DATA_IS_NOT_VALID = "Entered data is not valid";
 
     /**
      * Constructor.

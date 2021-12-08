@@ -358,4 +358,6 @@ public interface UBSClientService {
      * @author Sikhovskiy Rostyslav
      */
     LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
+
+    List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId);
 }

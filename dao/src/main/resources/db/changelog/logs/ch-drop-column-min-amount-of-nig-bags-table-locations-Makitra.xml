@@ -5,5 +5,43 @@
     <changeSet id="Makitra-10" author="Vadym Makitra">
         <dropColumn tableName="locations" columnName="min_amount_of_big_bags"/>
         <dropColumn tableName="service" columnName="location_id"/>
+        <dropColumn tableName="courier" columnName="location_id"/>
+        <dropColumn tableName="courier" columnName="min_amount_of_big_bags"/>
+        <dropColumn tableName="courier" columnName="max_amount_of_big_bags"/>
+        <dropColumn tableName="courier" columnName="min_price_of_order"/>
+        <dropColumn tableName="courier" columnName="max_price_of_order"/>
+        <dropColumn tableName="courier" columnName="courier_limits"/>
+        <createTable tableName="courier_locations">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_amount_of_big_bags" type="BIGINT"/>
+            <column name="max_amount_of_big_bags" type="BIGINT"/>
+            <column name="min_price_of_order" type="BIGINT"/>
+            <column name="max_price_of_order" type="BIGINT"/>
+            <column name="courier_limits" type="varchar" defaultValue="LIMIT_BY_AMOUNT_OF_BAG"/>
+        </createTable>
+        <addColumn tableName="courier">
+            <column name="courier_status" type="varchar" defaultValue="ACTIVE">
+                <constraints  nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="courier_locations"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_courier_locations_to_location_id"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="courier_locations"
+                                 baseColumnNames="courier_id"
+                                 constraintName="fk_courier_locations_to_courier_id"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="courier_locations" columnNames="courier_id,location_id" constraintName="uk_courier_and_location"/>
     </changeSet>
 </databaseChangeLog>

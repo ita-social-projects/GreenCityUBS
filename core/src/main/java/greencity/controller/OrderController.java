@@ -509,4 +509,18 @@ public class OrderController {
         @Valid @PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPaymentResponseFromFondy(orderId));
     }
+
+    @ApiOperation(value = "Get all location where courier is working")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierLocationDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping(value = "/getCourierLocation/{courierId}")
+    public ResponseEntity<List<GetCourierLocationDto>> getCourierLocations(
+        @PathVariable Long courierId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getCourierLocationByCourierIdAndLanguageCode(courierId));
+    }
 }

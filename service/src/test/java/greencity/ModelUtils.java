@@ -1655,19 +1655,16 @@ public class ModelUtils {
 
     public static Courier getCourier(CourierLimit courierLimit) {
         return Courier.builder()
-            .location(getLocation())
-            .courierLimit(courierLimit)
+//            .courierLimit(courierLimit)
             .courierTranslationList(getCourierTranslations())
-            .minAmountOfBigBags(2L)
-            .maxAmountOfBigBags(300L)
+//            .minAmountOfBigBags(2L)
+//            .maxAmountOfBigBags(300L)
             .build();
     }
 
     public static Courier getCourier() {
         return Courier.builder()
-            .location(getLocation())
-            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-            .location(getLocation())
+//            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .courierTranslationList(getCourierTranslations())
             .build();
     }
@@ -1785,10 +1782,9 @@ public class ModelUtils {
                 .id(1L)
                 .courier(Courier.builder()
                     .id(1L)
-                    .location(getLocation())
-                    .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-                    .minAmountOfBigBags(2L)
-                    .maxAmountOfBigBags(999L)
+//                    .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+//                    .minAmountOfBigBags(2L)
+//                    .maxAmountOfBigBags(999L)
                     .build())
                 .build())
             .name("Test")
@@ -1799,7 +1795,7 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .locationId(1L)
+            /* .locationId(1L) */
             .createCourierTranslationDtos(getCreateCourierTranslationDto())
             .build();
     }
