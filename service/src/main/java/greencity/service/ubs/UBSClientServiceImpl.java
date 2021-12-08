@@ -21,6 +21,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import java.lang.reflect.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -837,12 +839,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
-        AddressDto addressDto = userProfileDto.getAddressDto();
+        List<AddressDto> addressDto = userProfileDto.getAddressDto();
         Address address = modelMapper.map(addressDto, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepo.save(address);
         User savedUser = userRepository.save(user);
-        AddressDto mapperAddressDto = modelMapper.map(savedAddress, AddressDto.class);
+        Type savedAddressDtoList = new TypeToken<List<AddressDto>>() {
+        }.getType();
+        List<AddressDto> mapperAddressDto = modelMapper.map(savedAddress, savedAddressDtoList);
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
         return mappedUserProfileDto;
@@ -855,7 +859,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         for (Address address : allAddress) {
-            AddressDto addressDto = modelMapper.map(address, AddressDto.class);
+            List<AddressDto> addressDto =
+                allAddress.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
             setAddressData(address, addressDto);
             userProfileDto.setAddressDto(addressDto);
         }
@@ -871,13 +876,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         return user;
     }
 
-    private Address setAddressData(Address address, AddressDto addressDto) {
-        address.setCity(addressDto.getCity());
-        address.setStreet(addressDto.getStreet());
-        address.setDistrict(addressDto.getDistrict());
-        address.setHouseNumber(addressDto.getHouseNumber());
-        address.setEntranceNumber(addressDto.getEntranceNumber());
-        address.setHouseCorpus(addressDto.getHouseCorpus());
+    private Address setAddressData(Address address, List<AddressDto> addressDto) {
+        List<String> city = addressDto.stream().map(AddressDto::getCity).collect(Collectors.toList());
+        List<String> street = addressDto.stream().map(AddressDto::getStreet).collect(Collectors.toList());
+        List<String> district = addressDto.stream().map(AddressDto::getDistrict).collect(Collectors.toList());
+        List<String> houseNumber = addressDto.stream().map(AddressDto::getHouseNumber).collect(Collectors.toList());
+        List<String> entranceNumber =
+            addressDto.stream().map(AddressDto::getEntranceNumber).collect(Collectors.toList());
+        List<String> houseCorpus = addressDto.stream().map(AddressDto::getHouseCorpus).collect(Collectors.toList());
+        address.setCity(String.valueOf(city));
+        address.setStreet(String.valueOf(street));
+        address.setDistrict(String.valueOf(district));
+        address.setHouseNumber(String.valueOf(houseNumber));
+        address.setEntranceNumber(String.valueOf(entranceNumber));
+        address.setHouseCorpus(String.valueOf(houseCorpus));
 
         return address;
     }

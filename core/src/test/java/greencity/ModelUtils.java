@@ -2,6 +2,7 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -14,6 +15,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 
@@ -83,8 +85,9 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddressDto addressDto() {
-        return AddressDto.builder()
+    public static List<AddressDto> addressDto() {
+        List<AddressDto> list = new ArrayList<>();
+        list.add(AddressDto.builder()
             .id(1L)
             .entranceNumber("7a")
             .houseCorpus("2")
@@ -94,7 +97,18 @@ public class ModelUtils {
             .district("Zaliznuchnuy")
             .city("Lviv")
             .actual(false)
-            .build();
+            .build());
+        list.add(AddressDto.builder().id(2L)
+            .entranceNumber("9a")
+            .houseCorpus("2")
+            .houseNumber("7")
+            .street("Shevchenka")
+            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .district("Zaliznuchnuy")
+            .city("Lviv")
+            .actual(false)
+            .build());
+        return list;
     }
 
     public static UserProfileDto userProfileDto() {
@@ -279,16 +293,26 @@ public class ModelUtils {
     }
 
     public static Address address() {
+        List<Long> id = addressDto().stream().map(AddressDto::getId).collect(Collectors.toList());
+        List<String> city = addressDto().stream().map(AddressDto::getCity).collect(Collectors.toList());
+        List<String> street = addressDto().stream().map(AddressDto::getStreet).collect(Collectors.toList());
+        List<String> district = addressDto().stream().map(AddressDto::getDistrict).collect(Collectors.toList());
+        List<String> houseNumber = addressDto().stream().map(AddressDto::getHouseNumber).collect(Collectors.toList());
+        List<String> entranceNumber =
+            addressDto().stream().map(AddressDto::getEntranceNumber).collect(Collectors.toList());
+        List<String> houseCorpus = addressDto().stream().map(AddressDto::getHouseCorpus).collect(Collectors.toList());
+        List<Boolean> actual = addressDto().stream().map(AddressDto::getActual).collect(Collectors.toList());
         return Address.builder()
-            .id(addressDto().getId())
-            .city(addressDto().getCity())
-            .district(addressDto().getDistrict())
-            .street(addressDto().getStreet())
-            .coordinates(addressDto().getCoordinates())
-            .entranceNumber(addressDto().getEntranceNumber())
-            .houseNumber(addressDto().getHouseNumber())
-            .houseCorpus(addressDto().getHouseCorpus())
-            .actual(addressDto().getActual())
+            .id(id.get(0))
+            .city(String.valueOf(city))
+            .district(String.valueOf(district))
+            .street(String.valueOf(street))
+            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .entranceNumber(String.valueOf(entranceNumber))
+            .houseNumber(String.valueOf(houseNumber))
+            .houseCorpus(String.valueOf(houseCorpus))
+            .actual(Boolean.valueOf(String.valueOf(actual)))
+            .addressStatus(AddressStatus.DELETED)
             .build();
     }
 
