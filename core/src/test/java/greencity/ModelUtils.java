@@ -542,6 +542,15 @@ public class ModelUtils {
                     .id(1L)
                     .build()))
                 .build())
+                .updateOrderDetailDto(List.of(
+                        UpdateOrderDetailDto.builder()
+                                .amount(1)
+                                .exportedQuantity(1)
+                                .confirmedQuantity(1)
+                                .exportedQuantity(1)
+                                .bagId(1)
+                                .build())
+                )
             .build();
     }
 }
