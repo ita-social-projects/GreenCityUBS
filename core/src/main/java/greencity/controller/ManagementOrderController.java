@@ -940,8 +940,8 @@ public class ManagementOrderController {
     @PatchMapping("/update-order-page-admin-info/{id}")
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, uuid);
+        @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
