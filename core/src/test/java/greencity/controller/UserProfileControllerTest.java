@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.List;
 
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.Mockito.verify;
@@ -55,7 +56,7 @@ class UserProfileControllerTest {
     @Test
     void saveUserDate() throws Exception {
         UserProfileDto userProfileDto = ModelUtils.userProfileDto();
-        AddressDto addressDto = ModelUtils.addressDto();
+        List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
