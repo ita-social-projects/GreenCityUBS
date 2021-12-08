@@ -29,6 +29,6 @@ class CreateServiceDtoMapperTest {
         Assertions.assertEquals(dto.getCommission(), mapper.convert(service).getCommission());
         Assertions.assertEquals(dto.getPrice(), mapper.convert(service).getPrice());
         Assertions.assertEquals(dto.getCourierId(), mapper.convert(service).getCourierId());
-        Assertions.assertEquals(service.getFullPrice(), 150);
+        Assertions.assertEquals(150, service.getFullPrice());
     }
 }

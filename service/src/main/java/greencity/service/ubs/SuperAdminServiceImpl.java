@@ -321,9 +321,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .build()).collect(Collectors.toList()))
             .build();
         courier.getCourierTranslationList().forEach(courierTranslation -> courierTranslation.setCourier(courier));
-        courier.getCourierLocations().forEach(courierLocations -> {
-            courierLocations.setCourier(courier);
-        });
+        courier.getCourierLocations().forEach(courierLocations -> courierLocations.setCourier(courier));
         return courier;
     }
 
