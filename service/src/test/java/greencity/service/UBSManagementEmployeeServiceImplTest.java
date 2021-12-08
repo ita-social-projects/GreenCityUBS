@@ -4,10 +4,14 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.EmployeeStatus;
+import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
+import greencity.filters.EmployeeFilterCriteria;
+import greencity.filters.EmployeePage;
+import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
@@ -22,6 +26,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +53,8 @@ class UBSManagementEmployeeServiceImplTest {
     private PhoneNumberFormatterService phoneFormatter;
     @InjectMocks
     private UBSManagementEmployeeServiceImpl employeeService;
+    @Mock
+    private EmployeeCriteriaRepository employeeCriteriaRepository;
 
     @Test
     void saveEmployee() {
@@ -107,13 +114,15 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void findAll() {
-        Pageable pageable = PageRequest.of(1, 2);
-
-        when(repository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
-
-        employeeService.findAll(pageable);
-
-        verify(repository, times(1)).findAll(pageable);
+        EmployeePage employeePage = new EmployeePage();
+        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(
+            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+        when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1l));
+        employeeService.findAll(employeePage, employeeFilterCriteria);
+        verify(employeeCriteriaRepository, times(1))
+            .findAll(employeePage, employeeFilterCriteria);
     }
 
     @Test

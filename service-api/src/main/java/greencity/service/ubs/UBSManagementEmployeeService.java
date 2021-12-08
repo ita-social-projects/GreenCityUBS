@@ -1,7 +1,9 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
-import org.springframework.data.domain.Pageable;
+import greencity.filters.EmployeeFilterCriteria;
+import greencity.filters.EmployeePage;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,14 +20,9 @@ public interface UBSManagementEmployeeService {
     EmployeeDto save(AddEmployeeDto dto, MultipartFile image);
 
     /**
-     * Method finds all employee.
-     *
-     * @param pageable {@link Pageable}
-     * @return pageableDto {@link PageableAdvancedDto} that contains employees from
-     *         database.
-     * @author Mykola Danylko
+     * {@inheritDoc}
      */
-    PageableAdvancedDto<EmployeeDto> findAll(Pageable pageable);
+    Page<EmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * Method updates information about employee.

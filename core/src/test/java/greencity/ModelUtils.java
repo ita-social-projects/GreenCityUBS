@@ -228,8 +228,9 @@ public class ModelUtils {
 
     public static ExportDetailsDto getOrderDetailExportDto() {
         return ExportDetailsDto.builder()
-            .exportedDate("2020")
-            .exportedTime("10:20:30")
+            .dateExport("20-12-2001")
+            .timeDeliveryFrom("20:20:20")
+            .timeDeliveryTo("20:20:20")
             .receivingStation("Petrivka")
             .allReceivingStations(Arrays.asList("a,b,v"))
             .build();
@@ -489,7 +490,7 @@ public class ModelUtils {
                 .build())
             .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
-                .id(1L)
+                .addressId(1L)
                 .addressDistrict("aaaaaaa")
                 .addressStreet("aaaaa")
                 .addressEntranceNumber("12")
@@ -510,8 +511,9 @@ public class ModelUtils {
                     .build()))
             .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
                 .builder()
-                .exportedDate("20-12-2001")
-                .exportedTime("20:20:20")
+                .dateExport("20-12-2001")
+                .timeDeliveryFrom("20:20:20")
+                .timeDeliveryTo("20:20:20")
                 .receivingStation(String.valueOf(ReceivingStation
                     .builder()
                     .id(1L)
