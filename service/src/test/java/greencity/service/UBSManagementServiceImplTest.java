@@ -1336,7 +1336,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findAll())
             .thenReturn(List.of(ModelUtils.getReceivingStation()));
 
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "abc");
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc");
 
         verify(ubsClientService, times(1))
             .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "abc");
@@ -1347,6 +1347,6 @@ class UBSManagementServiceImplTest {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
         assertThrows(UpdateAdminPageInfoException.class,
-            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "abc"));
+            () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc"));
     }
 }

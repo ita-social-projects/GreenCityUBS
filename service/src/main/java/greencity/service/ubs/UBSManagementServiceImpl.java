@@ -899,19 +899,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
-        final User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(request, currentUser, language);
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
-            updateOrderRepository.updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
-                updateOrderDetailDto.getBagId().longValue());
-            updateOrderRepository
-                .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue());
-            updateOrderRepository
-                .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue());
+            if (nonNull(updateOrderDetailDto.getAmount())) {
+                updateOrderRepository
+                    .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
+                        updateOrderDetailDto.getBagId().longValue());
+            }
+            if (nonNull(updateOrderDetailDto.getExportedQuantity())) {
+                updateOrderRepository
+                    .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
+                        updateOrderDetailDto.getBagId().longValue());
+            }
+            if (nonNull(updateOrderDetailDto.getConfirmedQuantity())) {
+                updateOrderRepository
+                    .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
+                        updateOrderDetailDto.getBagId().longValue());
+            }
         }
 
         Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
@@ -920,6 +924,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
         orderRepository.save(order);
+
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        collectEventsAboutSetOrderDetails(request, currentUser, language);
+
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -939,7 +948,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
                     updateOrderRepository.getConfirmWaste(dto.get(i).getOrderId(), Long.valueOf(dto.get(i).getBagId()));
-                if (!confirmWasteWas.equals(Long.valueOf(dto.get(i).getConfirmedQuantity()))) {
+                if (nonNull(dto.get(i).getConfirmedQuantity())
+                    && !confirmWasteWas.equals(Long.valueOf(dto.get(i).getConfirmedQuantity()))) {
                     if (i == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
@@ -2006,13 +2016,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     @Override
-    public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String currentUser) {
+    public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
+        String currentUser) {
         try {
-            updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
-            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
-            updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
-            updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
-            updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
+            if (nonNull(updateOrderPageDto.getOrderDetailStatusRequestDto())) {
+                updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
+            }
+            if (nonNull(updateOrderPageDto.getUbsCustomersDtoUpdate())) {
+                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
+            }
+            if (nonNull(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate())) {
+                updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
+            }
+            if (nonNull(updateOrderPageDto.getExportDetailsDtoUpdate())) {
+                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
+            }
+            if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
+                updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
+            }
+            if (nonNull(updateOrderPageDto.getUpdateOrderDetailDto())) {
+                setOrderDetail(updateOrderPageDto.getUpdateOrderDetailDto(), lang, currentUser);
+            }
         } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
             | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
             throw new UpdateAdminPageInfoException(e.getMessage());

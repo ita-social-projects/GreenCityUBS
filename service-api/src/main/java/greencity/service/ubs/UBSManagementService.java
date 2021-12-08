@@ -361,5 +361,6 @@ public interface UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String currentUser);
+    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String lang,
+        String currentUser);
 }
