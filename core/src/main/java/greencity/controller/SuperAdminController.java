@@ -37,8 +37,10 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Create new tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/createTariffService")
     public ResponseEntity<AddServiceDto> createTariffService(
@@ -57,7 +59,8 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about tariff")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getTariffService")
     public ResponseEntity<List<GetTariffServiceDto>> createService() {
@@ -74,7 +77,8 @@ class SuperAdminController {
     @ApiOperation(value = "Delete tariff by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
@@ -93,7 +97,8 @@ class SuperAdminController {
     @ApiOperation(value = "Edit tariff by id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
@@ -113,8 +118,10 @@ class SuperAdminController {
 
     @ApiOperation(value = "Add new service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CreateServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = CreateServiceDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/createService")
     public ResponseEntity<CreateServiceDto> createServices(
@@ -133,7 +140,8 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about service")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getService")
     public ResponseEntity<List<GetServiceDto>> getService() {
@@ -149,7 +157,8 @@ class SuperAdminController {
     @ApiOperation(value = "Delete service by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @DeleteMapping("/deleteService/{id}")
     public ResponseEntity<HttpStatus> deleteService(
@@ -167,7 +176,8 @@ class SuperAdminController {
     @ApiOperation(value = "Edit service by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PutMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> editService(
@@ -186,7 +196,8 @@ class SuperAdminController {
     @ApiOperation(value = "Get info about location and min amount of bag for this location")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getLocations")
     public ResponseEntity<List<GetLocationTranslationDto>> getLocations() {
@@ -202,8 +213,10 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Create new location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddLocationDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = AddLocationDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/addLocations")
     public ResponseEntity<AddLocationDto> addLocation(
@@ -221,7 +234,8 @@ class SuperAdminController {
     @ApiOperation(value = "Deactivate location by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/deactivateLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> deactivateLocation(
@@ -239,7 +253,8 @@ class SuperAdminController {
     @ApiOperation(value = "Active location Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<GetLocationTranslationDto> activeLocation(
@@ -257,7 +272,8 @@ class SuperAdminController {
     @ApiOperation(value = "Create new Courier")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = CreateCourierTranslationDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/createCourier")
     public ResponseEntity<CreateCourierDto> addService(
@@ -274,7 +290,8 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about couriers")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getCouriers")
     public ResponseEntity<List<GetCourierLocationDto>> getAllCouriers() {
@@ -291,7 +308,8 @@ class SuperAdminController {
     @ApiOperation(value = "Set limit by amount of sum")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/setAmountOfSum/{id}")
     public ResponseEntity<HttpStatuses> setAmountOfBag(
@@ -309,7 +327,8 @@ class SuperAdminController {
     @ApiOperation(value = "Set limit by amount of bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/setAmountOfBag/{id}")
     public ResponseEntity<HttpStatus> setAmountOfSum(
@@ -327,7 +346,8 @@ class SuperAdminController {
     @ApiOperation(value = "Set new Limit Description")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/setLimitDescription/{courierId}")
     public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
@@ -345,7 +365,8 @@ class SuperAdminController {
     @ApiOperation(value = "Include bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/includeBag/{id}")
     public ResponseEntity<GetTariffServiceDto> includeBag(
@@ -362,7 +383,8 @@ class SuperAdminController {
     @ApiOperation(value = "Exclude bag")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffServiceDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/excludeBag/{id}")
     public ResponseEntity<GetTariffServiceDto> excludeBag(
@@ -379,10 +401,28 @@ class SuperAdminController {
     @ApiOperation(value = "Edit info About Tariff")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = EditTariffInfoDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/editInfoAboutTariff")
     public ResponseEntity<EditTariffInfoDto> editInfoInTariff(@RequestBody EditTariffInfoDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editInfoInTariff(dto));
+    }
+
+    /**
+     * Controller for delete courier's.
+     *
+     * @param id - courier id that will need to be deleted;
+     */
+    @ApiOperation(value = "Edit info About Tariff")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PatchMapping("/deleteCourier/{id}")
+    public ResponseEntity<HttpStatuses> editInfoInTariff(@PathVariable Long id) {
+        superAdminService.deleteCourier(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

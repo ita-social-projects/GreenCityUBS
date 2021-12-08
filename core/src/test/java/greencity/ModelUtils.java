@@ -64,7 +64,6 @@ public class ModelUtils {
                 .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
-            .courierId(1L)
             .build();
     }
 
@@ -424,7 +423,7 @@ public class ModelUtils {
         return EditAmountOfBagDto.builder()
             .minAmountOfBigBags(1L)
             .maxAmountOfBigBags(2L)
-            .languageId(1L)
+            /* .languageId(1L) */
             .build();
     }
 

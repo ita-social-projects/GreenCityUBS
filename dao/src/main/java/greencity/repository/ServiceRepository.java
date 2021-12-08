@@ -18,9 +18,9 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * from service s "
-            + "join courier c on c.id = s.courier_id "
-            + "join orders o on c.id = o.courier_id "
-            + "where o.id = :orderId and c.id = :courierId")
+            + "join courier_locations cl on s.id = cl.courier_id "
+            + "join orders o on cl.courier_id = o.courier_locations_id "
+            + "where o.id = :orderId and cl.courier_id = :courierId ")
     Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
 
     /**

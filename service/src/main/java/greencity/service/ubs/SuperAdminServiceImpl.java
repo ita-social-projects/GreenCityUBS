@@ -425,4 +425,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courierLocationRepository.save(courierLocations);
         return dto;
     }
+
+    @Override
+    public void deleteCourier(Long id) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+        courier.setCourierStatus(CourierStatus.DELETED);
+        courierRepository.save(courier);
+    }
 }

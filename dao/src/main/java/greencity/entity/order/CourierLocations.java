@@ -5,6 +5,7 @@ import greencity.entity.user.Location;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -40,4 +41,7 @@ public class CourierLocations {
 
     @ManyToOne
     Courier courier;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courierLocations")
+    List<Order> orders;
 }

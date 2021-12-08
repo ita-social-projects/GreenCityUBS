@@ -14,7 +14,8 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * from courier c "
-            + "join orders o on c.id = o.courier_id "
+            + "join courier_locations cl on c.id = cl.courier_id "
+            + "join orders o on cl.id = o.courier_locations_id "
             + "where o.id = :orderId")
     Courier findCourierByOrderId(@Param("orderId") Long orderId);
 }

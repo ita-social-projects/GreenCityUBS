@@ -185,4 +185,11 @@ public interface SuperAdminService {
      * @return {@link EditTariffInfoDto}
      */
     EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
+
+    /**
+     * Method for delete {@link Courier}
+     * 
+     * @param id - courier Id.
+     */
+    void deleteCourier(Long id);
 }

@@ -149,5 +149,5 @@ public class Order {
     private Long counterOrderPaymentId;
 
     @ManyToOne
-    Courier courier;
+    CourierLocations courierLocations;
 }
