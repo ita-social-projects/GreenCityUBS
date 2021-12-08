@@ -1010,9 +1010,6 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailThrowsException() {
-        User user = User.builder().uuid("abc").id(42L).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -1024,11 +1021,8 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void setOrderDetailsOrderNotFoundException() {
-        User user = User.builder().uuid("abc").id(42L).build();
-        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class,
+    void setOrderDetailsUnExistingOrderException() {
+        assertThrows(UnexistingOrderException.class,
             () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
     }
 
