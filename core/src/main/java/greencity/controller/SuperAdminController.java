@@ -414,14 +414,14 @@ class SuperAdminController {
      *
      * @param id - courier id that will need to be deleted;
      */
-    @ApiOperation(value = "Edit info About Tariff")
+    @ApiOperation(value = "Delete courier's by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PatchMapping("/deleteCourier/{id}")
-    public ResponseEntity<HttpStatuses> editInfoInTariff(@PathVariable Long id) {
+    @DeleteMapping("/deleteCourier/{id}")
+    public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
         superAdminService.deleteCourier(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
