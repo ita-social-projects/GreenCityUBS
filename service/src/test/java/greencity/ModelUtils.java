@@ -253,7 +253,6 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .courier(ModelUtils.getCourier())
             .build();
     }
 
@@ -1660,17 +1659,15 @@ public class ModelUtils {
 
     public static Courier getCourier(CourierLimit courierLimit) {
         return Courier.builder()
-//            .courierLimit(courierLimit)
             .courierTranslationList(getCourierTranslations())
-//            .minAmountOfBigBags(2L)
-//            .maxAmountOfBigBags(300L)
             .build();
     }
 
     public static Courier getCourier() {
         return Courier.builder()
-//            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .courierStatus(CourierStatus.ACTIVE)
             .courierTranslationList(getCourierTranslations())
+            .courierLocations(List.of(getCourierLocations()))
             .build();
     }
 
@@ -1787,9 +1784,6 @@ public class ModelUtils {
                 .id(1L)
                 .courier(Courier.builder()
                     .id(1L)
-//                    .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-//                    .minAmountOfBigBags(2L)
-//                    .maxAmountOfBigBags(999L)
                     .build())
                 .build())
             .name("Test")
@@ -1800,8 +1794,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            /* .locationId(1L) */
             .createCourierTranslationDtos(getCreateCourierTranslationDto())
+            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
             .build();
     }
 
@@ -2039,6 +2033,73 @@ public class ModelUtils {
             .description("Test")
             .languageId(1L)
             .name("Test")
+            .build();
+    }
+
+    public static CourierLocations getCourierLocations() {
+        return CourierLocations.builder()
+            .maxAmountOfBigBags(99L)
+            .minAmountOfBigBags(2L)
+            .maxPriceOfOrder(100000L)
+            .minPriceOfOrder(500L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .location(getLocation())
+            .build();
+    }
+
+    public static GetCourierLocationDto getCourierLocationsDto() {
+        return GetCourierLocationDto.builder()
+            .courierLocationId(getLocation().getId())
+            .minPriceOfOrder(500L)
+            .maxPriceOfOrder(20000L)
+            .courierLimit("LIMIT_BY_AMOUNT_OF_BAG")
+            .minAmountOfBigBags(2L)
+            .maxAmountOfBigBags(20L)
+            .locationsDtos(List.of(LocationsDto.builder()
+                .locationStatus(getLocation().getLocationStatus().toString())
+                .locationId(getLocation().getId())
+                .build()))
+            .build();
+    }
+
+    public static EditPriceOfOrder getEditPriceOfOrder() {
+        return EditPriceOfOrder.builder()
+            .maxPriceOfOrder(500000L)
+            .minPriceOfOrder(300L)
+            .locationId(1L)
+            .build();
+    }
+
+    public static EditAmountOfBagDto getAmountOfBagDto() {
+        return EditAmountOfBagDto.builder()
+            .maxAmountOfBigBags(99L)
+            .minAmountOfBigBags(2L)
+            .locationId(1L)
+            .build();
+    }
+
+    public static LimitsDto getCourierLimitsDto() {
+        return LimitsDto.builder()
+            .locationId(1L)
+            .maxAmountOfBigBags(99L)
+            .minAmountOfBigBags(2L)
+            .maxPriceOfOrder(100000L)
+            .minPriceOfOrder(500L)
+            .build();
+    }
+
+    public static CreateCourierDto createCourier() {
+        return CreateCourierDto.builder()
+            .createCourierLimitsDto(List.of(LimitsDto.builder()
+                .minPriceOfOrder(500L)
+                .maxPriceOfOrder(500000L)
+                .minAmountOfBigBags(2L)
+                .maxAmountOfBigBags(50L)
+                .build()))
+            .createCourierTranslationDtos(List.of(CreateCourierTranslationDto.builder()
+                .name("Test")
+                .limitDescription("Test")
+                .build()))
             .build();
     }
 }

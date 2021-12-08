@@ -359,5 +359,12 @@ public interface UBSClientService {
      */
     LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
 
+    /**
+     * Method for getting info about courier,location,and courier limits.
+     *
+     * @param courierId - id of current courier;
+     * @return {@link GetCourierLocationDto}
+     * @author Vadym Makitra
+     */
     List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId);
 }

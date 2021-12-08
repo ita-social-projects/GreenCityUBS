@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 @Builder
 public class GetCourierLocationDto {
-    private Long courierId;
+    private Long courierLocationId;
     private Long minAmountOfBigBags;
     private Long maxAmountOfBigBags;
     private Long minPriceOfOrder;

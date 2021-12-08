@@ -510,6 +510,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPaymentResponseFromFondy(orderId));
     }
 
+    /**
+     * Controller for getting all information about courier,courier limits,and
+     * courier locations.
+     *
+     * @param courierId - id of current courier
+     * @return {@link GetCourierLocationDto}
+     * @author Vadym Makitra
+     */
     @ApiOperation(value = "Get all location where courier is working")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierLocationDto.class),

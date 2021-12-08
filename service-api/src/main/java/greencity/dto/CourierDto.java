@@ -12,6 +12,7 @@ import java.util.List;
 @ToString
 @Builder
 public class CourierDto {
+    private Long courierId;
     private String courierStatus;
     private List<CourierTranslationDto> courierTranslationDtos;
 }

@@ -187,7 +187,7 @@ public interface SuperAdminService {
     EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
 
     /**
-     * Method for delete {@link Courier}
+     * Method for delete courier.
      * 
      * @param id - courier Id.
      */

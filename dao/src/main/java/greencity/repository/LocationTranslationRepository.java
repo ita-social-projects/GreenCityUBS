@@ -19,6 +19,14 @@ public interface LocationTranslationRepository extends JpaRepository<LocationTra
      */
     Optional<LocationTranslation> findLocationTranslationByLocationAndLanguageCode(Location location, String code);
 
+    /**
+     * Method find location translation by courier id and language code.
+     *
+     * @param courierId    - id of needed courier
+     * @param languageCode - language code of needed language
+     * @return {@link LocationTranslation}
+     * @author Vadym Makitra
+     */
     @Query(nativeQuery = true,
         value = "select * from location_translations lt "
             + "join languages lang on lt.language_id = lang.id "

@@ -82,6 +82,8 @@ class UBSClientServiceImplTest {
     private LocationTranslationRepository locationTranslationRepository;
     @Mock
     private CourierRepository courierRepository;
+    @Mock
+    private CourierLocationRepository courierLocationRepository;
 
     @Test
     @Transactional
@@ -175,14 +177,14 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(courierRepository.findById(any()))
-            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
@@ -234,9 +236,9 @@ class UBSClientServiceImplTest {
         }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(courierRepository.findById(any()))
-            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         Assertions.assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
@@ -790,6 +792,8 @@ class UBSClientServiceImplTest {
         value.put("paytypes", "card");
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -797,8 +801,6 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
-        when(courierRepository.findById(any()))
-            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
@@ -842,9 +844,9 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(courierRepository.findById(any()))
-            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
         assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
         });
@@ -877,13 +879,13 @@ class UBSClientServiceImplTest {
         order1.getPayment().add(payment1);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(bag);
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
-        when(courierRepository.findById(any()))
-            .thenReturn(Optional.of(getCourier(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)));
 
         assertThrows(NotFoundOrderAddressException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
@@ -950,5 +952,27 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(restClient).getDataFromLiqPay(any());
+    }
+
+    @Test
+    void getCourierLocationByCourierIdAndLanguageCodetest() {
+        CourierLocations courierLocations = ModelUtils.getCourierLocations();
+        GetCourierLocationDto getCourierLocationDto = ModelUtils.getCourierLocationsDto();
+
+        when(courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(1L, "ua"))
+            .thenReturn(List.of(courierLocations));
+        when(modelMapper.map(courierLocations, GetCourierLocationDto.class)).thenReturn(getCourierLocationDto);
+
+        assertEquals(List.of(getCourierLocationDto), ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
+
+        verify(courierLocationRepository).findCourierLocationsByCourierIdAndLanguageCode(1L, "ua");
+        verify(modelMapper).map(courierLocations, GetCourierLocationDto.class);
+    }
+
+    @Test
+    void getCourierLocationByCourierIdAndLanguageCodeThrowsCourierLocationException() {
+        when(courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(1L, "ua"))
+            .thenReturn(Collections.emptyList());
+        assertThrows(CourierLocationException.class, () -> ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
     }
 }

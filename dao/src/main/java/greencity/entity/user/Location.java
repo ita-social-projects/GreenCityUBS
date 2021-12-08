@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@EqualsAndHashCode(exclude = "user")
+@EqualsAndHashCode(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

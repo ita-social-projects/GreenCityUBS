@@ -16,7 +16,7 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocations
     protected GetCourierLocationDto convert(CourierLocations source) {
         List<Courier> couriers = List.of(source.getCourier());
         List<CourierDto> courierDtos = couriers.stream()
-            .map(i -> new CourierDto(i.getCourierStatus().toString(),
+            .map(i -> new CourierDto(i.getId(), i.getCourierStatus().toString(),
                 i.getCourierTranslationList().stream().map(j -> new CourierTranslationDto(
                     j.getName(), j.getLimitDescription(), j.getLanguage().getCode())).collect(Collectors.toList())))
             .collect(Collectors.toList());
@@ -27,7 +27,7 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocations
                 .collect(Collectors.toList())))
             .collect(Collectors.toList());
         return GetCourierLocationDto.builder()
-            .courierId(source.getCourier().getId())
+            .courierLocationId(source.getId())
             .courierLimit(source.getCourierLimit().toString())
             .maxAmountOfBigBags(source.getMaxAmountOfBigBags())
             .minAmountOfBigBags(source.getMinAmountOfBigBags())

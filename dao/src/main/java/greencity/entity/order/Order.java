@@ -26,7 +26,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode(exclude = {"employeeOrderPositions"})
+@EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations"})
 @ToString
 public class Order {
     @Id
