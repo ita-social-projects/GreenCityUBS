@@ -28,6 +28,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAll(Pageable pageable);
 
     /**
+     * Method gets all active {@link Employee} employee.
+     *
+     * @param pageable {@link Pageable}
+     * @return list of {@link Employee}
+     * @author Yurii Kuzo
+     */
+    @Query(nativeQuery = true, value = "SELECT * FROM employees "
+        + "WHERE employees.status = 'ACTIVE'")
+    Page<Employee> findAllActiveEmployees(Pageable pageable);
+
+    /**
      * Method checks if {@link String} phoneNumber already exist.
      *
      * @param phoneNumber {@link String}
