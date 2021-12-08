@@ -27,8 +27,7 @@ public final class SwaggerExampleModel {
             + "  \"email\": \"string\",\n";
 
     private static final String EMPLOYEE_END =
-        "  \"employeeStatus\": \"string\",\n"
-            + "  \"employeePositions\": [ \n"
+        "  \"employeePositions\": [ \n"
             + "    {\n"
             + "      \"id\": 0,\n"
             + "      \"name\": \"string\"\n"

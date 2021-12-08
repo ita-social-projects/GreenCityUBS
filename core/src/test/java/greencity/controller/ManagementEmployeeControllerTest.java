@@ -42,6 +42,7 @@ class ManagementEmployeeControllerTest {
     private final String SAVE_LINK = "/save-employee";
     private final String UPDATE_LINK = "/update-employee";
     private final String FIND_ALL_LINK = "/getAll-employees";
+    private final String FIND_ALL_ACTIVE_LINK = "/getAll-active-employees";
     private final String DELETE_LINK = "/delete-employee";
     private final String SAVE_POSITION_LINK = "/create-position";
     private final String UPDATE_POSITION_LINK = "/update-position";
@@ -111,6 +112,17 @@ class ManagementEmployeeControllerTest {
             .andExpect(status().isOk());
 
         verify(service).findAll(employeePage, employeeFilterCriteria);
+    }
+
+    @Test
+    void getAllActiveEmployees() throws Exception {
+        EmployeePage employeePage = new EmployeePage();
+        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
+
+        mockMvc.perform(get(UBS_LINK + FIND_ALL_ACTIVE_LINK))
+            .andExpect(status().isOk());
+
+        verify(service).findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 
     @Test
