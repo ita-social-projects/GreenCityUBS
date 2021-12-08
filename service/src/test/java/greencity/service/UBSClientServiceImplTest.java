@@ -25,11 +25,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -479,7 +481,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("87df9ad5-6393-441f-8423-8b2e770b01a8")).thenReturn(user);
 
-        AddressDto addressDto = ModelUtils.addressDto();
+        List<AddressDto> addressDto = ModelUtils.addressDto();
         Address address = ModelUtils.address();
 
         UserProfileDto userProfileDto =
@@ -487,13 +489,15 @@ class UBSClientServiceImplTest {
                 .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
                 .recipientPhone(user.getRecipientPhone())
                 .build();
+        Type savedAddressDtoList = new TypeToken<List<AddressDto>>() {
+        }.getType();
 
         when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
         when(userRepository.save(user)).thenReturn(user);
         when(addressRepository.save(address)).thenReturn(address);
-        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(address, savedAddressDtoList)).thenReturn(addressDto);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(modelMapper.map(address, AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(address, savedAddressDtoList)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
@@ -505,7 +509,7 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUser();
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         UserProfileDto userProfileDto = new UserProfileDto();
-        AddressDto addressDto = ModelUtils.addressDto();
+        List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
         Address address = ModelUtils.address();
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);

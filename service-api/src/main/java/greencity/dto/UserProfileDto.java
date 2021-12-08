@@ -6,6 +6,7 @@ import lombok.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +28,5 @@ public class UserProfileDto {
     @NotBlank
     @ValidPhoneNumber
     private String recipientPhone;
-    private AddressDto addressDto;
+    private List<AddressDto> addressDto;
 }
