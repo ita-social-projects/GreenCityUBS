@@ -368,8 +368,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Order order = orderRepository.getUserByOrderId(orderId).orElseThrow(
+            () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long overpayment = calculateOverpayment(order, sumToPay);
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
         PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
@@ -378,6 +378,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+            User user = order.getUser();
+            user.setCurrentPoints(user.getCurrentPoints() + Integer.parseInt(overpayment.toString()));
+            orderRepository.save(order);
         }
         dto.getPaymentInfoDtos().add(payDto);
         dto.setOverpayment(dto.getOverpayment() - overpayment);
