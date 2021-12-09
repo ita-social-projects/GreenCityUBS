@@ -983,6 +983,7 @@ public class ModelUtils {
             .recipientName("Taras")
             .uuid("abc")
             .ubsUsers(getUbsUsers())
+            .currentPoints(100)
             .build();
     }
 
@@ -1891,6 +1892,13 @@ public class ModelUtils {
             .overpayment(200L)
             .build();
     }
+
+    public static PaymentInfoDto getInfoPayment() {
+        return PaymentInfoDto.builder()
+                .comment("ddd")
+                .build();
+    }
+
 
     public static OrderPaymentStatusTranslation getOrderPaymentStatusTranslation() {
         return OrderPaymentStatusTranslation.builder()
