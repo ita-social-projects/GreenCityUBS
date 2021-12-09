@@ -148,16 +148,16 @@ public class BigOrderTableRepository {
                     LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), eopSetJoin));
+            filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),orderRoot);
         }
         if (nonNull(sc.getResponsibleLogiestManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(), eopSetJoin));
+           filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(),orderRoot);
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), eopSetJoin));
+            filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(),orderRoot);
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), eopSetJoin));
+            filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(),orderRoot);
         }
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates, cq);
@@ -165,19 +165,15 @@ public class BigOrderTableRepository {
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
-    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee, SetJoin<Order, EmployeeOrderPosition> eopSetJoin) {
+    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee,Root<Order> orderRoot) {
         CriteriaBuilder.In<Long> responsibleEmployeeId =
-                criteriaBuilder.in(eopSetJoin.get("employee").get("id"));
+                criteriaBuilder.in(orderRoot.joinSet("employeeOrderPositions",JoinType.LEFT).join("employee").get("id"));
         Arrays.stream(idEmployee)
                 .forEach(responsibleEmployeeId::value);
-        Predicate position = criteriaBuilder.equal(eopSetJoin.get("position").get("id"), idPosition);
+        Predicate position = criteriaBuilder.equal(orderRoot.joinSet("employeeOrderPositions",
+                JoinType.LEFT).join("position",JoinType.LEFT).get("id"), idPosition);
 
-//       Predicate finale = eopSetJoin.on(
-//              responsibleEmployeeId, responsibleEmployeeId
-//         );
-        return criteriaBuilder.and(
-             position
-        );
+         return criteriaBuilder.and(responsibleEmployeeId,position);
     }
 
     private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates, CriteriaQuery<Order> cq) {
