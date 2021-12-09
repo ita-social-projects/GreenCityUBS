@@ -448,7 +448,6 @@ public class ModelUtils {
         return EditAmountOfBagDto.builder()
             .minAmountOfBigBags(1L)
             .maxAmountOfBigBags(2L)
-            /* .languageId(1L) */
             .build();
     }
 
