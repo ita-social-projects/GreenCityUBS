@@ -14,11 +14,19 @@ import lombok.*;
 public class OrderSearchCriteria {
     private OrderStatus[] orderStatus;
     private OrderPaymentStatus[] orderPaymentStatus;
-    private String[] responsibleCallerFirstName;
-    private String[] responsibleCallerLastName;
     private String[] receivingStation;
+    private Long[] responsibleCallerId;
+    private Long[] responsibleDriverId;
+    private Long[] responsibleNavigatorId;
+    private Long[] responsibleLogiestManId;
+    private String orderDateFrom;
+    private String orderDateTo;
+    private String deliverFromFrom;
+    private String deliverFromTo;
+    private String deliverToFrom;
+    private String deliverToTo;
+    private String paymentDateFrom;
+    private String paymentDateTo;
     private String[] districts;
-    private String dateFrom;
-    private String dateTo;
     private String search;
 }
