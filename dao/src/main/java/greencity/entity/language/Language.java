@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"bagTranslations"})
+@EqualsAndHashCode(exclude = {"bagTranslations","serviceTranslations","locationTranslations","courierTranslations"})
 @ToString(exclude = {"bagTranslations"})
 @Builder
 @Table(name = "languages")
