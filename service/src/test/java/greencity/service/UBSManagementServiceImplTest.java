@@ -430,8 +430,8 @@ class UBSManagementServiceImplTest {
 
         Long sumToPay = 0L;
 
-        assertEquals("Зарахування на бонусний рахунок",ubsManagementService.returnOverpaymentInfo(1L,sumToPay,0L)
-                .getPaymentInfoDtos().get(1).getComment());
+        assertEquals("Зарахування на бонусний рахунок", ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 0L)
+            .getPaymentInfoDtos().get(1).getComment());
 
         assertEquals(0L, ubsManagementService.returnOverpaymentInfo(1L, sumToPay, 1L)
             .getOverpayment());

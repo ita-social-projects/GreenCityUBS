@@ -1895,10 +1895,9 @@ public class ModelUtils {
 
     public static PaymentInfoDto getInfoPayment() {
         return PaymentInfoDto.builder()
-                .comment("ddd")
-                .build();
+            .comment("ddd")
+            .build();
     }
-
 
     public static OrderPaymentStatusTranslation getOrderPaymentStatusTranslation() {
         return OrderPaymentStatusTranslation.builder()
