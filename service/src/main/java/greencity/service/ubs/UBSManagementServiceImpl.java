@@ -1408,7 +1408,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
-        return Math.max((sumToPay - paidAmount), 0L);
+        return sumToPay < paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
