@@ -1383,7 +1383,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(Payment::getAmount)
             .reduce(Long::sum)
             .orElse(0L);
-        return Math.max((paymentSum - sumToPay), 0L);
+
+        Long resultPayment = sumToPay >= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
+        return resultPayment;
     }
 
     /**
