@@ -2,6 +2,7 @@ package greencity.dto;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -18,20 +19,20 @@ public class UbsCustomersDtoUpdate {
     @NotNull
     @Min(1)
     private Long recipientId;
-    @NotBlank
     @NotNull
     @Length(max = 60)
+    @NotBlank
     private String recipientName;
-    @NotBlank
     @NotNull
     @Length(max = 60)
-    private String recipientSurName;
     @NotBlank
+    private String recipientSurName;
     @NotNull
     @Length(max = 9)
-    private String recipientPhoneNumber;
     @NotBlank
+    private String recipientPhoneNumber;
     @NotNull
     @Length(max = 50)
+    @NotBlank
     private String recipientEmail;
 }
