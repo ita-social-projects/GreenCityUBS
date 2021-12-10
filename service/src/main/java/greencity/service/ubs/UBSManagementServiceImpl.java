@@ -904,8 +904,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
-            if (!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                updateOrderDetailDto.getBagId().longValue())) {
+            if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue()))) {
                 updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
                     updateOrderDetailDto.getBagId().longValue());
             }
