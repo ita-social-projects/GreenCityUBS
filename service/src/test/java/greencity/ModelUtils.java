@@ -1004,6 +1004,7 @@ public class ModelUtils {
             .recipientName("Taras")
             .uuid("abc")
             .ubsUsers(getUbsUsers())
+            .currentPoints(100)
             .build();
     }
 
@@ -1910,6 +1911,12 @@ public class ModelUtils {
             .unPaidAmount(0L)
             .paymentInfoDtos(List.of(PaymentInfoDto.builder().build()))
             .overpayment(200L)
+            .build();
+    }
+
+    public static PaymentInfoDto getInfoPayment() {
+        return PaymentInfoDto.builder()
+            .comment("ddd")
             .build();
     }
 
