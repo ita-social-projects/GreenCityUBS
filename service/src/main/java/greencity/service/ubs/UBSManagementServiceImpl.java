@@ -904,6 +904,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue()))) {
+                updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            }
             if (nonNull(updateOrderDetailDto.getAmount())) {
                 updateOrderRepository
                     .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
@@ -965,7 +970,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
                     Long.valueOf(dto.get(i).getBagId()));
-                if (!exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
+                if (nonNull(dto.get(i).getExportedQuantity())
+                    && !exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
                     if (i == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
@@ -1145,31 +1151,39 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (payment.isEmpty()) {
             throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
         }
-        order.setComment(dto.getOrderComment());
-        OrderStatus newStatus = OrderStatus.valueOf(dto.getOrderStatus());
-        order.setOrderStatus(newStatus);
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (newStatus == OrderStatus.ADJUSTMENT) {
-            notificationService.notifyCourierItineraryFormed(order);
-            eventService.save(OrderHistory.ORDER_ADJUSTMENT,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CONFIRMED) {
-            eventService.save(OrderHistory.ORDER_CONFIRMED,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
-            eventService.save(
-                OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
-                    + order.getImageReasonNotTakingBags(),
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CANCELED) {
-            eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        if (nonNull(dto.getOrderComment())) {
+            order.setComment(dto.getOrderComment());
+            orderRepository.save(order);
         }
-        paymentRepository.paymentInfo(id)
-            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
-        orderRepository.save(order);
-        paymentRepository.saveAll(payment);
+        if (nonNull(dto.getOrderStatus())) {
+            order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
+
+            User currentUser = userRepository.findUserByUuid(uuid)
+                .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+                notificationService.notifyCourierItineraryFormed(order);
+                eventService.save(OrderHistory.ORDER_ADJUSTMENT,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                eventService.save(OrderHistory.ORDER_CONFIRMED,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                eventService.save(
+                    OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
+                        + order.getImageReasonNotTakingBags(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            }
+            orderRepository.save(order);
+        }
+        if (nonNull(dto.getOrderPaymentStatus())) {
+            paymentRepository.paymentInfo(id)
+                .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
+            paymentRepository.saveAll(payment);
+        }
+
         return buildStatuses(order, payment.get(0));
     }
 
@@ -1249,13 +1263,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
-        address.setCity(dto.getAddressCity());
-        address.setRegion(dto.getAddressRegion());
-        address.setHouseNumber(dto.getAddressHouseNumber());
-        address.setEntranceNumber(dto.getAddressEntranceNumber());
-        address.setDistrict(dto.getAddressDistrict());
-        address.setStreet(dto.getAddressStreet());
-        address.setHouseCorpus(dto.getAddressHouseCorpus());
+        if (nonNull(dto.getAddressCity())) {
+            address.setCity(dto.getAddressCity());
+        }
+        if (nonNull(dto.getAddressRegion())) {
+            address.setRegion(dto.getAddressRegion());
+        }
+        if (nonNull(dto.getAddressHouseNumber())) {
+            address.setHouseNumber(dto.getAddressHouseNumber());
+        }
+        if (nonNull(dto.getAddressEntranceNumber())) {
+            address.setEntranceNumber(dto.getAddressEntranceNumber());
+        }
+        if (nonNull(dto.getAddressDistrict())) {
+            address.setDistrict(dto.getAddressDistrict());
+        }
+        if (nonNull(dto.getAddressStreet())) {
+            address.setStreet(dto.getAddressStreet());
+        }
+        if (nonNull(dto.getAddressHouseCorpus())) {
+            address.setHouseCorpus(dto.getAddressHouseCorpus());
+        }
         return address;
     }
 

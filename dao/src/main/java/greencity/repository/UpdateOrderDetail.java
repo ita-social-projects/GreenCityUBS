@@ -12,8 +12,6 @@ public class UpdateOrderDetail {
 
     /**
      * Method for update Exported value.
-     *
-     * @return
      */
 
     public Boolean updateExporter(Integer valueExported, Long orderId, Long bagId) {
@@ -56,6 +54,19 @@ public class UpdateOrderDetail {
     }
 
     /**
+     * Method for INSERT new record for ability to update value in next steps.
+     */
+    public Boolean insertNewRecord(Long orderId, Long bagId) {
+        String query = "INSERT INTO ORDER_BAG_MAPPING (ORDER_ID,BAG_ID) VALUES (?,?)";
+        return jdbcTemplate.execute(query, (PreparedStatementCallback<Boolean>) ps -> {
+            ps.setLong(1, orderId);
+            ps.setLong(2, bagId);
+
+            return ps.execute();
+        });
+    }
+
+    /**
      * Method for getting Confirm waste value.
      */
     public Long getConfirmWaste(Long orderId, Long bagId) {
@@ -71,5 +82,15 @@ public class UpdateOrderDetail {
         String query = "SELECT EXPORTED_QUANTITY FROM ORDER_BAG_MAPPING "
             + " WHERE ORDER_ID = ? AND BAG_ID = ?";
         return jdbcTemplate.queryForObject(query, new Object[] {orderId, bagId}, Long.class);
+    }
+
+    /**
+     * Method for checking if exist record with current order id and bag id.
+     */
+    public Boolean ifRecordExist(Long orderId, Long bagId) {
+        String query = "SELECT count(*) FROM ORDER_BAG_MAPPING WHERE ORDER_ID = ? and BAG_ID=?";
+        int trueOrFalse = jdbcTemplate.queryForObject(query, new Object[] {orderId, bagId}, Integer.class);
+
+        return trueOrFalse > 0;
     }
 }
