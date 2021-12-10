@@ -2,7 +2,7 @@ package greencity.mapping;
 
 import greencity.dto.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierLocations;
+import greencity.entity.order.CourierLocation;
 import greencity.entity.order.CourierTranslation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 public class CreateCourierDtoMapper extends AbstractConverter<Courier, CreateCourierDto> {
     @Override
     protected CreateCourierDto convert(Courier source) {
-        List<CourierTranslation> courierTranslations = new ArrayList<>(source.getCourierTranslationList());
+        List<CourierTranslation> courierTranslations = source.getCourierTranslationList();
         List<CreateCourierTranslationDto> dtos = courierTranslations.stream().map(i -> new CreateCourierTranslationDto(
             i.getName(), i.getLanguage().getId(), i.getLimitDescription())).collect(Collectors.toList());
-        List<CourierLocations> courierLocations = new ArrayList<>(source.getCourierLocations());
+        List<CourierLocation> courierLocations = new ArrayList<>(source.getCourierLocations());
         List<LimitsDto> limitsDtos = courierLocations.stream().map(
             i -> new LimitsDto(i.getMinAmountOfBigBags(), i.getMaxAmountOfBigBags(), i.getMinPriceOfOrder(),
                 i.getMaxPriceOfOrder(), i.getLocation().getId()))

@@ -651,7 +651,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleNotEnoughBagsException(NotEnoughBagsException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
-        log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
     }
 
@@ -667,7 +666,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleSumOfOrderException(SumOfOrderException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
-        log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
     }
 
@@ -683,7 +681,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleCourierLocationException(CourierLocationException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
-        log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
     }
 }

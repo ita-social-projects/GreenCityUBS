@@ -2,7 +2,7 @@ package greencity.mapping;
 
 import greencity.dto.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierLocations;
+import greencity.entity.order.CourierLocation;
 import greencity.entity.user.Location;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class GetCourierLocationMapper extends AbstractConverter<CourierLocations, GetCourierLocationDto> {
+public class GetCourierLocationMapper extends AbstractConverter<CourierLocation, GetCourierLocationDto> {
     @Override
-    protected GetCourierLocationDto convert(CourierLocations source) {
+    protected GetCourierLocationDto convert(CourierLocation source) {
         List<Courier> couriers = List.of(source.getCourier());
         List<CourierDto> courierDtos = couriers.stream()
             .map(i -> new CourierDto(i.getId(), i.getCourierStatus().toString(),

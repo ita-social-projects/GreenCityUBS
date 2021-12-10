@@ -2,7 +2,7 @@ package greencity.entity.user;
 
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
-import greencity.entity.order.CourierLocations;
+import greencity.entity.order.CourierLocation;
 import lombok.*;
 
 import javax.persistence.*;
@@ -29,7 +29,7 @@ public class Location {
     private List<User> user;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
-    List<CourierLocations> courierLocations;
+    List<CourierLocation> courierLocations;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Bag> bags;

@@ -24,7 +24,7 @@ public class Courier {
     private CourierStatus courierStatus;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
-    private List<CourierLocations> courierLocations;
+    private List<CourierLocation> courierLocations;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslationList;

@@ -960,17 +960,17 @@ class UBSClientServiceImplTest {
 
     @Test
     void getCourierLocationByCourierIdAndLanguageCodetest() {
-        CourierLocations courierLocations = ModelUtils.getCourierLocations();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
         GetCourierLocationDto getCourierLocationDto = ModelUtils.getCourierLocationsDto();
 
         when(courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(1L, "ua"))
-            .thenReturn(List.of(courierLocations));
-        when(modelMapper.map(courierLocations, GetCourierLocationDto.class)).thenReturn(getCourierLocationDto);
+            .thenReturn(List.of(courierLocation));
+        when(modelMapper.map(courierLocation, GetCourierLocationDto.class)).thenReturn(getCourierLocationDto);
 
         assertEquals(List.of(getCourierLocationDto), ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
 
         verify(courierLocationRepository).findCourierLocationsByCourierIdAndLanguageCode(1L, "ua");
-        verify(modelMapper).map(courierLocations, GetCourierLocationDto.class);
+        verify(modelMapper).map(courierLocation, GetCourierLocationDto.class);
     }
 
     @Test

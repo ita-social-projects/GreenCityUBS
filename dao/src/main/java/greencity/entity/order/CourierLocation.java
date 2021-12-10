@@ -15,21 +15,21 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(exclude = {"courier", "orders", "location"})
 @Table(name = "courier_locations")
-public class CourierLocations {
+public class CourierLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "min_amount_of_big_bags")
+    @Column
     private Long minAmountOfBigBags;
 
-    @Column(name = "max_amount_of_big_bags")
+    @Column
     private Long maxAmountOfBigBags;
 
-    @Column(name = "min_price_of_order")
+    @Column
     private Long minPriceOfOrder;
 
-    @Column(name = "max_price_of_order")
+    @Column
     private Long maxPriceOfOrder;
 
     @Column(name = "courier_limits")

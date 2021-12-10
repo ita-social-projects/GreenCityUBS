@@ -207,20 +207,20 @@ class SuperAdminController {
     /**
      * Create new Location.
      * 
-     * @param dto {@link AddLocationDto}
+     * @param dto {@link LocationCreateDto}
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Create new location")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = AddLocationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = LocationCreateDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/addLocations")
-    public ResponseEntity<AddLocationDto> addLocation(
-        @RequestBody AddLocationDto dto) {
+    public ResponseEntity<LocationCreateDto> addLocation(
+        @RequestBody LocationCreateDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addLocation(dto));
     }
 
@@ -420,7 +420,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @DeleteMapping("/deleteCourier/{id}")
+    @DeleteMapping("/courier/{id}")
     public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
         superAdminService.deleteCourier(id);
         return ResponseEntity.status(HttpStatus.OK).build();

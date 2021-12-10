@@ -92,11 +92,11 @@ public interface SuperAdminService {
     /**
      * Method for adding location.
      *
-     * @param dto {@link AddLocationDto}
+     * @param dto {@link LocationCreateDto}
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    AddLocationDto addLocation(AddLocationDto dto);
+    LocationCreateDto addLocation(LocationCreateDto dto);
 
     /**
      * Method for deactivate location.

@@ -6,7 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@EqualsAndHashCode(exclude = {"location","language"})
+@EqualsAndHashCode(exclude = {"location", "language"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

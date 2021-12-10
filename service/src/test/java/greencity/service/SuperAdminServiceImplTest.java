@@ -224,43 +224,43 @@ class SuperAdminServiceImplTest {
     @Test
     void setCourierLimitBySumOfOrder() {
         EditPriceOfOrder dto = ModelUtils.getEditPriceOfOrder();
-        CourierLocations courierLocations = ModelUtils.getCourierLocations();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId()))
-            .thenReturn(courierLocations);
-        when(courierLocationRepository.save(courierLocations)).thenReturn(courierLocations);
+            .thenReturn(courierLocation);
+        when(courierLocationRepository.save(courierLocation)).thenReturn(courierLocation);
 
         superAdminService.setCourierLimitBySumOfOrder(1L, dto);
 
         verify(courierLocationRepository).findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
-        verify(courierLocationRepository).save(courierLocations);
+        verify(courierLocationRepository).save(courierLocation);
     }
 
     @Test
     void setCourierLimitByAmountOfBag() {
         EditAmountOfBagDto dto = ModelUtils.getAmountOfBagDto();
-        CourierLocations courierLocations = ModelUtils.getCourierLocations();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
 
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId()))
-            .thenReturn(courierLocations);
-        when(courierLocationRepository.save(courierLocations)).thenReturn(courierLocations);
+            .thenReturn(courierLocation);
+        when(courierLocationRepository.save(courierLocation)).thenReturn(courierLocation);
         superAdminService.setCourierLimitByAmountOfBag(1L, dto);
 
         verify(courierLocationRepository).findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
-        verify(courierLocationRepository).save(courierLocations);
+        verify(courierLocationRepository).save(courierLocation);
     }
 
     @Test
     void createCourier() {
         Courier courier = ModelUtils.getCourier();
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-        CourierLocations courierLocations = ModelUtils.getCourierLocations();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(courierRepository.save(courier)).thenReturn(courier);
         when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
             .thenReturn(ModelUtils.getCourierTranslations());
-        when(courierLocationRepository.saveAll(courier.getCourierLocations())).thenReturn(List.of(courierLocations));
+        when(courierLocationRepository.saveAll(courier.getCourierLocations())).thenReturn(List.of(courierLocation));
         when(modelMapper.map(courier, CreateCourierDto.class)).thenReturn(createCourierDto);
 
         assertEquals(createCourierDto, superAdminService.createCourier(createCourierDto));

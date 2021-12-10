@@ -2035,8 +2035,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddLocationDto getAddLocationDto() {
-        return AddLocationDto.builder()
+    public static LocationCreateDto getAddLocationDto() {
+        return LocationCreateDto.builder()
             .addLocationDtoList(List.of(getAddLocationTranslationDto()))
             .build();
     }
@@ -2057,8 +2057,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static CourierLocations getCourierLocations() {
-        return CourierLocations.builder()
+    public static CourierLocation getCourierLocations() {
+        return CourierLocation.builder()
             .maxAmountOfBigBags(99L)
             .minAmountOfBigBags(2L)
             .maxPriceOfOrder(100000L)
