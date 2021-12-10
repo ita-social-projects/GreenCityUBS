@@ -234,4 +234,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         + " Inner Join ubs_user uu on orders.ubs_user_id = uu.id"
         + " where orders.users_id = :userId limit 1", nativeQuery = true)
     String getUsersLastNameByOrderId(@Param(value = "userId") Long userId);
+
+    /**
+     * Method gets user order by order id.
+     *
+     * @author Max Boiarchuk
+     */
+    @Query(value = "select * from orders o "
+        + "join users u on o.users_id = u.id "
+        + "where o.id = :orderId", nativeQuery = true)
+    Optional<Order> getUserByOrderId(@Param(value = "orderId") Long orderId);
 }
