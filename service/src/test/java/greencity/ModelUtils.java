@@ -216,7 +216,7 @@ public class ModelUtils {
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId(1L)
-                .amount(200L)
+                .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
                 .comment("avb")
