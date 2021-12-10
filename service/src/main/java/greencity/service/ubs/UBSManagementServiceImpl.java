@@ -285,8 +285,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long paidAmount = calculatePaidAmount(order);
-        Long overpayment = calculateOverpayment(order, sumToPay);
+        Long paidAmount = calculatePaidAmount(order) / 100;
+        Long overpayment = calculateOverpayment(order, sumToPay) / 100;
         Long unPaidAmount = calculateUnpaidAmount(sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         paymentTableInfoDto.setOverpayment(overpayment);
