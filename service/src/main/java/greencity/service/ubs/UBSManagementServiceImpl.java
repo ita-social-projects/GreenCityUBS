@@ -904,32 +904,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            if (!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue())) {
+                updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            }
             if (nonNull(updateOrderDetailDto.getAmount())) {
-                if (!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue())) {
-                    updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-                }
                 updateOrderRepository
                     .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
                         updateOrderDetailDto.getBagId().longValue());
             }
             if (nonNull(updateOrderDetailDto.getExportedQuantity())) {
-                if (!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue())) {
-                    updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-                }
                 updateOrderRepository
                     .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
                         updateOrderDetailDto.getBagId().longValue());
             }
             if (nonNull(updateOrderDetailDto.getConfirmedQuantity())) {
-                if (!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue())) {
-                    updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-                }
                 updateOrderRepository
                     .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
                         updateOrderDetailDto.getBagId().longValue());
