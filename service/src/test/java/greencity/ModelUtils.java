@@ -1328,14 +1328,14 @@ public class ModelUtils {
     public static List<LocationTranslation> getLocationTranslationList() {
         List<LocationTranslation> locationTranslations = new ArrayList<>();
         locationTranslations.add(LocationTranslation.builder()
-            .location(Location.builder().id(1L).build())
+            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .locationName("Name1")
             .language(Language.builder().code("ua").build())
             .build());
         locationTranslations.add(LocationTranslation.builder()
             .language(Language.builder().code("ua").build())
             .locationName("Name2")
-            .location(Location.builder().id(2L).build())
+            .location(Location.builder().id(2L).locationStatus(LocationStatus.ACTIVE).build())
             .build());
         return locationTranslations;
     }
@@ -2007,5 +2007,42 @@ public class ModelUtils {
                     .build()))
                 .build())
             .build();
+    }
+
+    public static List<ServiceTranslation> getServiceTranslationDto() {
+        List<ServiceTranslation> serviceTranslations = new ArrayList<>();
+        serviceTranslations.add(ServiceTranslation.builder()
+            .id(1L)
+            .description("ss")
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("Max")
+            .service(Service.builder()
+                .capacity(120)
+                .basePrice(1022)
+                .commission(50)
+                .fullPrice(150)
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .location(Location.builder().id(1L).build())
+                .serviceTranslations(getServiceTranslation())
+                .build())
+            .build());
+        serviceTranslations.add(ServiceTranslation.builder()
+            .id(1L)
+            .description("ss")
+            .language(Language.builder().id(2L).code("ua").build())
+            .name("Max")
+            .service(Service.builder()
+                .capacity(120)
+                .basePrice(100)
+                .commission(50)
+                .fullPrice(150)
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .location(Location.builder().id(1L).build())
+                .serviceTranslations(getServiceTranslation())
+                .build())
+            .build());
+        return serviceTranslations;
     }
 }
