@@ -3,10 +3,12 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.exceptions.BagNotFoundException;
 import greencity.exceptions.CourierNotFoundException;
@@ -21,10 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,6 +54,8 @@ class SuperAdminServiceImplTest {
     private CourierRepository courierRepository;
     @Mock
     private CourierTranslationRepository courierTranslationRepository;
+    @Mock
+    private LocationTranslationRepository locationTranslationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -141,12 +142,12 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void getService() {
-        when(serviceTranslationRepository.findAll()).thenReturn(Arrays.asList(new ServiceTranslation()));
-        List<ServiceTranslation> serviceTranslations = serviceTranslationRepository.findAll();
+    void getServiceTest() {
+        List<ServiceTranslation> serviceTranslations = ModelUtils.getServiceTranslationDto();
 
-        verify(serviceTranslationRepository, times(1)).findAll();
-        assertEquals(1, serviceTranslations.size());
+        when(serviceTranslationRepository.findAll()).thenReturn(serviceTranslations);
+        superAdminService.getService();
+        verify(serviceTranslationRepository).findAll();
     }
 
     @Test
@@ -324,4 +325,12 @@ class SuperAdminServiceImplTest {
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
 
+    @Test
+    void getAllLocationTest() {
+        List<LocationTranslation> locationTranslationDto = ModelUtils.getLocationTranslationList();
+
+        when(locationTranslationRepository.findAll()).thenReturn(locationTranslationDto);
+        superAdminService.getAllLocation();
+        verify(locationTranslationRepository).findAll();
+    }
 }
