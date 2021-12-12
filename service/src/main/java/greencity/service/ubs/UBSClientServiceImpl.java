@@ -839,9 +839,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findByUuid(uuid);
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
+        List<AddressDto> addressDto =
+            allAddress.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
         for (Address address : allAddress) {
-            List<AddressDto> addressDto =
-                allAddress.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
             setAddressData(address, addressDto);
             userProfileDto.setAddressDto(addressDto);
         }
