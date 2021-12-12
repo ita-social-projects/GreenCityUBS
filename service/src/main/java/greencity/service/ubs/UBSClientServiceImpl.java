@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -591,10 +592,19 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private UBSuser updateRecipientDataInOrder(UBSuser ubSuser, UbsCustomersDtoUpdate dto) {
-        ubSuser.setFirstName(dto.getRecipientName());
-        ubSuser.setLastName(dto.getRecipientSurName());
-        ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
-        ubSuser.setEmail(dto.getRecipientEmail());
+        if (nonNull(dto.getRecipientEmail())) {
+            ubSuser.setEmail(dto.getRecipientEmail());
+        }
+        if (nonNull(dto.getRecipientName())) {
+            ubSuser.setFirstName(dto.getRecipientName());
+        }
+        if (nonNull(dto.getRecipientSurName())) {
+            ubSuser.setLastName(dto.getRecipientSurName());
+        }
+        if (nonNull(dto.getRecipientPhoneNumber())) {
+            ubSuser.setPhoneNumber(dto.getRecipientPhoneNumber());
+        }
+
         return ubSuser;
     }
 

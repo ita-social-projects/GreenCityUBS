@@ -391,7 +391,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public GetTariffServiceDto excludeBag(Integer id) {
         Bag bag = bagRepository.findById(id).orElseThrow(
             () -> new CourierNotFoundException(ErrorMessage.BAG_NOT_FOUND + id));
-        if (bag.getMinAmountOfBags().equals(MinAmountOfBag.EXCLUDE)) {
+        if (MinAmountOfBag.EXCLUDE.equals(bag.getMinAmountOfBags())) {
             throw new BagWithThisStatusAlreadySetException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }
         bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);

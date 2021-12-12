@@ -147,7 +147,7 @@ public class EmployeeCriteriaRepository {
         Expression<String> lastName = criteriaBuilder.upper(employeeRoot.get("lastName"));
         Expression<String> phoneNumber = criteriaBuilder.upper(employeeRoot.get("phoneNumber"));
         Expression<String> email = criteriaBuilder.upper(employeeRoot.get("email"));
-        String likeS = "%" + s + "%";
+        String likeS = "%" + s.toUpperCase() + "%";
         return criteriaBuilder.or(
             criteriaBuilder.like(firstName, likeS),
             criteriaBuilder.like(lastName, likeS),

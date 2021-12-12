@@ -216,7 +216,7 @@ public class ModelUtils {
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId(1L)
-                .amount(200L)
+                .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
                 .comment("avb")
@@ -1004,6 +1004,7 @@ public class ModelUtils {
             .recipientName("Taras")
             .uuid("abc")
             .ubsUsers(getUbsUsers())
+            .currentPoints(100)
             .build();
     }
 
@@ -1076,7 +1077,11 @@ public class ModelUtils {
     public static BagTranslation getBagTranslation() {
         return BagTranslation.builder()
             .id(1L)
-            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .bag(Bag.builder().id(1).capacity(120).price(350).location(Location.builder()
+                .id(1L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build())
+                .build())
             .language(Language.builder().id(1L).code("en").build())
             .name("Useless paper")
             .build();
@@ -1112,7 +1117,7 @@ public class ModelUtils {
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
-            .orderComment("all good")
+            .orderAdminComment("all good")
             .orderPaymentStatus("PAID").build();
     }
 
@@ -1325,14 +1330,14 @@ public class ModelUtils {
     public static List<LocationTranslation> getLocationTranslationList() {
         List<LocationTranslation> locationTranslations = new ArrayList<>();
         locationTranslations.add(LocationTranslation.builder()
-            .location(Location.builder().id(1L).build())
+            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .locationName("Name1")
             .language(Language.builder().code("ua").build())
             .build());
         locationTranslations.add(LocationTranslation.builder()
             .language(Language.builder().code("ua").build())
             .locationName("Name2")
-            .location(Location.builder().id(2L).build())
+            .location(Location.builder().id(2L).locationStatus(LocationStatus.ACTIVE).build())
             .build());
         return locationTranslations;
     }
@@ -1645,6 +1650,7 @@ public class ModelUtils {
             .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
+            .bagTranslations(List.of(BagTranslation.builder().description("ss").id(1L).build()))
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
@@ -1686,6 +1692,7 @@ public class ModelUtils {
 
     public static Courier getCourier() {
         return Courier.builder()
+            .id(1L)
             .courierStatus(CourierStatus.ACTIVE)
             .courierTranslationList(getCourierTranslations())
             .courierLocations(List.of(getCourierLocations()))
@@ -1746,20 +1753,13 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public static List<ServiceTranslationDto> getServiceTranslationDtoList() {
-        return List.of(ServiceTranslationDto.builder()
-            .description("test")
-            .languageId(1L)
-            .name("test")
-            .build());
-    }
-
     public static CreateServiceDto getCreateServiceDto() {
         return CreateServiceDto.builder()
             .capacity(120)
             .commission(50)
             .price(100)
-            .serviceTranslationDtoList(getServiceTranslationDtoList())
+            .serviceTranslationDtoList(List.of(getServiceTranslationDto()))
+            .courierId(1L)
             .build();
     }
 
@@ -1787,26 +1787,27 @@ public class ModelUtils {
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
             .serviceTranslations(getServiceTranslationList())
             .courier(getCourier())
+            .serviceTranslations(List.of(getServiceTranslation()))
             .build();
     }
 
-    public static List<ServiceTranslation> getServiceTranslationList() {
-        return List.of(ServiceTranslation.builder()
-            .name("test")
-            .language(getLanguage())
-            .description("test")
-            .build());
+    public static Service getEditedService() {
+        User user = ModelUtils.getUser();
+        return Service.builder()
+            .id(1L)
+            .capacity(120)
+            .basePrice(100)
+            .commission(50)
+            .fullPrice(150)
+            .editedAt(LocalDate.now())
+            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .serviceTranslations(getServiceTranslationList())
+            .courier(getCourier())
+            .build();
     }
 
     public static ServiceTranslation getServiceTranslation() {
         return ServiceTranslation.builder()
-            .id(1L)
-            .service(Service.builder()
-                .id(1L)
-                .courier(Courier.builder()
-                    .id(1L)
-                    .build())
-                .build())
             .name("Test")
             .description("Test")
             .language(getLanguage())
@@ -1931,6 +1932,12 @@ public class ModelUtils {
             .build();
     }
 
+    public static PaymentInfoDto getInfoPayment() {
+        return PaymentInfoDto.builder()
+            .comment("ddd")
+            .build();
+    }
+
     public static OrderPaymentStatusTranslation getOrderPaymentStatusTranslation() {
         return OrderPaymentStatusTranslation.builder()
             .id(1L)
@@ -1976,7 +1983,7 @@ public class ModelUtils {
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
             .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
@@ -2020,8 +2027,111 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<ServiceTranslation> getServiceTranslationList() {
+        return List.of(ServiceTranslation.builder()
+            .description("Test")
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("Test")
+            .id(1L)
+            .service(Service.builder()
+                .id(1L)
+                .capacity(120)
+                .basePrice(100)
+                .commission(50)
+                .fullPrice(150)
+                .courier(getCourier())
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .build())
+            .build());
+    }
+
+    public static Location getLocationDto() {
+        return Location.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .locationTranslations(List.of(LocationTranslation.builder().id(1L).build()))
+            .build();
+    }
+
+    public static LocationTranslation getLocationTranslation() {
+        return LocationTranslation
+            .builder()
+            .id(1l)
+            .location(Location.builder().locationStatus(LocationStatus.DEACTIVATED).build())
+            .language(Language.builder().code("ua").build())
+            .build();
+    }
+
+    public static Bag bagDto() {
+        return Bag.builder()
+            .id(1)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location
+                .builder()
+                .id(1L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build())
+            .build();
+    }
+
+    public static Bag bagDto2() {
+        return Bag.builder()
+            .id(1)
+            .minAmountOfBags(MinAmountOfBag.EXCLUDE)
+            .location(Location
+                .builder()
+                .id(1L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build())
+            .build();
+    }
+
+    public static BagTranslation bagTranslationDto() {
+        return BagTranslation
+            .builder()
+            .id(1L)
+            .description("dd")
+            .bag(Bag.builder().id(1).minAmountOfBags(MinAmountOfBag.EXCLUDE)
+                .location(Location.builder()
+                    .id(1L)
+                    .locationStatus(LocationStatus.ACTIVE)
+                    .build())
+                .build())
+            .language(Language.builder().id(1L).build())
+            .build();
+    }
+
+    public static EditTariffInfoDto editTariffInfoDto() {
+        return EditTariffInfoDto.builder()
+            .bagId(1)
+            .courierId(1L)
+            .courierLimitsBy(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .languageId(1L)
+            .limitDescription("dd")
+            .maxAmountOfBigBag(1L)
+            .minAmountOfBigBag(1L)
+            .maxAmountOfOrder(1L)
+            .minAmountOfOrder(1L)
+            .minimalAmountOfBagStatus(MinAmountOfBag.EXCLUDE)
+            .locationId(1L)
+            .build();
+    }
+
+    public static Courier getcourierDto() {
+        return Courier.builder()
+            .id(1L)
+            .courierTranslationList(List.of(CourierTranslation.builder()
+                .id(1L)
+                .limitDescription("dd")
+                .name("mark")
+                .build()))
+            .courierStatus(CourierStatus.ACTIVE)
+            .build();
+    }
+
     public static GetServiceDto getServiceDto() {
-        User user = new User();
+        User user = getUser();
         return GetServiceDto.builder()
             .id(1l)
             .name("test")
@@ -2032,10 +2142,12 @@ public class ModelUtils {
             .fullPrice(150)
             .editedAt(LocalDate.now())
             .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .languageCode("ua")
+            .courierId(1L)
             .build();
     }
 
-    public static LocationCreateDto getAddLocationDto() {
+    public static LocationCreateDto getLocationCreateDto() {
         return LocationCreateDto.builder()
             .addLocationDtoList(List.of(getAddLocationTranslationDto()))
             .build();
@@ -2044,7 +2156,7 @@ public class ModelUtils {
     public static AddLocationTranslationDto getAddLocationTranslationDto() {
         return AddLocationTranslationDto.builder()
             .locationName("Name1")
-            .languageId(null)
+            .languageId(1L)
             .region("Name1")
             .build();
     }
@@ -2121,6 +2233,23 @@ public class ModelUtils {
                 .name("Test")
                 .limitDescription("Test")
                 .build()))
+            .build();
+    }
+
+    public static GetServiceDto getAllInfoAboutService() {
+        User user = getUser();
+        return GetServiceDto.builder()
+            .name("Test")
+            .capacity(120)
+            .price(100)
+            .commission(50)
+            .description("Test")
+            .fullPrice(150)
+            .id(1L)
+            .createdAt(LocalDate.now())
+            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .languageCode("ua")
+            .courierId(1L)
             .build();
     }
 }

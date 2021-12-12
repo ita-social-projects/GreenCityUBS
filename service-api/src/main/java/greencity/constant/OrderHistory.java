@@ -1,15 +1,18 @@
 package greencity.constant;
 
 public final class OrderHistory {
+    public static final String ORDER_ON_THE_ROUTE = "Статус Замовлення - На маршруті";
+    public static final String ORDER_DONE = "Статус Замовлення - Виконано";
+    public static final String ORDER_BROUGHT_IT_HIMSELF = "Статус Замовлення - Привезе сам";
     public static final String ORDER_CANCELLED = "Статус Замовлення - Скасовано";
     public static final String ORDER_PAID = "Замовлення Оплачено";
     public static final String SYSTEM = "Система";
     public static final String ORDER_FORMED = "Статус Замовлення - Сформовано";
     public static final String CLIENT = "Клієнт";
     public static final String CHANGE_ORDER_DETAILS = "Змінено деталі замовлення.";
-    public static final String ORDER_ADJUSTMENT = "Статус Замовлення - Ужзгодженно";
+    public static final String ORDER_ADJUSTMENT = "Статус Замовлення - Узгодження";
     public static final String ORDER_CONFIRMED = "Статус Замовлення - Підтверджено";
-    public static final String ORDER_NOT_TAKEN_OUT = "Статус Замовлення - Не вивезено";
+    public static final String ORDER_NOT_TAKEN_OUT = "Статус Замовлення - Не вивезли";
     public static final String ASSIGN_DRIVER = "Закріплено водія";
     public static final String ASSIGN_LOGIEST = "Закріплено логіста";
     public static final String ASSIGN_CALL_MANAGER = "Закріплено менеджера обдзвону";

@@ -19,7 +19,7 @@ class LocationCreateDtoMapperTest {
     void convert() {
         Location location = ModelUtils.getLocation();
         location.setLocationTranslations(ModelUtils.getLocationTranslationList());
-        LocationCreateDto dto = ModelUtils.getAddLocationDto();
+        LocationCreateDto dto = ModelUtils.getLocationCreateDto();
         assertEquals(dto.getAddLocationDtoList().get(0).getLocationName(),
             mapper.convert(location).getAddLocationDtoList().get(0).getLocationName());
         assertEquals(dto.getAddLocationDtoList().get(0).getLanguageId(),
