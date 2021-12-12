@@ -24,7 +24,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrdersAdminsPageServiceImplTest {
+class OrdersAdminsPageServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
@@ -80,7 +80,7 @@ public class OrdersAdminsPageServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "aa", 1L);
-
+        verify(orderRepository).findById(1L);
     }
 
 }

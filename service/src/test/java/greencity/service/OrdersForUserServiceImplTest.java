@@ -17,7 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
-public class OrdersForUserServiceImplTest {
+class OrdersForUserServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
     @Mock

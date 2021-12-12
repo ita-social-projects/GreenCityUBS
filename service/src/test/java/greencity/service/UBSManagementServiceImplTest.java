@@ -1392,15 +1392,15 @@ class UBSManagementServiceImplTest {
         User user = ModelUtils.getUser();
         user.setUuid("uuid");
         AddingViolationsToUserDto addingViolationsToUserDto = ModelUtils.getAddingViolationsToUserDto();
-
-        MultipartFile file = new MockMultipartFile("manualPaymentDto",
-            "", "application/json", "random Bytes".getBytes());
-
         Violation violation = ModelUtils.getViolation();
 
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.ofNullable(violation));
+
         ubsManagementService.updateUserViolation(addingViolationsToUserDto, new MultipartFile[2], "uuid");
+
+        verify(userRepository).findUserByUuid("uuid");
+        verify(violationRepository).findByOrderId(1L);
     }
 
     @Test
@@ -1409,5 +1409,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
 
         ubsManagementService.saveReason(1L, "uu", Arrays.asList(new MultipartFile[2]));
+
+        verify(orderRepository).findById(1L);
     }
 }
