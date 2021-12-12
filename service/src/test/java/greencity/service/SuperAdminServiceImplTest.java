@@ -10,10 +10,7 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
-import greencity.exceptions.BagNotFoundException;
-import greencity.exceptions.CourierNotFoundException;
-import greencity.exceptions.LanguageNotFoundException;
-import greencity.exceptions.LocationNotFoundException;
+import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -23,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -330,7 +328,271 @@ class SuperAdminServiceImplTest {
         List<LocationTranslation> locationTranslationDto = ModelUtils.getLocationTranslationList();
 
         when(locationTranslationRepository.findAll()).thenReturn(locationTranslationDto);
+
         superAdminService.getAllLocation();
+
         verify(locationTranslationRepository).findAll();
+    }
+
+    @Test
+    void addLocation() {
+        AddLocationDto addLocationDto = ModelUtils.addLocationDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(languageRepository.findById(1L)).thenReturn(Optional.ofNullable(language));
+
+        superAdminService.addLocation(addLocationDto);
+
+        verify(languageRepository).findById(1L);
+    }
+
+    @Test
+    void activateLocation() {
+        Location location = ModelUtils.getLocationDto();
+        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
+            .thenReturn(Optional.ofNullable(locationTranslation));
+
+        superAdminService.activateLocation(1L, "ua");
+
+        verify(locationRepository).findById(1L);
+        verify(locationTranslationRepository).findLocationTranslationByLocationAndLanguageCode(location, "ua");
+    }
+
+    @Test
+    void deactivateLocation() {
+        Location location = ModelUtils.getLocationDto();
+        location.setLocationStatus(LocationStatus.ACTIVE);
+        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
+            .thenReturn(Optional.ofNullable(locationTranslation));
+
+        superAdminService.deactivateLocation(1L, "ua");
+
+        verify(locationRepository).findById(1L);
+        verify(locationTranslationRepository).findLocationTranslationByLocationAndLanguageCode(location, "ua");
+    }
+
+    @Test
+    void excludeBag() {
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
+        BagTranslation bagTranslation = ModelUtils.bagTranslationDto();
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+        when(bagTranslationRepository.findBagTranslationByBag(ModelUtils.bagDto2())).thenReturn(bagTranslation);
+
+        superAdminService.excludeBag(1);
+
+        verify(bagRepository).findById(1);
+        verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
+    }
+
+    @Test
+    void editInfoInTariff() {
+        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
+        Courier courier = ModelUtils.getcourierDto();
+        CourierTranslation courierTranslation = CourierTranslation.builder().id(1L).build();
+        Language language = ModelUtils.getLanguage();
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+        when(courierRepository.findById(1L)).thenReturn(Optional.ofNullable(courier));
+        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, 1L))
+            .thenReturn(courierTranslation);
+        when(languageRepository.findById(1L)).thenReturn(Optional.ofNullable(language));
+
+        superAdminService.editInfoInTariff(editTariffInfoDto);
+
+        verify(bagRepository).findById(1);
+        verify(courierRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourierAndLanguageId(courier, 1L);
+        verify(languageRepository).findById(1L);
+    }
+
+    @Test
+    void addTariffServiceExceptionTest() {
+        AddServiceDto dto = ModelUtils.addServiceDto();
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
+    }
+
+    @Test
+    void addTariffServiceException2Test() {
+        User user = ModelUtils.getUser();
+        AddServiceDto dto = ModelUtils.addServiceDto();
+
+        when(userRepository.findByUuid("123233")).thenReturn(user);
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getLocation()));
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addTariffService(dto, "123233"));
+    }
+
+    @Test
+    void createServiceWithTranslationExceptionTest() {
+        CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
+
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
+    }
+
+    @Test
+    void createServiceWithTranslationException2Test() {
+        CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
+        User user = ModelUtils.getUser();
+
+        when(userRepository.findByUuid("uuid")).thenReturn(user);
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
+    }
+
+    @Test
+    void deleteServiceExceptionTest() {
+        assertThrows(ServiceNotFoundException.class, () -> superAdminService.deleteService(1L));
+    }
+
+    @Test
+    void editServiceExceptionTest() {
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        assertThrows(ServiceNotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+
+    }
+
+    @Test
+    void editServiceException2Test() {
+
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        Service service = new Service();
+        service.setId(1L);
+        User user = new User();
+
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
+        when(userRepository.findByUuid("uuid")).thenReturn(user);
+
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+    }
+
+    @Test
+    void editServiceException3Test() {
+
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        Service service = new Service();
+        service.setId(1L);
+        User user = new User();
+        Location location = ModelUtils.getLocation();
+
+        when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
+        when(userRepository.findByUuid("uuid")).thenReturn(user);
+        when(locationRepository.findById(dto.getLocationId())).thenReturn(Optional.ofNullable(location));
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+    }
+
+    @Test
+    void addLocationExceptionTest() {
+        AddLocationDto addLocationDto = ModelUtils.addLocationDto();
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(addLocationDto));
+    }
+
+    @Test
+    void deactivateLocationExceptionTest() {
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.deactivateLocation(1L, "ua"));
+    }
+
+    @Test
+    void deactivateLocationException2Test() {
+        Location location = ModelUtils.getLocationDto();
+        location.setLocationStatus(LocationStatus.DEACTIVATED);
+        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
+            .thenReturn(Optional.ofNullable(locationTranslation));
+
+        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.deactivateLocation(1L, "ua"));
+    }
+
+    @Test
+    void activateLocationExceptionTest() {
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.activateLocation(1L, "ua"));
+    }
+
+    @Test
+    void activateLocationException2Test() {
+        Location location = ModelUtils.getLocationDto();
+        location.setLocationStatus(LocationStatus.ACTIVE);
+        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
+
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
+            .thenReturn(Optional.ofNullable(locationTranslation));
+
+        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.activateLocation(1L, "ua"));
+    }
+
+    @Test
+    void setLimitDescriptionExceptiomTest() {
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1", 1l));
+    }
+
+    @Test
+    void excludeBagExceptionTest() {
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.excludeBag(1));
+    }
+
+    @Test
+    void excludeBagException2Test() {
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto2());
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+
+        assertThrows(BagWithThisStatusAlreadySetException.class, () -> superAdminService.excludeBag(1));
+    }
+
+    @Test
+    void includeBagExceptionTest() {
+        assertThrows(BagNotFoundException.class, () -> superAdminService.includeBag(1));
+    }
+
+    @Test
+    void includeBagException2Test() {
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+
+        assertThrows(BagWithThisStatusAlreadySetException.class, () -> superAdminService.includeBag(1));
+    }
+
+    @Test
+    void editInfoInTariffExceptionTest() {
+        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
+    }
+
+    @Test
+    void editInfoInTariffException2Test() {
+        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
+    }
+
+    @Test
+    void editInfoInTariffException3Test() {
+        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
+        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
+        Courier courier = ModelUtils.getcourierDto();
+
+        when(bagRepository.findById(1)).thenReturn(bag);
+        when(courierRepository.findById(1L)).thenReturn(Optional.ofNullable(courier));
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
     }
 }
