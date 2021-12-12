@@ -86,8 +86,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String publicKey;
     @Value("${liqpay.private.key}")
     private String privateKey;
-    private static final Integer bibBagsCapacity = 120;
-    public static final String langCode = "ua";
+    private static final Integer BAG_CAPACITY = 120;
+    public static final String LANG_CODE = "ua";
     private final EventService eventService;
 
     @Override
@@ -781,7 +781,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
-            if (bag.getCapacity() >= bibBagsCapacity) {
+            if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
             checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
@@ -1422,7 +1422,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId) {
         List<CourierLocation> courierLocations =
-            courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(courierId, langCode);
+            courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(courierId, LANG_CODE);
         if (courierLocations.isEmpty()) {
             throw new CourierLocationException(COURIER_LOCATION_DATA_IS_NOT_VALID);
         }
