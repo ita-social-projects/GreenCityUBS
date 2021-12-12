@@ -852,7 +852,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<AddressDto> addressDto =
-            allAddress.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
+            allAddress.stream()
+                .sorted(Comparator.comparing(Address::getId))
+                .filter(a -> a.getAddressStatus() != AddressStatus.DELETED)
+                .map(a -> modelMapper.map(a, AddressDto.class))
+                .collect(Collectors.toList());
         for (Address address : allAddress) {
             setAddressData(address, addressDto);
             userProfileDto.setAddressDto(addressDto);
