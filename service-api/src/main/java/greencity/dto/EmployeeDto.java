@@ -1,7 +1,6 @@
 package greencity.dto;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.entity.enums.EmployeeStatus;
 import lombok.*;
 
 import javax.validation.constraints.*;
@@ -28,8 +27,6 @@ public class EmployeeDto {
     @Email
     private String email;
     private String image;
-    @NotNull
-    private EmployeeStatus employeeStatus;
     @NotEmpty
     private List<PositionDto> employeePositions;
     @NotEmpty

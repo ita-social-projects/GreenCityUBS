@@ -77,6 +77,19 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
+    public Page<EmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
+        Page<Employee> employees =
+            employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        List<EmployeeDto> employeeDtos = employees.stream()
+            .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
+        return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Transactional
     public EmployeeDto update(EmployeeDto dto, MultipartFile image) {
         if (!employeeRepository.existsById(dto.getId())) {
@@ -94,7 +107,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
         Employee employee = modelMapper.map(dto, Employee.class);
-        employee.setEmployeeStatus(dto.getEmployeeStatus());
         if (image != null) {
             if (!employee.getImagePath().equals(defaultImagePath)) {
                 fileService.delete(employee.getImagePath());

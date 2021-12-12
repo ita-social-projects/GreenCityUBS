@@ -216,7 +216,7 @@ public class ModelUtils {
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId(1L)
-                .amount(200L)
+                .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
                 .comment("avb")
@@ -760,7 +760,6 @@ public class ModelUtils {
             .lastName("Петренко")
             .phoneNumber("+380935577455")
             .email("test@gmail.com")
-            .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
                 .name("Водій")
@@ -1005,6 +1004,7 @@ public class ModelUtils {
             .recipientName("Taras")
             .uuid("abc")
             .ubsUsers(getUbsUsers())
+            .currentPoints(100)
             .build();
     }
 
@@ -1077,7 +1077,11 @@ public class ModelUtils {
     public static BagTranslation getBagTranslation() {
         return BagTranslation.builder()
             .id(1L)
-            .bag(Bag.builder().id(1).capacity(120).price(350).build())
+            .bag(Bag.builder().id(1).capacity(120).price(350).location(Location.builder()
+                .id(1L)
+                .minAmountOfBigBags(1L)
+                .build())
+                .build())
             .language(Language.builder().id(1L).code("en").build())
             .name("Useless paper")
             .build();
@@ -1113,7 +1117,7 @@ public class ModelUtils {
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
-            .orderComment("all good")
+            .orderAdminComment("all good")
             .orderPaymentStatus("PAID").build();
     }
 
@@ -1328,14 +1332,14 @@ public class ModelUtils {
     public static List<LocationTranslation> getLocationTranslationList() {
         List<LocationTranslation> locationTranslations = new ArrayList<>();
         locationTranslations.add(LocationTranslation.builder()
-            .location(Location.builder().id(1L).build())
+            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .locationName("Name1")
             .language(Language.builder().code("ua").build())
             .build());
         locationTranslations.add(LocationTranslation.builder()
             .language(Language.builder().code("ua").build())
             .locationName("Name2")
-            .location(Location.builder().id(2L).build())
+            .location(Location.builder().id(2L).locationStatus(LocationStatus.ACTIVE).build())
             .build());
         return locationTranslations;
     }
@@ -1648,6 +1652,7 @@ public class ModelUtils {
             .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
+            .bagTranslations(List.of(BagTranslation.builder().description("ss").id(1L).build()))
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
@@ -1914,6 +1919,12 @@ public class ModelUtils {
             .build();
     }
 
+    public static PaymentInfoDto getInfoPayment() {
+        return PaymentInfoDto.builder()
+            .comment("ddd")
+            .build();
+    }
+
     public static OrderPaymentStatusTranslation getOrderPaymentStatusTranslation() {
         return OrderPaymentStatusTranslation.builder()
             .id(1L)
@@ -1959,7 +1970,7 @@ public class ModelUtils {
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
             .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
@@ -2000,6 +2011,141 @@ public class ModelUtils {
                     .id(1L)
                     .build()))
                 .build())
+            .build();
+    }
+
+    public static List<ServiceTranslation> getServiceTranslationDto() {
+        List<ServiceTranslation> serviceTranslations = new ArrayList<>();
+        serviceTranslations.add(ServiceTranslation.builder()
+            .id(1L)
+            .description("ss")
+            .language(Language.builder().id(1L).code("ua").build())
+            .name("Max")
+            .service(Service.builder()
+                .capacity(120)
+                .basePrice(1022)
+                .commission(50)
+                .fullPrice(150)
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .location(Location.builder().id(1L).build())
+                .serviceTranslations(getServiceTranslation())
+                .build())
+            .build());
+        serviceTranslations.add(ServiceTranslation.builder()
+            .id(1L)
+            .description("ss")
+            .language(Language.builder().id(2L).code("ua").build())
+            .name("Max")
+            .service(Service.builder()
+                .capacity(120)
+                .basePrice(100)
+                .commission(50)
+                .fullPrice(150)
+                .createdAt(LocalDate.now())
+                .createdBy("Taras Ivanov")
+                .location(Location.builder().id(1L).build())
+                .serviceTranslations(getServiceTranslation())
+                .build())
+            .build());
+        return serviceTranslations;
+    }
+
+    public static AddLocationDto addLocationDto() {
+        return AddLocationDto.builder()
+            .addLocationDtoList(List.of(AddLocationTranslationDto.builder()
+                .locationName("dd")
+                .languageId(1L)
+                .region("ss")
+                .build()))
+            .build();
+    }
+
+    public static Location getLocationDto() {
+        return Location.builder()
+            .id(1L)
+            .locationStatus(LocationStatus.DEACTIVATED)
+            .locationTranslations(List.of(LocationTranslation.builder().id(1L).build()))
+            .build();
+    }
+
+    public static LocationTranslation getLocationTranslation() {
+        return LocationTranslation
+            .builder()
+            .id(1l)
+            .location(Location.builder().locationStatus(LocationStatus.DEACTIVATED).build())
+            .language(Language.builder().code("ua").build())
+            .build();
+    }
+
+    public static Bag bagDto() {
+        return Bag.builder()
+            .id(1)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location
+                .builder()
+                .id(1L)
+                .minAmountOfBigBags(1L)
+                .build())
+            .build();
+    }
+
+    public static Bag bagDto2() {
+        return Bag.builder()
+            .id(1)
+            .minAmountOfBags(MinAmountOfBag.EXCLUDE)
+            .location(Location
+                .builder()
+                .id(1L)
+                .minAmountOfBigBags(1L)
+                .build())
+            .build();
+    }
+
+    public static BagTranslation bagTranslationDto() {
+        return BagTranslation
+            .builder()
+            .id(1L)
+            .description("dd")
+            .bag(Bag.builder().id(1).minAmountOfBags(MinAmountOfBag.EXCLUDE)
+                .location(Location.builder()
+                    .id(1L)
+                    .minAmountOfBigBags(1L)
+                    .build())
+                .build())
+            .language(Language.builder().id(1L).build())
+            .build();
+    }
+
+    public static EditTariffInfoDto editTariffInfoDto() {
+        return EditTariffInfoDto.builder()
+            .bagId(1)
+            .courierId(1L)
+            .courierLimitsBy(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .languageId(1L)
+            .limitDescription("dd")
+            .maxAmountOfBigBag(1L)
+            .minAmountOfBigBag(1L)
+            .maxAmountOfOrder(1L)
+            .minAmountOfOrder(1L)
+            .minimalAmountOfBagStatus(MinAmountOfBag.EXCLUDE)
+            .build();
+    }
+
+    public static Courier getcourierDto() {
+        return Courier.builder()
+            .id(1L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .courierTranslationList(List.of(CourierTranslation.builder()
+                .id(1L)
+                .limitDescription("dd")
+                .name("mark")
+                .build()))
+            .location(Location.builder().id(1L).build())
+            .maxAmountOfBigBags(1L)
+            .maxPriceOfOrder(1L)
+            .minAmountOfBigBags(1L)
+            .minPriceOfOrder(1L)
             .build();
     }
 }

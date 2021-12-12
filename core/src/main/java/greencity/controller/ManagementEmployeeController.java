@@ -75,7 +75,28 @@ public class ManagementEmployeeController {
     @GetMapping("/getAll-employees")
     public ResponseEntity<Page<EmployeeDto>> getAllEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.findAll(employeePage, employeeFilterCriteria));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(employeeService.findAll(employeePage, employeeFilterCriteria));
+    }
+
+    /**
+     * Controller gets all active employees.
+     *
+     * @return {@link PageableAdvancedDto} pageable active employees.
+     * @author Yurii Kuzo.
+     */
+    @ApiOperation(value = "Get all active employees")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = PageableAdvancedDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @ApiPageable
+    @GetMapping("/getAll-active-employees")
+    public ResponseEntity<Page<EmployeeDto>> getAllActiveEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria));
     }
 
     /**

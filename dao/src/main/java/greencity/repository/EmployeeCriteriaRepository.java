@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
@@ -33,11 +34,39 @@ public class EmployeeCriteriaRepository {
      * {@inheritDoc}
      */
     public Page<Employee> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria) {
+        return getAllEmployees(employeePage, employeeFilterCriteria);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Page<Employee> findAllActiveEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
+        return getAllActiveEmployees(employeePage, employeeFilterCriteria);
+    }
+
+    private Page<Employee> getAllEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
         Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
-        Predicate predicate = getPredicate(employeeFilterCriteria, employeeRoot);
+        Predicate predicate = getAllPredicate(employeeFilterCriteria, employeeRoot);
         criteriaQuery.where(predicate);
         setOrder(employeePage, criteriaQuery, employeeRoot);
+        return processEmployees(employeePage, criteriaQuery, predicate);
+    }
+
+    private Page<Employee> getAllActiveEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria) {
+        CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
+        Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
+        Predicate predicate = getAllActivePredicate(employeeFilterCriteria, employeeRoot);
+        criteriaQuery.where(predicate);
+        setOrder(employeePage, criteriaQuery, employeeRoot);
+        return processEmployees(employeePage, criteriaQuery, predicate);
+    }
+
+    private Page<Employee> processEmployees(EmployeePage employeePage, CriteriaQuery<Employee> criteriaQuery,
+        Predicate predicate) {
         TypedQuery<Employee> employeeTypedQuery = entityManager.createQuery(criteriaQuery);
         employeeTypedQuery.setFirstResult(employeePage.getPageNumber() * employeePage.getPageSize());
         employeeTypedQuery.setMaxResults(employeePage.getPageSize());
@@ -45,8 +74,8 @@ public class EmployeeCriteriaRepository {
         Pageable pageable = PageRequest.of(employeePage.getPageNumber(),
             employeePage.getPageSize(), sort);
         long employeesCount = getEmployeesCount(predicate);
-        List<Employee> resulEmployees = employeeTypedQuery.getResultList();
-        return new PageImpl<>(resulEmployees, pageable, employeesCount);
+        List<Employee> resultEmployees = employeeTypedQuery.getResultList();
+        return new PageImpl<>(resultEmployees, pageable, employeesCount);
     }
 
     private long getEmployeesCount(Predicate predicate) {
@@ -66,7 +95,23 @@ public class EmployeeCriteriaRepository {
             .collect(Collectors.toList()));
     }
 
-    private Predicate getPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+    private Predicate getAllPredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<Employee> employeeRoot) {
+        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot);
+        return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
+    }
+
+    private Predicate getAllActivePredicate(EmployeeFilterCriteria employeeFilterCriteria,
+        Root<Employee> employeeRoot) {
+        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot);
+        CriteriaBuilder.In<EmployeeStatus> employeeStatusIn =
+            criteriaBuilder.in(employeeRoot.get("employeeStatus"));
+        employeeStatusIn.value(EmployeeStatus.ACTIVE);
+        predicates.add(employeeStatusIn);
+        return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
+    }
+
+    private List<Predicate> getBasicPredicate(EmployeeFilterCriteria employeeFilterCriteria,
         Root<Employee> employeeRoot) {
         List<Predicate> predicates = new ArrayList<>();
         if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getReceivingStations()))) {
@@ -86,7 +131,7 @@ public class EmployeeCriteriaRepository {
         if (nonNull(employeeFilterCriteria.getSearch())) {
             searchEmployee(employeeFilterCriteria, employeeRoot, predicates);
         }
-        return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
+        return predicates;
     }
 
     private void searchEmployee(EmployeeFilterCriteria employeeFilterCriteria,
@@ -102,7 +147,7 @@ public class EmployeeCriteriaRepository {
         Expression<String> lastName = criteriaBuilder.upper(employeeRoot.get("lastName"));
         Expression<String> phoneNumber = criteriaBuilder.upper(employeeRoot.get("phoneNumber"));
         Expression<String> email = criteriaBuilder.upper(employeeRoot.get("email"));
-        String likeS = "%" + s + "%";
+        String likeS = "%" + s.toUpperCase() + "%";
         return criteriaBuilder.or(
             criteriaBuilder.like(firstName, likeS),
             criteriaBuilder.like(lastName, likeS),

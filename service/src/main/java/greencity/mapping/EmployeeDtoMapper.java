@@ -1,6 +1,7 @@
 package greencity.mapping;
 
 import greencity.dto.EmployeeDto;
+import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -30,7 +31,7 @@ public class EmployeeDtoMapper extends AbstractConverter<EmployeeDto, Employee> 
             .phoneNumber(dto.getPhoneNumber())
             .email(dto.getEmail())
             .imagePath(dto.getImage())
-            .employeeStatus(dto.getEmployeeStatus())
+            .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(dto.getEmployeePositions().stream()
                 .map(p -> Position.builder()
                     .id(p.getId())

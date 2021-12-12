@@ -502,7 +502,7 @@ public class ModelUtils {
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
             .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
@@ -542,6 +542,14 @@ public class ModelUtils {
                     .id(1L)
                     .build()))
                 .build())
+            .updateOrderDetailDto(List.of(
+                UpdateOrderDetailDto.builder()
+                    .amount(1)
+                    .exportedQuantity(1)
+                    .confirmedQuantity(1)
+                    .exportedQuantity(1)
+                    .bagId(1)
+                    .build()))
             .build();
     }
 }
