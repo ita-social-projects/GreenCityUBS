@@ -714,6 +714,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid("uuid")).thenReturn(user);
         when(locationRepository.findAll()).thenReturn(getLocationList());
         when(locationTranslationRepository.findAll()).thenReturn(getLocationTranslationList());
+
         assertEquals(getLocationResponseDtoList(), ubsService.getAllLocations("uuid"));
     }
 

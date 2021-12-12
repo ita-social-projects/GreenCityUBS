@@ -1328,36 +1328,41 @@ public class ModelUtils {
     }
 
     public static List<LocationTranslation> getLocationTranslationList() {
-        List<LocationTranslation> locationTranslations = new ArrayList<>();
-        locationTranslations.add(LocationTranslation.builder()
-            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
+        return List.of(LocationTranslation.builder()
             .locationName("Name1")
-            .language(Language.builder().code("ua").build())
-            .build());
-        locationTranslations.add(LocationTranslation.builder()
-            .language(Language.builder().code("ua").build())
-            .locationName("Name2")
-            .location(Location.builder().id(2L).locationStatus(LocationStatus.ACTIVE).build())
-            .build());
-        return locationTranslations;
+            .region("Name1")
+            .language(getLanguage())
+            .region("Name1")
+            .location(Location.builder()
+                .id(1L)
+                .locationStatus(LocationStatus.ACTIVE)
+                .build())
+            .build(),
+            LocationTranslation.builder()
+                .locationName("Name2")
+                .region("Name2")
+                .language(getLanguage())
+                .location(Location.builder()
+                    .id(2L)
+                    .locationStatus(LocationStatus.ACTIVE)
+                    .build())
+                .build());
     }
 
     public static List<LocationResponseDto> getLocationResponseDtoList() {
-        List<LocationResponseDto> list = new ArrayList<>();
-
-        LocationResponseDto locationResponseDto1 = LocationResponseDto.builder()
-            .id(1l)
+        return List.of(LocationResponseDto.builder()
+            .id(1L)
             .name("Name1")
+            .region("Name1")
             .languageCode("ua")
-            .build();
-        LocationResponseDto locationResponseDto2 = LocationResponseDto.builder()
-            .id(2l)
-            .name("Name2")
-            .languageCode("ua")
-            .build();
-        list.add(locationResponseDto1);
-        list.add(locationResponseDto2);
-        return list;
+            .build(),
+            LocationResponseDto.builder()
+                .id(2L)
+                .name("Name2")
+                .region("Name2")
+                .languageCode("ua")
+                .build());
+
     }
 
     private static List<String> createAllLanguageCode() {
