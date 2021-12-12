@@ -27,7 +27,6 @@ public class BigOrderTableRepository {
     private static final String USER = "user";
     private static final String UBS_USER = "ubsUser";
     private static final String ADDRESS = "address";
-    private static final String EMPLOYEE_ORDER_POSITION = "employeeOrderPositions";
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -49,8 +48,8 @@ public class BigOrderTableRepository {
         orderRoot.join(USER, JoinType.LEFT);
         Join<Order, UBSuser> ubsUserJoin = orderRoot.join(UBS_USER, JoinType.LEFT);
         ubsUserJoin.join(ADDRESS, JoinType.LEFT);
-        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery);
 
+        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery);
         criteriaQuery.select(orderRoot).distinct(true);
         criteriaQuery.where(predicate);
 
@@ -62,7 +61,7 @@ public class BigOrderTableRepository {
 
         Sort sort = Sort.by(orderPage.getSortDirection(), orderPage.getSortBy());
         Pageable pageable =
-                PageRequest.of(orderPage.getPageNumber(), orderPage.getPageSize(), sort);
+            PageRequest.of(orderPage.getPageNumber(), orderPage.getPageSize(), sort);
 
         long ordersCount = getOrdersCount(predicate);
 
@@ -88,7 +87,6 @@ public class BigOrderTableRepository {
         } else if (split.length == 3) {
             sortBy = orderRoot.get(split[0]).get(split[1]).get(split[2]);
         }
-
         if (orderPage.getSortDirection().equals(Sort.Direction.ASC)) {
             criteriaQuery.orderBy(criteriaBuilder.asc(sortBy));
         } else {
@@ -96,76 +94,74 @@ public class BigOrderTableRepository {
         }
     }
 
-    private Predicate  getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
+    private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
         List<Predicate> predicates = new ArrayList<>();
         if (nonNull(sc.getOrderStatus())) {
             CriteriaBuilder.In<OrderStatus> orderStatus = criteriaBuilder.in(orderRoot.get("orderStatus"));
             Arrays.stream(sc.getOrderStatus())
-                    .forEach(orderStatus::value);
+                .forEach(orderStatus::value);
             predicates.add(orderStatus);
         }
         if (nonNull(sc.getOrderPaymentStatus())) {
             CriteriaBuilder.In<OrderPaymentStatus> orderPaymentStatus =
-                    criteriaBuilder.in(orderRoot.get("orderPaymentStatus"));
+                criteriaBuilder.in(orderRoot.get("orderPaymentStatus"));
             Arrays.stream(sc.getOrderPaymentStatus())
-                    .forEach(orderPaymentStatus::value);
+                .forEach(orderPaymentStatus::value);
             predicates.add(orderPaymentStatus);
         }
         if (nonNull(sc.getReceivingStation())) {
             CriteriaBuilder.In<String> receivingStation = criteriaBuilder.in(
-                    criteriaBuilder.upper(orderRoot.get("receivingStation")));
+                criteriaBuilder.upper(orderRoot.get("receivingStation")));
             Arrays.stream(sc.getReceivingStation())
-                    .map(String::toUpperCase)
-                    .forEach(receivingStation::value);
+                .map(String::toUpperCase)
+                .forEach(receivingStation::value);
             predicates.add(receivingStation);
         }
         if (nonNull(sc.getDistricts())) {
             CriteriaBuilder.In<String> district =
-                    criteriaBuilder.in(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("district")));
+                criteriaBuilder.in(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("district")));
             Arrays.stream(sc.getDistricts())
-                    .map(String::toUpperCase)
-                    .forEach(district::value);
+                .map(String::toUpperCase)
+                .forEach(district::value);
             predicates.add(district);
         }
         if (nonNull(sc.getOrderDateFrom()) && nonNull(sc.getOrderDateTo())) {
             predicates.add(criteriaBuilder.between(orderRoot.get("orderDate"),
-                    LocalDateTime.of(LocalDate.parse(sc.getOrderDateFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(sc.getOrderDateTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(sc.getOrderDateFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(sc.getOrderDateTo()), LocalTime.MAX)));
         }
         if (nonNull(sc.getDeliverFromFrom()) && nonNull(sc.getDeliverFromTo())) {
             predicates.add(criteriaBuilder.between(orderRoot.get("deliverFrom"),
-                    LocalDateTime.of(LocalDate.parse(sc.getDeliverFromFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(sc.getDeliverFromTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(sc.getDeliverFromFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(sc.getDeliverFromTo()), LocalTime.MAX)));
         }
         if (nonNull(sc.getDeliverToFrom()) && nonNull(sc.getDeliverToTo())) {
             predicates.add(criteriaBuilder.between(orderRoot.get("deliverTo"),
-                    LocalDateTime.of(LocalDate.parse(sc.getDeliverToFrom()), LocalTime.MIN),
-                    LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
+                LocalDateTime.of(LocalDate.parse(sc.getDeliverToFrom()), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
         }
         if (nonNull(sc.getPaymentDateFrom()) && nonNull(sc.getPaymentDateTo())) {
             Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
             Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-            ListJoin<Order,Payment> join = paymentRoot.joinList("payment",JoinType.LEFT);
+            ListJoin<Order, Payment> join = paymentRoot.joinList("payment", JoinType.LEFT);
             subQueryPayment.select(join).where(
-                    criteriaBuilder.between(
-                            join.get("settlementDate").as(String.class),
-                            sc.getPaymentDateFrom(),
-                            sc.getPaymentDateTo()
-                    )
-            );
+                criteriaBuilder.between(
+                    join.get("settlementDate").as(String.class),
+                    sc.getPaymentDateFrom(),
+                    sc.getPaymentDateTo()));
             predicates.add(criteriaBuilder.exists(subQueryPayment));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-          predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),orderRoot,cq));
+            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleLogiestManId())) {
-          predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(),orderRoot,cq));
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(),orderRoot,cq));
+            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(),orderRoot,cq));
+            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), orderRoot, cq));
         }
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates, cq);
@@ -173,34 +169,34 @@ public class BigOrderTableRepository {
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
-    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee,Root<Order> orderRoot,CriteriaQuery<Order> cq) {
+    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee, Root<Order> orderRoot,
+        CriteriaQuery<Order> cq) {
         Subquery<EmployeeOrderPosition> subQueryOEP = cq.subquery(EmployeeOrderPosition.class);
         Root<Order> oepRoot = subQueryOEP.correlate(orderRoot);
-        SetJoin<Order,EmployeeOrderPosition> join = oepRoot.joinSet("employeeOrderPositions",JoinType.LEFT);
-        join.join("employee",JoinType.LEFT);
-        join.join("position",JoinType.LEFT);
+        SetJoin<Order, EmployeeOrderPosition> join = oepRoot.joinSet("employeeOrderPositions", JoinType.LEFT);
+        join.join("employee", JoinType.LEFT);
+        join.join("position", JoinType.LEFT);
 
         CriteriaBuilder.In<Long> responsibleEmployeeId = criteriaBuilder.in(join.get("employee").get("id"));
         Arrays.stream(idEmployee)
-                .forEach(responsibleEmployeeId::value);
+            .forEach(responsibleEmployeeId::value);
 
         subQueryOEP.select(join).where(criteriaBuilder.and(
-                criteriaBuilder.equal(join.get("position").get("id"), idPosition),
-                responsibleEmployeeId));
+            criteriaBuilder.equal(join.get("position").get("id"), idPosition),
+            responsibleEmployeeId));
         return criteriaBuilder.exists(subQueryOEP);
-
     }
 
-    private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates, CriteriaQuery<Order> cq) {
+    private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates,
+        CriteriaQuery<Order> cq) {
         String[] searchWord = sc.getSearch().split(" ");
         for (String s : searchWord) {
             predicates.add(criteriaBuilder.or(
-                    formOrderLikePredicate(s, orderRoot),
-                    formUserLikePredicate(s, orderRoot),
-                    formUbsUserLikePredicate(s, orderRoot),
-                    formAddressLikePredicate(s, orderRoot),
-                    formPaymentLikePredicate(s, cq, orderRoot)
-            ));
+                formOrderLikePredicate(s, orderRoot),
+                formUserLikePredicate(s, orderRoot),
+                formUbsUserLikePredicate(s, orderRoot),
+                formAddressLikePredicate(s, orderRoot),
+                formPaymentLikePredicate(s, cq, orderRoot)));
         }
     }
 
@@ -210,10 +206,10 @@ public class BigOrderTableRepository {
         Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
         Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
         return criteriaBuilder.or(
-                criteriaBuilder.like(id, "%" + s + "%"),
-                criteriaBuilder.like(orderDate, "%" + s + "%"),
-                criteriaBuilder.like(note, "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(comment, "%" + s.toUpperCase() + "%"));
+            criteriaBuilder.like(id, "%" + s + "%"),
+            criteriaBuilder.like(orderDate, "%" + s + "%"),
+            criteriaBuilder.like(note, "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(comment, "%" + s.toUpperCase() + "%"));
     }
 
     private Predicate formUbsUserLikePredicate(String s, Root<Order> orderRoot) {
@@ -222,10 +218,10 @@ public class BigOrderTableRepository {
         Expression<String> phoneNumber = orderRoot.get(UBS_USER).get("phoneNumber");
         Expression<String> email = orderRoot.get(UBS_USER).get("email");
         return criteriaBuilder.or(
-                criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(phoneNumber), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(email), "%" + s.toUpperCase() + "%"));
+            criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(phoneNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(email), "%" + s.toUpperCase() + "%"));
     }
 
     private Predicate formUserLikePredicate(String s, Root<Order> orderRoot) {
@@ -235,11 +231,11 @@ public class BigOrderTableRepository {
         Expression<String> recipientEmail = orderRoot.get(USER).get("recipientEmail");
         Expression<String> violations = orderRoot.get(USER).get("violations").as(String.class);
         return criteriaBuilder.or(
-                criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(recipientPhone), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(recipientEmail), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(violations, "%" + s + "%"));
+            criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(recipientPhone), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(recipientEmail), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(violations, "%" + s + "%"));
     }
 
     private Predicate formAddressLikePredicate(String s, Root<Order> orderRoot) {
@@ -249,11 +245,11 @@ public class BigOrderTableRepository {
         Expression<String> entranceNumber = orderRoot.get(UBS_USER).get(ADDRESS).get("entranceNumber");
         Expression<String> addressComment = orderRoot.get(UBS_USER).get(ADDRESS).get("addressComment");
         return criteriaBuilder.or(
-                criteriaBuilder.like(criteriaBuilder.upper(street), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(houseNumber), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(houseCorpus), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(entranceNumber), "%" + s.toUpperCase() + "%"),
-                criteriaBuilder.like(criteriaBuilder.upper(addressComment), "%" + s.toUpperCase() + "%"));
+            criteriaBuilder.like(criteriaBuilder.upper(street), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(houseNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(houseCorpus), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(entranceNumber), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(addressComment), "%" + s.toUpperCase() + "%"));
     }
 
     private Predicate formPaymentLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
@@ -262,8 +258,6 @@ public class BigOrderTableRepository {
         Join<Order, Payment> paymentJoin = paymentRoot.join("payment");
         subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
         return criteriaBuilder.or(
-                criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%")
-        );
+            criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%"));
     }
-
 }
