@@ -1843,7 +1843,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String getPaymentDate(Order order) {
         return nonNull(order.getPayment())
-            ? order.getPayment().stream().map(Payment::getOrderTime).collect(joining(", "))
+            ? order.getPayment().stream().map(Payment::getSettlementDate).collect(joining(", "))
             : "-";
     }
 

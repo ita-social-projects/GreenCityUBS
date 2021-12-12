@@ -49,12 +49,7 @@ public class BigOrderTableRepository {
         orderRoot.join(USER, JoinType.LEFT);
         Join<Order, UBSuser> ubsUserJoin = orderRoot.join(UBS_USER, JoinType.LEFT);
         ubsUserJoin.join(ADDRESS, JoinType.LEFT);
-        ListJoin<Order, Payment> paymentListJoin = orderRoot.joinList("payment", JoinType.LEFT);
-        SetJoin<Order, EmployeeOrderPosition> eopSetJoin = orderRoot.joinSet("employeeOrderPositions", JoinType.LEFT);
-        eopSetJoin.join("employee", JoinType.LEFT);
-        eopSetJoin.join("position", JoinType.LEFT);
-
-        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery, eopSetJoin);
+        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery);
 
         criteriaQuery.select(orderRoot).distinct(true);
         criteriaQuery.where(predicate);
@@ -101,7 +96,7 @@ public class BigOrderTableRepository {
         }
     }
 
-    private Predicate  getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq, SetJoin<Order, EmployeeOrderPosition> eopSetJoin) {
+    private Predicate  getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
         List<Predicate> predicates = new ArrayList<>();
         if (nonNull(sc.getOrderStatus())) {
             CriteriaBuilder.In<OrderStatus> orderStatus = criteriaBuilder.in(orderRoot.get("orderStatus"));
@@ -148,16 +143,16 @@ public class BigOrderTableRepository {
                     LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-            filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),orderRoot,cq);
+          predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),orderRoot,cq));
         }
         if (nonNull(sc.getResponsibleLogiestManId())) {
-           filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(),orderRoot,cq);
+          predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(),orderRoot,cq));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(),orderRoot,cq);
+            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(),orderRoot,cq));
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(),orderRoot,cq);
+            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(),orderRoot,cq));
         }
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates, cq);
