@@ -1113,7 +1113,7 @@ public class ModelUtils {
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
-            .orderComment("all good")
+            .orderAdminComment("all good")
             .orderPaymentStatus("PAID").build();
     }
 
@@ -1965,7 +1965,7 @@ public class ModelUtils {
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
             .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
