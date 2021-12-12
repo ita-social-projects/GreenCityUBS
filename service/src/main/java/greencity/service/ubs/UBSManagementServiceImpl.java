@@ -1151,15 +1151,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (payment.isEmpty()) {
             throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
         }
-        if (nonNull(dto.getOrderComment())) {
-            order.setComment(dto.getOrderComment());
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (nonNull(dto.getOrderAdminComment())) {
+            order.setAdminComment(dto.getOrderAdminComment());
+            eventService.save(OrderHistory.ADD_ADMIN_COMMENT, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
             orderRepository.save(order);
         }
         if (nonNull(dto.getOrderStatus())) {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
-
-            User currentUser = userRepository.findUserByUuid(uuid)
-                .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(order);
                 eventService.save(OrderHistory.ORDER_ADJUSTMENT,
@@ -1174,6 +1175,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.DONE) {
+                eventService.save(OrderHistory.ORDER_DONE,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+                eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
+                eventService.save(OrderHistory.ORDER_ON_THE_ROUTE,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             }
             orderRepository.save(order);

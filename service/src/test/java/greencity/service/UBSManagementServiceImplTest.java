@@ -605,15 +605,10 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
 
         verify(eventService, times(1))
-            .save("Статус Замовлення - Ужзгодженно",
+            .save("Статус Замовлення - Узгодження",
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
             .save("Статус Замовлення - Підтверджено",
-                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
-        verify(eventService, times(1))
-            .save(
-                "Статус Замовлення - Не вивезено" + "  " + order.getComment() + "  "
-                    + order.getImageReasonNotTakingBags(),
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
             .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
