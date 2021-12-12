@@ -142,6 +142,19 @@ public class BigOrderTableRepository {
                     LocalDateTime.of(LocalDate.parse(sc.getDeliverToFrom()), LocalTime.MIN),
                     LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
         }
+        if (nonNull(sc.getPaymentDateFrom()) && nonNull(sc.getPaymentDateTo())) {
+            Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
+            Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
+            ListJoin<Order,Payment> join = paymentRoot.joinList("payment",JoinType.LEFT);
+            subQueryPayment.select(join).where(
+                    criteriaBuilder.between(
+                            join.get("settlementDate").as(String.class),
+                            sc.getPaymentDateFrom(),
+                            sc.getPaymentDateTo()
+                    )
+            );
+            predicates.add(criteriaBuilder.exists(subQueryPayment));
+        }
         if (nonNull(sc.getResponsibleCallerId())) {
           predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),orderRoot,cq));
         }
