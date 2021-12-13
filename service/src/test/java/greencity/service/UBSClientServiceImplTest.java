@@ -27,13 +27,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -487,23 +485,24 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("87df9ad5-6393-441f-8423-8b2e770b01a8")).thenReturn(user);
 
-        List<AddressDto> addressDto = ModelUtils.addressDto();
-        Address address = ModelUtils.address();
+        List<AddressDto> addressDto = ModelUtils.addressDtoList();
+        List<Address> address = ModelUtils.addressList();
 
         UserProfileDto userProfileDto =
             UserProfileDto.builder().addressDto(addressDto).recipientEmail(user.getRecipientEmail())
                 .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
                 .recipientPhone(user.getRecipientPhone())
                 .build();
-        Type savedAddressDtoList = new TypeToken<List<AddressDto>>() {
-        }.getType();
 
-        when(modelMapper.map(addressDto, Address.class)).thenReturn(address);
+        when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
+        when(modelMapper.map(addressDto.get(1), Address.class)).thenReturn(address.get(1));
         when(userRepository.save(user)).thenReturn(user);
-        when(addressRepository.save(address)).thenReturn(address);
-        when(modelMapper.map(address, savedAddressDtoList)).thenReturn(addressDto);
+        for (Address address1 : address) {
+            when(addressRepository.save(address1)).thenReturn(address1);
+        }
+        when(modelMapper.map(address.get(0), AddressDto.class)).thenReturn(addressDto.get(0));
+        when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(modelMapper.map(address, savedAddressDtoList)).thenReturn(addressDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
         assertNotNull(userProfileDto.getAddressDto());
         assertNotNull(userProfileDto);
@@ -515,9 +514,9 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUser();
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         UserProfileDto userProfileDto = new UserProfileDto();
-        List<AddressDto> addressDto = ModelUtils.addressDto();
+        List<AddressDto> addressDto = ModelUtils.addressDtoList();
         userProfileDto.setAddressDto(addressDto);
-        Address address = ModelUtils.address();
+        List<Address> address = ModelUtils.addressList();
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
         assertNotNull(addressDto);
