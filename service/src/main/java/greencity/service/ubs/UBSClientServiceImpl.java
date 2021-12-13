@@ -21,10 +21,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -832,14 +829,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
-        List<AddressDto> addressDto = userProfileDto.getAddressDto();
-        Address address = modelMapper.map(addressDto, Address.class);
-        address.setUser(user);
-        Address savedAddress = addressRepo.save(address);
+        List<AddressDto> addressDtoList = userProfileDto.getAddressDto();
+        List<Address> addressList =
+            addressDtoList.stream().map(a -> modelMapper.map(a, Address.class)).collect(Collectors.toList());
+        for (Address address : addressList) {
+            address.setUser(user);
+            addressRepo.save(address);
+        }
         User savedUser = userRepository.save(user);
-        Type savedAddressDtoList = new TypeToken<List<AddressDto>>() {
-        }.getType();
-        List<AddressDto> mapperAddressDto = modelMapper.map(savedAddress, savedAddressDtoList);
+        List<AddressDto> mapperAddressDto =
+            addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
         return mappedUserProfileDto;
@@ -853,14 +852,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<AddressDto> addressDto =
             allAddress.stream()
-                .sorted(Comparator.comparing(Address::getId))
                 .filter(a -> a.getAddressStatus() != AddressStatus.DELETED)
                 .map(a -> modelMapper.map(a, AddressDto.class))
                 .collect(Collectors.toList());
-        for (Address address : allAddress) {
-            setAddressData(address, addressDto);
-            userProfileDto.setAddressDto(addressDto);
-        }
+        userProfileDto.setAddressDto(addressDto);
         return userProfileDto;
     }
 
@@ -871,24 +866,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
-    }
-
-    private Address setAddressData(Address address, List<AddressDto> addressDto) {
-        List<String> city = addressDto.stream().map(AddressDto::getCity).collect(Collectors.toList());
-        List<String> street = addressDto.stream().map(AddressDto::getStreet).collect(Collectors.toList());
-        List<String> district = addressDto.stream().map(AddressDto::getDistrict).collect(Collectors.toList());
-        List<String> houseNumber = addressDto.stream().map(AddressDto::getHouseNumber).collect(Collectors.toList());
-        List<String> entranceNumber =
-            addressDto.stream().map(AddressDto::getEntranceNumber).collect(Collectors.toList());
-        List<String> houseCorpus = addressDto.stream().map(AddressDto::getHouseCorpus).collect(Collectors.toList());
-        address.setCity(String.valueOf(city));
-        address.setStreet(String.valueOf(street));
-        address.setDistrict(String.valueOf(district));
-        address.setHouseNumber(String.valueOf(houseNumber));
-        address.setEntranceNumber(String.valueOf(entranceNumber));
-        address.setHouseCorpus(String.valueOf(houseCorpus));
-
-        return address;
     }
 
     private User createUserByUuidIfUserDoesNotExist(String uuid) {
