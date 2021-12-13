@@ -438,5 +438,4 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1"))
             .andExpect(status().isOk());
     }
-
 }
