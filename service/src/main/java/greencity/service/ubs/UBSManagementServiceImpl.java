@@ -368,8 +368,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Order order = orderRepository.getUserByOrderId(orderId).orElseThrow(
+            () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long overpayment = calculateOverpayment(order, sumToPay);
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
         PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
@@ -378,6 +378,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             payDto.setComment(AppConstant.PAYMENT_REFUND);
         } else {
             payDto.setComment(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT);
+            User user = order.getUser();
+            user.setCurrentPoints(user.getCurrentPoints() + Integer.parseInt(overpayment.toString()));
+            orderRepository.save(order);
         }
         dto.getPaymentInfoDtos().add(payDto);
         dto.setOverpayment(dto.getOverpayment() - overpayment);
@@ -901,6 +904,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
         for (UpdateOrderDetailDto updateOrderDetailDto : request) {
+            if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
+                updateOrderDetailDto.getBagId().longValue()))) {
+                updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
+                    updateOrderDetailDto.getBagId().longValue());
+            }
             if (nonNull(updateOrderDetailDto.getAmount())) {
                 updateOrderRepository
                     .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
@@ -962,7 +970,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
                     Long.valueOf(dto.get(i).getBagId()));
-                if (!exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
+                if (nonNull(dto.get(i).getExportedQuantity())
+                    && !exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
                     if (i == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
@@ -1142,31 +1151,49 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (payment.isEmpty()) {
             throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
         }
-        order.setComment(dto.getOrderComment());
-        OrderStatus newStatus = OrderStatus.valueOf(dto.getOrderStatus());
-        order.setOrderStatus(newStatus);
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (newStatus == OrderStatus.ADJUSTMENT) {
-            notificationService.notifyCourierItineraryFormed(order);
-            eventService.save(OrderHistory.ORDER_ADJUSTMENT,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CONFIRMED) {
-            eventService.save(OrderHistory.ORDER_CONFIRMED,
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.NOT_TAKEN_OUT) {
-            eventService.save(
-                OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
-                    + order.getImageReasonNotTakingBags(),
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        } else if (newStatus == OrderStatus.CANCELED) {
-            eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        if (nonNull(dto.getOrderAdminComment())) {
+            order.setAdminComment(dto.getOrderAdminComment());
+            eventService.save(OrderHistory.ADD_ADMIN_COMMENT, currentUser.getRecipientName()
+                + "  " + currentUser.getRecipientSurname(), order);
+            orderRepository.save(order);
         }
-        paymentRepository.paymentInfo(id)
-            .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
-        orderRepository.save(order);
-        paymentRepository.saveAll(payment);
+        if (nonNull(dto.getOrderStatus())) {
+            order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
+            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+                notificationService.notifyCourierItineraryFormed(order);
+                eventService.save(OrderHistory.ORDER_ADJUSTMENT,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                eventService.save(OrderHistory.ORDER_CONFIRMED,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                eventService.save(
+                    OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
+                        + order.getImageReasonNotTakingBags(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.DONE) {
+                eventService.save(OrderHistory.ORDER_DONE,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+                eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE) {
+                eventService.save(OrderHistory.ORDER_ON_THE_ROUTE,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+            }
+            orderRepository.save(order);
+        }
+        if (nonNull(dto.getOrderPaymentStatus())) {
+            paymentRepository.paymentInfo(id)
+                .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
+            paymentRepository.saveAll(payment);
+        }
+
         return buildStatuses(order, payment.get(0));
     }
 
@@ -1246,13 +1273,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
-        address.setCity(dto.getAddressCity());
-        address.setRegion(dto.getAddressRegion());
-        address.setHouseNumber(dto.getAddressHouseNumber());
-        address.setEntranceNumber(dto.getAddressEntranceNumber());
-        address.setDistrict(dto.getAddressDistrict());
-        address.setStreet(dto.getAddressStreet());
-        address.setHouseCorpus(dto.getAddressHouseCorpus());
+        if (nonNull(dto.getAddressCity())) {
+            address.setCity(dto.getAddressCity());
+        }
+        if (nonNull(dto.getAddressRegion())) {
+            address.setRegion(dto.getAddressRegion());
+        }
+        if (nonNull(dto.getAddressHouseNumber())) {
+            address.setHouseNumber(dto.getAddressHouseNumber());
+        }
+        if (nonNull(dto.getAddressEntranceNumber())) {
+            address.setEntranceNumber(dto.getAddressEntranceNumber());
+        }
+        if (nonNull(dto.getAddressDistrict())) {
+            address.setDistrict(dto.getAddressDistrict());
+        }
+        if (nonNull(dto.getAddressStreet())) {
+            address.setStreet(dto.getAddressStreet());
+        }
+        if (nonNull(dto.getAddressHouseCorpus())) {
+            address.setHouseCorpus(dto.getAddressHouseCorpus());
+        }
         return address;
     }
 
@@ -1391,9 +1432,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long paymentSum = order.getPayment().stream()
             .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(Payment::getAmount)
+            .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-        return Math.max((paymentSum - sumToPay), 0L);
+
+        return sumToPay >= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
     }
 
     /**
@@ -1405,7 +1448,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculatePaidAmount(Order order) {
         return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).reduce(0L, (a, b) -> a + b);
+            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, (a, b) -> a + b);
     }
 
     /**
@@ -1417,7 +1460,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
-        return Math.max((sumToPay - paidAmount), 0L);
+        return sumToPay < paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
