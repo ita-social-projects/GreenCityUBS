@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -281,8 +282,66 @@ class OrderControllerTest {
     }
 
     @Test
-    void getFondyStatusPayment() throws Exception {
+    void getLiqPayStatusPayment() throws Exception {
         mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)).andExpect(status().isOk());
+    }
+
+    @Test
+    void processOrderForIFTest() throws Exception {
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String JsonDto = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processOrderIF")
+            .principal(principal)
+            .content(JsonDto)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void receivePaymentForIFTest() throws Exception {
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String paymentResponseJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/receivePaymentIF")
+            .content(paymentResponseJson)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void processLiqPayOrderForIF() throws Exception {
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processLiqPayOrderIF")
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void receiveLiqPayOrderForIF() throws Exception {
+        PaymentResponseDtoLiqPay dto = ModelUtils.getPaymentResponceDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String Json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/receiveLiqPayPaymentIF")
+            .content(Json)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void getFondyStatusPayment2() throws Exception {
+        mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1))
+            .andExpect(status().isOk());
     }
 
 }

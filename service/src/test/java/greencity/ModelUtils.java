@@ -2179,4 +2179,35 @@ public class ModelUtils {
             .minPriceOfOrder(1L)
             .build();
     }
+
+    public static OrderStatusTranslation getOrderStatusTranslation() {
+        return OrderStatusTranslation
+            .builder()
+            .statusId(1L)
+            .languageId(1L)
+            .id(1L)
+            .name("ua")
+            .build();
+    }
+
+    public static OrderStatusTranslation getOrderStatusTranslation2() {
+        return OrderStatusTranslation
+            .builder()
+            .statusId(1L)
+            .languageId(2L)
+            .id(1L)
+            .name("en")
+            .build();
+    }
+
+    public static Order getOrdersDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().paymentId(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.CANCELED)
+            .build();
+    }
 }
