@@ -1885,12 +1885,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getDateOfExport(Order order) {
-        return nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-";
+        return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
+            ? String.format("from %s to %s", order.getDeliverFrom().toLocalDate().toString(),
+                order.getDeliverTo().toLocalDate().toString())
+            : "-";
     }
 
     private String getTimeOfExport(Order order) {
         return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
-            ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+            ? String.format("from %s to %s", order.getDeliverFrom().toLocalTime().toString(),
                 order.getDeliverTo().toLocalTime().toString())
             : "-";
     }

@@ -96,60 +96,39 @@ public class BigOrderTableRepository {
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
         List<Predicate> predicates = new ArrayList<>();
+
         if (nonNull(sc.getOrderStatus())) {
-            CriteriaBuilder.In<OrderStatus> orderStatus = criteriaBuilder.in(orderRoot.get("orderStatus"));
-            Arrays.stream(sc.getOrderStatus())
-                .forEach(orderStatus::value);
-            predicates.add(orderStatus);
+            predicates.add(filterByOrderStatus(sc.getOrderStatus(), orderRoot));
         }
         if (nonNull(sc.getOrderPaymentStatus())) {
-            CriteriaBuilder.In<OrderPaymentStatus> orderPaymentStatus =
-                criteriaBuilder.in(orderRoot.get("orderPaymentStatus"));
-            Arrays.stream(sc.getOrderPaymentStatus())
-                .forEach(orderPaymentStatus::value);
-            predicates.add(orderPaymentStatus);
+            predicates.add(filterByOrderPaymentStatus(sc.getOrderPaymentStatus(), orderRoot));
         }
         if (nonNull(sc.getReceivingStation())) {
-            CriteriaBuilder.In<String> receivingStation = criteriaBuilder.in(
-                criteriaBuilder.upper(orderRoot.get("receivingStation")));
-            Arrays.stream(sc.getReceivingStation())
-                .map(String::toUpperCase)
-                .forEach(receivingStation::value);
-            predicates.add(receivingStation);
+            predicates.add(filterByReceivingStation(sc.getReceivingStation(), orderRoot));
+        }
+        if (nonNull(sc.getRegion())) {
+            predicates.add(filterByLocation(sc.getRegion(), "region", orderRoot));
+        }
+        if (nonNull(sc.getCity())) {
+            predicates.add(filterByLocation(sc.getCity(), "city", orderRoot));
         }
         if (nonNull(sc.getDistricts())) {
-            CriteriaBuilder.In<String> district =
-                criteriaBuilder.in(criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get("district")));
-            Arrays.stream(sc.getDistricts())
-                .map(String::toUpperCase)
-                .forEach(district::value);
-            predicates.add(district);
+            predicates.add(filterByLocation(sc.getDistricts(), "district", orderRoot));
         }
         if (nonNull(sc.getOrderDateFrom()) && nonNull(sc.getOrderDateTo())) {
-            predicates.add(criteriaBuilder.between(orderRoot.get("orderDate"),
-                LocalDateTime.of(LocalDate.parse(sc.getOrderDateFrom()), LocalTime.MIN),
-                LocalDateTime.of(LocalDate.parse(sc.getOrderDateTo()), LocalTime.MAX)));
+            predicates
+                .add(filterByDateFromOrderTable(sc.getOrderDateFrom(), sc.getOrderDateTo(), "orderDate", orderRoot));
         }
         if (nonNull(sc.getDeliverFromFrom()) && nonNull(sc.getDeliverFromTo())) {
-            predicates.add(criteriaBuilder.between(orderRoot.get("deliverFrom"),
-                LocalDateTime.of(LocalDate.parse(sc.getDeliverFromFrom()), LocalTime.MIN),
-                LocalDateTime.of(LocalDate.parse(sc.getDeliverFromTo()), LocalTime.MAX)));
+            predicates.add(
+                filterByDateFromOrderTable(sc.getDeliverFromFrom(), sc.getDeliverFromTo(), "deliverFrom", orderRoot));
         }
         if (nonNull(sc.getDeliverToFrom()) && nonNull(sc.getDeliverToTo())) {
-            predicates.add(criteriaBuilder.between(orderRoot.get("deliverTo"),
-                LocalDateTime.of(LocalDate.parse(sc.getDeliverToFrom()), LocalTime.MIN),
-                LocalDateTime.of(LocalDate.parse(sc.getDeliverToTo()), LocalTime.MAX)));
+            predicates
+                .add(filterByDateFromOrderTable(sc.getDeliverToFrom(), sc.getDeliverToTo(), "deliverTo", orderRoot));
         }
         if (nonNull(sc.getPaymentDateFrom()) && nonNull(sc.getPaymentDateTo())) {
-            Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
-            Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-            ListJoin<Order, Payment> join = paymentRoot.joinList("payment", JoinType.LEFT);
-            subQueryPayment.select(join).where(
-                criteriaBuilder.between(
-                    join.get("settlementDate").as(String.class),
-                    sc.getPaymentDateFrom(),
-                    sc.getPaymentDateTo()));
-            predicates.add(criteriaBuilder.exists(subQueryPayment));
+            predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
             predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), orderRoot, cq));
@@ -167,6 +146,57 @@ public class BigOrderTableRepository {
             searchOnBigTable(sc, orderRoot, predicates, cq);
         }
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    }
+
+    private Predicate filterByOrderStatus(OrderStatus[] filter, Root<Order> orderRoot) {
+        CriteriaBuilder.In<OrderStatus> orderStatus = criteriaBuilder.in(orderRoot.get("orderStatus"));
+        Arrays.stream(filter)
+            .forEach(orderStatus::value);
+        return orderStatus;
+    }
+
+    private Predicate filterByOrderPaymentStatus(OrderPaymentStatus[] filter, Root<Order> orderRoot) {
+        CriteriaBuilder.In<OrderPaymentStatus> orderPaymentStatus =
+            criteriaBuilder.in(orderRoot.get("orderPaymentStatus"));
+        Arrays.stream(filter)
+            .forEach(orderPaymentStatus::value);
+        return orderPaymentStatus;
+    }
+
+    private Predicate filterByReceivingStation(String[] filter, Root<Order> orderRoot) {
+        CriteriaBuilder.In<String> receivingStation = criteriaBuilder.in(
+            criteriaBuilder.upper(orderRoot.get("receivingStation")));
+        Arrays.stream(filter)
+            .map(String::toUpperCase)
+            .forEach(receivingStation::value);
+        return receivingStation;
+    }
+
+    private Predicate filterByLocation(String[] filter, String columnName, Root<Order> orderRoot) {
+        CriteriaBuilder.In<String> location = criteriaBuilder.in(
+            criteriaBuilder.upper(orderRoot.get(UBS_USER).get(ADDRESS).get(columnName)));
+        Arrays.stream(filter)
+            .map(String::toUpperCase)
+            .forEach(location::value);
+        return location;
+    }
+
+    private Predicate filterByDateFromOrderTable(String from, String to, String columnName, Root<Order> orderRoot) {
+        return criteriaBuilder.between(orderRoot.get(columnName),
+            LocalDateTime.of(LocalDate.parse(from), LocalTime.MIN),
+            LocalDateTime.of(LocalDate.parse(to), LocalTime.MAX));
+    }
+
+    private Predicate filterByPaymentDate(String from, String to, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
+        Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
+        Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
+        ListJoin<Order, Payment> join = paymentRoot.joinList("payment", JoinType.LEFT);
+        subQueryPayment.select(join).where(
+            criteriaBuilder.between(
+                join.get("settlementDate").as(String.class),
+                from,
+                to));
+        return criteriaBuilder.exists(subQueryPayment);
     }
 
     private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee, Root<Order> orderRoot,

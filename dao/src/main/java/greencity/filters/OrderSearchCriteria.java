@@ -27,6 +27,8 @@ public class OrderSearchCriteria {
     private String deliverToTo;
     private String paymentDateFrom;
     private String paymentDateTo;
+    private String[] region;
+    private String[] city;
     private String[] districts;
     private String search;
 }
