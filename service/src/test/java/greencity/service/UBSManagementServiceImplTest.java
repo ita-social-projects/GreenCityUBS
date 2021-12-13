@@ -1373,7 +1373,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrders() {
         OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
-        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().dateFrom("ddd").build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().orderDateFrom("ddd").build();
 
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(Page.empty());
 
