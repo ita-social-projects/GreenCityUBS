@@ -386,15 +386,15 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void findAllOrdersByUuid() {
-        when(orderRepository.findAllOrdersByUserUuid("87df9ad5-6393-441f-8423-8b2e770b01a8"))
-            .thenReturn(Arrays.asList(ModelUtils.getOrder()));
-        assertEquals(ModelUtils.getOrder().getPointsToUse(),
-            ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8").getUserBonuses());
+    void findUserByUuid() {
+        String uuid ="87df9ad5-6393-441f-8423-8b2e770b01a8";
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(ModelUtils.getUser()));
+        ubsService.findAllCurrentPointsForUser(uuid);
+        verify(userRepository).findUserByUuid(uuid);
     }
 
     @Test
-    void findAllUserNotFoundException() {
+    void findUserNotFoundException() {
         Exception thrown = assertThrows(UserNotFoundException.class,
             () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
         assertEquals(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());

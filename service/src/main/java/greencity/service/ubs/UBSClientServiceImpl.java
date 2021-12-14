@@ -793,7 +793,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         List<ChangeOfPoints> changeOfPointsList = currentUser.getChangeOfPointsList();
         List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
-        if (changeOfPointsList.size() != 0) {
+        if (nonNull(changeOfPointsList)) {
             bonusForUbsUser = changeOfPointsList.stream()
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
                 .collect(Collectors.toList());
