@@ -387,7 +387,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void findUserByUuid() {
-        String uuid ="87df9ad5-6393-441f-8423-8b2e770b01a8";
+        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(ModelUtils.getUser()));
         ubsService.findAllCurrentPointsForUser(uuid);
         verify(userRepository).findUserByUuid(uuid);
