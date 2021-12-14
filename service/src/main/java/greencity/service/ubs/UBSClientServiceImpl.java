@@ -784,16 +784,21 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
-        List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
-        if (allByUserId.isEmpty()) {
-            throw new OrderNotFoundException(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Integer userBonuses = currentUser.getCurrentPoints();
+        if (userBonuses == null) {
+            userBonuses = 0;
         }
-        List<PointsForUbsUserDto> bonusForUbsUser = allByUserId.stream()
-            .filter(a -> a.getPointsToUse() != 0)
-            .map(u -> modelMapper.map(u, PointsForUbsUserDto.class))
-            .collect(Collectors.toList());
+        List<ChangeOfPoints> changeOfPointsList = currentUser.getChangeOfPointsList();
+        List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
+        if (nonNull(changeOfPointsList)) {
+            bonusForUbsUser = changeOfPointsList.stream()
+                .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
+                .collect(Collectors.toList());
+        }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
-        allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
+        allBonusesForUserDto.setUserBonuses(userBonuses);
         allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
         return allBonusesForUserDto;
     }
@@ -815,10 +820,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-    }
-
-    private Integer sumUserPoints(List<Order> allByUserId) {
-        return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
     }
 
     /**

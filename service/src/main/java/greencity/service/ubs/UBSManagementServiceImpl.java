@@ -615,6 +615,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
         User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        if (ourUser.getCurrentPoints() == null) {
+            ourUser.setCurrentPoints(0);
+        }
         ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(addingPointsToUserDto.getAdditionalPoints())
