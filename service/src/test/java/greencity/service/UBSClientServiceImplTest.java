@@ -394,10 +394,10 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void findAllOrderNotFoundException() {
-        Exception thrown = assertThrows(OrderNotFoundException.class,
+    void findAllUserNotFoundException() {
+        Exception thrown = assertThrows(UserNotFoundException.class,
             () -> ubsService.findAllCurrentPointsForUser("87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        assertEquals(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST, thrown.getMessage());
+        assertEquals(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
     void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
