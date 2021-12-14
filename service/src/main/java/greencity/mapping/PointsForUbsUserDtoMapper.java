@@ -2,7 +2,6 @@ package greencity.mapping;
 
 import greencity.dto.PointsForUbsUserDto;
 import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
