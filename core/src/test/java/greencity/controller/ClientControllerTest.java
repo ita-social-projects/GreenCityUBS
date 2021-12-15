@@ -175,11 +175,24 @@ class ClientControllerTest {
     }
 
     @Test
+    void processOrderFondyForIF() throws Exception {
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJson = objectMapper.writeValueAsString(dto);
+
+        this.mockMvc.perform(post(ubsLink + "/processOrderFondyIF")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(dtoJson))
+            .andExpect(status().isOk());
+    }
+    
+    @Test
     void changeOrderToPaidStatusTest() throws Exception {
         this.mockMvc.perform(put(ubsLink + "/change-order-to-paid-status/{id}", 1)
             .principal(principal))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).changeOrderToPaidStatus(1L, null);
+        
+      verify(ubsClientService).changeOrderToPaidStatus(1L, null);
     }
+  
 }
