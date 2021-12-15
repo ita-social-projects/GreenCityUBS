@@ -358,4 +358,13 @@ public interface UBSClientService {
      * @author Sikhovskiy Rostyslav
      */
     LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
+
+    /**
+     * Method changes the status of payment and order .
+     *
+     * @param id   - current order id.
+     * @param uuid current {@link User}'s uuid;
+     * @author Max Boiarchuk
+     */
+    void changeOrderToPaidStatus(Long id, String uuid) throws Exception;
 }

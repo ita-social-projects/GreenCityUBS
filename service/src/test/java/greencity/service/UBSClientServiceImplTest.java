@@ -1174,4 +1174,16 @@ class UBSClientServiceImplTest {
         verify(orderRepository, times(2)).findById(1L);
         verify(restClient).getDataFromLiqPay(any());
     }
+
+    @Test
+    void changeOrderToPaidStatus() {
+        when(userRepository.findUserByUuid("uuid"))
+            .thenReturn(Optional.ofNullable(User.builder().currentPoints(1).build()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().id(1L).build()));
+
+        ubsService.changeOrderToPaidStatus(1L, "uuid");
+
+        verify(userRepository).findUserByUuid("uuid");
+        verify(orderRepository).findById(1L);
+    }
 }

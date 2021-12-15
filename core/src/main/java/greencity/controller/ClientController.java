@@ -270,4 +270,18 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
     }
+
+    /**
+     * Controller to update order status and payment status .
+     *
+     * @return {@link HttpStatus}.
+     * @author Max Boiarchuk
+     */
+    @PutMapping("/change-order-to-paid-status/{id}")
+    public ResponseEntity<HttpStatus> changeOrderToPaidStatus(
+        @Valid @PathVariable("id") Long id,
+        @ApiIgnore @CurrentUserUuid String uuid) throws Exception {
+        ubsClientService.changeOrderToPaidStatus(id, uuid);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

@@ -1381,4 +1381,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPaymentIF")
             .build();
     }
+
+    @Override
+    public void changeOrderToPaidStatus(Long id, String uuid) {
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        eventService.save(OrderHistory.ORDER_CONFIRMED,
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderRepository.save(order);
+    }
 }
