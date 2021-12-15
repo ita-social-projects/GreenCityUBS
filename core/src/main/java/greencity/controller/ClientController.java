@@ -280,7 +280,7 @@ public class ClientController {
     @PutMapping("/change-order-to-paid-status/{id}")
     public ResponseEntity<HttpStatus> changeOrderToPaidStatus(
         @Valid @PathVariable("id") Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) throws Exception {
+        @ApiIgnore @CurrentUserUuid String uuid) {
         ubsClientService.changeOrderToPaidStatus(id, uuid);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
