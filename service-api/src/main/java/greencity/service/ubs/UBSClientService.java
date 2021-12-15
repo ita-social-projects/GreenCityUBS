@@ -366,5 +366,5 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Max Boiarchuk
      */
-    void changeOrderToPaidStatus(Long id, String uuid) throws Exception;
+    void changeOrderToPaidStatus(Long id, String uuid);
 }
