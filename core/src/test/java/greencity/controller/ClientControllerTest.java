@@ -185,14 +185,14 @@ class ClientControllerTest {
             .content(dtoJson))
             .andExpect(status().isOk());
     }
-    
+
     @Test
     void changeOrderToPaidStatusTest() throws Exception {
         this.mockMvc.perform(put(ubsLink + "/change-order-to-paid-status/{id}", 1)
             .principal(principal))
             .andExpect(status().isOk());
-        
-      verify(ubsClientService).changeOrderToPaidStatus(1L, null);
+
+        verify(ubsClientService).changeOrderToPaidStatus(1L, null);
     }
-  
+
 }
