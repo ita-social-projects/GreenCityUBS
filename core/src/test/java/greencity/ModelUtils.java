@@ -492,7 +492,8 @@ public class ModelUtils {
     public static OrderFondyClientDto getOrderFondyClientDto() {
         return OrderFondyClientDto.builder()
             .orderId(1L)
-            .sum(2)
+            .pointsToUse(100)
+            .certificates(Collections.emptySet())
             .build();
     }
 

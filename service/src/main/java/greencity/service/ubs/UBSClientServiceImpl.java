@@ -751,6 +751,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
+    private int formBagsToBeSavedAndCalculateOrderSumClient(
+        Map<Integer, Integer> getOrderBagsAndQuantity) {
+        int sumToPay = 0;
+
+        for (Integer temp : getOrderBagsAndQuantity.keySet()) {
+            Integer amount = getOrderBagsAndQuantity.get(temp);
+            Bag bag = bagRepository.findById(temp)
+                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp));
+            sumToPay += bag.getPrice() * amount;
+        }
+        return sumToPay;
+    }
+
     private int formBagsToBeSavedAndCalculateOrderSum(
         Map<Integer, Integer> map, List<BagDto> bags, Long minAmountOfBigBags) {
         int sumToPay = 0;
@@ -1254,31 +1267,89 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto) throws Exception {
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+    public FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto, String uuid) throws Exception {
+        Order order = orderRepository.findById(dto.getOrderId())
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
+
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
+
         if (order.getCounterOrderPaymentId() == null) {
             order.setCounterOrderPaymentId(0L);
         }
-        Order increment = incrementCounter(order);
-        PaymentRequestDto paymentRequestDto = formPaymentForIF(increment.getId(), dto.getSum());
-        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
-        Elements links = doc.select("a[href]");
-        String link = links.attr("href");
-        return getPaymentRequestDto(order, link);
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+
+        Set<Certificate> orderCertificates = new HashSet<>();
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+
+        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
+        userRepository.save(currentUser);
+
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        }
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+        if (sumToPay == 0) {
+            return getPaymentRequestDto(order, null);
+        } else {
+            Order increment = incrementCounter(order);
+            PaymentRequestDto paymentRequestDto = formPaymentForIF(increment.getId(), sumToPay);
+            Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
+            Elements links = doc.select("a[href]");
+            String link = links.attr("href");
+            return getPaymentRequestDto(order, link);
+        }
     }
 
     @Override
-    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception {
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception {
+        Order order = orderRepository.findById(dto.getOrderId())
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
+
+        int sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
+
         if (order.getCounterOrderPaymentId() == null) {
             order.setCounterOrderPaymentId(0L);
         }
-        Order increment = incrementCounter(order);
-        PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), dto.getSum());
-        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
-        Elements links = doc.select("a[href]");
-        String link = links.attr("href");
-        return getPaymentRequestDto(order, link);
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+
+        Set<Certificate> orderCertificates = new HashSet<>();
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+
+        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
+        userRepository.save(currentUser);
+
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        }
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+        if (sumToPay == 0) {
+            return getPaymentRequestDto(order, null);
+        } else {
+            Order increment = incrementCounter(order);
+            PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
+            Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
+            Elements links = doc.select("a[href]");
+            String link = links.attr("href");
+            return getPaymentRequestDto(order, link);
+        }
     }
 
     private Order incrementCounter(Order order) {
@@ -1302,6 +1373,40 @@ public class UBSClientServiceImpl implements UBSClientService {
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
         return paymentRequestDto;
+    }
+
+    private int formCertificatesToBeSavedAndCalculateOrderSumClient(OrderFondyClientDto dto,
+        Set<Certificate> orderCertificates,
+        Order order, int sumToPay) {
+        if (sumToPay != 0 && dto.getCertificates() != null) {
+            boolean tooManyCertificates = false;
+            for (String temp : dto.getCertificates()) {
+                if (tooManyCertificates) {
+                    throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
+                }
+                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
+                    () -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
+                validateCertificate(certificate);
+                certificate.setOrder(order);
+                orderCertificates.add(certificate);
+                sumToPay -= certificate.getPoints();
+                certificate.setCertificateStatus(CertificateStatus.USED);
+                certificate.setDateOfUse(LocalDate.now());
+                if (dontSendLinkToFondyIfClient(sumToPay, certificate, dto)) {
+                    sumToPay = 0;
+                    tooManyCertificates = true;
+                }
+            }
+        }
+        return sumToPay;
+    }
+
+    private boolean dontSendLinkToFondyIfClient(int sumToPay, Certificate certificate, OrderFondyClientDto dto) {
+        if (sumToPay <= 0) {
+            certificate.setCertificateStatus(CertificateStatus.USED);
+            return true;
+        }
+        return false;
     }
 
     private PaymentRequestDto formPaymentForIF(Long orderId, int sumToPay) {
@@ -1381,20 +1486,5 @@ public class UBSClientServiceImpl implements UBSClientService {
             .paytypes("card")
             .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPaymentIF")
             .build();
-    }
-
-    @Override
-    public void changeOrderToPaidStatus(Long id, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-        eventService.save(OrderHistory.ORDER_CONFIRMED,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        orderRepository.save(order);
     }
 }

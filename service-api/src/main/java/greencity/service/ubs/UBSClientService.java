@@ -333,7 +333,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
-    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with Fondy payment. Version for Ivano-Frankivsk.
@@ -341,7 +341,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Sihovskiy Rostyslav
      */
-    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with liqpay payment .
@@ -358,13 +358,4 @@ public interface UBSClientService {
      * @author Sikhovskiy Rostyslav
      */
     LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
-
-    /**
-     * Method changes the status of payment and order .
-     *
-     * @param id   - current order id.
-     * @param uuid current {@link User}'s uuid;
-     * @author Max Boiarchuk
-     */
-    void changeOrderToPaidStatus(Long id, String uuid);
 }

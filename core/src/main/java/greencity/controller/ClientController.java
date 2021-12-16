@@ -104,9 +104,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderFondy")
-    public ResponseEntity<FondyOrderResponse> processOrderFondy(@Valid @RequestBody OrderFondyClientDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto));
+    public ResponseEntity<FondyOrderResponse> processOrderFondy(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto, userUuid));
     }
 
     /**
@@ -124,9 +125,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderFondyIF")
-    public ResponseEntity<FondyOrderResponse> processOrderFondyForIF(@Valid @RequestBody OrderFondyClientDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClientForIF(dto));
+    public ResponseEntity<FondyOrderResponse> processOrderFondyForIF(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClientForIF(dto, userUuid));
     }
 
     /**
@@ -269,19 +271,5 @@ public class ClientController {
         @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
-    }
-
-    /**
-     * Controller to update order status and payment status .
-     *
-     * @return {@link HttpStatus}.
-     * @author Max Boiarchuk
-     */
-    @PutMapping("/change-order-to-paid-status/{id}")
-    public ResponseEntity<HttpStatus> changeOrderToPaidStatus(
-        @Valid @PathVariable("id") Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsClientService.changeOrderToPaidStatus(id, uuid);
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
