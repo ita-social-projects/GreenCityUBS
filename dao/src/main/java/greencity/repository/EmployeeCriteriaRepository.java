@@ -132,18 +132,18 @@ public class EmployeeCriteriaRepository {
 
     private void filterByEmployeePosition(Root<Employee> employeeRoot, String[] filters,
         List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
-        Subquery<Position> subQueryOEP = criteriaQuery.subquery(Position.class);
-        Root<Employee> oepRoot = subQueryOEP.correlate(employeeRoot);
-        SetJoin<Employee, Position> join = oepRoot.joinSet("employeePosition", JoinType.LEFT);
-        setFilterAndAddPredicate(join, filters, predicates, subQueryOEP);
+        Subquery<Position> subQuery = criteriaQuery.subquery(Position.class);
+        Root<Employee> root = subQuery.correlate(employeeRoot);
+        SetJoin<Employee, Position> join = root.joinSet("employeePosition", JoinType.LEFT);
+        setFilterAndAddPredicate(join, filters, predicates, subQuery);
     }
 
     private void filterByReceivingStation(Root<Employee> employeeRoot, String[] filters,
         List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
-        Subquery<ReceivingStation> subQueryOEP = criteriaQuery.subquery(ReceivingStation.class);
-        Root<Employee> oepRoot = subQueryOEP.correlate(employeeRoot);
-        SetJoin<Employee, ReceivingStation> join = oepRoot.joinSet("receivingStation", JoinType.LEFT);
-        setFilterAndAddPredicate(join, filters, predicates, subQueryOEP);
+        Subquery<ReceivingStation> subQuery = criteriaQuery.subquery(ReceivingStation.class);
+        Root<Employee> root = subQuery.correlate(employeeRoot);
+        SetJoin<Employee, ReceivingStation> join = root.joinSet("receivingStation", JoinType.LEFT);
+        setFilterAndAddPredicate(join, filters, predicates, subQuery);
     }
 
     private <T> void setFilterAndAddPredicate(SetJoin<Employee, T> join, String[] filters, List<Predicate> predicates,
