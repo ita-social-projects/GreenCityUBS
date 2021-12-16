@@ -147,11 +147,11 @@ public class EmployeeCriteriaRepository {
     }
 
     private <T> void setFilterAndAddPredicate(SetJoin<Employee, T> join, String[] filters, List<Predicate> predicates,
-        Subquery<T> subQueryOEP) {
+        Subquery<T> subQuery) {
         CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(join.get("name")));
         Arrays.stream(filters).map(String::toUpperCase).forEach(stringIn::value);
-        subQueryOEP.select(join).where(stringIn);
-        predicates.add(criteriaBuilder.exists(subQueryOEP));
+        subQuery.select(join).where(stringIn);
+        predicates.add(criteriaBuilder.exists(subQuery));
     }
 
     private void searchEmployee(EmployeeFilterCriteria employeeFilterCriteria,
