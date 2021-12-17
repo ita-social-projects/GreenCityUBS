@@ -57,6 +57,6 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @return set of {@link Certificate}
      */
     @Query(value = "SELECT * FROM Certificate AS c "
-            + "where c.code in (:temp) and c.status = 'ACTIVE'", nativeQuery = true)
+        + "where c.code in (:temp) and c.status = 'ACTIVE'", nativeQuery = true)
     Set<Certificate> getAllByListId(List<String> temp);
 }
