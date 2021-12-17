@@ -80,6 +80,9 @@ public final class ErrorMessage {
     public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
         "Payment with selected id does not belong LiqPay.";
     public static final String ORDER_WITH_CURRENT_ID_NOT_FOUND = "Couldn't find order with id that you chose";
+    public static final String SOME_CERTIFICATES_ARE_INVALID =
+        "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
+    public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
 
     /**
      * Constructor.

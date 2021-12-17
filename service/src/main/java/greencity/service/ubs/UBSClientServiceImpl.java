@@ -46,6 +46,7 @@ import java.util.stream.LongStream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -1311,21 +1312,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception {
-        Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
+        Order order = findByIdOrderForClient(dto);
+        User currentUser = findByIdUserForClient(uuid);
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
-
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
-
-        if (order.getCounterOrderPaymentId() == null) {
-            order.setCounterOrderPaymentId(0L);
-        }
-
+        checkForNullCounter(order);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        Integer sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Set<Certificate> orderCertificates = new HashSet<>();
@@ -1334,22 +1326,47 @@ public class UBSClientServiceImpl implements UBSClientService {
         currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
         userRepository.save(currentUser);
 
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        }
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
-        eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+        paymentVerification(sumToPay, order);
+
         if (sumToPay == 0) {
             return getPaymentRequestDto(order, null);
         } else {
-            Order increment = incrementCounter(order);
-            PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
-            Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
-            Elements links = doc.select("a[href]");
-            String link = links.attr("href");
+            String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private void paymentVerification(Integer sumToPay, Order order) {
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            order.setOrderStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
+        }
+    }
+
+    private void checkForNullCounter(Order order) {
+        if (order.getCounterOrderPaymentId() == null) {
+            order.setCounterOrderPaymentId(0L);
+        }
+    }
+
+    private Order findByIdOrderForClient(OrderFondyClientDto dto) {
+        return orderRepository.findById(dto.getOrderId())
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    }
+
+    private User findByIdUserForClient(String uuid) {
+        return userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    }
+
+    private String formedLink(Order order, Integer sumToPay) {
+        Order increment = incrementCounter(order);
+        PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
+        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
+        Elements links = doc.select("a[href]");
+        return links.attr("href");
     }
 
     private Order incrementCounter(Order order) {
@@ -1379,31 +1396,43 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
         if (sumToPay != 0 && dto.getCertificates() != null) {
-            boolean tooManyCertificates = false;
-            for (String temp : dto.getCertificates()) {
-                if (tooManyCertificates) {
-                    throw new TooManyCertificatesEntered(TOO_MANY_CERTIFICATES);
-                }
-                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
-                    () -> new CertificateNotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
-                validateCertificate(certificate);
-                certificate.setOrder(order);
-                orderCertificates.add(certificate);
+            Set<Certificate> certificates =
+                certificateRepository.getAllByListId(new ArrayList<>(dto.getCertificates()));
+            if (certificates.isEmpty()) {
+                throw new CertificateNotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND);
+            }
+            checkValidationCertificates(certificates, dto);
+            for (Certificate temp : certificates) {
+                Certificate certificate = getCertificateForClient(orderCertificates, temp, order);
                 sumToPay -= certificate.getPoints();
-                certificate.setCertificateStatus(CertificateStatus.USED);
-                certificate.setDateOfUse(LocalDate.now());
-                if (dontSendLinkToFondyIfClient(sumToPay, certificate, dto)) {
+
+                if (dontSendLinkToFondyIfClient(sumToPay)) {
+                    certificate.setCertificateStatus(CertificateStatus.USED);
                     sumToPay = 0;
-                    tooManyCertificates = true;
                 }
             }
         }
         return sumToPay;
     }
 
-    private boolean dontSendLinkToFondyIfClient(int sumToPay, Certificate certificate, OrderFondyClientDto dto) {
+    private void checkValidationCertificates(Set<Certificate> certificates, OrderFondyClientDto dto) {
+        if (certificates.size() != dto.getCertificates().size()) {
+            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
+            throw new CertificateNotFoundException(ErrorMessage.SOME_CERTIFICATES_ARE_INVALID + validCertification);
+        }
+    }
+
+    private Certificate getCertificateForClient(Set<Certificate> orderCertificates, Certificate certificate,
+        Order order) {
+        certificate.setOrder(order);
+        orderCertificates.add(certificate);
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setDateOfUse(LocalDate.now());
+        return certificate;
+    }
+
+    private boolean dontSendLinkToFondyIfClient(int sumToPay) {
         if (sumToPay <= 0) {
-            certificate.setCertificateStatus(CertificateStatus.USED);
             return true;
         }
         return false;

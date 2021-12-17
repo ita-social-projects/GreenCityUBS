@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 /**
@@ -48,4 +49,14 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
     @Query(value = "SELECT * FROM ORDERS AS O JOIN CERTIFICATE AS C "
         + "ON O.ID = C.ORDER_ID WHERE O.ID = :idOrder", nativeQuery = true)
     List<Certificate> findCertificate(@Param("idOrder") Long idOrder);
+
+    /**
+     * The query for get all Certificate.
+     *
+     * @param temp is list Certificate
+     * @return set of {@link Certificate}
+     */
+    @Query(value = "SELECT * FROM Certificate AS c "
+            + "where c.code in (:temp) and c.status = 'ACTIVE'", nativeQuery = true)
+    Set<Certificate> getAllByListId(List<String> temp);
 }
