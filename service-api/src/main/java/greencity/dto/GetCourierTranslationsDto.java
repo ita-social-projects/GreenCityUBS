@@ -2,6 +2,8 @@ package greencity.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -11,13 +13,9 @@ import lombok.*;
 @ToString
 public class GetCourierTranslationsDto {
     private Long id;
-    private Long minAmountOfBigBags;
-    private Long maxAmountOfBigBags;
-    private Long minPriceOfOrder;
-    private Long maxPriceOfOrder;
     private Long locationId;
-    private String courierLimit;
     private String name;
     private String languageCode;
     private String limitDescription;
+    List<CourierDto> couriersLimit;
 }

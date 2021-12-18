@@ -17,6 +17,6 @@ public class CreateServiceDto {
     Integer price;
     Integer commission;
     @NotNull
-    Long locationId;
+    Long courierId;
     List<ServiceTranslationDto> serviceTranslationDtoList;
 }

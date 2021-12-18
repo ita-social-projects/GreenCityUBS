@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-10" author="Vadym Makitra">
+        <dropColumn tableName="locations" columnName="min_amount_of_big_bags"/>
+        <dropColumn tableName="service" columnName="location_id"/>
+        <dropColumn tableName="courier" columnName="location_id"/>
+        <dropColumn tableName="courier" columnName="min_amount_of_big_bags"/>
+        <dropColumn tableName="courier" columnName="max_amount_of_big_bags"/>
+        <dropColumn tableName="courier" columnName="min_price_of_order"/>
+        <dropColumn tableName="courier" columnName="max_price_of_order"/>
+        <dropColumn tableName="courier" columnName="courier_limits"/>
+        <dropColumn tableName="orders" columnName="courier_id"/>
+        <createTable tableName="courier_locations">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="location_id" type="BIGINT" value="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="BIGINT" value="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_amount_of_big_bags" type="BIGINT"/>
+            <column name="max_amount_of_big_bags" type="BIGINT"/>
+            <column name="min_price_of_order" type="BIGINT"/>
+            <column name="max_price_of_order" type="BIGINT"/>
+            <column name="courier_limits" type="varchar" defaultValue="LIMIT_BY_AMOUNT_OF_BAG"/>
+        </createTable>
+        <insert tableName="courier_locations">
+            <column name="id" value="1"/>
+            <column name="location_id" value="1"/>
+            <column name="courier_id" value="1"/>
+            <column name="min_amount_of_big_bags" value="2"/>
+            <column name="max_amount_of_big_bags" value="99"/>
+            <column name="min_price_of_order" value="500"/>
+            <column name="max_price_of_order" value="500000"/>
+            <column name="courier_limits" value="LIMIT_BY_AMOUNT_OF_BAG"/>
+        </insert>
+        <addColumn tableName="courier">
+            <column name="courier_status" type="varchar" defaultValue="ACTIVE">
+                <constraints  nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="orders">
+            <column name="courier_locations_id" type="BIGINT" defaultValue="1">
+            <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="courier_locations"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_courier_locations_to_location_id"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="courier_locations"
+                                 baseColumnNames="courier_id"
+                                 constraintName="fk_courier_locations_to_courier_id"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="courier_locations_id"
+                                 constraintName="fk_orders_to_courier_locations_id"
+                                 referencedTableName="courier_locations"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="courier_locations" columnNames="courier_id,location_id" constraintName="uk_courier_and_location"/>
+    </changeSet>
+</databaseChangeLog>

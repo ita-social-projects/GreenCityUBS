@@ -1,6 +1,5 @@
 package greencity.entity.order;
 
-import greencity.entity.user.Location;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,9 +13,9 @@ import java.util.List;
 @Setter
 @Builder
 @EqualsAndHashCode(
-    exclude = {"serviceTranslations"})
+    exclude = {"serviceTranslations", "courier"})
 @ToString(
-    exclude = {"serviceTranslations"})
+    exclude = {"serviceTranslations", "courier"})
 @Table(name = "service")
 
 public class Service {
@@ -47,9 +46,6 @@ public class Service {
 
     @Column(nullable = false)
     private String editedBy;
-
-    @ManyToOne
-    Location location;
 
     @ManyToOne
     Courier courier;

@@ -66,6 +66,7 @@ public class ModelUtils {
                 .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
+            .locationId(1L)
             .build();
     }
 
@@ -447,7 +448,6 @@ public class ModelUtils {
         return EditAmountOfBagDto.builder()
             .minAmountOfBigBags(1L)
             .maxAmountOfBigBags(2L)
-            .languageId(1L)
             .build();
     }
 
@@ -550,6 +550,19 @@ public class ModelUtils {
                     .exportedQuantity(1)
                     .bagId(1)
                     .build()))
+            .build();
+    }
+
+    public static LocationCreateDto getLocationCreateDto() {
+        return LocationCreateDto.builder()
+            .addLocationDtoList(List.of(getAddLocationTranslationDto())).build();
+    }
+
+    public static AddLocationTranslationDto getAddLocationTranslationDto() {
+        return AddLocationTranslationDto.builder()
+            .region("Test")
+            .locationName("Test")
+            .languageId(1L)
             .build();
     }
 }
