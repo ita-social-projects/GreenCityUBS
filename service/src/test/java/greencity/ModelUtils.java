@@ -1147,7 +1147,7 @@ public class ModelUtils {
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
-            .orderAdminComment("all good")
+            .adminComment("all good")
             .orderPaymentStatus("PAID").build();
     }
 
@@ -1220,7 +1220,6 @@ public class ModelUtils {
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .addressId(1L)
-            .orderId(1L)
             .addressHouseNumber("1")
             .addressEntranceNumber("3")
             .addressDistrict("Syhiv")
@@ -2015,23 +2014,22 @@ public class ModelUtils {
 
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
-            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+            .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderAdminComment("aaa")
+                .adminComment("aaa")
                 .build())
-            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+            .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
                 .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
+            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
-                .orderId(1L)
                 .addressDistrict("aaaaaaa")
                 .addressStreet("aaaaa")
                 .addressEntranceNumber("12")
@@ -2050,7 +2048,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
+            .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
                 .timeDeliveryFrom("1997-12-04T15:40:24")
