@@ -21,7 +21,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -75,6 +74,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationTranslationRepository locationTranslationRepository;
     private final LiqPay liqPay;
     private final LanguageRepository languageRepository;
+    private final CourierLocationRepository courierLocationRepository;
     @PersistenceContext
     private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
@@ -85,6 +85,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String publicKey;
     @Value("${liqpay.private.key}")
     private String privateKey;
+    private static final Integer BAG_CAPACITY = 120;
+    public static final String LANG_CODE = "ua";
     private final EventService eventService;
 
     @Override
@@ -150,13 +152,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid) {
         int currentUserPoints = 0;
         User user = userRepository.findByUuid(uuid);
-        Location lastLocation = user.getLastLocation();
         currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
-        return new UserPointsAndAllBagsDto(btdList, lastLocation.getMinAmountOfBigBags(), currentUserPoints);
+        return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
     private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
@@ -202,6 +203,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             certificate.getExpirationDate(), certificate.getCode());
     }
 
+    private void checkSumIfCourierLimitBySumOfOrder(CourierLocation courierLocation, Integer sumWithoutDiscount) {
+        if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
+            && sumWithoutDiscount < courierLocation.getMinPriceOfOrder()) {
+            throw new SumOfOrderException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMinPriceOfOrder());
+        } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
+            && sumWithoutDiscount > courierLocation.getMaxPriceOfOrder()) {
+            throw new SumOfOrderException(
+                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMaxPriceOfOrder());
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -211,19 +223,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        CourierLocation courierLocation =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            location.getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courierLocation);
+        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourier(courier);
+        order.setCourierLocations(courierLocation);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -259,19 +270,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDBForIF(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Location location = locationRepository.getOne(currentUser.getLastLocation().getId());
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        CourierLocation courierLocation =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            location.getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courierLocation);
+        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourier(courier);
+        order.setCourierLocations(courierLocation);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -752,6 +762,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
+    private void checkAmountOfBagsIfCourierLimitByAmountOfBag(CourierLocation courierLocation, Integer countOfBigBag) {
+        if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
+            && courierLocation.getMinAmountOfBigBags() > countOfBigBag) {
+            throw new NotEnoughBagsException(
+                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMinAmountOfBigBags());
+        } else if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
+            && courierLocation.getMaxAmountOfBigBags() < countOfBigBag) {
+            throw new NotEnoughBagsException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMaxAmountOfBigBags());
+        }
+    }
+  
     private int formBagsToBeSavedAndCalculateOrderSumClient(
         Map<Integer, Integer> getOrderBagsAndQuantity) {
         int sumToPay = 0;
@@ -764,22 +785,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         return sumToPay;
     }
-
+  
     private int formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags, Long minAmountOfBigBags) {
+        Map<Integer, Integer> map, List<BagDto> bags, CourierLocation courierLocation) {
         int sumToPay = 0;
         int bigBagCounter = 0;
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
-            if (bag.getCapacity() >= 120) {
+            if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
+            checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
-        }
-        if (minAmountOfBigBags > bigBagCounter) {
-            throw new NotEnoughBagsException(NOT_ENOUGH_BIG_BAGS_EXCEPTION + minAmountOfBigBags);
         }
         return sumToPay;
     }
@@ -998,18 +1017,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        CourierLocation courierLocation =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            currentUser.getLastLocation().getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courierLocation);
+        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourier(courier);
+        order.setCourierLocations(courierLocation);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -1038,18 +1057,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPayForIF(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        Courier courier = courierRepository.findById(1L)
-            .orElseThrow(() -> new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + 1));
+        CourierLocation courierLocation =
+            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            currentUser.getLastLocation().getMinAmountOfBigBags());
-
+        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
+            courierLocation);
+        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourier(courier);
+        order.setCourierLocations(courierLocation);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -1515,5 +1534,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             .paytypes("card")
             .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPaymentIF")
             .build();
+    }
+
+    @Override
+    public List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId) {
+        List<CourierLocation> courierLocations =
+            courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(courierId, LANG_CODE);
+        if (courierLocations.isEmpty()) {
+            throw new CourierLocationException(COURIER_LOCATION_DATA_IS_NOT_VALID);
+        }
+        return courierLocations.stream()
+            .map(courierLocation -> modelMapper.map(courierLocation, GetCourierLocationDto.class))
+            .collect(Collectors.toList());
     }
 }

@@ -26,8 +26,10 @@ import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
-import greencity.service.ubs.*;
-import org.aspectj.weaver.ast.Or;
+import greencity.service.ubs.EventService;
+import greencity.service.ubs.FileService;
+import greencity.service.ubs.UBSClientServiceImpl;
+import greencity.service.ubs.UBSManagementServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +57,6 @@ import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {

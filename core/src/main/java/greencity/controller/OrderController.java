@@ -120,7 +120,7 @@ public class OrderController {
     @PostMapping("/processOrder")
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
+        @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
@@ -141,7 +141,7 @@ public class OrderController {
     @PostMapping("/processOrderIF")
     public ResponseEntity<FondyOrderResponse> processOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
+        @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBForIF(dto, userUuid));
     }
 
@@ -406,7 +406,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrder")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
+        @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
     }
 
@@ -428,7 +428,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrderIF")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
+        @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.saveFullOrderToDBFromLiqPayForIF(dto, userUuid));
     }
@@ -508,5 +508,27 @@ public class OrderController {
     public ResponseEntity<FondyPaymentResponse> getFondyStatusPayment(
         @Valid @PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPaymentResponseFromFondy(orderId));
+    }
+
+    /**
+     * Controller for getting all information about courier,courier limits,and
+     * courier locations.
+     *
+     * @param courierId - id of current courier
+     * @return {@link GetCourierLocationDto}
+     * @author Vadym Makitra
+     */
+    @ApiOperation(value = "Get all location where courier is working")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierLocationDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping(value = "/courier/{courierId}")
+    public ResponseEntity<List<GetCourierLocationDto>> getCourierLocations(
+        @PathVariable Long courierId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getCourierLocationByCourierIdAndLanguageCode(courierId));
     }
 }

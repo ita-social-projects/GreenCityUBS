@@ -2,6 +2,8 @@ package greencity.repository;
 
 import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.*;
@@ -49,7 +51,7 @@ public class EmployeeCriteriaRepository {
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
         Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
-        Predicate predicate = getAllPredicate(employeeFilterCriteria, employeeRoot);
+        Predicate predicate = getAllPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
         criteriaQuery.where(predicate);
         setOrder(employeePage, criteriaQuery, employeeRoot);
         return processEmployees(employeePage, criteriaQuery, predicate);
@@ -59,7 +61,7 @@ public class EmployeeCriteriaRepository {
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
         Root<Employee> employeeRoot = criteriaQuery.from(Employee.class);
-        Predicate predicate = getAllActivePredicate(employeeFilterCriteria, employeeRoot);
+        Predicate predicate = getAllActivePredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
         criteriaQuery.where(predicate);
         setOrder(employeePage, criteriaQuery, employeeRoot);
         return processEmployees(employeePage, criteriaQuery, predicate);
@@ -95,15 +97,15 @@ public class EmployeeCriteriaRepository {
             .collect(Collectors.toList()));
     }
 
-    private Predicate getAllPredicate(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot) {
-        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot);
+    private Predicate getAllPredicate(EmployeeFilterCriteria employeeFilterCriteria, Root<Employee> employeeRoot,
+        CriteriaQuery<Employee> criteriaQuery) {
+        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
         return criteriaBuilder.and(predicates.toArray(predicates.toArray(new Predicate[0])));
     }
 
     private Predicate getAllActivePredicate(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot) {
-        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot);
+        Root<Employee> employeeRoot, CriteriaQuery<Employee> criteriaQuery) {
+        List<Predicate> predicates = getBasicPredicate(employeeFilterCriteria, employeeRoot, criteriaQuery);
         CriteriaBuilder.In<EmployeeStatus> employeeStatusIn =
             criteriaBuilder.in(employeeRoot.get("employeeStatus"));
         employeeStatusIn.value(EmployeeStatus.ACTIVE);
@@ -112,21 +114,15 @@ public class EmployeeCriteriaRepository {
     }
 
     private List<Predicate> getBasicPredicate(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot) {
+        Root<Employee> employeeRoot, CriteriaQuery<Employee> criteriaQuery) {
         List<Predicate> predicates = new ArrayList<>();
         if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getReceivingStations()))) {
-            CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(
-                employeeRoot.get("receivingStation").get("name")));
-            Arrays.stream(employeeFilterCriteria.getReceivingStations()).map(String::toUpperCase)
-                .forEach(stringIn::value);
-            predicates.add(stringIn);
+            filterByReceivingStation(employeeRoot, employeeFilterCriteria.getReceivingStations(),
+                predicates, criteriaQuery);
         }
         if (Boolean.TRUE.equals(nonNullAndSize(employeeFilterCriteria.getEmployeePositions()))) {
-            CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(
-                employeeRoot.get("employeePosition").get("name")));
-            Arrays.stream(employeeFilterCriteria.getEmployeePositions()).map(String::toUpperCase)
-                .forEach(stringIn::value);
-            predicates.add(stringIn);
+            filterByEmployeePosition(employeeRoot, employeeFilterCriteria.getEmployeePositions(),
+                predicates, criteriaQuery);
         }
         if (nonNull(employeeFilterCriteria.getSearch())) {
             searchEmployee(employeeFilterCriteria, employeeRoot, predicates);
@@ -134,9 +130,32 @@ public class EmployeeCriteriaRepository {
         return predicates;
     }
 
+    private void filterByEmployeePosition(Root<Employee> employeeRoot, String[] filters,
+        List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
+        Subquery<Position> subQuery = criteriaQuery.subquery(Position.class);
+        Root<Employee> root = subQuery.correlate(employeeRoot);
+        SetJoin<Employee, Position> join = root.joinSet("employeePosition", JoinType.LEFT);
+        setFilterAndAddPredicate(join, filters, predicates, subQuery);
+    }
+
+    private void filterByReceivingStation(Root<Employee> employeeRoot, String[] filters,
+        List<Predicate> predicates, CriteriaQuery<Employee> criteriaQuery) {
+        Subquery<ReceivingStation> subQuery = criteriaQuery.subquery(ReceivingStation.class);
+        Root<Employee> root = subQuery.correlate(employeeRoot);
+        SetJoin<Employee, ReceivingStation> join = root.joinSet("receivingStation", JoinType.LEFT);
+        setFilterAndAddPredicate(join, filters, predicates, subQuery);
+    }
+
+    private <T> void setFilterAndAddPredicate(SetJoin<Employee, T> join, String[] filters, List<Predicate> predicates,
+        Subquery<T> subQuery) {
+        CriteriaBuilder.In<String> stringIn = criteriaBuilder.in(criteriaBuilder.upper(join.get("name")));
+        Arrays.stream(filters).map(String::toUpperCase).forEach(stringIn::value);
+        subQuery.select(join).where(stringIn);
+        predicates.add(criteriaBuilder.exists(subQuery));
+    }
+
     private void searchEmployee(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<Employee> employeeRoot,
-        List<Predicate> predicates) {
+        Root<Employee> employeeRoot, List<Predicate> predicates) {
         String[] searchWords = employeeFilterCriteria.getSearch().split(" ");
         Arrays.stream(searchWords).forEach(x -> predicates.add(fromEmployeeLikePredicate(x,
             employeeRoot)));
