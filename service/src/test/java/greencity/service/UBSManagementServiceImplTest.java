@@ -23,6 +23,8 @@ import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
@@ -153,6 +155,8 @@ class UBSManagementServiceImplTest {
     private ServiceRepository serviceRepository;
     @Mock
     private CourierRepository courierRepository;
+    @Mock
+    private BigOrderTableRepository bigOrderTableRepository;
 
     private void getMocksBehavior() {
 
@@ -1365,5 +1369,43 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
         assertThrows(UpdateAdminPageInfoException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc"));
+    }
+
+    @Test
+    void getOrders() {
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().orderDateFrom("ddd").build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(Page.empty());
+
+        ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid");
+
+        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria);
+    }
+
+    @Test
+    void updateUserViolation() {
+        User user = ModelUtils.getUser();
+        user.setUuid("uuid");
+        AddingViolationsToUserDto addingViolationsToUserDto = ModelUtils.getAddingViolationsToUserDto();
+        Violation violation = ModelUtils.getViolation();
+
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.ofNullable(violation));
+
+        ubsManagementService.updateUserViolation(addingViolationsToUserDto, new MultipartFile[2], "uuid");
+
+        verify(userRepository).findUserByUuid("uuid");
+        verify(violationRepository).findByOrderId(1L);
+    }
+
+    @Test
+    void saveReason() {
+        Order order = ModelUtils.getOrdersDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+
+        ubsManagementService.saveReason(1L, "uu", Arrays.asList(new MultipartFile[2]));
+
+        verify(orderRepository).findById(1L);
     }
 }

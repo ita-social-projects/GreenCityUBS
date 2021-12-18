@@ -439,4 +439,10 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    void getOrderBagsInfo() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/getOrderBagsInfo" + "/{id}", 1L))
+            .andExpect(status().isOk());
+    }
+
 }

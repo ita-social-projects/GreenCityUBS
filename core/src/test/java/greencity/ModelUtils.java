@@ -552,4 +552,17 @@ public class ModelUtils {
                     .build()))
             .build();
     }
+
+    public static LocationCreateDto getLocationCreateDto() {
+        return LocationCreateDto.builder()
+            .addLocationDtoList(List.of(getAddLocationTranslationDto())).build();
+    }
+
+    public static AddLocationTranslationDto getAddLocationTranslationDto() {
+        return AddLocationTranslationDto.builder()
+            .region("Test")
+            .locationName("Test")
+            .languageId(1L)
+            .build();
+    }
 }

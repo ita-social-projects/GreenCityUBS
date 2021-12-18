@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
@@ -559,5 +560,40 @@ class SuperAdminServiceImplTest {
         when(bagRepository.findById(1)).thenReturn(bag);
 
         assertThrows(LanguageNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
+    }
+
+    @Test
+    void addServiceThrowCourierNotFoundException() {
+        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.addService(dto, "123321"));
+
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void deleteCourierTest() {
+        Courier courier = ModelUtils.getCourier();
+        ;
+        courier.setCourierStatus(CourierStatus.DELETED);
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(courierRepository.save(courier)).thenReturn(courier);
+
+        superAdminService.deleteCourier(1L);
+        assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
+
+        verify(courierRepository).findById(1L);
+        verify(courierRepository).save(courier);
+    }
+
+    @Test
+    void deleteCourierThrowCourierNotFoundException() {
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.deleteCourier(1L));
+
+        verify(courierRepository).findById(1L);
     }
 }

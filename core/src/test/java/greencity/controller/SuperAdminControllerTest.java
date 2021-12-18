@@ -156,4 +156,16 @@ class SuperAdminControllerTest {
     void getAllCouriers() throws Exception {
         mockMvc.perform(get(ubsLink + "/getCouriers")).andExpect(status().isOk());
     }
+
+    @Test
+    void addLocation() throws Exception {
+        LocationCreateDto dto = ModelUtils.getLocationCreateDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
+            .content(ServiceResponceDtoJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 }

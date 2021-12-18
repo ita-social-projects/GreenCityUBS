@@ -21,7 +21,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -32,7 +31,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -805,16 +803,21 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
-        List<Order> allByUserId = orderRepository.findAllOrdersByUserUuid(uuid);
-        if (allByUserId.isEmpty()) {
-            throw new OrderNotFoundException(ErrorMessage.ORDERS_FOR_UUID_NOT_EXIST);
+        User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Integer userBonuses = currentUser.getCurrentPoints();
+        if (userBonuses == null) {
+            userBonuses = 0;
         }
-        List<PointsForUbsUserDto> bonusForUbsUser = allByUserId.stream()
-            .filter(a -> a.getPointsToUse() != 0)
-            .map(u -> modelMapper.map(u, PointsForUbsUserDto.class))
-            .collect(Collectors.toList());
+        List<ChangeOfPoints> changeOfPointsList = currentUser.getChangeOfPointsList();
+        List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
+        if (nonNull(changeOfPointsList)) {
+            bonusForUbsUser = changeOfPointsList.stream()
+                .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
+                .collect(Collectors.toList());
+        }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
-        allBonusesForUserDto.setUserBonuses(sumUserPoints(allByUserId));
+        allBonusesForUserDto.setUserBonuses(userBonuses);
         allBonusesForUserDto.setUbsUserBonuses(bonusForUbsUser);
         return allBonusesForUserDto;
     }
@@ -838,10 +841,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private Integer sumUserPoints(List<Order> allByUserId) {
-        return allByUserId.stream().map(Order::getPointsToUse).reduce(0, (x, y) -> x + y);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -850,14 +849,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileDto);
-        List<AddressDto> addressDto = userProfileDto.getAddressDto();
-        Address address = modelMapper.map(addressDto, Address.class);
-        address.setUser(user);
-        Address savedAddress = addressRepo.save(address);
+        List<AddressDto> addressDtoList = userProfileDto.getAddressDto();
+        List<Address> addressList =
+            addressDtoList.stream().map(a -> modelMapper.map(a, Address.class)).collect(Collectors.toList());
+        for (Address address : addressList) {
+            address.setUser(user);
+            addressRepo.save(address);
+        }
         User savedUser = userRepository.save(user);
-        Type savedAddressDtoList = new TypeToken<List<AddressDto>>() {
-        }.getType();
-        List<AddressDto> mapperAddressDto = modelMapper.map(savedAddress, savedAddressDtoList);
+        List<AddressDto> mapperAddressDto =
+            addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
         UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
         mappedUserProfileDto.setAddressDto(mapperAddressDto);
         return mappedUserProfileDto;
@@ -869,12 +870,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findByUuid(uuid);
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
-        for (Address address : allAddress) {
-            List<AddressDto> addressDto =
-                allAddress.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
-            setAddressData(address, addressDto);
-            userProfileDto.setAddressDto(addressDto);
-        }
+        List<AddressDto> addressDto =
+            allAddress.stream()
+                .filter(a -> a.getAddressStatus() != AddressStatus.DELETED)
+                .map(a -> modelMapper.map(a, AddressDto.class))
+                .collect(Collectors.toList());
+        userProfileDto.setAddressDto(addressDto);
         return userProfileDto;
     }
 
@@ -885,24 +886,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
         user.setRecipientEmail(userProfileDto.getRecipientEmail());
         return user;
-    }
-
-    private Address setAddressData(Address address, List<AddressDto> addressDto) {
-        List<String> city = addressDto.stream().map(AddressDto::getCity).collect(Collectors.toList());
-        List<String> street = addressDto.stream().map(AddressDto::getStreet).collect(Collectors.toList());
-        List<String> district = addressDto.stream().map(AddressDto::getDistrict).collect(Collectors.toList());
-        List<String> houseNumber = addressDto.stream().map(AddressDto::getHouseNumber).collect(Collectors.toList());
-        List<String> entranceNumber =
-            addressDto.stream().map(AddressDto::getEntranceNumber).collect(Collectors.toList());
-        List<String> houseCorpus = addressDto.stream().map(AddressDto::getHouseCorpus).collect(Collectors.toList());
-        address.setCity(String.valueOf(city));
-        address.setStreet(String.valueOf(street));
-        address.setDistrict(String.valueOf(district));
-        address.setHouseNumber(String.valueOf(houseNumber));
-        address.setEntranceNumber(String.valueOf(entranceNumber));
-        address.setHouseCorpus(String.valueOf(houseCorpus));
-
-        return address;
     }
 
     private User createUserByUuidIfUserDoesNotExist(String uuid) {

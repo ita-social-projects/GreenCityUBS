@@ -615,6 +615,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
         User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        if (ourUser.getCurrentPoints() == null) {
+            ourUser.setCurrentPoints(0);
+        }
         ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(addingPointsToUserDto.getAdditionalPoints())
@@ -1886,7 +1889,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String getPaymentDate(Order order) {
         return nonNull(order.getPayment())
-            ? order.getPayment().stream().map(Payment::getOrderTime).collect(joining(", "))
+            ? order.getPayment().stream().map(Payment::getSettlementDate).collect(joining(", "))
             : "-";
     }
 
@@ -1928,12 +1931,15 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getDateOfExport(Order order) {
-        return nonNull(order.getDateOfExport()) ? order.getDateOfExport().toString() : "-";
+        return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
+            ? String.format("from %s to %s", order.getDeliverFrom().toLocalDate().toString(),
+                order.getDeliverTo().toLocalDate().toString())
+            : "-";
     }
 
     private String getTimeOfExport(Order order) {
         return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
-            ? String.format("%s-%s", order.getDeliverFrom().toLocalTime().toString(),
+            ? String.format("from %s to %s", order.getDeliverFrom().toLocalTime().toString(),
                 order.getDeliverTo().toLocalTime().toString())
             : "-";
     }
