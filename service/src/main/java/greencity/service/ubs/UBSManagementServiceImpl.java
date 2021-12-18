@@ -675,7 +675,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId, String uuid) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
+        String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
