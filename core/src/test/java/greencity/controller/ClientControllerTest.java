@@ -158,6 +158,7 @@ class ClientControllerTest {
 
         this.mockMvc.perform(post(ubsLink + "/processOrderFondy")
             .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
             .content(dtoJson))
             .andExpect(status().isOk());
     }
@@ -182,6 +183,7 @@ class ClientControllerTest {
 
         this.mockMvc.perform(post(ubsLink + "/processOrderFondyIF")
             .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
             .content(dtoJson))
             .andExpect(status().isOk());
     }
