@@ -772,7 +772,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotEnoughBagsException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMaxAmountOfBigBags());
         }
     }
-  
+
     private int formBagsToBeSavedAndCalculateOrderSumClient(
         Map<Integer, Integer> getOrderBagsAndQuantity) {
         int sumToPay = 0;
@@ -785,7 +785,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         return sumToPay;
     }
-  
+
     private int formBagsToBeSavedAndCalculateOrderSum(
         Map<Integer, Integer> map, List<BagDto> bags, CourierLocation courierLocation) {
         int sumToPay = 0;
