@@ -2328,7 +2328,6 @@ public class ModelUtils {
             .location(Location
                 .builder()
                 .id(1L)
-                .minAmountOfBigBags(1L)
                 .build())
             .build();
     }
