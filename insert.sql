@@ -27,6 +27,11 @@ VALUES (1,'first.mike@gmail.com','Mike','Miopes','095634873',1,null),
        (9,'nineth.gregor@gmail.com','Gregor','Tutson','081704873',9,null),
        (10,'tenth.siona@gmail.com','Siona','Milletta','085874873',10,null);
 
+INSERT INTO courier values (100,2,30,250,500000,1,'LIMIT_BY_AMOUNT_OF_BAG');
+
+INSERT INTO courier_translations
+values (1,'УБС-КУР''ЄР',1,1,'Опис лімітів'),
+       (2,'UBS-COURIER',1,1,'Description limit');
 
 INSERT INTO orders
 VALUES  (1,'order comment',null,null,null,'2021-03-13 10:03:38.289346','FORMED',0,null,1,1,null),

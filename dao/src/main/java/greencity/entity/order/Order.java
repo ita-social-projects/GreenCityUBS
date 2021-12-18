@@ -26,7 +26,8 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode(exclude = {"employeeOrderPositions"})
+@EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations"})
+@ToString
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -148,5 +149,5 @@ public class Order {
     private Long counterOrderPaymentId;
 
     @ManyToOne
-    Courier courier;
+    CourierLocation courierLocations;
 }
