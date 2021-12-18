@@ -930,6 +930,14 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderFondyClient() throws Exception {
         Order order = ModelUtils.getOrderCount();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(100);
+
+        Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -940,10 +948,13 @@ class UBSClientServiceImplTest {
         }
 
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
-        ubsService.processOrderFondyClient(dto);
+        ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(restClient).getDataFromFondy(any());
@@ -1132,6 +1143,14 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderFondyClientForIF() throws Exception {
         Order order = ModelUtils.getOrderCount();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(100);
+
+        Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -1140,14 +1159,19 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
+
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
-        ubsService.processOrderFondyClientForIF(dto);
+        ubsService.processOrderFondyClientForIF(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(restClient).getDataFromFondy(any());
+
     }
 
     @Test

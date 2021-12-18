@@ -333,7 +333,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
-    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with Fondy payment. Version for Ivano-Frankivsk.
@@ -341,7 +341,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Sihovskiy Rostyslav
      */
-    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with liqpay payment .

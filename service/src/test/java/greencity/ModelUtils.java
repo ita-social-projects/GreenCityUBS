@@ -1985,13 +1985,14 @@ public class ModelUtils {
     public static OrderFondyClientDto getOrderFondyClientDto() {
         return OrderFondyClientDto.builder()
             .orderId(1L)
-            .sum(1)
+            .pointsToUse(100)
             .build();
     }
 
     public static Order getOrderCount() {
         return Order.builder()
             .id(1L)
+            .pointsToUse(1)
             .counterOrderPaymentId(2L)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId(1L)
@@ -2316,6 +2317,18 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.CANCELED)
+            .build();
+    }
+
+    public static Bag bagDtoClient() {
+        return Bag.builder()
+            .id(1)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .price(1)
+            .location(Location
+                .builder()
+                .id(1L)
+                .build())
             .build();
     }
 }
