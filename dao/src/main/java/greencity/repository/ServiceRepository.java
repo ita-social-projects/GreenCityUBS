@@ -33,4 +33,16 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
     @Query(nativeQuery = true,
         value = "select * from service s where s.id = :serviceId")
     Optional<Service> findServiceById(@Param("serviceId") Long serviceId);
+
+    /**
+     * Method that return full price by courier id.
+     *
+     * @param courierId {@link Long}
+     * @return {@link Integer}
+     * @author Maksym Kuzbyt
+     */
+    @Query(nativeQuery = true,
+        value = "select full_price from service s "
+            + "where s.courier_id = :courierId ")
+    Integer findFullPriceByCourierId(@Param("courierId") Long courierId);
 }

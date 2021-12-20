@@ -714,11 +714,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
-        Courier courier = courierRepository.findCourierByOrderId(orderId);
-        greencity.entity.order.Service service = new greencity.entity.order.Service();
-        if (service != null) {
-            serviceRepository.findServiceByOrderIdAndCourierId(orderId, courier.getId());
-        }
+        Integer fullPrice =
+            serviceRepository.findFullPriceByCourierId(order.get().getCourierLocations().getCourier().getId());
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -748,8 +745,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
-            .courierPricePerPackage(service.getFullPrice())
-            .courierInfo(modelMapper.map(courier, CourierInfoDto.class))
+            .courierPricePerPackage(fullPrice)
+            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
