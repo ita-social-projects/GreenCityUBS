@@ -23,6 +23,16 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
             + "where o.id = :orderId and cl.courier_id = :courierId ")
     Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
 
+
+    @Query(nativeQuery = true,
+            value = "select full_price from service s "
+                    + "join courier_locations cl on s.id = cl.courier_id "
+                    + "join orders o on cl.courier_id = o.courier_locations_id "
+                    + "where o.id = :orderId and cl.courier_id = :courierId ")
+    Integer findFullPriceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
+
+
+
     /**
      * Method that return service by id.
      *
