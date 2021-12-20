@@ -716,8 +716,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
         Courier courier = courierRepository.findCourierByOrderId(orderId);
-        greencity.entity.order.Service service =
+        greencity.entity.order.Service service = new greencity.entity.order.Service();
+        if (service != null) {
             serviceRepository.findServiceByOrderIdAndCourierId(orderId, courier.getId());
+        }
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
