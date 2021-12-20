@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employee", "position"})
+@EqualsAndHashCode(exclude = {"employee", "position", "order"})
 @Table(name = "employee_order_position")
 public class EmployeeOrderPosition {
     @Id
