@@ -15,4 +15,5 @@ public class UserFilterCriteria {
     private String[] numberOfOrders;
     private String[] numberOfViolations;
     private String[] numberOfBonuses;
+    private String search;
 }

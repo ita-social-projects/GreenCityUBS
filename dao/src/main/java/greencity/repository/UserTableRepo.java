@@ -1,6 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.enums.SortingOrder;
+import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.*;
@@ -81,11 +83,35 @@ public class UserTableRepo {
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
     }
 
+    private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
+        Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
+        Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
+
+        Predicate predicate = criteriaBuilder.or(
+            criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
+                "%" + us.getSearch().toUpperCase() + "%"),
+            criteriaBuilder.like(
+                criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
+                "%" + us.getSearch() + "%"),
+            criteriaBuilder.like((userRoot.get("violations").as(String.class)),
+                "%" + us.getSearch().toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get("recipientName")),
+                "%" + us.getSearch().toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get("recipientEmail")),
+                "%" + us.getSearch().toUpperCase() + "%"),
+            criteriaBuilder.like((userRoot.get("recipientPhone")),
+                "%" + us.getSearch().toUpperCase() + "%"),
+            criteriaBuilder.like(expression.as(String.class), us.getSearch()),
+            criteriaBuilder.like((userRoot.get("currentPoints").as(String.class)),
+                "%" + us.getSearch().toUpperCase() + "%"));
+        predicateList.add(predicate);
+    }
+
     private Predicate getPredicateForHaving(UserFilterCriteria us, Root<User> userRoot) {
         List<Predicate> predicateList = new ArrayList<>();
 
         if (nonNull(us.getOrderDate())) {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
             if (us.getOrderDate().length == 1) {
                 LocalDate number = LocalDate.parse(us.getOrderDate()[0], df);
@@ -110,6 +136,10 @@ public class UserTableRepo {
         }
         if (nonNull(us.getNumberOfOrders())) {
             predicateList.add(userOrdersFiltering(us.getNumberOfOrders(), userRoot));
+        }
+
+        if (nonNull(us.getSearch())) {
+            searchUsers(us, userRoot, predicateList);
         }
 
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
@@ -142,7 +172,7 @@ public class UserTableRepo {
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
             return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class),
