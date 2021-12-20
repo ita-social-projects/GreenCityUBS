@@ -652,7 +652,7 @@ class UBSManagementServiceImplTest {
         when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(address));
         when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
-            ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc");
+            ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
         verify(orderRepository).findById(1L);
         verify(addressRepository).save(TEST_ADDRESS);
@@ -667,7 +667,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc"));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc"));
     }
 
     @Test
@@ -677,7 +677,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrderWithoutAddress()));
 
         assertThrows(NotFoundOrderAddressException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc"));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc"));
     }
 
     @Test
@@ -1351,7 +1351,7 @@ class UBSManagementServiceImplTest {
         when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
             "abc")).thenReturn(ModelUtils.getUbsCustomersDto());
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
-        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setUbsCustomersDtoUpdate(ModelUtils.getUbsCustomersDtoUpdate());
         when(addressRepository.findById(1L))
             .thenReturn(Optional.of(TEST_ADDRESS));
         when(receivingStationRepository.findAll())

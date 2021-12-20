@@ -499,20 +499,20 @@ public class ModelUtils {
 
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
-            .generalOrderInfo(OrderDetailStatusRequestDto
+            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .adminComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
-            .userInfoDto(UbsCustomersDtoUpdate
+            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
                 .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
+            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
                 .addressDistrict("aaaaaaa")
@@ -533,7 +533,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDto(ExportDetailsDtoUpdate
+            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("20-12-2001")
                 .timeDeliveryFrom("20:20:20")
