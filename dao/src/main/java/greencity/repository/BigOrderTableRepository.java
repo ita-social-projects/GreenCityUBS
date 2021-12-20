@@ -283,11 +283,24 @@ public class BigOrderTableRepository {
     }
 
     private Predicate formPaymentLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
-        Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
+        Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
         Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-        Join<Order, Payment> paymentJoin = paymentRoot.join("payment");
-        subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
-        return criteriaBuilder.or(
-            criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%"));
+        ListJoin<Order, Payment> join = paymentRoot.joinList("payment", JoinType.LEFT);
+
+        subQueryPayment.select(join).where(criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.sum(join.get("amount")).as(String.class),"%" + s + "00" + "%"),
+                criteriaBuilder.like(join.get("settlementDate"),"%" + s + "%")
+        ));
+        return criteriaBuilder.exists(subQueryPayment);
     }
+
+//    private Predicate formPaymenSumtLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+//        Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
+//        Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
+//        Join<Order, Payment> paymentJoin = paymentRoot.join("payment");
+//        subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
+//        return criteriaBuilder.or(
+//            criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%")
+//        );
+   // }
 }
