@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode
 public class AddressExportDetailsDto {
-    private Long addressId;
+    private Long id;
     private String addressCity;
     private String addressDistrict;
     private String addressRegion;
