@@ -64,7 +64,7 @@ public class UserTableRepo {
         typedQuery.setFirstResult(page.getPageNumber() * 10);
         typedQuery.setMaxResults(10);
 
-        Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), "recipientPhone");
+        Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), RECIPIENT_PHONE);
         Pageable pageable = PageRequest.of(page.getPageNumber(), 10, sort);
 
         List<User> resultList = typedQuery.getResultList();
