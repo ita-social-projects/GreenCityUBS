@@ -88,28 +88,27 @@ public class UserTableRepo {
 
     private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
         Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
-        Expression<Long> expression = null;
+        Predicate predicate = null;
         if (orderJoin.isPresent()) {
-            criteriaBuilder.count(orderJoin.get().get("user"));
+            Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
+            predicate = criteriaBuilder.or(
+                criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
+                    "%" + us.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like(
+                    criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
+                    "%" + us.getSearch() + "%"),
+                criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
+                    "%" + us.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
+                    "%" + us.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
+                    "%" + us.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
+                    "%" + us.getSearch().toUpperCase() + "%"),
+                criteriaBuilder.like(expression.as(String.class), us.getSearch()),
+                criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
+                    "%" + us.getSearch().toUpperCase() + "%"));
         }
-
-        Predicate predicate = criteriaBuilder.or(
-            criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
-                "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(
-                criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
-                "%" + us.getSearch() + "%"),
-            criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
-                "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
-                "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
-                "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
-                "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(expression.as(String.class), us.getSearch()),
-            criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
-                "%" + us.getSearch().toUpperCase() + "%"));
         predicateList.add(predicate);
     }
 
@@ -153,7 +152,7 @@ public class UserTableRepo {
 
     private void setOrder(String column, SortingOrder sortingOrder, CriteriaQuery<User> criteriaQuery,
         Root<User> userRoot) {
-        Expression<?> sortBy = userRoot.get("recipientName");
+        Expression<?> sortBy = userRoot.get(RECIPIENT_NAME);
         Optional<Join<User, ?>> first = userRoot.getJoins().stream().findFirst();
         if (nonNull(column)) {
             if (column.equals(ORDER_DATE)) {
@@ -165,7 +164,7 @@ public class UserTableRepo {
                     sortBy = criteriaBuilder.count(first.get().get("user"));
                 }
             } else if (column.equals("clientName")) {
-                sortBy = userRoot.get("recipientName");
+                sortBy = userRoot.get(RECIPIENT_NAME);
             } else {
                 sortBy = userRoot.get(column);
             }
@@ -198,22 +197,22 @@ public class UserTableRepo {
     private Predicate userViolationsFiltering(String[] numberOfViolations, Root<User> userRoot) {
         if (numberOfViolations.length == 1) {
             int number = Integer.parseInt(numberOfViolations[0]);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get("violations"), number);
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(VIOLATIONS), number);
         } else {
             int number1 = Integer.parseInt(numberOfViolations[0]);
             int number2 = Integer.parseInt(numberOfViolations[1]);
-            return criteriaBuilder.between(userRoot.get("violations"), number1, number2);
+            return criteriaBuilder.between(userRoot.get(VIOLATIONS), number1, number2);
         }
     }
 
     private Predicate userBonusesFiltering(String[] bonuses, Root<User> userRoot) {
         if (bonuses.length == 1) {
             int number = Integer.parseInt(bonuses[0]);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get("currentPoints"), number);
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(POINTS), number);
         } else {
             int number1 = Integer.parseInt(bonuses[0]);
             int number2 = Integer.parseInt(bonuses[1]);
-            return criteriaBuilder.between(userRoot.get("currentPoints"), number1, number2);
+            return criteriaBuilder.between(userRoot.get(POINTS), number1, number2);
         }
     }
 
