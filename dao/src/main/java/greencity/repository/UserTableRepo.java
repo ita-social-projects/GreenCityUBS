@@ -89,28 +89,28 @@ public class UserTableRepo {
 
     private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
         Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
-        Predicate predicate = null;
         if (orderJoin.isPresent()) {
             Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
-            predicate = criteriaBuilder.or(
+            Predicate predicate = criteriaBuilder.or(
                 criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
-                    "%" + us.getSearch().toUpperCase() + "%"),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(
                     criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
-                    "%" + us.getSearch() + "%"),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
-                    "%" + us.getSearch().toUpperCase() + "%"),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
-                    "%" + us.getSearch().toUpperCase() + "%"),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
-                    "%" + us.getSearch().toUpperCase() + "%"),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
-                    "%" + us.getSearch().toUpperCase() + "%"),
-                criteriaBuilder.like(expression.as(String.class), us.getSearch()),
+                    anyCoincidence(us.getSearch())),
+                criteriaBuilder.like(expression.as(String.class),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
-                    "%" + us.getSearch().toUpperCase() + "%"));
+                    anyCoincidence(us.getSearch())));
+            predicateList.add(predicate);
         }
-        predicateList.add(predicate);
     }
 
     private Predicate getPredicateForHaving(UserFilterCriteria us, Root<User> userRoot) {
@@ -231,5 +231,9 @@ public class UserTableRepo {
             long number2 = Integer.parseInt(bonuses[1]);
             return criteriaBuilder.between(expression, number1, number2);
         }
+    }
+
+    private String anyCoincidence(String search) {
+        return "%" + search.toUpperCase() + "%";
     }
 }
