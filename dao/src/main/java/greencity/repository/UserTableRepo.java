@@ -29,6 +29,7 @@ public class UserTableRepo {
     private static final String RECIPIENT_PHONE = "recipientPhone";
     private static final String POINTS = "currentPoints";
     private static final String VIOLATIONS = "violations";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -116,7 +117,7 @@ public class UserTableRepo {
         List<Predicate> predicateList = new ArrayList<>();
 
         if (nonNull(us.getOrderDate())) {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter df = DateTimeFormatter.ofPattern(DATE_FORMAT);
             Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
             if (us.getOrderDate().length == 1) {
                 LocalDate number = LocalDate.parse(us.getOrderDate()[0], df);
@@ -177,7 +178,7 @@ public class UserTableRepo {
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(DATE_FORMAT);
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
             return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class),
