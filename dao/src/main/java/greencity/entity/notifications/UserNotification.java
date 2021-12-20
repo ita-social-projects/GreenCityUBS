@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@EqualsAndHashCode(exclude = {"order","user","parameters","notificationTime"})
+@EqualsAndHashCode(exclude = {"order", "user", "parameters", "notificationTime"})
 @Entity
 @Table(name = "user_notifications")
 public class UserNotification {
