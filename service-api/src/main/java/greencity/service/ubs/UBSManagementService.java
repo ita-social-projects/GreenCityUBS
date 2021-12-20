@@ -155,7 +155,8 @@ public interface UBSManagementService {
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid);
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
+        String uuid);
 
     /**
      * Method for getting order detail by language and order id.
