@@ -12,7 +12,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employees"})
+@EqualsAndHashCode(exclude = {"employees", "employeeOrderPositions"})
 @Table(name = "positions")
 public class Position {
     @Id

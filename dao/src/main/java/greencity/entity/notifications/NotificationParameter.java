@@ -5,7 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"userNotification"})
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,8 +25,6 @@ public class NotificationParameter {
     }
 
     @ManyToOne
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "notification_id", nullable = false)
     private UserNotification userNotification;
 
