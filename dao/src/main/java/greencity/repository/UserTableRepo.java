@@ -1,8 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.enums.SortingOrder;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.*;
@@ -26,6 +24,11 @@ public class UserTableRepo {
     private static final String ORDERS = "orders";
     private static final String ORDER_DATE = "orderDate";
     private static final String DATE_OF_REGISTRATION = "dateOfRegistration";
+    private static final String RECIPIENT_NAME = "recipientName";
+    private static final String RECIPIENT_EMAIL = "recipientEmail";
+    private static final String RECIPIENT_PHONE = "recipientPhone";
+    private static final String POINTS = "currentPoints";
+    private static final String VIOLATIONS = "violations";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -85,7 +88,10 @@ public class UserTableRepo {
 
     private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
         Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
-        Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
+        Expression<Long> expression = null;
+        if (orderJoin.isPresent()) {
+            criteriaBuilder.count(orderJoin.get().get("user"));
+        }
 
         Predicate predicate = criteriaBuilder.or(
             criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
@@ -93,16 +99,16 @@ public class UserTableRepo {
             criteriaBuilder.like(
                 criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
                 "%" + us.getSearch() + "%"),
-            criteriaBuilder.like((userRoot.get("violations").as(String.class)),
+            criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
                 "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get("recipientName")),
+            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
                 "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get("recipientEmail")),
+            criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
                 "%" + us.getSearch().toUpperCase() + "%"),
-            criteriaBuilder.like((userRoot.get("recipientPhone")),
+            criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
                 "%" + us.getSearch().toUpperCase() + "%"),
             criteriaBuilder.like(expression.as(String.class), us.getSearch()),
-            criteriaBuilder.like((userRoot.get("currentPoints").as(String.class)),
+            criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
                 "%" + us.getSearch().toUpperCase() + "%"));
         predicateList.add(predicate);
     }
