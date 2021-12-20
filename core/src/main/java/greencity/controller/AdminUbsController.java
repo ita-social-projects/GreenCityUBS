@@ -60,7 +60,7 @@ public class AdminUbsController {
     })
     @GetMapping("/usersAll")
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(@ApiIgnore Pageable page,
-        @RequestParam String columnName,
+        String columnName,
         @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria));
