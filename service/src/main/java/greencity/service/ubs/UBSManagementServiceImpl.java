@@ -746,7 +746,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
             .courierPricePerPackage(fullPrice)
-            .courierInfo(modelMapper.map(order.get().getCourierLocations(),CourierInfoDto.class))
+            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
