@@ -11,10 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class UpdateOrderPageAdminDto {
-    private OrderDetailStatusRequestDto generalOrderInfo;
-    private UbsCustomersDtoUpdate userInfoDto;
-    private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
+    private OrderDetailStatusRequestDto orderDetailStatusRequestDto;
+    private UbsCustomersDtoUpdate ubsCustomersDtoUpdate;
+    private OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate;
     private List<EcoNumberDto> ecoNumberFromShop;
-    private ExportDetailsDtoUpdate exportDetailsDto;
+    private ExportDetailsDtoUpdate exportDetailsDtoUpdate;
     private List<UpdateOrderDetailDto> updateOrderDetailDto;
 }

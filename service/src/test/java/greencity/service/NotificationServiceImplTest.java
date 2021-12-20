@@ -296,7 +296,7 @@ class NotificationServiceImplTest {
 
             notificationService.notifyAllHalfPaidPackages();
 
-            verify(userNotificationRepository, times(1)).save(notification);
+            verify(userNotificationRepository, times(2)).save(notification);
             verify(notificationParameterRepository, times(2)).saveAll(any());
         }
     }

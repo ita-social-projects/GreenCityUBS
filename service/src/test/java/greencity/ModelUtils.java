@@ -256,6 +256,65 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrderForGetOrderStatusDataTest() {
+        return Order.builder()
+            .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId(1L)
+                .amount(20000L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .addressComment("near mall")
+                    .houseCorpus("1")
+                    .houseNumber("4")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .receivingStation("C")
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .courierLocations(CourierLocation.builder()
+                .courier(Courier.builder()
+                    .id(1L)
+                    .build())
+                .id(1L)
+                .location(Location.builder()
+                    .id(1L)
+                    .build())
+                .maxAmountOfBigBags(2L)
+                .maxPriceOfOrder(500000L)
+                .minAmountOfBigBags(99L)
+                .minPriceOfOrder(500L)
+                .build())
+            .build();
+    }
+
     public static Order getOrderWithoutAddress() {
         return Order.builder()
             .id(1L)
@@ -1147,7 +1206,7 @@ public class ModelUtils {
     public static OrderDetailStatusRequestDto getTestOrderDetailStatusRequestDto() {
         return OrderDetailStatusRequestDto.builder()
             .orderStatus("FORMED")
-            .adminComment("all good")
+            .orderAdminComment("all good")
             .orderPaymentStatus("PAID").build();
     }
 
@@ -1220,6 +1279,7 @@ public class ModelUtils {
     private static OrderAddressExportDetailsDtoUpdate createOrderAddressDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .addressId(1L)
+            .orderId(1L)
             .addressHouseNumber("1")
             .addressEntranceNumber("3")
             .addressDistrict("Syhiv")
@@ -2014,22 +2074,23 @@ public class ModelUtils {
 
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
-            .generalOrderInfo(OrderDetailStatusRequestDto
+            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .adminComment("aaa")
+                .orderAdminComment("aaa")
                 .build())
-            .userInfoDto(UbsCustomersDtoUpdate
+            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
                 .builder()
                 .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
+            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
+                .orderId(1L)
                 .addressDistrict("aaaaaaa")
                 .addressStreet("aaaaa")
                 .addressEntranceNumber("12")
@@ -2048,7 +2109,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDto(ExportDetailsDtoUpdate
+            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
                 .timeDeliveryFrom("1997-12-04T15:40:24")

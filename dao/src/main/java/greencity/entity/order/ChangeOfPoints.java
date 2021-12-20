@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = {"user", "order"})
 @Builder
 @Table(name = "change_of_points")
 public class ChangeOfPoints {

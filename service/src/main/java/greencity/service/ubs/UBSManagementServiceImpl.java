@@ -675,11 +675,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
-        String uuid) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findById(dtoUpdate.getOrderId())
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
@@ -715,9 +714,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
-        Courier courier = courierRepository.findCourierByOrderId(orderId);
-        greencity.entity.order.Service service =
-            serviceRepository.findServiceByOrderIdAndCourierId(orderId, courier.getId());
+        Integer fullPrice =
+            serviceRepository.findFullPriceByCourierId(order.get().getCourierLocations().getCourier().getId());
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -747,8 +745,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
-            .courierPricePerPackage(service.getFullPrice())
-            .courierInfo(modelMapper.map(courier, CourierInfoDto.class))
+            .courierPricePerPackage(fullPrice)
+            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
@@ -763,7 +761,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
         return AddressExportDetailsDto.builder()
-            .addressId(address.getId())
+            .id(address.getId())
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
@@ -1157,8 +1155,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (nonNull(dto.getAdminComment())) {
-            order.setAdminComment(dto.getAdminComment());
+        if (nonNull(dto.getOrderAdminComment())) {
+            order.setAdminComment(dto.getOrderAdminComment());
             eventService.save(OrderHistory.ADD_ADMIN_COMMENT, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
             orderRepository.save(order);
@@ -2069,17 +2067,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String currentUser) {
         try {
-            if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
-                updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), currentUser);
+            if (nonNull(updateOrderPageDto.getOrderDetailStatusRequestDto())) {
+                updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
             }
-            if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), currentUser);
+            if (nonNull(updateOrderPageDto.getUbsCustomersDtoUpdate())) {
+                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
             }
-            if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
-                updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, currentUser);
+            if (nonNull(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate())) {
+                updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
             }
-            if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
-                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), currentUser);
+            if (nonNull(updateOrderPageDto.getExportDetailsDtoUpdate())) {
+                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
             }
             if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
                 updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);

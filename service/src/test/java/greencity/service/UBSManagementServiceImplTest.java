@@ -652,7 +652,7 @@ class UBSManagementServiceImplTest {
         when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(address));
         when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
-            ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc");
+            ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc");
         assertEquals(Optional.of(TEST_ORDER_ADDRESS_DTO_RESPONSE), actual);
         verify(orderRepository).findById(1L);
         verify(addressRepository).save(TEST_ADDRESS);
@@ -667,7 +667,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc"));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc"));
     }
 
     @Test
@@ -677,7 +677,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrderWithoutAddress()));
 
         assertThrows(NotFoundOrderAddressException.class,
-            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc"));
+            () -> ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, "abc"));
     }
 
     @Test
@@ -1244,7 +1244,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getOrderStatusDataTest() {
-        Order order = ModelUtils.getOrder();
+        Order order = ModelUtils.getOrderForGetOrderStatusDataTest();
         order.setOrderStatus(OrderStatus.CONFIRMED);
         Map<Integer, Integer> hashMap = new HashMap<>();
         hashMap.put(1, 1);
@@ -1252,10 +1252,8 @@ class UBSManagementServiceImplTest {
         order.setConfirmedQuantity(hashMap);
         order.setExportedQuantity(hashMap);
         order.setPointsToUse(100);
-        Bag bag = ModelUtils.getBag().get();
         BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
         Language language = ModelUtils.getLanguage();
-        Courier courier = ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
@@ -1280,20 +1278,14 @@ class UBSManagementServiceImplTest {
             .thenReturn(ModelUtils.getExportDetails());
         lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
             .thenReturn(ModelUtils.getPaymentTableInfoDto());
-        when(serviceRepository.findServiceByOrderIdAndCourierId(order.getId(), courier.getId()))
-            .thenReturn(ModelUtils.getService());
-        when(courierRepository.findCourierByOrderId(order.getId())).thenReturn(
-            ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER));
+        when(serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId()))
+            .thenReturn(1);
         ubsManagementService.getOrderStatusData(1L, "ua");
-
-        verify(serviceRepository).findServiceByOrderIdAndCourierId(order.getId(), courier.getId());
-        verify(modelMapper).map(ModelUtils.getCourier(CourierLimit.LIMIT_BY_SUM_OF_ORDER), CourierInfoDto.class);
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
         verify(orderRepository, times(4)).findById(1L);
         verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
-        verify(courierRepository).findCourierByOrderId(order.getId());
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
     }
 
@@ -1351,7 +1343,7 @@ class UBSManagementServiceImplTest {
         when(ubsClientService.updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(),
             "abc")).thenReturn(ModelUtils.getUbsCustomersDto());
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
-        updateOrderPageAdminDto.setUserInfoDto(ModelUtils.getUbsCustomersDtoUpdate());
+        updateOrderPageAdminDto.setUbsCustomersDtoUpdate(ModelUtils.getUbsCustomersDtoUpdate());
         when(addressRepository.findById(1L))
             .thenReturn(Optional.of(TEST_ADDRESS));
         when(receivingStationRepository.findAll())

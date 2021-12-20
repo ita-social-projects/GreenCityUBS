@@ -9,7 +9,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orders", "address"})
+@EqualsAndHashCode(exclude = {"orders", "address", "user",})
 @Getter
 @Setter
 @Builder
