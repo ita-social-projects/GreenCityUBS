@@ -192,4 +192,6 @@ public interface SuperAdminService {
      * @param id - courier Id.
      */
     void deleteCourier(Long id);
+
+    void addLocationToCourier(NewLocationForCourierDto dto);
 }

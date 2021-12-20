@@ -436,4 +436,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Integer getFullPrice(Integer price, Integer commission) {
         return price + commission;
     }
+
+    @Override
+    public void addLocationToCourier(NewLocationForCourierDto dto){
+        CourierLocation courierLocation = modelMapper.map(dto,CourierLocation.class);
+        courierLocation.setCourier(courierRepository.findById(dto.getCourierId()).orElseThrow(
+                ()->new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId())));
+        courierLocation.setLocation(locationRepository.findById(
+                dto.getLocationId()).orElseThrow(()->new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND)));
+        courierLocationRepository.save(courierLocation);
+    }
 }

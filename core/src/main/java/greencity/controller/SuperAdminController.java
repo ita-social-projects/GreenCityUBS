@@ -425,4 +425,20 @@ class SuperAdminController {
         superAdminService.deleteCourier(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    /**
+     * Controller for add new locations for courier's.
+     *
+     */
+    @ApiOperation(value = "Controller for add new locations for courier's.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PutMapping("/addLocation")
+    public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
+        superAdminService.addLocationToCourier(dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
