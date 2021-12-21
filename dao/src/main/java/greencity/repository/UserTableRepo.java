@@ -93,22 +93,22 @@ public class UserTableRepo {
             Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
             Predicate predicate = criteriaBuilder.or(
                 criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(
                     criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like(expression.as(String.class),
-                    anyMatch(us.getSearch())),
+                    anyCoincidence(us.getSearch())),
                 criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
-                    anyMatch(us.getSearch())));
+                    anyCoincidence(us.getSearch())));
             predicateList.add(predicate);
         }
     }
@@ -233,7 +233,7 @@ public class UserTableRepo {
         }
     }
 
-    private String anyMatch(String search) {
+    private String anyCoincidence(String search) {
         return "%" + search.toUpperCase() + "%";
     }
 }
