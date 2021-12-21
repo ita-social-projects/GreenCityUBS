@@ -1400,7 +1400,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
+                orderId + order.getCounterOrderPaymentId().toString() + order.getPayment().get(0).getId())
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
