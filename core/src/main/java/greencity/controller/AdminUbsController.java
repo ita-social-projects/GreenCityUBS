@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
+import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
@@ -59,7 +60,7 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/usersAll")
-    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(Pageable page,
+    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(CustomerPage page,
         String columnName,
         @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
