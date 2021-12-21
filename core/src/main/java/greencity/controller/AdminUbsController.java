@@ -59,7 +59,7 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/usersAll")
-    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(@ApiIgnore Pageable page,
+    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(Pageable page,
         String columnName,
         @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
