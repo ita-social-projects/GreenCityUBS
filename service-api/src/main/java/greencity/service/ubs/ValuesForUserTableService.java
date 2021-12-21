@@ -4,8 +4,8 @@ import greencity.dto.FieldsForUsersTableDto;
 import greencity.dto.PageableDto;
 import greencity.dto.UserWithSomeOrderDetailDto;
 import greencity.entity.enums.SortingOrder;
+import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import org.springframework.data.domain.Pageable;
 
 public interface ValuesForUserTableService {
     /**
@@ -14,6 +14,6 @@ public interface ValuesForUserTableService {
      * @return {@link FieldsForUsersTableDto}.
      * @author Stepan Tehlivets.
      */
-    PageableDto<UserWithSomeOrderDetailDto> getAllFields(Pageable page, String columnName,
+    PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
         SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria);
 }

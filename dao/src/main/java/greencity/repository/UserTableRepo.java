@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
+import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -48,7 +49,7 @@ public class UserTableRepo {
      */
 
     public Page<User> findAll(UserFilterCriteria userFilterCriteria, String column,
-        SortingOrder sortingOrder, Pageable page) {
+        SortingOrder sortingOrder, CustomerPage page) {
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> userRoot = criteriaQuery.from(User.class);
         userRoot.join(ORDERS, JoinType.INNER);
@@ -62,15 +63,16 @@ public class UserTableRepo {
         }
 
         TypedQuery<User> typedQuery = entityManager.createQuery(criteriaQuery);
-        typedQuery.setFirstResult(page.getPageNumber() * 10);
-        typedQuery.setMaxResults(10);
+        long usersCount = typedQuery.getResultList().size();
+        typedQuery.setFirstResult(page.getPageNumber() * page.getPageSize());
+        typedQuery.setMaxResults(page.getPageSize());
 
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), RECIPIENT_PHONE);
-        Pageable pageable = PageRequest.of(page.getPageNumber(), 10, sort);
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
 
         List<User> resultList = typedQuery.getResultList();
 
-        return new PageImpl<>(resultList, pageable, resultList.size());
+        return new PageImpl<>(resultList, pageable, usersCount);
     }
 
     private Predicate getPredicateForWhere(UserFilterCriteria us, Root<User> userRoot) {
