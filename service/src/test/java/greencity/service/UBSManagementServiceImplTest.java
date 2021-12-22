@@ -1283,7 +1283,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrderStatusData(1L, "ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
-        verify(orderRepository, times(4)).findById(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
