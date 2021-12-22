@@ -1475,14 +1475,36 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) {
+    public LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
-        if (order.getCounterOrderPaymentId() == null) {
-            order.setCounterOrderPaymentId(0L);
+        User currentUser = findByIdUserForClient(uuid);
+
+        Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
+        checkForNullCounter(order);
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+
+        Integer sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
+        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
+
+        Set<Certificate> orderCertificates = new HashSet<>();
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+
+        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
+        userRepository.save(currentUser);
+
+        paymentVerification(sumToPay, order);
+
+        if (sumToPay == 0) {
+            return buildOrderResponse(order, null);
+        } else {
+            return linkButton(order, sumToPay);
         }
-        Order increment = incrementCounter(order);
-        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(increment.getId(), dto.getSum());
-        return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
+    }
+
+    private LiqPayOrderResponse linkButton(Order order, Integer sumToPay) {
+        Order order1 = incrementCounter(order);
+        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(order1.getId(), sumToPay);
+        return buildOrderResponse(order1, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
             .replace("\"", "")
             .replace("\n", ""));
     }
