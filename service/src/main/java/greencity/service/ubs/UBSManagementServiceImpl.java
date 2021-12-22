@@ -733,7 +733,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(prices.getTotalSumAmount())
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getOverpayment() > 0 ? 0
+                : prices.getTotalSumAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
@@ -1039,7 +1040,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             double totalSumAmountToCheck =
                 (sumAmount - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                     + order.getPointsToUse()));
-            totalSumAmount = totalSumAmountToCheck > 0 ? 0 : totalSumAmountToCheck;
+            totalSumAmount = totalSumAmountToCheck <= 0 ? 0 : totalSumAmountToCheck;
             totalSumConfirmed =
                 (sumConfirmed
                     - ((currentCertificate.stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
@@ -1438,7 +1439,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-        return sumToPay <= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
+        return sumToPay >= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
     }
 
     /**
@@ -1462,7 +1463,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
-        return sumToPay > paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
+        return sumToPay < paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
