@@ -1766,6 +1766,7 @@ public class ModelUtils {
         return Location.builder()
             .id(1L)
             .locationStatus(LocationStatus.ACTIVE)
+            .locationTranslations(getLocationTranslationList())
             .coordinates(Coordinates.builder()
                 .longitude(3.34d)
                 .latitude(1.32d).build())
@@ -2259,26 +2260,34 @@ public class ModelUtils {
 
     public static CourierLocation getCourierLocations() {
         return CourierLocation.builder()
-            .maxAmountOfBigBags(99L)
+            .maxAmountOfBigBags(20L)
             .minAmountOfBigBags(2L)
-            .maxPriceOfOrder(100000L)
+            .maxPriceOfOrder(20000L)
             .minPriceOfOrder(500L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .location(getLocation())
+            .courier(Courier.builder()
+                .id(1L)
+                .courierStatus(CourierStatus.ACTIVE)
+                .courierTranslationList(getCourierTranslations())
+                .build())
             .build();
     }
 
     public static GetCourierLocationDto getCourierLocationsDto() {
         return GetCourierLocationDto.builder()
-            .courierLocationId(getLocation().getId())
             .minPriceOfOrder(500L)
             .maxPriceOfOrder(20000L)
             .courierLimit("LIMIT_BY_AMOUNT_OF_BAG")
             .minAmountOfBigBags(2L)
             .maxAmountOfBigBags(20L)
+            .courierDtos(getCourierDtoList())
             .locationsDtos(List.of(LocationsDto.builder()
                 .locationStatus(getLocation().getLocationStatus().toString())
                 .locationId(getLocation().getId())
+                .latitude(1.32d)
+                .longitude(3.34d)
+                .locationTranslationDtoList(getLocationTranslationDto())
                 .build()))
             .build();
     }
@@ -2302,9 +2311,9 @@ public class ModelUtils {
     public static LimitsDto getCourierLimitsDto() {
         return LimitsDto.builder()
             .locationId(1L)
-            .maxAmountOfBigBags(99L)
+            .maxAmountOfBigBags(20L)
             .minAmountOfBigBags(2L)
-            .maxPriceOfOrder(100000L)
+            .maxPriceOfOrder(20000L)
             .minPriceOfOrder(500L)
             .build();
     }
@@ -2426,7 +2435,7 @@ public class ModelUtils {
         return Region.builder()
             .id(1L)
             .regionTranslation(getRegionTranslationsList())
-            .locationList(getLocationList())
+            .locationList(List.of(getLocation()))
             .build();
     }
 
@@ -2435,5 +2444,58 @@ public class ModelUtils {
             .id(1L)
             .regionTranslation(getRegionTranslationsList())
             .build();
+    }
+
+    public static NewLocationForCourierDto newLocationForCourierDto() {
+        return NewLocationForCourierDto.builder()
+            .courierId(1L)
+            .locationId(1L)
+            .maxAmountOfBigBag(20L)
+            .minAmountOfBigBag(2L)
+            .maxAmountOfOrder(20000L)
+            .minAmountOfOrder(500L)
+            .build();
+    }
+
+    public static FindInfoAboutLocationDto getInfoAboutLocationDto() {
+        return FindInfoAboutLocationDto.builder()
+            .regionId(1L)
+            .regionTranslationDtos(getRegionTranslationsDto())
+            .locationsDto(getLocationsDto()).build();
+    }
+
+    public static List<LocationsDto> getLocationsDto() {
+        return List.of(LocationsDto.builder()
+            .locationId(1L)
+            .locationTranslationDtoList(getLocationTranslationDto())
+            .locationStatus("ACTIVE")
+            .longitude(3.34d)
+            .latitude(1.32d)
+            .build());
+    }
+
+    public static List<LocationTranslationDto> getLocationTranslationDto() {
+        return List.of(LocationTranslationDto.builder()
+            .locationName("Київ")
+            .languageCode("ua")
+            .build(),
+            LocationTranslationDto.builder()
+                .locationName("Name2")
+                .languageCode("ua").build());
+    }
+
+    public static List<CourierDto> getCourierDtoList() {
+        return List.of(CourierDto.builder()
+            .courierId(1L)
+            .courierStatus("ACTIVE")
+            .courierTranslationDtos(getCourierTranslationDtoList())
+            .build());
+    }
+
+    public static List<CourierTranslationDto> getCourierTranslationDtoList() {
+        return List.of(CourierTranslationDto.builder()
+            .name("Test")
+            .limitDescription("Test")
+            .languageCode("ua").build());
     }
 }

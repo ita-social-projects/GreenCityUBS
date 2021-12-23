@@ -169,4 +169,40 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
+
+    @Test
+    void deactivateLocation() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/deactivateLocations/" + 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void activateException() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void addNewLocationForCourier() throws Exception {
+        NewLocationForCourierDto dto = ModelUtils.getNewLocationForCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/courier/location")
+            .principal(principal)
+            .content(requestJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierTest() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 }

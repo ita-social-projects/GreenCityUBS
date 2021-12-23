@@ -441,7 +441,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PutMapping("courier/location")
+    @PutMapping("/courier/location")
     public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
         superAdminService.addLocationToCourier(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();

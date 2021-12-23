@@ -623,4 +623,62 @@ class SuperAdminServiceImplTest {
 
         verify(courierRepository).findById(1L);
     }
+
+    @Test
+    void addLocationToCourierTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        Location location = ModelUtils.getLocation();
+        courierLocation.setCourier(courier);
+        courierLocation.setLocation(location);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(courierLocationRepository.save(courierLocation)).thenReturn(courierLocation);
+
+        superAdminService.addLocationToCourier(dto);
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+        verify(courierLocationRepository).save(courierLocation);
+    }
+
+    @Test
+    void addLocationToCourierThrowCourierNotFoundExceptionTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        courierLocation.setCourier(courier);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void addLocationToCourierThrowLocationNotFoundExceptionTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        Location location = ModelUtils.getLocation();
+        courierLocation.setCourier(courier);
+        courierLocation.setLocation(location);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+    }
 }

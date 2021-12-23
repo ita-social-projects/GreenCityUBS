@@ -588,4 +588,40 @@ public class ModelUtils {
             .languageCode("ua")
             .build());
     }
+
+    public static NewLocationForCourierDto getNewLocationForCourierDto() {
+        return NewLocationForCourierDto.builder()
+            .courierId(1L)
+            .locationId(1L)
+            .maxAmountOfBigBag(50L)
+            .minAmountOfBigBag(2L)
+            .maxAmountOfOrder(100000L)
+            .minAmountOfOrder(500L)
+            .build();
+    }
+
+    public static CreateCourierDto getCreateCourierDto() {
+        return CreateCourierDto.builder()
+            .createCourierTranslationDtos(getCreateCourierTranslationDto())
+            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+            .build();
+    }
+
+    public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
+        return List.of(CreateCourierTranslationDto.builder()
+            .limitDescription("Test")
+            .languageId(1L)
+            .name("Test")
+            .build());
+    }
+
+    public static LimitsDto getCourierLimitsDto() {
+        return LimitsDto.builder()
+            .locationId(1L)
+            .maxAmountOfBigBags(99L)
+            .minAmountOfBigBags(2L)
+            .maxPriceOfOrder(100000L)
+            .minPriceOfOrder(500L)
+            .build();
+    }
 }

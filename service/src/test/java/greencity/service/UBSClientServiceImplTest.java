@@ -150,7 +150,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -765,7 +765,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -866,7 +866,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -987,7 +987,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -1091,7 +1091,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
