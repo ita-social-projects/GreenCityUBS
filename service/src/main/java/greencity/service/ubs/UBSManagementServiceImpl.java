@@ -287,7 +287,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long paidAmount = calculatePaidAmount(order);
         Long overpayment = calculateOverpayment(order, sumToPay);
-        Long unPaidAmount = calculateUnpaidAmount(sumToPay, paidAmount);
+        Long unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         paymentTableInfoDto.setOverpayment(overpayment);
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
@@ -1439,7 +1439,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-        return sumToPay >= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
+        return sumToPay - paymentSum < 0 ? Math.abs(paymentSum - sumToPay) : 0L;
     }
 
     /**
@@ -1457,13 +1457,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * Method that calculate unpaid amount.
      *
+     * @param order      of {@link Order} order id;
      * @param sumToPay   of {@link Long} sum to pay;
      * @param paidAmount of {@link Long} sum to pay;
      * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
-        return sumToPay < paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
+    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) {
+        sumToPay =
+            sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                + order.getPointsToUse());
+        return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
