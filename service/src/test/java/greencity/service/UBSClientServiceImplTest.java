@@ -929,6 +929,14 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderFondyClient() throws Exception {
         Order order = ModelUtils.getOrderCount();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(100);
+
+        Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -939,10 +947,13 @@ class UBSClientServiceImplTest {
         }
 
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
-        ubsService.processOrderFondyClient(dto);
+        ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(restClient).getDataFromFondy(any());
@@ -952,11 +963,19 @@ class UBSClientServiceImplTest {
     @Test
     void proccessOrderLiqpayClient() {
         Order order = ModelUtils.getOrderCount();
-        OrderLiqpayClienDto dto = ModelUtils.getOrderLiqpayClientDto();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        OrderFondyClientDto dto = getOrderFondyClientDto();
+        Bag bag = ModelUtils.bagDtoClient();
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(100);
+
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         when(restClient.getDataFromLiqPay(any())).thenReturn("TestValue");
-
-        ubsService.proccessOrderLiqpayClient(dto);
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+        ubsService.proccessOrderLiqpayClient(dto, "uuid");
 
         verify(orderRepository, times(2)).findById(1L);
         verify(restClient).getDataFromLiqPay(any());
@@ -1131,6 +1150,14 @@ class UBSClientServiceImplTest {
     @Test
     void processOrderFondyClientForIF() throws Exception {
         Order order = ModelUtils.getOrderCount();
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        User user = ModelUtils.getUser();
+        user.setCurrentPoints(100);
+
+        Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -1139,14 +1166,19 @@ class UBSClientServiceImplTest {
                 f.set(ubsService, "1");
             }
         }
+
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
+
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
 
-        ubsService.processOrderFondyClientForIF(dto);
+        ubsService.processOrderFondyClientForIF(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
         verify(restClient).getDataFromFondy(any());
+
     }
 
     @Test

@@ -492,26 +492,27 @@ public class ModelUtils {
     public static OrderFondyClientDto getOrderFondyClientDto() {
         return OrderFondyClientDto.builder()
             .orderId(1L)
-            .sum(2)
+            .pointsToUse(100)
+            .certificates(Collections.emptySet())
             .build();
     }
 
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
-            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+            .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderAdminComment("aaa")
+                .adminComment("aaa")
                 .build())
-            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+            .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
                 .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
+            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
                 .addressDistrict("aaaaaaa")
@@ -532,7 +533,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
+            .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("20-12-2001")
                 .timeDeliveryFrom("20:20:20")

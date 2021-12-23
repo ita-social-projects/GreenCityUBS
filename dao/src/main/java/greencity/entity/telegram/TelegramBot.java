@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"user"})
 public class TelegramBot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -5,12 +5,12 @@ import greencity.dto.UserWithSomeOrderDetailDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -23,9 +23,10 @@ import java.util.Optional;
 public class ValuesForUserTableServiceImpl implements ValuesForUserTableService {
     UserRepository userRepository;
     UserTableRepo userTableRepo;
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Override
-    public PageableDto<UserWithSomeOrderDetailDto> getAllFields(Pageable page, String columnName,
+    public PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
         SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         Page<User> users = userTableRepo.findAll(userFilterCriteria, columnName, sortingOrder, page);
         List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
@@ -66,7 +67,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         allFieldsFromTableDto.setViolation(u.getViolations());
         if (u.getDateOfRegistration() != null) {
             allFieldsFromTableDto
-                .setRegistrationDate(u.getDateOfRegistration().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                .setRegistrationDate(u.getDateOfRegistration().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         } else {
             allFieldsFromTableDto.setRegistrationDate("");
         }
@@ -76,7 +77,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         if (optional.isPresent()) {
             allFieldsFromTableDto
                 .setLastOrderDate(optional
-                    .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         }
         return allFieldsFromTableDto;
     }

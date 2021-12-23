@@ -18,8 +18,6 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @NotNull
     @Min(1)
     private Long addressId;
-    @NotNull
-    private Long orderId;
     @NotBlank
     @Length(max = 30)
     private String addressDistrict;
