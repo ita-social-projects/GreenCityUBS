@@ -2370,16 +2370,17 @@ public class ModelUtils {
 
     public static Bag bagDtoClient() {
         return Bag.builder()
-            .id(1)
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .price(1)
-            .location(Location
-                .builder()
-                .id(1L)
-                .build())
-            .build();
+                .id(1)
+                .minAmountOfBags(MinAmountOfBag.INCLUDE)
+                .price(1)
+                .location(Location
+                        .builder()
+                        .id(1L)
+                        .build())
+                .build();
+    }
 
-    public static List<Region> getAllRegions() {
+    public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
             .regionTranslation(getRegionTranslationsList())
