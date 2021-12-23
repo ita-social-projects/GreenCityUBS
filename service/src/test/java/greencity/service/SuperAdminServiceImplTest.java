@@ -496,12 +496,13 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addLocationExceptionTest() {
-        /*
-         * LocationCreateDto locationCreateDto = ModelUtils.getLocationCreateDto();
-         * 
-         * assertThrows(LanguageNotFoundException.class, () ->
-         * superAdminService.addLocation(locationCreateDto));
-         */
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
+
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(null);
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+
+        verify(languageRepository).findLanguageByCode("ua");
     }
 
     @Test
