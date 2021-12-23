@@ -2378,49 +2378,50 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .build();
-  
-      public static List<Region> getAllRegions(){
+
+    public static List<Region> getAllRegions() {
         return List.of(Region.builder()
-                .id(1L)
-                .regionTranslation(getRegionTranslationsList())
-                .locationList(getLocationList())
-                .build());
+            .id(1L)
+            .regionTranslation(getRegionTranslationsList())
+            .locationList(getLocationList())
+            .build());
     }
-    public static List<RegionTranslation> getRegionTranslationsList(){
+
+    public static List<RegionTranslation> getRegionTranslationsList() {
         return List.of(RegionTranslation.builder()
-                .name("Київська область")
-                .language(getLanguage())
-                .build());
+            .name("Київська область")
+            .language(getLanguage())
+            .build());
     }
 
-    public static List<RegionTranslationDto> getRegionTranslationsDto(){
+    public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(RegionTranslationDto.builder()
-                .languageCode("ua")
-                .regionName("Київська область")
-                .build());
+            .languageCode("ua")
+            .regionName("Київська область")
+            .build());
     }
 
-    public static List<LocationCreateDto> getLocationCreateDtoList(){
+    public static List<LocationCreateDto> getLocationCreateDtoList() {
         return List.of(LocationCreateDto.builder()
-                .addLocationDtoList(getAddLocationTranslationDtoList())
-                .regionTranslationDtos(getRegionTranslationsDto())
-                .longitude(1.32d)
-                .latitude(3.34)
-                .build());
+            .addLocationDtoList(getAddLocationTranslationDtoList())
+            .regionTranslationDtos(getRegionTranslationsDto())
+            .longitude(1.32d)
+            .latitude(3.34)
+            .build());
     }
 
-    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList(){
+    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(AddLocationTranslationDto.builder()
-                .locationName("Київ")
-                .languageCode("ua")
-                .build());
+            .locationName("Київ")
+            .languageCode("ua")
+            .build());
     }
 
-    public static Region getRegion(){
+    public static Region getRegion() {
         return Region.builder()
-                .id(1L)
-                .regionTranslation(getRegionTranslationsList())
-                .locationList(getLocationList())
-                .build();
+            .id(1L)
+            .regionTranslation(getRegionTranslationsList())
+            .locationList(getLocationList())
+            .build();
     }
 }

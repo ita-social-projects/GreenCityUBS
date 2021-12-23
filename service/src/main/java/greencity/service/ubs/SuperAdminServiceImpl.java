@@ -450,13 +450,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return language;
     }
 
-    private Courier tryToFindCourierById(Long id){
+    private Courier tryToFindCourierById(Long id) {
         return courierRepository.findById(id).orElseThrow(
-                () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
     }
 
-    private Location tryToFindLocationById(Long id){
+    private Location tryToFindLocationById(Long id) {
         return locationRepository.findById(id).orElseThrow(
-                () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
+            () -> new LocationNotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
     }
 }

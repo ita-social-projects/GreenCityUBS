@@ -566,26 +566,26 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<RegionTranslationDto> getRegionTranslationsDto(){
+    public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(RegionTranslationDto.builder()
-                .languageCode("ua")
-                .regionName("Київська область")
-                .build());
+            .languageCode("ua")
+            .regionName("Київська область")
+            .build());
     }
 
-    public static List<LocationCreateDto> getLocationCreateDtoList(){
+    public static List<LocationCreateDto> getLocationCreateDtoList() {
         return List.of(LocationCreateDto.builder()
-                .addLocationDtoList(getAddLocationTranslationDtoList())
-                .regionTranslationDtos(getRegionTranslationsDto())
-                .longitude(1.32d)
-                .latitude(3.34)
-                .build());
+            .addLocationDtoList(getAddLocationTranslationDtoList())
+            .regionTranslationDtos(getRegionTranslationsDto())
+            .longitude(1.32d)
+            .latitude(3.34)
+            .build());
     }
 
-    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList(){
+    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(AddLocationTranslationDto.builder()
-                .locationName("Київ")
-                .languageCode("ua")
-                .build());
+            .locationName("Київ")
+            .languageCode("ua")
+            .build());
     }
 }

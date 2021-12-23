@@ -349,12 +349,12 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void  addLocationThrowLanguageNotFoundException(){
+    void addLocationThrowLanguageNotFoundException() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
 
         when(languageRepository.findLanguageByCode("ua")).thenReturn(null);
 
-        assertThrows(LanguageNotFoundException.class,()-> superAdminService.addLocation(locationCreateDtoList));
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
     }
 
     @Test
@@ -365,11 +365,12 @@ class SuperAdminServiceImplTest {
 
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(regionRepository.findRegionByName("Київська область")).thenReturn(null);
-        when(regionTranslationRepository.saveAll(region.getRegionTranslation())).thenReturn(ModelUtils.getRegionTranslationsList());
+        when(regionTranslationRepository.saveAll(region.getRegionTranslation()))
+            .thenReturn(ModelUtils.getRegionTranslationsList());
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(languageRepository,times(2)).findLanguageByCode("ua");
+        verify(languageRepository, times(2)).findLanguageByCode("ua");
         verify(regionRepository).findRegionByName("Київська область");
         verify(regionTranslationRepository).saveAll(region.getRegionTranslation());
     }
