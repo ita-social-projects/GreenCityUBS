@@ -349,7 +349,7 @@ public interface UBSClientService {
      * @param dto - current OrderLiqpayClientDto dto.
      * @author Max Boiarchuk
      */
-    LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with liqpay payment. Version for Ivano-Frankivsk.
