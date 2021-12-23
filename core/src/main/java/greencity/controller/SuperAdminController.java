@@ -215,7 +215,7 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Create new location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = LocationCreateDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.CREATED),
         @ApiResponse(code = 201, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)

@@ -1414,7 +1414,7 @@ public class ModelUtils {
 
     public static List<LocationTranslation> getLocationTranslationList() {
         return List.of(LocationTranslation.builder()
-            .locationName("Name1")
+            .locationName("Київ")
             .language(getLanguage())
             .location(Location.builder()
                 .id(1L)
@@ -1434,7 +1434,7 @@ public class ModelUtils {
     public static List<LocationResponseDto> getLocationResponseDtoList() {
         return List.of(LocationResponseDto.builder()
             .id(1L)
-            .name("Name1")
+            .name("Київ")
             .languageCode("ua")
             .build(),
             LocationResponseDto.builder()
@@ -1766,6 +1766,10 @@ public class ModelUtils {
         return Location.builder()
             .id(1L)
             .locationStatus(LocationStatus.ACTIVE)
+            .coordinates(Coordinates.builder()
+                .longitude(3.34d)
+                .latitude(1.32d).build())
+            .region(getRegionForMapper())
             .build();
     }
 
@@ -2406,8 +2410,8 @@ public class ModelUtils {
         return List.of(LocationCreateDto.builder()
             .addLocationDtoList(getAddLocationTranslationDtoList())
             .regionTranslationDtos(getRegionTranslationsDto())
-            .longitude(1.32d)
-            .latitude(3.34)
+            .longitude(3.34d)
+            .latitude(1.32d)
             .build());
     }
 
@@ -2423,6 +2427,13 @@ public class ModelUtils {
             .id(1L)
             .regionTranslation(getRegionTranslationsList())
             .locationList(getLocationList())
+            .build();
+    }
+
+    public static Region getRegionForMapper() {
+        return Region.builder()
+            .id(1L)
+            .regionTranslation(getRegionTranslationsList())
             .build();
     }
 }
