@@ -1457,7 +1457,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * Method that calculate unpaid amount.
      *
-     * @param order of {@link Order} order id;
+     * @param order      of {@link Order} order id;
      * @param sumToPay   of {@link Long} sum to pay;
      * @param paidAmount of {@link Long} sum to pay;
      * @return {@link Long }
