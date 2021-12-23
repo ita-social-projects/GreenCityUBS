@@ -1,5 +1,6 @@
 package greencity.entity.user;
 
+import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.CourierLocation;
@@ -25,6 +26,9 @@ public class Location {
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
 
+    @Embedded
+    private Coordinates coordinates;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
     private List<User> user;
 
@@ -36,4 +40,7 @@ public class Location {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<LocationTranslation> locationTranslations;
+
+    @ManyToOne
+    private Region region;
 }

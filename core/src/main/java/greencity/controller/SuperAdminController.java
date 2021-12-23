@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/ubs/superAdmin")
 class SuperAdminController {
     private final SuperAdminService superAdminService;
@@ -190,17 +192,17 @@ class SuperAdminController {
     /**
      * Get all info about locations, and min amount of bag for locations.
      * 
-     * @return {@link GetLocationTranslationDto}
+     * @return {@link FindInfoAboutLocationDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Get info about location and min amount of bag for this location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getLocations")
-    public ResponseEntity<List<GetLocationTranslationDto>> getLocations() {
+    public ResponseEntity<List<FindInfoAboutLocationDto>> getLocations() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllLocation());
     }
 
@@ -208,58 +210,61 @@ class SuperAdminController {
      * Create new Location.
      * 
      * @param dto {@link LocationCreateDto}
-     * @return {@link GetLocationTranslationDto}
+     * @return {@link FindInfoAboutLocationDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Create new location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = LocationCreateDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/addLocations")
-    public ResponseEntity<LocationCreateDto> addLocation(
-        @RequestBody LocationCreateDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addLocation(dto));
+    public ResponseEntity<HttpStatus> addLocation(
+        @Valid @RequestBody List<LocationCreateDto> dto) {
+        superAdminService.addLocation(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
      * Controller for deactivating location byb Id.
      * 
      * @param id - id of location
-     * @return {@link GetLocationTranslationDto}
+     * @return {@link FindInfoAboutLocationDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Deactivate location by Id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/deactivateLocations/{id}")
-    public ResponseEntity<GetLocationTranslationDto> deactivateLocation(
-        @PathVariable Long id, String languageCode) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateLocation(id, languageCode));
+    public ResponseEntity<HttpStatus> deactivateLocation(
+        @PathVariable Long id) {
+        superAdminService.deactivateLocation(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
      * Controller for activating location by Id.
      * 
      * @param id - id location
-     * @return {@link GetLocationTranslationDto}
+     * @return {@link FindInfoAboutLocationDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Active location Id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetLocationTranslationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PatchMapping("/activeLocations/{id}")
-    public ResponseEntity<GetLocationTranslationDto> activeLocation(
-        @PathVariable Long id, String languageCode) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.activateLocation(id, languageCode));
+    public ResponseEntity<HttpStatus> activeLocation(
+        @PathVariable Long id) {
+        superAdminService.activateLocation(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -277,7 +282,7 @@ class SuperAdminController {
     })
     @PostMapping("/createCourier")
     public ResponseEntity<CreateCourierDto> addService(
-        @RequestBody CreateCourierDto dto) {
+        @Valid @RequestBody CreateCourierDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.createCourier(dto));
     }
 
@@ -432,13 +437,13 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Controller for add new locations for courier's.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PutMapping("/addLocation")
+    @PutMapping("courier/location")
     public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
         superAdminService.addLocationToCourier(dto);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

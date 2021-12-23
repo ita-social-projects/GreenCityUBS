@@ -11,11 +11,11 @@ public class NewLocationForCourierDtoMapper extends AbstractConverter<NewLocatio
     @Override
     protected CourierLocation convert(NewLocationForCourierDto source) {
         return CourierLocation.builder()
-                .minPriceOfOrder(source.getMinAmountOfOrder())
-                .maxPriceOfOrder(source.getMaxAmountOfOrder())
-                .maxAmountOfBigBags(source.getMaxAmountOfBigBag())
-                .minAmountOfBigBags(source.getMinAmountOfBigBag())
-                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-                .build();
+            .minPriceOfOrder(source.getMinAmountOfOrder())
+            .maxPriceOfOrder(source.getMaxAmountOfOrder())
+            .maxAmountOfBigBags(source.getMaxAmountOfBigBag())
+            .minAmountOfBigBags(source.getMinAmountOfBigBag())
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .build();
     }
 }

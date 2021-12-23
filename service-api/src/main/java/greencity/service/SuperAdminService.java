@@ -84,35 +84,32 @@ public interface SuperAdminService {
     /**
      * Method for get all info about location.
      *
-     * @return {@link GetLocationTranslationDto}
+     * @return {@link FindInfoAboutLocationDto}
      * @author Vadym Makitra
      */
-    List<GetLocationTranslationDto> getAllLocation();
+    List<FindInfoAboutLocationDto> getAllLocation();
 
     /**
      * Method for adding location.
      *
      * @param dto {@link LocationCreateDto}
-     * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    LocationCreateDto addLocation(LocationCreateDto dto);
+    void addLocation(List<LocationCreateDto> dto);
 
     /**
      * Method for deactivate location.
      *
      * @param id - if of location
-     * @return {@link GetLocationTranslationDto}
      */
-    GetLocationTranslationDto deactivateLocation(Long id, String code);
+    void deactivateLocation(Long id);
 
     /**
      * Method for activate location.
      *
      * @param id - id of Location
-     * @return {@link GetLocationTranslationDto}
      */
-    GetLocationTranslationDto activateLocation(Long id, String code);
+    void activateLocation(Long id);
 
     /**
      * Method for creating courier.
@@ -193,5 +190,11 @@ public interface SuperAdminService {
      */
     void deleteCourier(Long id);
 
+    /**
+     * Method for add new location to courier.
+     *
+     * @param dto {@link NewLocationForCourierDto}
+     * @author Vadym Makitra
+     */
     void addLocationToCourier(NewLocationForCourierDto dto);
 }

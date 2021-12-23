@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -159,12 +160,12 @@ class SuperAdminControllerTest {
 
     @Test
     void addLocation() throws Exception {
-        LocationCreateDto dto = ModelUtils.getLocationCreateDto();
+        List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
         ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        String requestJson = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
-            .content(ServiceResponceDtoJSON)
+            .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }

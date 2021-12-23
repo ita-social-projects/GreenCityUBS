@@ -9,8 +9,6 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class LocationResponseDto {
-    private Long id;
-    private String name;
-    private String languageCode;
+public class RegionInfoDto {
+    private Long regionId;
 }

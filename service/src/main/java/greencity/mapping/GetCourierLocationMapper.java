@@ -22,9 +22,10 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocation,
             .collect(Collectors.toList());
         List<Location> locations = List.of(source.getLocation());
         List<LocationsDto> locationsDtos = locations.stream().map(
-            i -> new LocationsDto(i.getId(), i.getLocationStatus().toString(), i.getLocationTranslations().stream().map(
-                j -> new LocationTranslationDto(j.getLocationName(), j.getLanguage().getCode(), j.getRegion()))
-                .collect(Collectors.toList())))
+            i -> new LocationsDto(i.getId(), i.getLocationStatus().toString(), i.getCoordinates().getLatitude(),
+                i.getCoordinates().getLongitude(), i.getLocationTranslations().stream().map(
+                    j -> new LocationTranslationDto(j.getLocationName(), j.getLanguage().getCode()))
+                    .collect(Collectors.toList())))
             .collect(Collectors.toList());
         return GetCourierLocationDto.builder()
             .courierLocationId(source.getId())

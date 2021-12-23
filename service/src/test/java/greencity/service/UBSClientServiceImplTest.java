@@ -297,8 +297,7 @@ class UBSClientServiceImplTest {
         List<Order> orderList = Collections.singletonList(order);
         List<OrderClientDto> expected = Collections.singletonList(dto);
 
-        when(orderRepository.getAllOrdersOfUser(anyString()))
-            .thenReturn(orderList);
+        when(orderRepository.getAllOrdersOfUser(any())).thenReturn(orderList);
         when(modelMapper.map(order, OrderClientDto.class)).thenReturn(dto);
 
         List<OrderClientDto> result = ubsService.getAllOrdersDoneByUser(anyString());

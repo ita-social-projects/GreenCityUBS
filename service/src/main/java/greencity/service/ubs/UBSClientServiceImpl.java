@@ -968,7 +968,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return LocationResponseDto.builder()
             .id(locationTranslation.getLocation().getId())
             .name(locationTranslation.getLocationName())
-            .region(locationTranslation.getRegion())
             .languageCode(locationTranslation.getLanguage().getCode())
             .build();
     }

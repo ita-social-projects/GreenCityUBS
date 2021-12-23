@@ -10,10 +10,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
-import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
+import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
@@ -1360,9 +1357,7 @@ public class ModelUtils {
     public static List<LocationTranslation> getLocationTranslationList() {
         return List.of(LocationTranslation.builder()
             .locationName("Name1")
-            .region("Name1")
             .language(getLanguage())
-            .region("Name1")
             .location(Location.builder()
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
@@ -1370,7 +1365,6 @@ public class ModelUtils {
             .build(),
             LocationTranslation.builder()
                 .locationName("Name2")
-                .region("Name2")
                 .language(getLanguage())
                 .location(Location.builder()
                     .id(2L)
@@ -1383,13 +1377,11 @@ public class ModelUtils {
         return List.of(LocationResponseDto.builder()
             .id(1L)
             .name("Name1")
-            .region("Name1")
             .languageCode("ua")
             .build(),
             LocationResponseDto.builder()
                 .id(2L)
                 .name("Name2")
-                .region("Name2")
                 .languageCode("ua")
                 .build());
 
@@ -2191,8 +2183,7 @@ public class ModelUtils {
     public static AddLocationTranslationDto getAddLocationTranslationDto() {
         return AddLocationTranslationDto.builder()
             .locationName("Name1")
-            .languageId(1L)
-            .region("Name1")
+            .languageCode("ua")
             .build();
     }
 
@@ -2317,5 +2308,50 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.CANCELED)
             .build();
+    }
+
+    public static List<Region> getAllRegions(){
+        return List.of(Region.builder()
+                .id(1L)
+                .regionTranslation(getRegionTranslationsList())
+                .locationList(getLocationList())
+                .build());
+    }
+    public static List<RegionTranslation> getRegionTranslationsList(){
+        return List.of(RegionTranslation.builder()
+                .name("Київська область")
+                .language(getLanguage())
+                .build());
+    }
+
+    public static List<RegionTranslationDto> getRegionTranslationsDto(){
+        return List.of(RegionTranslationDto.builder()
+                .languageCode("ua")
+                .regionName("Київська область")
+                .build());
+    }
+
+    public static List<LocationCreateDto> getLocationCreateDtoList(){
+        return List.of(LocationCreateDto.builder()
+                .addLocationDtoList(getAddLocationTranslationDtoList())
+                .regionTranslationDtos(getRegionTranslationsDto())
+                .longitude(1.32d)
+                .latitude(3.34)
+                .build());
+    }
+
+    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList(){
+        return List.of(AddLocationTranslationDto.builder()
+                .locationName("Київ")
+                .languageCode("ua")
+                .build());
+    }
+
+    public static Region getRegion(){
+        return Region.builder()
+                .id(1L)
+                .regionTranslation(getRegionTranslationsList())
+                .locationList(getLocationList())
+                .build();
     }
 }

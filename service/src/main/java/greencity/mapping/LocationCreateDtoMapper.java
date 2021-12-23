@@ -3,7 +3,6 @@ package greencity.mapping;
 import greencity.dto.AddLocationTranslationDto;
 import greencity.dto.LocationCreateDto;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +13,14 @@ import java.util.stream.Collectors;
 public class LocationCreateDtoMapper extends AbstractConverter<Location, LocationCreateDto> {
     @Override
     protected LocationCreateDto convert(Location source) {
-        List<LocationTranslation> locationTranslations = source.getLocationTranslations();
-        List<AddLocationTranslationDto> dtos = locationTranslations.stream().map(
-            i -> new AddLocationTranslationDto(i.getLocationName(), i.getLocationName(), i.getLanguage().getId()))
+        List<AddLocationTranslationDto> dtos = source.getLocationTranslations().stream().map(
+            i -> new AddLocationTranslationDto(i.getLocationName(), i.getLanguage().getCode()))
             .collect(Collectors.toList());
+
         return LocationCreateDto.builder()
-            .addLocationDtoList(dtos).build();
+            .addLocationDtoList(dtos)
+            .longitude(source.getCoordinates().getLongitude())
+            .latitude(source.getCoordinates().getLatitude())
+            .build();
     }
 }

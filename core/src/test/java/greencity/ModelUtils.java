@@ -560,9 +560,31 @@ public class ModelUtils {
 
     public static AddLocationTranslationDto getAddLocationTranslationDto() {
         return AddLocationTranslationDto.builder()
-            .region("Test")
             .locationName("Test")
-            .languageId(1L)
+            .languageCode("ua")
             .build();
+    }
+
+    public static List<RegionTranslationDto> getRegionTranslationsDto(){
+        return List.of(RegionTranslationDto.builder()
+                .languageCode("ua")
+                .regionName("Київська область")
+                .build());
+    }
+
+    public static List<LocationCreateDto> getLocationCreateDtoList(){
+        return List.of(LocationCreateDto.builder()
+                .addLocationDtoList(getAddLocationTranslationDtoList())
+                .regionTranslationDtos(getRegionTranslationsDto())
+                .longitude(1.32d)
+                .latitude(3.34)
+                .build());
+    }
+
+    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList(){
+        return List.of(AddLocationTranslationDto.builder()
+                .locationName("Київ")
+                .languageCode("ua")
+                .build());
     }
 }

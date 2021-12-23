@@ -86,6 +86,7 @@ public final class ErrorMessage {
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =
         "The price of you're order without discount is lower than allowable limit: ";
     public static final String COURIER_LOCATION_DATA_IS_NOT_VALID = "Entered data is not valid";
+    public static final String REGION_IS_NOT_FOUND = "Region with chosen name doesn't found ";
 
     /**
      * Constructor.

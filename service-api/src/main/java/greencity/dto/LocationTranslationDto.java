@@ -12,5 +12,4 @@ import lombok.*;
 public class LocationTranslationDto {
     private String locationName;
     private String languageCode;
-    private String region;
 }

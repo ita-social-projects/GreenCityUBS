@@ -683,4 +683,19 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
     }
+
+    /**
+     * Method interceptor exception {@link RegionNotFoundException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler({RegionNotFoundException.class})
+    public final ResponseEntity<Object> handleCourierLocationException(RegionNotFoundException ex,
+        WebRequest webRequest) {
+        ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
 }

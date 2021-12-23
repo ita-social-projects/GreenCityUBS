@@ -10,7 +10,7 @@ import lombok.*;
 @ToString
 public class NewLocationForCourierDto {
     private Long courierId;
-    private Long LocationId;
+    private Long locationId;
     private Long minAmountOfBigBag;
     private Long maxAmountOfBigBag;
     private Long minAmountOfOrder;
