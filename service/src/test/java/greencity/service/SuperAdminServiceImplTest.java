@@ -324,7 +324,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getAllLocationTest() {
-        List<Region> regionList = ModelUtils.getAllRegions();
+        List<Region> regionList = ModelUtils.getAllRegion();
 
         when(regionRepository.findAll()).thenReturn(regionList);
 
