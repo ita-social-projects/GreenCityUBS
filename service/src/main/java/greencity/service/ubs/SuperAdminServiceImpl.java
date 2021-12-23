@@ -227,6 +227,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void addLocation(List<LocationCreateDto> dtoList) {
         dtoList.forEach(dto -> {
+            checkIfLocationAlreadyCreated(dto);
             Location location = Location.builder()
                 .locationStatus(LocationStatus.ACTIVE)
                 .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
@@ -244,6 +245,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             locationRepository.save(location);
             locationTranslationRepository.saveAll(location.getLocationTranslations());
         });
+    }
+
+    private void checkIfLocationAlreadyCreated(LocationCreateDto dto) {
+        Location location = locationRepository.findLocationByName(dto.getAddLocationDtoList().get(0).getLocationName());
+        if (location != null) {
+            throw new LocationAlreadyCreatedException("The location with name"
+                + dto.getAddLocationDtoList().get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+        }
     }
 
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {

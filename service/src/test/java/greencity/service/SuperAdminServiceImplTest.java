@@ -498,11 +498,25 @@ class SuperAdminServiceImplTest {
     void addLocationExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
 
+        when(locationRepository.findLocationByName("Київ")).thenReturn(null);
+
         when(languageRepository.findLanguageByCode("ua")).thenReturn(null);
 
         assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
         verify(languageRepository).findLanguageByCode("ua");
+    }
+
+    @Test
+    void addLocationThrowLocationAlreadyCreatedExceptionTest() {
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
+        Location location = ModelUtils.getLocation();
+
+        when(locationRepository.findLocationByName("Київ")).thenReturn(location);
+
+        assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+
+        verify(locationRepository).findLocationByName("Київ");
     }
 
     @Test
