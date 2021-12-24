@@ -894,7 +894,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderDetailDto dto = new OrderDetailDto();
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        setOrderDetailDto(dto, order, orderId, language);
+        setOrderDetailDto(dto, order, language);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -904,86 +904,103 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
+    public List<OrderDetailInfoDto> setOrderDetail(Long orderId,
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
-        for (UpdateOrderDetailDto updateOrderDetailDto : request) {
-            if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                updateOrderDetailDto.getBagId().longValue()))) {
-                updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue());
-            }
-            if (nonNull(updateOrderDetailDto.getAmount())) {
+
+        if (nonNull(exported)) {
+            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+                if (!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue())) {
+                    updateOrderRepository.insertNewRecord(orderId,
+                        entry.getKey().longValue());
+                }
                 updateOrderRepository
-                    .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
+                    .updateExporter(entry.getValue(), orderId,
+                        entry.getKey().longValue());
             }
-            if (nonNull(updateOrderDetailDto.getExportedQuantity())) {
+        }
+        if (nonNull(confirmed)) {
+            for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
+                if (!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue())) {
+                    updateOrderRepository.insertNewRecord(orderId,
+                        entry.getKey().longValue());
+                }
                 updateOrderRepository
-                    .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-            }
-            if (nonNull(updateOrderDetailDto.getConfirmedQuantity())) {
-                updateOrderRepository
-                    .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
+                    .updateConfirm(entry.getValue(), orderId,
+                        entry.getKey().longValue());
             }
         }
 
-        Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
+        Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(
-                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
+                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
+        setOrderDetailDto(dto, order, language);
         orderRepository.save(order);
 
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(request, currentUser, language);
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
 
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
 
-    private void collectEventsAboutSetOrderDetails(List<UpdateOrderDetailDto> dto, User currentUser, String language) {
-        Order order = orderRepository.findById(dto.get(0).getOrderId()).orElseThrow(
+    private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
+        Long orderId, User currentUser, String language) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Long languageId = languageRepository.findIdByCode(language);
         StringBuilder values = new StringBuilder();
-        for (int i = 0; i < dto.size(); i++) {
-            Integer capacity = bagRepository.findCapacityById(dto.get(i).getBagId());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(dto.get(i).getBagId(), languageId);
-
-            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
-                || order.getOrderStatus() == OrderStatus.CONFIRMED
-                || order.getOrderStatus() == OrderStatus.FORMED
-                || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                Long confirmWasteWas =
-                    updateOrderRepository.getConfirmWaste(dto.get(i).getOrderId(), Long.valueOf(dto.get(i).getBagId()));
-                if (nonNull(dto.get(i).getConfirmedQuantity())
-                    && !confirmWasteWas.equals(Long.valueOf(dto.get(i).getConfirmedQuantity()))) {
-                    if (i == 0) {
-                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+        int countOfChanges = 0;
+        if (nonNull(exported)) {
+            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+                Integer capacity = bagRepository.findCapacityById(entry.getKey());
+                StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+                if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+                    || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                    || order.getOrderStatus() == OrderStatus.DONE
+                    || order.getOrderStatus() == OrderStatus.CANCELED) {
+                    Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
+                        entry.getKey().longValue());
+                    if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                        if (countOfChanges == 0) {
+                            values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                            countOfChanges++;
+                        }
+                        values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                            .append(exporterWasteWas)
+                            .append(" шт на ").append(entry.getValue()).append(" шт.");
                     }
-                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(confirmWasteWas)
-                        .append(" шт на ").append(dto.get(i).getConfirmedQuantity()).append(" шт.");
-                }
-            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-                || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELED) {
-                Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
-                    Long.valueOf(dto.get(i).getBagId()));
-                if (nonNull(dto.get(i).getExportedQuantity())
-                    && !exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
-                    if (i == 0) {
-                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
-                    }
-                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(exporterWasteWas)
-                        .append(" шт на ").append(dto.get(i).getExportedQuantity()).append(" шт.");
                 }
             }
         }
-        if (!dto.isEmpty()) {
+        if (nonNull(confirmed)) {
+            for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
+                Integer capacity = bagRepository.findCapacityById(entry.getKey());
+                StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+
+                if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
+                    || order.getOrderStatus() == OrderStatus.CONFIRMED
+                    || order.getOrderStatus() == OrderStatus.FORMED
+                    || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                    Long confirmWasteWas =
+                        updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
+                    if (nonNull(confirmWasteWas)
+                        && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                        if (countOfChanges == 0) {
+                            values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                        }
+                        values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                            .append(confirmWasteWas)
+                            .append(" шт на ").append(entry.getValue()).append(" шт.");
+                    }
+                }
+            }
+        }
+        if (nonNull(confirmed) || nonNull(exported)) {
             eventService.save(values.toString(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         }
@@ -1256,21 +1273,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
-        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(orderId)
+        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, orderId)
+        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));
 
-        dto.setOrderId(orderId);
+        dto.setOrderId(order.getId());
 
         return dto;
     }
@@ -2083,8 +2100,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
                 updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
             }
-            if (nonNull(updateOrderPageDto.getUpdateOrderDetailDto())) {
-                setOrderDetail(updateOrderPageDto.getUpdateOrderDetailDto(), lang, currentUser);
+            if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+                setOrderDetail(
+                    orderId,
+                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                    lang,
+                    currentUser);
             }
         } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
             | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {

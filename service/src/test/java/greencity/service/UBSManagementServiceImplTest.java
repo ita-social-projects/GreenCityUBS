@@ -1005,7 +1005,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
-        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
@@ -1019,9 +1018,11 @@ class UBSManagementServiceImplTest {
         }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
         List<OrderDetailInfoDto> actual =
-            ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc");
+            ubsManagementService.setOrderDetail(1L,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                "ua", "abc");
         assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
-        verify(updateOrderRepository).updateAmount(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         verify(orderRepository).getOrderDetails(1L);
@@ -1037,20 +1038,25 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailThrowsException() {
-        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
 
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
+            () -> ubsManagementService.setOrderDetail(1L,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                "ua", "abc"));
     }
 
     @Test
     void setOrderDetailsUnExistingOrderException() {
         assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
+            () -> ubsManagementService.setOrderDetail(1L,
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+                "ua", "abc"));
     }
 
     @Test

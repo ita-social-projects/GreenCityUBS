@@ -163,9 +163,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
-            case "responsibleCaller":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
+            case "responsibleCaller":
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
             case "responsibleLogicMan":
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
             case "responsibleDriver":

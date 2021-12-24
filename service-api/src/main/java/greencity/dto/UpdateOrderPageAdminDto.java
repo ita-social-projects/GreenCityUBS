@@ -3,6 +3,7 @@ package greencity.dto;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -16,5 +17,5 @@ public class UpdateOrderPageAdminDto {
     private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
     private List<EcoNumberDto> ecoNumberFromShop;
     private ExportDetailsDtoUpdate exportDetailsDto;
-    private List<UpdateOrderDetailDto> updateOrderDetailDto;
+    private UpdateOrderDetailDto orderDetailDto;
 }
