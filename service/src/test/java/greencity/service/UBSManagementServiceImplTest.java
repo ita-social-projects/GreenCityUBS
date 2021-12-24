@@ -1340,6 +1340,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.paymentInfo(1L))
             .thenReturn(List.of(ModelUtils.getPayment()));
         when(userRepository.findUserByUuid("abc"))
