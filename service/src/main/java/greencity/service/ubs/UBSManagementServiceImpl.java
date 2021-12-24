@@ -908,6 +908,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
@@ -933,17 +936,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         entry.getKey().longValue());
             }
         }
-
-        Order order = orderRepository.getOrderDetails(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(
-                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-
-        setOrderDetailDto(dto, order, language);
-        orderRepository.save(order);
-
-        final User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
