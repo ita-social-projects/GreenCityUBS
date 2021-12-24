@@ -911,7 +911,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
                     entry.getKey().longValue()))) {
                     updateOrderRepository.insertNewRecord(orderId,
                         entry.getKey().longValue());
@@ -923,7 +923,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
                     entry.getKey().longValue()))) {
                     updateOrderRepository.insertNewRecord(orderId,
                         entry.getKey().longValue());

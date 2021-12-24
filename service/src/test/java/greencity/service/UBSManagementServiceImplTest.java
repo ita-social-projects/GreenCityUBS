@@ -1014,8 +1014,6 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
         when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
         when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
-        when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1031,8 +1029,6 @@ class UBSManagementServiceImplTest {
         verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
         verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
         verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
-        verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType()));
     }
 
     @Test
