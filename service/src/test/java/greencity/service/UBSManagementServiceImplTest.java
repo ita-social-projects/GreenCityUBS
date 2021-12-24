@@ -1007,13 +1007,6 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
-        when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
-        }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
-        when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
-        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
-        when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
@@ -1022,13 +1015,6 @@ class UBSManagementServiceImplTest {
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
-        verify(orderRepository).getOrderDetails(1L);
-        verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
-        }.getType());
-        verify(bagRepository).findBagByOrderId(1L);
-        verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
-        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
-        verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
     }
 
     @Test
@@ -1321,7 +1307,6 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.paymentInfo(1L))
             .thenReturn(List.of(ModelUtils.getPayment()));
         when(userRepository.findUserByUuid("abc"))
