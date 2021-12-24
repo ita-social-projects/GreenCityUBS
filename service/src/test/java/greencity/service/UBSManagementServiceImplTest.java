@@ -1032,25 +1032,11 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testSetOrderDetailThrowsException() {
+    void testSetOrderDetailThrowsUserNotFoundException() {
         Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
         Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
 
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
-        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
-
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
-
-        assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
-    }
-
-    @Test
-    void setOrderDetailsUnExistingOrderException() {
-        Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
-        Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
-
-        assertThrows(UnexistingOrderException.class,
+        assertThrows(UserNotFoundException.class,
             () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
     }
 
