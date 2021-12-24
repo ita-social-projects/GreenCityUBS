@@ -146,9 +146,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderLiqpay")
-    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(@Valid @RequestBody OrderLiqpayClienDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto));
+    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto, userUuid));
     }
 
     /**

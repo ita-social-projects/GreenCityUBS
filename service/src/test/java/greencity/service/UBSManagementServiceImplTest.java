@@ -469,9 +469,9 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getOverpayment());
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getOverpayment());
         assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
-        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
     }
 
     @Test
@@ -1289,7 +1289,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrderStatusData(1L, "ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(orderRepository, times(1)).getOrderDetails(1L);
-        verify(orderRepository, times(4)).findById(1L);
+        verify(orderRepository, times(5)).findById(1L);
         verify(languageRepository, times(1)).findIdByCode("ua");
         verify(bagRepository, times(1)).findAll();
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
