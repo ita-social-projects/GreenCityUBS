@@ -171,7 +171,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    List<OrderDetailInfoDto> setOrderDetail(Long orderId,
+    void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid);
 
     /**

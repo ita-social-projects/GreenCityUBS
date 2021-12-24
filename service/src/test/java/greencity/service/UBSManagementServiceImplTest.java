@@ -1017,12 +1017,11 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
-        List<OrderDetailInfoDto> actual =
-            ubsManagementService.setOrderDetail(1L,
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-                "ua", "abc");
-        assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         verify(orderRepository).getOrderDetails(1L);

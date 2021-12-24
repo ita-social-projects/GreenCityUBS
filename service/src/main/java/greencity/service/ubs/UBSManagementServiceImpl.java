@@ -905,14 +905,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<OrderDetailInfoDto> setOrderDetail(Long orderId,
+    public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
         OrderDetailDto dto = new OrderDetailDto();
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue())) {
+                if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
                     updateOrderRepository.insertNewRecord(orderId,
                         entry.getKey().longValue());
                 }
@@ -923,8 +923,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                if (!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue())) {
+                if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
                     updateOrderRepository.insertNewRecord(orderId,
                         entry.getKey().longValue());
                 }
@@ -944,9 +944,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
-
-        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType());
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
@@ -957,53 +954,63 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         StringBuilder values = new StringBuilder();
         int countOfChanges = 0;
         if (nonNull(exported)) {
-            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                Integer capacity = bagRepository.findCapacityById(entry.getKey());
-                StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
-                if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-                    || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-                    || order.getOrderStatus() == OrderStatus.DONE
-                    || order.getOrderStatus() == OrderStatus.CANCELED) {
-                    Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
-                        entry.getKey().longValue());
-                    if (!exporterWasteWas.equals(entry.getValue().longValue())) {
-                        if (countOfChanges == 0) {
-                            values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
-                            countOfChanges++;
-                        }
-                        values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                            .append(exporterWasteWas)
-                            .append(" шт на ").append(entry.getValue()).append(" шт.");
-                    }
-                }
-            }
+            collectEventAboutExportedWaste(exported, languageId, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed)) {
-            for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                Integer capacity = bagRepository.findCapacityById(entry.getKey());
-                StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
-
-                if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
-                    || order.getOrderStatus() == OrderStatus.CONFIRMED
-                    || order.getOrderStatus() == OrderStatus.FORMED
-                    || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                    Long confirmWasteWas =
-                        updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                    if (nonNull(confirmWasteWas)
-                        && !confirmWasteWas.equals(entry.getValue().longValue())) {
-                        if (countOfChanges == 0) {
-                            values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
-                        }
-                        values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                            .append(confirmWasteWas)
-                            .append(" шт на ").append(entry.getValue()).append(" шт.");
-                    }
-                }
-            }
+            collectEventAboutConfirmWaste(confirmed, languageId, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed) || nonNull(exported)) {
             eventService.save(values.toString(),
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        }
+    }
+
+    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Long languageId, Order order,
+        Long orderId, int countOfChanges, StringBuilder values) {
+        for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
+            Integer capacity = bagRepository.findCapacityById(entry.getKey());
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+
+            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
+                || order.getOrderStatus() == OrderStatus.CONFIRMED
+                || order.getOrderStatus() == OrderStatus.FORMED
+                || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+                Long confirmWasteWas =
+                    updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
+                if (nonNull(confirmWasteWas)
+                    && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                    if (countOfChanges == 0) {
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                    }
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                        .append(confirmWasteWas)
+                        .append(" шт на ").append(entry.getValue()).append(" шт.");
+                }
+            }
+        }
+    }
+
+    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Long languageId, Order order,
+        Long orderId, int countOfChanges, StringBuilder values) {
+        for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+            Integer capacity = bagRepository.findCapacityById(entry.getKey());
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                || order.getOrderStatus() == OrderStatus.DONE
+                || order.getOrderStatus() == OrderStatus.CANCELED) {
+                Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
+                    entry.getKey().longValue());
+                if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                    if (countOfChanges == 0) {
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                        countOfChanges++;
+                    }
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                        .append(exporterWasteWas)
+                        .append(" шт на ").append(entry.getValue()).append(" шт.");
+                }
+            }
         }
     }
 
