@@ -148,8 +148,8 @@ public class BigOrderTableRepository {
             predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),
                 subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
         }
-        if (nonNull(sc.getResponsibleLogiestManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(),
+        if (nonNull(sc.getResponsibleLogicManId())) {
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(),
                 subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
