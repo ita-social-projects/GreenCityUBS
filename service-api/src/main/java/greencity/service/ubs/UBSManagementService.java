@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -155,7 +156,8 @@ public interface UBSManagementService {
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
-    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid);
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
+        String uuid);
 
     /**
      * Method for getting order detail by language and order id.
@@ -169,7 +171,8 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid);
+    void setOrderDetail(Long orderId,
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid);
 
     /**
      * Method that count sum order.

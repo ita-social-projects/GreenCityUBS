@@ -66,6 +66,7 @@ public class ModelUtils {
                 .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
+            .locationId(1L)
             .build();
     }
 
@@ -447,7 +448,6 @@ public class ModelUtils {
         return EditAmountOfBagDto.builder()
             .minAmountOfBigBags(1L)
             .maxAmountOfBigBags(2L)
-            .languageId(1L)
             .build();
     }
 
@@ -492,26 +492,27 @@ public class ModelUtils {
     public static OrderFondyClientDto getOrderFondyClientDto() {
         return OrderFondyClientDto.builder()
             .orderId(1L)
-            .sum(2)
+            .pointsToUse(100)
+            .certificates(Collections.emptySet())
             .build();
     }
 
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
-            .orderDetailStatusRequestDto(OrderDetailStatusRequestDto
+            .generalOrderInfo(OrderDetailStatusRequestDto
                 .builder()
                 .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
                 .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .orderAdminComment("aaa")
+                .adminComment("aaa")
                 .build())
-            .ubsCustomersDtoUpdate(UbsCustomersDtoUpdate
+            .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
                 .recipientId(2L)
                 .recipientName("aaaaa")
                 .recipientPhoneNumber("085555")
                 .recipientEmail("yura@333gmail.com")
                 .build())
-            .orderAddressExportDetailsDtoUpdate(OrderAddressExportDetailsDtoUpdate
+            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
                 .addressDistrict("aaaaaaa")
@@ -532,7 +533,7 @@ public class ModelUtils {
                     .newEcoNumber("1")
                     .oldEcoNumber("2")
                     .build()))
-            .exportDetailsDtoUpdate(ExportDetailsDtoUpdate
+            .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("20-12-2001")
                 .timeDeliveryFrom("20:20:20")
@@ -542,14 +543,24 @@ public class ModelUtils {
                     .id(1L)
                     .build()))
                 .build())
-            .updateOrderDetailDto(List.of(
+            .orderDetailDto(
                 UpdateOrderDetailDto.builder()
-                    .amount(1)
-                    .exportedQuantity(1)
-                    .confirmedQuantity(1)
-                    .exportedQuantity(1)
-                    .bagId(1)
-                    .build()))
+                    .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
+                    .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
+                    .build())
+            .build();
+    }
+
+    public static LocationCreateDto getLocationCreateDto() {
+        return LocationCreateDto.builder()
+            .addLocationDtoList(List.of(getAddLocationTranslationDto())).build();
+    }
+
+    public static AddLocationTranslationDto getAddLocationTranslationDto() {
+        return AddLocationTranslationDto.builder()
+            .region("Test")
+            .locationName("Test")
+            .languageId(1L)
             .build();
     }
 }

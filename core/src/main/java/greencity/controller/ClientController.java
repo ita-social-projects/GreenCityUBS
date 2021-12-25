@@ -104,9 +104,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderFondy")
-    public ResponseEntity<FondyOrderResponse> processOrderFondy(@Valid @RequestBody OrderFondyClientDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto));
+    public ResponseEntity<FondyOrderResponse> processOrderFondy(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto, userUuid));
     }
 
     /**
@@ -124,9 +125,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderFondyIF")
-    public ResponseEntity<FondyOrderResponse> processOrderFondyForIF(@Valid @RequestBody OrderFondyClientDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClientForIF(dto));
+    public ResponseEntity<FondyOrderResponse> processOrderFondyForIF(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClientForIF(dto, userUuid));
     }
 
     /**
@@ -144,9 +146,10 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrderLiqpay")
-    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(@Valid @RequestBody OrderLiqpayClienDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto));
+    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(
+        @Valid @RequestBody OrderFondyClientDto dto,
+        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto, userUuid));
     }
 
     /**

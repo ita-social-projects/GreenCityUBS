@@ -12,15 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateCourierDto {
     @NotNull
-    private Long minAmountOfBigBags;
-    @NotNull
-    private Long maxAmountOfBigBags;
-    @NotNull
-    private Long minPriceOfOrder;
-    @NotNull
-    private Long maxPriceOfOrder;
-    @NotNull
-    private Long locationId;
+    List<LimitsDto> createCourierLimitsDto;
     @NotNull
     List<CreateCourierTranslationDto> createCourierTranslationDtos;
 }

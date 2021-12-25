@@ -287,7 +287,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long paidAmount = calculatePaidAmount(order);
         Long overpayment = calculateOverpayment(order, sumToPay);
-        Long unPaidAmount = calculateUnpaidAmount(sumToPay, paidAmount);
+        Long unPaidAmount = calculateUnpaidAmount(order, sumToPay, paidAmount);
         PaymentTableInfoDto paymentTableInfoDto = new PaymentTableInfoDto();
         paymentTableInfoDto.setOverpayment(overpayment);
         paymentTableInfoDto.setUnPaidAmount(unPaidAmount);
@@ -615,6 +615,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
         User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        if (ourUser.getCurrentPoints() == null) {
+            ourUser.setCurrentPoints(0);
+        }
         ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(addingPointsToUserDto.getAdditionalPoints())
@@ -672,10 +675,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, String uuid) {
+    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
+        String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(dtoUpdate.getOrderId())
+        Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
@@ -711,9 +715,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
-        Courier courier = courierRepository.findCourierByOrderId(orderId);
-        greencity.entity.order.Service service =
-            serviceRepository.findServiceByOrderIdAndCourierId(orderId, courier.getId());
+        Integer fullPrice =
+            serviceRepository.findFullPriceByCourierId(order.get().getCourierLocations().getCourier().getId());
         Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -730,7 +733,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(prices.getTotalSumAmount())
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getOverpayment() > 0 ? 0
+                : prices.getTotalSumAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
@@ -743,8 +747,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(
                 order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
-            .courierPricePerPackage(service.getFullPrice())
-            .courierInfo(modelMapper.map(courier, CourierInfoDto.class))
+            .courierPricePerPackage(fullPrice)
+            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
@@ -759,7 +763,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
         return AddressExportDetailsDto.builder()
-            .id(address.getId())
+            .addressId(address.getId())
             .addressCity(address.getCity())
             .addressStreet(address.getStreet())
             .addressDistrict(address.getDistrict())
@@ -891,7 +895,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderDetailDto dto = new OrderDetailDto();
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        setOrderDetailDto(dto, order, orderId, language);
+        setOrderDetailDto(dto, order, language);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -901,88 +905,103 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public List<OrderDetailInfoDto> setOrderDetail(List<UpdateOrderDetailDto> request, String language, String uuid) {
-        OrderDetailDto dto = new OrderDetailDto();
-        for (UpdateOrderDetailDto updateOrderDetailDto : request) {
-            if (Boolean.FALSE.equals(!updateOrderRepository.ifRecordExist(updateOrderDetailDto.getOrderId(),
-                updateOrderDetailDto.getBagId().longValue()))) {
-                updateOrderRepository.insertNewRecord(updateOrderDetailDto.getOrderId(),
-                    updateOrderDetailDto.getBagId().longValue());
-            }
-            if (nonNull(updateOrderDetailDto.getAmount())) {
-                updateOrderRepository
-                    .updateAmount(updateOrderDetailDto.getAmount(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-            }
-            if (nonNull(updateOrderDetailDto.getExportedQuantity())) {
-                updateOrderRepository
-                    .updateExporter(updateOrderDetailDto.getExportedQuantity(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-            }
-            if (nonNull(updateOrderDetailDto.getConfirmedQuantity())) {
-                updateOrderRepository
-                    .updateConfirm(updateOrderDetailDto.getConfirmedQuantity(), updateOrderDetailDto.getOrderId(),
-                        updateOrderDetailDto.getBagId().longValue());
-            }
-        }
-
-        Order order = orderRepository.getOrderDetails(request.get(0).getOrderId())
-            .orElseThrow(() -> new UnexistingOrderException(
-                ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + request.get(0).getOrderId()));
-
-        setOrderDetailDto(dto, order, request.get(0).getOrderId(), language);
-        orderRepository.save(order);
-
+    public void setOrderDetail(Long orderId,
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(request, currentUser, language);
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
 
-        return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType());
+        if (nonNull(exported)) {
+            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
+                    updateOrderRepository.insertNewRecord(orderId,
+                        entry.getKey().longValue());
+                }
+                updateOrderRepository
+                    .updateExporter(entry.getValue(), orderId,
+                        entry.getKey().longValue());
+            }
+        }
+        if (nonNull(confirmed)) {
+            for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
+                    updateOrderRepository.insertNewRecord(orderId,
+                        entry.getKey().longValue());
+                }
+                updateOrderRepository
+                    .updateConfirm(entry.getValue(), orderId,
+                        entry.getKey().longValue());
+            }
+        }
     }
 
-    private void collectEventsAboutSetOrderDetails(List<UpdateOrderDetailDto> dto, User currentUser, String language) {
-        Order order = orderRepository.findById(dto.get(0).getOrderId()).orElseThrow(
+    private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
+        Long orderId, User currentUser, String language) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Long languageId = languageRepository.findIdByCode(language);
         StringBuilder values = new StringBuilder();
-        for (int i = 0; i < dto.size(); i++) {
-            Integer capacity = bagRepository.findCapacityById(dto.get(i).getBagId());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(dto.get(i).getBagId(), languageId);
+        int countOfChanges = 0;
+        if (nonNull(exported)) {
+            collectEventAboutExportedWaste(exported, languageId, order, orderId, countOfChanges, values);
+        }
+        if (nonNull(confirmed)) {
+            collectEventAboutConfirmWaste(confirmed, languageId, order, orderId, countOfChanges, values);
+        }
+        if (nonNull(confirmed) || nonNull(exported)) {
+            eventService.save(values.toString(),
+                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        }
+    }
+
+    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Long languageId, Order order,
+        Long orderId, int countOfChanges, StringBuilder values) {
+        for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
+            Integer capacity = bagRepository.findCapacityById(entry.getKey());
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
-                    updateOrderRepository.getConfirmWaste(dto.get(i).getOrderId(), Long.valueOf(dto.get(i).getBagId()));
-                if (nonNull(dto.get(i).getConfirmedQuantity())
-                    && !confirmWasteWas.equals(Long.valueOf(dto.get(i).getConfirmedQuantity()))) {
-                    if (i == 0) {
+                    updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
+                if (nonNull(confirmWasteWas)
+                    && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                    if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
-                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(confirmWasteWas)
-                        .append(" шт на ").append(dto.get(i).getConfirmedQuantity()).append(" шт.");
-                }
-            } else if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-                || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELED) {
-                Long exporterWasteWas = updateOrderRepository.getExporterWaste(dto.get(i).getOrderId(),
-                    Long.valueOf(dto.get(i).getBagId()));
-                if (nonNull(dto.get(i).getExportedQuantity())
-                    && !exporterWasteWas.equals(Long.valueOf(dto.get(i).getExportedQuantity()))) {
-                    if (i == 0) {
-                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
-                    }
-                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ").append(exporterWasteWas)
-                        .append(" шт на ").append(dto.get(i).getExportedQuantity()).append(" шт.");
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                        .append(confirmWasteWas)
+                        .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
         }
-        if (!dto.isEmpty()) {
-            eventService.save(values.toString(),
-                currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+    }
+
+    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Long languageId, Order order,
+        Long orderId, int countOfChanges, StringBuilder values) {
+        for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+            Integer capacity = bagRepository.findCapacityById(entry.getKey());
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+                || order.getOrderStatus() == OrderStatus.DONE
+                || order.getOrderStatus() == OrderStatus.CANCELED) {
+                Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
+                    entry.getKey().longValue());
+                if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                    if (countOfChanges == 0) {
+                        values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
+                        countOfChanges++;
+                    }
+                    values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
+                        .append(exporterWasteWas)
+                        .append(" шт на ").append(entry.getValue()).append(" шт.");
+                }
+            }
         }
     }
 
@@ -1153,8 +1172,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (nonNull(dto.getOrderAdminComment())) {
-            order.setAdminComment(dto.getOrderAdminComment());
+        if (nonNull(dto.getAdminComment())) {
+            order.setAdminComment(dto.getAdminComment());
             eventService.save(OrderHistory.ADD_ADMIN_COMMENT, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
             orderRepository.save(order);
@@ -1253,21 +1272,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, Long orderId, String language) {
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
-        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(orderId)
+        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, orderId)
+        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));
 
-        dto.setOrderId(orderId);
+        dto.setOrderId(order.getId());
 
         return dto;
     }
@@ -1435,8 +1454,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-
-        return sumToPay >= paymentSum ? Math.abs(paymentSum - sumToPay) : 0L;
+        return sumToPay - paymentSum < 0 ? Math.abs(paymentSum - sumToPay) : 0L;
     }
 
     /**
@@ -1454,13 +1472,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * Method that calculate unpaid amount.
      *
+     * @param order      of {@link Order} order id;
      * @param sumToPay   of {@link Long} sum to pay;
      * @param paidAmount of {@link Long} sum to pay;
      * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Long sumToPay, Long paidAmount) {
-        return sumToPay < paidAmount ? Math.abs(sumToPay - paidAmount) : 0L;
+    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) {
+        sumToPay =
+            sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                + order.getPointsToUse());
+        return sumToPay - paidAmount > 0 ? Math.abs(sumToPay - paidAmount) : 0L;
     }
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
@@ -2065,23 +2087,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String currentUser) {
         try {
-            if (nonNull(updateOrderPageDto.getOrderDetailStatusRequestDto())) {
-                updateOrderDetailStatus(orderId, updateOrderPageDto.getOrderDetailStatusRequestDto(), currentUser);
+            if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
+                updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), currentUser);
             }
-            if (nonNull(updateOrderPageDto.getUbsCustomersDtoUpdate())) {
-                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUbsCustomersDtoUpdate(), currentUser);
+            if (nonNull(updateOrderPageDto.getUserInfoDto())) {
+                ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), currentUser);
             }
-            if (nonNull(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate())) {
-                updateAddress(updateOrderPageDto.getOrderAddressExportDetailsDtoUpdate(), currentUser);
+            if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
+                updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), orderId, currentUser);
             }
-            if (nonNull(updateOrderPageDto.getExportDetailsDtoUpdate())) {
-                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDtoUpdate(), currentUser);
+            if (nonNull(updateOrderPageDto.getExportDetailsDto())) {
+                updateOrderExportDetails(orderId, updateOrderPageDto.getExportDetailsDto(), currentUser);
             }
             if (nonNull(updateOrderPageDto.getEcoNumberFromShop())) {
                 updateEcoNumberForOrder(updateOrderPageDto.getEcoNumberFromShop(), orderId, currentUser);
             }
-            if (nonNull(updateOrderPageDto.getUpdateOrderDetailDto())) {
-                setOrderDetail(updateOrderPageDto.getUpdateOrderDetailDto(), lang, currentUser);
+            if (nonNull(updateOrderPageDto.getOrderDetailDto())) {
+                setOrderDetail(
+                    orderId,
+                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                    updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                    lang,
+                    currentUser);
             }
         } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
             | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {

@@ -108,7 +108,7 @@ public class BigOrderTableRepository {
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq,
-        Map<String, Subquery> subqueryMap, Map<String, Join> joinMap) {
+                                   Map<String, Subquery> subqueryMap, Map<String, Join> joinMap) {
         List<Predicate> predicates = new ArrayList<>();
 
         if (nonNull(sc.getOrderStatus())) {

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Table(name = "events")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"order"})
 
 public class Event {
     @Id

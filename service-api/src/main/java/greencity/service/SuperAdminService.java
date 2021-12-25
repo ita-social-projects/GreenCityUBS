@@ -92,11 +92,11 @@ public interface SuperAdminService {
     /**
      * Method for adding location.
      *
-     * @param dto {@link AddLocationDto}
+     * @param dto {@link LocationCreateDto}
      * @return {@link GetLocationTranslationDto}
      * @author Vadym Makitra
      */
-    AddLocationDto addLocation(AddLocationDto dto);
+    LocationCreateDto addLocation(LocationCreateDto dto);
 
     /**
      * Method for deactivate location.
@@ -128,27 +128,26 @@ public interface SuperAdminService {
      * 
      * @return {@link GetCourierTranslationsDto}
      */
-    List<GetCourierTranslationsDto> getAllCouriers();
+    List<GetCourierLocationDto> getAllCouriers();
 
     /**
      * Method for set courier limit by sum of order.
      *
      * @param id  - id of courier
      * @param dto {@link EditPriceOfOrder}
-     * @return {@link GetCourierTranslationsDto}
+     * 
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
+    void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
 
     /**
      * Method for set courier limit by amount of bag.
      *
      * @param id  - id of courier.
      * @param dto {@link EditAmountOfBagDto}
-     * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
+    void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
 
     /**
      * Method for edit limit description.
@@ -186,4 +185,11 @@ public interface SuperAdminService {
      * @return {@link EditTariffInfoDto}
      */
     EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
+
+    /**
+     * Method for delete courier.
+     * 
+     * @param id - courier Id.
+     */
+    void deleteCourier(Long id);
 }

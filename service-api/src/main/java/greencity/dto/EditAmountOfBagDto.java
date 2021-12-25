@@ -15,5 +15,5 @@ public class EditAmountOfBagDto {
     @NotNull
     private Long maxAmountOfBigBags;
     @NotNull
-    private Long languageId;
+    private Long locationId;
 }

@@ -333,7 +333,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
-    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with Fondy payment. Version for Ivano-Frankivsk.
@@ -341,7 +341,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Sihovskiy Rostyslav
      */
-    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto) throws Exception;
+    FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with liqpay payment .
@@ -349,7 +349,7 @@ public interface UBSClientService {
      * @param dto - current OrderLiqpayClientDto dto.
      * @author Max Boiarchuk
      */
-    LiqPayOrderResponse proccessOrderLiqpayClient(OrderLiqpayClienDto dto) throws Exception;
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
      * Method return link with liqpay payment. Version for Ivano-Frankivsk.
@@ -358,4 +358,13 @@ public interface UBSClientService {
      * @author Sikhovskiy Rostyslav
      */
     LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) throws Exception;
+
+    /**
+     * Method for getting info about courier,location,and courier limits.
+     *
+     * @param courierId - id of current courier;
+     * @return {@link GetCourierLocationDto}
+     * @author Vadym Makitra
+     */
+    List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId);
 }

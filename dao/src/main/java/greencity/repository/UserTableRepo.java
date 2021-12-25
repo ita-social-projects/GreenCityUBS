@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
+import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -24,6 +25,12 @@ public class UserTableRepo {
     private static final String ORDERS = "orders";
     private static final String ORDER_DATE = "orderDate";
     private static final String DATE_OF_REGISTRATION = "dateOfRegistration";
+    private static final String RECIPIENT_NAME = "recipientName";
+    private static final String RECIPIENT_EMAIL = "recipientEmail";
+    private static final String RECIPIENT_PHONE = "recipientPhone";
+    private static final String POINTS = "currentPoints";
+    private static final String VIOLATIONS = "violations";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -42,7 +49,7 @@ public class UserTableRepo {
      */
 
     public Page<User> findAll(UserFilterCriteria userFilterCriteria, String column,
-        SortingOrder sortingOrder, Pageable page) {
+        SortingOrder sortingOrder, CustomerPage page) {
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> userRoot = criteriaQuery.from(User.class);
         userRoot.join(ORDERS, JoinType.INNER);
@@ -56,15 +63,16 @@ public class UserTableRepo {
         }
 
         TypedQuery<User> typedQuery = entityManager.createQuery(criteriaQuery);
-        typedQuery.setFirstResult(page.getPageNumber() * 10);
-        typedQuery.setMaxResults(10);
+        long usersCount = typedQuery.getResultList().size();
+        typedQuery.setFirstResult(page.getPageNumber() * page.getPageSize());
+        typedQuery.setMaxResults(page.getPageSize());
 
-        Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), "recipientPhone");
-        Pageable pageable = PageRequest.of(page.getPageNumber(), 10, sort);
+        Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), RECIPIENT_PHONE);
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
 
         List<User> resultList = typedQuery.getResultList();
 
-        return new PageImpl<>(resultList, pageable, resultList.size());
+        return new PageImpl<>(resultList, pageable, usersCount);
     }
 
     private Predicate getPredicateForWhere(UserFilterCriteria us, Root<User> userRoot) {
@@ -81,11 +89,37 @@ public class UserTableRepo {
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
     }
 
+    private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
+        Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
+        if (orderJoin.isPresent()) {
+            Expression<Long> expression = criteriaBuilder.count(orderJoin.get().get("user"));
+            Predicate predicate = criteriaBuilder.or(
+                criteriaBuilder.like((userRoot.get(DATE_OF_REGISTRATION)).as(String.class),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like(
+                    criteriaBuilder.max(orderJoin.get().get(ORDER_DATE)).as(String.class),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like((userRoot.get(VIOLATIONS).as(String.class)),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_NAME)),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like(criteriaBuilder.upper(userRoot.get(RECIPIENT_EMAIL)),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like((userRoot.get(RECIPIENT_PHONE)),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like(expression.as(String.class),
+                    anyMatch(us.getSearch())),
+                criteriaBuilder.like((userRoot.get(POINTS).as(String.class)),
+                    anyMatch(us.getSearch())));
+            predicateList.add(predicate);
+        }
+    }
+
     private Predicate getPredicateForHaving(UserFilterCriteria us, Root<User> userRoot) {
         List<Predicate> predicateList = new ArrayList<>();
 
         if (nonNull(us.getOrderDate())) {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            DateTimeFormatter df = DateTimeFormatter.ofPattern(DATE_FORMAT);
             Optional<Join<User, ?>> orderJoin = userRoot.getJoins().stream().findFirst();
             if (us.getOrderDate().length == 1) {
                 LocalDate number = LocalDate.parse(us.getOrderDate()[0], df);
@@ -112,12 +146,16 @@ public class UserTableRepo {
             predicateList.add(userOrdersFiltering(us.getNumberOfOrders(), userRoot));
         }
 
+        if (nonNull(us.getSearch())) {
+            searchUsers(us, userRoot, predicateList);
+        }
+
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
     }
 
     private void setOrder(String column, SortingOrder sortingOrder, CriteriaQuery<User> criteriaQuery,
         Root<User> userRoot) {
-        Expression<?> sortBy = userRoot.get("recipientName");
+        Expression<?> sortBy = userRoot.get(RECIPIENT_NAME);
         Optional<Join<User, ?>> first = userRoot.getJoins().stream().findFirst();
         if (nonNull(column)) {
             if (column.equals(ORDER_DATE)) {
@@ -129,7 +167,7 @@ public class UserTableRepo {
                     sortBy = criteriaBuilder.count(first.get().get("user"));
                 }
             } else if (column.equals("clientName")) {
-                sortBy = userRoot.get("recipientName");
+                sortBy = userRoot.get(RECIPIENT_NAME);
             } else {
                 sortBy = userRoot.get(column);
             }
@@ -142,7 +180,7 @@ public class UserTableRepo {
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(DATE_FORMAT);
         if (dates.length == 1) {
             LocalDate number = LocalDate.parse(dates[0], df);
             return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(DATE_OF_REGISTRATION).as(LocalDate.class),
@@ -162,22 +200,22 @@ public class UserTableRepo {
     private Predicate userViolationsFiltering(String[] numberOfViolations, Root<User> userRoot) {
         if (numberOfViolations.length == 1) {
             int number = Integer.parseInt(numberOfViolations[0]);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get("violations"), number);
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(VIOLATIONS), number);
         } else {
             int number1 = Integer.parseInt(numberOfViolations[0]);
             int number2 = Integer.parseInt(numberOfViolations[1]);
-            return criteriaBuilder.between(userRoot.get("violations"), number1, number2);
+            return criteriaBuilder.between(userRoot.get(VIOLATIONS), number1, number2);
         }
     }
 
     private Predicate userBonusesFiltering(String[] bonuses, Root<User> userRoot) {
         if (bonuses.length == 1) {
             int number = Integer.parseInt(bonuses[0]);
-            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get("currentPoints"), number);
+            return criteriaBuilder.greaterThanOrEqualTo(userRoot.get(POINTS), number);
         } else {
             int number1 = Integer.parseInt(bonuses[0]);
             int number2 = Integer.parseInt(bonuses[1]);
-            return criteriaBuilder.between(userRoot.get("currentPoints"), number1, number2);
+            return criteriaBuilder.between(userRoot.get(POINTS), number1, number2);
         }
     }
 
@@ -195,5 +233,9 @@ public class UserTableRepo {
             long number2 = Integer.parseInt(bonuses[1]);
             return criteriaBuilder.between(expression, number1, number2);
         }
+    }
+
+    private String anyMatch(String search) {
+        return "%" + search.toUpperCase() + "%";
     }
 }

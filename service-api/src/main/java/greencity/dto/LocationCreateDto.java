@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class AddLocationDto {
+public class LocationCreateDto {
     private List<AddLocationTranslationDto> addLocationDtoList;
 }

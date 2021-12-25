@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"order", "user", "parameters", "notificationTime"})
 @Entity
 @Table(name = "user_notifications")
 public class UserNotification {
@@ -40,7 +40,6 @@ public class UserNotification {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<NotificationParameter> parameters = new HashSet<>();
 
-    @EqualsAndHashCode.Exclude
     @Column(name = "notification_time")
     private LocalDateTime notificationTime = LocalDateTime.now();
 }

@@ -20,7 +20,7 @@ import java.util.Set;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot",
-    "viberBot"})
+    "viberBot", "lastLocation"})
 @Entity
 public class User {
     @Id
@@ -51,7 +51,7 @@ public class User {
     @Column(name = "recipient_phone")
     private String recipientPhone;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private List<ChangeOfPoints> changeOfPointsList;
 
     @Column
