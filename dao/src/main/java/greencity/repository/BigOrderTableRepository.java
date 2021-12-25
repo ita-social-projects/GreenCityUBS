@@ -133,8 +133,8 @@ public class BigOrderTableRepository {
         if (nonNull(sc.getResponsibleCallerId())) {
             predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), orderRoot, cq));
         }
-        if (nonNull(sc.getResponsibleLogiestManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogiestManId(), orderRoot, cq));
+        if (nonNull(sc.getResponsibleLogicManId())) {
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
             predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), orderRoot, cq));
