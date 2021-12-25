@@ -16,5 +16,5 @@ public class UpdateOrderPageAdminDto {
     private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
     private List<EcoNumberDto> ecoNumberFromShop;
     private ExportDetailsDtoUpdate exportDetailsDto;
-    private List<UpdateOrderDetailDto> updateOrderDetailDto;
+    private UpdateOrderDetailDto orderDetailDto;
 }
