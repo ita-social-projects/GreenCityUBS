@@ -593,10 +593,8 @@ public class ModelUtils {
         return NewLocationForCourierDto.builder()
             .courierId(1L)
             .locationId(1L)
-            .maxAmountOfBigBag(50L)
-            .minAmountOfBigBag(2L)
-            .maxAmountOfOrder(100000L)
-            .minAmountOfOrder(500L)
+            .amountOfBigBag(RangeDto.builder().max(50L).min(2L).build())
+            .amountOfOrder(RangeDto.builder().max(20000L).min(500L).build())
             .build();
     }
 

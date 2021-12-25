@@ -11,8 +11,6 @@ import lombok.*;
 public class NewLocationForCourierDto {
     private Long courierId;
     private Long locationId;
-    private Long minAmountOfBigBag;
-    private Long maxAmountOfBigBag;
-    private Long minAmountOfOrder;
-    private Long maxAmountOfOrder;
+    private RangeDto amountOfBigBag;
+    private RangeDto amountOfOrder;
 }

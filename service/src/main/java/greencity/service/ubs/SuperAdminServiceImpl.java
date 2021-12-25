@@ -249,9 +249,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
         dto.forEach(locationTranslationDto -> {
-            locationRepository.findLocationByName(locationTranslationDto.getLocationName()).orElseThrow(
-                () -> new LocationAlreadyCreatedException("The location with name: "
-                    + locationTranslationDto.getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST));
+            Location location =
+                locationRepository.findLocationByName(locationTranslationDto.getLocationName()).orElse(null);
+            if (location != null) {
+                throw new LocationAlreadyCreatedException("The location with name: "
+                    + locationTranslationDto.getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+            }
         });
     }
 
@@ -455,11 +458,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Language getLanguageByCode(String languageCode) {
-        Language language = languageRepository.findLanguageByCode(languageCode);
-        if (null == language) {
-            throw new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + languageCode);
-        }
-        return language;
+        return languageRepository.findLanguageByLanguageCode(languageCode).orElseThrow(
+            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + languageCode));
     }
 
     private Courier tryToFindCourierById(Long id) {

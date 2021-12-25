@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -340,22 +339,13 @@ class SuperAdminServiceImplTest {
         Language language = ModelUtils.getLanguage();
         Region region = ModelUtils.getRegion();
 
-        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
         when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.of(region));
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(languageRepository).findLanguageByCode("ua");
+        verify(languageRepository).findLanguageByLanguageCode("ua");
         verify(regionRepository).findRegionByName("Київська область");
-    }
-
-    @Test
-    void addLocationThrowLanguageNotFoundException() {
-        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
-
-        when(languageRepository.findLanguageByCode("ua")).thenReturn(null);
-
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
     }
 
     @Test
@@ -363,17 +353,26 @@ class SuperAdminServiceImplTest {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Language language = ModelUtils.getLanguage();
         Region region = ModelUtils.getRegion();
+        Location location = ModelUtils.getLocationForCreateRegion();
+        List<LocationTranslation> locationTranslations = List.of(ModelUtils.getLocationTranslation());
 
-        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
-        when(regionRepository.findRegionByName("Київська область")).thenReturn(null);
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
+        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.empty());
         when(regionTranslationRepository.saveAll(region.getRegionTranslations()))
             .thenReturn(ModelUtils.getRegionTranslationsList());
+        when(locationRepository.save(location)).thenReturn(location);
+        when(locationTranslationRepository.saveAll(location.getLocationTranslations()))
+            .thenReturn(locationTranslations);
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(languageRepository, times(2)).findLanguageByCode("ua");
+        verify(locationRepository).findLocationByName("Київ");
+        verify(languageRepository, times(2)).findLanguageByLanguageCode("ua");
         verify(regionRepository).findRegionByName("Київська область");
         verify(regionTranslationRepository).saveAll(region.getRegionTranslations());
+        verify(locationRepository).save(location);
+        verify(locationTranslationRepository).saveAll(location.getLocationTranslations());
     }
 
     @Test
@@ -499,13 +498,12 @@ class SuperAdminServiceImplTest {
     void addLocationExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
 
-        when(locationRepository.findLocationByName("Київ")).thenReturn(null);
-
-        when(languageRepository.findLanguageByCode("ua")).thenReturn(null);
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.empty());
 
         assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
-        verify(languageRepository).findLanguageByCode("ua");
+        verify(languageRepository).findLanguageByLanguageCode("ua");
     }
 
     @Test
@@ -514,7 +512,6 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
 
         when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.of(location));
-
         assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
         verify(locationRepository).findLocationByName("Київ");

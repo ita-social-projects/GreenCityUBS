@@ -1764,7 +1764,6 @@ public class ModelUtils {
 
     public static Location getLocation() {
         return Location.builder()
-            .id(1L)
             .locationStatus(LocationStatus.ACTIVE)
             .locationTranslations(getLocationTranslationList())
             .coordinates(Coordinates.builder()
@@ -2450,10 +2449,13 @@ public class ModelUtils {
         return NewLocationForCourierDto.builder()
             .courierId(1L)
             .locationId(1L)
-            .maxAmountOfBigBag(20L)
-            .minAmountOfBigBag(2L)
-            .maxAmountOfOrder(20000L)
-            .minAmountOfOrder(500L)
+            .amountOfBigBag(RangeDto.builder()
+                .max(20L)
+                .min(2L).build())
+            .amountOfOrder(RangeDto.builder()
+                .max(20000L)
+                .min(500L)
+                .build())
             .build();
     }
 
@@ -2466,7 +2468,6 @@ public class ModelUtils {
 
     public static List<LocationsDto> getLocationsDto() {
         return List.of(LocationsDto.builder()
-            .locationId(1L)
             .locationTranslationDtoList(getLocationTranslationDto())
             .locationStatus("ACTIVE")
             .longitude(3.34d)
@@ -2497,5 +2498,19 @@ public class ModelUtils {
             .name("Test")
             .limitDescription("Test")
             .languageCode("ua").build());
+    }
+
+    public static Location getLocationForCreateRegion() {
+        return Location.builder()
+            .locationStatus(LocationStatus.ACTIVE)
+            .locationTranslations(List.of(LocationTranslation.builder().locationName("Київ").build()))
+            .coordinates(Coordinates.builder()
+                .longitude(3.34d)
+                .latitude(1.32d).build())
+            .region(Region.builder()
+                .regionTranslations(getRegionTranslationsList())
+                .locations(List.of(getLocation()))
+                .build())
+            .build();
     }
 }
