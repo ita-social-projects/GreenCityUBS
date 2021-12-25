@@ -85,9 +85,8 @@ public class ModelUtils {
     public static final List<Map<String, Object>> TEST_MAP_ADDITIONAL_BAG_LIST =
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
-    public static final List<UpdateOrderDetailDto> TEST_UPDATE_ORDER_DETAIL_DTO_LIST =
-        Collections.singletonList(TEST_UPDATE_ORDER_DETAIL_DTO);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
+    public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -1529,11 +1528,8 @@ public class ModelUtils {
 
     private static UpdateOrderDetailDto createUpdateOrderDetailDto() {
         return UpdateOrderDetailDto.builder()
-            .amount(5)
-            .orderId(1L)
-            .bagId(1)
-            .exportedQuantity(10)
-            .confirmedQuantity(10)
+            .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
+            .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
             .build();
     }
 
@@ -2117,6 +2113,12 @@ public class ModelUtils {
                     .id(1L)
                     .build()))
                 .build())
+            .orderDetailDto(
+                UpdateOrderDetailDto.builder()
+                    .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
+                    .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
+                    .build())
+
             .build();
     }
 

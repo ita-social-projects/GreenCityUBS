@@ -361,28 +361,6 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for update order info.
-     *
-     * @return {@link List OrderDetailInfoDto}.
-     * @author Orest Mahdziak
-     */
-    @ApiOperation(value = "Update order detail info")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED, response = OrderDetailInfoDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PutMapping("/set-order-detail")
-    public ResponseEntity<List<OrderDetailInfoDto>> setOrderDetailAmount(
-        @RequestParam String language, @RequestBody List<UpdateOrderDetailDto> dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.setOrderDetail(dto, language, uuid));
-    }
-
-    /**
      * Controller for calculate order sum.
      *
      * @return {@link CounterOrderDetailsDto}.

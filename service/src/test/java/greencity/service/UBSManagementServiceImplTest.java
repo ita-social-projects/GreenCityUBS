@@ -1005,52 +1005,25 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
-        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
-        when(modelMapper.map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
-        }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
-        when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
-        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
-        when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
-        when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
-        List<OrderDetailInfoDto> actual =
-            ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc");
-        assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
-        verify(updateOrderRepository).updateAmount(anyInt(), anyLong(), anyLong());
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
-        verify(orderRepository).getOrderDetails(1L);
-        verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
-        }.getType());
-        verify(bagRepository).findBagByOrderId(1L);
-        verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
-        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
-        verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
-        verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
-        }.getType()));
     }
 
     @Test
-    void testSetOrderDetailThrowsException() {
-        when(updateOrderRepository.updateAmount(anyInt(), anyLong(), anyLong())).thenReturn(true);
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
-        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+    void testSetOrderDetailThrowsUserNotFoundException() {
+        Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
+        Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
 
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
-
-        assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
-    }
-
-    @Test
-    void setOrderDetailsUnExistingOrderException() {
-        assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.setOrderDetail(TEST_UPDATE_ORDER_DETAIL_DTO_LIST, "ua", "abc"));
+        assertThrows(UserNotFoundException.class,
+            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
     }
 
     @Test
