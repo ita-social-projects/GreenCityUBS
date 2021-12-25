@@ -18,7 +18,7 @@ public class OrderSearchCriteria {
     private Long[] responsibleCallerId;
     private Long[] responsibleDriverId;
     private Long[] responsibleNavigatorId;
-    private Long[] responsibleLogiestManId;
+    private Long[] responsibleLogicManId;
     private String orderDateFrom;
     private String orderDateTo;
     private String deliverFromFrom;
