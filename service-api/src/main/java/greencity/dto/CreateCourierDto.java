@@ -7,9 +7,11 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@Builder
+@ToString
 public class CreateCourierDto {
     @NotNull
     List<LimitsDto> createCourierLimitsDto;

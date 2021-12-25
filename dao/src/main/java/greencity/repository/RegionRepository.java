@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface RegionRepository extends JpaRepository<Region, Long> {
     /**
      * Method for get info about region.
@@ -17,5 +19,5 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
         value = "select * from regions r "
             + "join region_translations rt on r.id = rt.region_id "
             + "where rt.name = :name")
-    Region findRegionByName(@Param("name") String name);
+    Optional<Region> findRegionByName(@Param("name") String name);
 }

@@ -192,17 +192,17 @@ class SuperAdminController {
     /**
      * Get all info about locations, and min amount of bag for locations.
      * 
-     * @return {@link FindInfoAboutLocationDto}
+     * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Get info about location and min amount of bag for this location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getLocations")
-    public ResponseEntity<List<FindInfoAboutLocationDto>> getLocations() {
+    public ResponseEntity<List<LocationInfoDto>> getLocations() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllLocation());
     }
 
@@ -210,13 +210,13 @@ class SuperAdminController {
      * Create new Location.
      * 
      * @param dto {@link LocationCreateDto}
-     * @return {@link FindInfoAboutLocationDto}
+     * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Create new location")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.CREATED),
-        @ApiResponse(code = 201, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
@@ -231,12 +231,12 @@ class SuperAdminController {
      * Controller for deactivating location byb Id.
      * 
      * @param id - id of location
-     * @return {@link FindInfoAboutLocationDto}
+     * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Deactivate location by Id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
@@ -251,12 +251,12 @@ class SuperAdminController {
      * Controller for activating location by Id.
      * 
      * @param id - id location
-     * @return {@link FindInfoAboutLocationDto}
+     * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Active location Id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = FindInfoAboutLocationDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })

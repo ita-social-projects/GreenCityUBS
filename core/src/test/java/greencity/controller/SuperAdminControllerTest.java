@@ -6,13 +6,19 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
+import greencity.exception.handler.CustomExceptionHandler;
+import greencity.exceptions.LocationAlreadyCreatedException;
+import greencity.exceptions.LocationNotFoundException;
 import greencity.service.SuperAdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -30,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SecurityConfig.class)
 class SuperAdminControllerTest {
     private MockMvc mockMvc;
+
     @Mock
     RestClient restClient;
 
@@ -43,12 +50,15 @@ class SuperAdminControllerTest {
 
     private Principal principal = getUuid();
 
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(restClient))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }
 
@@ -171,6 +181,20 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
+        List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(dto);
+
+        Mockito.doThrow(LocationAlreadyCreatedException.class).when(superAdminService).addLocation(dto);
+
+        mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
+            .content(requestJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void deactivateLocation() throws Exception {
         mockMvc.perform(patch(ubsLink + "/deactivateLocations/" + 1L)).andExpect(status().isOk());
     }
@@ -204,5 +228,20 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierInterceptExceptionTest() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+
+        Mockito.when(superAdminService.createCourier(dto)).thenThrow(LocationNotFoundException.class);
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 }

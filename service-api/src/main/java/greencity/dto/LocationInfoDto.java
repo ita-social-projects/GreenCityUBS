@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class FindInfoAboutLocationDto {
+public class LocationInfoDto {
     private Long regionId;
     private List<RegionTranslationDto> regionTranslationDtos;
     private List<LocationsDto> locationsDto;

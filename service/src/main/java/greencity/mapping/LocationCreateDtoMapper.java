@@ -17,7 +17,7 @@ public class LocationCreateDtoMapper extends AbstractConverter<Location, Locatio
         List<AddLocationTranslationDto> dtos = source.getLocationTranslations().stream().map(
             i -> new AddLocationTranslationDto(i.getLocationName(), i.getLanguage().getCode()))
             .collect(Collectors.toList());
-        List<RegionTranslationDto> regionTranslationDtoList = source.getRegion().getRegionTranslation().stream().map(
+        List<RegionTranslationDto> regionTranslationDtoList = source.getRegion().getRegionTranslations().stream().map(
             i -> new RegionTranslationDto(i.getName(), i.getLanguage().getCode())).collect(Collectors.toList());
         return LocationCreateDto.builder()
             .addLocationDtoList(dtos)

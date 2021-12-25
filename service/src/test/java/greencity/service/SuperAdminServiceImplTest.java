@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -340,7 +341,7 @@ class SuperAdminServiceImplTest {
         Region region = ModelUtils.getRegion();
 
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
-        when(regionRepository.findRegionByName("Київська область")).thenReturn(region);
+        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.of(region));
 
         superAdminService.addLocation(locationCreateDtoList);
 
@@ -365,14 +366,14 @@ class SuperAdminServiceImplTest {
 
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(regionRepository.findRegionByName("Київська область")).thenReturn(null);
-        when(regionTranslationRepository.saveAll(region.getRegionTranslation()))
+        when(regionTranslationRepository.saveAll(region.getRegionTranslations()))
             .thenReturn(ModelUtils.getRegionTranslationsList());
 
         superAdminService.addLocation(locationCreateDtoList);
 
         verify(languageRepository, times(2)).findLanguageByCode("ua");
         verify(regionRepository).findRegionByName("Київська область");
-        verify(regionTranslationRepository).saveAll(region.getRegionTranslation());
+        verify(regionTranslationRepository).saveAll(region.getRegionTranslations());
     }
 
     @Test
@@ -512,7 +513,7 @@ class SuperAdminServiceImplTest {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
 
-        when(locationRepository.findLocationByName("Київ")).thenReturn(location);
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.of(location));
 
         assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 

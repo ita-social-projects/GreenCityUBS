@@ -218,16 +218,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<FindInfoAboutLocationDto> getAllLocation() {
+    public List<LocationInfoDto> getAllLocation() {
         return regionRepository.findAll().stream()
-            .map(i -> modelMapper.map(i, FindInfoAboutLocationDto.class))
+            .map(i -> modelMapper.map(i, LocationInfoDto.class))
             .collect(Collectors.toList());
     }
 
     @Override
     public void addLocation(List<LocationCreateDto> dtoList) {
         dtoList.forEach(dto -> {
-            checkIfLocationAlreadyCreated(dto);
+            checkIfLocationAlreadyCreated(dto.getAddLocationDtoList());
             Location location = Location.builder()
                 .locationStatus(LocationStatus.ACTIVE)
                 .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
@@ -247,20 +247,23 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         });
     }
 
-    private void checkIfLocationAlreadyCreated(LocationCreateDto dto) {
-        Location location = locationRepository.findLocationByName(dto.getAddLocationDtoList().get(0).getLocationName());
-        if (location != null) {
-            throw new LocationAlreadyCreatedException("The location with name"
-                + dto.getAddLocationDtoList().get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
-        }
+    private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
+        dto.forEach(locationTranslationDto -> {
+            locationRepository.findLocationByName(locationTranslationDto.getLocationName()).orElseThrow(
+                () -> new LocationAlreadyCreatedException("The location with name: "
+                    + locationTranslationDto.getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST));
+        });
     }
 
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {
-        Region region = regionRepository.findRegionByName(dto.getRegionTranslationDtos().get(0).getRegionName());
+        Region region = new Region();
+        for (RegionTranslationDto regionTranslationDto : dto.getRegionTranslationDtos()) {
+            region = regionRepository.findRegionByName(regionTranslationDto.getRegionName()).orElse(null);
+        }
         if (null == region) {
             region = createRegionWithTranslation(dto);
             regionRepository.save(region);
-            regionTranslationRepository.saveAll(region.getRegionTranslation());
+            regionTranslationRepository.saveAll(region.getRegionTranslations());
         }
         return region;
     }
@@ -441,13 +444,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
-        Region region = Region.builder().regionTranslation(
+        Region region = Region.builder().regionTranslations(
             dto.getRegionTranslationDtos().stream()
                 .map(i -> RegionTranslation.builder().language(getLanguageByCode(i.getLanguageCode()))
                     .name(i.getRegionName()).build())
                 .collect(Collectors.toList()))
             .build();
-        region.getRegionTranslation().forEach(regionTranslation -> regionTranslation.setRegion(region));
+        region.getRegionTranslations().forEach(regionTranslation -> regionTranslation.setRegion(region));
         return region;
     }
 

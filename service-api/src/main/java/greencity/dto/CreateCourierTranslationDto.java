@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @ToString
 public class CreateCourierTranslationDto {

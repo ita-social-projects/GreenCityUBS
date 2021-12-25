@@ -2396,8 +2396,8 @@ public class ModelUtils {
     public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
-            .regionTranslation(getRegionTranslationsList())
-            .locationList(getLocationList())
+            .regionTranslations(getRegionTranslationsList())
+            .locations(getLocationList())
             .build());
     }
 
@@ -2434,15 +2434,15 @@ public class ModelUtils {
     public static Region getRegion() {
         return Region.builder()
             .id(1L)
-            .regionTranslation(getRegionTranslationsList())
-            .locationList(List.of(getLocation()))
+            .regionTranslations(getRegionTranslationsList())
+            .locations(List.of(getLocation()))
             .build();
     }
 
     public static Region getRegionForMapper() {
         return Region.builder()
             .id(1L)
-            .regionTranslation(getRegionTranslationsList())
+            .regionTranslations(getRegionTranslationsList())
             .build();
     }
 
@@ -2457,8 +2457,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static FindInfoAboutLocationDto getInfoAboutLocationDto() {
-        return FindInfoAboutLocationDto.builder()
+    public static LocationInfoDto getInfoAboutLocationDto() {
+        return LocationInfoDto.builder()
             .regionId(1L)
             .regionTranslationDtos(getRegionTranslationsDto())
             .locationsDto(getLocationsDto()).build();

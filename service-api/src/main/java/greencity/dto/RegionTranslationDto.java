@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @ToString
 @Builder
 public class RegionTranslationDto {
-    @Pattern(regexp = "[A-Za-zА-Яа-яёЁЇїІіЄєҐґ']*", message = "use only English,Ukrainian or Russian letters")
+    @Pattern(regexp = "[A-Za-zА-Яа-яёЁЇїІіЄєҐґ ']*", message = "use only English,Ukrainian or Russian letters")
     @NotEmpty(message = "name must not be empty")
     private String regionName;
     @Pattern(regexp = "[A-Za-zА']*", message = "use only English letters")

@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.FindInfoAboutLocationDto;
+import greencity.dto.LocationInfoDto;
 import greencity.entity.user.Region;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ class FindAllInfoAboutLocationDtoMapperTest {
     @Test
     void convert() {
         Region region = ModelUtils.getRegion();
-        FindInfoAboutLocationDto dto = ModelUtils.getInfoAboutLocationDto();
+        LocationInfoDto dto = ModelUtils.getInfoAboutLocationDto();
         Assertions.assertEquals(dto, mapper.convert(region));
     }
 }

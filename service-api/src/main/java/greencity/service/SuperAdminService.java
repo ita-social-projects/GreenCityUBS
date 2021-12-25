@@ -84,10 +84,10 @@ public interface SuperAdminService {
     /**
      * Method for get all info about location.
      *
-     * @return {@link FindInfoAboutLocationDto}
+     * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
-    List<FindInfoAboutLocationDto> getAllLocation();
+    List<LocationInfoDto> getAllLocation();
 
     /**
      * Method for adding location.
