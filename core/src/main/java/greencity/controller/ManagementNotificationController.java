@@ -60,7 +60,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = "/update")
-    public void updateNotificationTemplate(NotificationTemplateDto notificationTemplateDto) {
+    public void updateNotificationTemplate(@RequestBody NotificationTemplateDto notificationTemplateDto) {
         notificationService.update(notificationTemplateDto);
     }
 

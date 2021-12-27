@@ -563,4 +563,12 @@ public class ModelUtils {
             .languageId(1L)
             .build();
     }
+
+    public static NotificationTemplateDto getNotificationTemplateDto() {
+        return NotificationTemplateDto.builder()
+            .id(1L)
+            .title("test")
+            .body("test")
+            .build();
+    }
 }
