@@ -3,6 +3,8 @@ package greencity.repository;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +22,14 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
      */
     Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
         NotificationType type, String languageCode, NotificationReceiverType receiverType);
+
+    /**
+     * {@inheritDoc}
+     */
+    Optional<NotificationTemplate> findNotificationTemplateById(Long id);
+
+    /**
+     * {@inheritDoc}
+     */
+    Page<NotificationTemplate> findAll(Pageable pageable);
 }
