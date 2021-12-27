@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-public class ManagementNotificationControllerTest {
+class ManagementNotificationControllerTest {
     private static final String url = "/admin/notification";
     private MockMvc mockMvc;
     @Mock
