@@ -295,11 +295,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
-        paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
+        paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             notificationService.notifyBonuses(order, overpayment);
         }
         return paymentTableInfoDto;
+    }
+
+    private List<PaymentInfoDto> getAmountInUAH(List<PaymentInfoDto> paymentInfoDtos) {
+        int index = 0;
+        if (paymentInfoDtos != null && paymentInfoDtos.size() > 0) {
+            for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
+                if (paymentInfoDto != null) {
+                    Long s = paymentInfoDtos.get(index++).getAmount() / 100;
+                    paymentInfoDto.setAmount(s);
+                }
+            }
+        }
+        return paymentInfoDtos;
     }
 
     /**
