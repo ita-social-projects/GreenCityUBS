@@ -43,12 +43,12 @@ class ManagementNotificationServiceImplTest {
     void updateTest() {
         NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
         NotificationTemplate template = ModelUtils.getNotificationTemplate();
-        when(templateRepository.findNotificationTemplateById(1l)).thenReturn(
+        when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
             Optional.of(template));
 
         notificationService.update(dto);
 
-        verify(templateRepository).findNotificationTemplateById(1l);
+        verify(templateRepository).findNotificationTemplateById(1L);
         verify(templateRepository).save(template);
     }
 
@@ -56,12 +56,12 @@ class ManagementNotificationServiceImplTest {
     void findByIdTest() {
         NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
         NotificationTemplate template = ModelUtils.getNotificationTemplate();
-        when(templateRepository.findNotificationTemplateById(1l)).thenReturn(
+        when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
             Optional.of(template));
         when(modelMapper.map(template, NotificationTemplateDto.class))
             .thenReturn(dto);
-        notificationService.findById(1l);
-        verify(templateRepository).findNotificationTemplateById(1l);
+        notificationService.findById(1L);
+        verify(templateRepository).findNotificationTemplateById(1L);
         verify(modelMapper).map(template, NotificationTemplateDto.class);
     }
 }

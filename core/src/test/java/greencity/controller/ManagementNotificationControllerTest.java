@@ -1,13 +1,10 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
-import greencity.dto.NotificationDto;
-import greencity.service.notification.ManagementNotificationService;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,20 +19,18 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
 
-import static greencity.ModelUtils.getNotificationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
-class ManagementNotificationControllerTest {
+ class ManagementNotificationControllerTest {
     private static final String url = "/admin/notification";
     private MockMvc mockMvc;
     @Mock
     ManagementNotificationController notificationController;
-    @Mock
-    ManagementNotificationService notificationService;
+
     private final Principal principal = getUuid();
 
     @BeforeEach
@@ -70,7 +65,7 @@ class ManagementNotificationControllerTest {
     void getNotificationTemplateTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateDto());
-        mockMvc.perform(MockMvcRequestBuilders.get(url + "/" + 1l)
+        mockMvc.perform(MockMvcRequestBuilders.get(url + "/" + 1L)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
