@@ -303,12 +303,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private List<PaymentInfoDto> getAmountInUAH(List<PaymentInfoDto> paymentInfoDtos) {
-        int index = 0;
-        if (paymentInfoDtos != null && paymentInfoDtos.size() > 0) {
+        if (!paymentInfoDtos.isEmpty()) {
             for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
                 if (paymentInfoDto != null) {
-                    Long s = paymentInfoDtos.get(index++).getAmount() / 100;
-                    paymentInfoDto.setAmount(s);
+                    Long coins = paymentInfoDto.getAmount() / 100;
+                    paymentInfoDto.setAmount(coins);
                 }
             }
         }
