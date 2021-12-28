@@ -13,4 +13,5 @@ public class PaymentInfoDto {
     Long paymentId;
     Long amount;
     String comment;
+    String imagePath;
 }
