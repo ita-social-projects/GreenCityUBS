@@ -14,6 +14,7 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocation,
     protected GetCourierLocationDto convert(CourierLocation source) {
         List<CourierDto> courierDtoList = List.of(CourierDto.builder()
             .courierId(source.getCourier().getId())
+            .courierStatus(source.getCourier().getCourierStatus().toString())
             .courierTranslationDtos(source.getCourier().getCourierTranslationList().stream()
                 .map(courierTranslation -> CourierTranslationDto.builder()
                     .languageCode(courierTranslation.getLanguage().getCode())
