@@ -790,16 +790,18 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> map, List<BagDto> bags, CourierLocation courierLocation) {
         int sumToPay = 0;
         int bigBagCounter = 0;
+
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
             if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
-            checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
+
+        checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
         return sumToPay;
     }
 
