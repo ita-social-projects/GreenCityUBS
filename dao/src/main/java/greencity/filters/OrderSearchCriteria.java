@@ -21,10 +21,8 @@ public class OrderSearchCriteria {
     private Long[] responsibleLogicManId;
     private String orderDateFrom;
     private String orderDateTo;
-    private String deliverFromFrom;
-    private String deliverFromTo;
-    private String deliverToFrom;
-    private String deliverToTo;
+    private String deliveryDateFrom;
+    private String deliveryDateTo;
     private String paymentDateFrom;
     private String paymentDateTo;
     private String[] region;
