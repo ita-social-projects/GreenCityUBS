@@ -331,7 +331,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public List<GetCourierLocationDto> getAllCouriers() {
         return courierLocationRepository.findAllInfoAboutCourier()
             .stream()
-            .map(i -> modelMapper.map(i, GetCourierLocationDto.class))
+            .map(courierLocation -> modelMapper.map(courierLocation, GetCourierLocationDto.class))
             .collect(Collectors.toList());
     }
 

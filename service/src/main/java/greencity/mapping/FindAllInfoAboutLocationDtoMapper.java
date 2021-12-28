@@ -16,14 +16,27 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
     @Override
     protected LocationInfoDto convert(Region source) {
         List<LocationsDto> locationsDtoList = source.getLocations().stream()
-            .map(i -> new LocationsDto(i.getId(), i.getLocationStatus().toString(), i.getCoordinates().getLatitude(),
-                i.getCoordinates().getLongitude(),
-                i.getLocationTranslations().stream()
-                    .map(j -> new LocationTranslationDto(j.getLocationName(), j.getLanguage().getCode()))
-                    .collect(Collectors.toList())))
+            .map(location -> LocationsDto.builder()
+                .locationId(location.getId())
+                .longitude(location.getCoordinates().getLongitude())
+                .latitude(location.getCoordinates().getLatitude())
+                .locationStatus(location.getLocationStatus().toString())
+                .locationTranslationDtoList(location.getLocationTranslations().stream()
+                    .map(locationTranslation -> LocationTranslationDto.builder()
+                        .languageCode(locationTranslation.getLanguage().getCode())
+                        .locationName(locationTranslation.getLocationName())
+                        .build())
+                    .collect(Collectors.toList()))
+                .build())
             .collect(Collectors.toList());
+
         List<RegionTranslationDto> regionTranslationDtoList = source.getRegionTranslations().stream()
-            .map(i -> new RegionTranslationDto(i.getName(), i.getLanguage().getCode())).collect(Collectors.toList());
+            .map(regionTranslation -> RegionTranslationDto.builder()
+                .regionName(regionTranslation.getName())
+                .languageCode(regionTranslation.getLanguage().getCode())
+                .build())
+            .collect(Collectors.toList());
+
         return LocationInfoDto.builder()
             .regionId(source.getId())
             .locationsDto(locationsDtoList)
