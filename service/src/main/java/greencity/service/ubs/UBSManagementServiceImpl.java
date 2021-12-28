@@ -1988,7 +1988,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
             .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
             .map(EmployeeOrderPosition::getEmployee)
-            .map(e -> e.getId().toString())
+            .map(e -> e.getFirstName() + " " + e.getLastName())
             .reduce("", String::concat) : "-";
     }
 
