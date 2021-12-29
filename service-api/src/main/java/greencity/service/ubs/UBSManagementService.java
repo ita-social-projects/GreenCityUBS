@@ -312,7 +312,7 @@ public interface UBSManagementService {
      * @param multipartFiles {@link MultipartFile}
      * @author Bohdan Melnyk
      */
-    void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid);
+    void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid);
 
     /**
      * Method that save ReasonNotTakeBagDto.
