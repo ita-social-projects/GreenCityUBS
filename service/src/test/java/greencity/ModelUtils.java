@@ -743,6 +743,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static UpdateViolationToUserDto getUpdateViolationToUserDto() {
+        return UpdateViolationToUserDto.builder()
+            .orderID(1L)
+            .violationDescription("String1 string1 string1")
+            .violationLevel("low")
+            .imagesToDelete(null)
+            .build();
+    }
+
     public static OrderClientDto getOrderClientDto() {
         return OrderClientDto.builder()
             .id(1L)
