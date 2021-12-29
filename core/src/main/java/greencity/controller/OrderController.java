@@ -120,7 +120,7 @@ public class OrderController {
     @PostMapping("/processOrder")
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
@@ -141,7 +141,7 @@ public class OrderController {
     @PostMapping("/processOrderIF")
     public ResponseEntity<FondyOrderResponse> processOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBForIF(dto, userUuid));
     }
 
@@ -406,7 +406,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrder")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
     }
 
@@ -428,7 +428,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrderIF")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.saveFullOrderToDBFromLiqPayForIF(dto, userUuid));
     }

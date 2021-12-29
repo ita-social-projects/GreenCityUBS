@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.UserProfileDto;
+import greencity.dto.UserProfileUpdateDto;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,8 +32,8 @@ public class UserProfileController {
     /**
      * Controller returns user`s data or update {@link UserProfileDto} date.
      * 
-     * @param userUuid       {@link UserProfileDto} id.
-     * @param userProfileDto {@link UserProfileDto}
+     * @param userUuid             {@link UserProfileDto} id.
+     * @param userProfileUpdateDto {@link UserProfileDto}
      * @return {@link UserProfileDto}.
      * @author Mykhaolo Berezhinskiy
      */
@@ -43,10 +44,10 @@ public class UserProfileController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PutMapping("/user/update")
-    public ResponseEntity<UserProfileDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody UserProfileDto userProfileDto) {
+    public ResponseEntity<UserProfileUpdateDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
+        @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.updateProfileData(userUuid, userProfileDto));
+            .body(ubsClientService.updateProfileData(userUuid, userProfileUpdateDto));
     }
 
     /**

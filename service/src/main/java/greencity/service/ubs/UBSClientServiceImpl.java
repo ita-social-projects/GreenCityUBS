@@ -859,11 +859,11 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserProfileDto updateProfileData(String uuid, UserProfileDto userProfileDto) {
+    public UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto userProfileUpdateDto) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
-        setUserData(user, userProfileDto);
-        List<AddressDto> addressDtoList = userProfileDto.getAddressDto();
+        setUserData(user, userProfileUpdateDto);
+        List<AddressDto> addressDtoList = userProfileUpdateDto.getAddressDto();
         List<Address> addressList =
             addressDtoList.stream().map(a -> modelMapper.map(a, Address.class)).collect(Collectors.toList());
         for (Address address : addressList) {
@@ -873,8 +873,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         User savedUser = userRepository.save(user);
         List<AddressDto> mapperAddressDto =
             addressList.stream().map(a -> modelMapper.map(a, AddressDto.class)).collect(Collectors.toList());
-        UserProfileDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileDto.class);
-        mappedUserProfileDto.setAddressDto(mapperAddressDto);
+        UserProfileUpdateDto mappedUserProfileDto = modelMapper.map(savedUser, UserProfileUpdateDto.class);
+        UserProfileUpdateDto.builder().addressDto(mapperAddressDto).build();
         return mappedUserProfileDto;
     }
 
@@ -893,12 +893,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         return userProfileDto;
     }
 
-    private User setUserData(User user, UserProfileDto userProfileDto) {
-        user.setRecipientName(userProfileDto.getRecipientName());
-        user.setRecipientSurname(userProfileDto.getRecipientSurname());
+    private User setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {
+        user.setRecipientName(userProfileUpdateDto.getRecipientName());
+        user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
         user.setRecipientPhone(
-            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileDto.getRecipientPhone()));
-        user.setRecipientEmail(userProfileDto.getRecipientEmail());
+            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
         return user;
     }
 

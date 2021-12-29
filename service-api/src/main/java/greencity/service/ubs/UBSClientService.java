@@ -175,7 +175,7 @@ public interface UBSClientService {
      *         user;
      * @author Liubomyr Bratakh.
      */
-    UserProfileDto updateProfileData(String uuid, UserProfileDto dto);
+    UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);
 
     /**
      * Method that get user profile for current user.
