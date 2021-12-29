@@ -63,6 +63,6 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
 
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findNotificationTemplateById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND + id));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));
     }
 }

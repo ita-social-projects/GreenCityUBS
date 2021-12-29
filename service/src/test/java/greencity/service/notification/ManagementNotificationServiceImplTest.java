@@ -3,6 +3,7 @@ package greencity.service.notification;
 import greencity.ModelUtils;
 import greencity.dto.NotificationTemplateDto;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,7 @@ import org.modelmapper.ModelMapper;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,5 +65,10 @@ class ManagementNotificationServiceImplTest {
         notificationService.findById(1L);
         verify(templateRepository).findNotificationTemplateById(1L);
         verify(modelMapper).map(template, NotificationTemplateDto.class);
+    }
+
+    @Test
+    void findByIdNotFoundExceptionTest() {
+        assertThrows(NotFoundException.class, () -> notificationService.findById(2L));
     }
 }

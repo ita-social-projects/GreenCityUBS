@@ -3,7 +3,11 @@ package greencity.entity.notifications;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.language.Language;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -12,7 +16,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
-@Builder
+@Accessors(chain = true)
 @Table(name = "notification_templates")
 public class NotificationTemplate {
     @Id

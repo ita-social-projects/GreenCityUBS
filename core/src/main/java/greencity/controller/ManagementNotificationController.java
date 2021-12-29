@@ -8,27 +8,20 @@ import greencity.service.notification.ManagementNotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/admin/notification")
-@Validated
+@RequiredArgsConstructor
 public class ManagementNotificationController {
     private final ManagementNotificationService notificationService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public ManagementNotificationController(ManagementNotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
 
     /**
      * {@inheritDoc}
@@ -60,7 +53,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = "/update")
-    public void updateNotificationTemplate(@RequestBody NotificationTemplateDto notificationTemplateDto) {
+    public void updateNotificationTemplate(@RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
         notificationService.update(notificationTemplateDto);
     }
 

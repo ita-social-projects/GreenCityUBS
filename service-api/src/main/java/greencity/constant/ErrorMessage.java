@@ -89,7 +89,7 @@ public final class ErrorMessage {
     public static final String SOME_CERTIFICATES_ARE_INVALID =
         "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
     public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
-    public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "couldn't found notification template with id:";
+    public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "Notification template doesn't exist";
 
     /**
      * Constructor.

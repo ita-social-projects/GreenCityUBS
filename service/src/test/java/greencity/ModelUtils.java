@@ -2394,19 +2394,17 @@ public class ModelUtils {
     }
 
     public static NotificationTemplate getNotificationTemplate() {
-        return NotificationTemplate.builder()
-            .id(1L)
-            .title("test")
-            .body("test")
-            .build();
+        return new NotificationTemplate()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
-        return NotificationTemplateDto.builder()
-            .id(1L)
-            .title("test")
-            .body("test")
-            .build();
+        return new NotificationTemplateDto()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
     }
 
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {

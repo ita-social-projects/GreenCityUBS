@@ -565,10 +565,9 @@ public class ModelUtils {
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
-        return NotificationTemplateDto.builder()
-            .id(1L)
-            .title("test")
-            .body("test")
-            .build();
+        return new NotificationTemplateDto()
+            .setId(1L)
+            .setTitle("test")
+            .setBody("test");
     }
 }
