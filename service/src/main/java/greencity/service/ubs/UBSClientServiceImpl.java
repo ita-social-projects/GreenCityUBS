@@ -1,14 +1,11 @@
 package greencity.service.ubs;
 
-import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
-import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -27,9 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -65,18 +60,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
-    private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
-    private final CourierRepository courierRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    private final LocationTranslationRepository locationTranslationRepository;
-    private final LiqPay liqPay;
     private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
-    @PersistenceContext
-    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
