@@ -226,25 +226,35 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public void addLocation(List<LocationCreateDto> dtoList) {
-        dtoList.forEach(dto -> {
-            checkIfLocationAlreadyCreated(dto.getAddLocationDtoList());
-            Location location = Location.builder()
-                .locationStatus(LocationStatus.ACTIVE)
-                .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
-                .locationTranslations(dto.getAddLocationDtoList()
-                    .stream()
-                    .map(locationTranslationDto -> LocationTranslation.builder()
-                        .locationName(locationTranslationDto.getLocationName())
-                        .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
-                        .build())
-                    .collect(Collectors.toList()))
-                .region(checkIfRegionAlreadyCreated(dto))
-                .build();
+        dtoList.forEach(locationCreateDto -> {
+            checkIfLocationAlreadyCreated(locationCreateDto.getAddLocationDtoList());
+
+            Location location = createNewLocation(locationCreateDto);
             location.getLocationTranslations()
-                .forEach(locationTranslation -> locationTranslation.setLocation(location));
+                    .forEach(locationTranslation -> locationTranslation.setLocation(location));
+
             locationRepository.save(location);
             locationTranslationRepository.saveAll(location.getLocationTranslations());
         });
+    }
+
+    private Location createNewLocation(LocationCreateDto dto){
+        return Location.builder()
+                .locationStatus(LocationStatus.ACTIVE)
+                .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
+                .locationTranslations(dto.getAddLocationDtoList()
+                        .stream()
+                        .map(this::addTranslationToLocation)
+                        .collect(Collectors.toList()))
+                .region(checkIfRegionAlreadyCreated(dto))
+                .build();
+    }
+
+    private LocationTranslation addTranslationToLocation(AddLocationTranslationDto locationTranslationDto){
+        return LocationTranslation.builder()
+                .locationName(locationTranslationDto.getLocationName())
+                .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
+                .build();
     }
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
@@ -260,11 +270,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {
         Region region = new Region();
+
         for (RegionTranslationDto regionTranslationDto : dto.getRegionTranslationDtos()) {
             region = regionRepository.findRegionByName(regionTranslationDto.getRegionName()).orElse(null);
         }
+
         if (null == region) {
             region = createRegionWithTranslation(dto);
+
             regionRepository.save(region);
             regionTranslationRepository.saveAll(region.getRegionTranslations());
         }
@@ -447,14 +460,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
-        Region region = Region.builder().regionTranslations(
-            dto.getRegionTranslationDtos().stream()
-                .map(i -> RegionTranslation.builder().language(getLanguageByCode(i.getLanguageCode()))
-                    .name(i.getRegionName()).build())
-                .collect(Collectors.toList()))
-            .build();
+        Region region = createNewRegion(dto);
         region.getRegionTranslations().forEach(regionTranslation -> regionTranslation.setRegion(region));
         return region;
+    }
+
+    private Region createNewRegion(LocationCreateDto dto){
+        return Region.builder().regionTranslations(
+                        dto.getRegionTranslationDtos().stream()
+                                .map(regionTranslationDto -> RegionTranslation.builder()
+                                        .language(getLanguageByCode(regionTranslationDto.getLanguageCode()))
+                                        .name(regionTranslationDto.getRegionName())
+                                        .build())
+                                .collect(Collectors.toList()))
+                .build();
     }
 
     private Language getLanguageByCode(String languageCode) {

@@ -30,9 +30,6 @@ public class Location {
     @Embedded
     private Coordinates coordinates;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
-    private List<User> user;
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
     List<CourierLocation> courierLocations;
 

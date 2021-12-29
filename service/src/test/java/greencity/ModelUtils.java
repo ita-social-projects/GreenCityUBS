@@ -1380,7 +1380,6 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .lastLocation(location)
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .build();

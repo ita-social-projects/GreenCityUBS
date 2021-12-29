@@ -944,50 +944,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return dto;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<LocationResponseDto> getAllLocations(String userUuid) {
-        User user = userRepository.findByUuid(userUuid);
-        List<Location> locations = locationRepository.findAll();
-        List<LocationTranslation> locationTranslations = locationTranslationRepository.findAll();
-        Location lastOrderLocation = user.getLastLocation();
-
-        if (lastOrderLocation != null) {
-            locations.remove(lastOrderLocation);
-            locations.add(0, lastOrderLocation);
-        }
-        return buildLocationResponseList(locationTranslations);
-    }
-
-    private List<LocationResponseDto> buildLocationResponseList(List<LocationTranslation> locations) {
-        return locations.stream()
-            .map(a -> buildLocationResponseDto(a))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
-        User currentUser = userRepository.findByUuid(userUuid);
-        Location location = locationRepository.findById(locationIdDto.getLocationId())
-            .orElseThrow(() -> new LocationNotFoundException(LOCATION_DOESNT_FOUND));
-        currentUser.setLastLocation(location);
-
-        userRepository.save(currentUser);
-    }
-
-    private LocationResponseDto buildLocationResponseDto(LocationTranslation locationTranslation) {
-        return LocationResponseDto.builder()
-            .id(locationTranslation.getLocation().getId())
-            .name(locationTranslation.getLocationName())
-            .languageCode(locationTranslation.getLanguage().getCode())
-            .build();
-    }
-
     @Override
     public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
         PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
