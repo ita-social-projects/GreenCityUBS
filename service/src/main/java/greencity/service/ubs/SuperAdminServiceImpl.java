@@ -231,30 +231,30 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
             Location location = createNewLocation(locationCreateDto);
             location.getLocationTranslations()
-                    .forEach(locationTranslation -> locationTranslation.setLocation(location));
+                .forEach(locationTranslation -> locationTranslation.setLocation(location));
 
             locationRepository.save(location);
             locationTranslationRepository.saveAll(location.getLocationTranslations());
         });
     }
 
-    private Location createNewLocation(LocationCreateDto dto){
+    private Location createNewLocation(LocationCreateDto dto) {
         return Location.builder()
-                .locationStatus(LocationStatus.ACTIVE)
-                .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
-                .locationTranslations(dto.getAddLocationDtoList()
-                        .stream()
-                        .map(this::addTranslationToLocation)
-                        .collect(Collectors.toList()))
-                .region(checkIfRegionAlreadyCreated(dto))
-                .build();
+            .locationStatus(LocationStatus.ACTIVE)
+            .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
+            .locationTranslations(dto.getAddLocationDtoList()
+                .stream()
+                .map(this::addTranslationToLocation)
+                .collect(Collectors.toList()))
+            .region(checkIfRegionAlreadyCreated(dto))
+            .build();
     }
 
-    private LocationTranslation addTranslationToLocation(AddLocationTranslationDto locationTranslationDto){
+    private LocationTranslation addTranslationToLocation(AddLocationTranslationDto locationTranslationDto) {
         return LocationTranslation.builder()
-                .locationName(locationTranslationDto.getLocationName())
-                .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
-                .build();
+            .locationName(locationTranslationDto.getLocationName())
+            .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
+            .build();
     }
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
@@ -465,15 +465,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return region;
     }
 
-    private Region createNewRegion(LocationCreateDto dto){
+    private Region createNewRegion(LocationCreateDto dto) {
         return Region.builder().regionTranslations(
-                        dto.getRegionTranslationDtos().stream()
-                                .map(regionTranslationDto -> RegionTranslation.builder()
-                                        .language(getLanguageByCode(regionTranslationDto.getLanguageCode()))
-                                        .name(regionTranslationDto.getRegionName())
-                                        .build())
-                                .collect(Collectors.toList()))
-                .build();
+            dto.getRegionTranslationDtos().stream()
+                .map(regionTranslationDto -> RegionTranslation.builder()
+                    .language(getLanguageByCode(regionTranslationDto.getLanguageCode()))
+                    .name(regionTranslationDto.getRegionName())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
     }
 
     private Language getLanguageByCode(String languageCode) {
