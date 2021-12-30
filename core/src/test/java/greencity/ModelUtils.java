@@ -619,4 +619,11 @@ public class ModelUtils {
             .minPriceOfOrder(500L)
             .build();
     }
+
+    public static NotificationTemplateDto getNotificationTemplateDto() {
+        return new NotificationTemplateDto()
+            .setId(1L)
+            .setTitle("test")
+            .setBody("test");
+    }
 }

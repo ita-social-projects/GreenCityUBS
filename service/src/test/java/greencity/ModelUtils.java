@@ -61,6 +61,7 @@ public class ModelUtils {
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
+    public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
         new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
@@ -84,6 +85,12 @@ public class ModelUtils {
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
+    public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
+    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
+        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
+    public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
+    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -1560,6 +1567,14 @@ public class ModelUtils {
             1);
     }
 
+    private static PageableDto<NotificationTemplateDto> templateDtoPageableDto() {
+        return new PageableDto<>(
+            TEST_NOTIFICATION_TEMPLATE_LIST,
+            1,
+            0,
+            1);
+    }
+
     private static NotificationTemplate createNotificationTemplate() {
         NotificationTemplate notificationTemplate = new NotificationTemplate();
         notificationTemplate.setTitle("Test");
@@ -2400,6 +2415,26 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .build();
+    }
+
+    public static NotificationTemplate getNotificationTemplate() {
+        return new NotificationTemplate()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
+    }
+
+    public static NotificationTemplateDto getNotificationTemplateDto() {
+        return new NotificationTemplateDto()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
+    }
+
+    public static Page<NotificationTemplate> getNotificationTemplatePageable() {
+        return new PageImpl<>(List.of(getNotificationTemplate()),
+            TEST_PAGEABLE_NOTIFICATION_TEMPLATE,
+            2);
     }
 
     public static UserProfileUpdateDto updateUserProfileDto() {
