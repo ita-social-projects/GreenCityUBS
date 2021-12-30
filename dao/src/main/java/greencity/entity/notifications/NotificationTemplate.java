@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -15,6 +16,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
+@Accessors(chain = true)
 @Table(name = "notification_templates")
 public class NotificationTemplate {
     @Id
