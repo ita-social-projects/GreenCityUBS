@@ -4,6 +4,7 @@ import greencity.dto.AddressDto;
 import greencity.dto.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -15,22 +16,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
     @Override
     protected UserProfileUpdateDto convert(User user) {
         List<AddressDto> addressDtoList = user.getAddresses().stream()
-            .map(address -> AddressDto.builder()
-                .id(address.getId())
-                .city(address.getCity())
-                .district(address.getDistrict())
-                .region(address.getRegion())
-                .entranceNumber(address.getEntranceNumber())
-                .houseCorpus(address.getHouseCorpus())
-                .houseNumber(address.getHouseNumber())
-                .street(address.getStreet())
-                .addressComment(address.getAddressComment())
-                .coordinates(Coordinates.builder()
-                    .latitude(address.getCoordinates().getLatitude())
-                    .longitude(address.getCoordinates().getLongitude())
-                    .build())
-                .actual(address.getActual())
-                .build())
+            .map(this::createAddressDto)
             .collect(Collectors.toList());
 
         return UserProfileUpdateDto.builder()
@@ -38,6 +24,25 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
             .addressDto(addressDtoList)
+            .build();
+    }
+
+    private AddressDto createAddressDto(Address address) {
+        return AddressDto.builder()
+            .id(address.getId())
+            .city(address.getCity())
+            .district(address.getDistrict())
+            .region(address.getRegion())
+            .entranceNumber(address.getEntranceNumber())
+            .houseCorpus(address.getHouseCorpus())
+            .houseNumber(address.getHouseNumber())
+            .street(address.getStreet())
+            .addressComment(address.getAddressComment())
+            .coordinates(Coordinates.builder()
+                .latitude(address.getCoordinates().getLatitude())
+                .longitude(address.getCoordinates().getLongitude())
+                .build())
+            .actual(address.getActual())
             .build();
     }
 }
