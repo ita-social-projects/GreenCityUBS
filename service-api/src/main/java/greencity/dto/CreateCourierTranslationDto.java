@@ -5,9 +5,9 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @ToString
 public class CreateCourierTranslationDto {

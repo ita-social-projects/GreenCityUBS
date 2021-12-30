@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
     /**
@@ -17,4 +19,13 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         + "JOIN BAG AS B ON OBM.ORDER_ID = :orderId and OBM.BAG_ID = B.ID ) "
         + "LIMIT 1 ", nativeQuery = true)
     Location findByOrderId(@Param("orderId") Long id);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Query(nativeQuery = true,
+        value = "select * FROM locations as l "
+            + "join location_translations lt on l.id = lt.location_id "
+            + "where lt.location_name = :locationName")
+    Optional<Location> findLocationByName(@Param("locationName") String locationName);
 }

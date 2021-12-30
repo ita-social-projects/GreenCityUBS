@@ -1,5 +1,6 @@
 package greencity.entity.user;
 
+import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.CourierLocation;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Entity
 @EqualsAndHashCode(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
+@ToString(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -25,8 +27,8 @@ public class Location {
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "lastLocation")
-    private List<User> user;
+    @Embedded
+    private Coordinates coordinates;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
     List<CourierLocation> courierLocations;
@@ -36,4 +38,7 @@ public class Location {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<LocationTranslation> locationTranslations;
+
+    @ManyToOne
+    private Region region;
 }
