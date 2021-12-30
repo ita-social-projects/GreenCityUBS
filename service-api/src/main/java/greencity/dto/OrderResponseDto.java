@@ -32,7 +32,7 @@ public class OrderResponseDto implements Serializable {
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
         message = "This certificate code is not valid") String> certificates;
 
-    private Set<@Length(max = 10) String> additionalOrders;
+    private Set<@Length(min = 3, max = 10) @Pattern(regexp = "[0-9]+") String> additionalOrders;
 
     @Length(max = 170)
     private String orderComment;

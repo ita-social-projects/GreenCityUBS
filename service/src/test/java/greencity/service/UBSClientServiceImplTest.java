@@ -483,8 +483,8 @@ class UBSClientServiceImplTest {
         List<AddressDto> addressDto = ModelUtils.addressDtoList();
         List<Address> address = ModelUtils.addressList();
 
-        UserProfileDto userProfileDto =
-            UserProfileDto.builder().addressDto(addressDto).recipientEmail(user.getRecipientEmail())
+        UserProfileUpdateDto userProfileUpdateDto =
+            UserProfileUpdateDto.builder().addressDto(addressDto)
                 .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
                 .recipientPhone(user.getRecipientPhone())
                 .build();
@@ -497,10 +497,10 @@ class UBSClientServiceImplTest {
         }
         when(modelMapper.map(address.get(0), AddressDto.class)).thenReturn(addressDto.get(0));
         when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
-        when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileDto);
-        assertNotNull(userProfileDto.getAddressDto());
-        assertNotNull(userProfileDto);
+        when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
+        ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileUpdateDto);
+        assertNotNull(userProfileUpdateDto.getAddressDto());
+        assertNotNull(userProfileUpdateDto);
         assertNotNull(address);
     }
 
