@@ -713,5 +713,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
-
 }

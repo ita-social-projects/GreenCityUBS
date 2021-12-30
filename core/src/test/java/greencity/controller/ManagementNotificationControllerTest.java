@@ -42,7 +42,7 @@ class ManagementNotificationControllerTest {
     ManagementNotificationController notificationController;
     @Mock
     ManagementNotificationService notificationService;
-    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final Principal principal = getUuid();
     @Mock
     RestClient restClient;
@@ -50,11 +50,11 @@ class ManagementNotificationControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
-                .setCustomArgumentResolvers(
-                        new PageableHandlerMethodArgumentResolver(),
-                        new UserArgumentResolver(restClient))
-                .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
-                .build();
+            .setCustomArgumentResolvers(
+                new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(restClient))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+            .build();
     }
 
     @Test
