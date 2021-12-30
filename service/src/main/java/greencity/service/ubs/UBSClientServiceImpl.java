@@ -863,9 +863,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileUpdateDto);
-        List<AddressDto> addressDtoList = userProfileUpdateDto.getAddressDto();
+
         List<Address> addressList =
-            addressDtoList.stream().map(a -> modelMapper.map(a, Address.class)).collect(Collectors.toList());
+            userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
+                .collect(Collectors.toList());
+
         for (Address address : addressList) {
             address.setUser(user);
             addressRepo.save(address);

@@ -2399,4 +2399,13 @@ public class ModelUtils {
                 .build())
             .build();
     }
+
+    public static UserProfileUpdateDto updateUserProfileDto() {
+        return UserProfileUpdateDto.builder()
+            .recipientName("Taras")
+            .recipientSurname("Ivanov")
+            .recipientPhone("962473289")
+            .addressDto(addressDtoList())
+            .build();
+    }
 }
