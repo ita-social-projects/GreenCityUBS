@@ -42,7 +42,7 @@ class ManagementNotificationServiceImplTest {
             ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(templateRepository).findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(modelMapper).map(template, NotificationTemplateDto.class);
-        assertEquals(ModelUtils.TEST_TEMPLATE_DTO, actual);
+        assertEquals(template, actual);
     }
 
     @Test

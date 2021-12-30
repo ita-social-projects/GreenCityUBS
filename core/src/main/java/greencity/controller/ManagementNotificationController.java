@@ -57,8 +57,9 @@ public class ManagementNotificationController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PutMapping
-    public void updateNotificationTemplate(@RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
+    public ResponseEntity<HttpStatuses> updateNotificationTemplate(@RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
         notificationService.update(notificationTemplateDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

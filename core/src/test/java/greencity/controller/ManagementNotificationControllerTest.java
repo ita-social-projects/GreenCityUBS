@@ -2,12 +2,22 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
+import greencity.converters.UserArgumentResolver;
+import greencity.dto.NotificationTemplateDto;
+import greencity.exception.handler.CustomExceptionHandler;
+import greencity.exceptions.NotFoundException;
+import greencity.service.notification.ManagementNotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -28,16 +38,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ManagementNotificationControllerTest {
     private static final String url = "/admin/notification";
     private MockMvc mockMvc;
-    @Mock
+    @InjectMocks
     ManagementNotificationController notificationController;
-
+    @Mock
+    ManagementNotificationService notificationService;
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final Principal principal = getUuid();
+    @Mock
+    RestClient restClient;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
-            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-            .build();
+                .setCustomArgumentResolvers(
+                        new PageableHandlerMethodArgumentResolver(),
+                        new UserArgumentResolver(restClient))
+                .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+                .build();
     }
 
     @Test
@@ -73,10 +90,14 @@ class ManagementNotificationControllerTest {
 
     @Test
     void saveBadRequestTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
+        String JsonDto = objectMapper.writeValueAsString(dto);
+        Mockito.doThrow(NotFoundException.class).when(notificationService).update(dto);
         mockMvc.perform(put(url)
             .principal(principal)
-            .content("{}")
+            .content(JsonDto)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 }
