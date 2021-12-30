@@ -19,6 +19,7 @@ public class PaymentInfoMapper extends AbstractConverter<Payment, PaymentInfoDto
             .amount(source.getAmount())
             .settlementdate(source.getSettlementDate())
             .comment(source.getComment())
+            .imagePath(source.getImagePath())
             .build();
     }
 }

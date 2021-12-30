@@ -1352,13 +1352,15 @@ class UBSManagementServiceImplTest {
     void updateUserViolation() {
         User user = ModelUtils.getUser();
         user.setUuid("uuid");
-        AddingViolationsToUserDto addingViolationsToUserDto = ModelUtils.getAddingViolationsToUserDto();
+        UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
         Violation violation = ModelUtils.getViolation();
 
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.ofNullable(violation));
 
-        ubsManagementService.updateUserViolation(addingViolationsToUserDto, new MultipartFile[2], "uuid");
+        ubsManagementService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "uuid");
+
+        assertEquals(2, violation.getImages().size());
 
         verify(userRepository).findUserByUuid("uuid");
         verify(violationRepository).findByOrderId(1L);
