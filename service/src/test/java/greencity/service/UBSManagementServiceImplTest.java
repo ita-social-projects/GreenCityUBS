@@ -1136,7 +1136,6 @@ class UBSManagementServiceImplTest {
     void testUpdateEcoNumberForOrder() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
-        when(orderRepository.findEcoNumberFromShop("22222", 1L)).thenReturn("123456");
         ubsManagementService.updateEcoNumberForOrder(ModelUtils.getEcoNumberDto(), 1L, "abc");
         verify(eventService, times(1)).save(any(), any(), any());
     }

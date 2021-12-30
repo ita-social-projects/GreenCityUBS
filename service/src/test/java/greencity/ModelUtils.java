@@ -252,6 +252,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                .additionalOrders(Set.of("1111"))
             .build();
     }
 
