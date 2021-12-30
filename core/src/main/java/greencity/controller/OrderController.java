@@ -120,7 +120,7 @@ public class OrderController {
     @PostMapping("/processOrder")
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
@@ -141,7 +141,7 @@ public class OrderController {
     @PostMapping("/processOrderIF")
     public ResponseEntity<FondyOrderResponse> processOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBForIF(dto, userUuid));
     }
 
@@ -349,47 +349,6 @@ public class OrderController {
     }
 
     /**
-     * Controller gets list of locations.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "gets list of locations")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationResponseDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
-    })
-    @GetMapping("/order/get-locations")
-    public ResponseEntity<List<LocationResponseDto>> getAllLocationsForPopUp(
-        @ApiIgnore @CurrentUserUuid String userUuid) {
-        return ResponseEntity.ok(ubsClientService.getAllLocations(userUuid));
-    }
-
-    /**
-     * Controller sets new last order location.
-     *
-     * @param locationId {@link LocationIdDto}
-     * @param userUuid   {@link UserVO} id.
-     * @return {@link HttpStatus} - http status.
-     */
-    @ApiOperation(value = "sets new last order location")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
-    })
-    @PostMapping("/order/get-locations")
-    public ResponseEntity<HttpStatus> setNewLastOrderLocationForUser(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody LocationIdDto locationId) {
-        ubsClientService.setNewLastOrderLocation(userUuid, locationId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
      * Controller saves all entered by user data to database from LiqPay.
      *
      * @param userUuid {@link UserVO} id.
@@ -406,7 +365,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrder")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
     }
 
@@ -428,7 +387,7 @@ public class OrderController {
     @PostMapping("/processLiqPayOrderIF")
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrderForIF(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @RequestBody OrderResponseDto dto) {
+        @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.saveFullOrderToDBFromLiqPayForIF(dto, userUuid));
     }

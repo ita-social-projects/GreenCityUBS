@@ -88,4 +88,5 @@
     <include file="db/changelog/logs/ch-add-column-status-into-employees-table-Kuzo.xml"/>
     <include file="db/changelog/logs/ch-edit-length-column-order-status-Makitra.xml"/>
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-nig-bags-table-locations-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
 </databaseChangeLog>

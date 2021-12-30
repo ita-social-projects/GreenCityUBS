@@ -10,6 +10,7 @@ import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.LocationTranslation;
+import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.exceptions.*;
 import greencity.repository.*;
@@ -59,6 +60,10 @@ class SuperAdminServiceImplTest {
     private LocationTranslationRepository locationTranslationRepository;
     @Mock
     private CourierLocationRepository courierLocationRepository;
+    @Mock
+    private RegionRepository regionRepository;
+    @Mock
+    private RegionTranslationRepository regionTranslationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -319,40 +324,66 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getAllLocationTest() {
-        List<LocationTranslation> locationTranslationDto = ModelUtils.getLocationTranslationList();
+        List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(locationTranslationRepository.findAll()).thenReturn(locationTranslationDto);
+        when(regionRepository.findAll()).thenReturn(regionList);
 
         superAdminService.getAllLocation();
 
-        verify(locationTranslationRepository).findAll();
+        verify(regionRepository).findAll();
     }
 
     @Test
     void addLocationTest() {
-        LocationCreateDto locationCreateDto = ModelUtils.getLocationCreateDto();
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Language language = ModelUtils.getLanguage();
+        Region region = ModelUtils.getRegion();
 
-        when(languageRepository.findById(1L)).thenReturn(Optional.ofNullable(language));
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
+        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.of(region));
 
-        superAdminService.addLocation(locationCreateDto);
+        superAdminService.addLocation(locationCreateDtoList);
 
-        verify(languageRepository).findById(1L);
+        verify(languageRepository).findLanguageByLanguageCode("ua");
+        verify(regionRepository).findRegionByName("Київська область");
+    }
+
+    @Test
+    void addLocationCreateNewRegionTest() {
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
+        Language language = ModelUtils.getLanguage();
+        Region region = ModelUtils.getRegion();
+        Location location = ModelUtils.getLocationForCreateRegion();
+        List<LocationTranslation> locationTranslations = List.of(ModelUtils.getLocationTranslation());
+
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
+        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.empty());
+        when(regionTranslationRepository.saveAll(region.getRegionTranslations()))
+            .thenReturn(ModelUtils.getRegionTranslationsList());
+        when(locationRepository.save(location)).thenReturn(location);
+        when(locationTranslationRepository.saveAll(location.getLocationTranslations()))
+            .thenReturn(locationTranslations);
+
+        superAdminService.addLocation(locationCreateDtoList);
+
+        verify(locationRepository).findLocationByName("Київ");
+        verify(languageRepository, times(2)).findLanguageByLanguageCode("ua");
+        verify(regionRepository).findRegionByName("Київська область");
+        verify(regionTranslationRepository).saveAll(region.getRegionTranslations());
+        verify(locationRepository).save(location);
+        verify(locationTranslationRepository).saveAll(location.getLocationTranslations());
     }
 
     @Test
     void activateLocation() {
         Location location = ModelUtils.getLocationDto();
-        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
-            .thenReturn(Optional.ofNullable(locationTranslation));
 
-        superAdminService.activateLocation(1L, "ua");
+        superAdminService.activateLocation(1L);
 
         verify(locationRepository).findById(1L);
-        verify(locationTranslationRepository).findLocationTranslationByLocationAndLanguageCode(location, "ua");
     }
 
     @Test
@@ -362,13 +393,10 @@ class SuperAdminServiceImplTest {
         LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
-            .thenReturn(Optional.ofNullable(locationTranslation));
 
-        superAdminService.deactivateLocation(1L, "ua");
+        superAdminService.deactivateLocation(1L);
 
         verify(locationRepository).findById(1L);
-        verify(locationTranslationRepository).findLocationTranslationByLocationAndLanguageCode(location, "ua");
     }
 
     @Test
@@ -468,14 +496,30 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addLocationExceptionTest() {
-        LocationCreateDto locationCreateDto = ModelUtils.getLocationCreateDto();
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
 
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDto));
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
+        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.empty());
+
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+
+        verify(languageRepository).findLanguageByLanguageCode("ua");
+    }
+
+    @Test
+    void addLocationThrowLocationAlreadyCreatedExceptionTest() {
+        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
+        Location location = ModelUtils.getLocation();
+
+        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.of(location));
+        assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+
+        verify(locationRepository).findLocationByName("Київ");
     }
 
     @Test
     void deactivateLocationExceptionTest() {
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.deactivateLocation(1L, "ua"));
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.deactivateLocation(1L));
     }
 
     @Test
@@ -485,15 +529,13 @@ class SuperAdminServiceImplTest {
         LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
-            .thenReturn(Optional.ofNullable(locationTranslation));
 
-        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.deactivateLocation(1L, "ua"));
+        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.deactivateLocation(1L));
     }
 
     @Test
     void activateLocationExceptionTest() {
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.activateLocation(1L, "ua"));
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.activateLocation(1L));
     }
 
     @Test
@@ -503,10 +545,8 @@ class SuperAdminServiceImplTest {
         LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(locationTranslationRepository.findLocationTranslationByLocationAndLanguageCode(location, "ua"))
-            .thenReturn(Optional.ofNullable(locationTranslation));
 
-        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.activateLocation(1L, "ua"));
+        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.activateLocation(1L));
     }
 
     @Test
@@ -595,5 +635,63 @@ class SuperAdminServiceImplTest {
         assertThrows(CourierNotFoundException.class, () -> superAdminService.deleteCourier(1L));
 
         verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void addLocationToCourierTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        Location location = ModelUtils.getLocation();
+        courierLocation.setCourier(courier);
+        courierLocation.setLocation(location);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        when(courierLocationRepository.save(courierLocation)).thenReturn(courierLocation);
+
+        superAdminService.addLocationToCourier(dto);
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
+        verify(courierLocationRepository).save(courierLocation);
+    }
+
+    @Test
+    void addLocationToCourierThrowCourierNotFoundExceptionTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        courierLocation.setCourier(courier);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void addLocationToCourierThrowLocationNotFoundExceptionTest() {
+        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        Courier courier = ModelUtils.getCourier();
+        Location location = ModelUtils.getLocation();
+        courierLocation.setCourier(courier);
+        courierLocation.setLocation(location);
+
+        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
+
+        verify(modelMapper).map(dto, CourierLocation.class);
+        verify(courierRepository).findById(1L);
+        verify(locationRepository).findById(1L);
     }
 }

@@ -9,12 +9,12 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Builder
 @ToString
-public class AddLocationTranslationDto {
+@Builder
+public class RegionTranslationDto {
     @Pattern(regexp = "[A-Za-zА-Яа-яёЁЇїІіЄєҐґ ']*", message = "use only English,Ukrainian or Russian letters")
     @NotEmpty(message = "name must not be empty")
-    private String locationName;
+    private String regionName;
     @Pattern(regexp = "[A-Za-zА']*", message = "use only English letters")
     @NotEmpty(message = "language code must not be empty")
     private String languageCode;
