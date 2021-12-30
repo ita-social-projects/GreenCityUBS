@@ -252,7 +252,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .additionalOrders(Set.of("1111"))
+            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
             .build();
     }
 
@@ -1837,7 +1837,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(Set.of("1111"))
+            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
             .build();
     }
 

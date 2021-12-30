@@ -2041,7 +2041,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param orderId      {@link Long}.
      * @param uuid         {@link String}.
      *
-     * @author Sikhovskiy Rostyslav.
+     * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
     public void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String uuid) {
@@ -2099,7 +2099,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
      *
-     * @author Yuriy Bahlay.
+     * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,

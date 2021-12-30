@@ -1141,6 +1141,15 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void testUpdateEcoNumberThrowOrderNotFoundException() {
+        EcoNumberDto dto = ModelUtils.getEcoNumberDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.updateEcoNumberForOrder(dto, 1L, "uuid"));
+    }
+
+    @Test
     void checkAddUserViolationThrowsException() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
