@@ -1161,7 +1161,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
+        EcoNumberDto ecoNumberDto = getEcoNumberDto();
         assertThrows(OrderNotFoundException.class,
             () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
     }

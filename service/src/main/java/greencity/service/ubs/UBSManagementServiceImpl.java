@@ -26,6 +26,7 @@ import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+import org.glassfish.grizzly.utils.ArraySet;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2029,49 +2030,71 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param orderId      {@link Long}.
      * @param uuid         {@link String}.
      *
-     * @author Yuriy Bahlay.
+     * @author Sikhovskiy Rostyslav.
      */
     @Override
-    public void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
+    public void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String uuid) {
+        final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        if (ecoNumberDto != null) {
-            StringBuilder collectedValue = new StringBuilder();
-            for (int i = 0; i < ecoNumberDto.size(); i++) {
-                EcoNumberDto ecoNumber = ecoNumberDto.get(i);
-                String oldNumber = orderRepository.findEcoNumberFromShop(ecoNumber.getOldEcoNumber(), orderId);
-                if (oldNumber != null) {
-                    orderRepository.setOrderAdditionalNumber(ecoNumber.getNewEcoNumber(), oldNumber, orderId);
-                    collectedValue.append(
-                        collectInfoAboutEcoNumberEventHistory(i, oldNumber, ecoNumber.getNewEcoNumber()));
-                }
-            }
-            if (collectedValue.length() > 1) {
-                eventService.save(collectedValue.toString(),
-                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+        Set<String> oldEcoNumbers = Set.copyOf(order.getAdditionalOrders());
+        Set<String> newEcoNumbers = ecoNumberDto.getEcoNumber();
+
+        int countOfNewNumbers = 0;
+        int countOfDeleted = 0;
+
+        StringBuilder collectedNewValue = new StringBuilder();
+        StringBuilder collectedDeletedValue = new StringBuilder();
+        for (String newNumber : newEcoNumbers) {
+            if (!oldEcoNumbers.contains(newNumber)
+                && !newNumber.equals("")) {
+                order.getAdditionalOrders().add(newNumber);
+                collectedNewValue.append(collectInfoAboutAddNewEcoNumber(countOfNewNumbers, newNumber));
+                countOfNewNumbers++;
             }
         }
+        for (String oldNumber : oldEcoNumbers) {
+            if (!newEcoNumbers.contains(oldNumber)) {
+                order.getAdditionalOrders().remove(oldNumber);
+                collectedDeletedValue.append(collectInfoAboutDeletedEcoNumber(countOfDeleted, oldNumber));
+                countOfDeleted++;
+            }
+        }
+
+        orderRepository.save(order);
+        eventService.save(allHistoryChanges(collectedNewValue, collectedDeletedValue),
+            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
     }
 
-    /**
-     * This is method which collects info about eco number for event history.
-     *
-     * @author Yuriy Bahlay.
-     */
-    private String collectInfoAboutEcoNumberEventHistory(int i, String oldNumber, String newEcoNumber) {
+    private String allHistoryChanges(
+        StringBuilder collectedNewValue,
+        StringBuilder collectedDeletedValue) {
+        StringBuilder finalHistory = new StringBuilder();
+        if (!collectedNewValue.toString().isEmpty()) {
+            finalHistory.append(collectedNewValue);
+        }
+        if (!collectedDeletedValue.toString().isEmpty()) {
+            finalHistory.append(collectedDeletedValue);
+        }
+        return finalHistory.toString();
+    }
+
+    private String collectInfoAboutAddNewEcoNumber(int i, String newEcoNumber) {
         StringBuilder values = new StringBuilder();
         if (i == 0) {
-            values.append(OrderHistory.CHANGES_ECO_NUMBER);
+            values.append(OrderHistory.ADD_NEW_ECO_NUMBER + ": ");
         }
-        if (i > 0) {
-            values.append(";");
+        values.append(newEcoNumber + "; ");
+        return values.toString();
+    }
+
+    private String collectInfoAboutDeletedEcoNumber(int i, String oldNumber) {
+        StringBuilder values = new StringBuilder();
+        if (i == 0) {
+            values.append(OrderHistory.DELETED_ECO_NUMBER + ":");
         }
-        values.append(OrderHistory.FROM);
-        values.append(oldNumber);
-        values.append(OrderHistory.TO);
-        values.append(newEcoNumber);
+        values.append(" " + oldNumber + ";");
         return values.toString();
     }
 

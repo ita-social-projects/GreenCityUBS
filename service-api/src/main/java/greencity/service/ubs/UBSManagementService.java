@@ -353,7 +353,7 @@ public interface UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    void updateEcoNumberForOrder(List<EcoNumberDto> ecoNumberDto, Long orderId, String uuid);
+    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String uuid);
 
     /**
      * This is method which is updates admin page info for order.
