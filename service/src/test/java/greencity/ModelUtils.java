@@ -2402,6 +2402,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static UserProfileUpdateDto updateUserProfileDto() {
+        return UserProfileUpdateDto.builder()
+            .recipientName("Taras")
+            .recipientSurname("Ivanov")
+            .recipientPhone("962473289")
+            .addressDto(addressDtoList())
+            .build();
+    }
+
     public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
