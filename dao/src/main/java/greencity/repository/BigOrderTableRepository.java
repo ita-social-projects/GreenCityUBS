@@ -136,13 +136,9 @@ public class BigOrderTableRepository {
             predicates
                 .add(filterByDateFromOrderTable(sc.getOrderDateFrom(), sc.getOrderDateTo(), "orderDate", orderRoot));
         }
-        if (nonNull(sc.getDeliverFromFrom()) && nonNull(sc.getDeliverFromTo())) {
+        if (nonNull(sc.getDeliveryDateFrom()) && nonNull(sc.getDeliveryDateTo())) {
             predicates.add(
-                filterByDateFromOrderTable(sc.getDeliverFromFrom(), sc.getDeliverFromTo(), "deliverFrom", orderRoot));
-        }
-        if (nonNull(sc.getDeliverToFrom()) && nonNull(sc.getDeliverToTo())) {
-            predicates
-                .add(filterByDateFromOrderTable(sc.getDeliverToFrom(), sc.getDeliverToTo(), "deliverTo", orderRoot));
+                filterByDateFromOrderTable(sc.getDeliveryDateFrom(), sc.getDeliveryDateTo(), "deliverFrom", orderRoot));
         }
         if (nonNull(sc.getPaymentDateFrom()) && nonNull(sc.getPaymentDateTo())) {
             predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));

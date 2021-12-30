@@ -42,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -295,11 +296,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<PaymentInfoDto> paymentInfoDtos = order.getPayment().stream()
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
-        paymentTableInfoDto.setPaymentInfoDtos(paymentInfoDtos);
+        paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             notificationService.notifyBonuses(order, overpayment);
         }
         return paymentTableInfoDto;
+    }
+
+    private List<PaymentInfoDto> getAmountInUAH(List<PaymentInfoDto> paymentInfoDtos) {
+        if (!paymentInfoDtos.isEmpty()) {
+            for (PaymentInfoDto paymentInfoDto : paymentInfoDtos) {
+                if (paymentInfoDto != null) {
+                    Long coins = paymentInfoDto.getAmount() / 100;
+                    paymentInfoDto.setAmount(coins);
+                }
+            }
+        }
+        return paymentInfoDtos;
     }
 
     /**
@@ -1725,7 +1738,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void updateUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
+    public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
@@ -1736,34 +1749,33 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
     }
 
-    private void updateViolation(Violation violation, AddingViolationsToUserDto add, MultipartFile[] multipartFiles) {
+    private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {
         violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
         violation.setDescription(add.getViolationDescription());
-        if (!violation.getImages().isEmpty()) {
-            List<String> images = violation.getImages();
+        List<String> violationImages = violation.getImages();
+        if (add.getImagesToDelete() != null) {
+            List<String> images = add.getImagesToDelete();
             for (String image : images) {
                 fileService.delete(image);
+                violationImages.remove(image);
             }
-            violation.setImages(null);
-            images.clear();
-            if (multipartFiles.length > 0) {
-                setImages(multipartFiles, images);
+        }
+        if (multipartFiles.length > 0) {
+            List<String> images = new LinkedList<>();
+            setImages(multipartFiles, images);
+            if (violation.getImages().isEmpty()) {
                 violation.setImages(images);
-            }
-        } else {
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                setImages(multipartFiles, images);
-                violation.setImages(images);
+            } else {
+                violation
+                    .setImages(Stream.concat(violationImages.stream(), images.stream()).collect(Collectors.toList()));
             }
         }
     }
 
-    private List<String> setImages(MultipartFile[] multipartFiles, List<String> images) {
+    private void setImages(MultipartFile[] multipartFiles, List<String> images) {
         for (MultipartFile multipartFile : multipartFiles) {
             images.add(fileService.upload(multipartFile));
         }
-        return images;
     }
 
     @Override

@@ -3,7 +3,6 @@ package greencity.dto;
 import lombok.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -12,6 +11,5 @@ import lombok.*;
 public class LocationResponseDto {
     private Long id;
     private String name;
-    private String region;
     private String languageCode;
 }

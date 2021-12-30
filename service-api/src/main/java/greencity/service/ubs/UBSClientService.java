@@ -175,7 +175,7 @@ public interface UBSClientService {
      *         user;
      * @author Liubomyr Bratakh.
      */
-    UserProfileDto updateProfileData(String uuid, UserProfileDto dto);
+    UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);
 
     /**
      * Method that get user profile for current user.
@@ -226,24 +226,6 @@ public interface UBSClientService {
      * @author Oleksandr Khomiakov
      */
     OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto);
-
-    /**
-     * Method gets list of locations.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @return {@link LocationResponseDto} dto that contains location id and name;
-     * @author Denys Kisliak
-     */
-    List<LocationResponseDto> getAllLocations(String userUuid);
-
-    /**
-     * Method updates last order location.
-     *
-     * @param userUuid   {@link UserVO} id.
-     * @param locationId {@link LocationIdDto} id.
-     * @author Denys Kisliak
-     */
-    void setNewLastOrderLocation(String userUuid, LocationIdDto locationId);
 
     /**
      * Methods for finding all events for Order.
