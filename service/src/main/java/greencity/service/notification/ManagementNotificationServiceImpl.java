@@ -61,6 +61,9 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
         return modelMapper.map(getById(id), NotificationTemplateDto.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findNotificationTemplateById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));

@@ -6,17 +6,23 @@ import org.springframework.data.domain.Pageable;
 
 public interface ManagementNotificationService {
     /**
-     * {@inheritDoc}
+     * Method that update notification template.
+     *
+     * @author Dima Sannytski
      */
     void update(NotificationTemplateDto notificationTemplateDto);
 
     /**
-     * {@inheritDoc}
+     * Method that returns page with all notification templates.
+     *
+     * @author Dima Sannytski
      */
     PageableDto<NotificationTemplateDto> findAll(Pageable pageable);
 
     /**
-     * {@inheritDoc}
+     * Method that finds and returns notification template by id.
+     *
+     * @author Dima Sannytski
      */
     NotificationTemplateDto findById(Long id);
 }

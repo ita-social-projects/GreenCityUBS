@@ -24,7 +24,9 @@ public class ManagementNotificationController {
     private final ManagementNotificationService notificationService;
 
     /**
-     * {@inheritDoc}
+     * Controller that returns all notification templates.
+     *
+     * @author Dima Sannytski.
      */
     @ApiOperation(value = "Get all notification templates")
     @ApiResponses(value = {
@@ -42,7 +44,9 @@ public class ManagementNotificationController {
     }
 
     /**
-     * {@inheritDoc}
+     * Controller that updates notification template.
+     *
+     * @author Dima Sannytski.
      */
     @ApiOperation("Update notification template")
     @ApiResponses(value = {
@@ -52,13 +56,15 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping(value = "/update")
+    @PutMapping
     public void updateNotificationTemplate(@RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
         notificationService.update(notificationTemplateDto);
     }
 
     /**
-     * {@inheritDoc}
+     * Controller that returns notification template by id.
+     *
+     * @author Dima Sannytski.
      */
     @ApiOperation(value = "Get notification template by id")
     @ApiResponses(value = {

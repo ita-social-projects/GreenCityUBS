@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import greencity.ModelUtils;
 import greencity.dto.NotificationTemplateDto;
+import greencity.dto.PageableDto;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationTemplateRepository;
@@ -14,6 +15,7 @@ import org.modelmapper.ModelMapper;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,21 +32,23 @@ class ManagementNotificationServiceImplTest {
 
     @Test
     void findAll() {
-        NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
-        NotificationTemplate template = ModelUtils.getNotificationTemplate();
+        NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
         when(templateRepository.findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE)).thenReturn(
             ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
         when(modelMapper.map(template, NotificationTemplateDto.class))
             .thenReturn(dto);
-        notificationService.findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
+        PageableDto<NotificationTemplateDto> actual = notificationService.findAll(
+            ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(templateRepository).findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(modelMapper).map(template, NotificationTemplateDto.class);
+        assertEquals(ModelUtils.TEST_TEMPLATE_DTO, actual);
     }
 
     @Test
     void updateTest() {
-        NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
-        NotificationTemplate template = ModelUtils.getNotificationTemplate();
+        NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
         when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
             Optional.of(template));
 
@@ -56,8 +60,8 @@ class ManagementNotificationServiceImplTest {
 
     @Test
     void findByIdTest() {
-        NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
-        NotificationTemplate template = ModelUtils.getNotificationTemplate();
+        NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
+        NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
         when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
             Optional.of(template));
         when(modelMapper.map(template, NotificationTemplateDto.class))

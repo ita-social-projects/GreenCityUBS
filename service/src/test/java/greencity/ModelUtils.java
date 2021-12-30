@@ -89,6 +89,11 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
+    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
+        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
+    public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
+    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -1557,6 +1562,14 @@ public class ModelUtils {
     private static PageableDto<NotificationShortDto> createPageableDto() {
         return new PageableDto<>(
             TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1);
+    }
+
+    private static PageableDto<NotificationTemplateDto> templateDtoPageableDto() {
+        return new PageableDto<>(
+            TEST_NOTIFICATION_TEMPLATE_LIST,
             1,
             0,
             1);

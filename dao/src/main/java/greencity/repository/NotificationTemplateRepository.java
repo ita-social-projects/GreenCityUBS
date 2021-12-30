@@ -24,12 +24,18 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
         NotificationType type, String languageCode, NotificationReceiverType receiverType);
 
     /**
-     * {@inheritDoc}
+     * Method, that returns {@link Optional} of {@link NotificationTemplate} by id.
+     *
+     *
+     * @return {@link Optional} of {@link NotificationTemplate}.
+     * @author Dima Sannytski
      */
     Optional<NotificationTemplate> findNotificationTemplateById(Long id);
 
     /**
-     * {@inheritDoc}
+     * Method that returns all notification templates.
+     *
+     * @author Dima Sannytski
      */
     Page<NotificationTemplate> findAll(Pageable pageable);
 }

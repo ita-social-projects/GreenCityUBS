@@ -20,7 +20,7 @@ import java.security.Principal;
 import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +54,7 @@ class ManagementNotificationControllerTest {
     void updateNotificationTemplateTest() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String JsonDto = objectMapper.writeValueAsString(ModelUtils.getNotificationTemplateDto());
-        mockMvc.perform(post(url + "/update")
+        mockMvc.perform(put(url)
             .principal(principal)
             .content(JsonDto)
             .contentType(MediaType.APPLICATION_JSON))
@@ -69,5 +69,14 @@ class ManagementNotificationControllerTest {
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void saveBadRequestTest() throws Exception {
+        mockMvc.perform(put(url)
+            .principal(principal)
+            .content("{}")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 }
