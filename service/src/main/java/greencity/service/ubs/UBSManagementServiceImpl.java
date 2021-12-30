@@ -2051,61 +2051,45 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Set<String> oldEcoNumbers = Set.copyOf(order.getAdditionalOrders());
         Set<String> newEcoNumbers = ecoNumberDto.getEcoNumber();
+        var changes = new Object() {
+            int countOfNewNumbers = 0;
+            int countOfDeleted = 0;
+        };
 
-        int countOfNewNumbers = 0;
-        int countOfDeleted = 0;
+        StringBuilder collectedValuesOfChanges = new StringBuilder();
 
-        StringBuilder collectedNewValue = new StringBuilder();
-        StringBuilder collectedDeletedValue = new StringBuilder();
-        for (String newNumber : newEcoNumbers) {
-            if (!oldEcoNumbers.contains(newNumber)
-                && !newNumber.equals("")) {
+        newEcoNumbers.stream()
+            .filter(newNumber -> !oldEcoNumbers.contains(newNumber)
+                && !newNumber.equals(""))
+            .forEach(newNumber -> {
                 order.getAdditionalOrders().add(newNumber);
-                collectedNewValue.append(collectInfoAboutAddNewEcoNumber(countOfNewNumbers, newNumber));
-                countOfNewNumbers++;
-            }
-        }
-        for (String oldNumber : oldEcoNumbers) {
-            if (!newEcoNumbers.contains(oldNumber)) {
+                collectedValuesOfChanges.append(collectInfoAboutChangesOfEcoNumber(changes.countOfNewNumbers,
+                    newNumber,
+                    OrderHistory.ADD_NEW_ECO_NUMBER));
+                changes.countOfNewNumbers++;
+            });
+
+        oldEcoNumbers.stream()
+            .filter(oldNumber -> !newEcoNumbers.contains(oldNumber))
+            .forEach(oldNumber -> {
                 order.getAdditionalOrders().remove(oldNumber);
-                collectedDeletedValue.append(collectInfoAboutDeletedEcoNumber(countOfDeleted, oldNumber));
-                countOfDeleted++;
-            }
-        }
+                collectedValuesOfChanges.append(collectInfoAboutChangesOfEcoNumber(changes.countOfDeleted,
+                    oldNumber,
+                    OrderHistory.DELETED_ECO_NUMBER));
+                changes.countOfDeleted++;
+            });
 
         orderRepository.save(order);
-        eventService.save(allHistoryChanges(collectedNewValue, collectedDeletedValue),
+        eventService.save(collectedValuesOfChanges.toString().trim(),
             currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
     }
 
-    private String allHistoryChanges(
-        StringBuilder collectedNewValue,
-        StringBuilder collectedDeletedValue) {
-        StringBuilder finalHistory = new StringBuilder();
-        if (!collectedNewValue.toString().isEmpty()) {
-            finalHistory.append(collectedNewValue);
-        }
-        if (!collectedDeletedValue.toString().isEmpty()) {
-            finalHistory.append(collectedDeletedValue);
-        }
-        return finalHistory.toString();
-    }
-
-    private String collectInfoAboutAddNewEcoNumber(int i, String newEcoNumber) {
+    private String collectInfoAboutChangesOfEcoNumber(int i, String newEcoNumber, String orderHistory) {
         StringBuilder values = new StringBuilder();
         if (i == 0) {
-            values.append(OrderHistory.ADD_NEW_ECO_NUMBER + ": ");
+            values.append(orderHistory).append(": ");
         }
-        values.append(newEcoNumber + "; ");
-        return values.toString();
-    }
-
-    private String collectInfoAboutDeletedEcoNumber(int i, String oldNumber) {
-        StringBuilder values = new StringBuilder();
-        if (i == 0) {
-            values.append(OrderHistory.DELETED_ECO_NUMBER + ":");
-        }
-        values.append(" " + oldNumber + ";");
+        values.append(newEcoNumber).append("; ");
         return values.toString();
     }
 
