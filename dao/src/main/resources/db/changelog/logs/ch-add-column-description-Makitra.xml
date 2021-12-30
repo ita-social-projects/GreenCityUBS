@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-2" author="Vadym Makitra">
+        <addAutoIncrement tableName="bag_translations" columnName="id"/>
+        <addColumn tableName="bag_translations">
+            <column name="description" type="varchar" />
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
