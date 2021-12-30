@@ -22,7 +22,8 @@ public class BigOrderTableDTO {
     private String senderPhone;
     private String senderEmail;
     private Integer violationsAmount;
-    private String location;
+    private String region;
+    private String settlement;
     private String district;
     private String address;
     private String commentToAddressForClient;
@@ -37,7 +38,6 @@ public class BigOrderTableDTO {
     private String timeOfExport;
     private String idOrderFromShop;
     private String receivingStation;
-    private String responsibleManager;
     private String responsibleLogicMan;
     private String responsibleDriver;
     private String responsibleCaller;

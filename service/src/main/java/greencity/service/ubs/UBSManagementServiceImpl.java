@@ -1875,23 +1875,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .senderPhone(nonNull(order.getUser()) ? order.getUser().getRecipientPhone() : "-")
             .senderEmail(nonNull(order.getUser()) ? order.getUser().getRecipientEmail() : "-")
             .violationsAmount(order.getUser().getViolations())
+            .region(nonNull(address.getRegion()) ? address.getRegion() : "-")
+            .settlement(nonNull(address.getCity()) ? address.getCity() : "-")
             .district(nonNull(address.getDistrict()) ? address.getDistrict() : "-")
-            // need to implement field - область
-            // need to implement field - населений пункт
             .address(getAddress(address))
             .commentToAddressForClient(nonNull(address.getAddressComment()) ? address.getAddressComment() : "-")
             .bagsAmount(getBagsAmount(order))
             .totalOrderSum(paymentSum)
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue((paymentSum - certificateSum) <= 0 ? 0 : paymentSum - certificateSum)
+            .amountDue(paymentSum - certificateSum - order.getPointsToUse())
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
             .timeOfExport(getTimeOfExport(order))
             .idOrderFromShop(getIdOrderFromShop(order))
             .receivingStation(getReceivingStation(order))
-            .responsibleManager(getEmployeeIdByIdPosition(order, 2L))
             .responsibleLogicMan(getEmployeeIdByIdPosition(order, 3L))
             .responsibleDriver(getEmployeeIdByIdPosition(order, 5L))
             .responsibleCaller(getEmployeeIdByIdPosition(order, 1L))
@@ -1980,8 +1979,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String getIdOrderFromShop(Order order) {
-        return nonNull(order.getPayment()) ? order.getPayment().stream().map(Payment::getId).map(Objects::toString)
-            .collect(joining(", ")) : "-";
+        return nonNull(order.getAdditionalOrders()) ? order.getAdditionalOrders().stream().collect(joining(", ")) : "-";
     }
 
     private String getEmployeeIdByIdPosition(Order order, Long idPosition) {

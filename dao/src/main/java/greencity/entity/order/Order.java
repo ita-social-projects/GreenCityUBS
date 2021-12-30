@@ -28,7 +28,7 @@ import java.util.Set;
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
-    "events", "imageReasonNotTakingBags"})
+    "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString
 public class Order {
     @Id
@@ -121,9 +121,9 @@ public class Order {
     private Set<Employee> attachedEmployees;
 
     @ElementCollection
-    @CollectionTable(name = "order_additional", joinColumns = @JoinColumn(name = "orders_id"))
+    @CollectionTable(name = "order_additional",
+        joinColumns = @JoinColumn(name = "orders_id", referencedColumnName = "id"))
     @Column(name = "additional_order")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
