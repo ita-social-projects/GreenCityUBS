@@ -2069,10 +2069,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 removed.add(oldNumber);
             });
         StringBuilder historyChanges = new StringBuilder();
-        if (added.size() >= 1) {
+        if (!added.isEmpty()) {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
         }
-        if (removed.size() >= 1) {
+        if (!removed.isEmpty()) {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(removed, OrderHistory.DELETED_ECO_NUMBER));
         }
 
