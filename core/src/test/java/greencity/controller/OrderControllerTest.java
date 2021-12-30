@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -184,31 +183,6 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService).updateOrderCancellationReason(anyLong(), anyObject());
-    }
-
-    @Test
-    void testGetAllLocationsForPopUp() throws Exception {
-        when(restClient.findUuidByEmail((anyString()))).thenReturn("uuid");
-        mockMvc.perform(get(ubsLink + "/order/get-locations")
-            .principal(principal))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).getAllLocations("uuid");
-    }
-
-    @Test
-    void testSetNewLastOrderLocationForUser() throws Exception {
-        LocationIdDto locationIdDto = getLocationIdDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        when(restClient.findUuidByEmail((anyString()))).thenReturn("uuid");
-
-        mockMvc.perform(post(ubsLink + "/order/get-locations")
-            .content(objectMapper.writeValueAsString(locationIdDto))
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).setNewLastOrderLocation("uuid", locationIdDto);
     }
 
     @Test

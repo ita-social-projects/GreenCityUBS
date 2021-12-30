@@ -5,25 +5,25 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
-@EqualsAndHashCode(exclude = {"location", "language"})
-@ToString(exclude = {"location", "language"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-@Table(name = "location_translations")
-public class LocationTranslation {
+@Table(name = "region_translations")
+@EqualsAndHashCode(exclude = {"region", "language"})
+@ToString(exclude = {"region", "language"})
+@Entity
+public class RegionTranslation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "location_name")
-    private String locationName;
+    @Column
+    private String name;
 
     @ManyToOne
-    private Location location;
+    private Region region;
 
     @ManyToOne
     private Language language;

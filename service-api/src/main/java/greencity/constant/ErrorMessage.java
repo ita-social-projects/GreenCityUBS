@@ -89,6 +89,8 @@ public final class ErrorMessage {
     public static final String SOME_CERTIFICATES_ARE_INVALID =
         "SOME CERTIFICATES ARE INVALID. A valid certificate is listed here";
     public static final String CERTIFICATE_NOT_FOUND = "CERTIFICATE_NOT_FOUND";
+    public static final String REGION_IS_NOT_FOUND = "Region with chosen name doesn't exist ";
+    public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
 
     /**
      * Constructor.

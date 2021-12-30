@@ -1,14 +1,11 @@
 package greencity.service.ubs;
 
-import com.liqpay.LiqPay;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
-import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -27,9 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -65,18 +60,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
-    private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
-    private final CourierRepository courierRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    private final LocationTranslationRepository locationTranslationRepository;
-    private final LiqPay liqPay;
     private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
-    @PersistenceContext
-    private final EntityManager entityManager;
     @Value("${fondy.payment.key}")
     private String fondyPaymentKey;
     @Value("${merchant.id}")
@@ -790,16 +779,18 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> map, List<BagDto> bags, CourierLocation courierLocation) {
         int sumToPay = 0;
         int bigBagCounter = 0;
+
         for (BagDto temp : bags) {
             Bag bag = bagRepository.findById(temp.getId())
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getId()));
             if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
-            checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
             sumToPay += bag.getPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
+
+        checkAmountOfBagsIfCourierLimitByAmountOfBag(courierLocation, bigBagCounter);
         return sumToPay;
     }
 
@@ -941,51 +932,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setId(id);
         orderRepository.save(order);
         return dto;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<LocationResponseDto> getAllLocations(String userUuid) {
-        User user = userRepository.findByUuid(userUuid);
-        List<Location> locations = locationRepository.findAll();
-        List<LocationTranslation> locationTranslations = locationTranslationRepository.findAll();
-        Location lastOrderLocation = user.getLastLocation();
-
-        if (lastOrderLocation != null) {
-            locations.remove(lastOrderLocation);
-            locations.add(0, lastOrderLocation);
-        }
-        return buildLocationResponseList(locationTranslations);
-    }
-
-    private List<LocationResponseDto> buildLocationResponseList(List<LocationTranslation> locations) {
-        return locations.stream()
-            .map(a -> buildLocationResponseDto(a))
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setNewLastOrderLocation(String userUuid, LocationIdDto locationIdDto) {
-        User currentUser = userRepository.findByUuid(userUuid);
-        Location location = locationRepository.findById(locationIdDto.getLocationId())
-            .orElseThrow(() -> new LocationNotFoundException(LOCATION_DOESNT_FOUND));
-        currentUser.setLastLocation(location);
-
-        userRepository.save(currentUser);
-    }
-
-    private LocationResponseDto buildLocationResponseDto(LocationTranslation locationTranslation) {
-        return LocationResponseDto.builder()
-            .id(locationTranslation.getLocation().getId())
-            .name(locationTranslation.getLocationName())
-            .region(locationTranslation.getRegion())
-            .languageCode(locationTranslation.getLanguage().getCode())
-            .build();
     }
 
     @Override

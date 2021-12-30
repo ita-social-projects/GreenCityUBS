@@ -558,9 +558,65 @@ public class ModelUtils {
 
     public static AddLocationTranslationDto getAddLocationTranslationDto() {
         return AddLocationTranslationDto.builder()
-            .region("Test")
             .locationName("Test")
+            .languageCode("ua")
+            .build();
+    }
+
+    public static List<RegionTranslationDto> getRegionTranslationsDto() {
+        return List.of(RegionTranslationDto.builder()
+            .languageCode("ua")
+            .regionName("Київська область")
+            .build());
+    }
+
+    public static List<LocationCreateDto> getLocationCreateDtoList() {
+        return List.of(LocationCreateDto.builder()
+            .addLocationDtoList(getAddLocationTranslationDtoList())
+            .regionTranslationDtos(getRegionTranslationsDto())
+            .longitude(1.32d)
+            .latitude(3.34)
+            .build());
+    }
+
+    public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
+        return List.of(AddLocationTranslationDto.builder()
+            .locationName("Київ")
+            .languageCode("ua")
+            .build());
+    }
+
+    public static NewLocationForCourierDto getNewLocationForCourierDto() {
+        return NewLocationForCourierDto.builder()
+            .courierId(1L)
+            .locationId(1L)
+            .amountOfBigBag(RangeDto.builder().max(50L).min(2L).build())
+            .amountOfOrder(RangeDto.builder().max(20000L).min(500L).build())
+            .build();
+    }
+
+    public static CreateCourierDto getCreateCourierDto() {
+        return CreateCourierDto.builder()
+            .createCourierTranslationDtos(getCreateCourierTranslationDto())
+            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+            .build();
+    }
+
+    public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
+        return List.of(CreateCourierTranslationDto.builder()
+            .limitDescription("Test")
             .languageId(1L)
+            .name("Test")
+            .build());
+    }
+
+    public static LimitsDto getCourierLimitsDto() {
+        return LimitsDto.builder()
+            .locationId(1L)
+            .maxAmountOfBigBags(99L)
+            .minAmountOfBigBags(2L)
+            .maxPriceOfOrder(100000L)
+            .minPriceOfOrder(500L)
             .build();
     }
 }

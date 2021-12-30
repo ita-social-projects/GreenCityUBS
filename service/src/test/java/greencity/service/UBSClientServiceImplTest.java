@@ -6,9 +6,11 @@ import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.*;
+import greencity.entity.enums.AddressStatus;
+import greencity.entity.enums.CertificateStatus;
+import greencity.entity.enums.LocationStatus;
+import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.*;
-import greencity.entity.user.Location;
 import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -150,7 +152,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -297,8 +299,7 @@ class UBSClientServiceImplTest {
         List<Order> orderList = Collections.singletonList(order);
         List<OrderClientDto> expected = Collections.singletonList(dto);
 
-        when(orderRepository.getAllOrdersOfUser(anyString()))
-            .thenReturn(orderList);
+        when(orderRepository.getAllOrdersOfUser(any())).thenReturn(orderList);
         when(modelMapper.map(order, OrderClientDto.class)).thenReturn(dto);
 
         List<OrderClientDto> result = ubsService.getAllOrdersDoneByUser(anyString());
@@ -701,40 +702,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testGetAllLocationsForNewUser() {
-        User user = getUser();
-
-        when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(locationRepository.findAll()).thenReturn(getLocationList());
-        when(locationTranslationRepository.findAll()).thenReturn(getLocationTranslationList());
-        assertEquals(getLocationResponseDtoList(), ubsService.getAllLocations("uuid"));
-    }
-
-    @Test
-    void testGetAllLocationsForUserWithLocation() {
-        User user = getUser();
-        user.setLastLocation(getLastLocation());
-
-        when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(locationRepository.findAll()).thenReturn(getLocationList());
-        when(locationTranslationRepository.findAll()).thenReturn(getLocationTranslationList());
-
-        assertEquals(getLocationResponseDtoList(), ubsService.getAllLocations("uuid"));
-    }
-
-    @Test
-    void testSetNewLastOrderLocation() {
-        LocationIdDto locationIdDto = LocationIdDto.builder().locationId(1l).build();
-        User user = getUser();
-        Location lastLocation = getLastLocation();
-        when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(locationRepository.findById(1l)).thenReturn(Optional.of(lastLocation));
-        ubsService.setNewLastOrderLocation("uuid", locationIdDto);
-
-        assertEquals(user.getLastLocation(), lastLocation);
-    }
-
-    @Test
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = ModelUtils.getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
@@ -766,7 +733,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -867,7 +834,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -988,7 +955,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
@@ -1092,7 +1059,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);

@@ -2,8 +2,8 @@ package greencity.mapping;
 
 import greencity.dto.AddLocationTranslationDto;
 import greencity.dto.LocationCreateDto;
+import greencity.dto.RegionTranslationDto;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +14,25 @@ import java.util.stream.Collectors;
 public class LocationCreateDtoMapper extends AbstractConverter<Location, LocationCreateDto> {
     @Override
     protected LocationCreateDto convert(Location source) {
-        List<LocationTranslation> locationTranslations = source.getLocationTranslations();
-        List<AddLocationTranslationDto> dtos = locationTranslations.stream().map(
-            i -> new AddLocationTranslationDto(i.getLocationName(), i.getLocationName(), i.getLanguage().getId()))
+        List<AddLocationTranslationDto> locationTranslationDtoList = source.getLocationTranslations().stream()
+            .map(locationTranslation -> AddLocationTranslationDto.builder()
+                .languageCode(locationTranslation.getLanguage().getCode())
+                .locationName(locationTranslation.getLocationName())
+                .build())
             .collect(Collectors.toList());
+
+        List<RegionTranslationDto> regionTranslationDtoList = source.getRegion().getRegionTranslations().stream()
+            .map(regionTranslation -> RegionTranslationDto.builder()
+                .regionName(regionTranslation.getName())
+                .languageCode(regionTranslation.getLanguage().getCode())
+                .build())
+            .collect(Collectors.toList());
+
         return LocationCreateDto.builder()
-            .addLocationDtoList(dtos).build();
+            .addLocationDtoList(locationTranslationDtoList)
+            .longitude(source.getCoordinates().getLongitude())
+            .latitude(source.getCoordinates().getLatitude())
+            .regionTranslationDtos(regionTranslationDtoList)
+            .build();
     }
 }

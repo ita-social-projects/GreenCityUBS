@@ -6,13 +6,19 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
+import greencity.exception.handler.CustomExceptionHandler;
+import greencity.exceptions.LocationAlreadyCreatedException;
+import greencity.exceptions.LocationNotFoundException;
 import greencity.service.SuperAdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -20,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SecurityConfig.class)
 class SuperAdminControllerTest {
     private MockMvc mockMvc;
+
     @Mock
     RestClient restClient;
 
@@ -42,12 +50,15 @@ class SuperAdminControllerTest {
 
     private Principal principal = getUuid();
 
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(restClient))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }
 
@@ -159,13 +170,78 @@ class SuperAdminControllerTest {
 
     @Test
     void addLocation() throws Exception {
-        LocationCreateDto dto = ModelUtils.getLocationCreateDto();
+        List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
         ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+        String requestJson = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
-            .content(ServiceResponceDtoJSON)
+            .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void addLocationInterceptLocationAlreadyCreatedException() throws Exception {
+        List<LocationCreateDto> dto = ModelUtils.getLocationCreateDtoList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(dto);
+
+        Mockito.doThrow(LocationAlreadyCreatedException.class).when(superAdminService).addLocation(dto);
+
+        mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
+            .content(requestJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deactivateLocation() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/deactivateLocations/" + 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void activateException() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void addNewLocationForCourier() throws Exception {
+        NewLocationForCourierDto dto = ModelUtils.getNewLocationForCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/courier/location")
+            .principal(principal)
+            .content(requestJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierTest() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierInterceptExceptionTest() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+
+        Mockito.when(superAdminService.createCourier(dto)).thenThrow(LocationNotFoundException.class);
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 }

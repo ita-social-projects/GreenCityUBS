@@ -66,10 +66,6 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private ViberBot viberBot;
 
-    @ManyToOne()
-    @JoinColumn(name = "last_order_location", referencedColumnName = "id")
-    private Location lastLocation;
-
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;
 }
