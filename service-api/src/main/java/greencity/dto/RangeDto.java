@@ -5,10 +5,10 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode
 @ToString
-@Builder
-public class LocationTranslationDto {
-    private String locationName;
-    private String languageCode;
+public class RangeDto {
+    private Long min;
+    private Long max;
 }

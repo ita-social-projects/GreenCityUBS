@@ -4,6 +4,7 @@ import greencity.entity.order.BagTranslation;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.LocationTranslation;
+import greencity.entity.user.RegionTranslation;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,7 +14,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"bagTranslations", "serviceTranslations", "locationTranslations", "courierTranslations"})
+@EqualsAndHashCode(exclude = {"bagTranslations", "serviceTranslations", "locationTranslations", "courierTranslations",
+    "regionTranslations"})
 @ToString(exclude = {"bagTranslations"})
 @Builder
 @Table(name = "languages")
@@ -37,4 +39,7 @@ public class Language {
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslations;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "language")
+    private List<RegionTranslation> regionTranslations;
 }

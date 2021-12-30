@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Makitra-12" author="Vadym Makitra">
+        <createTable tableName="regions">
+            <column name="id" autoIncrement="true" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        <createTable tableName="region_translations">
+            <column name="id" autoIncrement="true" type="bigint">
+            <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_id" type="bigint">
+            <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <insert tableName="regions">
+            <column name="id" value="1"/>
+        </insert>
+        <addColumn tableName="locations">
+            <column name="region_id" type="bigint" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="double"/>
+            <column name="longitude" type="double"/>
+        </addColumn>
+        <dropColumn tableName="location_translations" columnName="region"/>
+
+
+        <addForeignKeyConstraint baseTableName="region_translations"
+                                 baseColumnNames="region_id"
+                                 constraintName="fk_region_translations_to_region_id"
+                                 referencedTableName="regions"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="region_translations"
+                                 baseColumnNames="language_id"
+                                 constraintName="fk_region_translations_to_language_id"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="locations"
+                                 baseColumnNames="region_id"
+                                 constraintName="fk_location_to_region_id"
+                                 referencedTableName="regions"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="region_translations" columnNames="region_id,language_id" constraintName="uk_region_id_to_language_id"/>
+    </changeSet>
+</databaseChangeLog>

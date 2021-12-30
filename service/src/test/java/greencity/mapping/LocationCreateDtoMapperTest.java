@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,12 +21,16 @@ class LocationCreateDtoMapperTest {
     void convert() {
         Location location = ModelUtils.getLocation();
         location.setLocationTranslations(ModelUtils.getLocationTranslationList());
-        LocationCreateDto dto = ModelUtils.getLocationCreateDto();
-        assertEquals(dto.getAddLocationDtoList().get(0).getLocationName(),
+        List<LocationCreateDto> dtoList = ModelUtils.getLocationCreateDtoList();
+        assertEquals(dtoList.get(0).getAddLocationDtoList().get(0).getLocationName(),
             mapper.convert(location).getAddLocationDtoList().get(0).getLocationName());
-        assertEquals(dto.getAddLocationDtoList().get(0).getLanguageId(),
-            mapper.convert(location).getAddLocationDtoList().get(0).getLanguageId());
-        assertEquals(dto.getAddLocationDtoList().get(0).getRegion(),
-            mapper.convert(location).getAddLocationDtoList().get(0).getRegion());
+        assertEquals(dtoList.get(0).getAddLocationDtoList().get(0).getLanguageCode(),
+            mapper.convert(location).getAddLocationDtoList().get(0).getLanguageCode());
+        assertEquals(dtoList.get(0).getRegionTranslationDtos().get(0).getRegionName(),
+            mapper.convert(location).getRegionTranslationDtos().get(0).getRegionName());
+        assertEquals(dtoList.get(0).getRegionTranslationDtos().get(0).getLanguageCode(),
+            mapper.convert(location).getRegionTranslationDtos().get(0).getLanguageCode());
+        assertEquals(dtoList.get(0).getLatitude(), mapper.convert(location).getLatitude());
+        assertEquals(dtoList.get(0).getLongitude(), mapper.convert(location).getLongitude());
     }
 }
