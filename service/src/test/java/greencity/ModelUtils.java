@@ -1837,7 +1837,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333","")))
+            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333", "")))
             .build();
     }
 
