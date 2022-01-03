@@ -26,6 +26,7 @@ import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2052,28 +2053,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Set<String> oldEcoNumbers = Set.copyOf(order.getAdditionalOrders());
         Set<String> newEcoNumbers = ecoNumberDto.getEcoNumber();
 
-        Collection<String> removed = new ArrayList<>();
-        Collection<String> added = new ArrayList<>();
-        newEcoNumbers.stream()
-            .filter(newNumber -> !oldEcoNumbers.contains(newNumber)
-                && !newNumber.equals(""))
-            .forEach(newNumber -> {
-                order.getAdditionalOrders().add(newNumber);
-                added.add(newNumber);
-            });
-
-        oldEcoNumbers.stream()
-            .filter(oldNumber -> !newEcoNumbers.contains(oldNumber))
-            .forEach(oldNumber -> {
-                order.getAdditionalOrders().remove(oldNumber);
-                removed.add(oldNumber);
-            });
+        Collection<String> removed = CollectionUtils.subtract(oldEcoNumbers, newEcoNumbers);
+        Collection<String> added = CollectionUtils.subtract(newEcoNumbers, oldEcoNumbers);
         StringBuilder historyChanges = new StringBuilder();
-        if (!added.isEmpty()) {
-            historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
-        }
+
         if (!removed.isEmpty()) {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(removed, OrderHistory.DELETED_ECO_NUMBER));
+            removed.stream()
+                .forEach(oldNumber -> order.getAdditionalOrders().remove(oldNumber));
+        }
+        if (!added.isEmpty()
+            && !added.contains("")) {
+            historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
+            added.stream()
+                .forEach(newNumber -> order.getAdditionalOrders().add(newNumber));
         }
 
         orderRepository.save(order);
