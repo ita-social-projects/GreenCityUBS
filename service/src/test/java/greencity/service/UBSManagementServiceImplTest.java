@@ -1388,6 +1388,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(notificationService).notifyHalfPaidPackage(order);
         doNothing().when(notificationService).notifyCourierItineraryFormed(order);
         when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
     }
 
     @Test
@@ -1401,6 +1402,7 @@ class UBSManagementServiceImplTest {
         doNothing().when(notificationService).notifyHalfPaidPackage(order);
         doNothing().when(notificationService).notifyCourierItineraryFormed(order);
         when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
     }
 
     @Test
