@@ -1402,4 +1402,11 @@ class UBSManagementServiceImplTest {
         doNothing().when(notificationService).notifyCourierItineraryFormed(order);
         when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
     }
+
+    @Test
+    void getOrderSumDetailsThrowsUnexcitingOrderExceptionTest() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderSumDetails(1L);
+        });
+    }
 }
