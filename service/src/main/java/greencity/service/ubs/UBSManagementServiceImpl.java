@@ -1129,7 +1129,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void updateOrderPaymentStatus(Order currentOrder, double totalSumAmount, double totalConfirmed,
         double totalExported) {
-
         long paymentsForCurrentOrder = currentOrder.getPayment().stream().filter(payment -> payment.getPaymentStatus()
             .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(amount -> amount / 100).reduce(Long::sum)
             .orElse(0L);
@@ -1137,7 +1136,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (orderStatusesBeforeShipment.contains(currentOrder.getOrderStatus())) {
             setOrderPaymentStatusForConfirmedBags(currentOrder, paymentsForCurrentOrder, totalSumAmount,
                 totalConfirmed);
-
         } else if (orderStatusesAfterConfirmation.contains(currentOrder.getOrderStatus())) {
             setOrderPaymentStatusForExportedBags(currentOrder, paymentsForCurrentOrder, totalExported);
         }
@@ -1146,7 +1144,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
         double totalSumAmount, double totalConfirmed) {
-
         boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
@@ -1159,7 +1156,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(currentOrder);
             }
-
         } else if (halfPaidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             notificationService.notifyHalfPaidPackage(currentOrder);
@@ -1168,7 +1164,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForExportedBags(Order currentOrder, long paymentsForCurrentOrder,
         double totalExported) {
-
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalExported > paymentsForCurrentOrder;
         boolean paidCondition = totalExported <= paymentsForCurrentOrder && paymentsForCurrentOrder > 0;
         boolean unpaidCondition =
