@@ -1149,7 +1149,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
             || totalConfirmed > paymentsForCurrentOrder;
         boolean unpaidCondition =
-                paymentsForCurrentOrder == 0L && currentOrder.getOrderStatus() == OrderStatus.CANCELED;
+            paymentsForCurrentOrder == 0L && currentOrder.getOrderStatus() == OrderStatus.CANCELED;
 
         if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
