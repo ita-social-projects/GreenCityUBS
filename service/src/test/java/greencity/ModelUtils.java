@@ -256,6 +256,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
             .build();
     }
 
@@ -1844,15 +1845,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<EcoNumberDto> getEcoNumberDto() {
-        return List.of(EcoNumberDto.builder()
-            .newEcoNumber("123456")
-            .oldEcoNumber("22222")
-            .build(),
-            EcoNumberDto.builder()
-                .newEcoNumber("123456")
-                .oldEcoNumber("22222")
-                .build());
+    public static EcoNumberDto getEcoNumberDto() {
+        return EcoNumberDto.builder()
+            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .build();
     }
 
     public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
@@ -2112,16 +2108,9 @@ public class ModelUtils {
                 .addressCity("dsfsdf")
                 .addressRegion("sdfsdfsd")
                 .build())
-            .ecoNumberFromShop(List.of(EcoNumberDto
-                .builder()
-                .newEcoNumber("1")
-                .oldEcoNumber("2")
-                .build(),
-                EcoNumberDto
-                    .builder()
-                    .newEcoNumber("1")
-                    .oldEcoNumber("2")
-                    .build()))
+            .ecoNumberFromShop(EcoNumberDto.builder()
+                .ecoNumber(Set.of("1111"))
+                .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
