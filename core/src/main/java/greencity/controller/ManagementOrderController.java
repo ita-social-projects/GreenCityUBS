@@ -892,7 +892,7 @@ public class ManagementOrderController {
     })
     @PutMapping("/update-eco-store{id}")
     public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
-        @RequestBody @Valid List<EcoNumberDto> ecoNumberDto, @PathVariable(name = "id") Long orderId,
+        @RequestBody @Valid EcoNumberDto ecoNumberDto, @PathVariable(name = "id") Long orderId,
         @ApiIgnore @CurrentUserUuid String uuid) {
         ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();

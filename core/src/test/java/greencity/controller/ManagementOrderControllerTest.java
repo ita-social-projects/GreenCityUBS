@@ -328,7 +328,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void updateEcoNumberForOrder() throws Exception {
-        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
+        EcoNumberDto ecoNumberDto = getEcoNumberDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
 
