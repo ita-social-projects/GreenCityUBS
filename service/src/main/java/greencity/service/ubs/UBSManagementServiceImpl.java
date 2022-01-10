@@ -1166,8 +1166,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalExported) {
         boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalExported > paymentsForCurrentOrder;
         boolean paidCondition = totalExported <= paymentsForCurrentOrder && paymentsForCurrentOrder > 0;
-        boolean unpaidCondition =
-            paymentsForCurrentOrder == 0L && currentOrder.getOrderStatus() == OrderStatus.CANCELED;
 
         if (halfPaidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
@@ -1175,8 +1173,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             notificationService.notifyPaidOrder(currentOrder);
-        } else if (unpaidCondition) {
-            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
     }
 
