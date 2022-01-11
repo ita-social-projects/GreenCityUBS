@@ -2,9 +2,9 @@ package greencity.service.ubs;
 
 import greencity.dto.UserViolationsDto;
 import greencity.dto.UserWithViolationsDto;
-import greencity.dto.UsernameDto;
+import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.repository.OrderRepository;
+import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserViolationsServiceImpl implements UserViolationsService {
     private ViolationRepository violationRepository;
-    private OrderRepository orderRepository;
+    private UserRepository userRepository;
 
     @Override
     public UserWithViolationsDto getAllViolations(Long userId) {
-        String username = getUsername(userId).getFirstName() + " " + getUsername(userId).getLastName();
+        String username = getUsername(userId);
         Long numberOfViolations = violationRepository.getNumberOfViolationsByUser(userId);
         List<UserViolationsDto> userViolationsList;
         userViolationsList = violationRepository
@@ -39,10 +39,8 @@ public class UserViolationsServiceImpl implements UserViolationsService {
             .build();
     }
 
-    private UsernameDto getUsername(Long userID) {
-        return UsernameDto.builder()
-            .firstName(orderRepository.getUsersFirstNameByOrderId(userID))
-            .lastName(orderRepository.getUsersLastNameByOrderId(userID))
-            .build();
+    private String getUsername(Long userID) {
+        User currentUser = userRepository.getOne(userID);
+        return currentUser.getRecipientName() + " " + currentUser.getRecipientSurname();
     }
 }
