@@ -83,6 +83,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final LocationRepository locationRepository;
     private final ServiceRepository serviceRepository;
     private final CourierRepository courierRepository;
+    private final Set<OrderStatus> orderStatusesBeforeShipment =
+        EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
+    private final Set<OrderStatus> orderStatusesAfterConfirmation =
+        EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
+
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -1024,14 +1029,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
 
     @Override
-    public CounterOrderDetailsDto getOrderSumDetails(Long id) {
-        CounterOrderDetailsDto dto = getPriceDetails(id);
-        Order order = orderRepository.getOrderDetails(id)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        final List<Payment> payment = paymentRepository.paymentInfo(id);
+    public CounterOrderDetailsDto getOrderSumDetails(Long orderId) {
+        CounterOrderDetailsDto dto = getPriceDetails(orderId);
+        Order order = orderRepository.getOrderDetails(orderId)
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+        double totalSumAmount = dto.getTotalSumAmount();
         double totalSumConfirmed = dto.getTotalSumConfirmed();
         double totalSumExported = dto.getTotalSumExported();
-        updateStatus(payment, order, totalSumConfirmed, totalSumExported);
+
+        updateOrderPaymentStatus(order, totalSumAmount, totalSumConfirmed, totalSumExported);
         return dto;
     }
 
@@ -1121,40 +1128,53 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setTotalSumExported(totalSumExported);
     }
 
-    private void updateStatus(List<Payment> payments, Order currentOrder, double totalConfirmed, double totalExported) {
-        if (currentOrder.getOrderStatus() == OrderStatus.FORMED
-            || currentOrder.getOrderStatus() == OrderStatus.CONFIRMED
-            || currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
-            if (payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) >= totalConfirmed) {
-                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-                notificationService.notifyPaidOrder(currentOrder);
-                if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
-                    notificationService.notifyCourierItineraryFormed(currentOrder);
-                }
-            }
-            if (totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)
-                && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) == 0L) {
-                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            }
-            if (totalConfirmed > 0 && payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L) > 0
-                && totalConfirmed > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-                notificationService.notifyHalfPaidPackage(currentOrder);
-            }
-        } else if (currentOrder.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-            || currentOrder.getOrderStatus() == OrderStatus.DONE
-            || currentOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-            || currentOrder.getOrderStatus() == OrderStatus.CANCELED) {
-            if (totalExported > payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-                notificationService.notifyHalfPaidPackage(currentOrder);
-            }
-            if (totalExported <= payments.stream().map(Payment::getAmount).reduce(Long::sum).orElse(0L)) {
-                currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-                notificationService.notifyPaidOrder(currentOrder);
-            }
+    private void updateOrderPaymentStatus(Order currentOrder, double totalSumAmount, double totalConfirmed,
+        double totalExported) {
+        long paymentsForCurrentOrder = currentOrder.getPayment().stream().filter(payment -> payment.getPaymentStatus()
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(amount -> amount / 100).reduce(Long::sum)
+            .orElse(0L);
+
+        if (orderStatusesBeforeShipment.contains(currentOrder.getOrderStatus())) {
+            setOrderPaymentStatusForConfirmedBags(currentOrder, paymentsForCurrentOrder, totalSumAmount,
+                totalConfirmed);
+        } else if (orderStatusesAfterConfirmation.contains(currentOrder.getOrderStatus())) {
+            setOrderPaymentStatusForExportedBags(currentOrder, paymentsForCurrentOrder, totalExported);
         }
-        paymentRepository.saveAll(payments);
+        orderRepository.save(currentOrder);
+    }
+
+    private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
+        double totalSumAmount, double totalConfirmed) {
+        boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
+            && paymentsForCurrentOrder >= totalConfirmed;
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
+            || totalConfirmed > paymentsForCurrentOrder;
+
+        if (paidCondition) {
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            notificationService.notifyPaidOrder(currentOrder);
+
+            if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+                notificationService.notifyCourierItineraryFormed(currentOrder);
+            }
+        } else if (halfPaidCondition) {
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+            notificationService.notifyHalfPaidPackage(currentOrder);
+        }
+    }
+
+    private void setOrderPaymentStatusForExportedBags(Order currentOrder, long paymentsForCurrentOrder,
+        double totalExported) {
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalExported > paymentsForCurrentOrder;
+        boolean paidCondition = totalExported <= paymentsForCurrentOrder && paymentsForCurrentOrder > 0;
+
+        if (halfPaidCondition) {
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+            notificationService.notifyHalfPaidPackage(currentOrder);
+        } else if (paidCondition) {
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+            notificationService.notifyPaidOrder(currentOrder);
+        }
     }
 
     /**

@@ -7,7 +7,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
@@ -31,6 +31,7 @@ import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,7 +69,7 @@ class UBSManagementServiceImplTest {
     @Mock
     private FileService fileService;
 
-    @Mock
+    @Mock(lenient = true)
     OrderRepository orderRepository;
 
     @Mock
@@ -107,7 +108,7 @@ class UBSManagementServiceImplTest {
     @Mock
     private RestClient restClient;
 
-    @Mock
+    @Mock(lenient = true)
     private NotificationServiceImpl notificationService;
 
     @Mock
@@ -1382,5 +1383,84 @@ class UBSManagementServiceImplTest {
         ubsManagementService.saveReason(1L, "uu", Arrays.asList(new MultipartFile[2]));
 
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getOrderSumDetailsForFormedOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getFormedOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForCanceledPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getCanceledPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForAdjustmentPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getAdjustmentPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForFormedHalfPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getFormedHalfPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsForCanceledHalfPaidOrder() {
+        CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
+        Order order = ModelUtils.getCanceledHalfPaidOrder();
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+
+        doNothing().when(notificationService).notifyPaidOrder(order);
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+        doNothing().when(notificationService).notifyCourierItineraryFormed(order);
+        when(ubsManagementService.getOrderSumDetails(1L)).thenReturn(dto);
+        Assertions.assertNotNull(order);
+    }
+
+    @Test
+    void getOrderSumDetailsThrowsUnexcitingOrderExceptionTest() {
+        Assertions.assertThrows(UnexistingOrderException.class, () -> {
+            ubsManagementService.getOrderSumDetails(1L);
+        });
     }
 }
