@@ -1449,7 +1449,8 @@ public class ModelUtils {
     private static Bag createBag() {
         return Bag.builder()
             .id(2)
-            .price(100)
+            .fullPrice(100)
+            // .price(100)
             .build();
     }
 
@@ -2495,6 +2496,8 @@ public class ModelUtils {
             .id(1)
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .price(1)
+            .fullPrice(1)
+            .commission(2)
             .location(Location
                 .builder()
                 .id(1L)

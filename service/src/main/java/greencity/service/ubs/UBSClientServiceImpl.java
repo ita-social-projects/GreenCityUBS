@@ -752,7 +752,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             Integer amount = getOrderBagsAndQuantity.get(temp);
             Bag bag = bagRepository.findById(temp)
                 .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp));
-            sumToPay += bag.getPrice() * amount;
+            sumToPay += bag.getFullPrice() * amount;
         }
         return sumToPay;
     }
@@ -768,7 +768,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             if (bag.getCapacity() >= BAG_CAPACITY) {
                 bigBagCounter += temp.getAmount();
             }
-            sumToPay += bag.getPrice() * temp.getAmount();
+            sumToPay += bag.getFullPrice() * temp.getAmount();
             map.put(temp.getId(), temp.getAmount());
         }
 
