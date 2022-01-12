@@ -29,7 +29,9 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
-@ToString
+@ToString(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,7 +101,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @Column(name = "order_payment_status")
+    @Column(nullable = false, name = "order_payment_status")
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 

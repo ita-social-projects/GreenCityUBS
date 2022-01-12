@@ -113,7 +113,8 @@ public class BigOrderTableRepository {
     private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq,
         Map<String, Subquery> subqueryMap, Map<String, Join> joinMap) {
         List<Predicate> predicates = new ArrayList<>();
-
+        Subquery<EmployeeOrderPosition> subOEP = subqueryMap.get(SUB_QUERY_OEP);
+        Join<Order, EmployeeOrderPosition> joinOEP = joinMap.get(JOIN_OEP);
         if (nonNull(sc.getOrderStatus())) {
             predicates.add(filterByOrderStatus(sc.getOrderStatus(), orderRoot));
         }
@@ -144,20 +145,16 @@ public class BigOrderTableRepository {
             predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(),
-                subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
+            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), subOEP, joinOEP));
         }
         if (nonNull(sc.getResponsibleLogicManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(),
-                subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), subOEP, joinOEP));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(),
-                subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
+            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), subOEP, joinOEP));
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(),
-                subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)));
+            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), subOEP, joinOEP));
         }
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc, orderRoot, predicates, cq, subqueryMap, joinMap);
@@ -361,11 +358,11 @@ public class BigOrderTableRepository {
         SetJoin<Order, Certificate> certificateJoin = certificateRoot.joinSet("certificates");
 
         Expression<String> certificateCode = certificateJoin.get("code");
-        Expression<String> certificatePoints = certificateJoin.get("points");
+        Expression<String> certificatePoints = certificateJoin.get("points").as(String.class);
 
         Predicate predicate = criteriaBuilder.or(
             criteriaBuilder.like(certificateCode, "%" + s + "%"),
-            criteriaBuilder.like(certificatePoints.as(String.class), "%" + s + "%"));
+            criteriaBuilder.like(certificatePoints, "%" + s + "%"));
 
         subCertificate.select(certificateJoin).where(predicate);
 

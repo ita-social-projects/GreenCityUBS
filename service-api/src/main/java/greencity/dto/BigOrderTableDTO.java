@@ -4,8 +4,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
 
+@Setter
 @Builder
+@ToString
+@EqualsAndHashCode
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
