@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @ToString
 public class PaymentInfoDto {
+    Long id;
     String settlementdate;
     Long paymentId;
     Long amount;
