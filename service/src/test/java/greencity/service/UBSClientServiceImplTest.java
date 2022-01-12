@@ -160,7 +160,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -219,7 +219,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -741,7 +741,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -805,7 +805,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(1);
+        bag.setFullPrice(1);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -963,7 +963,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1021,7 +1021,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1067,7 +1067,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
