@@ -346,16 +346,17 @@ class UBSManagementServiceImplTest {
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        Order order = ModelUtils.getOrderTest();
+        Order order = ModelUtils.getFormedOrder();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500l).receiptLink("link").paymentId(1l).build();
+            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId(1L).build();
 
-        when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum", order);
-        ubsManagementService.saveNewManualPayment(1l, paymentDetails, null, "abc");
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, null, "abc");
 
         verify(eventService, times(1))
             .save("Замовлення Оплачено", "Система", order);
@@ -382,14 +383,16 @@ class UBSManagementServiceImplTest {
     @Test
     void checkUpdateManualPayment() {
         User user = ModelUtils.getTestUser();
+        Order order = ModelUtils.getFormedOrder();
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
             getOrder());
-        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), null, "abc");
+        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1l);
         verify(paymentRepository, times(1)).save(any());
         verify(eventService, times(1)).save(any(), any(), any());
@@ -399,17 +402,19 @@ class UBSManagementServiceImplTest {
     @Test
     void checkUpdateManualPaymentWithImage() {
         User user = ModelUtils.getTestUser();
+        Order order = ModelUtils.getFormedHalfPaidOrder();
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
             "", "application/json", "random Bytes".getBytes());
-        when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(fileService.upload(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
             getOrder());
-        ubsManagementService.updateManualPayment(1l, getManualPaymentRequestDto(), file, "abc");
+        ubsManagementService.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1l);
         verify(paymentRepository, times(1)).save(any());
         verify(eventService, times(1)).save(any(), any(), any());
