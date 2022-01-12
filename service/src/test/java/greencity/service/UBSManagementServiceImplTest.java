@@ -1137,9 +1137,17 @@ class UBSManagementServiceImplTest {
     void testUpdateEcoNumberForOrder() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
-        when(orderRepository.findEcoNumberFromShop("22222", 1L)).thenReturn("123456");
         ubsManagementService.updateEcoNumberForOrder(ModelUtils.getEcoNumberDto(), 1L, "abc");
         verify(eventService, times(1)).save(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateEcoNumberThrowOrderNotFoundException() {
+        EcoNumberDto dto = ModelUtils.getEcoNumberDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.updateEcoNumberForOrder(dto, 1L, "uuid"));
     }
 
     @Test
@@ -1162,7 +1170,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        List<EcoNumberDto> ecoNumberDto = getEcoNumberDto();
+        EcoNumberDto ecoNumberDto = getEcoNumberDto();
         assertThrows(OrderNotFoundException.class,
             () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
     }

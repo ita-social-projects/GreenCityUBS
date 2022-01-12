@@ -256,6 +256,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
             .build();
     }
 
@@ -1938,15 +1939,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<EcoNumberDto> getEcoNumberDto() {
-        return List.of(EcoNumberDto.builder()
-            .newEcoNumber("123456")
-            .oldEcoNumber("22222")
-            .build(),
-            EcoNumberDto.builder()
-                .newEcoNumber("123456")
-                .oldEcoNumber("22222")
-                .build());
+    public static EcoNumberDto getEcoNumberDto() {
+        return EcoNumberDto.builder()
+            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .build();
     }
 
     public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
@@ -2206,16 +2202,9 @@ public class ModelUtils {
                 .addressCity("dsfsdf")
                 .addressRegion("sdfsdfsd")
                 .build())
-            .ecoNumberFromShop(List.of(EcoNumberDto
-                .builder()
-                .newEcoNumber("1")
-                .oldEcoNumber("2")
-                .build(),
-                EcoNumberDto
-                    .builder()
-                    .newEcoNumber("1")
-                    .oldEcoNumber("2")
-                    .build()))
+            .ecoNumberFromShop(EcoNumberDto.builder()
+                .ecoNumber(Set.of("1111"))
+                .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
@@ -2491,11 +2480,13 @@ public class ModelUtils {
     public static Order getOrdersDto() {
         return Order.builder()
             .id(1L)
-            .payment(List.of(Payment.builder().paymentId(1L).build()))
+            .payment(
+                List.of(Payment.builder().id(1L).paymentId(1L).build(), Payment.builder().id(2L).paymentId(1L).build()))
             .user(User.builder().id(1L).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.CANCELED)
+            .counterOrderPaymentId(1L)
             .build();
     }
 
@@ -2661,4 +2652,28 @@ public class ModelUtils {
                 .build())
             .build();
     }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .order_id("1_1_1")
+            .payment_id(2)
+            .currency("a")
+            .amount(1)
+            .order_status("approved")
+            .response_status("failure")
+            .sender_cell_phone("sss")
+            .sender_account("ss")
+            .masked_card("s")
+            .card_type("s")
+            .response_code(2)
+            .response_description("ddd")
+            .order_time("s")
+            .settlement_date("s")
+            .fee(null)
+            .payment_system("s")
+            .sender_email("s")
+            .payment_id(2)
+            .build();
+    }
+
 }

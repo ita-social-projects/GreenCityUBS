@@ -34,9 +34,8 @@ public final class OrderHistory {
     public static final String RETURN_OVERPAYMENT_AS_BONUS_TO_CLIENT = "Зараховано кошти на бонусний рахунок клієнта";
     public static final String WASTE_REMOVAL_ADDRESS_CHANGE = "Змінено адресу вивезення відходів";
     public static final String ADD_ADMIN_COMMENT = "Додано коментар";
-    public static final String CHANGES_ECO_NUMBER = "Номер замовлення з магазину змінено";
-    public static final String FROM = " з ";
-    public static final String TO = " на ";
+    public static final String ADD_NEW_ECO_NUMBER = "Додано номер замовлення з магазину";
+    public static final String DELETED_ECO_NUMBER = "Видалено номер замовлення з магазину";
     public static final String CHANGED_SENDER = "Змінено дані Відправника";
 
     /**

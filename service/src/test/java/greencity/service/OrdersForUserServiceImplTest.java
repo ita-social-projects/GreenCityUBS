@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.ModelUtils;
 import greencity.entity.enums.SortingOrder;
 import greencity.repository.*;
 import greencity.service.ubs.OrdersForUserServiceImpl;
@@ -37,6 +38,7 @@ class OrdersForUserServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.valueOf(SortingOrder.ASC.toString()), "AA");
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(Page.empty());
+        when(userRepository.getOne(anyLong())).thenReturn(ModelUtils.getUser());
         ordersForUserService.getAllOrders(PageRequest.of(1, 1), 1L, SortingOrder.ASC, "AA");
 
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
