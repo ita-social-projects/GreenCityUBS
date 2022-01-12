@@ -1064,12 +1064,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Integer> exportedValues = new ArrayList<>(order.getExportedQuantity().values());
 
         for (int i = 0; i < bag.size(); i++) {
-            sumAmount += amountValues.get(i) * bag.get(i).getPrice();
+            sumAmount += amountValues.get(i) * bag.get(i).getFullPrice();
             if (!confirmedValues.isEmpty()) {
-                sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+                sumConfirmed += confirmedValues.get(i) * bag.get(i).getFullPrice();
             }
             if (!exportedValues.isEmpty()) {
-                sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+                sumExported += exportedValues.get(i) * bag.get(i).getFullPrice();
             }
         }
 
@@ -1576,8 +1576,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        return buildPaymentResponseDto(
+
+        ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
             paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, currentUser)));
+        updateOrderPaymentStatusForManualPayment(order);
+        return manualPaymentResponseDto;
     }
 
     /**
@@ -1612,7 +1615,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
             currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
-        return buildPaymentResponseDto(paymentUpdated);
+
+        ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
+        updateOrderPaymentStatusForManualPayment(payment.getOrder());
+        return manualPaymentResponseDto;
+    }
+
+    private void updateOrderPaymentStatusForManualPayment(Order order) {
+        CounterOrderDetailsDto dto = getPriceDetails(order.getId());
+        long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(payment -> payment / 100).reduce(Long::sum)
+            .orElse(0L);
+        double totalAmount = dto.getTotalSumAmount();
+
+        if (paymentsForCurrentOrder > 0 && totalAmount > paymentsForCurrentOrder) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        } else if (paymentsForCurrentOrder > 0 && totalAmount >= paymentsForCurrentOrder) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        }
+        orderRepository.save(order);
     }
 
     private Payment changePaymentEntity(Payment updatePayment,
