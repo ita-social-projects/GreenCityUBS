@@ -14,8 +14,8 @@ import org.springframework.data.domain.*;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class UserViolationsServiceImplTest {
@@ -31,7 +31,6 @@ class UserViolationsServiceImplTest {
 
     @Test
     void getAllViolations() {
-
         when(violationRepository.getNumberOfViolationsByUser(anyLong())).thenReturn(5L);
         when(userRepository.getOne(any())).thenReturn(ModelUtils.getUser());
         when(userViolationsTableRepo.findAll(anyLong(), anyString(), any(), any())).thenReturn(
@@ -39,8 +38,7 @@ class UserViolationsServiceImplTest {
                 PageRequest.of(0, 5, Sort.by("id").descending()), 5));
 
         userViolationsService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC);
-        assertTrue(userViolationsService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC)
-            .getUserViolationsDto().getPage().get(0).getViolationDate()
-            .equals(ModelUtils.getViolation().getViolationDate()));
+        assertEquals(userViolationsService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC)
+            .getUserViolationsDto().getPage().get(0).getViolationDate(), ModelUtils.getViolation().getViolationDate());
     }
 }
