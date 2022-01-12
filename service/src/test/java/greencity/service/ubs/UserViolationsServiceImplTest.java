@@ -40,6 +40,7 @@ class UserViolationsServiceImplTest {
 
         userViolationsService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC);
         assertTrue(userViolationsService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC)
-                .getUserViolationsDto().getPage().get(0).getViolationDate().equals(ModelUtils.getViolation().getViolationDate()));
+            .getUserViolationsDto().getPage().get(0).getViolationDate()
+            .equals(ModelUtils.getViolation().getViolationDate()));
     }
 }
