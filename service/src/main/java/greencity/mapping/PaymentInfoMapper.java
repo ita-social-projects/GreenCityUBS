@@ -15,6 +15,7 @@ public class PaymentInfoMapper extends AbstractConverter<Payment, PaymentInfoDto
     @Override
     protected PaymentInfoDto convert(Payment source) {
         return PaymentInfoDto.builder()
+            .id(source.getId())
             .paymentId(source.getPaymentId())
             .amount(source.getAmount())
             .settlementdate(source.getSettlementDate())
