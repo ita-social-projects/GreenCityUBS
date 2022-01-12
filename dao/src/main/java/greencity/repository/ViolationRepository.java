@@ -1,14 +1,19 @@
 package greencity.repository;
 
 import greencity.entity.user.Violation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ViolationRepository extends CrudRepository<Violation, Long> {
+@Repository
+public interface ViolationRepository extends PagingAndSortingRepository<Violation, Long> {
     /**
      * Method returns violation by order id.
      *
@@ -22,11 +27,10 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      *
      * @author Roman Sulymka
      */
-    @Query(value = "select * from violations_description_mapping"
-        + "    INNER JOIN orders o on o.id = violations_description_mapping.order_id"
-        + "    INNER JOIN users on o.users_id = users.id"
-        + "    WHERE users.id = :userId", nativeQuery = true)
-    List<Violation> getAllViolationsByUserId(@Param(value = "userId") Long userId);
+    @Query(value = "select * from violations_description_mapping" +
+        "    JOIN orders o on o.id = violations_description_mapping.order_id" +
+        "WHERE users_id = :userId order by order_id asc", nativeQuery = true)
+    Page<Violation> getAllViolationsByUserId(Pageable pageable, @Param(value = "userId") Long userId);
 
     /**
      * Method gets orderId for user by violationId.
