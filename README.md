@@ -57,7 +57,6 @@ Though there are four GitHub projects ([GreenCity](https://github.com/ita-social
 
 6. `Enviroment variables`:
 
-
 ![env-vars](user_enviroment_variables.png)
 Add also this fields inti User environment variables, ask in GreenCity group,
 propertires to this fields.
@@ -116,6 +115,7 @@ greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 
 5. Copy the given access token and put it into GreenCityUBS(http://localhost:8050/swagger-ui.html#/) Authentication Header. Press **Authorize** button.
 
+
    ![Authentication-button-swagger](./authentication-swagger.png)
 
    Insert the given token into input field. The scheme should be like this `Bearer <given_token>`. Press **Authorize** button.
@@ -125,6 +125,7 @@ greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 6. Now you can use swagger UI to test REST API. Some controllers require *ADMIN* role. By default, new registered users have role *USER*. To overcome this you need to update record that corresponds to your user in the local database. For example, `UPDATE users SET role = 1 WHERE id = <your_user_id>`.
 
 ### 4.5. Connect with front-end
+
 
 There is no special configurations required. Just clone [GreenCityClient](https://github.com/ita-social-projects/GreenCityClient) and run it. If you want to sign in with Google account, it's mandatory to set `google.clientId`. Read more about how to obtain [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication), it's free.
 

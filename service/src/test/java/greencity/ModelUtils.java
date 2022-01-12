@@ -87,6 +87,12 @@ public class ModelUtils {
     public static final UpdateOrderDetailDto TEST_UPDATE_ORDER_DETAIL_DTO = createUpdateOrderDetailDto();
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
+    public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
+    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
+        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
+    public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
+    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -252,6 +258,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
             .build();
     }
 
@@ -1203,11 +1210,104 @@ public class ModelUtils {
             .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
             .pointsToUse(100)
             .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
+    }
+
+    public static Order getCanceledPaidOrder() {
+        return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.CANCELED)
+            .payment(singletonList(Payment.builder()
+                .id(1L)
+                .amount(350L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
+    }
+
+    public static Order getAdjustmentPaidOrder() {
+        return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .payment(singletonList(Payment.builder()
+                .id(1L)
+                .amount(300000L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(2, 2))
+            .pointsToUse(100)
+            .user(User.builder().id(1L).currentPoints(100).build())
+            .build();
+    }
+
+    public static Order getFormedHalfPaidOrder() {
+        return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.FORMED)
+            .payment(singletonList(Payment.builder()
+                .id(1L)
+                .amount(100L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 1))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(50)
+            .user(User.builder().id(1L).currentPoints(500).build())
+            .build();
+    }
+
+    public static Order getCanceledHalfPaidOrder() {
+        return Order.builder()
+            .id(1L)
+            .events(List.of(new Event(1L, LocalDateTime.now(),
+                "Roman", "Roman", new Order())))
+            .orderStatus(OrderStatus.CANCELED)
+            .payment(singletonList(Payment.builder()
+                .id(1L)
+                .amount(1000L)
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .amountOfBagsOrdered(Collections.singletonMap(1, 1))
+            .exportedQuantity(Collections.singletonMap(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .pointsToUse(50)
+            .user(User.builder().id(1L).currentPoints(500).build())
             .build();
     }
 
@@ -1351,6 +1451,7 @@ public class ModelUtils {
     private static Bag createBag() {
         return Bag.builder()
             .id(2)
+            .price(100)
             .build();
     }
 
@@ -1558,6 +1659,14 @@ public class ModelUtils {
     private static PageableDto<NotificationShortDto> createPageableDto() {
         return new PageableDto<>(
             TEST_NOTIFICATION_SHORT_DTO_LIST,
+            1,
+            0,
+            1);
+    }
+
+    private static PageableDto<NotificationTemplateDto> templateDtoPageableDto() {
+        return new PageableDto<>(
+            TEST_NOTIFICATION_TEMPLATE_LIST,
             1,
             0,
             1);
@@ -1832,15 +1941,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<EcoNumberDto> getEcoNumberDto() {
-        return List.of(EcoNumberDto.builder()
-            .newEcoNumber("123456")
-            .oldEcoNumber("22222")
-            .build(),
-            EcoNumberDto.builder()
-                .newEcoNumber("123456")
-                .oldEcoNumber("22222")
-                .build());
+    public static EcoNumberDto getEcoNumberDto() {
+        return EcoNumberDto.builder()
+            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .build();
     }
 
     public static PaymentResponseDtoLiqPay getPaymentResponceDto() {
@@ -2100,16 +2204,9 @@ public class ModelUtils {
                 .addressCity("dsfsdf")
                 .addressRegion("sdfsdfsd")
                 .build())
-            .ecoNumberFromShop(List.of(EcoNumberDto
-                .builder()
-                .newEcoNumber("1")
-                .oldEcoNumber("2")
-                .build(),
-                EcoNumberDto
-                    .builder()
-                    .newEcoNumber("1")
-                    .oldEcoNumber("2")
-                    .build()))
+            .ecoNumberFromShop(EcoNumberDto.builder()
+                .ecoNumber(Set.of("1111"))
+                .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
@@ -2390,6 +2487,7 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.CANCELED)
+            .counterOrderPaymentId(1L)
             .build();
     }
 
@@ -2403,6 +2501,26 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .build();
+    }
+
+    public static NotificationTemplate getNotificationTemplate() {
+        return new NotificationTemplate()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
+    }
+
+    public static NotificationTemplateDto getNotificationTemplateDto() {
+        return new NotificationTemplateDto()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test");
+    }
+
+    public static Page<NotificationTemplate> getNotificationTemplatePageable() {
+        return new PageImpl<>(List.of(getNotificationTemplate()),
+            TEST_PAGEABLE_NOTIFICATION_TEMPLATE,
+            2);
     }
 
     public static UserProfileUpdateDto updateUserProfileDto() {
@@ -2535,6 +2653,30 @@ public class ModelUtils {
                 .build())
             .build();
     }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .order_id("1_1_1")
+            .payment_id(2)
+            .currency("a")
+            .amount(1)
+            .order_status("approved")
+            .response_status("failure")
+            .sender_cell_phone("sss")
+            .sender_account("ss")
+            .masked_card("s")
+            .card_type("s")
+            .response_code(2)
+            .response_description("ddd")
+            .order_time("s")
+            .settlement_date("s")
+            .fee(null)
+            .payment_system("s")
+            .sender_email("s")
+            .payment_id(2)
+            .build();
+    }
+
 
     public static Page<Order> getPageOrder() {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
