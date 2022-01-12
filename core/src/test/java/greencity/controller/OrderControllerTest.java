@@ -318,16 +318,4 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
-    @Test
-    void receivePaymentClientTest() throws Exception {
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String paymentResponseJson = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/receivePaymentClient")
-            .content(paymentResponseJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
-    }
 }
