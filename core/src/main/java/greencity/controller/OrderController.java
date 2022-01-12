@@ -490,27 +490,4 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getCourierLocationByCourierIdAndLanguageCode(courierId));
     }
-
-    /**
-     * Controller checks if received data Client is valid and stores payment info if
-     * is.
-     *
-     * @param dto {@link PaymentResponseDto} - response order data.
-     * @return {@link HttpStatus} - http status.
-     * @author Max Boiarchuk
-     */
-    @ApiOperation(value = "Receive payment from  Client Fondy.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
-    })
-    @PostMapping("/receivePaymentClient")
-    public ResponseEntity<HttpStatus> receivePaymentClient(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
-        ubsClientService.validatePaymentClient(dto);
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }
