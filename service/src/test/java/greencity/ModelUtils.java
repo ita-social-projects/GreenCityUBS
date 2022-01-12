@@ -2488,7 +2488,7 @@ public class ModelUtils {
     public static Order getOrdersDto() {
         return Order.builder()
             .id(1L)
-            .payment(List.of(Payment.builder().paymentId(1L).build()))
+            .payment(List.of(Payment.builder().id(1L).build()))
             .user(User.builder().id(1L).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
