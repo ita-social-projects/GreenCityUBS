@@ -1183,29 +1183,4 @@ class UBSClientServiceImplTest {
             .thenReturn(Collections.emptyList());
         assertThrows(CourierLocationException.class, () -> ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
     }
-
-    @Test
-    void validatePaymentClientTest() {
-
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersDto()));
-        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
-
-        ubsService.validatePaymentClient(dto);
-
-        verify(orderRepository, times(2)).findById(1L);
-        verify(encryptionUtil).checkIfResponseSignatureIsValid(dto, null);
-
-    }
-
-    @Test
-    void validatePaymentClientExceptionTest() {
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-
-        when(orderRepository.findById(1L))
-            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersDto()));
-
-        assertThrows(PaymentValidationException.class, () -> ubsService.validatePaymentClient(dto));
-    }
 }
