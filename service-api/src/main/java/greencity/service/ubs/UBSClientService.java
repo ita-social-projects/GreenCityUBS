@@ -349,4 +349,11 @@ public interface UBSClientService {
      * @author Vadym Makitra
      */
     List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId);
+
+    /**
+     * Method validates received payment client response.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     */
+    void validatePaymentClient(PaymentResponseDto dto);
 }

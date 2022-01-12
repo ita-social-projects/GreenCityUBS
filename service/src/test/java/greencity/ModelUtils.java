@@ -2480,11 +2480,13 @@ public class ModelUtils {
     public static Order getOrdersDto() {
         return Order.builder()
             .id(1L)
-            .payment(List.of(Payment.builder().paymentId(1L).build()))
+            .payment(
+                List.of(Payment.builder().id(1L).paymentId(1L).build(), Payment.builder().id(2L).paymentId(1L).build()))
             .user(User.builder().id(1L).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.CANCELED)
+            .counterOrderPaymentId(1L)
             .build();
     }
 
@@ -2650,4 +2652,28 @@ public class ModelUtils {
                 .build())
             .build();
     }
+
+    public static PaymentResponseDto getPaymentResponseDto() {
+        return PaymentResponseDto.builder()
+            .order_id("1_1_1")
+            .payment_id(2)
+            .currency("a")
+            .amount(1)
+            .order_status("approved")
+            .response_status("failure")
+            .sender_cell_phone("sss")
+            .sender_account("ss")
+            .masked_card("s")
+            .card_type("s")
+            .response_code(2)
+            .response_description("ddd")
+            .order_time("s")
+            .settlement_date("s")
+            .fee(null)
+            .payment_system("s")
+            .sender_email("s")
+            .payment_id(2)
+            .build();
+    }
+
 }
