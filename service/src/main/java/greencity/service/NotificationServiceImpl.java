@@ -158,7 +158,7 @@ public class NotificationServiceImpl implements NotificationService {
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBagsOrdered = order.getAmountOfBagsOrdered();
 
-        Integer price = bags.stream().map(bag -> amountOfBagsOrdered.get(bag.getId()) * bag.getPrice())
+        Integer price = bags.stream().map(bag -> amountOfBagsOrdered.get(bag.getId()) * bag.getFullPrice())
             .reduce(0, Integer::sum);
 
         long amountToPay = price - paidAmount;

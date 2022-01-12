@@ -1063,12 +1063,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<Integer> exportedValues = new ArrayList<>(order.getExportedQuantity().values());
 
         for (int i = 0; i < bag.size(); i++) {
-            sumAmount += amountValues.get(i) * bag.get(i).getPrice();
+            sumAmount += amountValues.get(i) * bag.get(i).getFullPrice();
             if (!confirmedValues.isEmpty()) {
-                sumConfirmed += confirmedValues.get(i) * bag.get(i).getPrice();
+                sumConfirmed += confirmedValues.get(i) * bag.get(i).getFullPrice();
             }
             if (!exportedValues.isEmpty()) {
-                sumExported += exportedValues.get(i) * bag.get(i).getPrice();
+                sumExported += exportedValues.get(i) * bag.get(i).getFullPrice();
             }
         }
 
