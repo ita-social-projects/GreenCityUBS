@@ -1,12 +1,17 @@
 package greencity.service.ubs;
 
+import greencity.dto.PageableDto;
 import greencity.dto.UserViolationsDto;
-import greencity.dto.UserWithViolationsDto;
+import greencity.dto.UserViolationsWithUserName;
+import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.repository.UserRepository;
+import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,18 +22,27 @@ import java.util.stream.Collectors;
 public class UserViolationsServiceImpl implements UserViolationsService {
     private ViolationRepository violationRepository;
     private UserRepository userRepository;
+    private UserViolationsTableRepo userViolationsTableRepo;
 
     @Override
-    public UserWithViolationsDto getAllViolations(Long userId) {
+    public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,
+        SortingOrder sortingOrder) {
         String username = getUsername(userId);
         Long numberOfViolations = violationRepository.getNumberOfViolationsByUser(userId);
-        List<UserViolationsDto> userViolationsList;
-        userViolationsList = violationRepository
-            .getAllViolationsByUserId(userId)
-            .stream()
-            .map(this::getAllViolations)
-            .collect(Collectors.toList());
-        return new UserWithViolationsDto(username, numberOfViolations, userViolationsList);
+
+        Page<Violation> violationPage = userViolationsTableRepo.findAll(userId, columnName, sortingOrder, page);
+
+        List<UserViolationsDto> userViolationsList =
+            violationPage.getContent()
+                .stream()
+                .map(this::getAllViolations)
+                .collect(Collectors.toList());
+
+        return UserViolationsWithUserName.builder()
+            .userViolationsDto(new PageableDto<>(userViolationsList, numberOfViolations,
+                violationPage.getPageable().getPageNumber(), violationPage.getTotalPages()))
+            .fullName(username)
+            .build();
     }
 
     private UserViolationsDto getAllViolations(Violation violation) {
