@@ -219,7 +219,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
-                .paymentId("1L")
+                .paymentId("1")
                 .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
@@ -1136,7 +1136,7 @@ public class ModelUtils {
             .paymentDate("02-08-2021")
             .amount(500l)
             .receiptLink("link")
-            .paymentId("1l")
+            .paymentId("1")
             .build();
     }
 
