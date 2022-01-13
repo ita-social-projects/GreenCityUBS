@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.Nonnull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -81,9 +80,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-    private final LocationRepository locationRepository;
     private final ServiceRepository serviceRepository;
-    private final CourierRepository courierRepository;
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =

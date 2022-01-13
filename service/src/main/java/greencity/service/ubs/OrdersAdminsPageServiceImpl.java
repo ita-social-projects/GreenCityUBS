@@ -233,15 +233,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return optionForColumnDTOS;
     }
 
-    private List<OptionForColumnDTO> managerList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(1L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        for (Employee e : employeeList) {
-            optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
-        }
-        return optionForColumnDTOS;
-    }
-
     private List<OptionForColumnDTO> callerList() {
         List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(2L);
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
