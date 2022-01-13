@@ -1913,7 +1913,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return BigOrderTableDTO.builder()
             .id(order.getId())
             .orderStatus(order.getOrderStatus().name())
-            .paymentStatus(order.getOrderPaymentStatus().name())
+            .orderPaymentStatus(order.getOrderPaymentStatus().name())
             .orderDate(getOrderDate(order))
             .paymentDate(getPaymentDate(order))
             .clientName(getClientName(order))
