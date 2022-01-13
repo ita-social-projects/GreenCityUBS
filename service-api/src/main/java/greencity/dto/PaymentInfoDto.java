@@ -11,8 +11,9 @@ import lombok.*;
 public class PaymentInfoDto {
     Long id;
     String settlementdate;
-    Long paymentId;
+    String paymentId;
     Long amount;
     String comment;
+    String receiptLink;
     String imagePath;
 }

@@ -336,7 +336,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getFormedOrder();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId(1L).build();
+            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
@@ -354,9 +354,11 @@ class UBSManagementServiceImplTest {
     @Test
     void checkDeleteManualPayment() {
         User user = ModelUtils.getTestUser();
+        Order order = ModelUtils.getFormedOrder();
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1l);
         doNothing().when(fileService).delete("");

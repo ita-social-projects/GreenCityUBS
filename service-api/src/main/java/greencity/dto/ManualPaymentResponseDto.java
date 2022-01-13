@@ -10,7 +10,7 @@ import lombok.*;
 public class ManualPaymentResponseDto {
     private String paymentDate;
     private Long amount;
-    private Long paymentId;
+    private String paymentId;
     private String receiptLink;
     private String imagePath;
     private String currentDate;
