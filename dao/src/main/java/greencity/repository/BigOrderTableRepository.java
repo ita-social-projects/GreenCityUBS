@@ -29,9 +29,6 @@ public class BigOrderTableRepository {
     private static final String EMPLOYEE = "employee";
     private static final String PAYMENT = "payment";
 
-    private static final String SUB_QUERY_OEP = "subQueryOEP";
-    private static final String JOIN_OEP = "joinOEP";
-
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -60,12 +57,7 @@ public class BigOrderTableRepository {
         joinOEP.join(EMPLOYEE, JoinType.LEFT);
         joinOEP.join("position", JoinType.LEFT);
 
-        Map<String, Subquery> subqueryMap = new HashMap<>();
-        subqueryMap.put(SUB_QUERY_OEP, subQueryOEP);
-        Map<String, Join> joinMap = new HashMap<>();
-        joinMap.put(JOIN_OEP, joinOEP);
-
-        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery, subqueryMap, joinMap);
+        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery, subQueryOEP, joinOEP);
         criteriaQuery.select(orderRoot).distinct(true);
         criteriaQuery.where(predicate);
 
@@ -111,10 +103,8 @@ public class BigOrderTableRepository {
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq,
-        Map<String, Subquery> subqueryMap, Map<String, Join> joinMap) {
+        Subquery<EmployeeOrderPosition> subquery, SetJoin<Order, EmployeeOrderPosition> setJoin) {
         List<Predicate> predicates = new ArrayList<>();
-        Subquery<EmployeeOrderPosition> subOEP = subqueryMap.get(SUB_QUERY_OEP);
-        Join<Order, EmployeeOrderPosition> joinOEP = joinMap.get(JOIN_OEP);
         if (nonNull(sc.getOrderStatus())) {
             predicates.add(filterByOrderStatus(sc.getOrderStatus(), orderRoot));
         }
@@ -145,19 +135,19 @@ public class BigOrderTableRepository {
             predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), subOEP, joinOEP));
+            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleLogicManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), subOEP, joinOEP));
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), subOEP, joinOEP));
+            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), subOEP, joinOEP));
+            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), subquery, setJoin));
         }
         if (nonNull(sc.getSearch())) {
-            searchOnBigTable(sc, orderRoot, predicates, cq, subqueryMap, joinMap);
+            searchOnBigTable(sc, orderRoot, predicates, cq, subquery, setJoin);
         }
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
@@ -229,7 +219,8 @@ public class BigOrderTableRepository {
     }
 
     private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates,
-        CriteriaQuery<Order> cq, Map<String, Subquery> subqueryMap, Map<String, Join> joinMap) {
+        CriteriaQuery<Order> cq, Subquery<EmployeeOrderPosition> subquery,
+        SetJoin<Order, EmployeeOrderPosition> setJoin) {
         String[] searchWord = sc.getSearch().split(" ");
 
         for (String s : searchWord) {
@@ -239,8 +230,8 @@ public class BigOrderTableRepository {
                 formUbsUserLikePredicate(s, orderRoot),
                 formAddressLikePredicate(s, orderRoot),
                 formPaymentLikePredicate(s, cq, orderRoot),
-                formPaymenSumtLikePredicate(s, cq, orderRoot),
-                fromEOPLikePredicate(s, subqueryMap.get(SUB_QUERY_OEP), joinMap.get(JOIN_OEP)),
+                formPaymentSumLikePredicate(s, cq, orderRoot),
+                fromEOPLikePredicate(s, subquery, setJoin),
                 fromBagAmount(s, cq, orderRoot),
                 fromCertificate(s, cq, orderRoot)));
         }
@@ -316,7 +307,7 @@ public class BigOrderTableRepository {
         return criteriaBuilder.exists(subQueryPayment);
     }
 
-    private Predicate formPaymenSumtLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+    private Predicate formPaymentSumLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
         Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
         Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
         Join<Order, Payment> paymentJoin = paymentRoot.join(PAYMENT);
