@@ -1596,6 +1596,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + paymentId,
             currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
+        updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
 
     /**
@@ -1629,6 +1630,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         } else if (paymentsForCurrentOrder > 0 && totalAmount >= paymentsForCurrentOrder) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        } else if (paymentsForCurrentOrder == 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
         orderRepository.save(order);
     }

@@ -1092,7 +1092,7 @@ public class ModelUtils {
             .orderStatus("approved")
             .responseStatus("approved")
             .order(getOrder())
-            .paymentId("1L")
+            .paymentId("1")
             .fee(0L)
             .build();
     }

@@ -354,9 +354,11 @@ class UBSManagementServiceImplTest {
     @Test
     void checkDeleteManualPayment() {
         User user = ModelUtils.getTestUser();
+        Order order = ModelUtils.getFormedOrder();
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1l);
         doNothing().when(fileService).delete("");
