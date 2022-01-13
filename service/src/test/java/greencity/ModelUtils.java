@@ -2812,7 +2812,7 @@ public class ModelUtils {
         BigOrderTableDTO bigOrderTableDTO = BigOrderTableDTO.builder()
             .id(3333L)
             .orderStatus("FORMED")
-            .paymentStatus("PAID")
+            .orderPaymentStatus("PAID")
             .orderDate("2021-12-08T15:59:52")
             .paymentDate("30-11-2021, 30-11-2021")
             .clientName("Uliana Стан")
