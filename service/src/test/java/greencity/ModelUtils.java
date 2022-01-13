@@ -217,7 +217,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
-                .paymentId(1L)
+                .paymentId("1L")
                 .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
@@ -264,7 +264,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
-                .paymentId(1L)
+                .paymentId("1L")
                 .amount(20000L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
@@ -1090,7 +1090,7 @@ public class ModelUtils {
             .orderStatus("approved")
             .responseStatus("approved")
             .order(getOrder())
-            .paymentId(1L)
+            .paymentId("1L")
             .fee(0L)
             .build();
     }
@@ -1121,7 +1121,7 @@ public class ModelUtils {
             .settlementDate("02-08-2021")
             .amount(500l)
             .paymentStatus(PaymentStatus.PAID)
-            .paymentId(1l)
+            .paymentId("1l")
             .receiptLink("somelink.com")
             .currency("UAH")
             .imagePath("")
@@ -1134,7 +1134,7 @@ public class ModelUtils {
             .paymentDate("02-08-2021")
             .amount(500l)
             .receiptLink("link")
-            .paymentId(1l)
+            .paymentId("1l")
             .build();
     }
 
@@ -2164,7 +2164,7 @@ public class ModelUtils {
             .pointsToUse(1)
             .counterOrderPaymentId(2L)
             .payment(Lists.newArrayList(Payment.builder()
-                .paymentId(1L)
+                .paymentId("1L")
                 .amount(200L)
                 .currency("UAH")
                 .settlementDate("20.02.1990")
@@ -2487,7 +2487,8 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(
-                List.of(Payment.builder().id(1L).paymentId(1L).build(), Payment.builder().id(2L).paymentId(1L).build()))
+                List.of(Payment.builder().id(1L).paymentId("1L").build(),
+                    Payment.builder().id(2L).paymentId("1L").build()))
             .user(User.builder().id(1L).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")

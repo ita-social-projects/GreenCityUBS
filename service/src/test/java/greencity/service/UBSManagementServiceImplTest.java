@@ -349,7 +349,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getFormedOrder();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId(1L).build();
+            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1L").build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));

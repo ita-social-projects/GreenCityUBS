@@ -320,7 +320,7 @@ public class ModelUtils {
         return ManualPaymentResponseDto.builder()
             .amount(500l)
             .paymentDate("09-02-2021")
-            .paymentId(10l)
+            .paymentId("10l")
             .currentDate("10-02-2021")
             .receiptLink("somelink.com")
             .imagePath("imagepath")
@@ -332,7 +332,7 @@ public class ModelUtils {
             .amount(500l)
             .paymentDate("09-02-2021")
             .receiptLink("somelink.com")
-            .paymentId(10l)
+            .paymentId("10l")
             .build();
     }
 
