@@ -18,7 +18,7 @@ import lombok.ToString;
 public class BigOrderTableDTO {
     private Long id;
     private String orderStatus;
-    private String paymentStatus;
+    private String orderPaymentStatus;
     private String orderDate;
     private String paymentDate;
     private String clientName;
