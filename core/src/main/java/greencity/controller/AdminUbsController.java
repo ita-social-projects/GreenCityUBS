@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
@@ -168,7 +169,7 @@ public class AdminUbsController {
      * Controller for obtaining all violations by user.
      *
      * @param userId {@link Long}
-     * @author Roman Sulymka.
+     * @author Roman Sulymka and Max Bohonko.
      */
     @ApiOperation("Get users for the table")
     @ApiResponses(value = {
@@ -177,10 +178,13 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @ApiPageable
     @GetMapping("/{userId}/violationsAll")
-    public ResponseEntity<UserWithViolationsDto> getAllViolationsByUser(
-        @PathVariable Long userId) {
+    public ResponseEntity<UserViolationsWithUserName> getAllViolationsByUser(
+        @ApiIgnore Pageable page, @PathVariable Long userId,
+        @RequestParam String columnName,
+        @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(userViolationsService.getAllViolations(userId));
+            .body(userViolationsService.getAllViolations(page, userId, columnName, sortingOrder));
     }
 }
