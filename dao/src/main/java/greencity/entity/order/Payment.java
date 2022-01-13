@@ -53,8 +53,8 @@ public class Payment {
     private String receiptLink;
     @Column
     private String imagePath;
-    @Column(length = 19)
-    private Long paymentId;
+    @Column
+    private String paymentId;
     @ManyToOne
     private Order order;
     @Column
