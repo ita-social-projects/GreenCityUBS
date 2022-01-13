@@ -4,8 +4,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
 
+@Setter
 @Builder
+@ToString
+@EqualsAndHashCode
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,7 +28,8 @@ public class BigOrderTableDTO {
     private String senderPhone;
     private String senderEmail;
     private Integer violationsAmount;
-    private String location;
+    private String region;
+    private String settlement;
     private String district;
     private String address;
     private String commentToAddressForClient;
@@ -37,7 +44,6 @@ public class BigOrderTableDTO {
     private String timeOfExport;
     private String idOrderFromShop;
     private String receivingStation;
-    private String responsibleManager;
     private String responsibleLogicMan;
     private String responsibleDriver;
     private String responsibleCaller;

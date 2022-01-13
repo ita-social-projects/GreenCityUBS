@@ -66,7 +66,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto(orderStatus, "Статус замовлення", "Order's status"), orderStatus, 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), ordersInfo),
-            new ColumnDTO(new TitleDto("paymentStatus", "Статус оплати", "Payment status"), "paymentStatus", 20,
+            new ColumnDTO(new TitleDto("orderPaymentStatus", "Статус оплати", "Payment status"), "orderPaymentStatus",
+                20,
                 true, true, true, 3, EditType.READ_ONLY, orderPaymentStatusListForDevelopStage(), ordersInfo),
             new ColumnDTO(new TitleDto("orderDate", "Дата замовлення", "Order date"), "orderDate", 20, false, true,
                 true,
@@ -91,8 +92,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("location", "Локація", "Location"), "user.lastLocation", 20, false, true,
                 false,
                 13, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+            new ColumnDTO(new TitleDto("region", "Область", "Region"), "ubsUser.address.region", 20, false,
+                true, false, 35, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+            new ColumnDTO(new TitleDto("city", "Населений пункт", "Settlement"), "ubsUser.address.city", 20, false,
+                true, false, 36, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "ubsUser.address.district", 20, false,
-                true, false, 14, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+                true, false, 37, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), needToImplement, 20, false, true,
                 false, 15,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
@@ -127,8 +132,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto(receivingStation, "Станція приймання", "Receiving station"),
                 receivingStation, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 orderDetails),
-            new ColumnDTO(new TitleDto("responsibleManager", "Менеджер послуги", "Responsible manager"), "", 20,
-                false, true, false, 28, EditType.SELECT, managerList(), responsible),
             new ColumnDTO(new TitleDto("responsibleCaller", "Менеджер обдзвону", "Responsible caller"), "", 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
             new ColumnDTO(new TitleDto("responsibleLogicMan", "Логіст", "Responsible logic man"), "", 20, false,
@@ -226,15 +229,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (ReceivingStationDto r : receivingStations) {
             optionForColumnDTOS.add(modelMapper.map(r, OptionForColumnDTO.class));
-        }
-        return optionForColumnDTOS;
-    }
-
-    private List<OptionForColumnDTO> managerList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(1L);
-        List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
-        for (Employee e : employeeList) {
-            optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
         }
         return optionForColumnDTOS;
     }
