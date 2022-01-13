@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -16,9 +17,7 @@ import javax.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Objects.nonNull;
 
@@ -27,6 +26,9 @@ public class BigOrderTableRepository {
     private static final String USER = "user";
     private static final String UBS_USER = "ubsUser";
     private static final String ADDRESS = "address";
+    private static final String EMPLOYEE = "employee";
+    private static final String PAYMENT = "payment";
+
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -49,7 +51,13 @@ public class BigOrderTableRepository {
         Join<Order, UBSuser> ubsUserJoin = orderRoot.join(UBS_USER, JoinType.LEFT);
         ubsUserJoin.join(ADDRESS, JoinType.LEFT);
 
-        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery);
+        Subquery<EmployeeOrderPosition> subQueryOEP = criteriaQuery.subquery(EmployeeOrderPosition.class);
+        Root<Order> oepRoot = subQueryOEP.correlate(orderRoot);
+        SetJoin<Order, EmployeeOrderPosition> joinOEP = oepRoot.joinSet("employeeOrderPositions", JoinType.LEFT);
+        joinOEP.join(EMPLOYEE, JoinType.LEFT);
+        joinOEP.join("position", JoinType.LEFT);
+
+        Predicate predicate = getPredicate(searchCriteria, orderRoot, criteriaQuery, subQueryOEP, joinOEP);
         criteriaQuery.select(orderRoot).distinct(true);
         criteriaQuery.where(predicate);
 
@@ -94,9 +102,9 @@ public class BigOrderTableRepository {
         }
     }
 
-    private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
+    private Predicate getPredicate(OrderSearchCriteria sc, Root<Order> orderRoot, CriteriaQuery<Order> cq,
+        Subquery<EmployeeOrderPosition> subquery, SetJoin<Order, EmployeeOrderPosition> setJoin) {
         List<Predicate> predicates = new ArrayList<>();
-
         if (nonNull(sc.getOrderStatus())) {
             predicates.add(filterByOrderStatus(sc.getOrderStatus(), orderRoot));
         }
@@ -127,19 +135,19 @@ public class BigOrderTableRepository {
             predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
-            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), orderRoot, cq));
+            predicates.add(filteredByEmployeeOrderPosition(1L, sc.getResponsibleCallerId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleLogicManId())) {
-            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), orderRoot, cq));
+            predicates.add(filteredByEmployeeOrderPosition(3L, sc.getResponsibleLogicManId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), orderRoot, cq));
+            predicates.add(filteredByEmployeeOrderPosition(4L, sc.getResponsibleNavigatorId(), subquery, setJoin));
         }
         if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), orderRoot, cq));
+            predicates.add(filteredByEmployeeOrderPosition(5L, sc.getResponsibleDriverId(), subquery, setJoin));
         }
         if (nonNull(sc.getSearch())) {
-            searchOnBigTable(sc, orderRoot, predicates, cq);
+            searchOnBigTable(sc, orderRoot, predicates, cq, subquery, setJoin);
         }
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
@@ -186,54 +194,64 @@ public class BigOrderTableRepository {
     private Predicate filterByPaymentDate(String from, String to, Root<Order> orderRoot, CriteriaQuery<Order> cq) {
         Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
         Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-        ListJoin<Order, Payment> join = paymentRoot.joinList("payment", JoinType.LEFT);
+        ListJoin<Order, Payment> join = paymentRoot.joinList(PAYMENT, JoinType.LEFT);
+
         subQueryPayment.select(join).where(
             criteriaBuilder.between(
                 join.get("settlementDate").as(String.class),
                 from,
                 to));
+
         return criteriaBuilder.exists(subQueryPayment);
     }
 
-    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee, Root<Order> orderRoot,
-        CriteriaQuery<Order> cq) {
-        Subquery<EmployeeOrderPosition> subQueryOEP = cq.subquery(EmployeeOrderPosition.class);
-        Root<Order> oepRoot = subQueryOEP.correlate(orderRoot);
-        SetJoin<Order, EmployeeOrderPosition> join = oepRoot.joinSet("employeeOrderPositions", JoinType.LEFT);
-        join.join("employee", JoinType.LEFT);
-        join.join("position", JoinType.LEFT);
-
-        CriteriaBuilder.In<Long> responsibleEmployeeId = criteriaBuilder.in(join.get("employee").get("id"));
+    private Predicate filteredByEmployeeOrderPosition(Long idPosition, Long[] idEmployee,
+        Subquery<EmployeeOrderPosition> subQueryOEP, Join<Order, EmployeeOrderPosition> join) {
+        CriteriaBuilder.In<Long> responsibleEmployeeId = criteriaBuilder.in(join.get(EMPLOYEE).get("id"));
         Arrays.stream(idEmployee)
             .forEach(responsibleEmployeeId::value);
 
         subQueryOEP.select(join).where(criteriaBuilder.and(
             criteriaBuilder.equal(join.get("position").get("id"), idPosition),
             responsibleEmployeeId));
+
         return criteriaBuilder.exists(subQueryOEP);
     }
 
     private void searchOnBigTable(OrderSearchCriteria sc, Root<Order> orderRoot, List<Predicate> predicates,
-        CriteriaQuery<Order> cq) {
+        CriteriaQuery<Order> cq, Subquery<EmployeeOrderPosition> subquery,
+        SetJoin<Order, EmployeeOrderPosition> setJoin) {
         String[] searchWord = sc.getSearch().split(" ");
+
         for (String s : searchWord) {
             predicates.add(criteriaBuilder.or(
                 formOrderLikePredicate(s, orderRoot),
                 formUserLikePredicate(s, orderRoot),
                 formUbsUserLikePredicate(s, orderRoot),
                 formAddressLikePredicate(s, orderRoot),
-                formPaymentLikePredicate(s, cq, orderRoot)));
+                formPaymentLikePredicate(s, cq, orderRoot),
+                formPaymentSumLikePredicate(s, cq, orderRoot),
+                fromEOPLikePredicate(s, subquery, setJoin),
+                fromBagAmount(s, cq, orderRoot),
+                fromCertificate(s, cq, orderRoot)));
         }
     }
 
     private Predicate formOrderLikePredicate(String s, Root<Order> orderRoot) {
         Expression<String> id = orderRoot.get("id").as(String.class);
         Expression<String> orderDate = orderRoot.get("orderDate").as(String.class);
+        Expression<String> exportDateTime = orderRoot.get("deliverFrom").as(String.class);
+        Expression<String> orderStatus = orderRoot.get("orderStatus").as(String.class);
+        Expression<String> orderPaymentStatus = orderRoot.get("orderPaymentStatus").as(String.class);
         Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
         Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
+
         return criteriaBuilder.or(
             criteriaBuilder.like(id, "%" + s + "%"),
             criteriaBuilder.like(orderDate, "%" + s + "%"),
+            criteriaBuilder.like(exportDateTime, "%" + s + "%"),
+            criteriaBuilder.like(orderStatus, "%" + s + "%"),
+            criteriaBuilder.like(orderPaymentStatus, "%" + s + "%"),
             criteriaBuilder.like(note, "%" + s.toUpperCase() + "%"),
             criteriaBuilder.like(comment, "%" + s.toUpperCase() + "%"));
     }
@@ -279,11 +297,66 @@ public class BigOrderTableRepository {
     }
 
     private Predicate formPaymentLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
+        Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
+        ListJoin<Order, Payment> join = paymentRoot.joinList(PAYMENT, JoinType.LEFT);
+
+        subQueryPayment.select(join).where(criteriaBuilder.or(
+            criteriaBuilder.like(join.get("settlementDate"), "%" + s + "%")));
+
+        return criteriaBuilder.exists(subQueryPayment);
+    }
+
+    private Predicate formPaymentSumLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
         Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
         Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-        Join<Order, Payment> paymentJoin = paymentRoot.join("payment");
+        Join<Order, Payment> paymentJoin = paymentRoot.join(PAYMENT);
+
         subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
+
         return criteriaBuilder.or(
             criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%"));
+    }
+
+    private Predicate fromEOPLikePredicate(String s, Subquery<EmployeeOrderPosition> subQueryOEP,
+        Join<Order, EmployeeOrderPosition> join) {
+        Expression<String> firstName = join.get(EMPLOYEE).get("firstName");
+        Expression<String> lastName = join.get(EMPLOYEE).get("lastName");
+
+        Predicate name = criteriaBuilder.or(
+            criteriaBuilder.like(criteriaBuilder.upper(firstName), "%" + s.toUpperCase() + "%"),
+            criteriaBuilder.like(criteriaBuilder.upper(lastName), "%" + s.toUpperCase() + "%"));
+
+        subQueryOEP.select(join).where(name);
+
+        return criteriaBuilder.exists(subQueryOEP);
+    }
+
+    private Predicate fromBagAmount(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        Subquery<Integer> subBagAmount = cq.subquery(Integer.class);
+        Root<Order> bagAmountRoot = subBagAmount.correlate(orderRoot);
+        MapJoin<Order, Integer, Integer> bagAmountJoin = bagAmountRoot.joinMap("amountOfBagsOrdered");
+
+        subBagAmount.select(criteriaBuilder.sum(bagAmountJoin.value()));
+
+        return criteriaBuilder.or(
+            criteriaBuilder.like(subBagAmount.as(String.class), "%" + s + "%"));
+    }
+
+    private Predicate fromCertificate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        Subquery<Certificate> subCertificate = cq.subquery(Certificate.class);
+        Root<Order> certificateRoot = subCertificate.correlate(orderRoot);
+        SetJoin<Order, Certificate> certificateJoin = certificateRoot.joinSet("certificates");
+
+        Expression<String> certificateCode = certificateJoin.get("code");
+        Expression<String> certificatePoints = certificateJoin.get("points").as(String.class);
+
+        Predicate predicate = criteriaBuilder.or(
+            criteriaBuilder.like(certificateCode, "%" + s + "%"),
+            criteriaBuilder.like(certificatePoints, "%" + s + "%"));
+
+        subCertificate.select(certificateJoin).where(predicate);
+
+        return criteriaBuilder.exists(subCertificate);
     }
 }

@@ -30,6 +30,8 @@ import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,7 @@ import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -151,11 +154,8 @@ class UBSManagementServiceImplTest {
     private UBSManagementServiceImpl ubsManagementServiceMock;
 
     @Mock
-    private LocationRepository locationRepository;
-    @Mock
     private ServiceRepository serviceRepository;
-    @Mock
-    private CourierRepository courierRepository;
+
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
 
@@ -176,19 +176,6 @@ class UBSManagementServiceImplTest {
                     .build());
             }
         }
-    }
-
-    private static Stream<Arguments> provideDistanceAndLitres() {
-        return Stream.of(Arguments.of(-1, 5),
-            Arguments.of(25, 5),
-            Arguments.of(10, -5),
-            Arguments.of(10, 20000));
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideDistanceAndLitres")
-    void getClusteredCoordsInvalidParametersTest(double invalidDistance, int invalidLitres) {
-        assertThrows(Exception.class, () -> ubsManagementService.getClusteredCoords(invalidDistance, invalidLitres));
     }
 
     @Test
@@ -349,7 +336,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getFormedOrder();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1L").build();
+            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId(1L).build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
@@ -1360,6 +1347,269 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid");
 
         verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria);
+    }
+
+    @Test
+    void getOrdersCorrectCalculateWhenAllValueNotNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        OrderPage orderPage = OrderPage.builder()
+            .pageNumber(1)
+            .build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder()
+            .search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateOrderStatusIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).getUbsUser().setFirstName(null);
+        pageOrder.getContent().get(0).getUbsUser().setLastName(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setClientName("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculatePaymentIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setPayment(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setPaymentDate("-");
+        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
+        bigOrderTableDTOPage.getContent().get(0).setPayment("-");
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-200L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateUbsUserIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setUbsUser(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setClientName("-");
+        bigOrderTableDTOPage.getContent().get(0).setPhoneNumber("-");
+        bigOrderTableDTOPage.getContent().get(0).setEmail("-");
+        bigOrderTableDTOPage.getContent().get(0).setRegion("-");
+        bigOrderTableDTOPage.getContent().get(0).setSettlement("-");
+        bigOrderTableDTOPage.getContent().get(0).setDistrict("-");
+        bigOrderTableDTOPage.getContent().get(0).setCommentToAddressForClient("-");
+        bigOrderTableDTOPage.getContent().get(0).setAddress("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateAddressFieldsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setRegion(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setCity(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setDistrict(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setStreet(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setHouseNumber(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setHouseCorpus(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setEntranceNumber(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setRegion("-");
+        bigOrderTableDTOPage.getContent().get(0).setSettlement("-");
+        bigOrderTableDTOPage.getContent().get(0).setDistrict("-");
+        bigOrderTableDTOPage.getContent().get(0).setAddress("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateCertificatesNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setCertificates(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setOrderCertificateCode("-");
+        bigOrderTableDTOPage.getContent().get(0).setOrderCertificatePoints("-");
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(400L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateUserIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setUser(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setSenderName("-");
+        bigOrderTableDTOPage.getContent().get(0).setSenderPhone("-");
+        bigOrderTableDTOPage.getContent().get(0).setSenderEmail("-");
+        bigOrderTableDTOPage.getContent().get(0).setViolationsAmount(0);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateDateAndTimeOfExportNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setDeliverFrom(null);
+        pageOrder.getContent().get(0).setDeliverTo(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setDateOfExport("-");
+        bigOrderTableDTOPage.getContent().get(0).setTimeOfExport("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateOrderDateNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setOrderDate(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setOrderDate("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectIdOrderFromShopDateNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setAdditionalOrders(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setIdOrderFromShop("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectEmployeeOrderPositionIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setEmployeeOrderPositions(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleCaller("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleDriver("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleLogicMan("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleNavigator("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCommentsForOrderIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setNote(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setCommentsForOrder("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectBlockedByEmployeeIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setBlockedByEmployee(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setBlockedBy("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
     }
 
     @Test
