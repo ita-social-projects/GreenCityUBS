@@ -19,6 +19,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
@@ -1030,6 +1031,10 @@ public class ModelUtils {
             .id(1L)
             .name("Петрівка")
             .build();
+    }
+
+    public static List<ReceivingStation> getReceivingList() {
+        return List.of(ReceivingStation.builder().id(1L).build());
     }
 
     public static UbsTableCreationDto getUbsTableCreationDto() {
@@ -2105,6 +2110,24 @@ public class ModelUtils {
             .price(100)
             .capacity(10)
             .commission(21)
+            .fullPrice(20)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(21)
+                .build());
+    }
+
+    public static List<Bag> getBag2list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(20)
             .build());
     }
 
@@ -2118,12 +2141,13 @@ public class ModelUtils {
     }
 
     public static OrderStatusTranslation getStatusTranslation() {
-        return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(1L).name("ds").build();
+        return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(0L).name("ds").build();
     }
 
     public static BagInfoDto getBagInfoDto() {
         return BagInfoDto.builder()
             .id(1)
+            .name("name")
             .price(100)
             .capacity(10)
             .build();
@@ -2857,4 +2881,71 @@ public class ModelUtils {
         return new PageImpl<>(getBigOrderTableDTO(), pageable, 1L);
     }
 
+    public static Order getOrderForGetOrderStatusData2Test() {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(1, 1);
+        hashMap.put(2, 1);
+
+        return Order.builder()
+            .id(1L)
+            .amountOfBagsOrdered(hashMap)
+            .confirmedQuantity(hashMap)
+            .exportedQuantity(hashMap)
+            .pointsToUse(100)
+            .orderStatus(OrderStatus.FORMED)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId("1L")
+                .amount(20000L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .addressComment("near mall")
+                    .houseCorpus("1")
+                    .houseNumber("4")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .receivingStation("C")
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .courierLocations(CourierLocation.builder()
+                .courier(Courier.builder()
+                    .id(1L)
+                    .build())
+                .id(1L)
+                .location(Location.builder()
+                    .id(1L)
+                    .build())
+                .maxAmountOfBigBags(2L)
+                .maxPriceOfOrder(500000L)
+                .minAmountOfBigBags(99L)
+                .minPriceOfOrder(500L)
+                .build())
+            .build();
+    }
 }
