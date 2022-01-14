@@ -111,7 +111,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .fee(Long.valueOf(dto.getFee()))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
-            .paymentId(Long.valueOf(dto.getPayment_id()))
+            .paymentId(String.valueOf(dto.getPayment_id()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
@@ -1180,7 +1180,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         payment.setPaymentSystem("LiqPay");
         payment.setCardType((String) map.get("sender_card_type"));
         payment.setResponseDescription((String) map.get("err_description"));
-        payment.setPaymentId((Long) map.get("payment_id"));
+        payment.setPaymentId((String) map.get("payment_id"));
         payment.setComment((String) map.get("description"));
         payment.setPaymentType(PaymentType.AUTO);
         payment.setSenderCellPhone((String) map.get("sender_phone"));
@@ -1539,7 +1539,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .fee(Long.valueOf(dto.getFee()))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
-            .paymentId(Long.valueOf(dto.getPayment_id()))
+            .paymentId(String.valueOf(dto.getPayment_id()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
@@ -1565,7 +1565,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
         if (dto.getOrder_status().equals("approved")) {
-            orderPayment.setPaymentId(Long.valueOf(dto.getPayment_id()));
+            orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);

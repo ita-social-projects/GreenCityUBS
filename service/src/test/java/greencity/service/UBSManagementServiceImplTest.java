@@ -7,7 +7,6 @@ import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
@@ -30,14 +29,13 @@ import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
+import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -52,7 +50,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -151,11 +148,8 @@ class UBSManagementServiceImplTest {
     private UBSManagementServiceImpl ubsManagementServiceMock;
 
     @Mock
-    private LocationRepository locationRepository;
-    @Mock
     private ServiceRepository serviceRepository;
-    @Mock
-    private CourierRepository courierRepository;
+
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
 
@@ -176,19 +170,6 @@ class UBSManagementServiceImplTest {
                     .build());
             }
         }
-    }
-
-    private static Stream<Arguments> provideDistanceAndLitres() {
-        return Stream.of(Arguments.of(-1, 5),
-            Arguments.of(25, 5),
-            Arguments.of(10, -5),
-            Arguments.of(10, 20000));
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideDistanceAndLitres")
-    void getClusteredCoordsInvalidParametersTest(double invalidDistance, int invalidLitres) {
-        assertThrows(Exception.class, () -> ubsManagementService.getClusteredCoords(invalidDistance, invalidLitres));
     }
 
     @Test
@@ -349,7 +330,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getFormedOrder();
         Payment payment = ModelUtils.getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId(1L).build();
+            .paymentDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
@@ -367,9 +348,11 @@ class UBSManagementServiceImplTest {
     @Test
     void checkDeleteManualPayment() {
         User user = ModelUtils.getTestUser();
+        Order order = ModelUtils.getFormedOrder();
         user.setRecipientName("Yuriy");
         user.setRecipientSurname("Gerasum");
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1l)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1l);
         doNothing().when(fileService).delete("");
@@ -1230,53 +1213,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusDataTest() {
-        Order order = ModelUtils.getOrderForGetOrderStatusDataTest();
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-        Map<Integer, Integer> hashMap = new HashMap<>();
-        hashMap.put(1, 1);
-        order.setAmountOfBagsOrdered(hashMap);
-        order.setConfirmedQuantity(hashMap);
-        order.setExportedQuantity(hashMap);
-        order.setPointsToUse(100);
-        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
-        Language language = ModelUtils.getLanguage();
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
-        when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 0L))
-            .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
-        when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
-        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
-                .thenReturn("Abc");
-        when(orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(1L))
-            .thenReturn(List.of(ModelUtils.getStatusTranslation(), ModelUtils.getStatusTranslation()));
-        when(orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslationsByLanguageId(1L))
-            .thenReturn(
-                List.of(ModelUtils.getOrderPaymentStatusTranslation(), ModelUtils.getOrderPaymentStatusTranslation()));
-        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L))
-            .thenReturn(ModelUtils.getUserInfoDto());
-        when(receivingStationRepository.findAll())
-            .thenReturn(List.of(ModelUtils.getReceivingStation(), ModelUtils.getReceivingStation()));
-        lenient().when(ubsManagementServiceMock.getOrderExportDetails(1L))
-            .thenReturn(ModelUtils.getExportDetails());
-        lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
-            .thenReturn(ModelUtils.getPaymentTableInfoDto());
-        when(serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId()))
-            .thenReturn(1);
-        ubsManagementService.getOrderStatusData(1L, "ua");
-        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(orderRepository, times(1)).getOrderDetails(1L);
-        verify(orderRepository, times(5)).findById(1L);
-        verify(languageRepository, times(1)).findIdByCode("ua");
-        verify(bagRepository, times(1)).findAll();
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
-    }
-
-    @Test
     void getOrderStatusDataThrowsUnexistingOrderExceptionTest() {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderStatusData(100L, "ua");
@@ -1360,6 +1296,269 @@ class UBSManagementServiceImplTest {
         ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid");
 
         verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria);
+    }
+
+    @Test
+    void getOrdersCorrectCalculateWhenAllValueNotNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        OrderPage orderPage = OrderPage.builder()
+            .pageNumber(1)
+            .build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder()
+            .search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateOrderStatusIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).getUbsUser().setFirstName(null);
+        pageOrder.getContent().get(0).getUbsUser().setLastName(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setClientName("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculatePaymentIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setPayment(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setPaymentDate("-");
+        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
+        bigOrderTableDTOPage.getContent().get(0).setPayment("-");
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-200L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateUbsUserIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setUbsUser(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setClientName("-");
+        bigOrderTableDTOPage.getContent().get(0).setPhoneNumber("-");
+        bigOrderTableDTOPage.getContent().get(0).setEmail("-");
+        bigOrderTableDTOPage.getContent().get(0).setRegion("-");
+        bigOrderTableDTOPage.getContent().get(0).setSettlement("-");
+        bigOrderTableDTOPage.getContent().get(0).setDistrict("-");
+        bigOrderTableDTOPage.getContent().get(0).setCommentToAddressForClient("-");
+        bigOrderTableDTOPage.getContent().get(0).setAddress("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateAddressFieldsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setRegion(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setCity(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setDistrict(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setStreet(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setHouseNumber(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setHouseCorpus(null);
+        pageOrder.getContent().get(0).getUbsUser().getAddress().setEntranceNumber(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setRegion("-");
+        bigOrderTableDTOPage.getContent().get(0).setSettlement("-");
+        bigOrderTableDTOPage.getContent().get(0).setDistrict("-");
+        bigOrderTableDTOPage.getContent().get(0).setAddress("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateCertificatesNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setCertificates(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setOrderCertificateCode("-");
+        bigOrderTableDTOPage.getContent().get(0).setOrderCertificatePoints("-");
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(400L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateUserIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setUser(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setSenderName("-");
+        bigOrderTableDTOPage.getContent().get(0).setSenderPhone("-");
+        bigOrderTableDTOPage.getContent().get(0).setSenderEmail("-");
+        bigOrderTableDTOPage.getContent().get(0).setViolationsAmount(0);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateDateAndTimeOfExportNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setDeliverFrom(null);
+        pageOrder.getContent().get(0).setDeliverTo(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setDateOfExport("-");
+        bigOrderTableDTOPage.getContent().get(0).setTimeOfExport("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCalculateOrderDateNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setOrderDate(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setOrderDate("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectIdOrderFromShopDateNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setAdditionalOrders(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setIdOrderFromShop("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectEmployeeOrderPositionIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setEmployeeOrderPositions(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleCaller("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleDriver("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleLogicMan("-");
+        bigOrderTableDTOPage.getContent().get(0).setResponsibleNavigator("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectCommentsForOrderIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setNote(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setCommentsForOrder("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
+    void getOrdersCorrectBlockedByEmployeeIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setBlockedByEmployee(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setBlockedBy("-");
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
     }
 
     @Test
@@ -1467,5 +1666,109 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderSumDetails(1L);
         });
+    }
+
+    @Test
+    void getOrderStatusDataTest() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+            1L);
+        verify(receivingStationRepository).findAll();
+    }
+
+    @Test
+    void getOrderStatusData2Test() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+            1L);
+        verify(receivingStationRepository).findAll();
+    }
+
+    @Test
+    void getOrderStatusDataExceptionTest() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        assertThrows(ReceivingStationNotFoundException.class, () -> {
+            ubsManagementService.getOrderStatusData(1L, "ua");
+        });
+
     }
 }
