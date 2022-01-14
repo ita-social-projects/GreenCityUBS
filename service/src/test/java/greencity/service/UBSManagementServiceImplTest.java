@@ -7,7 +7,6 @@ import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
@@ -30,16 +29,13 @@ import greencity.service.ubs.EventService;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
-import org.junit.Assert;
-import org.junit.Before;
+import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -51,11 +47,9 @@ import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1219,53 +1213,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusDataTest() {
-        Order order = ModelUtils.getOrderForGetOrderStatusDataTest();
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-        Map<Integer, Integer> hashMap = new HashMap<>();
-        hashMap.put(1, 1);
-        order.setAmountOfBagsOrdered(hashMap);
-        order.setConfirmedQuantity(hashMap);
-        order.setExportedQuantity(hashMap);
-        order.setPointsToUse(100);
-        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
-        Language language = ModelUtils.getLanguage();
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
-        when(bagRepository.findAll()).thenReturn(ModelUtils.getBaglist());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(4, 0L))
-            .thenReturn(Optional.ofNullable(ModelUtils.getStatusTranslation()));
-        when(languageRepository.findLanguageByCode(anyString())).thenReturn(language);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
-        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
-                .thenReturn("Abc");
-        when(orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(1L))
-            .thenReturn(List.of(ModelUtils.getStatusTranslation(), ModelUtils.getStatusTranslation()));
-        when(orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslationsByLanguageId(1L))
-            .thenReturn(
-                List.of(ModelUtils.getOrderPaymentStatusTranslation(), ModelUtils.getOrderPaymentStatusTranslation()));
-        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L))
-            .thenReturn(ModelUtils.getUserInfoDto());
-        when(receivingStationRepository.findAll())
-            .thenReturn(List.of(ModelUtils.getReceivingStation(), ModelUtils.getReceivingStation()));
-        lenient().when(ubsManagementServiceMock.getOrderExportDetails(1L))
-            .thenReturn(ModelUtils.getExportDetails());
-        lenient().when(ubsManagementServiceMock.getPaymentInfo(1L, 1L))
-            .thenReturn(ModelUtils.getPaymentTableInfoDto());
-        when(serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId()))
-            .thenReturn(1);
-        ubsManagementService.getOrderStatusData(1L, "ua");
-        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(orderRepository, times(1)).getOrderDetails(1L);
-        verify(orderRepository, times(5)).findById(1L);
-        verify(languageRepository, times(1)).findIdByCode("ua");
-        verify(bagRepository, times(1)).findAll();
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(4, 0L);
-    }
-
-    @Test
     void getOrderStatusDataThrowsUnexistingOrderExceptionTest() {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderStatusData(100L, "ua");
@@ -1719,5 +1666,109 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderSumDetails(1L);
         });
+    }
+
+    @Test
+    void getOrderStatusDataTest() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+            1L);
+        verify(receivingStationRepository).findAll();
+    }
+
+    @Test
+    void getOrderStatusData2Test() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+            1L);
+        verify(receivingStationRepository).findAll();
+    }
+
+    @Test
+    void getOrderStatusDataExceptionTest() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(ModelUtils.getCertificateList());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+                .thenReturn("name");
+        assertThrows(ReceivingStationNotFoundException.class, () -> {
+            ubsManagementService.getOrderStatusData(1L, "ua");
+        });
+
     }
 }
