@@ -10,8 +10,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@EqualsAndHashCode(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
-@ToString(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
+@EqualsAndHashCode(exclude = {"courierLocations", "bags", "locationTranslations"})
+@ToString(exclude = {"courierLocations", "bags", "locationTranslations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
