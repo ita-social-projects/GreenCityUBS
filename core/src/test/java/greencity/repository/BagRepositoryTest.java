@@ -9,14 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
 public class BagRepositoryTest extends IntegrationTestBase {
     @Autowired
-    private BagRepository bagRepository;
+    AdditionalBagsInfoRepo additionalBagsInfoRepo;
 
     @Test
     void findById() {
-        Assertions.assertNull(bagRepository.findBagByOrderId(1L));
+        List<Map<String, Object>> expected = new ArrayList<>();
+        Assertions.assertEquals(expected,additionalBagsInfoRepo.getAdditionalBagInfo(1L,"test@mail.com"));
     }
 }

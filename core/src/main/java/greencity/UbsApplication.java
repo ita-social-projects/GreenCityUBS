@@ -12,8 +12,10 @@ public class UbsApplication {
      * Main method of SpringBoot app.
      */
     public static void main(String[] args) {
-        ApiContextInitializer.init();
         SpringApplication.run(UbsApplication.class, args);
+    }
+    static{
+        ApiContextInitializer.init();
     }
 
     /**
