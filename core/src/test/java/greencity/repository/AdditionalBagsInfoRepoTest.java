@@ -15,7 +15,7 @@ import java.util.Map;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
-public class BagRepositoryTest extends IntegrationTestBase {
+class AdditionalBagsInfoRepoTest extends IntegrationTestBase {
     @Autowired
     AdditionalBagsInfoRepo additionalBagsInfoRepo;
 
