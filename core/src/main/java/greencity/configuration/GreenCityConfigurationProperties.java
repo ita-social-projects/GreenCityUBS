@@ -5,11 +5,10 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-
 @Configuration
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "greencity",ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "greencity", ignoreUnknownFields = false)
 public class GreenCityConfigurationProperties {
     private String tokenKey;
 
@@ -30,6 +29,4 @@ public class GreenCityConfigurationProperties {
     private String liqPayPublicKey;
 
     private String liqPayPrivateKey;
-
-
 }

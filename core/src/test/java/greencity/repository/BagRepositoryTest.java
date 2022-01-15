@@ -22,6 +22,6 @@ public class BagRepositoryTest extends IntegrationTestBase {
     @Test
     void findById() {
         List<Map<String, Object>> expected = new ArrayList<>();
-        Assertions.assertEquals(expected,additionalBagsInfoRepo.getAdditionalBagInfo(1L,"test@mail.com"));
+        Assertions.assertEquals(expected, additionalBagsInfoRepo.getAdditionalBagInfo(1L, "test@mail.com"));
     }
 }
