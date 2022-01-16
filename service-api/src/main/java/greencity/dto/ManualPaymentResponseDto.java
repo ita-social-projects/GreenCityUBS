@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class ManualPaymentResponseDto {
     private Long id;
-    private String settlementDate;
+    private String settlementdate;
     private Long amount;
     private String paymentId;
     private String receiptLink;

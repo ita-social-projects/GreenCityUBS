@@ -319,7 +319,7 @@ public class ModelUtils {
     public static ManualPaymentResponseDto getResponseDto() {
         return ManualPaymentResponseDto.builder()
             .amount(500l)
-            .settlementDate("09-02-2021")
+            .settlementdate("09-02-2021")
             .paymentId("10l")
             .currentDate("10-02-2021")
             .receiptLink("somelink.com")
@@ -330,7 +330,7 @@ public class ModelUtils {
     public static ManualPaymentRequestDto getRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500l)
-            .settlementDate("09-02-2021")
+            .settlementdate("09-02-2021")
             .receiptLink("somelink.com")
             .paymentId("10l")
             .build();
