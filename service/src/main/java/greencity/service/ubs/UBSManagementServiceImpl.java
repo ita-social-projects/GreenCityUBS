@@ -1639,14 +1639,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment changePaymentEntity(Payment updatePayment,
         ManualPaymentRequestDto requestDto,
         MultipartFile image) {
-        updatePayment.setSettlementDate(requestDto.getSettlementDate());
+        updatePayment.setSettlementDate(requestDto.getSettlementdate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
+        if (requestDto.getImagePath().isEmpty() || requestDto.getImagePath() == null) {
+            fileService.delete(updatePayment.getImagePath());
+            updatePayment.setImagePath(null);
+        }
         if (image != null) {
             updatePayment.setImagePath(fileService.upload(image));
-        } else {
-            updatePayment.setImagePath(null);
         }
         return updatePayment;
     }
@@ -1656,7 +1658,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
-            .settlementDate(payment.getSettlementDate())
+            .settlementdate(payment.getSettlementDate())
             .amount(payment.getAmount())
             .receiptLink(payment.getReceiptLink())
             .imagePath(payment.getImagePath())
@@ -1667,7 +1669,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
         User currentUser) {
         Payment payment = Payment.builder()
-            .settlementDate(paymentRequestDto.getSettlementDate())
+            .settlementDate(paymentRequestDto.getSettlementdate())
             .amount(paymentRequestDto.getAmount())
             .paymentStatus(PaymentStatus.PAID)
             .paymentId(paymentRequestDto.getPaymentId())
