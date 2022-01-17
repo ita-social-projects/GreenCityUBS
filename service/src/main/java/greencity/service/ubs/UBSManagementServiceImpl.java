@@ -1643,8 +1643,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
-        if (requestDto.getImagePath().isEmpty() || requestDto.getImagePath() == null) {
-            fileService.delete(updatePayment.getImagePath());
+        if (requestDto.getImagePath().isEmpty() && requestDto.getImagePath() != null) {
+            if (updatePayment.getImagePath() != null) {
+                fileService.delete(updatePayment.getImagePath());
+            }
             updatePayment.setImagePath(null);
         }
         if (image != null) {
