@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
-import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
@@ -391,7 +390,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
                 final String historyChanges;
 
-                if (existedBefore) {
+                if (existedBefore.equals(Boolean.TRUE)) {
                     employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
                     historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.TRUE);
                 } else {
