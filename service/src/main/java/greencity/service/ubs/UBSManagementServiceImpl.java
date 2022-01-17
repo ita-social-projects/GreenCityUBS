@@ -1639,27 +1639,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment changePaymentEntity(Payment updatePayment,
         ManualPaymentRequestDto requestDto,
         MultipartFile image) {
-        updatePayment.setSettlementDate(requestDto.getPaymentDate());
+        updatePayment.setSettlementDate(requestDto.getSettlementdate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
-        if (updatePayment.getImagePath() != null) {
-            fileService.delete(updatePayment.getImagePath());
+        if (requestDto.getImagePath().isEmpty() && requestDto.getImagePath() != null) {
+            if (updatePayment.getImagePath() != null) {
+                fileService.delete(updatePayment.getImagePath());
+            }
+            updatePayment.setImagePath(null);
         }
         if (image != null) {
             updatePayment.setImagePath(fileService.upload(image));
-        } else {
-            updatePayment.setImagePath(null);
         }
-
         return updatePayment;
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return ManualPaymentResponseDto.builder()
+            .id(payment.getId())
             .paymentId(payment.getPaymentId())
-            .paymentDate(payment.getSettlementDate())
+            .settlementdate(payment.getSettlementDate())
             .amount(payment.getAmount())
             .receiptLink(payment.getReceiptLink())
             .imagePath(payment.getImagePath())
@@ -1670,7 +1671,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
         User currentUser) {
         Payment payment = Payment.builder()
-            .settlementDate(paymentRequestDto.getPaymentDate())
+            .settlementDate(paymentRequestDto.getSettlementdate())
             .amount(paymentRequestDto.getAmount())
             .paymentStatus(PaymentStatus.PAID)
             .paymentId(paymentRequestDto.getPaymentId())

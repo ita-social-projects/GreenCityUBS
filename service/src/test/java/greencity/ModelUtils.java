@@ -1138,10 +1138,11 @@ public class ModelUtils {
 
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
-            .paymentDate("02-08-2021")
+            .settlementdate("02-08-2021")
             .amount(500l)
             .receiptLink("link")
             .paymentId("1")
+            .imagePath("fdhgh")
             .build();
     }
 
