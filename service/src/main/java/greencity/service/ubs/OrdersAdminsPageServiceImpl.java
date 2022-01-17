@@ -387,23 +387,24 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                Boolean existedBefore = employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
+                Boolean existedBefore =
+                    employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
                 final String historyChanges;
 
-                if (existedBefore){
+                if (existedBefore) {
                     employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
                     historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.TRUE);
-                }
-                else {
+                } else {
                     List<EmployeeOrderPosition> employeeOrderPositions =
-                            employeeOrderPositionRepository.findAllByOrderId(orderId);
+                        employeeOrderPositionRepository.findAllByOrderId(orderId);
                     EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
-                            .employee(existedEmployee).position(existedPosition)
-                            .order(existedOrder).build();
+                        .employee(existedEmployee).position(existedPosition)
+                        .order(existedOrder).build();
                     employeeOrderPositions.add(newEmployeeOrderPosition);
                     Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
                     existedOrder.setEmployeeOrderPositions(positionSet);
-                    historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
+                    historyChanges =
+                        eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
                 }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
