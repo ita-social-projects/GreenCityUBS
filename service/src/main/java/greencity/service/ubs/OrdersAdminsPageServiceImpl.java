@@ -1,16 +1,19 @@
 package greencity.service.ubs;
 
 import greencity.client.RestClient;
+import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.BadOrderStatusRequestException;
+import greencity.exceptions.UserNotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -41,6 +44,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
+    private final EventService eventService;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -164,15 +168,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, userUuid));
             case "responsibleCaller":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, userUuid));
             case "responsibleLogicMan":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, userUuid));
             case "responsibleDriver":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L, employeeId));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L, userUuid));
             case "responsibleNavigator":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L, employeeId));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L, userUuid));
             default:
                 return createReturnForSwitchChangeOrder(new ArrayList<>());
         }
@@ -368,7 +372,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
-        Long employeeId) {
+        String uuid) {
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -381,24 +387,29 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                List<EmployeeOrderPosition> employeeOrderPositions =
-                    employeeOrderPositionRepository.findAllByOrderId(orderId);
-                EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
-                    .employee(existedEmployee).position(existedPosition)
-                    .order(existedOrder).build();
+                Boolean existedBefore = employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
+                final String historyChanges;
 
-                if (Boolean.TRUE
-                    .equals(employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition))) {
+                if (existedBefore){
                     employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
-                } else {
-                    employeeOrderPositionRepository.save(newEmployeeOrderPosition);
+                    historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.TRUE);
                 }
-                employeeOrderPositions.add(newEmployeeOrderPosition);
-                Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
-                existedOrder.setEmployeeOrderPositions(positionSet);
+                else {
+                    List<EmployeeOrderPosition> employeeOrderPositions =
+                            employeeOrderPositionRepository.findAllByOrderId(orderId);
+                    EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
+                            .employee(existedEmployee).position(existedPosition)
+                            .order(existedOrder).build();
+                    employeeOrderPositions.add(newEmployeeOrderPosition);
+                    Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
+                    existedOrder.setEmployeeOrderPositions(positionSet);
+                    historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
+                }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
+                eventService.save(historyChanges,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
