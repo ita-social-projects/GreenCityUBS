@@ -190,7 +190,7 @@ class ClientControllerTest {
 
     @Test
     void getUserBonusesTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-user-bonuses")
+        this.mockMvc.perform(get(ubsLink + "/user-bonuses")
             .principal(principal)).andExpect(status().isOk());
     }
 }
