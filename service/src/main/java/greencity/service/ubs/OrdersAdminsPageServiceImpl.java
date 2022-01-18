@@ -11,8 +11,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.BadOrderStatusRequestException;
-import greencity.exceptions.UserNotFoundException;
+import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -375,15 +374,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
+            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
-            .orElseThrow(() -> new EntityNotFoundException(POSITION_NOT_FOUND_BY_ID));
+            .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 Boolean existedBefore =
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
                 final String historyChanges;

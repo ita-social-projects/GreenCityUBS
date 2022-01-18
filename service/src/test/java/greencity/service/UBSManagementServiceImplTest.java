@@ -1467,17 +1467,11 @@ class UBSManagementServiceImplTest {
             .thenReturn(List.of(ModelUtils.getReceivingStation()));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc");
+        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
+        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
 
         verify(ubsClientService, times(1))
             .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "abc");
-    }
-
-    @Test
-    void updateOrderAdminPageInfoWithNullValuesTest() {
-        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
-        ubsManagementServiceMock.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
-
-        verify(ubsManagementServiceMock).updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
     }
 
     @Test

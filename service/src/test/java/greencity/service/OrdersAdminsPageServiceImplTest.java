@@ -2,31 +2,35 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.client.RestClient;
-import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
+import greencity.exceptions.EmployeeNotFoundException;
+import greencity.exceptions.PositionNotFoundException;
+import greencity.exceptions.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
-import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersAdminsPageServiceImpl;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -148,4 +152,52 @@ class OrdersAdminsPageServiceImplTest {
         verify(eventService).changesWithResponsibleEmployee(1L, Boolean.FALSE);
     }
 
+    @Test
+    void responsibleEmployeeThrowsUserNotFoundException() {
+        String uuid = "uuid";
+
+        assertThrows(UserNotFoundException.class,
+            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+    }
+
+    @Test
+    void responsibleEmployeeThrowsEntityNotFoundException() {
+        String uuid = "uuid";
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+
+        assertThrows(EmployeeNotFoundException.class,
+            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+    }
+
+    @Test
+    void responsibleEmployeeThrowsPositionNotFoundException() {
+        String uuid = "uuid";
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+
+        assertThrows(PositionNotFoundException.class,
+            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+    }
+
+    @Test
+    void responsibleEmployeeCatchException() {
+        String uuid = "uuid";
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Position> position = Optional.of(ModelUtils.getPosition());
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(positionRepository.findById(1l)).thenReturn(position);
+
+        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(employeeRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+    }
 }

@@ -2234,7 +2234,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         currentUser));
             }
         } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
-            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
+            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException
+            | EmployeeNotFoundException
+            | PositionNotFoundException e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
         }
     }
