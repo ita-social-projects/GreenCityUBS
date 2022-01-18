@@ -143,7 +143,6 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private UBSManagementServiceImpl ubsManagementServiceMock;
-
     @Mock
     private ServiceRepository serviceRepository;
 
@@ -298,6 +297,11 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void deleteViolationThrowsException() {
+        assertThrows(UserNotFoundException.class, () -> ubsManagementService.deleteViolation(1L, "abc"));
+    }
+
+    @Test
     void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
         User user = ModelUtils.getTestUser();
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
@@ -310,12 +314,10 @@ class UBSManagementServiceImplTest {
     void deleteViolationFromOrderByOrderId() {
         User user = ModelUtils.getTestUser();
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        Violation violation = ModelUtils.getViolation();
+        Violation violation = ModelUtils.getViolation2();
         Long id = ModelUtils.getViolation().getOrder().getId();
-        Order order = ModelUtils.getOrder();
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
         doNothing().when(violationRepository).deleteById(id);
-//        doNothing().when(userRepository.countTotalUsersViolations(user.getId()));
         ubsManagementService.deleteViolation(id, "abc");
 
         verify(violationRepository, times(1)).deleteById(id);
@@ -541,6 +543,15 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateOrderDetailStatusThrowException() {
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
+        assertThrows(PaymentNotFoundException.class, () -> {
+            ubsManagementService.updateOrderDetailStatus(1L, ModelUtils.getTestOrderDetailStatusRequestDto(), "uuid");
+        });
+    }
+
+    @Test
     void updateOrderDetailStatus() {
         User user = ModelUtils.getTestUser();
         user.setRecipientName("Петро");
@@ -600,6 +611,33 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
 
+        testOrderDetail.setOrderStatus(OrderStatus.DONE.toString());
+        expectedObject.setOrderStatus(OrderStatus.DONE.toString());
+        OrderDetailStatusDto producedObjectDone = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectDone.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectDone.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectDone.getDate());
+
+        testOrderDetail.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
+        expectedObject.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF.toString());
+        OrderDetailStatusDto producedObjectBroughtItHimself = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectBroughtItHimself.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
+
+        testOrderDetail.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
+        expectedObject.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
+        OrderDetailStatusDto producedObjectOnTheRoute = ubsManagementService
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+
+        assertEquals(expectedObject.getOrderStatus(), producedObjectOnTheRoute.getOrderStatus());
+        assertEquals(expectedObject.getPaymentStatus(), producedObjectOnTheRoute.getPaymentStatus());
+        assertEquals(expectedObject.getDate(), producedObjectOnTheRoute.getDate());
+
         verify(eventService, times(1))
             .save("Статус Замовлення - Узгодження",
                 user.getRecipientName() + "  " + user.getRecipientSurname(), order);
@@ -633,12 +671,14 @@ class UBSManagementServiceImplTest {
     @Test
     void testUpdateAddress() {
         User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(TEST_ORDER));
-        when(addressRepository.save(TEST_ADDRESS)).thenReturn(TEST_ADDRESS);
         Address address = TEST_ADDRESS;
         address.setId(1L);
-        when(addressRepository.findById(TEST_ADDRESS.getId())).thenReturn(Optional.of(address));
+        OrderAddressExportDetailsDtoUpdate dtoUpdate = ModelUtils.getOrderAddressExportDetailsDtoUpdate();
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(TEST_ORDER));
+        when(addressRepository.findById(dtoUpdate.getAddressId())).thenReturn(Optional.of(address));
+
+        when(addressRepository.save(TEST_ADDRESS)).thenReturn(TEST_ADDRESS);
         when(modelMapper.map(TEST_ADDRESS, OrderAddressDtoResponse.class)).thenReturn(TEST_ORDER_ADDRESS_DTO_RESPONSE);
         Optional<OrderAddressDtoResponse> actual =
             ubsManagementService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, 1L, "abc");
@@ -991,7 +1031,7 @@ class UBSManagementServiceImplTest {
         User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusAdjustmentDto()));
         when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -1004,6 +1044,160 @@ class UBSManagementServiceImplTest {
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailConfirmed() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailFormed() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailNotTakenOut() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusNotTakenOutDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailOnTheRoute() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusOnThe_RouteDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailsDone() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderBroughtItHimself() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailsCanseled() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusCanseledDto()));
+        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "ua", "abc");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void setOrderDetailExceptionTest() {
+        Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
+        Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
     }
 
     @Test
@@ -1677,7 +1871,6 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderStatusDataTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
-        order.setOrderStatus(OrderStatus.DONE);
         BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
         Language language = ModelUtils.getLanguage();
 
@@ -1689,10 +1882,10 @@ class UBSManagementServiceImplTest {
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
                 .thenReturn("name");
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
@@ -1707,16 +1900,54 @@ class UBSManagementServiceImplTest {
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(bagTranslationRepository).findNameByBagId(1, 1L);
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
-        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
             1L);
         verify(receivingStationRepository).findAll();
     }
 
     @Test
-    void getOrderStatusData2Test() {
+    void getOrderStatusDataTestEmptyPriceDetails() {
+        Order order = ModelUtils.getOrderForGetOrderStatusEmptyPriceDetails();
+        BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
+        Language language = ModelUtils.getLanguage();
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+        when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
+                .thenReturn("name");
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
+        when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().get(0), PaymentInfoDto.class))
+            .thenReturn(ModelUtils.getInfoPayment());
+
+        ubsManagementService.getOrderStatusData(1L, "ua");
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
+            1L);
+        verify(receivingStationRepository).findAll();
+
+    }
+
+    @Test
+    void getOrderStatusDataWithEmptyCertificateTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
-        order.setOrderStatus(OrderStatus.DONE);
         BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
         Language language = ModelUtils.getLanguage();
 
@@ -1728,10 +1959,10 @@ class UBSManagementServiceImplTest {
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
                 .thenReturn("name");
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
@@ -1745,8 +1976,8 @@ class UBSManagementServiceImplTest {
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
         verify(bagTranslationRepository).findNameByBagId(1, 1L);
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(1, 0L);
-        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L,
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
             1L);
         verify(receivingStationRepository).findAll();
     }
@@ -1754,7 +1985,6 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderStatusDataExceptionTest() {
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
-        order.setOrderStatus(OrderStatus.DONE);
         BagInfoDto bagInfoDto = ModelUtils.getBagInfoDto();
         Language language = ModelUtils.getLanguage();
 
@@ -1767,10 +1997,10 @@ class UBSManagementServiceImplTest {
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 0l))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
-            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(2L, 1L))
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
                 .thenReturn("name");
         assertThrows(ReceivingStationNotFoundException.class, () -> {
             ubsManagementService.getOrderStatusData(1L, "ua");
