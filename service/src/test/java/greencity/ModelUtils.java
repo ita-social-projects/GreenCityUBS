@@ -94,6 +94,16 @@ public class ModelUtils {
         List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
+    public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
+        getRequestToChangeOrdersDataDTO();
+
+    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDTO.builder()
+            .columnName("orderStatus")
+            .orderId(List.of(1l))
+            .newValue("1")
+            .build();
+    }
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()

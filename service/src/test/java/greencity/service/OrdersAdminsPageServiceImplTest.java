@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.client.RestClient;
+import greencity.dto.RequestToChangeOrdersDataDTO;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.user.User;
@@ -29,8 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersAdminsPageServiceImplTest {
@@ -203,5 +204,85 @@ class OrdersAdminsPageServiceImplTest {
         verify(userRepository).findUserByUuid(uuid);
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherTest() {
+        String uuid = "uuid";
+        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+
+        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+        when(userRepository.findByUuid(uuid)).thenReturn(user.get());
+        when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
+
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("dateOfExport");
+        dto.setNewValue("2022-12-12");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("timeOfExport");
+        dto.setNewValue("00:00-00:30");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("receivingStation");
+        dto.setNewValue("1");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+
+        verify(userRepository, atLeast(1)).findByUuid(uuid);
+        verify(receivingStationRepository, atLeast(1)).getOne(1L);
+        verify(employeeRepository, atLeast(1)).findByEmail(user.get().getRecipientEmail());
+    }
+
+    @Test
+    void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
+        String uuid = "uuid";
+        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        Optional<Position> position = Optional.of(ModelUtils.getPosition());
+        Optional<Order> order = Optional.of(ModelUtils.getOrder());
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(orderRepository.findById(1L)).thenReturn(order);
+        lenient().when(positionRepository.findById(1l)).thenReturn(position);
+        lenient().when(positionRepository.findById(2l)).thenReturn(position);
+        lenient().when(positionRepository.findById(3l)).thenReturn(position);
+        lenient().when(positionRepository.findById(4l)).thenReturn(position);
+        lenient().when(positionRepository.findById(5l)).thenReturn(position);
+        when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
+            .thenReturn(Boolean.FALSE);
+        when(employeeOrderPositionRepository.findAllByOrderId(1L))
+            .thenReturn(new ArrayList<>(Arrays.asList(EmployeeOrderPosition.builder()
+                .id(1l)
+                .employee(employee.get())
+                .order(order.get())
+                .position(position.get())
+                .build())));
+        when(eventService.changesWithResponsibleEmployee(1L, Boolean.FALSE)).thenReturn("Some changes");
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user.get());
+        when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
+        dto.setColumnName("responsibleManager");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("responsibleCaller");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("responsibleLogicMan");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("responsibleDriver");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        dto.setColumnName("responsibleNavigator");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+
+        verify(userRepository, atLeast(1)).findByUuid(uuid);
+        verify(userRepository, atLeast(1)).findUserByUuid(uuid);
+        verify(employeeRepository, atLeast(1)).findById(1L);
+        verify(orderRepository, atLeast(1)).findById(1L);
+        verify(employeeOrderPositionRepository, atLeast(1)).existsByOrderAndPosition(order.get(), position.get());
+        verify(employeeOrderPositionRepository, atLeast(1)).findAllByOrderId(1L);
+        verify(eventService, atLeast(1)).changesWithResponsibleEmployee(1L, Boolean.FALSE);
     }
 }
