@@ -159,7 +159,7 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> ordersId = List.of(1l);
 
         assertThrows(UserNotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
     }
 
     @Test
