@@ -25,10 +25,7 @@ import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
-import greencity.service.ubs.EventService;
-import greencity.service.ubs.FileService;
-import greencity.service.ubs.UBSClientServiceImpl;
-import greencity.service.ubs.UBSManagementServiceImpl;
+import greencity.service.ubs.*;
 import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -152,6 +149,9 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
+
+    @Mock
+    OrdersAdminsPageService ordersAdminsPageService;
 
     private void getMocksBehavior() {
 
@@ -1276,6 +1276,12 @@ class UBSManagementServiceImplTest {
 
         verify(ubsClientService, times(1))
             .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "abc");
+    }
+
+    @Test
+    void updateOrderAdminPageInfoWithNullValuesTest(){
+        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
+        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
     }
 
     @Test
