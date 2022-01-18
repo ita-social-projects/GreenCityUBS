@@ -155,6 +155,7 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void responsibleEmployeeThrowsUserNotFoundException() {
         String uuid = "uuid";
+        List<Long> ordersId = List.of(1l);
 
         assertThrows(UserNotFoundException.class,
             () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
@@ -163,16 +164,18 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void responsibleEmployeeThrowsEntityNotFoundException() {
         String uuid = "uuid";
+        List<Long> ordersId = List.of(1l);
         Optional<User> user = Optional.of(ModelUtils.getUser());
         when(userRepository.findUserByUuid(uuid)).thenReturn(user);
 
         assertThrows(EmployeeNotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
     }
 
     @Test
     void responsibleEmployeeThrowsPositionNotFoundException() {
         String uuid = "uuid";
+        List<Long> ordersId = List.of(1l);
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
 
@@ -180,12 +183,13 @@ class OrdersAdminsPageServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(employee);
 
         assertThrows(PositionNotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid));
+            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
     }
 
     @Test
     void responsibleEmployeeCatchException() {
         String uuid = "uuid";
+        List<Long> ordersId = List.of(1l);
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
@@ -194,7 +198,7 @@ class OrdersAdminsPageServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(positionRepository.findById(1l)).thenReturn(position);
 
-        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1L, uuid);
+        ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid);
 
         verify(userRepository).findUserByUuid(uuid);
         verify(employeeRepository).findById(1L);
