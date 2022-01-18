@@ -379,9 +379,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Position existedPosition = positionRepository.findById(position)
             .orElseThrow(() -> new EntityNotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            /* update all */
-        }
+
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)

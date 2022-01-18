@@ -136,7 +136,7 @@ class OrdersAdminsPageServiceImplTest {
                 .order(order.get())
                 .position(position.get())
                 .build())));
-        when(eventService.changesWithResponsibleEmployee(1L, Boolean.TRUE)).thenReturn("Some changes");
+        when(eventService.changesWithResponsibleEmployee(1L, Boolean.FALSE)).thenReturn("Some changes");
 
         ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, uuid);
 

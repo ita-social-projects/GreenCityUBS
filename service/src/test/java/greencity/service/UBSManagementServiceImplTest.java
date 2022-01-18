@@ -1475,7 +1475,9 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderAdminPageInfoWithNullValuesTest() {
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
-        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
+        ubsManagementServiceMock.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
+
+        verify(ubsManagementServiceMock).updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
     }
 
     @Test
