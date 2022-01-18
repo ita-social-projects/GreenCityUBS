@@ -1473,7 +1473,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void updateOrderAdminPageInfoWithNullValuesTest(){
+    void updateOrderAdminPageInfoWithNullValuesTest() {
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
         ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
     }
