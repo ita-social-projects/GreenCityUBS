@@ -356,4 +356,13 @@ public interface UBSClientService {
      * @param dto {@link PaymentResponseDto} - response order data.
      */
     void validatePaymentClient(PaymentResponseDto dto);
+
+    /**
+     * Methods returns current user's bonus points.
+     *
+     * @param uuid current {@link User}'s uuid.
+     * @return {@link UserPointDto}.
+     * @author Max Boiarchuk
+     */
+    UserPointDto getUserPoint(String uuid);
 }

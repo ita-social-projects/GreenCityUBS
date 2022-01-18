@@ -1582,4 +1582,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setFee(0);
         }
     }
+
+    @Override
+    public UserPointDto getUserPoint(String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        int currentUserPoints = user.getCurrentPoints();
+
+        return new UserPointDto(currentUserPoints);
+    }
 }
