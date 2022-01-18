@@ -5,7 +5,12 @@ import greencity.client.RestClient;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.Position;
 import greencity.repository.*;
+import greencity.service.ubs.EventService;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersAdminsPageServiceImpl;
 import greencity.service.ubs.UBSManagementEmployeeService;
@@ -46,6 +51,8 @@ class OrdersAdminsPageServiceImplTest {
     private RestClient restClient;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    EventService eventService;
 
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
@@ -81,6 +88,64 @@ class OrdersAdminsPageServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "aa", 1L);
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void responsibleEmployeeWithExistedBeforeTest() {
+        String uuid = "uuid";
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Position> position = Optional.of(ModelUtils.getPosition());
+        Optional<Order> order = Optional.of(ModelUtils.getOrder());
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(positionRepository.findById(1l)).thenReturn(position);
+        when(orderRepository.findById(1L)).thenReturn(order);
+        when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
+            .thenReturn(Boolean.TRUE);
+        when(eventService.changesWithResponsibleEmployee(1L, Boolean.TRUE)).thenReturn("Some changes");
+
+        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(employeeRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(employeeOrderPositionRepository).existsByOrderAndPosition(order.get(), position.get());
+        verify(eventService).changesWithResponsibleEmployee(1L, Boolean.TRUE);
+    }
+
+    @Test
+    void responsibleEmployeeWithoutExistedBeforeTest() {
+        String uuid = "uuid";
+        Optional<User> user = Optional.of(ModelUtils.getUser());
+        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Optional<Position> position = Optional.of(ModelUtils.getPosition());
+        Optional<Order> order = Optional.of(ModelUtils.getOrder());
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
+        when(positionRepository.findById(1l)).thenReturn(position);
+        when(orderRepository.findById(1L)).thenReturn(order);
+        when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
+            .thenReturn(Boolean.FALSE);
+        when(employeeOrderPositionRepository.findAllByOrderId(1L))
+            .thenReturn(new ArrayList<>(Arrays.asList(EmployeeOrderPosition.builder()
+                .id(1l)
+                .employee(employee.get())
+                .order(order.get())
+                .position(position.get())
+                .build())));
+        when(eventService.changesWithResponsibleEmployee(1L, Boolean.TRUE)).thenReturn("Some changes");
+
+        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(employeeRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(employeeOrderPositionRepository).existsByOrderAndPosition(order.get(), position.get());
+        verify(employeeOrderPositionRepository).findAllByOrderId(1L);
+        verify(eventService).changesWithResponsibleEmployee(1L, Boolean.FALSE);
     }
 
 }
