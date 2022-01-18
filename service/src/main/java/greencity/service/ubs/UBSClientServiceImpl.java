@@ -77,6 +77,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
     private final EventService eventService;
+    private static final String FAILED_STATUS = "failure";
+    private static final String APPROVED_STATUS = "approved";
 
     @Override
     @Transactional
@@ -1329,9 +1331,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         int lastNumber = order.getPayment().size() - 1;
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_"
-                    + order.getPayment().get(lastNumber).getId())
+            .orderId(String.format("%s_%s_%s", orderId, order.getCounterOrderPaymentId(),
+                order.getPayment().get(lastNumber).getId()))
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
@@ -1536,7 +1537,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
             .settlementDate(dto.getSettlement_date())
-            .fee(Long.valueOf(dto.getFee()))
+            .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
             .paymentId(String.valueOf(dto.getPayment_id()))
@@ -1549,7 +1550,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getResponse_status().equals("failure")) {
+        if (dto.getResponse_status().equals(FAILED_STATUS)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(orderPayment);
@@ -1564,7 +1565,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals("approved")) {
+        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
             orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);

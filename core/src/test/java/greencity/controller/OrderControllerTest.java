@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.lang.reflect.Field;
 import java.security.Principal;
 
 import static greencity.ModelUtils.*;
@@ -221,6 +222,14 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
+        Field[] fields = OrderController.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("greenCityClient")) {
+                f.setAccessible(true);
+                f.set(orderController, "1");
+            }
+        }
+
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
             .principal(principal)
@@ -324,6 +333,13 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
+        Field[] fields = OrderController.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("greenCityClient")) {
+                f.setAccessible(true);
+                f.set(orderController, "1");
+            }
+        }
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
             .principal(principal)

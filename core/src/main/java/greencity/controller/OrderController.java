@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +29,9 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
+
+    @Value("${green.city.client}")
+    private String greenCityClient;
 
     /**
      * Constructor with parameters.
@@ -408,7 +412,7 @@ public class OrderController {
         PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect(greenCityClient);
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -509,7 +513,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect(greenCityClient);
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
