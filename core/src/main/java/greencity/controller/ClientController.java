@@ -289,7 +289,7 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-user-bonuses")
+    @GetMapping("/user-bonuses")
     public ResponseEntity<UserPointDto> getUserBonuses(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
