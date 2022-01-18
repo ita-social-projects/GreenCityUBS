@@ -273,4 +273,26 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
     }
+
+    /**
+     * Controller returns bonus points of current user.
+     * {@link greencity.dto.UserVO}.
+     *
+     * @param userUuid {@link String} uuid.
+     * @return {@link UserPointDto}.
+     * @author Max Boiarchuk
+     */
+    @ApiOperation(value = "Get current user points.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/get-user-bonuses")
+    public ResponseEntity<UserPointDto> getUserBonuses(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.getUserPoint(userUuid));
+    }
 }

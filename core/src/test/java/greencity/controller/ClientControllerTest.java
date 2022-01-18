@@ -187,4 +187,10 @@ class ClientControllerTest {
             .content(dtoJson))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void getUserBonusesTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/get-user-bonuses")
+            .principal(principal)).andExpect(status().isOk());
+    }
 }
