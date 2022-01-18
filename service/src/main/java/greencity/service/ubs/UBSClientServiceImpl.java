@@ -1585,10 +1585,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public UserPointDto getUserPoint(String uuid) {
-        int currentUserPoints = 0;
-
         User user = userRepository.findByUuid(uuid);
-        currentUserPoints = user.getCurrentPoints();
+        int currentUserPoints = user.getCurrentPoints();
 
         return new UserPointDto(currentUserPoints);
     }
