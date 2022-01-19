@@ -10,6 +10,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
