@@ -13,6 +13,7 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.EncryptionUtil;
+import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -61,6 +62,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
+    private final OrderUtils orderUtils;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -1328,11 +1330,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private PaymentRequestDto formPayment(Long orderId, int sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        int lastNumber = order.getPayment().size() - 1;
+
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(String.format("%s_%s_%s", orderId, order.getCounterOrderPaymentId(),
-                order.getPayment().get(lastNumber).getId()))
+            .orderId(orderUtils.generateOrderIdForPayment(orderId, order))
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)

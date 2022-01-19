@@ -3,6 +3,7 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
+import greencity.configuration.GreenCityPropertiesConfig;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
@@ -222,13 +223,7 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
-        Field[] fields = OrderController.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("greenCityClient")) {
-                f.setAccessible(true);
-                f.set(orderController, "1");
-            }
-        }
+        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
 
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
@@ -327,23 +322,23 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Mock
+    GreenCityPropertiesConfig greenCityPropertiesConfig;
+
     @Test
     void receivePaymentClientTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
-        Field[] fields = OrderController.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("greenCityClient")) {
-                f.setAccessible(true);
-                f.set(orderController, "1");
-            }
-        }
+        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
+
+        verify(greenCityPropertiesConfig).getGreenCityClient();
     }
 }
