@@ -90,4 +90,5 @@
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-nig-bags-table-locations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
     <include file="db/changelog/logs/ch-alter-table-column-paymentId-payment-table-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notification-schedule-Sannytski.xml"/>
 </databaseChangeLog>

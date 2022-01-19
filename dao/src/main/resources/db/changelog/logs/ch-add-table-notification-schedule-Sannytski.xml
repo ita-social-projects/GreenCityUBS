@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Sannytski-1" author="Dmytro Sannytski">
+        <createTable tableName="notification_schedule">
+            <column name="notification_type" type="VARCHAR" autoIncrement="false">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="seconds" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="minutes" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hours" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day_of_month" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="month" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day_of_week" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="year" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="Sannytski-2" author="Dmytro Sannytski">
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="UNPAID_ORDER"/>
+            <column name="seconds" value="0"/>
+            <column name="minutes" value="0"/>
+            <column name="hours" value="18"/>
+            <column name="day_of_month" value="*"/>
+            <column name="month" value="*"/>
+            <column name="day_of_week" value="?"/>
+            <column name="year" value=""/>
+        </insert>
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="UNPAID_PACKAGE"/>
+            <column name="seconds" value="0"/>
+            <column name="minutes" value="0"/>
+            <column name="hours" value="18"/>
+            <column name="day_of_month" value="*"/>
+            <column name="month" value="*"/>
+            <column name="day_of_week" value="?"/>
+            <column name="year" value=""/>
+        </insert>
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="LETS_STAY_CONNECTED"/>
+            <column name="seconds" value="0"/>
+            <column name="minutes" value="0"/>
+            <column name="hours" value="18"/>
+            <column name="day_of_month" value="*"/>
+            <column name="month" value="*"/>
+            <column name="day_of_week" value="?"/>
+            <column name="year" value=""/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

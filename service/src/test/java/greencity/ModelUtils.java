@@ -10,6 +10,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
+import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -94,6 +95,8 @@ public class ModelUtils {
         List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
+    public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -2561,14 +2564,17 @@ public class ModelUtils {
         return new NotificationTemplate()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType(NotificationType.UNPAID_ORDER);
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
         return new NotificationTemplateDto()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType("UNPAID_ORDER")
+            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {

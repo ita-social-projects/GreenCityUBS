@@ -1,10 +1,14 @@
 package greencity.service.notification;
 
 import greencity.constant.ErrorMessage;
+import greencity.dto.NotificationScheduleDto;
 import greencity.dto.NotificationTemplateDto;
 import greencity.dto.PageableDto;
+import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
+import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class ManagementNotificationServiceImpl implements ManagementNotificationService {
     private NotificationTemplateRepository notificationTemplateRepository;
     private final ModelMapper modelMapper;
+    private final NotificationScheduleRepo scheduleRepo;
 
     /**
      * {@inheritDoc}
@@ -31,9 +36,13 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
     @Override
     public void update(NotificationTemplateDto notificationTemplateDto) {
         NotificationTemplate template = getById(notificationTemplateDto.getId());
+        NotificationSchedule notificationSchedule = scheduleRepo.getOne(NotificationType.valueOf(
+            notificationTemplateDto.getNotificationType()));
+        modelMapper.map(notificationTemplateDto.getSchedule(), notificationSchedule);
         template.setBody(notificationTemplateDto.getBody());
         template.setTitle(notificationTemplateDto.getTitle());
         notificationTemplateRepository.save(template);
+        scheduleRepo.save(notificationSchedule);
     }
 
     /**
@@ -45,7 +54,9 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
             .descending());
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
-            .map(x -> modelMapper.map(x, NotificationTemplateDto.class)).collect(Collectors.toList());
+            .map(x -> modelMapper.map(x, NotificationTemplateDto.class)
+                .setSchedule(getScheduleDto(x)))
+            .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
             notificationTemplates.getTotalElements(),
@@ -67,5 +78,10 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findNotificationTemplateById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));
+    }
+
+    private NotificationScheduleDto getScheduleDto(NotificationTemplate notificationTemplate) {
+        return modelMapper.map(scheduleRepo.getOne(
+            notificationTemplate.getNotificationType()), NotificationScheduleDto.class);
     }
 }
