@@ -30,6 +30,7 @@ import greencity.service.ubs.FileService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementServiceImpl;
 import org.hibernate.mapping.Any;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -231,8 +232,9 @@ class UBSManagementServiceImplTest {
     void getAddressByOrderId() {
         Order order = ModelUtils.getOrder();
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
-        when(modelMapper.map(addressRepository.getAddressByOrderId(order.getId()), ReadAddressByOrderDto.class))
-            .thenReturn(readAddressByOrderDto);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(ubsManagementService.getAddressByOrderId(1L)).thenReturn(readAddressByOrderDto);
+        Assertions.assertNotNull(order);
     }
 
     @Test
