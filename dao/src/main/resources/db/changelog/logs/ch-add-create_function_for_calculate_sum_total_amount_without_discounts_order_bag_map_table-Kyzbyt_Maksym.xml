@@ -9,7 +9,7 @@
              BEGIN
              if(TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
              UPDATE orders o
-             SET sum_total_amount_without_discounts = (SELECT sum (obm.amount*b.price)
+             SET sum_total_amount_without_discounts = (SELECT sum (obm.amount*b.full_price)
              FROM order_bag_mapping obm
              INNER JOIN bag b on obm.bag_id = b.id
              WHERE order_id = o.id)

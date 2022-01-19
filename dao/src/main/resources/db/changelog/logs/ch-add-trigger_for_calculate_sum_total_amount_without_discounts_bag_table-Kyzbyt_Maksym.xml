@@ -9,7 +9,6 @@
             AFTER UPDATE OR INSERT on bag
             FOR EACH ROW EXECUTE PROCEDURE calculate_sum_total_amount_without_discounts_for_bag();
 
-
             /
         </sql>
     </changeSet>
