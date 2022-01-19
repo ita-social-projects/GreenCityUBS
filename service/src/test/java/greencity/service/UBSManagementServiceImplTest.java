@@ -58,7 +58,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
-    @Mock
+    @Mock(lenient = true)
     AddressRepository addressRepository;
     double distance = 2;
     int litres = 1000;
@@ -75,7 +75,7 @@ class UBSManagementServiceImplTest {
     @Mock
     CertificateRepository certificateRepository;
 
-    @Mock
+    @Mock(lenient = true)
     private ModelMapper modelMapper;
 
     @Mock
@@ -135,7 +135,7 @@ class UBSManagementServiceImplTest {
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
 
-    @Mock
+    @Mock(lenient = true)
     private CustomTableViewRepo customTableViewRepo;
 
     @Mock
@@ -225,6 +225,14 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
             ubsManagementService.getAddressByOrderId(10000000l);
         });
+    }
+
+    @Test
+    void getAddressByOrderId() {
+        Order order = ModelUtils.getOrder();
+        ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
+        when(modelMapper.map(addressRepository.getAddressByOrderId(order.getId()), ReadAddressByOrderDto.class))
+            .thenReturn(readAddressByOrderDto);
     }
 
     @Test
@@ -1438,11 +1446,25 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getCustomTableParameters() {
-        String uuid = "uuid1";
-        ubsManagementService.getCustomTableParameters(uuid);
+    void getCustomTableParametersForExistUuid() {
+        CustomTableView customTableView = ModelUtils.getCustomTableView();
+        when(customTableViewRepo.findByUuid("uuid1")).thenReturn(customTableView);
+        when(customTableViewRepo.existsByUuid("uuid1")).thenReturn(Boolean.TRUE);
+        ubsManagementService.getCustomTableParameters(customTableView.getUuid());
 
-        verify(customTableViewRepo).existsByUuid(uuid);
+        verify(customTableViewRepo).existsByUuid(customTableView.getUuid());
+        Assertions.assertNotNull(customTableView);
+    }
+
+    @Test
+    void getCustomTableParametersForNon_ExistUuid() {
+        CustomTableView customTableView = ModelUtils.getCustomTableView();
+        when(customTableViewRepo.findByUuid("uuid1")).thenReturn(customTableView);
+        when(customTableViewRepo.existsByUuid("uuid1")).thenReturn(Boolean.FALSE);
+        ubsManagementService.getCustomTableParameters(customTableView.getUuid());
+
+        verify(customTableViewRepo).existsByUuid(customTableView.getUuid());
+        Assertions.assertNotNull(customTableView);
     }
 
     @Test
