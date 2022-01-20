@@ -3,6 +3,7 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
+import greencity.configuration.GreenCityPropertiesConfig;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.lang.reflect.Field;
 import java.security.Principal;
 
 import static greencity.ModelUtils.*;
@@ -221,6 +223,8 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
+        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
             .principal(principal)
@@ -318,16 +322,23 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Mock
+    GreenCityPropertiesConfig greenCityPropertiesConfig;
+
     @Test
     void receivePaymentClientTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
+        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
+
+        verify(greenCityPropertiesConfig).getGreenCityClient();
     }
 }
