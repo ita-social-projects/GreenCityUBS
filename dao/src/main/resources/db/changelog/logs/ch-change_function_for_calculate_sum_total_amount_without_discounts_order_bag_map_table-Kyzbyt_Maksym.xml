@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Kuzbyt-6" author="Maksym Kuzbyt">
+        <sql endDelimiter="/">
+            CREATE OR REPLACE FUNCTION  calculate_sum_total_amount_without_discounts_for_order_bag_map() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT' )AND (old.confirmed_quantity is null OR new.confirmed_quantity is null )) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.amount*b.full_price)
+            FROM order_bag_mapping obm
+            INNER JOIN bag b on obm.bag_id = b.id
+            WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW;
+            END if;
+            IF ((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (new.confirmed_quantity is not null OR old.confirmed_quantity is not null)) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.confirmed_quantity*b.full_price)
+            FROM order_bag_mapping obm
+            INNER JOIN bag b on obm.bag_id = b.id
+            WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW ;
+            END IF;
+            RETURN Null;
+            END
+            $orders$ LANGUAGE plpgsql;
+            /
+        </sql>
+    </changeSet>
+</databaseChangeLog>
