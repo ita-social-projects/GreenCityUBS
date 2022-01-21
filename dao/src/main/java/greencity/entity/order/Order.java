@@ -154,4 +154,7 @@ public class Order {
 
     @ManyToOne
     CourierLocation courierLocations;
+
+    @Column(name = "sum_total_amount_without_discounts")
+    private Long sumTotalAmountWithoutDiscounts;
 }

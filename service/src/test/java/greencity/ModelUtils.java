@@ -10,6 +10,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -3103,5 +3104,24 @@ public class ModelUtils {
             .addressHouseNumber("ss")
             .build();
 
+    }
+
+    public static CustomTableView getCustomTableView() {
+        return CustomTableView.builder()
+            .id(1L)
+            .uuid("uuid1")
+            .titles("title")
+            .build();
+    }
+
+    public static ReadAddressByOrderDto getReadAddressByOrderDto() {
+        return ReadAddressByOrderDto.builder()
+            .street("Levaya")
+            .district("frankivskiy")
+            .entranceNumber("5")
+            .houseCorpus("1")
+            .houseNumber("4")
+            .comment("helo")
+            .build();
     }
 }
