@@ -96,6 +96,7 @@
     <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-change_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-address-Boiarchuk.xml"/>
 
 
 </databaseChangeLog>
