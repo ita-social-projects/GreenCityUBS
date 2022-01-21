@@ -4,9 +4,15 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Kuzbyt-6" author="Maksym Kuzbyt">
         <sql endDelimiter="/">
-            CREATE OR REPLACE FUNCTION  calculate_sum_total_amount_without_discounts_for_order_bag_map() RETURNS TRIGGER AS $orders$
+
+            DROP TRIGGER IF EXISTS insert_update_order_bag_mapping on order_bag_mapping ;
+            DROP  FUNCTION calculate_sum_total_amount_without_discounts_for_order_bag_map();
+            DROP TRIGGER IF EXISTS insert_update_bag on bag;
+            DROP  FUNCTION calculate_sum_total_amount_without_discounts_for_bag();
+
+            CREATE OR REPLACE FUNCTION  total_amount_without_discounts_OBM_amount() RETURNS TRIGGER AS $orders$
             BEGIN
-            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT' )AND (old.confirmed_quantity is null OR new.confirmed_quantity is null )) THEN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT' )  AND (old.amount is not null or new.amount is not null ) )THEN
             UPDATE orders o
             SET sum_total_amount_without_discounts = (SELECT sum (obm.amount*b.full_price)
             FROM order_bag_mapping obm
@@ -14,19 +20,53 @@
             WHERE order_id = o.id)
             WHERE o.id = old.order_id OR o.id = new.order_id;
             RETURN NEW;
-            END if;
-            IF ((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (new.confirmed_quantity is not null OR old.confirmed_quantity is not null)) THEN
+            END IF;
+            END
+            $orders$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION  sum_total_amount_without_discounts_OBM_confirmed_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.confirmed_quantity is not null or new.confirmed_quantity is not null ) ) THEN
             UPDATE orders o
             SET sum_total_amount_without_discounts = (SELECT sum (obm.confirmed_quantity*b.full_price)
             FROM order_bag_mapping obm
             INNER JOIN bag b on obm.bag_id = b.id
             WHERE order_id = o.id)
             WHERE o.id = old.order_id OR o.id = new.order_id;
-            RETURN NEW ;
+            RETURN NEW;
             END IF;
-            RETURN Null;
             END
             $orders$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION  sum_total_amount_without_discounts_OBM_exported_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.exported_quantity is not null or new.exported_quantity is not null )) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.exported_quantity*b.full_price)
+            FROM order_bag_mapping obm
+            INNER JOIN bag b on obm.bag_id = b.id
+            WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END
+            $orders$ LANGUAGE plpgsql;
+
+
+
+
+
+            CREATE TRIGGER insert_update_order_bag_mapping_amount
+            AFTER UPDATE OF amount on  order_bag_mapping
+            FOR EACH ROW EXECUTE PROCEDURE total_amount_without_discounts_OBM_amount();
+
+            CREATE TRIGGER insert_update_order_bag_mapping_confirmed_quantity
+            AFTER UPDATE OF confirmed_quantity on  order_bag_mapping
+            FOR EACH ROW EXECUTE PROCEDURE sum_total_amount_without_discounts_OBM_confirmed_quantity();
+
+            CREATE TRIGGER insert_update_order_bag_mapping_exported_quantity
+            AFTER UPDATE OF exported_quantity on  order_bag_mapping
+            FOR EACH ROW EXECUTE PROCEDURE sum_total_amount_without_discounts_OBM_exported_quantity();
             /
         </sql>
     </changeSet>
