@@ -2258,7 +2258,7 @@ public class ModelUtils {
                 .addressRegion("sdfsdfsd")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
-                .ecoNumber(Set.of("1111"))
+                .ecoNumber(Set.of("1111111111"))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
