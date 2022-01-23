@@ -2233,10 +2233,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         dto.getPositionId(),
                         currentUser));
             }
-        } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
-            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException
-            | EmployeeNotFoundException
-            | PositionNotFoundException e) {
+        } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
         }
     }

@@ -218,7 +218,6 @@ class OrdersAdminsPageServiceImplTest {
         when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
         dto.setColumnName("dateOfExport");
         dto.setNewValue("2022-12-12");
         ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);

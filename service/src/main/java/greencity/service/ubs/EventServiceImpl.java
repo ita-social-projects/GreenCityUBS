@@ -3,12 +3,22 @@ package greencity.service.ubs;
 import greencity.constant.OrderHistory;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.exceptions.PositionNotFoundException;
 import greencity.repository.EventRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,27 +56,36 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public String changesWithResponsibleEmployee(Long positionId, Boolean existedBefore) {
-        if (existedBefore.equals(Boolean.TRUE)) {
-            if (positionId == 2) {
-                return OrderHistory.UPDATE_MANAGER_CALL;
-            } else if (positionId == 3) {
-                return OrderHistory.UPDATE_MANAGER_LOGIEST;
-            } else if (positionId == 4) {
-                return OrderHistory.UPDATE_MANAGER_CALL_PILOT;
-            } else if (positionId == 5) {
-                return OrderHistory.UPDATE_MANAGER_DRIVER;
-            }
-        } else {
-            if (positionId == 2) {
-                return OrderHistory.ASSIGN_CALL_MANAGER;
-            } else if (positionId == 3) {
-                return OrderHistory.ASSIGN_LOGIEST;
-            } else if (positionId == 4) {
-                return OrderHistory.ASSIGN_CALL_PILOT;
-            } else if (positionId == 5) {
-                return OrderHistory.ASSIGN_DRIVER;
-            }
+        EmployeePositionChanges employeePosition = EmployeePositionChanges.fromEmployeePosition(positionId);
+        return existedBefore == Boolean.TRUE ? employeePosition.getUpdated() : employeePosition.getAssigned();
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    private static class EmployeePositionChanges {
+        private final String updated;
+        private final String assigned;
+        private final Long position;
+
+        static final EmployeePositionChanges CALLER_MANAGER =
+            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL,
+                OrderHistory.ASSIGN_CALL_MANAGER, 2L);
+        static final EmployeePositionChanges LOGIC_MAN =
+            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_LOGIEST,
+                OrderHistory.ASSIGN_LOGIEST, 3L);
+        static final EmployeePositionChanges NAVIGATOR =
+            new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_CALL_PILOT,
+                OrderHistory.ASSIGN_CALL_PILOT, 4L);
+        static final EmployeePositionChanges DRIVER = new EmployeePositionChanges(OrderHistory.UPDATE_MANAGER_DRIVER,
+            OrderHistory.ASSIGN_DRIVER, 5L);
+
+        static final Map<Long, EmployeePositionChanges> ALL_VAlUES =
+            Stream.of(CALLER_MANAGER, LOGIC_MAN, NAVIGATOR, DRIVER)
+                .collect(Collectors.toMap(EmployeePositionChanges::getPosition, Function.identity()));
+
+        public static EmployeePositionChanges fromEmployeePosition(Long position) {
+            return Optional.ofNullable(ALL_VAlUES.get(position))
+                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID + position));
         }
-        return "Немає відповідної позиції";
     }
 }
