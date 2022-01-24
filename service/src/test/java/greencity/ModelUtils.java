@@ -11,6 +11,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.schedule.NotificationSchedule;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -95,8 +96,6 @@ public class ModelUtils {
         List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
-    public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto().setCron("0 0 18 * * ?");
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -262,7 +261,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
+            .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .build();
     }
 
@@ -1977,7 +1976,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
             .build();
     }
 
@@ -2260,7 +2259,7 @@ public class ModelUtils {
                 .addressRegion("sdfsdfsd")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
-                .ecoNumber(Set.of("1111"))
+                .ecoNumber(Set.of("1111111111"))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
@@ -2564,17 +2563,14 @@ public class ModelUtils {
         return new NotificationTemplate()
             .setId(1L)
             .setBody("test")
-            .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER);
+            .setTitle("test");
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
         return new NotificationTemplateDto()
             .setId(1L)
             .setBody("test")
-            .setTitle("test")
-            .setNotificationType("UNPAID_ORDER")
-            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
+            .setTitle("test");
     }
 
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {
@@ -3095,5 +3091,24 @@ public class ModelUtils {
             .addressHouseNumber("ss")
             .build();
 
+    }
+
+    public static CustomTableView getCustomTableView() {
+        return CustomTableView.builder()
+            .id(1L)
+            .uuid("uuid1")
+            .titles("title")
+            .build();
+    }
+
+    public static ReadAddressByOrderDto getReadAddressByOrderDto() {
+        return ReadAddressByOrderDto.builder()
+            .street("Levaya")
+            .district("frankivskiy")
+            .entranceNumber("5")
+            .houseCorpus("1")
+            .houseNumber("4")
+            .comment("helo")
+            .build();
     }
 }

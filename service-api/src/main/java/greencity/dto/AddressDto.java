@@ -43,4 +43,15 @@ public class AddressDto implements Serializable {
     private Coordinates coordinates;
 
     private Boolean actual;
+    @NotBlank
+    @Length(max = 30)
+    private String cityEn;
+    @NotBlank
+    @Length(max = 30)
+    private String regionEn;
+    @Length(max = 50)
+    private String streetEn;
+    @NotBlank
+    @Length(max = 30)
+    private String districtEn;
 }

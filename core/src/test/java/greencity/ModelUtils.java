@@ -420,7 +420,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(Set.of("1111"))
+            .ecoNumber(Set.of("1111111111"))
             .build();
     }
 

@@ -69,4 +69,16 @@ public class Address {
 
     @Embedded
     private Coordinates coordinates;
+
+    @Column(name = "city_en", nullable = false)
+    private String cityEn;
+
+    @Column(name = "region_en", nullable = false)
+    private String regionEn;
+
+    @Column(name = "street_en", nullable = false)
+    private String streetEn;
+
+    @Column(name = "district_en", nullable = false)
+    private String districtEn;
 }
