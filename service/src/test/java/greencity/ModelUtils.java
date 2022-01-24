@@ -96,7 +96,7 @@ public class ModelUtils {
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto();
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto().setCron("0 0 18 * * ?");
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()

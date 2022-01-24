@@ -6,7 +6,6 @@ import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
@@ -22,7 +21,7 @@ import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
 
-    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto();
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO = new NotificationScheduleDto().setCron("0 0 18 * * ?");
 
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
