@@ -49,15 +49,15 @@ public class OrderAddressDtoRequest {
 
     private Boolean actual;
     @Length(max = 30)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String cityEn;
     @Length(max = 30)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String regionEn;
     @Length(max = 50)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Z0-9a-z-\\s',]{3,40}")
+    @Pattern(regexp = "[a-zA-Z0-9-\\s'.]{3,40}")
     private String streetEn;
     @Length(max = 30)
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-\\s'.]{3,30}")
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
     private String districtEn;
 }
