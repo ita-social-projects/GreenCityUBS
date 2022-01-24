@@ -92,6 +92,7 @@ public final class ErrorMessage {
     public static final String NOTIFICATION_TEMPLATE_NOT_FOUND = "Notification template doesn't exist";
     public static final String REGION_IS_NOT_FOUND = "Region with chosen name doesn't exist ";
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
+    public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
 
     /**
      * Constructor.
