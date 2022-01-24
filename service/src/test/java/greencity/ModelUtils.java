@@ -270,7 +270,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
+            .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .build();
     }
 
@@ -1985,7 +1985,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
             .build();
     }
 
@@ -2268,7 +2268,7 @@ public class ModelUtils {
                 .addressRegion("sdfsdfsd")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
-                .ecoNumber(Set.of("1111"))
+                .ecoNumber(Set.of("1111111111"))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()

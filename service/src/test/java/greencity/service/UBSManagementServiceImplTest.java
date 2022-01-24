@@ -1368,6 +1368,17 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void updateEcoNumberTrowsIncorrectEcoNumberFormatException() {
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
+
+        EcoNumberDto ecoNumberDto = ModelUtils.getEcoNumberDto();
+        ecoNumberDto.setEcoNumber(new HashSet<>(Arrays.asList("1234")));
+        assertThrows(IncorrectEcoNumberFormatException.class,
+            () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
+    }
+
+    @Test
     void saveAdminCommentThrowsException() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
