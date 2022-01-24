@@ -227,8 +227,6 @@ class OrdersAdminsPageServiceImplTest {
         dto.setColumnName("receivingStation");
         dto.setNewValue("1");
         ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        dto.setColumnName("");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
 
         verify(userRepository, atLeast(1)).findByUuid(uuid);
         verify(receivingStationRepository, atLeast(1)).getOne(1L);
@@ -247,11 +245,8 @@ class OrdersAdminsPageServiceImplTest {
         when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(orderRepository.findById(1L)).thenReturn(order);
-        lenient().when(positionRepository.findById(1l)).thenReturn(position);
-        lenient().when(positionRepository.findById(2l)).thenReturn(position);
-        lenient().when(positionRepository.findById(3l)).thenReturn(position);
-        lenient().when(positionRepository.findById(4l)).thenReturn(position);
-        lenient().when(positionRepository.findById(5l)).thenReturn(position);
+        when(positionRepository.findById(1l)).thenReturn(position);
+
         when(employeeOrderPositionRepository.existsByOrderAndPosition(order.get(), position.get()))
             .thenReturn(Boolean.FALSE);
         when(employeeOrderPositionRepository.findAllByOrderId(1L))
@@ -266,14 +261,6 @@ class OrdersAdminsPageServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(user.get());
         when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
         dto.setColumnName("responsibleManager");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        dto.setColumnName("responsibleCaller");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        dto.setColumnName("responsibleLogicMan");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        dto.setColumnName("responsibleDriver");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
-        dto.setColumnName("responsibleNavigator");
         ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
 
         verify(userRepository, atLeast(1)).findByUuid(uuid);

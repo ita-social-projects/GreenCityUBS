@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -165,19 +166,25 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
-            case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, userUuid));
-            case "responsibleCaller":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, userUuid));
-            case "responsibleLogicMan":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, userUuid));
-            case "responsibleDriver":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L, userUuid));
-            case "responsibleNavigator":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L, userUuid));
             default:
-                return createReturnForSwitchChangeOrder(new ArrayList<>());
+                Long position = columnNameToEmployeePosition(columnName);
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, userUuid));
         }
+    }
+
+    private Long columnNameToEmployeePosition(String columnName) {
+        final Map<String, Long> columnNameToPosition = new HashMap<>() {
+            {
+                put("responsibleManager", 1L);
+                put("responsibleCaller", 2L);
+                put("responsibleLogicMan", 3L);
+                put("responsibleNavigator", 4L);
+                put("responsibleDriver", 5L);
+            }
+        };
+
+        return Optional.ofNullable(columnNameToPosition.get(columnName))
+            .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
     }
 
     private ChangeOrderResponseDTO createReturnForSwitchChangeOrder(List<Long> ordersId) {
