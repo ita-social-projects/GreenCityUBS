@@ -2180,7 +2180,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
             added.stream()
                 .forEach(newNumber -> {
-                    if (newNumber.length() != 10) {
+                    if (!newNumber.matches("[0-9]+") ||newNumber.length() != 10) {
                         throw new IncorrectEcoNumberFormatException(INCORRECT_ECO_NUMBER);
                     }
                     order.getAdditionalOrders().add(newNumber);
