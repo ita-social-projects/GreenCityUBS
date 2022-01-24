@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 import static greencity.constant.ErrorMessage.*;
 
@@ -173,15 +172,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private Long columnNameToEmployeePosition(String columnName) {
-        final Map<String, Long> columnNameToPosition = new HashMap<>() {
-            {
-                put("responsibleManager", 1L);
-                put("responsibleCaller", 2L);
-                put("responsibleLogicMan", 3L);
-                put("responsibleNavigator", 4L);
-                put("responsibleDriver", 5L);
-            }
-        };
+        final Map<String, Long> columnNameToPosition = new HashMap<>();
+        columnNameToPosition.put("responsibleManager", 1L);
+        columnNameToPosition.put("responsibleCaller", 2L);
+        columnNameToPosition.put("responsibleLogicMan", 3L);
+        columnNameToPosition.put("responsibleNavigator", 4L);
+        columnNameToPosition.put("responsibleDriver", 5L);
 
         return Optional.ofNullable(columnNameToPosition.get(columnName))
             .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
