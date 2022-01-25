@@ -17,6 +17,7 @@ import javax.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.util.Objects.nonNull;
@@ -28,6 +29,7 @@ public class BigOrderTableRepository {
     private static final String ADDRESS = "address";
     private static final String EMPLOYEE = "employee";
     private static final String PAYMENT = "payment";
+    private static final String SETTLEMENT_DATE = "settlementDate";
 
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
@@ -123,15 +125,15 @@ public class BigOrderTableRepository {
         if (nonNull(sc.getDistricts())) {
             predicates.add(filterByLocation(sc.getDistricts(), "district", orderRoot));
         }
-        if (nonNull(sc.getOrderDateFrom()) && nonNull(sc.getOrderDateTo())) {
+        if (nonNull(sc.getOrderDateTo())) {
             predicates
                 .add(filterByDateFromOrderTable(sc.getOrderDateFrom(), sc.getOrderDateTo(), "orderDate", orderRoot));
         }
-        if (nonNull(sc.getDeliveryDateFrom()) && nonNull(sc.getDeliveryDateTo())) {
+        if (nonNull(sc.getDeliveryDateTo())) {
             predicates.add(
                 filterByDateFromOrderTable(sc.getDeliveryDateFrom(), sc.getDeliveryDateTo(), "deliverFrom", orderRoot));
         }
-        if (nonNull(sc.getPaymentDateFrom()) && nonNull(sc.getPaymentDateTo())) {
+        if (nonNull(sc.getPaymentDateTo())) {
             predicates.add(filterByPaymentDate(sc.getPaymentDateFrom(), sc.getPaymentDateTo(), orderRoot, cq));
         }
         if (nonNull(sc.getResponsibleCallerId())) {
@@ -186,8 +188,12 @@ public class BigOrderTableRepository {
     }
 
     private Predicate filterByDateFromOrderTable(String from, String to, String columnName, Root<Order> orderRoot) {
-        return criteriaBuilder.between(orderRoot.get(columnName),
-            LocalDateTime.of(LocalDate.parse(from), LocalTime.MIN),
+        if (nonNull(from)) {
+            return criteriaBuilder.between(orderRoot.get(columnName),
+                LocalDateTime.of(LocalDate.parse(from), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.parse(to), LocalTime.MAX));
+        }
+        return criteriaBuilder.lessThanOrEqualTo(orderRoot.get(columnName),
             LocalDateTime.of(LocalDate.parse(to), LocalTime.MAX));
     }
 
@@ -195,13 +201,20 @@ public class BigOrderTableRepository {
         Subquery<Payment> subQueryPayment = cq.subquery(Payment.class);
         Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
         ListJoin<Order, Payment> join = paymentRoot.joinList(PAYMENT, JoinType.LEFT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MM-yyyy");
+        Predicate predicate;
+        var settlementDate = join.<String>get(SETTLEMENT_DATE);
+        if (from != null && !from.isEmpty()) {
+            predicate = criteriaBuilder.between(settlementDate
+                .as(LocalDate.class),
+                LocalDate.parse(from, formatter),
+                LocalDate.parse(to, formatter));
+        } else {
+            predicate =
+                criteriaBuilder.lessThanOrEqualTo(settlementDate.as(LocalDate.class), LocalDate.parse(to, formatter));
+        }
 
-        subQueryPayment.select(join).where(
-            criteriaBuilder.between(
-                join.get("settlementDate").as(String.class),
-                from,
-                to));
-
+        subQueryPayment.select(join).where(criteriaBuilder.and(predicate, settlementDate.isNotNull()));
         return criteriaBuilder.exists(subQueryPayment);
     }
 
@@ -306,7 +319,7 @@ public class BigOrderTableRepository {
         ListJoin<Order, Payment> join = paymentRoot.joinList(PAYMENT, JoinType.LEFT);
 
         subQueryPayment.select(join).where(criteriaBuilder.or(
-            criteriaBuilder.like(join.get("settlementDate"), "%" + s + "%")));
+            criteriaBuilder.like(join.get(SETTLEMENT_DATE), "%" + s + "%")));
 
         return criteriaBuilder.exists(subQueryPayment);
     }
