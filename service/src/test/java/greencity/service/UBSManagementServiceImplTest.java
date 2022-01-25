@@ -1564,6 +1564,25 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrdersCorrectCalculateTotalOrderSumIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setSumTotalAmountWithoutDiscounts(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-500L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
     void getOrdersCorrectCalculatePaymentIsNull() {
         Page<Order> pageOrder = ModelUtils.getPageOrder();
         pageOrder.getContent().get(0).setPayment(null);
