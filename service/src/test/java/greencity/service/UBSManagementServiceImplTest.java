@@ -1570,9 +1570,8 @@ class UBSManagementServiceImplTest {
 
         Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
         bigOrderTableDTOPage.getContent().get(0).setPaymentDate("-");
-        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
         bigOrderTableDTOPage.getContent().get(0).setPayment("-");
-        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-200L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(300L);
 
         OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
         OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
@@ -1644,7 +1643,7 @@ class UBSManagementServiceImplTest {
         Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
         bigOrderTableDTOPage.getContent().get(0).setOrderCertificateCode("-");
         bigOrderTableDTOPage.getContent().get(0).setOrderCertificatePoints("-");
-        bigOrderTableDTOPage.getContent().get(0).setAmountDue(400L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(100L);
 
         OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
         OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
