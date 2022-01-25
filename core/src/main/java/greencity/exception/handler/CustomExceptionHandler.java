@@ -713,4 +713,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
+
+    /**
+     * Method interceptor exception {@link IncorrectEcoNumberFormatException}.
+     *
+     * @param ex      Exception which should be intercepted.
+     * @param request contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(IncorrectEcoNumberFormatException.class)
+    public final ResponseEntity<Object> incorrectEcoNumberFormat(IncorrectEcoNumberFormatException ex,
+        WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
 }
