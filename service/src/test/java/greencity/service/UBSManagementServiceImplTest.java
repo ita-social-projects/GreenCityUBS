@@ -1373,7 +1373,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         EcoNumberDto ecoNumberDto = ModelUtils.getEcoNumberDto();
-        ecoNumberDto.setEcoNumber(new HashSet<>(Arrays.asList("1234")));
+        ecoNumberDto.setEcoNumber(new HashSet<>(Arrays.asList("1234a")));
         assertThrows(IncorrectEcoNumberFormatException.class,
             () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
     }
