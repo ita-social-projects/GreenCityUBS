@@ -1911,8 +1911,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        long paymentSum = getPaymentSum(order);
-        int certificateSum = getCertificatesSum(order);
         Address address = getUbsUserAddress(order);
         return BigOrderTableDTO.builder()
             .id(order.getId())
@@ -1933,10 +1931,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .address(getAddress(address))
             .commentToAddressForClient(getCommentToAddreaForClient(address))
             .bagsAmount(getBagsAmount(order))
-            .totalOrderSum(order.getSumTotalAmountWithoutDiscounts())
+            .totalOrderSum(getTotalOrderSum(order))
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(order.getSumTotalAmountWithoutDiscounts() - paymentSum - certificateSum - order.getPointsToUse())
+            .amountDue(getAmountDue(order))
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -2069,6 +2067,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum);
     }
 
+    private long getTotalOrderSum(Order order) {
+        return nonNull(order.getSumTotalAmountWithoutDiscounts()) ? order.getSumTotalAmountWithoutDiscounts()
+            : 0;
+    }
+
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
             .collect(joining("; "))
@@ -2079,6 +2082,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return nonNull(order.getCertificates())
             ? order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString).collect(joining(", "))
             : "-";
+    }
+
+    private long getAmountDue(Order order) {
+        return getTotalOrderSum(order) - (getPaymentSum(order) + getCertificatesSum(order) + order.getPointsToUse());
     }
 
     private String getDateOfExport(Order order) {
