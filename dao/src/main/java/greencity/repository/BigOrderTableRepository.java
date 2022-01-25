@@ -234,7 +234,7 @@ public class BigOrderTableRepository {
                 fromEOPLikePredicate(s, subquery, setJoin),
                 fromBagAmount(s, cq, orderRoot),
                 fromCertificate(s, cq, orderRoot),
-                searchByAmountDue(s,cq,orderRoot)));
+                searchByAmountDue(s, cq, orderRoot)));
         }
     }
 
@@ -246,7 +246,8 @@ public class BigOrderTableRepository {
         Expression<String> orderPaymentStatus = orderRoot.get("orderPaymentStatus").as(String.class);
         Expression<String> note = criteriaBuilder.upper(orderRoot.get("note"));
         Expression<String> comment = criteriaBuilder.upper(orderRoot.get("comment"));
-        Expression<String> sumTotalAmountWithoutDiscounts = orderRoot.get("sumTotalAmountWithoutDiscounts").as(String.class);
+        Expression<String> sumTotalAmountWithoutDiscounts =
+            orderRoot.get("sumTotalAmountWithoutDiscounts").as(String.class);
 
         return criteriaBuilder.or(
             criteriaBuilder.like(id, "%" + s + "%"),
@@ -311,14 +312,8 @@ public class BigOrderTableRepository {
     }
 
     private Predicate formPaymentSumLikePredicate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
-        Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
-        Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
-        Join<Order, Payment> paymentJoin = paymentRoot.join(PAYMENT);
-
-        subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
-
-        return criteriaBuilder.or(
-            criteriaBuilder.like(subQueryPayment.as(String.class), "%" + s + "00" + "%"));
+        var paymentSumInGrn = criteriaBuilder.quot(sumPayment(cq, orderRoot), 100);
+        return criteriaBuilder.like(paymentSumInGrn.as(String.class), "%" + s + "%");
     }
 
     private Predicate fromEOPLikePredicate(String s, Subquery<EmployeeOrderPosition> subQueryOEP,
@@ -342,8 +337,7 @@ public class BigOrderTableRepository {
 
         subBagAmount.select(criteriaBuilder.sum(bagAmountJoin.value()));
 
-        return criteriaBuilder.or(
-            criteriaBuilder.like(subBagAmount.as(String.class), "%" + s + "%"));
+        return criteriaBuilder.like(subBagAmount.as(String.class), "%" + s + "%");
     }
 
     private Predicate fromCertificate(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
@@ -363,24 +357,36 @@ public class BigOrderTableRepository {
         return criteriaBuilder.exists(subCertificate);
     }
 
-    private Predicate searchByAmountDue (String s, CriteriaQuery<Order> cq, Root<Order> orderRoot){
-        Subquery<Integer> subAmountDue = cq.subquery(Integer.class);
-        Root<Order> root = subAmountDue.correlate(orderRoot);
-        SetJoin<Order, Certificate> certificateJoin = root.joinSet("certificates");
-        ListJoin<Order, Payment> paymentJoin = root.joinList(PAYMENT);
-        var sumTotalAmountWithoutDiscounts = root.get("sumTotalAmountWithoutDiscounts").as(Number.class);
-        var pointToUse = root.get("pointsToUse").as(Number.class);
-        var sumPayment = criteriaBuilder.sum(paymentJoin.get("amount"));
-        var sumCertificatePoint = criteriaBuilder.sum(certificateJoin.get("points"));
-        var sumPaymentAndCertificate =     criteriaBuilder.sum(sumPayment,sumCertificatePoint);
-        var totalPay = criteriaBuilder.sum(pointToUse,sumPaymentAndCertificate);
-        var amountDue =  criteriaBuilder.diff(sumTotalAmountWithoutDiscounts,totalPay);
-        var predicate = criteriaBuilder.like(amountDue.as(String.class), "%" + s + "%");
+    private Predicate searchByAmountDue(String s, CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        var sumTotalAmountWithoutDiscounts = orderRoot.<Integer>get("sumTotalAmountWithoutDiscounts");
+        var pointToUse = orderRoot.<Integer>get("pointsToUse");
+        var sumPaymentInGrn = criteriaBuilder.quot(getSelectCase(sumPayment(cq, orderRoot)).as(Integer.class), 100);
+        var sumCertificatePoint = sumCertificatePoint(cq, orderRoot);
+        var sumPaymentAndCertificate = criteriaBuilder.sum(sumPaymentInGrn,
+            getSelectCase(sumCertificatePoint).as(Integer.class));
+        var totalPayWithDiscount = criteriaBuilder.sum(pointToUse, sumPaymentAndCertificate);
+        var amountDue = criteriaBuilder.diff(sumTotalAmountWithoutDiscounts, totalPayWithDiscount);
 
-        subAmountDue.select(amountDue.as(Integer.class));
+        return criteriaBuilder.like(amountDue.as(String.class), "%" + s + "%");
+    }
 
-        return criteriaBuilder.or(
-                criteriaBuilder.like(subAmountDue.as(String.class), "%" + s + "%"));
+    private Subquery<Integer> sumCertificatePoint(CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        Subquery<Integer> subCertificatePoint = cq.subquery(Integer.class);
+        Root<Order> rootCertificate = subCertificatePoint.correlate(orderRoot);
+        SetJoin<Order, Certificate> certificateJoin = rootCertificate.joinSet("certificates");
+        return subCertificatePoint.select(criteriaBuilder.sum(certificateJoin.get("points")));
+    }
+
+    private Subquery<Integer> sumPayment(CriteriaQuery<Order> cq, Root<Order> orderRoot) {
+        Subquery<Integer> subQueryPayment = cq.subquery(Integer.class);
+        Root<Order> paymentRoot = subQueryPayment.correlate(orderRoot);
+        ListJoin<Order, Payment> paymentJoin = paymentRoot.joinList(PAYMENT);
+        return subQueryPayment.select(criteriaBuilder.sum(paymentJoin.get("amount")));
+    }
+
+    private Expression<Object> getSelectCase(Subquery<Integer> subquery) {
+        return criteriaBuilder.selectCase()
+            .when(criteriaBuilder.isNull(subquery), 0)
+            .otherwise(subquery);
     }
 }
-
