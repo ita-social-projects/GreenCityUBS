@@ -2738,11 +2738,11 @@ public class ModelUtils {
 
         List<Payment> paymentList = new ArrayList<>();
         paymentList.add(Payment.builder()
-            .amount(30000L)
+            .amount(20000L)
             .settlementDate("30-11-2021")
             .build());
         paymentList.add(Payment.builder()
-            .amount(20000L)
+            .amount(10000L)
             .settlementDate("30-11-2021")
             .build());
 
@@ -2847,6 +2847,7 @@ public class ModelUtils {
             .additionalOrders(additionalOrders)
             .receivingStation("Саперно-Слобідська")
             .employeeOrderPositions(employeeOrderPosition)
+            .sumTotalAmountWithoutDiscounts(500L)
             .note("commentsForOrder")
             .blocked(true)
             .blockedByEmployee(employeeBlockedOrder)
@@ -2878,9 +2879,9 @@ public class ModelUtils {
             .totalOrderSum(500L)
             .orderCertificateCode("5489-2789")
             .orderCertificatePoints("100")
-            .amountDue(300L)
+            .amountDue(0L)
             .commentForOrderByClient("commentForOrderByClient")
-            .payment("300, 200")
+            .payment("200, 100")
             .dateOfExport("2021-12-08")
             .timeOfExport("from 15:59:52 to 15:59:52")
             .idOrderFromShop("3245678765")
