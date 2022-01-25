@@ -209,10 +209,11 @@ public class BigOrderTableRepository {
         if (from != null && !from.isEmpty()) {
             predicate = criteriaBuilder.between(settlementDate
                 .as(LocalDate.class),
-                LocalDate.parse(from,formatter),
-                LocalDate.parse(to,formatter));
+                LocalDate.parse(from, formatter),
+                LocalDate.parse(to, formatter));
         } else {
-            predicate = criteriaBuilder.lessThanOrEqualTo(settlementDate.as(LocalDate.class), LocalDate.parse(to,formatter));
+            predicate =
+                criteriaBuilder.lessThanOrEqualTo(settlementDate.as(LocalDate.class), LocalDate.parse(to, formatter));
         }
 
         subQueryPayment.select(join).where(criteriaBuilder.and(predicate, settlementDate.isNotNull()));
