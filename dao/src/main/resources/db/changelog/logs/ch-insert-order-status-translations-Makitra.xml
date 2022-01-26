@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Makitra-15" author="Makitra Vadym">
+
+        <insert tableName="order_status_translations">
+            <column name="id">1</column>
+            <column name="status_id">1</column>
+            <column name="language_id">1</column>
+            <column name="name">Сформовано</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">2</column>
+            <column name="status_id">2</column>
+            <column name="language_id">1</column>
+            <column name="name">Узгодження</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">3</column>
+            <column name="status_id">3</column>
+            <column name="language_id">1</column>
+            <column name="name">Привезе сам</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">4</column>
+            <column name="status_id">4</column>
+            <column name="language_id">1</column>
+            <column name="name">Підтвердженно</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">5</column>
+            <column name="status_id">5</column>
+            <column name="language_id">1</column>
+            <column name="name">На маршруті</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">6</column>
+            <column name="status_id">6</column>
+            <column name="language_id">1</column>
+            <column name="name">Виконано</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">7</column>
+            <column name="status_id">7</column>
+            <column name="language_id">1</column>
+            <column name="name">Не вивезли</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">8</column>
+            <column name="status_id">8</column>
+            <column name="language_id">1</column>
+            <column name="name">Скасовано</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">9</column>
+            <column name="status_id">1</column>
+            <column name="language_id">2</column>
+            <column name="name">Formed</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">10</column>
+            <column name="status_id">2</column>
+            <column name="language_id">2</column>
+            <column name="name">Adjustment</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">11</column>
+            <column name="status_id">3</column>
+            <column name="language_id">2</column>
+            <column name="name">Brought by himself</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">12</column>
+            <column name="status_id">4</column>
+            <column name="language_id">2</column>
+            <column name="name">Confirmed</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">13</column>
+            <column name="status_id">5</column>
+            <column name="language_id">2</column>
+            <column name="name">Оn the route</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">14</column>
+            <column name="status_id">6</column>
+            <column name="language_id">2</column>
+            <column name="name">Done</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">15</column>
+            <column name="status_id">7</column>
+            <column name="language_id">2</column>
+            <column name="name">Not taken out</column>
+        </insert>
+        <insert tableName="order_status_translations">
+            <column name="id">16</column>
+            <column name="status_id">8</column>
+            <column name="language_id">2</column>
+            <column name="name">Canceled</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
