@@ -3100,26 +3100,26 @@ public class ModelUtils {
 
     public static ReadAddressByOrderDto getReadAddressByOrderDto() {
         return ReadAddressByOrderDto.builder()
-                .street("Levaya")
-                .district("frankivskiy")
-                .entranceNumber("5")
-                .houseCorpus("1")
-                .houseNumber("4")
-                .comment("helo")
-                .build();
+            .street("Levaya")
+            .district("frankivskiy")
+            .entranceNumber("5")
+            .houseCorpus("1")
+            .houseNumber("4")
+            .comment("helo")
+            .build();
 
     }
 
     public static List<Bot> botList() {
         List<Bot> botList = new ArrayList<>();
         botList.add(Bot.builder()
-                .type("TELEGRAM")
-                .link("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8")
-                .build());
+            .type("TELEGRAM")
+            .link("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .build());
         botList.add(Bot.builder()
-                .type("VIBER")
-                .link("viber://pa?chatURI=ubstestbot2&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
-                .build());
+            .type("VIBER")
+            .link("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .build());
         return botList;
     }
 }
