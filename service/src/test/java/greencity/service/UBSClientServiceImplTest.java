@@ -1218,4 +1218,13 @@ class UBSClientServiceImplTest {
 
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePaymentClient(dto));
     }
+
+    @Test
+    void getUserPointTest() {
+        when(userRepository.findByUuid("uuid")).thenReturn(User.builder().id(1L).currentPoints(100).build());
+
+        ubsService.getUserPoint("uuid");
+
+        verify(userRepository).findByUuid("uuid");
+    }
 }

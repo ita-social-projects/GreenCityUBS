@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Max-101" author="Max Boiarchuk">
+        <addColumn tableName="address">
+            <column name="city_en" type="varchar"/>
+        </addColumn>
+        <rollback>
+            <dropColumn columnName="city_en" tableName="address"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="Max-102" author="Max Boiarchuk">
+        <addColumn tableName="address">
+            <column name="region_en" type="varchar"/>
+        </addColumn>
+        <rollback>
+            <dropColumn columnName="region_en" tableName="address"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="Max-103" author="Max Boiarchuk">
+        <addColumn tableName="address">
+            <column name="street_en" type="varchar"/>
+        </addColumn>
+        <rollback>
+            <dropColumn columnName="street_en" tableName="address"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="Max-104" author="Max Boiarchuk">
+        <addColumn tableName="address">
+            <column name="district_en" type="varchar"/>
+        </addColumn>
+        <rollback>
+            <dropColumn columnName="district_en" tableName="address"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
