@@ -54,8 +54,8 @@ public class ManagementNotificationServiceImpl implements ManagementNotification
             .descending());
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
-            .map(x -> modelMapper.map(x, NotificationTemplateDto.class)
-                .setSchedule(getScheduleDto(x)))
+            .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class)
+                .setSchedule(getScheduleDto(notificationTemplate)))
             .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
