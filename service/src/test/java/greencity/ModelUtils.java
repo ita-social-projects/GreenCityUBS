@@ -3118,7 +3118,7 @@ public class ModelUtils {
                 .build());
         botList.add(Bot.builder()
                 .type("VIBER")
-                .link("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
+                .link("viber://pa?chatURI=ubstestbot2&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
                 .build());
         return botList;
     }
