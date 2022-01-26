@@ -556,20 +556,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
-        CertificateFilterCriteria certificateFilterCriteria) {
-        Page<Certificate> certificates =
-            certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
-        return getAllCertificatesTranslationDto(certificates);
-    }
-
-    @Override
-    public void addCertificate(CertificateDtoForAdding add) {
-        Certificate certificate = modelMapper.map(add, Certificate.class);
-        certificateRepository.save(certificate);
-    }
-
-    @Override
     public ViolationsInfoDto getAllUserViolations(String email) {
         String uuidId = restClient.findUuidByEmail(email);
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(

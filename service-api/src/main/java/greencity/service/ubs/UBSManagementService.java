@@ -76,15 +76,6 @@ public interface UBSManagementService {
         SortingOrder sortingOrder);
 
     /**
-     * Method returns all certificates with filtering and sorting data.
-     *
-     * @return List of {@link greencity.entity.order.Certificate} lists.
-     * @author Sikhovskiy Rostyslav
-     */
-    PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
-        CertificateFilterCriteria certificateFilterCriteria);
-
-    /**
      * Method save or update view of Orders table.
      *
      * @author Sikhovskiy Rostyslav
@@ -97,13 +88,6 @@ public interface UBSManagementService {
      * @author Sikhovskiy Rostyslav
      */
     CustomTableViewDto getCustomTableParameters(String uuid);
-
-    /**
-     * Method add a certificates.
-     *
-     * @author Nazar Struk
-     */
-    void addCertificate(CertificateDtoForAdding add);
 
     /**
      * Method add some points to UserUBS by email.

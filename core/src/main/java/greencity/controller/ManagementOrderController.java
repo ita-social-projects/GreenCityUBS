@@ -10,13 +10,13 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,13 +37,15 @@ import java.util.Set;
 @RequestMapping("/ubs/management")
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
+    private final CertificateService certificateService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService) {
         this.ubsManagementService = ubsManagementService;
+        this.certificateService = certificateService;
     }
 
     /**
@@ -63,10 +65,9 @@ public class ManagementOrderController {
     @GetMapping("/getAllCertificates")
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
         CertificatePage certificatePage,
-        @ApiIgnore Pageable pageable,
         CertificateFilterCriteria certificateFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria));
+            .body(certificateService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria));
     }
 
     /**
@@ -86,7 +87,7 @@ public class ManagementOrderController {
     @PostMapping("/addCertificate")
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
-        ubsManagementService.addCertificate(certificateDtoForAdding);
+        certificateService.addCertificate(certificateDtoForAdding);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

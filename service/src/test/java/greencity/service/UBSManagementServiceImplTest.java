@@ -25,10 +25,7 @@ import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
-import greencity.service.ubs.EventService;
-import greencity.service.ubs.FileService;
-import greencity.service.ubs.UBSClientServiceImpl;
-import greencity.service.ubs.UBSManagementServiceImpl;
+import greencity.service.ubs.*;
 import org.hibernate.mapping.Any;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -190,15 +187,6 @@ class UBSManagementServiceImplTest {
         List<GroupedOrderDto> actual = ubsManagementService.getClusteredCoords(distance, 60);
 
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void addCertificateTest() {
-        CertificateDtoForAdding certificateDtoForAdding = new CertificateDtoForAdding("1111-1234", 5, 100);
-        Certificate certificate = new Certificate();
-        when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
-        ubsManagementService.addCertificate(certificateDtoForAdding);
-        verify(certificateRepository, times(1)).save(certificate);
     }
 
     @Test
@@ -1385,24 +1373,6 @@ class UBSManagementServiceImplTest {
         AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(OrderNotFoundException.class,
             () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
-    }
-
-    @Test
-    void getCertificatesWithFilter() {
-        CertificateFilterCriteria certificateFilterCriteria = new CertificateFilterCriteria();
-        CertificatePage certificatePage = new CertificatePage();
-        List<Certificate> certificateList = Arrays.asList(new Certificate(), new Certificate());
-        Pageable pageable = PageRequest.of(certificatePage.getPageNumber(), certificatePage.getPageSize());
-        Page<Certificate> certificates = new PageImpl<>(certificateList, pageable, 1L);
-
-        when(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria))
-            .thenReturn(certificates);
-
-        ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
-
-        verify(certificateCriteriaRepo).findAllWithFilter(certificatePage, certificateFilterCriteria);
-        assertEquals(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria),
-            certificates);
     }
 
     @Test

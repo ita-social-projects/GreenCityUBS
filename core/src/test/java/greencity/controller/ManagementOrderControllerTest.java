@@ -6,6 +6,7 @@ import greencity.client.RestClient;
 import greencity.dto.*;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
+import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     UBSManagementService ubsManagementService;
+
+    @Mock
+    CertificateService certificateService;
 
     @Mock
     RestClient restClient;
@@ -103,7 +107,7 @@ class ManagementOrderControllerTest {
         mockMvc
             .perform(MockMvcRequestBuilders.get(ubsLink + "/getAllCertificates"))
             .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(ubsManagementService).getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
+        verify(certificateService).getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
     }
 
     @Test
@@ -112,13 +116,12 @@ class ManagementOrderControllerTest {
             .content(contentForaddingcontroller)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isCreated());
-        ObjectMapper mapper = new ObjectMapper();
         CertificateDtoForAdding certificateDtoForAdding = CertificateDtoForAdding.builder()
             .code("1111-2222")
             .points(100)
             .monthCount(8)
             .build();
-        verify(ubsManagementService, times(1)).addCertificate(certificateDtoForAdding);
+        verify(certificateService, times(1)).addCertificate(certificateDtoForAdding);
     }
 
     @Test
