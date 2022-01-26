@@ -12,8 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(exclude = {"certificateStatus", "order", "points", "creationDate",
-    "expirationDate", "dateOfUse"})
+@EqualsAndHashCode(exclude = {"order"})
 @Table(name = "certificate")
 public class Certificate {
     @Id
@@ -28,6 +27,7 @@ public class Certificate {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Column
     private Integer points;
 
     @Column

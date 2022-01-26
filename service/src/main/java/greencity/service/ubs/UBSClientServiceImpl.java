@@ -14,6 +14,7 @@ import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -62,6 +63,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
+    private final OrderUtils orderUtils;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -82,10 +84,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
     private final EventService eventService;
-    public static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
-    public static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
-    public static final String VIBER_PART_3_OF_LINK = "&context=";
-    public static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
+    private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
+    private static final String VIBER_PART_3_OF_LINK = "&context=";
+    private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final String FAILED_STATUS = "failure";
+    private static final String APPROVED_STATUS = "approved";
 
     @Override
     @Transactional
@@ -917,7 +921,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
             return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
-                .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName())
+                .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
                 .dateOfRegistration(LocalDate.now()).build());
         }
         return user;
@@ -1361,12 +1365,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private PaymentRequestDto formPayment(Long orderId, int sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        int lastNumber = order.getPayment().size() - 1;
+
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_"
-                    + order.getPayment().get(lastNumber).getId())
+            .orderId(orderUtils.generateOrderIdForPayment(orderId, order))
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
@@ -1571,7 +1573,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
             .settlementDate(dto.getSettlement_date())
-            .fee(Long.valueOf(dto.getFee()))
+            .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
             .paymentId(String.valueOf(dto.getPayment_id()))
@@ -1584,7 +1586,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getResponse_status().equals("failure")) {
+        if (dto.getResponse_status().equals(FAILED_STATUS)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(orderPayment);
@@ -1599,7 +1601,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals("approved")) {
+        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
             orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
@@ -1616,5 +1618,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (dto.getFee() == null) {
             dto.setFee(0);
         }
+    }
+
+    @Override
+    public UserPointDto getUserPoint(String uuid) {
+        User user = userRepository.findByUuid(uuid);
+        int currentUserPoints = user.getCurrentPoints();
+
+        return new UserPointDto(currentUserPoints);
     }
 }

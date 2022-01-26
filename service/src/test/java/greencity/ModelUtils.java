@@ -10,6 +10,7 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -260,7 +261,7 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .additionalOrders(new HashSet<>(Arrays.asList("1111", "2222")))
+            .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .build();
     }
 
@@ -1053,7 +1054,22 @@ public class ModelUtils {
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
-            .images(new LinkedList<String>())
+            .images(new LinkedList<>())
+            .build();
+    }
+
+    public static Violation getViolation2() {
+        LocalDateTime localdatetime = LocalDateTime.of(
+            2021, Month.MARCH,
+            16, 13, 00, 00);
+        return Violation.builder()
+            .id(1L)
+            .order(Order.builder()
+                .id(1L).user(ModelUtils.getTestUser()).build())
+            .violationLevel(MAJOR)
+            .description("violation1")
+            .violationDate(localdatetime)
+            .images(List.of("as", "s"))
             .build();
     }
 
@@ -1393,6 +1409,8 @@ public class ModelUtils {
             .district("Syhiv")
             .street("Stys")
             .houseCorpus("2")
+            .city("cc")
+            .region("cc")
             .build();
     }
 
@@ -1404,6 +1422,8 @@ public class ModelUtils {
             .addressDistrict("Syhiv")
             .addressStreet("Stys")
             .addressHouseCorpus("2")
+            .addressCity("s")
+            .addressRegion("s")
             .build();
     }
 
@@ -1956,7 +1976,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(new HashSet<>(Arrays.asList("1111", "3333")))
+            .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
             .build();
     }
 
@@ -2143,7 +2163,7 @@ public class ModelUtils {
     }
 
     public static OrderStatusTranslation getStatusTranslation() {
-        return OrderStatusTranslation.builder().id(1L).statusId(2L).languageId(0L).name("ds").build();
+        return OrderStatusTranslation.builder().id(6L).statusId(2L).languageId(1L).name("name").build();
     }
 
     public static BagInfoDto getBagInfoDto() {
@@ -2167,6 +2187,8 @@ public class ModelUtils {
     public static PaymentInfoDto getInfoPayment() {
         return PaymentInfoDto.builder()
             .comment("ddd")
+            .id(1L)
+            .amount(1000L)
             .build();
     }
 
@@ -2237,7 +2259,7 @@ public class ModelUtils {
                 .addressRegion("sdfsdfsd")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
-                .ecoNumber(Set.of("1111"))
+                .ecoNumber(Set.of("1111111111"))
                 .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
@@ -2717,11 +2739,11 @@ public class ModelUtils {
 
         List<Payment> paymentList = new ArrayList<>();
         paymentList.add(Payment.builder()
-            .amount(30000L)
+            .amount(20000L)
             .settlementDate("30-11-2021")
             .build());
         paymentList.add(Payment.builder()
-            .amount(20000L)
+            .amount(10000L)
             .settlementDate("30-11-2021")
             .build());
 
@@ -2826,6 +2848,7 @@ public class ModelUtils {
             .additionalOrders(additionalOrders)
             .receivingStation("Саперно-Слобідська")
             .employeeOrderPositions(employeeOrderPosition)
+            .sumTotalAmountWithoutDiscounts(500L)
             .note("commentsForOrder")
             .blocked(true)
             .blockedByEmployee(employeeBlockedOrder)
@@ -2857,9 +2880,9 @@ public class ModelUtils {
             .totalOrderSum(500L)
             .orderCertificateCode("5489-2789")
             .orderCertificatePoints("100")
-            .amountDue(300L)
+            .amountDue(0L)
             .commentForOrderByClient("commentForOrderByClient")
-            .payment("300, 200")
+            .payment("200, 100")
             .dateOfExport("2021-12-08")
             .timeOfExport("from 15:59:52 to 15:59:52")
             .idOrderFromShop("3245678765")
@@ -2894,7 +2917,7 @@ public class ModelUtils {
             .confirmedQuantity(hashMap)
             .exportedQuantity(hashMap)
             .pointsToUse(100)
-            .orderStatus(OrderStatus.FORMED)
+            .orderStatus(OrderStatus.DONE)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(20000L)
@@ -2934,7 +2957,6 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
-            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .courierLocations(CourierLocation.builder()
                 .courier(Courier.builder()
                     .id(1L)
@@ -2951,7 +2973,147 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<Bot> botList() {
+    public static Order getOrderForGetOrderStatusEmptyPriceDetails() {
+        return Order.builder()
+            .id(1L)
+            .amountOfBagsOrdered(new HashMap<Integer, Integer>())
+            .confirmedQuantity(new HashMap<Integer, Integer>())
+            .exportedQuantity(new HashMap<Integer, Integer>())
+            .pointsToUse(100)
+            .orderStatus(OrderStatus.DONE)
+            .build();
+    }
+
+    public static Order getOrdersStatusAdjustmentDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusConfirmedDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.CONFIRMED)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusFormedDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.FORMED)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusNotTakenOutDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.NOT_TAKEN_OUT)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusOnThe_RouteDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.ON_THE_ROUTE)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusBROUGHT_IT_HIMSELFDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.BROUGHT_IT_HIMSELF)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusDoneDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.DONE)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static Order getOrdersStatusCanseledDto() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.CANCELED)
+            .counterOrderPaymentId(1L)
+            .build();
+    }
+
+    public static OrderAddressExportDetailsDtoUpdate getOrderAddressExportDetailsDtoUpdate() {
+        return OrderAddressExportDetailsDtoUpdate.builder()
+            .addressId(1L)
+            .addressStreet("s")
+            .addressCity("ss")
+            .addressDistrict("s")
+            .addressHouseCorpus("ss")
+            .addressEntranceNumber("ss")
+            .addressRegion("ss")
+            .addressHouseNumber("ss")
+            .build();
+
+    }
+
+    public static CustomTableView getCustomTableView() {
+        return CustomTableView.builder()
+            .id(1L)
+            .uuid("uuid1")
+            .titles("title")
+            .build();
+    }
+
+    public static ReadAddressByOrderDto getReadAddressByOrderDto() {
+        return ReadAddressByOrderDto.builder()
+            .street("Levaya")
+            .district("frankivskiy")
+            .entranceNumber("5")
+            .houseCorpus("1")
+            .houseNumber("4")
+            .comment("helo")
+            .build();
+
+    }
+      public static List<Bot> botList() {
         List<Bot> botList = new ArrayList<>();
         botList.add(Bot.builder()
             .type("TELEGRAM")
@@ -2962,5 +3124,5 @@ public class ModelUtils {
             .link("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
             .build());
         return botList;
-    }
+      }
 }
