@@ -17,10 +17,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.util.Bot;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
@@ -32,7 +29,6 @@ import java.util.*;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.nonNull;
 
 public class ModelUtils {
 
@@ -2958,8 +2954,8 @@ public class ModelUtils {
             .link("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8")
             .build());
         botList.add(Bot.builder()
-            .type("VIBER")
-            .link("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
+                .type("VIBER")
+                .link("viber://pa?chatURI=ubstestbot2&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
             .build());
         return botList;
     }
