@@ -92,6 +92,15 @@
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-nig-bags-table-locations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
     <include file="db/changelog/logs/ch-alter-table-column-paymentId-payment-table-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-sum_total_amount_without_discounts-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-create_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_bag_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-trigger_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-change_function_for_calculate_sum_total_amount_without_discounts_order_bag_map_table-Kyzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-address-Boiarchuk.xml"/>
+
+
     <include file="db/changelog/logs/ch-insert-into-order_payment_status_transaltion-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-order-status-translations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-positions.xml"/>

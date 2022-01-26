@@ -1639,27 +1639,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment changePaymentEntity(Payment updatePayment,
         ManualPaymentRequestDto requestDto,
         MultipartFile image) {
-        updatePayment.setSettlementDate(requestDto.getPaymentDate());
+        updatePayment.setSettlementDate(requestDto.getSettlementdate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
-        if (updatePayment.getImagePath() != null) {
-            fileService.delete(updatePayment.getImagePath());
+        if (requestDto.getImagePath().isEmpty() && requestDto.getImagePath() != null) {
+            if (updatePayment.getImagePath() != null) {
+                fileService.delete(updatePayment.getImagePath());
+            }
+            updatePayment.setImagePath(null);
         }
         if (image != null) {
             updatePayment.setImagePath(fileService.upload(image));
-        } else {
-            updatePayment.setImagePath(null);
         }
-
         return updatePayment;
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return ManualPaymentResponseDto.builder()
+            .id(payment.getId())
             .paymentId(payment.getPaymentId())
-            .paymentDate(payment.getSettlementDate())
+            .settlementdate(payment.getSettlementDate())
             .amount(payment.getAmount())
             .receiptLink(payment.getReceiptLink())
             .imagePath(payment.getImagePath())
@@ -1670,7 +1671,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
         User currentUser) {
         Payment payment = Payment.builder()
-            .settlementDate(paymentRequestDto.getPaymentDate())
+            .settlementDate(paymentRequestDto.getSettlementdate())
             .amount(paymentRequestDto.getAmount())
             .paymentStatus(PaymentStatus.PAID)
             .paymentId(paymentRequestDto.getPaymentId())
@@ -1910,8 +1911,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        long paymentSum = getPaymentSum(order);
-        int certificateSum = getCertificatesSum(order);
         Address address = getUbsUserAddress(order);
         return BigOrderTableDTO.builder()
             .id(order.getId())
@@ -1932,10 +1931,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .address(getAddress(address))
             .commentToAddressForClient(getCommentToAddreaForClient(address))
             .bagsAmount(getBagsAmount(order))
-            .totalOrderSum(paymentSum)
+            .totalOrderSum(getTotalOrderSum(order))
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(paymentSum - certificateSum - order.getPointsToUse())
+            .amountDue(getAmountDue(order))
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -2068,6 +2067,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum);
     }
 
+    private long getTotalOrderSum(Order order) {
+        return nonNull(order.getSumTotalAmountWithoutDiscounts()) ? order.getSumTotalAmountWithoutDiscounts()
+            : 0;
+    }
+
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
             .collect(joining("; "))
@@ -2078,6 +2082,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return nonNull(order.getCertificates())
             ? order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString).collect(joining(", "))
             : "-";
+    }
+
+    private long getAmountDue(Order order) {
+        return getTotalOrderSum(order) - (getPaymentSum(order) + getCertificatesSum(order) + order.getPointsToUse());
     }
 
     private String getDateOfExport(Order order) {
@@ -2178,7 +2186,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             && !added.contains("")) {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
             added.stream()
-                .forEach(newNumber -> order.getAdditionalOrders().add(newNumber));
+                .forEach(newNumber -> {
+                    if (!newNumber.matches("[0-9]+") || newNumber.length() != 10) {
+                        throw new IncorrectEcoNumberFormatException(INCORRECT_ECO_NUMBER);
+                    }
+                    order.getAdditionalOrders().add(newNumber);
+                });
         }
 
         orderRepository.save(order);
