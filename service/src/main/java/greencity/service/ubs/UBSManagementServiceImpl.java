@@ -19,8 +19,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -553,20 +551,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
         Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
         return getAllCertificatesTranslationDto(certificates);
-    }
-
-    @Override
-    public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
-        CertificateFilterCriteria certificateFilterCriteria) {
-        Page<Certificate> certificates =
-            certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
-        return getAllCertificatesTranslationDto(certificates);
-    }
-
-    @Override
-    public void addCertificate(CertificateDtoForAdding add) {
-        Certificate certificate = modelMapper.map(add, Certificate.class);
-        certificateRepository.save(certificate);
     }
 
     @Override
