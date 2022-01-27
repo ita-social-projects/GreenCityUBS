@@ -101,7 +101,7 @@ public class ModelUtils {
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
     public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
-            getRequestToChangeOrdersDataDTO();
+        getRequestToChangeOrdersDataDTO();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -3121,11 +3121,12 @@ public class ModelUtils {
             .comment("helo")
             .build();
     }
+
     public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDTO.builder()
-                .columnName("orderStatus")
-                .orderId(List.of(1l))
-                .newValue("1")
-                .build();
+            .columnName("orderStatus")
+            .orderId(List.of(1l))
+            .newValue("1")
+            .build();
     }
 }
