@@ -12,7 +12,6 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
-import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
@@ -77,17 +76,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String publicKey;
     @Value("${liqpay.private.key}")
     private String privateKey;
-    @Value("${ubs.viber.bot.uri}")
-    private String viberBotUri;
-    @Value("${ubs.bot.name}")
-    private String telegramBotName;
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
     private final EventService eventService;
-    private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
-    private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
-    private static final String VIBER_PART_3_OF_LINK = "&context=";
-    private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
 
@@ -872,35 +863,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findByUuid(uuid);
         List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
-        List<Bot> botList = getListOfBots(user.getUuid());
         List<AddressDto> addressDto =
             allAddress.stream()
                 .filter(a -> a.getAddressStatus() != AddressStatus.DELETED)
                 .map(a -> modelMapper.map(a, AddressDto.class))
                 .collect(Collectors.toList());
         userProfileDto.setAddressDto(addressDto);
-        userProfileDto.setBotList(botList);
         return userProfileDto;
-    }
-
-    private List<Bot> getListOfBots(String uuid) {
-        return EnumSet.allOf(BotType.class)
-            .stream()
-            .map(type -> new Bot(type.name(), createLink(type, uuid)))
-            .collect(Collectors.toList());
-    }
-
-    private String createLink(BotType type, String uuid) {
-        String linkTemplate = null;
-        if ("TELEGRAM".equals(type.name())) {
-            linkTemplate = String.format("%s%s%s%s",
-                TELEGRAM_PART_1_OF_LINK, telegramBotName, TELEGRAM_PART_3_OF_LINK, uuid);
-        }
-        if ("VIBER".equals(type.name())) {
-            linkTemplate = String.format("%s%s%s%s",
-                VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
-        }
-        return linkTemplate;
     }
 
     private User setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {
