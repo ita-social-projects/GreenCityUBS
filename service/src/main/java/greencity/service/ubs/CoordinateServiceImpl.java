@@ -257,7 +257,7 @@ public class CoordinateServiceImpl implements CoordinateService {
      */
     @Override
     public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(@NonNull Set<CoordinatesDto> specified,
-                                                                      int litres, double additionalDistance) {
+        int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
