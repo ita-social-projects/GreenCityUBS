@@ -9,15 +9,17 @@ import greencity.exceptions.ActiveOrdersNotFoundException;
 import greencity.exceptions.IncorrectValueException;
 import greencity.repository.AddressRepository;
 import greencity.repository.OrderRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 
-@org.springframework.stereotype.Service
+@Service
 @RequiredArgsConstructor
 public class CoordinateServiceImpl implements CoordinateService {
     private final AddressRepository addressRepository;
@@ -32,16 +34,18 @@ public class CoordinateServiceImpl implements CoordinateService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
         List<Order> allOrders = getAllUndeliveredOrders();
         List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
-        for (Coordinates temp : allCoords) {
+        for (Coordinates coordinates : allCoords) {
             int currentCoordinatesCapacity =
-                addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
-            List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
-                .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
+                addressRepository.capacity(coordinates.getLatitude(), coordinates.getLongitude());
+
+            List<OrderDto> currentCoordinatesOrders = allOrders.stream()
+                .filter(o -> o.getUbsUser().getAddress().getCoordinates().equals(coordinates))
+                .map(o -> modelMapper.map(o, OrderDto.class))
+                .collect(Collectors.toList());
+
             allOrdersWithLitres.add(GroupedOrderDto.builder()
                 .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfOrders(currentCoordinatesOrdersDto)
+                .groupOfOrders(currentCoordinatesOrders)
                 .build());
         }
         return allOrdersWithLitres;
@@ -252,8 +256,8 @@ public class CoordinateServiceImpl implements CoordinateService {
      * {@inheritDoc}
      */
     @Override
-    public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
+    public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(@NonNull Set<CoordinatesDto> specified,
+                                                                      int litres, double additionalDistance) {
         checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
 
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();

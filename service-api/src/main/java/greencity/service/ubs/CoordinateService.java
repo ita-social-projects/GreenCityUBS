@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.CoordinatesDto;
 import greencity.dto.GroupedOrderDto;
+import lombok.NonNull;
 
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,6 @@ public interface CoordinateService {
      * @return List of {@link GroupedOrderDto} lists.
      * @author Oleh Bilonizhka
      */
-    List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
+    List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(@NonNull Set<CoordinatesDto> specified,
         int litres, double additionalDistance);
 }
