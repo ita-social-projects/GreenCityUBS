@@ -2282,7 +2282,10 @@ public class ModelUtils {
                     .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
                     .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
                     .build())
-
+            .updateResponsibleEmployeeDto(List.of(UpdateResponsibleEmployeeDto.builder()
+                .positionId(2L)
+                .employeeId(2L)
+                .build()))
             .build();
     }
 
