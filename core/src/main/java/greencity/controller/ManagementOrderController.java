@@ -12,6 +12,7 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ViolationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -38,14 +39,17 @@ import java.util.Set;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
+    private final ViolationService violationService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
+        ViolationService violationService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
+        this.violationService = violationService;
     }
 
     /**
@@ -210,7 +214,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.addUserViolation(add, files, uuid);
+        violationService.addUserViolation(add, files, uuid);
         ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -421,7 +425,7 @@ public class ManagementOrderController {
     public ResponseEntity<ViolationDetailInfoDto> getViolationDetailsForCurrentOrder(
         @Valid @PathVariable("orderId") Long orderId) {
         Optional<ViolationDetailInfoDto> violationDetailsByOrderId =
-            ubsManagementService.getViolationDetailsByOrderId(orderId);
+            violationService.getViolationDetailsByOrderId(orderId);
         if (violationDetailsByOrderId.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
         } else {
@@ -594,7 +598,7 @@ public class ManagementOrderController {
     @DeleteMapping("/delete-violation-from-order/{orderId}")
     public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteViolation(orderId, uuid);
+        violationService.deleteViolation(orderId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -803,7 +807,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
         @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateUserViolation(add, multipartFiles, uuid);
+        violationService.updateUserViolation(add, multipartFiles, uuid);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
