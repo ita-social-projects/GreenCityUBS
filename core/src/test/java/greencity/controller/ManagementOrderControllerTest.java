@@ -47,10 +47,10 @@ class ManagementOrderControllerTest {
 
     @Mock
     private ViolationService violationService;
-  
+
     @Mock
     CoordinateService coordinateService;
-  
+
     @Mock
     CertificateService certificateService;
 
