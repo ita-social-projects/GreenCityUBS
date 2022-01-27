@@ -8,25 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "greencity", ignoreUnknownFields = false)
-public class GreenCityConfigurationProperties {
-    private String tokenKey;
-
-    private String userServerAddress;
-
+@ConfigurationProperties(prefix = "greencity.bots", ignoreUnknownFields = false)
+public class BotsConfgProp {
     private String ubsBotName;
-
     private String ubsBotToken;
-
     private String viberBotUrl;
-
     private String viberBotToken;
-
-    private String merchantId;
-
-    private String fondyPaymentKey;
-
-    private String liqPayPublicKey;
-
-    private String liqPayPrivateKey;
 }
