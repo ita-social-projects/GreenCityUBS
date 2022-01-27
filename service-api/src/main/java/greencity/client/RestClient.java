@@ -28,11 +28,11 @@ public class RestClient {
     private static final String TOKEN_HEADER_NAME = "X-Viber-Auth-Token";
     private static final String EMAIL = "?email=";
     private final RestTemplate restTemplate;
-    @Value("${greencityuser.server.address}")
+    @Value("${greencity.redirect.user-server-address}")
     private String greenCityUserServerAddress;
-    @Value("${ubs.viber.bot.token}")
+    @Value("${greencity.bots.viber-bot-token}")
     private String viberBotToken;
-    @Value("${ubs.viber.bot.url}")
+    @Value("${greencity.bots.viber-bot-url}")
     private String viberBotUrl;
     private static final String orderId = "order_id";
     private final HttpServletRequest httpServletRequest;

@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class LiqPayConfiguration {
-    @Value("${liqpay.public.key}")
+    @Value("${greencity.payment.liq-pay-public-key")
     private String publicKey;
-    @Value("${liqpay.private.key}")
+    @Value("${greencity.payment.liq-pay-private-key}")
     private String privateKey;
 
     /**
