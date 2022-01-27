@@ -760,11 +760,13 @@ public class ModelUtils {
     }
 
     public static UpdateViolationToUserDto getUpdateViolationToUserDto() {
+        List<String> listImages = new ArrayList();
+        listImages.add("");
         return UpdateViolationToUserDto.builder()
             .orderID(1L)
             .violationDescription("String1 string1 string1")
             .violationLevel("low")
-            .imagesToDelete(null)
+            .imagesToDelete(listImages)
             .build();
     }
 
