@@ -92,4 +92,9 @@
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-nig-bags-table-locations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
     <include file="db/changelog/logs/ch-alter-table-column-paymentId-payment-table-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-order_payment_status_transaltion-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-insert-order-status-translations-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-positions.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-bags-and-bags-translations-Makitra.xml"/>
 </databaseChangeLog>
