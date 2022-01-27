@@ -87,11 +87,11 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's responsible employee.
      *
-     * @param employee   of {@link String}
-     * @param ordersId   of {@link List}
-     * @param position   of {@link Long}
-     * @param employeeId of {@link Long}
+     * @param employee of {@link String}
+     * @param ordersId of {@link List}
+     * @param position of {@link Long}
+     * @param uuid     of {@link String}
      * @author Liubomyr Pater
      */
-    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, Long employeeId);
+    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, String uuid);
 }

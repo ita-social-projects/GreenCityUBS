@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Makitra-14" author="Makitra Vadym">
+
+    <insert tableName="locations">
+        <column name="id">1</column>
+        <column name="location_status">ACTIVE</column>
+    </insert>
+        <insert tableName="courier">
+            <column name="id">1</column>
+            <column name="location_id">1</column>
+            <column name="min_amount_of_big_bags">2</column>
+            <column name="max_amount_of_big_bags">3</column>
+            <column name="min_price_of_order">500</column>
+            <column name="max_price_of_order">100000</column>
+            <column name="courier_limits">LIMIT_BY_AMOUNT_OF_BAG</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
