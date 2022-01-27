@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.constant.OrderHistory;
 import greencity.entity.order.Order;
 import greencity.repository.EventRepository;
 import greencity.service.ubs.EventServiceImpl;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,5 +33,14 @@ class EventServiceImplTest {
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
         eventService.save("Замовлення оплаченно", "Анжрій Іванюк", order);
         verify(eventRepository, times(1)).save(any());
+    }
+
+    @Test
+    void changesWithResponsibleEmployeeTest() {
+        String existedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.TRUE);
+        String unExistedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.FALSE);
+
+        assertEquals(OrderHistory.UPDATE_MANAGER_CALL, existedCallManager);
+        assertEquals(OrderHistory.ASSIGN_CALL_MANAGER, unExistedCallManager);
     }
 }

@@ -83,7 +83,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-
+    private final OrdersAdminsPageService ordersAdminsPageService;
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -2222,8 +2222,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     lang,
                     currentUser);
             }
-        } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
-            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
+            if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+                updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                    .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                        dto.getEmployeeId().toString(),
+                        dto.getPositionId(),
+                        currentUser));
+            }
+        } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
         }
     }
