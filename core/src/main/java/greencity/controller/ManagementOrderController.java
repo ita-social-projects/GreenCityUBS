@@ -42,7 +42,6 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
-    private final CoordinateService coordinateService;
 
     /**
      * Constructor with parameters.
