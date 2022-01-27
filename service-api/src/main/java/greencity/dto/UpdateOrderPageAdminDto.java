@@ -2,6 +2,8 @@ package greencity.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -15,4 +17,5 @@ public class UpdateOrderPageAdminDto {
     private EcoNumberDto ecoNumberFromShop;
     private ExportDetailsDtoUpdate exportDetailsDto;
     private UpdateOrderDetailDto orderDetailDto;
+    private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
 }

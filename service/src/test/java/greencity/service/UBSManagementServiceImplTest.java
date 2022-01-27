@@ -150,6 +150,9 @@ class UBSManagementServiceImplTest {
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
 
+    @Mock
+    OrdersAdminsPageService ordersAdminsPageService;
+
     private void getMocksBehavior() {
 
         when(addressRepository.capacity(anyDouble(), anyDouble())).thenReturn(25);
@@ -1472,6 +1475,8 @@ class UBSManagementServiceImplTest {
             .thenReturn(List.of(ModelUtils.getReceivingStation()));
 
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc");
+        UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
+        ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
 
         verify(ubsClientService, times(1))
             .updateUbsUserInfoInOrder(ModelUtils.getUbsCustomersDtoUpdate(), "abc");
