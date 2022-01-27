@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
+
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
+        new NotificationScheduleDto().setCron("0 0 18 * * ?");
+
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
     }
@@ -613,6 +617,8 @@ public class ModelUtils {
         return new NotificationTemplateDto()
             .setId(1L)
             .setTitle("test")
-            .setBody("test");
+            .setBody("test")
+            .setNotificationType("UNPAID_ORDER")
+            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 }

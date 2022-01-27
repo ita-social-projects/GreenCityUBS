@@ -3,8 +3,11 @@ package greencity.service.notification;
 import greencity.ModelUtils;
 import greencity.dto.NotificationTemplateDto;
 import greencity.dto.PageableDto;
+import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
+import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +29,8 @@ class ManagementNotificationServiceImplTest {
     NotificationTemplateRepository templateRepository;
     @Mock
     ModelMapper modelMapper;
-
+    @Mock
+    NotificationScheduleRepo scheduleRepo;
     @InjectMocks
     private ManagementNotificationServiceImpl notificationService;
 
@@ -34,6 +38,9 @@ class ManagementNotificationServiceImplTest {
     void findAll() {
         NotificationTemplateDto dto = ModelUtils.TEST_NOTIFICATION_TEMPLATE_DTO;
         NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
+        NotificationSchedule notificationSchedule = ModelUtils.NOTIFICATION_SCHEDULE
+            .setNotificationType(NotificationType.UNPAID_ORDER);
+        when(scheduleRepo.getOne(NotificationType.UNPAID_ORDER)).thenReturn(notificationSchedule);
         when(templateRepository.findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE)).thenReturn(
             ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
         when(modelMapper.map(template, NotificationTemplateDto.class))
@@ -51,9 +58,11 @@ class ManagementNotificationServiceImplTest {
         NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
         when(templateRepository.findNotificationTemplateById(1L)).thenReturn(
             Optional.of(template));
-
+        NotificationSchedule notificationSchedule = ModelUtils.NOTIFICATION_SCHEDULE
+            .setNotificationType(NotificationType.UNPAID_ORDER);
+        when(scheduleRepo.getOne(NotificationType.UNPAID_ORDER)).thenReturn(notificationSchedule);
         notificationService.update(dto);
-
+        verify(scheduleRepo).save(ModelUtils.NOTIFICATION_SCHEDULE);
         verify(templateRepository).findNotificationTemplateById(1L);
         verify(templateRepository).save(template);
     }
