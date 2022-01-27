@@ -7,6 +7,7 @@ import greencity.dto.*;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 
 import static greencity.ModelUtils.*;
@@ -47,6 +47,9 @@ class ManagementOrderControllerTest {
 
     @Mock
     private ViolationService violationService;
+
+    @Mock
+    CoordinateService coordinateService;
 
     @Mock
     CertificateService certificateService;
@@ -362,7 +365,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(get(ubsLink + "/all-undelivered"))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).getAllUndeliveredOrdersWithLiters();
+        verify(coordinateService).getAllUndeliveredOrdersWithLiters();
     }
 
     @Test

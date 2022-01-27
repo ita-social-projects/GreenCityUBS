@@ -11,6 +11,7 @@ import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +40,7 @@ import java.util.Set;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
+    private final CoordinateService coordinateService;
     private final ViolationService violationService;
 
     /**
@@ -46,10 +48,11 @@ public class ManagementOrderController {
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
-        ViolationService violationService) {
+        ViolationService violationService, CoordinateService coordinateService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
+        this.coordinateService = coordinateService;
     }
 
     /**
@@ -110,7 +113,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/all-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllUndeliveredOrdersWithLiters());
+        return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
 
     /**
@@ -131,7 +134,7 @@ public class ManagementOrderController {
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
         @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getClusteredCoords(radius, litres));
+            .body(coordinateService.getClusteredCoords(radius, litres));
     }
 
     /**
@@ -151,7 +154,7 @@ public class ManagementOrderController {
         @RequestParam(required = false, defaultValue = "3000") Integer litres,
         @RequestParam(required = false, defaultValue = "0") Double additionalDistance) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
+            .body(coordinateService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
     }
 
     /**
