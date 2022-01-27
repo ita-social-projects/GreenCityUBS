@@ -11,7 +11,6 @@ import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
@@ -40,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -60,7 +58,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
     private final BagsInfoRepo bagsInfoRepository;
-    private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final BigOrderTableRepository bigOrderTableRepository;
@@ -74,10 +71,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
-    private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
+
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
@@ -269,40 +266,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
-    }
-
-    @Override
-    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
-            ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
-            User user = order.getUser();
-            Violation violation = violationBuilder(add, order);
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                setImages(multipartFiles, images);
-                violation.setImages(images);
-            }
-            violationRepository.save(violation);
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), order);
-            notificationService.notifyAddViolation(order);
-        } else {
-            throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
-        }
-    }
-
-    private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
-        return Violation.builder()
-            .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
-            .description(add.getViolationDescription())
-            .violationDate(order.getOrderDate())
-            .order(order)
-            .build();
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -952,52 +915,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    /**
-     * Method returns detailed information about user violation by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ViolationDetailInfoDto};
-     * @author Rusanovscaia Nadejda
-     */
-    @Override
-    @Transactional
-    public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
-        User user =
-            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
-        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
-            .orderId(orderId)
-            .userName(user.getRecipientName())
-            .violationLevel(v.getViolationLevel())
-            .description(v.getDescription())
-            .images(v.getImages())
-            .violationDate(v.getViolationDate())
-            .build());
-    }
-
-    @Override
-    @Transactional
-    public void deleteViolation(Long id, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
-        if (violationOptional.isPresent()) {
-            List<String> images = violationOptional.get().getImages();
-            if (!images.isEmpty()) {
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
-                }
-            }
-            violationRepository.deleteById(violationOptional.get().getId());
-            User user = violationOptional.get().getOrder().getUser();
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
-        } else {
-            throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
-        }
-    }
-
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
@@ -1472,47 +1389,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else if (position == 5) {
             eventService.save(OrderHistory.UPDATE_MANAGER_DRIVER,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        }
-    }
-
-    @Override
-    public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Violation violation = violationRepository.findByOrderId(add.getOrderID())
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
-        updateViolation(violation, add, multipartFiles);
-        violationRepository.save(violation);
-        eventService.save(OrderHistory.CHANGES_VIOLATION,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
-    }
-
-    private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {
-        violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
-        violation.setDescription(add.getViolationDescription());
-        List<String> violationImages = violation.getImages();
-        if (add.getImagesToDelete() != null) {
-            List<String> images = add.getImagesToDelete();
-            for (String image : images) {
-                fileService.delete(image);
-                violationImages.remove(image);
-            }
-        }
-        if (multipartFiles.length > 0) {
-            List<String> images = new LinkedList<>();
-            setImages(multipartFiles, images);
-            if (violation.getImages().isEmpty()) {
-                violation.setImages(images);
-            } else {
-                violation
-                    .setImages(Stream.concat(violationImages.stream(), images.stream()).collect(Collectors.toList()));
-            }
-        }
-    }
-
-    private void setImages(MultipartFile[] multipartFiles, List<String> images) {
-        for (MultipartFile multipartFile : multipartFiles) {
-            images.add(fileService.upload(multipartFile));
         }
     }
 

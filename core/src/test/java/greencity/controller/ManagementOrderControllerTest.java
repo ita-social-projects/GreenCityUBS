@@ -9,6 +9,7 @@ import greencity.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ViolationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,8 +46,11 @@ class ManagementOrderControllerTest {
     UBSManagementService ubsManagementService;
 
     @Mock
+    private ViolationService violationService;
+  
+    @Mock
     CoordinateService coordinateService;
-
+  
     @Mock
     CertificateService certificateService;
 
@@ -171,18 +175,18 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isNotFound());
 
-        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+        verify(violationService).getViolationDetailsByOrderId(1L);
     }
 
     @Test
     void returnsDetailsAboutViolationWithGivenOrderId() throws Exception {
         ViolationDetailInfoDto violationDetailInfoDto = getViolationDetailInfoDto();
-        when(ubsManagementService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
+        when(violationService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
 
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+        verify(violationService).getViolationDetailsByOrderId(1L);
     }
 
     @Test
@@ -240,7 +244,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).deleteViolation(1L, null);
+        verify(violationService).deleteViolation(1L, null);
     }
 
     @Test
