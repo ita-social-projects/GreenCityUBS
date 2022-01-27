@@ -1,7 +1,6 @@
 package greencity.dto;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.util.Bot;
 import lombok.*;
 
 import javax.validation.constraints.Email;
@@ -30,5 +29,4 @@ public class UserProfileDto {
     @ValidPhoneNumber
     private String recipientPhone;
     private List<AddressDto> addressDto;
-    private List<Bot> botList;
 }
