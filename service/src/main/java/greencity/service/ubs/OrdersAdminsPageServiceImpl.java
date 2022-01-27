@@ -16,6 +16,7 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -184,8 +185,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
 
         public static Long columnNameToEmployeePosition(String columnName) {
-            return Optional.ofNullable(ColumnNameToPosition.valueOf(columnName).positionId)
-                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
+            return Arrays.stream(ColumnNameToPosition.values())
+                .filter(entity -> (entity.columnValue.equals(columnName)))
+                .mapToLong(value -> value.positionId).findFirst().getAsLong();
         }
 
         private final String columnValue;
