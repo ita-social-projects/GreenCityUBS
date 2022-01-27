@@ -138,7 +138,7 @@ class UBSManagementServiceImplTest {
 
     @Mock
     private BigOrderTableRepository bigOrderTableRepository;
-  
+
     @Mock
     OrdersAdminsPageService ordersAdminsPageService;
 
