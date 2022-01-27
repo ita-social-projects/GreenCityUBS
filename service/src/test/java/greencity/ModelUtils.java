@@ -11,6 +11,8 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.schedule.NotificationSchedule;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -95,16 +97,9 @@ public class ModelUtils {
         List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
-    public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
-        getRequestToChangeOrdersDataDTO();
-
-    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
-        return RequestToChangeOrdersDataDTO.builder()
-            .columnName("orderStatus")
-            .orderId(List.of(1l))
-            .newValue("1")
-            .build();
-    }
+    public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
+        new NotificationScheduleDto().setCron("0 0 18 * * ?");
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -2285,10 +2280,6 @@ public class ModelUtils {
                     .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
                     .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
                     .build())
-            .updateResponsibleEmployeeDto(new ArrayList<>(Arrays.asList(UpdateResponsibleEmployeeDto.builder()
-                .employeeId(1l)
-                .positionId(1l)
-                .build())))
 
             .build();
     }
@@ -2576,14 +2567,17 @@ public class ModelUtils {
         return new NotificationTemplate()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType(NotificationType.UNPAID_ORDER);
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
         return new NotificationTemplateDto()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType("UNPAID_ORDER")
+            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {
@@ -2752,11 +2746,11 @@ public class ModelUtils {
 
         List<Payment> paymentList = new ArrayList<>();
         paymentList.add(Payment.builder()
-            .amount(30000L)
+            .amount(20000L)
             .settlementDate("30-11-2021")
             .build());
         paymentList.add(Payment.builder()
-            .amount(20000L)
+            .amount(10000L)
             .settlementDate("30-11-2021")
             .build());
 
@@ -2861,6 +2855,7 @@ public class ModelUtils {
             .additionalOrders(additionalOrders)
             .receivingStation("Саперно-Слобідська")
             .employeeOrderPositions(employeeOrderPosition)
+            .sumTotalAmountWithoutDiscounts(500L)
             .note("commentsForOrder")
             .blocked(true)
             .blockedByEmployee(employeeBlockedOrder)
@@ -2892,9 +2887,9 @@ public class ModelUtils {
             .totalOrderSum(500L)
             .orderCertificateCode("5489-2789")
             .orderCertificatePoints("100")
-            .amountDue(300L)
+            .amountDue(0L)
             .commentForOrderByClient("commentForOrderByClient")
-            .payment("300, 200")
+            .payment("200, 100")
             .dateOfExport("2021-12-08")
             .timeOfExport("from 15:59:52 to 15:59:52")
             .idOrderFromShop("3245678765")

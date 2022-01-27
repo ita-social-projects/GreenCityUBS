@@ -193,15 +193,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void addCertificateTest() {
-        CertificateDtoForAdding certificateDtoForAdding = new CertificateDtoForAdding("1111-1234", 5, 100);
-        Certificate certificate = new Certificate();
-        when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
-        ubsManagementService.addCertificate(certificateDtoForAdding);
-        verify(certificateRepository, times(1)).save(certificate);
-    }
-
-    @Test
     void getAllCertificates() {
         Pageable pageable =
             PageRequest.of(0, 5, Sort.by(Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
@@ -1373,7 +1364,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         EcoNumberDto ecoNumberDto = ModelUtils.getEcoNumberDto();
-        ecoNumberDto.setEcoNumber(new HashSet<>(Arrays.asList("1234")));
+        ecoNumberDto.setEcoNumber(new HashSet<>(Arrays.asList("1234a")));
         assertThrows(IncorrectEcoNumberFormatException.class,
             () -> ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, 1L, "abc"));
     }
@@ -1385,24 +1376,6 @@ class UBSManagementServiceImplTest {
         AdminCommentDto adminCommentDto = getAdminCommentDto();
         assertThrows(OrderNotFoundException.class,
             () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
-    }
-
-    @Test
-    void getCertificatesWithFilter() {
-        CertificateFilterCriteria certificateFilterCriteria = new CertificateFilterCriteria();
-        CertificatePage certificatePage = new CertificatePage();
-        List<Certificate> certificateList = Arrays.asList(new Certificate(), new Certificate());
-        Pageable pageable = PageRequest.of(certificatePage.getPageNumber(), certificatePage.getPageSize());
-        Page<Certificate> certificates = new PageImpl<>(certificateList, pageable, 1L);
-
-        when(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria))
-            .thenReturn(certificates);
-
-        ubsManagementService.getCertificatesWithFilter(certificatePage, certificateFilterCriteria);
-
-        verify(certificateCriteriaRepo).findAllWithFilter(certificatePage, certificateFilterCriteria);
-        assertEquals(certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria),
-            certificates);
     }
 
     @Test
@@ -1566,15 +1539,33 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrdersCorrectCalculateTotalOrderSumIsNull() {
+        Page<Order> pageOrder = ModelUtils.getPageOrder();
+        pageOrder.getContent().get(0).setSumTotalAmountWithoutDiscounts(null);
+
+        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
+        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-500L);
+
+        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
+        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
+            .build();
+
+        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageOrder);
+
+        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
+            bigOrderTableDTOPage.getContent());
+    }
+
+    @Test
     void getOrdersCorrectCalculatePaymentIsNull() {
         Page<Order> pageOrder = ModelUtils.getPageOrder();
         pageOrder.getContent().get(0).setPayment(null);
 
         Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
         bigOrderTableDTOPage.getContent().get(0).setPaymentDate("-");
-        bigOrderTableDTOPage.getContent().get(0).setTotalOrderSum(0L);
         bigOrderTableDTOPage.getContent().get(0).setPayment("-");
-        bigOrderTableDTOPage.getContent().get(0).setAmountDue(-200L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(300L);
 
         OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
         OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")
@@ -1646,7 +1637,7 @@ class UBSManagementServiceImplTest {
         Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
         bigOrderTableDTOPage.getContent().get(0).setOrderCertificateCode("-");
         bigOrderTableDTOPage.getContent().get(0).setOrderCertificatePoints("-");
-        bigOrderTableDTOPage.getContent().get(0).setAmountDue(400L);
+        bigOrderTableDTOPage.getContent().get(0).setAmountDue(100L);
 
         OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
         OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().search("3333")

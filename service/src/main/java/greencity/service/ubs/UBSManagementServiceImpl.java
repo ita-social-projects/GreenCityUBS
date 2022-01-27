@@ -19,8 +19,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -553,20 +551,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
         Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
         return getAllCertificatesTranslationDto(certificates);
-    }
-
-    @Override
-    public PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
-        CertificateFilterCriteria certificateFilterCriteria) {
-        Page<Certificate> certificates =
-            certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
-        return getAllCertificatesTranslationDto(certificates);
-    }
-
-    @Override
-    public void addCertificate(CertificateDtoForAdding add) {
-        Certificate certificate = modelMapper.map(add, Certificate.class);
-        certificateRepository.save(certificate);
     }
 
     @Override
@@ -1911,8 +1895,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        long paymentSum = getPaymentSum(order);
-        int certificateSum = getCertificatesSum(order);
         Address address = getUbsUserAddress(order);
         return BigOrderTableDTO.builder()
             .id(order.getId())
@@ -1933,10 +1915,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .address(getAddress(address))
             .commentToAddressForClient(getCommentToAddreaForClient(address))
             .bagsAmount(getBagsAmount(order))
-            .totalOrderSum(paymentSum)
+            .totalOrderSum(getTotalOrderSum(order))
             .orderCertificateCode(getCertificateCode(order))
             .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(paymentSum - certificateSum - order.getPointsToUse())
+            .amountDue(getAmountDue(order))
             .commentForOrderByClient(order.getComment())
             .payment(getPayment(order))
             .dateOfExport(getDateOfExport(order))
@@ -2069,6 +2051,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum);
     }
 
+    private long getTotalOrderSum(Order order) {
+        return nonNull(order.getSumTotalAmountWithoutDiscounts()) ? order.getSumTotalAmountWithoutDiscounts()
+            : 0;
+    }
+
     private String getCertificateCode(Order order) {
         return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
             .collect(joining("; "))
@@ -2079,6 +2066,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return nonNull(order.getCertificates())
             ? order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString).collect(joining(", "))
             : "-";
+    }
+
+    private long getAmountDue(Order order) {
+        return getTotalOrderSum(order) - (getPaymentSum(order) + getCertificatesSum(order) + order.getPointsToUse());
     }
 
     private String getDateOfExport(Order order) {
@@ -2180,7 +2171,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             historyChanges.append(collectInfoAboutChangesOfEcoNumber(added, OrderHistory.ADD_NEW_ECO_NUMBER));
             added.stream()
                 .forEach(newNumber -> {
-                    if (newNumber.length() != 10) {
+                    if (!newNumber.matches("[0-9]+") || newNumber.length() != 10) {
                         throw new IncorrectEcoNumberFormatException(INCORRECT_ECO_NUMBER);
                     }
                     order.getAdditionalOrders().add(newNumber);
