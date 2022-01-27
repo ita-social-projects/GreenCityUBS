@@ -132,15 +132,7 @@ public class NotificationServiceImpl implements NotificationService {
             .build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
             .value("+380638175035, +380931038987").build());
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.COURIER_ITINERARY_FORMED);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created);
+        fillAdnSendNotification(parameters, order, NotificationType.COURIER_ITINERARY_FORMED);
     }
 
     /**
@@ -148,7 +140,6 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyHalfPaidPackage(Order order) {
-        UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Long paidAmount = order.getPayment().stream()
@@ -167,15 +158,7 @@ public class NotificationServiceImpl implements NotificationService {
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
             .value(order.getId().toString()).build());
-
-        userNotification.setNotificationType(NotificationType.UNPAID_PACKAGE);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created);
+        fillAdnSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
     }
 
     /**
@@ -214,16 +197,7 @@ public class NotificationServiceImpl implements NotificationService {
             .value(exportedBags.toString()).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(paidBags.toString()).build());
-
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created);
+        fillAdnSendNotification(parameters, order, NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
     }
 
     /**
@@ -231,20 +205,12 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyAddViolation(Order order) {
-        UserNotification userNotification = new UserNotification();
         Set<NotificationParameter> parameters = new HashSet<>();
         violationRepository.findByOrderId(order.getId())
             .ifPresent(value -> parameters.add(NotificationParameter.builder()
                 .key("violationDescription")
                 .value(value.getDescription()).build()));
-        userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created);
+        fillAdnSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
     }
 
     /**
@@ -381,5 +347,18 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationDto.builder().title(template.getTitle())
             .body(resultBody).build();
+    }
+
+    private void fillAdnSendNotification(Set<NotificationParameter> parameters, Order order,
+        NotificationType notificationType) {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(notificationType);
+        userNotification.setUser(order.getUser());
+        userNotification.setOrder(order);
+        UserNotification created = userNotificationRepository.save(userNotification);
+        parameters.forEach(parameter -> parameter.setUserNotification(created));
+        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+        created.setParameters(new HashSet<>(notificationParameters));
+        sendNotificationsForBotsAndEmail(created);
     }
 }

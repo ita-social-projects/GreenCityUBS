@@ -99,4 +99,5 @@
     <include file="db/changelog/logs/ch-add-columns-address-Boiarchuk.xml"/>
 
 
+    <include file="db/changelog/logs/ch-add-table-notification-schedule-Sannytski.xml"/>
 </databaseChangeLog>
