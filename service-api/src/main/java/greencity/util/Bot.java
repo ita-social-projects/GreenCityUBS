@@ -8,7 +8,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Bot implements Serializable {

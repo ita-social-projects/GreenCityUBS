@@ -884,27 +884,23 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<Bot> getListOfBots(String uuid) {
-        List<Bot> botList = new ArrayList<>();
-        EnumSet<BotType> botTypeEnumSet = EnumSet.allOf(BotType.class);
-        for (BotType botType : botTypeEnumSet) {
-            botList.add(new Bot(botType.name(), createLink(botType.name(), uuid)));
-        }
-        return botList;
+        return EnumSet.allOf(BotType.class)
+            .stream()
+            .map(type -> new Bot(type.name(), createLink(type, uuid)))
+            .collect(Collectors.toList());
     }
 
-    private String createLink(String type, String uuid) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (type.equals("TELEGRAM")) {
-            stringBuilder.append(TELEGRAM_PART_1_OF_LINK)
-                .append(telegramBotName).append(TELEGRAM_PART_3_OF_LINK)
-                .append(uuid);
+    private String createLink(BotType type, String uuid) {
+        String linkTemplate = null;
+        if ("TELEGRAM".equals(type.name())) {
+            linkTemplate = String.format("%s%s%s%s",
+                TELEGRAM_PART_1_OF_LINK, telegramBotName, TELEGRAM_PART_3_OF_LINK, uuid);
         }
-        if (type.equals("VIBER")) {
-            stringBuilder.append(VIBER_PART_1_OF_LINK)
-                .append(viberBotUri).append(VIBER_PART_3_OF_LINK)
-                .append(uuid);
+        if ("VIBER".equals(type.name())) {
+            linkTemplate = String.format("%s%s%s%s",
+                VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
         }
-        return stringBuilder.toString();
+        return linkTemplate;
     }
 
     private User setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {

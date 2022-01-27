@@ -3112,14 +3112,10 @@ public class ModelUtils {
 
     public static List<Bot> botList() {
         List<Bot> botList = new ArrayList<>();
-        botList.add(Bot.builder()
-            .type("TELEGRAM")
-            .link("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8")
-            .build());
-        botList.add(Bot.builder()
-            .type("VIBER")
-            .link("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8")
-            .build());
+        botList.add(new Bot("TELEGRAM",
+            "https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        botList.add(new Bot("VIBER",
+            "viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
         return botList;
     }
 }
