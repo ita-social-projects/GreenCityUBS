@@ -13,27 +13,21 @@ import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.ubs.*;
-import org.hibernate.mapping.Any;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -75,9 +69,6 @@ class UBSManagementServiceImplTest {
 
     @Mock(lenient = true)
     private ModelMapper modelMapper;
-
-    @Mock
-    private ViolationRepository violationRepository;
 
     @Mock
     private ReceivingStationRepository receivingStationRepository;
@@ -226,17 +217,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void returnsViolationDetailsByOrderId() {
-        Violation violation = ModelUtils.getViolation();
-        Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
-        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(violation.getOrder().getUser()));
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
-        Optional<ViolationDetailInfoDto> actual = ubsManagementService.getViolationDetailsByOrderId(1L);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void checkPaymentNotFound() {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderDetailStatus(100L);
@@ -292,33 +272,6 @@ class UBSManagementServiceImplTest {
         Assertions.assertThrows(UnexistingOrderException.class, () -> {
             ubsManagementService.getOrderExportDetails(100L);
         });
-    }
-
-    @Test
-    void deleteViolationThrowsException() {
-        assertThrows(UserNotFoundException.class, () -> ubsManagementService.deleteViolation(1L, "abc"));
-    }
-
-    @Test
-    void deleteViolationFromOrderResponsesNotFoundWhenNoViolationInOrder() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UnexistingOrderException.class, () -> ubsManagementService.deleteViolation(1L, "abc"));
-        verify(violationRepository, times(1)).findByOrderId(1L);
-    }
-
-    @Test
-    void deleteViolationFromOrderByOrderId() {
-        User user = ModelUtils.getTestUser();
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        Violation violation = ModelUtils.getViolation2();
-        Long id = ModelUtils.getViolation().getOrder().getId();
-        when(violationRepository.findByOrderId(1l)).thenReturn(Optional.of(violation));
-        doNothing().when(violationRepository).deleteById(id);
-        ubsManagementService.deleteViolation(id, "abc");
-
-        verify(violationRepository, times(1)).deleteById(id);
     }
 
     @Test
@@ -838,21 +791,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void checkAddUserViolation() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setUser(user);
-        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
-        add.setOrderID(order.getId());
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(userRepository.countTotalUsersViolations(1L)).thenReturn(1);
-        ubsManagementService.addUserViolation(add, new MultipartFile[2], "abc");
-
-        assertEquals(1, user.getViolations());
-    }
-
-    @Test
     void getClusteredCoordsAlongWithSpecifiedTest() {
         Coordinates coord = ModelUtils.getCoordinates();
         Set<Coordinates> result = new HashSet<>();
@@ -1331,21 +1269,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void checkAddUserViolationThrowsException() {
-        User user = ModelUtils.getTestUser();
-        Order order = user.getOrders().get(0);
-        order.setUser(user);
-        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
-        add.setOrderID(order.getId());
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
-
-        assertThrows(OrderViolationException.class,
-            () -> ubsManagementService.addUserViolation(add, new MultipartFile[2], "abc"));
-    }
-
-    @Test
     void updateEcoNumberTrowsException() {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
@@ -1776,24 +1699,6 @@ class UBSManagementServiceImplTest {
 
         assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
             bigOrderTableDTOPage.getContent());
-    }
-
-    @Test
-    void updateUserViolation() {
-        User user = ModelUtils.getUser();
-        user.setUuid("uuid");
-        UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
-        Violation violation = ModelUtils.getViolation();
-
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
-        when(violationRepository.findByOrderId(1L)).thenReturn(Optional.ofNullable(violation));
-
-        ubsManagementService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "uuid");
-
-        assertEquals(2, violation.getImages().size());
-
-        verify(userRepository).findUserByUuid("uuid");
-        verify(violationRepository).findByOrderId(1L);
     }
 
     @Test
