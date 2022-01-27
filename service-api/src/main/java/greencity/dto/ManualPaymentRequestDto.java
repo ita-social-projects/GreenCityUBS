@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ManualPaymentRequestDto {
-    private String paymentDate;
+    private String settlementdate;
     private Long amount;
     private String paymentId;
     private String receiptLink;
