@@ -166,21 +166,30 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             default:
-                Long position = columnNameToEmployeePosition(columnName);
+                Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, userUuid));
         }
     }
 
-    private Long columnNameToEmployeePosition(String columnName) {
-        final Map<String, Long> columnNameToPosition = new HashMap<>();
-        columnNameToPosition.put("responsibleManager", 1L);
-        columnNameToPosition.put("responsibleCaller", 2L);
-        columnNameToPosition.put("responsibleLogicMan", 3L);
-        columnNameToPosition.put("responsibleNavigator", 4L);
-        columnNameToPosition.put("responsibleDriver", 5L);
+    private enum ColumnNameToPosition {
+        RESPONSIBLE_MANAGER("responsibleManager", 1L),
+        RESPONSIBLE_CALLER("responsibleCaller", 2L),
+        RESPONSIBLE_LOGICMAN("responsibleLogicMan", 3L),
+        RESPONSIBLE_NAVIGATOR("responsibleNavigator", 4L),
+        RESPONSIBLE_DRIVER("responsibleDriver", 5L);
 
-        return Optional.ofNullable(columnNameToPosition.get(columnName))
-            .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
+        ColumnNameToPosition(String columnValue, Long positionId) {
+            this.columnValue = columnValue;
+            this.positionId = positionId;
+        }
+
+        public static Long columnNameToEmployeePosition(String columnName) {
+            return Optional.ofNullable(ColumnNameToPosition.valueOf(columnName).positionId)
+                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
+        }
+
+        private final String columnValue;
+        private final Long positionId;
     }
 
     private ChangeOrderResponseDTO createReturnForSwitchChangeOrder(List<Long> ordersId) {
