@@ -20,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OutOfRequestRestClient {
     private final RestTemplate restTemplate;
-    @Value("${greencityuser.server.address}")
+    @Value("${greencity.redirect.user-server-address}")
     @Setter
     private String greenCityUserServerAddress;
     @Autowired
