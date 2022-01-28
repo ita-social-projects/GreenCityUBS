@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @Builder
-public class UsernameDto {
-    private String firstName;
-    private String lastName;
+public class UserViolationsWithUserName {
+    String fullName;
+    PageableDto<UserViolationsDto> userViolationsDto;
 }

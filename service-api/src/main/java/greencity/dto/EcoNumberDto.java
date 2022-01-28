@@ -2,6 +2,8 @@ package greencity.dto;
 
 import lombok.*;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,6 +12,5 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class EcoNumberDto {
-    private String oldEcoNumber;
-    private String newEcoNumber;
+    private Set<String> ecoNumber;
 }

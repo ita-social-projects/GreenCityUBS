@@ -2,9 +2,9 @@ package greencity.service.ubs;
 
 import greencity.dto.UserOrdersDto;
 import greencity.dto.UserWithOrdersDto;
-import greencity.dto.UsernameDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +29,7 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     public UserWithOrdersDto getAllOrders(Pageable page, Long userId, SortingOrder sortingOrder, String column) {
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         String columnAmount = "amount";
-        String username = getUsername(userId).getFirstName() + " " + getUsername(userId).getLastName();
+        String username = getUsername(userId);
 
         List<UserOrdersDto> userOrdersDtoList = new ArrayList<>();
         if (!column.equals(columnAmount)) {
@@ -64,10 +64,8 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
             .build();
     }
 
-    private UsernameDto getUsername(Long userID) {
-        return UsernameDto.builder()
-            .firstName(orderRepository.getUsersFirstNameByOrderId(userID))
-            .lastName(orderRepository.getUsersLastNameByOrderId(userID))
-            .build();
+    private String getUsername(Long userID) {
+        User currentUser = userRepository.getOne(userID);
+        return currentUser.getRecipientName() + " " + currentUser.getRecipientSurname();
     }
 }

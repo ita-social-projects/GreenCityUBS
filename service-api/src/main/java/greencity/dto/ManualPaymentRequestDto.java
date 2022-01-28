@@ -8,8 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ManualPaymentRequestDto {
-    private String paymentDate;
+    private String settlementdate;
     private Long amount;
-    private Long paymentId;
+    private String paymentId;
     private String receiptLink;
+    private String imagePath;
 }

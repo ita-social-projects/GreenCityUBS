@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
+import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
@@ -28,13 +29,15 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
+    private final RedirectionConfigProp redirectionConfigProp;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService) {
+    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
         this.ubsClientService = ubsClientService;
+        this.redirectionConfigProp = redirectionConfigProp;
     }
 
     /**
@@ -408,7 +411,7 @@ public class OrderController {
         PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -489,5 +492,28 @@ public class OrderController {
         @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getCourierLocationByCourierIdAndLanguageCode(courierId));
+    }
+
+    /**
+     * Controller checks if received data Client is valid and stores payment info if
+     * is.
+     *
+     * @param dto {@link PaymentResponseDto} - response order data.
+     * @return {@link HttpStatus} - http status.
+     * @author Max Boiarchuk
+     */
+    @ApiOperation(value = "Receive payment from  Client Fondy.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @PostMapping("/receivePaymentClient")
+    public ResponseEntity<HttpStatus> receivePaymentClient(
+        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        ubsClientService.validatePaymentClient(dto);
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

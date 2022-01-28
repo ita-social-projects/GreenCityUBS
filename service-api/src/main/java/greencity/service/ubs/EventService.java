@@ -12,4 +12,13 @@ public interface EventService {
      * @author Yuriy Bahlay.
      */
     void save(String eventName, String eventAuthor, Order order);
+
+    /**
+     * This method return correct status for changes with Responsible employee.
+     *
+     * @param positionId    ID changed position.
+     * @param existedBefore True - We update Info, otherwise we assign a new one
+     * @author Rostyslav Sikhovskiy.
+     */
+    String changesWithResponsibleEmployee(Long positionId, Boolean existedBefore);
 }

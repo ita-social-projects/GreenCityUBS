@@ -14,7 +14,8 @@ public class UpdateOrderPageAdminDto {
     private OrderDetailStatusRequestDto generalOrderInfo;
     private UbsCustomersDtoUpdate userInfoDto;
     private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
-    private List<EcoNumberDto> ecoNumberFromShop;
+    private EcoNumberDto ecoNumberFromShop;
     private ExportDetailsDtoUpdate exportDetailsDto;
     private UpdateOrderDetailDto orderDetailDto;
+    private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
 }
