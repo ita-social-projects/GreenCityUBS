@@ -344,6 +344,6 @@ class OrderControllerTest {
     @Test
     void getCourierLocations() throws Exception {
         mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 }

@@ -382,11 +382,11 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeePage employeePage = new EmployeePage();
         EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
-                Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         when(employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria))
-                .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
         employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
-                .findAllActiveEmployees(employeePage, employeeFilterCriteria);
+            .findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 }
