@@ -39,6 +39,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -46,7 +47,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -2053,5 +2056,65 @@ class UBSManagementServiceImplTest {
             ubsManagementService.getOrderStatusData(1L, "ua");
         });
 
+    }
+
+    @Test
+    void deleteManualPaymentTest() {
+        Payment payment = ModelUtils.getManualPayment();
+        User user = ModelUtils.getTestUser();
+        Order order = getFormedOrder();
+
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        ubsManagementService.deleteManualPayment(1L, "abc");
+
+        verify(userRepository, times(1)).findUserByUuid("abc");
+        verify(paymentRepository, times(1)).findById(1L);
+        verify(paymentRepository, times(1)).deletePaymentById(1L);
+        verify(fileService, times(1)).delete(payment.getImagePath());
+        verify(eventService, times(1)).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
+            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+
+    }
+
+    @Test
+    void deleteManualTestWithoutImage() {
+        Payment payment = ModelUtils.getManualPayment();
+        User user = ModelUtils.getTestUser();
+        Order order = getFormedOrder();
+        payment.setImagePath(null);
+
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        ubsManagementService.deleteManualPayment(1L, "abc");
+
+        verify(userRepository, times(1)).findUserByUuid("abc");
+        verify(paymentRepository, times(1)).findById(1L);
+        verify(paymentRepository, times(1)).deletePaymentById(1L);
+        verify(fileService, times(0)).delete(payment.getImagePath());
+        verify(eventService, times(1)).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
+            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+    }
+
+    @Test
+    void deleteManualTestWithoutUser() {
+        when(userRepository.findUserByUuid("uuid25")).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> {
+            ubsManagementService.deleteManualPayment(1L, "uuid25");
+        });
+    }
+
+    @Test
+    void deleteManualTestWithoutPayment() {
+        User user = getTestUser();
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(paymentRepository.findById(25L)).thenReturn(Optional.empty());
+        assertThrows(ResponseStatusException.class, () -> {
+            ubsManagementService.deleteManualPayment(25L, "abc");
+        });
     }
 }

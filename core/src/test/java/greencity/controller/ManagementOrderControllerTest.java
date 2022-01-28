@@ -25,6 +25,7 @@ import org.springframework.validation.Validator;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static greencity.ModelUtils.*;
@@ -445,4 +446,21 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    void addUsersViolationTest() throws Exception {
+        AddingViolationsToUserDto add = new AddingViolationsToUserDto();
+        add.setOrderID(1L);
+        add.setViolationLevel("1");
+        add.setViolationDescription("test");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String dtoJson = objectMapper.writeValueAsString(add);
+        MockMultipartFile jsonFile = new MockMultipartFile("add",
+            "", "application/json", dtoJson.getBytes());
+
+        mockMvc.perform(multipart(ubsLink + "/addViolationToUser")
+            .file(jsonFile)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
 }
