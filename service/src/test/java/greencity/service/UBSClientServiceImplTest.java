@@ -20,6 +20,7 @@ import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
+import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -482,6 +483,7 @@ class UBSClientServiceImplTest {
 
         List<AddressDto> addressDto = ModelUtils.addressDtoList();
         List<Address> address = ModelUtils.addressList();
+        List<Bot> botList = ModelUtils.botList();
 
         UserProfileUpdateDto userProfileUpdateDto =
             UserProfileUpdateDto.builder().addressDto(addressDto)
@@ -499,6 +501,9 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileUpdateDto);
+        for (Bot bot : botList) {
+            assertNotNull(bot);
+        }
         assertNotNull(userProfileUpdateDto.getAddressDto());
         assertNotNull(userProfileUpdateDto);
         assertNotNull(address);
@@ -512,8 +517,13 @@ class UBSClientServiceImplTest {
         List<AddressDto> addressDto = ModelUtils.addressDtoList();
         userProfileDto.setAddressDto(addressDto);
         List<Address> address = ModelUtils.addressList();
+        List<Bot> botList = ModelUtils.botList();
+        userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
+        for (Bot bot : botList) {
+            assertNotNull(bot);
+        }
         assertNotNull(addressDto);
         assertNotNull(userProfileDto);
         assertNotNull(address);
