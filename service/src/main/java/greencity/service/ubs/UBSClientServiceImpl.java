@@ -68,9 +68,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private UBSManagementService ubsManagementService;
     private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
-    @Value("$ {greencity.payment.fondy-payment-key}")
+    @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
-    @Value("$ {greencity.payment.merchant-id}")
+    @Value("${greencity.payment.merchant-id}")
     private String merchantId;
     @Value("${greencity.payment.liq-pay-public-key}")
     private String publicKey;
