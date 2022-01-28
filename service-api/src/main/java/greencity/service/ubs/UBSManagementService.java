@@ -9,40 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public interface UBSManagementService {
-    /**
-     * Method to group orders into clusters including summary litres and specified
-     * coordinates.
-     *
-     * @param specified          - list of {@link CoordinatesDto}.
-     * @param litres             - preferred amount of litres.
-     * @param additionalDistance - additional km to radius.
-     * @return List of {@link GroupedOrderDto} lists.
-     * @author Oleh Bilonizhka
-     */
-    List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance);
-
-    /**
-     * Method to group orders into clusters including summary litres.
-     *
-     * @param distance - preferred distance for clusterization.
-     * @param litres   - preferred amount of litres.
-     * @return List of {@link GroupedOrderDto} lists.
-     * @author Oleh Bilonizhka
-     */
-    List<GroupedOrderDto> getClusteredCoords(double distance, int litres);
-
-    /**
-     * Method returns all undelivered orders including litres.
-     *
-     * @return List of {@link GroupedOrderDto} lists.
-     * @author Oleh Bilonizhka
-     */
-    List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters();
-
     /**
      * Method returns payment info.
      *
@@ -104,16 +72,6 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     ViolationsInfoDto getAllUserViolations(String email);
-
-    /**
-     * Method for adding violation for user.
-     *
-     * @param add            {@link AddingViolationsToUserDto}
-     * @param multipartFiles {@link MultipartFile}
-     * @param uuid           {@link String}.
-     * @author Nazar Struk
-     */
-    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid);
 
     /**
      * Method for send email with description to user.
@@ -188,15 +146,6 @@ public interface UBSManagementService {
     List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId);
 
     /**
-     * Method returns detailed information about user violation by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ViolationDetailInfoDto};
-     * @author Rusanovscaia Nadejda
-     */
-    Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId);
-
-    /**
      * Method that get order and payment status.
      *
      * @author Mahdziak Orest
@@ -230,15 +179,6 @@ public interface UBSManagementService {
      * @author Nazar Struk
      */
     List<AdditionalBagInfoDto> getAdditionalBagsInfo(Long orderId);
-
-    /**
-     * Method deletes violation from database by orderId.
-     *
-     * @param orderId {@link Long}
-     * @param uuid    {@link String}.
-     * @author Nadia Rusanovscaia
-     */
-    void deleteViolation(Long orderId, String uuid);
 
     /**
      * Method that saves manual payment and returns response with required fields.
@@ -288,15 +228,6 @@ public interface UBSManagementService {
      * Method that update EmployeePositionDtoResponse.
      */
     void updatePositions(EmployeePositionDtoResponse dto, String uuid);
-
-    /**
-     * Method for adding violation for user.
-     *
-     * @param add            {@link AddingViolationsToUserDto}
-     * @param multipartFiles {@link MultipartFile}
-     * @author Bohdan Melnyk
-     */
-    void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid);
 
     /**
      * Method that save ReasonNotTakeBagDto.

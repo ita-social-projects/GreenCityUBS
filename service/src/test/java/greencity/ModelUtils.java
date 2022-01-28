@@ -11,6 +11,8 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
+import greencity.entity.schedule.NotificationSchedule;
+import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -95,6 +97,11 @@ public class ModelUtils {
         List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
     public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
+    public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
+        new NotificationScheduleDto().setCron("0 0 18 * * ?");
+    public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
+        getRequestToChangeOrdersDataDTO();
 
     public static DetailsOrderInfoDto getTestDetailsOrderInfoDto() {
         return DetailsOrderInfoDto.builder()
@@ -753,11 +760,13 @@ public class ModelUtils {
     }
 
     public static UpdateViolationToUserDto getUpdateViolationToUserDto() {
+        List<String> listImages = new ArrayList();
+        listImages.add("");
         return UpdateViolationToUserDto.builder()
             .orderID(1L)
             .violationDescription("String1 string1 string1")
             .violationLevel("low")
-            .imagesToDelete(null)
+            .imagesToDelete(listImages)
             .build();
     }
 
@@ -2275,7 +2284,10 @@ public class ModelUtils {
                     .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
                     .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
                     .build())
-
+            .updateResponsibleEmployeeDto(List.of(UpdateResponsibleEmployeeDto.builder()
+                .positionId(2L)
+                .employeeId(2L)
+                .build()))
             .build();
     }
 
@@ -2562,14 +2574,17 @@ public class ModelUtils {
         return new NotificationTemplate()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType(NotificationType.UNPAID_ORDER);
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
         return new NotificationTemplateDto()
             .setId(1L)
             .setBody("test")
-            .setTitle("test");
+            .setTitle("test")
+            .setNotificationType("UNPAID_ORDER")
+            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {
@@ -3109,6 +3124,14 @@ public class ModelUtils {
             .houseCorpus("1")
             .houseNumber("4")
             .comment("helo")
+            .build();
+    }
+
+    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDTO.builder()
+            .columnName("orderStatus")
+            .orderId(List.of(1l))
+            .newValue("1")
             .build();
     }
 }

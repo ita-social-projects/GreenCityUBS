@@ -6,11 +6,12 @@ import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.BadOrderStatusRequestException;
+import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -41,6 +42,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final RestClient restClient;
     private final UserRepository userRepository;
+    private final EventService eventService;
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(Long userId) {
@@ -163,19 +165,32 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
             case "receivingStation":
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
-            case "responsibleManager":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 1L, employeeId));
-            case "responsibleCaller":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 2L, employeeId));
-            case "responsibleLogicMan":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 3L, employeeId));
-            case "responsibleDriver":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 5L, employeeId));
-            case "responsibleNavigator":
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, 4L, employeeId));
             default:
-                return createReturnForSwitchChangeOrder(new ArrayList<>());
+                Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, userUuid));
         }
+    }
+
+    private enum ColumnNameToPosition {
+        RESPONSIBLE_MANAGER("responsibleManager", 1L),
+        RESPONSIBLE_CALLER("responsibleCaller", 2L),
+        RESPONSIBLE_LOGICMAN("responsibleLogicMan", 3L),
+        RESPONSIBLE_NAVIGATOR("responsibleNavigator", 4L),
+        RESPONSIBLE_DRIVER("responsibleDriver", 5L);
+
+        ColumnNameToPosition(String columnValue, Long positionId) {
+            this.columnValue = columnValue;
+            this.positionId = positionId;
+        }
+
+        public static Long columnNameToEmployeePosition(String columnName) {
+            return Arrays.stream(ColumnNameToPosition.values())
+                .filter(entity -> (entity.columnValue.equals(columnName)))
+                .mapToLong(value -> value.positionId).findFirst().getAsLong();
+        }
+
+        private final String columnValue;
+        private final Long positionId;
     }
 
     private ChangeOrderResponseDTO createReturnForSwitchChangeOrder(List<Long> ordersId) {
@@ -368,37 +383,43 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
-        Long employeeId) {
+        String uuid) {
+        final User currentUser = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_DOESNT_EXIST));
+            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
-            .orElseThrow(() -> new EntityNotFoundException(POSITION_NOT_FOUND_BY_ID));
+            .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
-        if (ordersId.isEmpty()) {
-            /* update all */
-        }
+
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                List<EmployeeOrderPosition> employeeOrderPositions =
-                    employeeOrderPositionRepository.findAllByOrderId(orderId);
-                EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
-                    .employee(existedEmployee).position(existedPosition)
-                    .order(existedOrder).build();
+                    .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                Boolean existedBefore =
+                    employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
+                final String historyChanges;
 
-                if (Boolean.TRUE
-                    .equals(employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition))) {
+                if (existedBefore.equals(Boolean.TRUE)) {
                     employeeOrderPositionRepository.update(existedOrder, existedEmployee, existedPosition);
+                    historyChanges = eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.TRUE);
                 } else {
-                    employeeOrderPositionRepository.save(newEmployeeOrderPosition);
+                    List<EmployeeOrderPosition> employeeOrderPositions =
+                        employeeOrderPositionRepository.findAllByOrderId(orderId);
+                    EmployeeOrderPosition newEmployeeOrderPosition = EmployeeOrderPosition.builder()
+                        .employee(existedEmployee).position(existedPosition)
+                        .order(existedOrder).build();
+                    employeeOrderPositions.add(newEmployeeOrderPosition);
+                    Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
+                    existedOrder.setEmployeeOrderPositions(positionSet);
+                    historyChanges =
+                        eventService.changesWithResponsibleEmployee(existedPosition.getId(), Boolean.FALSE);
                 }
-                employeeOrderPositions.add(newEmployeeOrderPosition);
-                Set<EmployeeOrderPosition> positionSet = new HashSet<>(employeeOrderPositions);
-                existedOrder.setEmployeeOrderPositions(positionSet);
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
+                eventService.save(historyChanges,
+                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }

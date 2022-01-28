@@ -6,13 +6,11 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
-import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
@@ -41,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -61,7 +58,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
     private final BagsInfoRepo bagsInfoRepository;
-    private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final BigOrderTableRepository bigOrderTableRepository;
@@ -75,41 +71,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
-    private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
+
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-
+    private final OrdersAdminsPageService ordersAdminsPageService;
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters() {
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        List<Order> allOrders = getAllUndeliveredOrders();
-        List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
-        for (Coordinates temp : allCoords) {
-            int currentCoordinatesCapacity =
-                addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
-            List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
-                .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
-            allOrdersWithLitres.add(GroupedOrderDto.builder()
-                .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfOrders(currentCoordinatesOrdersDto)
-                .build());
-        }
-        return allOrdersWithLitres;
-    }
 
     /**
      * This method save or update view of orders table.
@@ -149,130 +122,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return CustomTableViewDto.builder()
             .titles(titles)
             .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
-        checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
-        List<GroupedOrderDto> allClusters = new ArrayList<>();
-
-        while (!allCoords.isEmpty()) {
-            Optional<Coordinates> any = allCoords.stream().findAny();
-            mainBlockOfGetClusteredCoords(allCoords, distance, litres, any, allClusters);
-        }
-        return allClusters;
-    }
-
-    private void mainBlockOfGetClusteredCoords(Set<Coordinates> allCoords, double distance,
-        int litres, Optional<Coordinates> any, List<GroupedOrderDto> allClusters) {
-        any.ifPresent(coordinates -> {
-            Coordinates currentlyCoord = coordinates;
-
-            Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
-                allCoords, currentlyCoord);
-            Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
-
-            while (!centralCoord.equals(currentlyCoord)) {
-                currentlyCoord = centralCoord;
-                closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
-                centralCoord = getNewCentralCoordinate(closeRelatives);
-            }
-            int amountOfLitresInCluster = 0;
-            for (Coordinates current : closeRelatives) {
-                int currentCoordinatesCapacity =
-                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
-                amountOfLitresInCluster += currentCoordinatesCapacity;
-            }
-            if (amountOfLitresInCluster > litres) {
-                List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
-                closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
-                int indexOfCoordToBeDeleted = -1;
-
-                while (amountOfLitresInCluster > litres) {
-                    Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
-                    int anountOfLitresInCurrentOrder = addressRepository
-                        .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
-                    amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
-                    closeRelatives.remove(coordToBeDeleted);
-                }
-            }
-            for (Coordinates grouped : closeRelatives) {
-                allCoords.remove(grouped);
-            }
-
-            // mapping coordinates to orderDto
-            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
-                amountOfLitresInCluster, allClusters);
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
-        checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
-
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        Set<Coordinates> result = specified.stream()
-            .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
-        for (Coordinates temp : result) {
-            if (!allCoords.contains(temp)) {
-                throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
-                    + ", " + temp.getLongitude());
-            }
-        }
-
-        Coordinates centralCoord = getNewCentralCoordinate(result);
-        int specifiedCoordsCapacity = 0;
-        double newRadius = 0;
-        for (Coordinates temp : result) {
-            double distanceFromCentralCoord = distanceBetweenEarthCoordinates(temp.getLatitude(), temp.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude());
-            if (distanceFromCentralCoord > newRadius) {
-                newRadius = distanceFromCentralCoord;
-            }
-            specifiedCoordsCapacity += addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-        }
-        newRadius += additionalDistance;
-
-        List<Coordinates> coordinatesInsideRadiusWithoutSpecifiedCoords = new ArrayList<>();
-        for (Coordinates temp : allCoords) {
-            double distanceFromCentralCoord = distanceBetweenEarthCoordinates(temp.getLatitude(), temp.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude());
-            if (distanceFromCentralCoord < newRadius) {
-                coordinatesInsideRadiusWithoutSpecifiedCoords.add(temp);
-            }
-        }
-        coordinatesInsideRadiusWithoutSpecifiedCoords.removeAll(result);
-
-        coordinatesInsideRadiusWithoutSpecifiedCoords.sort(getComparatorByDistanceFromCenter(centralCoord));
-        int amountOfLitresToFill = litres - specifiedCoordsCapacity;
-        double fill = 0;
-        int allCoordsCapacity = specifiedCoordsCapacity;
-        for (int i = coordinatesInsideRadiusWithoutSpecifiedCoords.size() - 1; i > -1; i--) {
-            Coordinates temp = coordinatesInsideRadiusWithoutSpecifiedCoords.get(i);
-            int capacity = addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            if (fill < amountOfLitresToFill) {
-                if ((fill + capacity) <= amountOfLitresToFill) {
-                    fill += capacity;
-                    allCoordsCapacity += capacity;
-                    result.add(temp);
-                }
-            } else {
-                break;
-            }
-        }
-        List<GroupedOrderDto> groupedOrderDtos = new ArrayList<>();
-        getUndeliveredOrdersByGroupedCoordinates(result,
-            allCoordsCapacity, groupedOrderDtos);
-
-        return groupedOrderDtos;
     }
 
     /**
@@ -402,148 +251,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    /**
-     * Method checks if entered parameters are valid.
-     *
-     * @param distance - preferred amount of litres.
-     * @param litres   - preferred search radius.
-     */
-    private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
-        if (distance < 0 || distance > 20) {
-            throw new IncorrectValueException(INAVALID_DISTANCE_AMOUNT);
-        }
-        if (litres < 0 || litres > 10000) {
-            throw new IncorrectValueException(INAVALID_LITRES_AMOUNT);
-        }
-    }
-
-    /**
-     * Method finds undelivered orders.
-     *
-     * @return List of {@link Order}
-     */
-    private List<Order> getAllUndeliveredOrders() {
-        List<Order> allCoords = orderRepository.undeliveredAddresses();
-        if (allCoords.isEmpty()) {
-            throw new ActiveOrdersNotFoundException(UNDELIVERED_ORDERS_NOT_FOUND);
-        }
-        return allCoords;
-    }
-
-    /**
-     * Method returns coordinates comparator by theirs distance from center of
-     * cluster.
-     *
-     * @param centralCoord {@link Integer}.
-     * @return {@link Comparator} of Coordinates.
-     * @author Oleh Bilonizhka
-     */
-    private Comparator<Coordinates> getComparatorByDistanceFromCenter(Coordinates centralCoord) {
-        return (o1, o2) -> {
-            Double o1Int = distanceBetweenEarthCoordinates(o1.getLatitude(), o1.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude()) * 1000;
-
-            Double o2Int = distanceBetweenEarthCoordinates(o2.getLatitude(), o2.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude()) * 1000;
-
-            return o2Int.compareTo(o1Int);
-        };
-    }
-
-    /**
-     * Method defines and returns all coordinates in certain radius.
-     *
-     * @param distance       - preferred distance for clusterization.
-     * @param allCoords      - list of {@link Coordinates} which shows all
-     *                       unclustered coordinates.
-     * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's
-     *         distant @relatives.
-     * @author Oleh Bilonizhka
-     */
-    private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
-        Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
-
-        for (Coordinates checked : allCoords) {
-            if (distanceBetweenEarthCoordinates(currentlyCoord.getLatitude(), currentlyCoord.getLongitude(),
-                checked.getLatitude(), checked.getLongitude()) <= distance) {
-                coordinateWithCloseRelativesList.add(checked);
-            }
-        }
-
-        return coordinateWithCloseRelativesList;
-    }
-
-    /**
-     * Method defines new central coordinate for existing ones.
-     *
-     * @param coordinateWithCloseRelatives list of {@link Coordinates}.
-     * @return {@link Coordinates} new central coordinate.
-     * @author Oleh Bilonizhka
-     */
-    private Coordinates getNewCentralCoordinate(Set<Coordinates> coordinateWithCloseRelatives) {
-        double sumLat = 0;
-        double sumLon = 0;
-        int amountOfCoords = coordinateWithCloseRelatives.size();
-
-        for (Coordinates checked : coordinateWithCloseRelatives) {
-            sumLat += checked.getLatitude();
-            sumLon += checked.getLongitude();
-        }
-
-        return new Coordinates(sumLat / amountOfCoords, sumLon / amountOfCoords);
-    }
-
-    /**
-     * Method to convert degrees to radians.
-     *
-     * @param degrees {@link Double} degrees.
-     * @return {@link Double} radians.
-     */
-    private double degreesToRadians(double degrees) {
-        return degrees * Math.PI / 180;
-    }
-
-    /**
-     * Method to determine distance between 2 earth coordinates.
-     *
-     * @param lat1 {@link Double} - latitude of 1 coordinate.
-     * @param lon1 {@link Double} - longitude of 1 coordinate.
-     * @param lat2 {@link Double} - latitude of 2 coordinate.
-     * @param lon2 {@link Double} - longitude of 2 coordinate.
-     * @return {@link Integer} distance in meters.
-     */
-    private double distanceBetweenEarthCoordinates(double lat1, double lon1, double lat2, double lon2) {
-        double earthRadiusKm = 6371;
-
-        double radiansLatitude = degreesToRadians(lat2 - lat1);
-        double radiansLongitude = degreesToRadians(lon2 - lon1);
-
-        lat1 = degreesToRadians(lat1);
-        lat2 = degreesToRadians(lat2);
-
-        double a = Math.sin(radiansLatitude / 2) * Math.sin(radiansLatitude / 2)
-            + Math.sin(radiansLongitude / 2) * Math.sin(radiansLongitude / 2) * Math.cos(lat1) * Math.cos(lat2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return earthRadiusKm * c;
-    }
-
-    private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
-        List<Order> orderslist = new ArrayList<>();
-        for (Coordinates coordinates : closeRelatives) {
-            List<Order> orders =
-                orderRepository.undeliveredOrdersGroupThem(coordinates.getLatitude(), coordinates.getLongitude());
-            orderslist.addAll(orders);
-        }
-        GroupedOrderDto cluster = new GroupedOrderDto();
-        cluster.setGroupOfOrders(
-            orderslist.stream().map(order -> modelMapper.map(order, OrderDto.class)).collect(Collectors.toList()));
-        cluster.setAmountOfLitres(amountOfLitresInCluster);
-        allClusters.add(cluster);
-    }
-
     @Override
     public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
         SortingOrder sortingOrder) {
@@ -559,40 +266,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
-    }
-
-    @Override
-    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
-            ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
-            User user = order.getUser();
-            Violation violation = violationBuilder(add, order);
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                setImages(multipartFiles, images);
-                violation.setImages(images);
-            }
-            violationRepository.save(violation);
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), order);
-            notificationService.notifyAddViolation(order);
-        } else {
-            throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
-        }
-    }
-
-    private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
-        return Violation.builder()
-            .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
-            .description(add.getViolationDescription())
-            .violationDate(order.getOrderDate())
-            .order(order)
-            .build();
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -1242,52 +915,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    /**
-     * Method returns detailed information about user violation by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ViolationDetailInfoDto};
-     * @author Rusanovscaia Nadejda
-     */
-    @Override
-    @Transactional
-    public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
-        User user =
-            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
-        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
-            .orderId(orderId)
-            .userName(user.getRecipientName())
-            .violationLevel(v.getViolationLevel())
-            .description(v.getDescription())
-            .images(v.getImages())
-            .violationDate(v.getViolationDate())
-            .build());
-    }
-
-    @Override
-    @Transactional
-    public void deleteViolation(Long id, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
-        if (violationOptional.isPresent()) {
-            List<String> images = violationOptional.get().getImages();
-            if (!images.isEmpty()) {
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
-                }
-            }
-            violationRepository.deleteById(violationOptional.get().getId());
-            User user = violationOptional.get().getOrder().getUser();
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
-        } else {
-            throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
-        }
-    }
-
     private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
@@ -1766,47 +1393,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Violation violation = violationRepository.findByOrderId(add.getOrderID())
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
-        updateViolation(violation, add, multipartFiles);
-        violationRepository.save(violation);
-        eventService.save(OrderHistory.CHANGES_VIOLATION,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
-    }
-
-    private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {
-        violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
-        violation.setDescription(add.getViolationDescription());
-        List<String> violationImages = violation.getImages();
-        if (add.getImagesToDelete() != null) {
-            List<String> images = add.getImagesToDelete();
-            for (String image : images) {
-                fileService.delete(image);
-                violationImages.remove(image);
-            }
-        }
-        if (multipartFiles.length > 0) {
-            List<String> images = new LinkedList<>();
-            setImages(multipartFiles, images);
-            if (violation.getImages().isEmpty()) {
-                violation.setImages(images);
-            } else {
-                violation
-                    .setImages(Stream.concat(violationImages.stream(), images.stream()).collect(Collectors.toList()));
-            }
-        }
-    }
-
-    private void setImages(MultipartFile[] multipartFiles, List<String> images) {
-        for (MultipartFile multipartFile : multipartFiles) {
-            images.add(fileService.upload(multipartFile));
-        }
-    }
-
-    @Override
     public ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images) {
         final Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
@@ -2222,8 +1808,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     lang,
                     currentUser);
             }
-        } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
-            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
+            if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+                updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                    .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                        dto.getEmployeeId().toString(),
+                        dto.getPositionId(),
+                        currentUser));
+            }
+        } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
         }
     }
