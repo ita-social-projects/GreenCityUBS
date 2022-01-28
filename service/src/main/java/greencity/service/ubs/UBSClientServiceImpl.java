@@ -879,6 +879,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(a -> modelMapper.map(a, AddressDto.class))
                 .collect(Collectors.toList());
         userProfileDto.setAddressDto(addressDto);
+        userProfileDto.setBotList(botList);
         return userProfileDto;
     }
 
