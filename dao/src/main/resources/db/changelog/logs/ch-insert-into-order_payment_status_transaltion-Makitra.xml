@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Makitra-15" author="Makitra Vadym">
+        <insert tableName="order_payment_status_translations">
+            <column name="id">1</column>
+            <column name="translation_value">Paid</column>
+            <column name="order_payment_status_id">1</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">2</column>
+            <column name="translation_value">Unpaid</column>
+            <column name="order_payment_status_id">2</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">3</column>
+            <column name="translation_value">Half paid</column>
+            <column name="order_payment_status_id">3</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">4</column>
+            <column name="translation_value">Payment refunded</column>
+            <column name="order_payment_status_id">4</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">5</column>
+            <column name="translation_value">Оплачено</column>
+            <column name="order_payment_status_id">1</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">6</column>
+            <column name="translation_value">Не оплачено</column>
+            <column name="order_payment_status_id">2</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">7</column>
+            <column name="translation_value">Частково оплачено</column>
+            <column name="order_payment_status_id">3</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="order_payment_status_translations">
+            <column name="id">8</column>
+            <column name="translation_value">Оплату повернуто</column>
+            <column name="order_payment_status_id">4</column>
+            <column name="language_id">1</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

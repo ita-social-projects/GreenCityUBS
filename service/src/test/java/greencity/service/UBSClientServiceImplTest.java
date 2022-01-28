@@ -160,7 +160,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -219,7 +219,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -741,7 +741,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -805,7 +805,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(1);
+        bag.setFullPrice(1);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -963,7 +963,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1021,7 +1021,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(100);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1067,7 +1067,7 @@ class UBSClientServiceImplTest {
 
         Bag bag = new Bag();
         bag.setCapacity(120);
-        bag.setPrice(400);
+        bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
 
@@ -1182,5 +1182,39 @@ class UBSClientServiceImplTest {
         when(courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(1L, "ua"))
             .thenReturn(Collections.emptyList());
         assertThrows(CourierLocationException.class, () -> ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
+    }
+
+    @Test
+    void validatePaymentClientTest() {
+
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersDto()));
+        when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
+
+        ubsService.validatePaymentClient(dto);
+
+        verify(orderRepository, times(2)).findById(1L);
+        verify(encryptionUtil).checkIfResponseSignatureIsValid(dto, null);
+
+    }
+
+    @Test
+    void validatePaymentClientExceptionTest() {
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+
+        when(orderRepository.findById(1L))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersDto()));
+
+        assertThrows(PaymentValidationException.class, () -> ubsService.validatePaymentClient(dto));
+    }
+
+    @Test
+    void getUserPointTest() {
+        when(userRepository.findByUuid("uuid")).thenReturn(User.builder().id(1L).currentPoints(100).build());
+
+        ubsService.getUserPoint("uuid");
+
+        verify(userRepository).findByUuid("uuid");
     }
 }

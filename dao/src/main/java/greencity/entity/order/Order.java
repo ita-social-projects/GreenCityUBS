@@ -28,8 +28,10 @@ import java.util.Set;
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
-    "events", "imageReasonNotTakingBags"})
-@ToString
+    "events", "imageReasonNotTakingBags", "additionalOrders"})
+@ToString(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
+    "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,7 +101,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @Column(name = "order_payment_status")
+    @Column(nullable = false, name = "order_payment_status")
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 
@@ -121,9 +123,9 @@ public class Order {
     private Set<Employee> attachedEmployees;
 
     @ElementCollection
-    @CollectionTable(name = "order_additional", joinColumns = @JoinColumn(name = "orders_id"))
+    @CollectionTable(name = "order_additional",
+        joinColumns = @JoinColumn(name = "orders_id", referencedColumnName = "id"))
     @Column(name = "additional_order")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -131,7 +133,7 @@ public class Order {
     private List<Payment> payment;
 
     @OneToMany(mappedBy = "order")
-    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
+    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
@@ -152,4 +154,7 @@ public class Order {
 
     @ManyToOne
     CourierLocation courierLocations;
+
+    @Column(name = "sum_total_amount_without_discounts")
+    private Long sumTotalAmountWithoutDiscounts;
 }

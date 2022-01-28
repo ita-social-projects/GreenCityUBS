@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
@@ -8,8 +9,8 @@ import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
-import greencity.service.ubs.UserViolationsService;
 import greencity.service.ubs.ValuesForUserTableService;
+import greencity.service.ubs.ViolationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -29,7 +30,7 @@ public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
-    private final UserViolationsService userViolationsService;
+    private final ViolationService violationService;
 
     /**
      * Constructor with parameters.
@@ -38,11 +39,11 @@ public class AdminUbsController {
     public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
         ValuesForUserTableService valuesForUserTable,
         OrdersForUserService ordersForUserService,
-        UserViolationsService userViolationsService) {
+        ViolationService violationService) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
         this.ordersForUserService = ordersForUserService;
-        this.userViolationsService = userViolationsService;
+        this.violationService = violationService;
     }
 
     /**
@@ -168,7 +169,7 @@ public class AdminUbsController {
      * Controller for obtaining all violations by user.
      *
      * @param userId {@link Long}
-     * @author Roman Sulymka.
+     * @author Roman Sulymka and Max Bohonko.
      */
     @ApiOperation("Get users for the table")
     @ApiResponses(value = {
@@ -177,10 +178,13 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @ApiPageable
     @GetMapping("/{userId}/violationsAll")
-    public ResponseEntity<UserWithViolationsDto> getAllViolationsByUser(
-        @PathVariable Long userId) {
+    public ResponseEntity<UserViolationsWithUserName> getAllViolationsByUser(
+        @ApiIgnore Pageable page, @PathVariable Long userId,
+        @RequestParam String columnName,
+        @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(userViolationsService.getAllViolations(userId));
+            .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
     }
 }

@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
+
+    public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
+        new NotificationScheduleDto().setCron("0 0 18 * * ?");
+
     public static Principal getPrincipal() {
         return () -> "test@gmail.com";
     }
@@ -319,8 +323,8 @@ public class ModelUtils {
     public static ManualPaymentResponseDto getResponseDto() {
         return ManualPaymentResponseDto.builder()
             .amount(500l)
-            .paymentDate("09-02-2021")
-            .paymentId(10l)
+            .settlementdate("09-02-2021")
+            .paymentId("10l")
             .currentDate("10-02-2021")
             .receiptLink("somelink.com")
             .imagePath("imagepath")
@@ -330,9 +334,9 @@ public class ModelUtils {
     public static ManualPaymentRequestDto getRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500l)
-            .paymentDate("09-02-2021")
+            .settlementdate("09-02-2021")
             .receiptLink("somelink.com")
-            .paymentId(10l)
+            .paymentId("10l")
             .build();
     }
 
@@ -417,7 +421,7 @@ public class ModelUtils {
 
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
-            .ecoNumber(Set.of("1111"))
+            .ecoNumber(Set.of("1111111111"))
             .build();
     }
 
@@ -613,6 +617,8 @@ public class ModelUtils {
         return new NotificationTemplateDto()
             .setId(1L)
             .setTitle("test")
-            .setBody("test");
+            .setBody("test")
+            .setNotificationType("UNPAID_ORDER")
+            .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 }

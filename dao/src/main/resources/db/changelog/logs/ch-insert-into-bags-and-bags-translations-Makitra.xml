@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Makitra-15" author="Makitra Vadym">
+        <insert tableName="bag">
+            <column name="id">1</column>
+            <column name="capacity">120</column>
+            <column name="price">200</column>
+            <column name="commission">50</column>
+            <column name="full_price">250</column>
+            <column name="location_id">1</column>
+            <column name="min_amount_of_bags">INCLUDE</column>
+        </insert>
+        <insert tableName="bag">
+            <column name="id">2</column>
+            <column name="capacity">120</column>
+            <column name="price">250</column>
+            <column name="commission">50</column>
+            <column name="full_price">300</column>
+            <column name="location_id">1</column>
+            <column name="min_amount_of_bags">INCLUDE</column>
+        </insert>
+        <insert tableName="bag">
+            <column name="id">3</column>
+            <column name="capacity">20</column>
+            <column name="price">50</column>
+            <column name="commission">0</column>
+            <column name="full_price">50</column>
+            <column name="location_id">1</column>
+            <column name="min_amount_of_bags">INCLUDE</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">1</column>
+            <column name="name">Безпечні відходи</column>
+            <column name="bag_id">1</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">2</column>
+            <column name="name">Текстильні відходи</column>
+            <column name="bag_id">2</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">3</column>
+            <column name="name">Текстильні відходи</column>
+            <column name="bag_id">3</column>
+            <column name="language_id">1</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">4</column>
+            <column name="name">Safe waste</column>
+            <column name="bag_id">1</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">5</column>
+            <column name="name">Textile waste</column>
+            <column name="bag_id">2</column>
+            <column name="language_id">2</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">6</column>
+            <column name="name">Textile waste</column>
+            <column name="bag_id">3</column>
+            <column name="language_id">2</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
