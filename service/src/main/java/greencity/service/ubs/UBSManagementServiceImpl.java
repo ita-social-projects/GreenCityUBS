@@ -407,8 +407,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getOverpayment() > 0 ? 0
-                : prices.getTotalSumAmount())
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
