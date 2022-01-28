@@ -2,7 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.configuration.GreenCityPropertiesConfig;
+import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
@@ -29,15 +29,15 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private final GreenCityPropertiesConfig greenCityPropertiesConfig;
+    private final RedirectionConfigProp redirectionConfigProp;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService, GreenCityPropertiesConfig greenCityPropertiesConfig) {
+    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
         this.ubsClientService = ubsClientService;
-        this.greenCityPropertiesConfig = greenCityPropertiesConfig;
+        this.redirectionConfigProp = redirectionConfigProp;
     }
 
     /**
@@ -411,7 +411,7 @@ public class OrderController {
         PaymentResponseDtoLiqPay dto, HttpServletResponse response) throws IOException {
         ubsClientService.validateLiqPayPayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect(greenCityPropertiesConfig.getGreenCityClient());
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -512,7 +512,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect(greenCityPropertiesConfig.getGreenCityClient());
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }

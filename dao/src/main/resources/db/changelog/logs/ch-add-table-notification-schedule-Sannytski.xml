@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Sannytski-1" author="Dmytro Sannytski">
+        <createTable tableName="notification_schedule">
+            <column name="notification_type" type="VARCHAR" autoIncrement="false">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="cron" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="Sannytski-2" author="Dmytro Sannytski">
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="UNPAID_ORDER"/>
+            <column name="cron" value="0 0 18 * * ?"/>
+        </insert>
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="UNPAID_PACKAGE"/>
+            <column name="cron" value="0 0 18 * * ?"/>
+        </insert>
+        <insert tableName="notification_schedule">
+            <column name="notification_type" value="LETS_STAY_CONNECTED"/>
+            <column name="cron" value="0 0 18 * * ?"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

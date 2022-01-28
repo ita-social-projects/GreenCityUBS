@@ -9,8 +9,8 @@ import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
-import greencity.service.ubs.UserViolationsService;
 import greencity.service.ubs.ValuesForUserTableService;
+import greencity.service.ubs.ViolationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -30,7 +30,7 @@ public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
-    private final UserViolationsService userViolationsService;
+    private final ViolationService violationService;
 
     /**
      * Constructor with parameters.
@@ -39,11 +39,11 @@ public class AdminUbsController {
     public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
         ValuesForUserTableService valuesForUserTable,
         OrdersForUserService ordersForUserService,
-        UserViolationsService userViolationsService) {
+        ViolationService violationService) {
         this.ordersAdminsPageService = ordersAdminsPageService;
         this.valuesForUserTable = valuesForUserTable;
         this.ordersForUserService = ordersForUserService;
-        this.userViolationsService = userViolationsService;
+        this.violationService = violationService;
     }
 
     /**
@@ -185,6 +185,6 @@ public class AdminUbsController {
         @RequestParam String columnName,
         @RequestParam SortingOrder sortingOrder) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(userViolationsService.getAllViolations(page, userId, columnName, sortingOrder));
+            .body(violationService.getAllViolations(page, userId, columnName, sortingOrder));
     }
 }

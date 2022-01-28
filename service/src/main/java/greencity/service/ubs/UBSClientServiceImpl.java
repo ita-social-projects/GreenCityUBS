@@ -68,13 +68,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     private UBSManagementService ubsManagementService;
     private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
-    @Value("${fondy.payment.key}")
+    @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
-    @Value("${merchant.id}")
+    @Value("${greencity.payment.merchant-id}")
     private String merchantId;
-    @Value("${liqpay.public.key}")
+    @Value("${greencity.payment.liq-pay-public-key}")
     private String publicKey;
-    @Value("${liqpay.private.key}")
+    @Value("${greencity.payment.liq-pay-private-key}")
     private String privateKey;
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
@@ -886,7 +886,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
             return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
-                .recipientEmail(ubsCustomersDto.getEmail()).recipientName(ubsCustomersDto.getName())
+                .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
                 .dateOfRegistration(LocalDate.now()).build());
         }
         return user;
