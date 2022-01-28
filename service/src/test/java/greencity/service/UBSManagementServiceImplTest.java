@@ -1867,7 +1867,7 @@ class UBSManagementServiceImplTest {
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
-            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+            () -> ubsManagementService.updateOrderExportDetails(1L, testDetails, "abc"));
     }
 
     @Test
@@ -1877,7 +1877,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(UnexistingOrderException.class,
-            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+            () -> ubsManagementService.updateOrderExportDetails(1L, testDetails, "abc"));
     }
 
     @Test
@@ -1889,7 +1889,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(Collections.emptyList());
         assertThrows(ReceivingStationNotFoundException.class,
-            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+            () -> ubsManagementService.updateOrderExportDetails(1L, testDetails, "abc"));
     }
 
     @Test
