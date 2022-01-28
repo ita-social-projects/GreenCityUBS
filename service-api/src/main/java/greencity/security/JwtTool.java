@@ -29,7 +29,7 @@ public class JwtTool {
      * Constructor.
      */
     @Autowired
-    public JwtTool(@Value("$ {greencity.token-key}") String accessTokenKey) {
+    public JwtTool(@Value("${greencity.authorization.token-key}") String accessTokenKey) {
         this.accessTokenKey = accessTokenKey;
     }
 
