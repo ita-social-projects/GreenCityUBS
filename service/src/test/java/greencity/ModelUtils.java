@@ -22,6 +22,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.util.Bot;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
@@ -3133,5 +3134,16 @@ public class ModelUtils {
             .orderId(List.of(1l))
             .newValue("1")
             .build();
+    }
+
+    public static List<Bot> botList() {
+        List<Bot> botList = new ArrayList<>();
+        botList.add(new Bot()
+            .setType("TELEGRAM")
+            .setLink("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        botList.add(new Bot()
+            .setType("VIBER")
+            .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        return botList;
     }
 }
