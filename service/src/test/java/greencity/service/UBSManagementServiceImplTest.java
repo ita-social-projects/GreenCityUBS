@@ -6,7 +6,9 @@ import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
+import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
@@ -38,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static greencity.ModelUtils.*;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
@@ -1825,5 +1828,125 @@ class UBSManagementServiceImplTest {
             ubsManagementService.getOrderStatusData(1L, "ua");
         });
 
+    }
+
+    @Test
+    void updateOrderExportDetails() {
+        User user = getTestUser();
+        Order order = getOrder();
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid());
+        verify(orderRepository, times(1)).save(order);
+    }
+
+    @Test
+    void updateOrderExportDetailsEmptyDetailsTest() {
+        User user = getTestUser();
+        Order order = getOrder();
+        order.setDeliverFrom(null);
+        List<ReceivingStation> receivingStations = List.of(getReceivingStation());
+        ExportDetailsDtoUpdate emptyDetails = ExportDetailsDtoUpdate.builder().build();
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(receivingStations);
+
+        ubsManagementService.updateOrderExportDetails(user.getId(), emptyDetails, user.getUuid());
+        verify(orderRepository, times(1)).save(order);
+    }
+
+    @Test
+    void updateOrderExportDetailsUserNotFoundExceptionTest() {
+        User user = getTestUser();
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class,
+            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+    }
+
+    @Test
+    void updateOrderExportDetailsUnexistingOrderExceptionTest() {
+        User user = getTestUser();
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+    }
+
+    @Test
+    void updateOrderExportDetailsReceivingStationNotFoundExceptionTest() {
+        User user = getTestUser();
+        Order order = getOrder();
+        ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findAll()).thenReturn(Collections.emptyList());
+        assertThrows(ReceivingStationNotFoundException.class,
+            () -> ubsManagementService.updateOrderExportDetails(user.getId(), testDetails, user.getUuid()));
+    }
+
+    @Test
+    void getPaymentInfo() {
+        Order order = getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        PaymentInfoDto paymentInfo = getInfoPayment();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
+
+        ubsManagementService.getPaymentInfo(order.getId(), 100L);
+        verify(notificationService, times(1)).notifyBonuses(any(), any());
+    }
+
+    @Test
+    void getPaymentInfoExceptionTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.getPaymentInfo(1L, 100L));
+    }
+
+    @Test
+    void updateManualPayment() {
+        User user = getUser();
+        Order order = getOrderUserFirst();
+        Payment payment = getPayment();
+        ManualPaymentRequestDto requestDto = getManualPaymentRequestDto();
+        requestDto.setImagePath("");
+        payment.setImagePath("abc");
+        MockMultipartFile file = new MockMultipartFile("manualPaymentDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any())).thenReturn(payment);
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+
+        ubsManagementService.updateManualPayment(payment.getId(), requestDto, file, user.getUuid());
+
+        verify(paymentRepository).save(any(Payment.class));
+        verify(eventService).save(any(), any(), any());
+    }
+
+    @Test
+    void updateManualPaymentUserNotFoundExceptionTest() {
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
+    }
+
+    @Test
+    void updateManualPaymentPaymentNotFoundExceptionTest() {
+        when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(getUser()));
+        when(paymentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(PaymentNotFoundException.class,
+            () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
     }
 }
