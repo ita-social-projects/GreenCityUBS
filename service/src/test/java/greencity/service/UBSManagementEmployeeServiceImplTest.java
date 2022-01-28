@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
@@ -23,18 +24,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -378,5 +375,18 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown2 = assertThrows(EmployeeIllegalOperationException.class,
             () -> employeeService.deleteEmployeeImage(1L));
         assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
+    }
+
+    @Test
+    void findAllActiveEmployees() {
+        EmployeePage employeePage = new EmployeePage();
+        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(
+                Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+        when(employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria))
+                .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
+        employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        verify(employeeCriteriaRepository, times(1))
+                .findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 }
