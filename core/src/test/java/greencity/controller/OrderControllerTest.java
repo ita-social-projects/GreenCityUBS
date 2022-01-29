@@ -3,6 +3,7 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
+import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
@@ -221,6 +222,8 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
+        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
             .principal(principal)
@@ -318,16 +321,29 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Mock
+    RedirectionConfigProp redirectionConfigProp;
+
     @Test
     void receivePaymentClientTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
+        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
+
+        verify(redirectionConfigProp).getGreenCityClient();
+    }
+
+    @Test
+    void getCourierLocations() throws Exception {
+        mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
+            .andExpect(status().isOk());
     }
 }

@@ -48,4 +48,16 @@ public class OrderAddressDtoRequest {
     private Coordinates coordinates;
 
     private Boolean actual;
+    @Length(max = 30)
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
+    private String cityEn;
+    @Length(max = 30)
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
+    private String regionEn;
+    @Length(max = 50)
+    @Pattern(regexp = "[a-zA-Z0-9-\\s'.]{3,40}")
+    private String streetEn;
+    @Length(max = 30)
+    @Pattern(regexp = "[a-zA-Z-\\s'.]{3,30}")
+    private String districtEn;
 }

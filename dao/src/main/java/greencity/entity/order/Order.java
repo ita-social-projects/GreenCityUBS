@@ -133,7 +133,7 @@ public class Order {
     private List<Payment> payment;
 
     @OneToMany(mappedBy = "order")
-    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
+    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
@@ -154,4 +154,7 @@ public class Order {
 
     @ManyToOne
     CourierLocation courierLocations;
+
+    @Column(name = "sum_total_amount_without_discounts")
+    private Long sumTotalAmountWithoutDiscounts;
 }
