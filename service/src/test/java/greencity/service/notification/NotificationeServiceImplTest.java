@@ -1,14 +1,19 @@
 package greencity.service.notification;
 
 import greencity.ModelUtils;
+import greencity.client.RestClient;
+import greencity.dto.AddingViolationsToUserDto;
 import greencity.dto.NotificationTemplateDto;
 import greencity.dto.PageableDto;
+import greencity.dto.UserViolationMailDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
+import greencity.entity.order.Order;
 import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,13 +23,14 @@ import org.modelmapper.ModelMapper;
 
 import java.util.Optional;
 
+import static greencity.ModelUtils.GET_ORDER_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class ManagementNotificationServiceImplTest {
+class NotificationeServiceImplTest {
     @Mock
     NotificationTemplateRepository templateRepository;
     @Mock
@@ -32,7 +38,11 @@ class ManagementNotificationServiceImplTest {
     @Mock
     NotificationScheduleRepo scheduleRepo;
     @InjectMocks
-    private ManagementNotificationServiceImpl notificationService;
+    private NotificationeServiceImpl notificationService;
+    @Mock(lenient = true)
+    OrderRepository orderRepository;
+    @Mock
+    RestClient restClient;
 
     @Test
     void findAll() {
@@ -83,5 +93,27 @@ class ManagementNotificationServiceImplTest {
     @Test
     void findByIdNotFoundExceptionTest() {
         assertThrows(NotFoundException.class, () -> notificationService.findById(2L));
+    }
+
+    @Test
+    void testSendNotificationAboutViolationWithFoundOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto(1L, "violation", "LOW");
+        Order order = GET_ORDER_DETAILS;
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
+        UserViolationMailDto mailDto =
+            new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
+                addingViolationsToUserDto.getViolationDescription());
+        notificationService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(1)).sendViolationOnMail(mailDto);
+    }
+
+    @Test
+    void testSendNotificationAboutViolationWithoutOrder() {
+        AddingViolationsToUserDto addingViolationsToUserDto =
+            new AddingViolationsToUserDto();
+        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
+        notificationService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
+        verify(restClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
     }
 }
