@@ -43,7 +43,7 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
-    private final NotificationeService managementNotificationeService;
+    private final NotificationeService notificationeService;
 
     /**
      * Constructor with parameters.
@@ -51,12 +51,12 @@ public class ManagementOrderController {
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
         ViolationService violationService, CoordinateService coordinateService,
-        NotificationeService managementNotificationeService) {
+        NotificationeService notificationeService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
-        this.managementNotificationeService = managementNotificationeService;
+        this.notificationeService = notificationeService;
     }
 
     /**
@@ -222,7 +222,7 @@ public class ManagementOrderController {
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.addUserViolation(add, files, uuid);
-        managementNotificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
+        notificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
