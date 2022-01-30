@@ -10,6 +10,7 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.service.notification.NotificationeService;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
@@ -42,17 +43,20 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
+    private final NotificationeService managementNotificationeService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
-        ViolationService violationService, CoordinateService coordinateService) {
+        ViolationService violationService, CoordinateService coordinateService,
+        NotificationeService managementNotificationeService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
+        this.managementNotificationeService = managementNotificationeService;
     }
 
     /**
@@ -218,7 +222,7 @@ public class ManagementOrderController {
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.addUserViolation(add, files, uuid);
-        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
+        managementNotificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

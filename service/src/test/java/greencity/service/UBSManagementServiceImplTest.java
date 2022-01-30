@@ -696,28 +696,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testSendNotificationAboutViolationWithFoundOrder() {
-        AddingViolationsToUserDto addingViolationsToUserDto =
-            new AddingViolationsToUserDto(1L, "violation", "LOW");
-        Order order = GET_ORDER_DETAILS;
-        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
-        UserViolationMailDto mailDto =
-            new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
-                addingViolationsToUserDto.getViolationDescription());
-        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(restClient, times(1)).sendViolationOnMail(mailDto);
-    }
-
-    @Test
-    void testSendNotificationAboutViolationWithoutOrder() {
-        AddingViolationsToUserDto addingViolationsToUserDto =
-            new AddingViolationsToUserDto();
-        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
-        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(restClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
-    }
-
-    @Test
     void testGetOrderExportDetailsReceivingStationNotFoundExceptionThrown() {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder()));
