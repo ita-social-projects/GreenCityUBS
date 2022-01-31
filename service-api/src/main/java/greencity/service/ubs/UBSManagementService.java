@@ -74,14 +74,6 @@ public interface UBSManagementService {
     ViolationsInfoDto getAllUserViolations(String email);
 
     /**
-     * Method for send email with description to user.
-     *
-     * @param dto {@link AddingViolationsToUserDto } order id with description.
-     * @author Veremchuk Zakhar.
-     */
-    void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
-
-    /**
      * Method that read user address by order id.
      *
      * @param orderId of {@link Long} order id;

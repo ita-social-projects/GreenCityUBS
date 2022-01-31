@@ -8,7 +8,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
-import greencity.service.notification.ManagementNotificationService;
+import greencity.service.notification.NotificationeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ class ManagementNotificationControllerTest {
     @InjectMocks
     ManagementNotificationController notificationController;
     @Mock
-    ManagementNotificationService notificationService;
+    NotificationeService notificationeService;
     private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final Principal principal = getUuid();
     @Mock
@@ -93,7 +93,7 @@ class ManagementNotificationControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         NotificationTemplateDto dto = ModelUtils.getNotificationTemplateDto();
         String JsonDto = objectMapper.writeValueAsString(dto);
-        Mockito.doThrow(NotFoundException.class).when(notificationService).update(dto);
+        Mockito.doThrow(NotFoundException.class).when(notificationeService).update(dto);
         mockMvc.perform(put(url)
             .principal(principal)
             .content(JsonDto)
