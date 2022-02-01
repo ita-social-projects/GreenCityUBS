@@ -15,7 +15,6 @@ public class ModelUtils {
 
     public static User getUser() {
         return User.builder()
-            .id(1L)
             .uuid("uuid")
             .orders(getOrderList())
             .currentPoints(0)
@@ -30,7 +29,6 @@ public class ModelUtils {
     public static List<Order> getOrderList() {
         List<Order> orderList = new ArrayList<>();
         orderList.add(Order.builder()
-            .id(1L)
             .orderStatus(OrderStatus.FORMED)
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .courierLocations(CourierLocation.builder().id(1L).build())
@@ -41,7 +39,6 @@ public class ModelUtils {
 
     public static Order getOrder() {
         return Order.builder()
-            .id(1L)
             .orderStatus(OrderStatus.FORMED)
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .courierLocations(CourierLocation.builder().id(1L).build())
@@ -51,7 +48,6 @@ public class ModelUtils {
     public static List<Address> getAddresses() {
         List<Address> addresses = new ArrayList<>();
         addresses.add(Address.builder()
-            .id(1L)
             .region("Kyiv")
             .city("Kyiv")
             .street("Ivana Franka")

@@ -27,12 +27,11 @@ public class UserRepositoryTest extends IntegrationTestBase {
 
     @Test
     void findUserByOrderId() {
-        // Only this test fails
         Order order = ModelUtils.getOrder();
         User user = ModelUtils.getUser();
-        userRepository.save(user);
+        user = userRepository.save(user);
         order.setUser(user);
-        orderRepository.save(order);
+        order = orderRepository.save(order);
         Optional<User> actual = userRepository.findUserByOrderId(order.getId());
         Assertions.assertEquals(Optional.of(order.getUser()), actual);
         orderRepository.deleteAll();
@@ -42,7 +41,7 @@ public class UserRepositoryTest extends IntegrationTestBase {
     @Test
     void findUserByUuid() {
         User user = ModelUtils.getUser();
-        userRepository.save(user);
+        user = userRepository.save(user);
         Assertions.assertEquals(Optional.of(user), userRepository.findUserByUuid("uuid"));
         userRepository.deleteAll();
     }
@@ -50,7 +49,7 @@ public class UserRepositoryTest extends IntegrationTestBase {
     @Test
     void countTotalUsersViolations() {
         User user = ModelUtils.getUser();
-        userRepository.save(user);
+        user = userRepository.save(user);
         Assertions.assertEquals(0, userRepository.countTotalUsersViolations(user.getId()));
         userRepository.deleteAll();
     }
@@ -58,7 +57,7 @@ public class UserRepositoryTest extends IntegrationTestBase {
     @Test
     void checkIfUserHasViolationForCurrentOrder() {
         User user = ModelUtils.getUser();
-        userRepository.save(user);
+        user = userRepository.save(user);
         Assertions.assertEquals(0,
             userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), user.getOrders().get(0).getId()));
         userRepository.deleteAll();
@@ -67,7 +66,7 @@ public class UserRepositoryTest extends IntegrationTestBase {
     @Test
     void getAllInactiveUsers() {
         List<User> users = new ArrayList<>();
-        userRepository.saveAll(users);
+        users = userRepository.saveAll(users);
         Assertions.assertEquals(users, userRepository.getAllInactiveUsers(LocalDate.of(2022, 1, 15), LocalDate.now()));
         userRepository.deleteAll();
     }
