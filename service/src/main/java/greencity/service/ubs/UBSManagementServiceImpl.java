@@ -303,24 +303,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
-        Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
-        UserViolationMailDto mailDto;
-        if (order != null) {
-            mailDto = UserViolationMailDto.builder()
-                .name(order.getUser().getRecipientName())
-                .email(order.getUser().getRecipientEmail())
-                .violationDescription(dto.getViolationDescription())
-                .language(language)
-                .build();
-            restClient.sendViolationOnMail(mailDto);
-        }
-    }
-
-    /**
      * {@inheritDoc} and {MaksymKuzbyt}
      */
     @Override
@@ -1096,7 +1078,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-        return sumToPay - paymentSum < 0 ? Math.abs(paymentSum - sumToPay) : 0L;
+        Long paymentsWithCertificatesAndPoints = paymentSum
+            + ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                + order.getPointsToUse());
+        return sumToPay - paymentsWithCertificatesAndPoints < 0 ? Math.abs(paymentsWithCertificatesAndPoints - sumToPay)
+            : 0L;
     }
 
     /**

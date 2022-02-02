@@ -372,7 +372,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.DONE);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getOverpayment());
+        assertEquals(100L, ubsManagementService.getPaymentInfo(order.getId(), 800L).getOverpayment());
         assertEquals(200L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getPaidAmount());
         assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 100L).getUnPaidAmount());
     }
@@ -693,28 +693,6 @@ class UBSManagementServiceImplTest {
         }
         assertEquals(detailsOrderInfoDtoList.toString(),
             ubsManagementService.getOrderBagsDetails(1L).toString());
-    }
-
-    @Test
-    void testSendNotificationAboutViolationWithFoundOrder() {
-        AddingViolationsToUserDto addingViolationsToUserDto =
-            new AddingViolationsToUserDto(1L, "violation", "LOW");
-        Order order = GET_ORDER_DETAILS;
-        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.of(order));
-        UserViolationMailDto mailDto =
-            new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
-                addingViolationsToUserDto.getViolationDescription());
-        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(restClient, times(1)).sendViolationOnMail(mailDto);
-    }
-
-    @Test
-    void testSendNotificationAboutViolationWithoutOrder() {
-        AddingViolationsToUserDto addingViolationsToUserDto =
-            new AddingViolationsToUserDto();
-        when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
-        ubsManagementService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(restClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
     }
 
     @Test
