@@ -15,8 +15,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-@Sql(scripts = "sqlFiles/userRepo/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "sqlFiles/userRepo/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "/sqlFiles/userRepo/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/sqlFiles/userRepo/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
 class UserRepositoryTest extends IntegrationTestBase {
