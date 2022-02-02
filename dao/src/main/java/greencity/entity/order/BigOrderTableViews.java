@@ -1,22 +1,29 @@
-package greencity.dto;
+package greencity.entity.order;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import java.time.LocalDate;
+import lombok.experimental.Accessors;
+import lombok.Getter;
+import lombok.Setter;
+
+@Accessors(fluent = true)
 @Data
-@JsonSerialize
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class BigOrderTableDTO {
+@Entity
+@Table(name = "big_order_table")
+public class BigOrderTableViews {
+    @Id
     private Long id;
     private String orderStatus;
     private String orderPaymentStatus;
-    private String orderDate;
-    private String paymentDate;
+    private LocalDate orderDate;
+    private LocalDate paymentDate;
     private String clientName;
-    private String clientPhone;
+    private String clientPhoneNumber;
     private String clientEmail;
     private String senderName;
     private String senderPhone;
@@ -27,21 +34,26 @@ public class BigOrderTableDTO {
     private String district;
     private String address;
     private String commentToAddressForClient;
-    private String bagsAmount;
+    private String bagAmount;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
     private Long totalPayment;
-    private String dateOfExport;
+    private LocalDate dateOfExport;
     private String timeOfExport;
     private String idOrderFromShop;
     private String receivingStation;
+    private Long receivingStationId;
     private String responsibleLogicMan;
+    private Long responsibleLogicManId;
     private String responsibleDriver;
+    private Long responsibleDriverId;
     private String responsibleCaller;
+    private Long responsibleCallerId;
     private String responsibleNavigator;
+    private Long responsibleNavigatorId;
     private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;

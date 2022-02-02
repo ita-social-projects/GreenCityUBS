@@ -14,7 +14,7 @@ import lombok.*;
 public class OrderSearchCriteria {
     private OrderStatus[] orderStatus;
     private OrderPaymentStatus[] orderPaymentStatus;
-    private String[] receivingStation;
+    private Long[] receivingStation;
     private Long[] responsibleCallerId;
     private Long[] responsibleDriverId;
     private Long[] responsibleNavigatorId;

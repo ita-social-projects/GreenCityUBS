@@ -39,6 +39,18 @@ public class UBSuser {
     @Column(name = "phone_number", length = 15, nullable = false)
     private String phoneNumber;
 
+    @Column(name = "sender_first_name", length = 30)
+    private String senderFirstName;
+
+    @Column(name = "sender_last_name", length = 30)
+    private String senderLastName;
+
+    @Column(name = "sender_email", length = 50)
+    private String senderEmail;
+
+    @Column(name = "sender_phone_number", length = 15)
+    private String senderPhoneNumber;
+
     @Column(nullable = false, length = 50)
     private String email;
 }
