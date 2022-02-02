@@ -274,6 +274,7 @@ public class ClientController {
             .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
     }
 
+    //for testing
     /**
      * Controller returns bonus points of current user.
      * {@link greencity.dto.UserVO}.
