@@ -239,7 +239,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
-            System.out.println(links.attr("href"));
             String link = links.attr("href");
             return getPaymentRequestDto(order, link);
         }
@@ -286,7 +285,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
-            System.out.println(links.attr("href"));
             String link = links.attr("href");
             return getPaymentRequestDto(order, link);
         }
@@ -729,7 +727,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 sumToPay -= certificate.getPoints();
                 certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setDateOfUse(LocalDate.now());
-                if (dontSendLinkToFondyIf(sumToPay, certificate, dto)) {
+                if (dontSendLinkToFondyIf(sumToPay, certificate)) {
                     sumToPay = 0;
                     tooManyCertificates = true;
                 }
@@ -738,7 +736,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPay;
     }
 
-    private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate, OrderResponseDto orderResponseDto) {
+    private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
             return true;
@@ -1180,7 +1178,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID, OrderHistory.SYSTEM, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM + payment.getPaymentId(),
                 OrderHistory.SYSTEM, order);
-        } else if (status.equals("failure")) {
+        } else if (status.equals(FAILED_STATUS)) {
             payment.setResponseStatus(status);
             payment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
@@ -1344,7 +1342,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-            .orderId(orderUtils.generateOrderIdForPayment(orderId, order))
+            .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
@@ -1395,10 +1393,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private boolean dontSendLinkToFondyIfClient(int sumToPay) {
-        if (sumToPay <= 0) {
-            return true;
-        }
-        return false;
+        return sumToPay <= 0;
     }
 
     private PaymentRequestDto formPaymentForIF(Long orderId, int sumToPay) {
