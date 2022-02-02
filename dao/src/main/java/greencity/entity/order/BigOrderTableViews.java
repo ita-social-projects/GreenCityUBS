@@ -7,11 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import java.time.LocalDate;
-import lombok.experimental.Accessors;
-import lombok.Getter;
-import lombok.Setter;
 
-@Accessors(fluent = true)
 @Data
 @Entity
 @Table(name = "big_order_table")
