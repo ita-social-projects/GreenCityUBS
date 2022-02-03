@@ -80,6 +80,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -367,13 +368,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public OrderStatusPageDto getOrderStatusData(Long orderId, String languageCode) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Optional<Order> order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
         Integer fullPrice =
-            serviceRepository.findFullPriceByCourierId(order.get().getCourierLocations().getCourier().getId());
-        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
+            serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId());
+        Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
@@ -381,7 +383,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         });
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
-            getInfoAboutStatusesAndDateFormed(order, language);
+            getInfoAboutStatusesAndDateFormed(Optional.of(order), language);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
@@ -392,18 +394,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
-            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
-            .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
-            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
-            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .amountOfBagsOrdered(order.getAmountOfBagsOrdered())
+            .amountOfBagsExported(order.getExportedQuantity())
+            .amountOfBagsConfirmed(order.getConfirmedQuantity())
+            .numbersFromShop(order.getAdditionalOrders())
             .certificates(prices.getCertificate())
             .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
-            .comment(
-                order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .comment(order.getComment())
             .courierPricePerPackage(fullPrice)
-            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
+            .courierInfo(modelMapper.map(order.getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
@@ -887,7 +888,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         String orderDate = order.getOrderDate().toLocalDate().format(formatter);
         return OrderDetailStatusDto.builder()
             .orderStatus(order.getOrderStatus().name())
@@ -1252,7 +1253,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
