@@ -198,9 +198,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET BLOCKED = FALSE, EMPLOYEE_ID = NULL WHERE employee_id = :employee_id",
+    @Query(value =
+            "START TRANSACTION; " +
+            "UPDATE orders SET blocked = FALSE, employee_id = NULL WHERE employee_id = :employee_id;" +
+            "SELECT id FROM orders WHERE blocked = TRUE AND employee_id = :employee_id;" +
+            "COMMIT;",
         nativeQuery = true)
-    void unblockAllOrders(@Param("employee_id") Long employeeId);
+    List<Long> failedUnblockAllOrders(@Param("employee_id") Long employeeId);
 
     /**
      * Method gets all orders for user by Id.

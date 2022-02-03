@@ -461,19 +461,22 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
-            orderRepository.unblockAllOrders(employee.getId());
+            return orderRepository.failedUnblockAllOrders(employee.getId());
         }
-        List<Long> unblockedOrdersId = new ArrayList<>();
+        List<Long> failedUnblockedOrdersId = new ArrayList<>();
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
             if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)) {
                 order.setBlocked(false);
                 order.setBlockedByEmployee(null);
-                orderRepository.save(order);
-                unblockedOrdersId.add(order.getId());
+                try {
+                    orderRepository.save(order);
+                }catch (Exception e){
+                    failedUnblockedOrdersId.add(orderId);
+                }
             }
         }
-        return unblockedOrdersId;
+        return failedUnblockedOrdersId;
     }
 }
