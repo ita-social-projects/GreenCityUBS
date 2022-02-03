@@ -80,6 +80,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -887,7 +888,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         String orderDate = order.getOrderDate().toLocalDate().format(formatter);
         return OrderDetailStatusDto.builder()
             .orderStatus(order.getOrderStatus().name())
@@ -1252,7 +1253,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
