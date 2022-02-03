@@ -12,6 +12,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.PhoneNumberFormatterService;
+import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -60,7 +61,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final PaymentRepository paymentRepository;
-    private final PhoneNumberFormatterService phoneNumberFormatterService;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
     private final OrderUtils orderUtils;
@@ -663,7 +663,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
         mappedFromDtoUser.setUser(currentUser);
         mappedFromDtoUser.setPhoneNumber(
-            phoneNumberFormatterService.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
+                UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             ubsUserRepository.save(mappedFromDtoUser);
@@ -885,7 +885,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         user.setRecipientName(userProfileUpdateDto.getRecipientName());
         user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
         user.setRecipientPhone(
-            phoneNumberFormatterService.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
+                UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
         return user;
     }
 

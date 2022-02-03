@@ -8,13 +8,13 @@ import greencity.exceptions.PhoneNumberParseException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PhoneNumberFormatterServiceImpl implements PhoneNumberFormatterService {
-    private final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
+public class UAPhoneNumberUtil {
+    private static final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
 
     /**
      * {@inheritDoc}
      */
-    public String getE164PhoneNumberFormat(String phoneNumberStr) {
+    public static String getE164PhoneNumberFormat(String phoneNumberStr) {
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(phoneNumberStr, "UA");
             return phoneNumberUtil.format(phoneNumber, PhoneNumberUtil.PhoneNumberFormat.E164);
