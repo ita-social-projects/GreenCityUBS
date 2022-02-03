@@ -11,7 +11,6 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
-import greencity.service.PhoneNumberFormatterService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
