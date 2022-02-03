@@ -472,7 +472,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 order.setBlockedByEmployee(null);
                 try {
                     orderRepository.save(order);
-                }catch (Exception e){
+                } catch (Exception e) {
                     failedUnblockedOrdersId.add(orderId);
                 }
             }
