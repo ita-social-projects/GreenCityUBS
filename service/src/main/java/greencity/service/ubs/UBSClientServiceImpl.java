@@ -245,53 +245,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    @Transactional
-    public FondyOrderResponse saveFullOrderToDBForIF(OrderResponseDto dto, String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
-        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
-
-        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            courierLocation);
-        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
-
-        Order order = modelMapper.map(dto, Order.class);
-        order.setCourierLocations(courierLocation);
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
-
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
-
-        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
-
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        }
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0 || !dto.isShouldBePaid()) {
-            return getPaymentRequestDto(order, null);
-        } else {
-            PaymentRequestDto paymentRequestDto = formPaymentRequestForIF(order.getId(), sumToPay);
-            String html = restClient.getDataFromFondy(paymentRequestDto);
-
-            Document doc = Jsoup.parse(html);
-            Elements links = doc.select("a[href]");
-            System.out.println(links.attr("href"));
-            String link = links.attr("href");
-            return getPaymentRequestDto(order, link);
-        }
-    }
-
     private FondyOrderResponse getPaymentRequestDto(Order order, String link) {
         return FondyOrderResponse.builder()
             .orderId(order.getId())
@@ -627,25 +580,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
-            .build();
-
-        paymentRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
-
-        return paymentRequestDto;
-    }
-
-    private PaymentRequestDto formPaymentRequestForIF(Long orderId, int sumToPay) {
-        Order testOrder = orderRepository.findById(orderId).orElseThrow(null);
-        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            .merchantId(Integer.parseInt(merchantId))
-            .orderId(orderId + "_"
-                + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
-            .orderDescription("ubs courier")
-            .currency("UAH")
-            .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentIF")
+            .responseUrl("http://localhost:8050/ubs/receivePayment")
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -670,14 +605,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             mappedFromDtoUser.setId(null);
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
-            if (dto.getEmail() != null && dto.getEmail().equals(currentUser.getRecipientEmail())) {
-                if (currentUser.getRecipientSurname() == null) {
-                    currentUser.setRecipientSurname(dto.getLastName());
-                }
-                if (currentUser.getRecipientPhone() == null) {
-                    currentUser.setRecipientPhone(dto.getPhoneNumber());
-                }
-            }
+
+            currentUser.setRecipientName(dto.getFirstName());
+            currentUser.setRecipientSurname(dto.getLastName());
+            currentUser.setRecipientPhone(dto.getPhoneNumber());
+
             userRepository.save(currentUser);
             return mappedFromDtoUser;
         } else {
@@ -992,45 +924,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    @Transactional
-    public LiqPayOrderResponse saveFullOrderToDBFromLiqPayForIF(OrderResponseDto dto, String uuid) {
-        User currentUser = userRepository.findByUuid(uuid);
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
-        Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
-
-        int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            courierLocation);
-        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
-
-        Order order = modelMapper.map(dto, Order.class);
-        order.setCourierLocations(courierLocation);
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
-
-        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
-
-        getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
-
-        eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0 || !dto.isShouldBePaid()) {
-            return buildOrderResponseWithoutButton(order);
-        } else {
-            PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequestForIF(order.getId(), sumToPay);
-            String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
-            return buildOrderResponse(order, liqPayData
-                .replace("\"", "")
-                .replace("\n", ""));
-        }
-    }
 
     private int reduceOrderSumDueToUsedPoints(int sumToPay, int pointsToUse) {
         if (sumToPay >= pointsToUse) {
@@ -1087,25 +980,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
-            .build();
-    }
-
-    private PaymentRequestDtoLiqPay formLiqPayPaymentRequestForIF(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId).orElseThrow(null);
-
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("ubs courier")
-            .orderId(orderId + "_" + order.getPayment()
-                .get(order.getPayment().size() - 1).getId().toString())
-            .language("en")
-            .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPaymentIF")
+            .resultUrl("http://localhost:8050/ubs/receiveLiqPayPayment")
             .build();
     }
 
@@ -1231,49 +1106,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public FondyOrderResponse processOrderFondyClientForIF(OrderFondyClientDto dto, String uuid) throws Exception {
-        Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
-        Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
-
-        int sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
-
-        if (order.getCounterOrderPaymentId() == null) {
-            order.setCounterOrderPaymentId(0L);
-        }
-
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
-
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
-
-        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
-        userRepository.save(currentUser);
-
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        }
-        order.setOrderStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
-        eventService.save(OrderHistory.ORDER_CONFIRMED, OrderHistory.SYSTEM, order);
-        if (sumToPay == 0) {
-            return getPaymentRequestDto(order, null);
-        } else {
-            Order increment = incrementCounter(order);
-            PaymentRequestDto paymentRequestDto = formPaymentForIF(increment.getId(), sumToPay);
-            Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
-            Elements links = doc.select("a[href]");
-            String link = links.attr("href");
-            return getPaymentRequestDto(order, link);
-        }
-    }
-
-    @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception {
         Order order = findByIdOrderForClient(dto);
         User currentUser = findByIdUserForClient(uuid);
@@ -1348,7 +1180,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient")
+            .responseUrl("http://localhost:8050/ubs/receivePaymentClient")
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1401,23 +1233,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
-    private PaymentRequestDto formPaymentForIF(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            .merchantId(Integer.parseInt(merchantId))
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
-            .orderDescription("courier")
-            .currency("UAH")
-            .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentIF")
-            .build();
-        paymentRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
-        return paymentRequestDto;
-    }
-
     @Override
     public LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
@@ -1453,19 +1268,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .replace("\n", ""));
     }
 
-    @Override
-    public LiqPayOrderResponse proccessOrderLiqpayClientForIF(OrderLiqpayClienDto dto) {
-        Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
-        if (order.getCounterOrderPaymentId() == null) {
-            order.setCounterOrderPaymentId(0L);
-        }
-        Order increment = incrementCounter(order);
-        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPaymentForIF(increment.getId(), dto.getSum());
-        return buildOrderResponse(increment, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
-            .replace("\"", "")
-            .replace("\n", ""));
-    }
-
     private PaymentRequestDtoLiqPay formLiqPayPayment(Long orderId, int sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
@@ -1480,25 +1282,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
-            .build();
-    }
-
-    private PaymentRequestDtoLiqPay formLiqPayPaymentForIF(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return PaymentRequestDtoLiqPay.builder()
-            .publicKey(publicKey)
-            .version(3)
-            .action("pay")
-            .amount(sumToPay)
-            .currency("UAH")
-            .description("сourier")
-            .orderId(
-                orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
-            .language("en")
-            .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPaymentIF")
+            .resultUrl("http://localhost:8050/ubs/receiveLiqPayPayment")
             .build();
     }
 

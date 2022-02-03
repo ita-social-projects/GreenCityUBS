@@ -128,27 +128,6 @@ public class OrderController {
     }
 
     /**
-     * Controller saves all entered by user data to database.
-     *
-     * @param userUuid {@link UserVO} id.
-     * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link HttpStatus}.
-     * @author Sihovskiy Rostyslav
-     */
-    @ApiOperation(value = "Process user order.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/processOrderIF")
-    public ResponseEntity<FondyOrderResponse> processOrderForIF(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBForIF(dto, userUuid));
-    }
-
-    /**
      * Controller checks if received data is valid and stores payment info if is.
      *
      * @param dto {@link PaymentResponseDto} - response order data.
@@ -370,29 +349,6 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
-    }
-
-    /**
-     * Controller saves all entered by user data to database from LiqPay. Version
-     * for Ivano-Frankivsk
-     *
-     * @param userUuid {@link UserVO} id.
-     * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link LiqPayOrderResponse}.
-     * @author Sihovskiy Rostyslav
-     */
-    @ApiOperation(value = "Process user order.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/processLiqPayOrderIF")
-    public ResponseEntity<LiqPayOrderResponse> processLiqPayOrderForIF(
-        @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.saveFullOrderToDBFromLiqPayForIF(dto, userUuid));
     }
 
     /**
