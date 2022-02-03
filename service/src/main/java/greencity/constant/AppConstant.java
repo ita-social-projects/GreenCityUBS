@@ -1,6 +1,9 @@
 package greencity.constant;
 
 public final class AppConstant {
+    private AppConstant() {
+    }
+
     public static final String AUTHORIZATION = "Authorization";
     public static final String ENROLLMENT_TO_THE_BONUS_ACCOUNT = "Зарахування на бонусний рахунок";
     public static final String PAYMENT_REFUND = "Повернення коштів";

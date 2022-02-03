@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 @ToString
 public class OrderUtils {
+    private OrderUtils() {
+    }
+
     /**
      * The method that generates the order id to be paid.
      * 
