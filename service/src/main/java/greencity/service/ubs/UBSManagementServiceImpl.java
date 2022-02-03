@@ -624,13 +624,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
                     updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (nonNull(confirmWasteWas)
-                    && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                if (!entry.getValue().equals(confirmWasteWas)){
+                    Long confirmWaste = confirmWasteWas == null ? 0 :confirmWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas)
+                        .append(confirmWaste)
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -864,7 +864,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
-                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                order.setCancellationComment(dto.getCancellationComment());
+                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.save(OrderHistory.ORDER_DONE,
