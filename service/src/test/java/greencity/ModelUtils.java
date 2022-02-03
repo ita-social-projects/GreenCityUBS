@@ -1376,10 +1376,10 @@ public class ModelUtils {
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionsEmployees = new HashMap<>();
         Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
         String value = getEmployee().getFirstName() + " " + getEmployee().getLastName();
-        allPositionsEmployees.put(getPositionDto(),new ArrayList<>(Arrays.asList(EmployeeNameIdDto.builder()
-                        .id(getPositionDto().getId())
-                        .name(value)
-                .build())));
+        allPositionsEmployees.put(getPositionDto(), new ArrayList<>(Arrays.asList(EmployeeNameIdDto.builder()
+            .id(getPositionDto().getId())
+            .name(value)
+            .build())));
         currentPositionEmployees.put(getPositionDto(), value);
         return EmployeePositionDtoRequest.builder()
             .orderId(1L)
