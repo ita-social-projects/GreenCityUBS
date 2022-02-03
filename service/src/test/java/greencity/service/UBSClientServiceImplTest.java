@@ -375,8 +375,9 @@ class UBSClientServiceImplTest {
         Order order = getOrderDoneByUser();
         order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        Locale locale = new Locale("en");
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
-            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
+            () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
     }
@@ -902,6 +903,7 @@ class UBSClientServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ubsService.deleteOrder(1L);
+        verify(orderRepository).delete(order);
     }
 
     @Test
