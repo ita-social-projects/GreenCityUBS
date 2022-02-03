@@ -624,8 +624,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
                     updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (!entry.getValue().equals(confirmWasteWas)){
-                    Long confirmWaste = confirmWasteWas == null ? 0 :confirmWasteWas;
+                if (entry.getValue().longValue() != confirmWasteWas) {
+                    Long confirmWaste = confirmWasteWas == null ? 0 : confirmWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
@@ -648,13 +648,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
                     entry.getKey().longValue());
-                if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                if (entry.getValue().longValue() != exporterWasteWas) {
+                    Long exporterWaste = exporterWasteWas == null ? 0 : exporterWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas)
+                        .append(exporterWaste)
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
