@@ -2458,12 +2458,10 @@ public class ModelUtils {
             .minAmountOfBigBags(2L)
             .maxAmountOfBigBags(20L)
             .courierDtos(getCourierDtoList())
-            .locationsDtos(List.of(LocationsDto.builder()
-                .locationStatus(getLocation().getLocationStatus().toString())
-                .locationId(getLocation().getId())
-                .latitude(1.32d)
-                .longitude(3.34d)
-                .locationTranslationDtoList(getLocationTranslationDto())
+            .locationInfoDtos(List.of(LocationInfoDto.builder()
+                .locationsDto(getLocationsDto())
+                .regionTranslationDtos(getRegionTranslationsDto())
+                .regionId(1L)
                 .build()))
             .build();
     }

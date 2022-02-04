@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import greencity.entity.user.Region;
 import lombok.*;
 
 import java.util.List;
@@ -18,6 +19,6 @@ public class GetCourierLocationDto {
     private Long minPriceOfOrder;
     private Long maxPriceOfOrder;
     private String courierLimit;
+    private List<LocationInfoDto> locationInfoDtos;
     private List<CourierDto> courierDtos;
-    private List<LocationsDto> locationsDtos;
 }
