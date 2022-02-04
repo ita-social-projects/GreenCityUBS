@@ -40,20 +40,9 @@ public class ViolationServiceImpl implements ViolationService {
     private UserViolationsTableRepo userViolationsTableRepo;
     private OrderRepository orderRepository;
 
-    private final EventService eventService;
-    private final NotificationServiceImpl notificationService;
-    private final FileService fileService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public ViolationServiceImpl(EventService eventService, NotificationServiceImpl notificationService,
-        FileService fileService) {
-        this.eventService = eventService;
-        this.notificationService = notificationService;
-        this.fileService = fileService;
-    }
+    private EventService eventService;
+    private NotificationServiceImpl notificationService;
+    private FileService fileService;
 
     @Override
     public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,
