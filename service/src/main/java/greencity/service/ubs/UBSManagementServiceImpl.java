@@ -1768,7 +1768,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     /**
      * This is method which is updates admin page info for order.
-     * 
+     *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
      *
@@ -1810,6 +1810,74 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang) {
+        for (Long id : updateAllOrderPageDto.getOrderId()) {
+            Order order = orderRepository.findById(id).orElseThrow(
+                () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+            try {
+                checkGeneralOrderInfoAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
+                checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid, lang);
+                checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
+            } catch (Exception e) {
+                throw new UpdateAdminPageInfoException(e.getMessage());
+            }
+        }
+    }
+
+    private void checkGeneralOrderInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto,
+        Order order, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getGeneralOrderInfo())) {
+            updateOrderDetailStatus(order.getId(), updateAllOrderPageDto.getGeneralOrderInfo(), uuid);
+        }
+    }
+
+    private void checkUserInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUserInfoDto())) {
+            ubsClientService.updateUbsUserInfoInOrder(updateAllOrderPageDto.getUserInfoDto(), uuid);
+        }
+    }
+
+    private void checkAddressExportDetailsAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getAddressExportDetailsDto())) {
+            updateAddress(updateAllOrderPageDto.getAddressExportDetailsDto(), order.getId(), uuid);
+        }
+    }
+
+    private void checkEcoNumberFromShopAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getEcoNumberFromShop())) {
+            updateEcoNumberForOrder(updateAllOrderPageDto.getEcoNumberFromShop(), order.getId(), uuid);
+        }
+    }
+
+    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid,
+        String lang) {
+        if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
+            setOrderDetail(
+                order.getId(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                lang,
+                uuid);
+        }
+    }
+
+    private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
+                    dto.getEmployeeId().toString(),
+                    dto.getPositionId(),
+                    uuid));
         }
     }
 }
