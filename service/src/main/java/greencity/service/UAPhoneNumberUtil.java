@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UAPhoneNumberUtil {
+    private UAPhoneNumberUtil() {
+    }
+
     private static final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
 
     /**
