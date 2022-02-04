@@ -35,7 +35,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ReceivingStationRepository stationRepository;
     private final FileService fileService;
     private final ModelMapper modelMapper;
-    //private final PhoneNumberFormatterService phoneFormatter;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
 

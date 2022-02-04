@@ -46,8 +46,6 @@ class UBSManagementEmployeeServiceImplTest {
     private FileService fileService;
     @Mock
     private ModelMapper modelMapper;
-    //@Mock
-    //private PhoneNumberFormatterService phoneFormatter;
     @InjectMocks
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
@@ -57,8 +55,6 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployee() {
         Employee employee = getEmployee();
         employee.setId(null);
-        //when(UAPhoneNumberUtil.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
-         //   .thenReturn(getAddEmployeeDto().getPhoneNumber());
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
@@ -68,8 +64,6 @@ class UBSManagementEmployeeServiceImplTest {
         AddEmployeeDto addEmployeeDto = getAddEmployeeDto();
         EmployeeDto result = employeeService.save(addEmployeeDto, null);
         assertEquals(1L, result.getId());
-        //verify(phoneFormatter, times(1))
-        //    .getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber());
         verify(fileService, never()).upload(null);
         verify(repository, times(1)).existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber());
         verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
@@ -85,8 +79,6 @@ class UBSManagementEmployeeServiceImplTest {
         employee.setId(null);
         AddEmployeeDto employeeDto = getAddEmployeeDto();
         employeeDto.setEmail("test@gmail.com");
-        //when(UAPhoneNumberUtil.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
-        //    .thenReturn(getAddEmployeeDto().getPhoneNumber());
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber()))
             .thenReturn(true, false, false, false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
@@ -124,7 +116,6 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployee() {
-        //when(UAPhoneNumberUtil.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
         when(modelMapper.map(any(), any())).thenReturn(getEmployee(), getEmployeeDto());
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
@@ -143,7 +134,6 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeShouldThrowExceptions() {
-        //when(UAPhoneNumberUtil.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
             .thenReturn(getEmployee(), null, null, null);

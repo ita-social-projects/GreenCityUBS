@@ -9,12 +9,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UAPhoneNumberUtil {
-
     private static final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
 
     /**
-     * {@inheritDoc}
+     * Method gets E164 phone number format in UA region.
+     *
+     * @param phoneNumberStr {@link String}
+     * @return {@link String} formatted phone number. Example: +380XXXXXXXXX.
+     * @author Mykola Danylko
      */
+
     public static String getE164PhoneNumberFormat(String phoneNumberStr) {
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(phoneNumberStr, "UA");
