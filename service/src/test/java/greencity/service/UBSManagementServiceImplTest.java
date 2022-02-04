@@ -2087,7 +2087,7 @@ class UBSManagementServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = mock(OrderPaymentStatusTranslation.class);
         try (MockedStatic<OrderStatus> staticOrderStatus = mockStatic(OrderStatus.class);
-             MockedStatic<OrderPaymentStatus> staticOrderPaymentStatus = mockStatic(OrderPaymentStatus.class)) {
+            MockedStatic<OrderPaymentStatus> staticOrderPaymentStatus = mockStatic(OrderPaymentStatus.class)) {
             when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
             when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
             when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
