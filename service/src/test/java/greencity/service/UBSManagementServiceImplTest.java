@@ -1927,4 +1927,131 @@ class UBSManagementServiceImplTest {
         assertThrows(PaymentNotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
     }
+
+    @Test
+    void updateAllOrderAdminPageInfoUnexistingOrderExceptionTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        when(orderRepository.findById(4L)).thenReturn(Optional.ofNullable(order));
+        assertThrows(UnexistingOrderException.class,
+            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua"));
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoUpdateAdminPageInfoExceptionTest() {
+        UpdateAllOrderPageDto updateAllOrderPageDto = updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
+        assertThrows(UpdateAdminPageInfoException.class,
+            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua"));
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusConfirmedTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusADJUSTMENTTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusDONETest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusBROUGHT_IT_HIMSELFTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusON_THE_ROUTETest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusNOT_TAKEN_OUTTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
+        order.setOrderDate(LocalDateTime.now());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoStatusCANCELEDTest() {
+        Order order = ModelUtils.getOrder();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
+
+    @Test
+    void updateAllOrderAdminPageInfoAdditionalOrdersEmptyTest() {
+        Order order = ModelUtils.getOrder2();
+        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
+        order.setOrderDate(LocalDateTime.now());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
+        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+    }
 }
