@@ -621,4 +621,10 @@ public class ModelUtils {
             .setNotificationType("UNPAID_ORDER")
             .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
+
+    public static UpdateAllOrderPageDto getUpdateAllOrderPageDto() {
+        return UpdateAllOrderPageDto.builder()
+            .orderId(List.of(1L, 2L, 3L))
+            .build();
+    }
 }

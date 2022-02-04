@@ -80,9 +80,10 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/tableParams/{userId}")
-    public ResponseEntity<TableParamsDTO> getTableParameters(@PathVariable Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userId));
+    @GetMapping("/tableParams")
+    public ResponseEntity<TableParamsDTO> getTableParameters(
+        @ApiIgnore @CurrentUserUuid String userUuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
     }
 
     /**
