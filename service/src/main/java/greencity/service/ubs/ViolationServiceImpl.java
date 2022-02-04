@@ -17,7 +17,6 @@ import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,20 +39,9 @@ public class ViolationServiceImpl implements ViolationService {
     private UserViolationsTableRepo userViolationsTableRepo;
     private OrderRepository orderRepository;
 
-    private final EventService eventService;
-    private final NotificationServiceImpl notificationService;
-    private final FileService fileService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public ViolationServiceImpl(EventService eventService, NotificationServiceImpl notificationService,
-        FileService fileService) {
-        this.eventService = eventService;
-        this.notificationService = notificationService;
-        this.fileService = fileService;
-    }
+    private EventService eventService;
+    private NotificationServiceImpl notificationService;
+    private FileService fileService;
 
     @Override
     public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,

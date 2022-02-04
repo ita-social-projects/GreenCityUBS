@@ -456,10 +456,10 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderDetailStatusThrowException() {
-
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrder()));
+        OrderDetailStatusRequestDto requestDto = getTestOrderDetailStatusRequestDto();
         assertThrows(PaymentNotFoundException.class, () -> {
-            ubsManagementService.updateOrderDetailStatus(1L, ModelUtils.getTestOrderDetailStatusRequestDto(), "uuid");
+            ubsManagementService.updateOrderDetailStatus(1L, requestDto, "uuid");
         });
     }
 
