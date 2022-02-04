@@ -69,7 +69,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable(1L));
+        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @Test
@@ -84,7 +84,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 2L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
-        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable(1L));
+        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @Test
