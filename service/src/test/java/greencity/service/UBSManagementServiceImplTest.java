@@ -1956,44 +1956,51 @@ class UBSManagementServiceImplTest {
         when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
 
         UpdateAllOrderPageDto expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
-        UpdateAllOrderPageDto pa = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        UpdateAllOrderPageDto actual = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
         expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
-        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
-        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
+        actual = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(),
+            actual.getGeneralOrderInfo().getOrderStatus());
 
         ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
     }
