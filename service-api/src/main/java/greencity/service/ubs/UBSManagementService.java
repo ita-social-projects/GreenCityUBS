@@ -44,20 +44,6 @@ public interface UBSManagementService {
         SortingOrder sortingOrder);
 
     /**
-     * Method save or update view of Orders table.
-     *
-     * @author Sikhovskiy Rostyslav
-     */
-    void changeOrderTableView(String uuid, String titles);
-
-    /**
-     * Method return parameters for custom orders table view.
-     *
-     * @author Sikhovskiy Rostyslav
-     */
-    CustomTableViewDto getCustomTableParameters(String uuid);
-
-    /**
      * Method add some points to UserUBS by email.
      *
      * @author Nazar Struk
@@ -233,13 +219,6 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
-
-    /**
-     * Method returns all order's data from big order table.
-     *
-     * @author Ihor Volianskyi
-     */
-    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid);
 
     /**
      * This is method which is save Admin comment.

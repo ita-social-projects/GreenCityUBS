@@ -8,8 +8,6 @@
                 viewName="big_order_table"
                 replaceIfExists="true">
 
-            CREATE VIEW big_order_table AS
-
             with group_capacity  as
             (SELECT this.order_id,
             case  when

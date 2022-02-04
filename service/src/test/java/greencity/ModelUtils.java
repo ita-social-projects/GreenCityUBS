@@ -2748,11 +2748,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static Page<BigOrderTableViews> getBigOrderedTableViewPage() {
-        var sort = Sort.by(Sort.Direction.DESC, "id");
-        var pageable = PageRequest.of(1, 1, sort);
-
-        var bigOrderTableView = new BigOrderTableViews()
+    public static BigOrderTableViews getBigOrderTableViews() {
+        return new BigOrderTableViews()
             .setId(3333L)
             .setOrderStatus("FORMED")
             .setOrderPaymentStatus("PAID")
@@ -2788,16 +2785,25 @@ public class ModelUtils {
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
-        return new PageImpl<>(Collections.singletonList(bigOrderTableView), pageable, 1L);
     }
 
-    public static List<BigOrderTableDTO> getBigOrderTableDTO() {
-        return Collections.singletonList(new BigOrderTableDTO()
+    public static List<BigOrderTableViews> getBigOrderTableViewsList() {
+        return Collections.singletonList(getBigOrderTableViews());
+    }
+
+    public static Page<BigOrderTableViews> getBigOrderedTableViewPage() {
+        var sort = Sort.by(Sort.Direction.DESC, "id");
+        var pageable = PageRequest.of(1, 1, sort);
+        return new PageImpl<>(getBigOrderTableViewsList(), pageable, 1L);
+    }
+
+    public static BigOrderTableDTO getBigOrderTableDto() {
+        return new BigOrderTableDTO()
             .setId(3333L)
             .setOrderStatus("FORMED")
             .setOrderPaymentStatus("PAID")
-            .setOrderDate("2021-12-08T15:59:52")
-            .setPaymentDate("30-11-2021, 30-11-2021")
+            .setOrderDate("2021-12-08")
+            .setPaymentDate("2021-12-08")
             .setClientName("Uliana Стан")
             .setClientPhone("+380996755544")
             .setClientEmail("motiy14146@ecofreon.com")
@@ -2827,12 +2833,16 @@ public class ModelUtils {
             .setResponsibleNavigator("Navigator Navigator")
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
-            .setBlockedBy("Blocked Test"));
+            .setBlockedBy("Blocked Test");
+    }
+
+    public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
+        return Collections.singletonList(getBigOrderTableDto());
     }
 
     public static Page<BigOrderTableDTO> getBigOrderTableDTOPage() {
         var sort = Sort.by(Sort.Direction.DESC, "id");
-        return new PageImpl<>(getBigOrderTableDTO(), PageRequest.of(1, 1, sort), 1L);
+        return new PageImpl<>(getBigOrderTableDTOList(), PageRequest.of(1, 1, sort), 1L);
     }
 
     public static Order getOrderForGetOrderStatusData2Test() {

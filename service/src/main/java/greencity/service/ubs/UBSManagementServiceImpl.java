@@ -60,7 +60,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagsInfoRepo bagsInfoRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
-    private final BigOrderTableRepository bigOrderTableRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
@@ -83,46 +82,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
-
-    /**
-     * This method save or update view of orders table.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
-    @Override
-    public void changeOrderTableView(String uuid, String titles) {
-        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
-            customTableViewRepo.update(uuid, titles);
-        } else {
-            CustomTableView customTableView = CustomTableView.builder()
-                .uuid(uuid)
-                .titles(titles)
-                .build();
-            customTableViewRepo.save(customTableView);
-        }
-    }
-
-    /**
-     * This method return parameters for orders table view.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
-    @Override
-    public CustomTableViewDto getCustomTableParameters(String uuid) {
-        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
-            return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
-        } else {
-            return CustomTableViewDto.builder()
-                .titles("")
-                .build();
-        }
-    }
-
-    private CustomTableViewDto castTableViewToDto(String titles) {
-        return CustomTableViewDto.builder()
-            .titles(titles)
-            .build();
-    }
 
     /**
      * Method gets all order payments, count paid amount, amount which user should
@@ -300,17 +259,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(ourUser);
-    }
-
-    /**
-     * {@inheritDoc} and {@maksymKuzbyt}
-     */
-    @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
-        var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
-        var orderList = new ArrayList<BigOrderTableDTO>();
-        orders.forEach(o -> orderList.add(modelMapper.map(o, BigOrderTableDTO.class)));
-        return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());
     }
 
     /**

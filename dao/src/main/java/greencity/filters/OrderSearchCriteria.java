@@ -4,13 +4,7 @@ import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class OrderSearchCriteria {
     private OrderStatus[] orderStatus;
     private OrderPaymentStatus[] orderPaymentStatus;

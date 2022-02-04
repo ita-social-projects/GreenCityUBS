@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
+import greencity.repository.BigOrderTableRepository;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.maneger.BigOrderTableServiceView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +65,9 @@ class ManagementOrderControllerTest {
 
     @InjectMocks
     ManagementOrderController managementOrderController;
+
+    @Mock
+    BigOrderTableServiceView bigOrderTableServiceView;
 
     public static final String contentForaddingcontroller = "{\n"
         + " \"code\": \"1111-2222\",\n" +

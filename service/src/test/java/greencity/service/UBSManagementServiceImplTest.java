@@ -136,9 +136,6 @@ class UBSManagementServiceImplTest {
     private ServiceRepository serviceRepository;
 
     @Mock
-    private BigOrderTableRepository bigOrderTableRepository;
-
-    @Mock
     OrdersAdminsPageService ordersAdminsPageService;
 
     @Test
@@ -1204,52 +1201,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void changeOrderTableView() {
-        String uuid = "uuid1";
-        CustomTableView customTableView = CustomTableView.builder()
-            .titles("titles1,titles2")
-            .uuid(uuid)
-            .build();
-
-        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
-
-        verify(customTableViewRepo).existsByUuid(uuid);
-        verify(customTableViewRepo).save(customTableView);
-    }
-
-    @Test
-    void changeOrderTableView2() {
-        String uuid = "uuid1";
-
-        when(customTableViewRepo.existsByUuid(uuid)).thenReturn(Boolean.TRUE);
-        ubsManagementService.changeOrderTableView(uuid, "titles1,titles2");
-
-        verify(customTableViewRepo).existsByUuid(uuid);
-    }
-
-    @Test
-    void getCustomTableParametersForExistUuid() {
-        CustomTableView customTableView = ModelUtils.getCustomTableView();
-        when(customTableViewRepo.findByUuid("uuid1")).thenReturn(customTableView);
-        when(customTableViewRepo.existsByUuid("uuid1")).thenReturn(Boolean.TRUE);
-        ubsManagementService.getCustomTableParameters(customTableView.getUuid());
-
-        verify(customTableViewRepo).existsByUuid(customTableView.getUuid());
-        Assertions.assertNotNull(customTableView);
-    }
-
-    @Test
-    void getCustomTableParametersForNon_ExistUuid() {
-        CustomTableView customTableView = ModelUtils.getCustomTableView();
-        when(customTableViewRepo.findByUuid("uuid1")).thenReturn(customTableView);
-        when(customTableViewRepo.existsByUuid("uuid1")).thenReturn(Boolean.FALSE);
-        ubsManagementService.getCustomTableParameters(customTableView.getUuid());
-
-        verify(customTableViewRepo).existsByUuid(customTableView.getUuid());
-        Assertions.assertNotNull(customTableView);
-    }
-
-    @Test
     void updateOrderAdminPageInfoTest() {
         OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
         Order order = ModelUtils.getOrder();
@@ -1284,38 +1235,6 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
         assertThrows(UpdateAdminPageInfoException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc"));
-    }
-
-    @Test
-    void getOrders() {
-        OrderPage orderPage = OrderPage.builder().pageNumber(1).build();
-        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder().orderDateFrom("ddd").build();
-
-        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(Page.empty());
-
-        ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid");
-
-        verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria);
-    }
-
-    @Test
-    void getOrdersCorrectCalculateWhenAllValueNotNull() {
-        Page<BigOrderTableViews> pageView = ModelUtils.getBigOrderedTableViewPage();
-        Page<BigOrderTableDTO> bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
-        var bigOrderTable = ModelUtils.getBigOrderTableDTO().get(0);
-        OrderPage orderPage = OrderPage.builder()
-            .pageNumber(1)
-            .build();
-        OrderSearchCriteria orderSearchCriteria = OrderSearchCriteria.builder()
-            .search("3333")
-            .build();
-
-        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria)).thenReturn(pageView);
-
-        when(modelMapper.map(pageView.getContent().get(0), BigOrderTableDTO.class)).thenReturn(bigOrderTable);
-        // verify(modelMapper.map(pageView.getContent().get(0),BigOrderTableDTO.class));
-        assertEquals(ubsManagementService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
-            bigOrderTableDTOPage.getContent());
     }
 
     @Test
