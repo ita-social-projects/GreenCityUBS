@@ -31,6 +31,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -755,9 +757,9 @@ class UBSManagementServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({"1, Змінено менеджера обдзвону",
-        "3, Змінено логіста",
-        "4, Змінено штурмана",
-        "5, Змінено водія"})
+            "3, Змінено логіста",
+            "4, Змінено штурмана",
+            "5, Змінено водія"})
     void testUpdatePositionTest(long diffParam, String eventName) {
         User user = ModelUtils.getTestUser();
         user.setRecipientSurname("Gerasum");
@@ -1926,5 +1928,112 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(PaymentNotFoundException.class,
             () -> ubsManagementService.updateManualPayment(1L, null, null, "abc"));
+    }
+
+    @Test
+    void saveNewManualPaymentWhenImageNotNull() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Maksym");
+        user.setRecipientSurname("Khomenko");
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        Order order = ModelUtils.getFormedOrder();
+        Payment payment = ModelUtils.getManualPayment();
+        ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
+                .settlementdate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(paymentRepository.save(any()))
+                .thenReturn(payment);
+        doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum", order);
+        ubsManagementService.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class), "abc");
+
+        verify(eventService, times(1))
+                .save("Замовлення Оплачено", "Система", order);
+        verify(paymentRepository, times(1)).save(any());
+        verify(orderRepository, times(1)).findById(1l);
+    }
+
+    @Test
+    void checkGetPaymentInfoWhenPaymentsWithCertificatesAndPointsSmallerThanSumToPay() {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertEquals(0L, ubsManagementService.getPaymentInfo(order.getId(), 1100L).getOverpayment());
+    }
+
+    @Test
+    void testAddPointsToUserWhenCurrentPointIsNull() {
+        User user = ModelUtils.getTestUser();
+        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setCurrentPoints(null);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenReturn(user);
+
+        ubsManagementService.addPointsToUser(AddingPointsToUserDto.builder().additionalPoints(anyInt()).build());
+
+        assertEquals(2L, user.getChangeOfPointsList().size());
+    }
+
+    @Test
+    void saveReasonWhenListElementsAreNotNulls() {
+        Order order = ModelUtils.getOrdersDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+
+        ubsManagementService.saveReason(1L, "uu", Arrays.asList(new MultipartFile[]{new MockMultipartFile("Name", new byte[2]), new MockMultipartFile("Name", new byte[2])}));
+
+        verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void getOrderStatusDataWithNotEmptyLists() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        Language language = getLanguage();
+        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = mock(OrderPaymentStatusTranslation.class);
+        try (MockedStatic<OrderStatus> staticOrderStatus = mockStatic(OrderStatus.class);
+             MockedStatic<OrderPaymentStatus> staticOrderPaymentStatus = mockStatic(OrderPaymentStatus.class)) {
+            when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+            when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
+            when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+            when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+            when(bagRepository.findAll()).thenReturn(getBag2list());
+            when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
+            when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+            when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+            when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
+                    .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            when(
+                    orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L, 1L))
+                    .thenReturn("name");
+            when(
+                    orderStatusTranslationRepository.getOrderStatusTranslationsByLanguageId(language.getId()))
+                    .thenReturn(List.of(orderStatusTranslation));
+            when(orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslationsByLanguageId(language.getId()))
+                    .thenReturn(List.of(orderPaymentStatusTranslation));
+
+            staticOrderStatus.when(() -> OrderStatus.getConvertedEnumFromLongToEnum(1L)).thenReturn("");
+            staticOrderPaymentStatus.when(() -> OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(1L)).thenReturn("");
+
+            when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+            when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+
+            ubsManagementService.getOrderStatusData(1L, "ua");
+
+            verify(orderRepository).getOrderDetails(1L);
+            verify(bagRepository).findBagByOrderId(1L);
+            verify(certificateRepository).findCertificate(1L);
+            verify(orderRepository, times(5)).findById(1L);
+            verify(bagRepository).findAll();
+            verify(languageRepository).findLanguageByCode("ua");
+            verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
+            verify(bagTranslationRepository).findNameByBagId(1, 1L);
+            verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
+            verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
+                    1L);
+            verify(receivingStationRepository).findAll();
+        }
     }
 }
