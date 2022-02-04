@@ -45,7 +45,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EventService eventService;
 
     @Override
-    public TableParamsDTO getParametersForOrdersTable(Long userId) {
+    public TableParamsDTO getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String orderStatus = "orderStatus";
         String needToImplement = "need to implement";
