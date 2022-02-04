@@ -2134,4 +2134,5 @@ class UBSManagementServiceImplTest {
             verify(receivingStationRepository).findAll();
         }
     }
+
 }
