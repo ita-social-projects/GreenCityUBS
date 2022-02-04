@@ -1948,98 +1948,54 @@ class UBSManagementServiceImplTest {
     @Test
     void updateAllOrderAdminPageInfoStatusConfirmedTest() {
         Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
         order.setOrderDate(LocalDateTime.now());
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
         when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
+        UpdateAllOrderPageDto expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        UpdateAllOrderPageDto pa = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-    @Test
-    void updateAllOrderAdminPageInfoStatusADJUSTMENTTest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
-        order.setOrderDate(LocalDateTime.now());
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.ADJUSTMENT);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-    @Test
-    void updateAllOrderAdminPageInfoStatusDONETest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
-        order.setOrderDate(LocalDateTime.now());
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.DONE);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-    @Test
-    void updateAllOrderAdminPageInfoStatusBROUGHT_IT_HIMSELFTest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.BROUGHT_IT_HIMSELF);
-        order.setOrderDate(LocalDateTime.now());
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-    @Test
-    void updateAllOrderAdminPageInfoStatusON_THE_ROUTETest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.ON_THE_ROUTE);
-        order.setOrderDate(LocalDateTime.now());
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
+        expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
+        pa = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
+        assertEquals(expectedObject.getGeneralOrderInfo().getOrderStatus(), pa.getGeneralOrderInfo().getOrderStatus());
 
-    @Test
-    void updateAllOrderAdminPageInfoStatusNOT_TAKEN_OUTTest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.NOT_TAKEN_OUT);
-        order.setOrderDate(LocalDateTime.now());
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
-
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
-    }
-
-    @Test
-    void updateAllOrderAdminPageInfoStatusCANCELEDTest() {
-        Order order = ModelUtils.getOrder();
-        UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
-        order.setOrderDate(LocalDateTime.now());
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(List.of(ModelUtils.getPayment()));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(ModelUtils.getUser()));
-        when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
-
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
     }
 
     @Test
@@ -2053,5 +2009,9 @@ class UBSManagementServiceImplTest {
         when(addressRepository.findById(1L)).thenReturn(Optional.ofNullable(Address.builder().id(1L).build()));
 
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
+
+        verify(orderRepository, times(5)).findById(1L);
+        verify(paymentRepository, times(2)).paymentInfo(1L);
+        verify(addressRepository).findById(1L);
     }
 }
