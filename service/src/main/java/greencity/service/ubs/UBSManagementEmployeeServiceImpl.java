@@ -14,7 +14,7 @@ import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.service.PhoneNumberFormatterService;
+import greencity.service.UAPhoneNumberUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -34,7 +34,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ReceivingStationRepository stationRepository;
     private final FileService fileService;
     private final ModelMapper modelMapper;
-    private final PhoneNumberFormatterService phoneFormatter;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
 
@@ -43,7 +42,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     public EmployeeDto save(AddEmployeeDto dto, MultipartFile image) {
-        dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
+        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (employeeRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new EmployeeValidationException(
                 ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
@@ -95,7 +94,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         if (!employeeRepository.existsById(dto.getId())) {
             throw new EmployeeNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId());
         }
-        dto.setPhoneNumber(phoneFormatter.getE164PhoneNumberFormat(dto.getPhoneNumber()));
+        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null) {
             throw new EmployeeValidationException(
                 ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());

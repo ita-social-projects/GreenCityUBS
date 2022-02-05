@@ -938,4 +938,29 @@ public class ManagementOrderController {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    /**
+     * Controller for updating all order admin page info.
+     *
+     * @param updateAllOrderPageDto {@link UpdateAllOrderPageDto}.
+     * @param uuid                  {@link String} currentUser.
+     * @param lang                  {@link String} language
+     * @author Max Boiarchuk.
+     */
+    @ApiOperation(value = "update all order admin page info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/all-order-page-admin-info")
+    public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
+        @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, @ApiIgnore @CurrentUserUuid String uuid,
+        @RequestParam String lang) {
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

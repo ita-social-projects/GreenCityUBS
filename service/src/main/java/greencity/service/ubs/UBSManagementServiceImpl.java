@@ -79,6 +79,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
@@ -569,13 +570,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
                     updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (nonNull(confirmWasteWas)
-                    && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                if (entry.getValue().longValue() != confirmWasteWas) {
+                    Long confirmWaste = confirmWasteWas == null ? 0 : confirmWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas)
+                        .append(confirmWaste)
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -593,13 +594,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
                     entry.getKey().longValue());
-                if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                if (entry.getValue().longValue() != exporterWasteWas) {
+                    Long exporterWaste = exporterWasteWas == null ? 0 : exporterWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas)
+                        .append(exporterWaste)
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -809,7 +811,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
-                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                order.setCancellationComment(dto.getCancellationComment());
+                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.save(OrderHistory.ORDER_DONE,
@@ -833,7 +836,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         String orderDate = order.getOrderDate().toLocalDate().format(formatter);
         return OrderDetailStatusDto.builder()
             .orderStatus(order.getOrderStatus().name())
@@ -1198,7 +1201,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
@@ -1246,11 +1249,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             dto.setCurrentPositionEmployees(currentPositionEmployee);
         }
         List<Position> positions = positionRepository.findAll();
-        Map<PositionDto, List<String>> allPositionEmployee = new HashMap<>();
+        Map<PositionDto, List<EmployeeNameIdDto>> allPositionEmployee = new HashMap<>();
         for (Position position : positions) {
             PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
             allPositionEmployee.put(positionDto, employeeRepository.getAllEmployeeByPositionId(position.getId())
-                .stream().map(e -> e.getFirstName() + " " + e.getLastName()).collect(Collectors.toList()));
+                .stream().map(employee -> EmployeeNameIdDto.builder()
+                    .id(employee.getId())
+                    .name(employee.getFirstName() + " " + employee.getLastName())
+                    .build())
+                .collect(Collectors.toList()));
+            dto.setAllPositionsEmployees(allPositionEmployee);
         }
         dto.setAllPositionsEmployees(allPositionEmployee);
 
@@ -1480,7 +1488,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     /**
      * This is method which is updates admin page info for order.
-     * 
+     *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
      *
@@ -1522,6 +1530,74 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang) {
+        for (Long id : updateAllOrderPageDto.getOrderId()) {
+            Order order = orderRepository.findById(id).orElseThrow(
+                () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+            try {
+                checkGeneralOrderInfoAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
+                checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid, lang);
+                checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
+            } catch (Exception e) {
+                throw new UpdateAdminPageInfoException(e.getMessage());
+            }
+        }
+    }
+
+    private void checkGeneralOrderInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto,
+        Order order, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getGeneralOrderInfo())) {
+            updateOrderDetailStatus(order.getId(), updateAllOrderPageDto.getGeneralOrderInfo(), uuid);
+        }
+    }
+
+    private void checkUserInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUserInfoDto())) {
+            ubsClientService.updateUbsUserInfoInOrder(updateAllOrderPageDto.getUserInfoDto(), uuid);
+        }
+    }
+
+    private void checkAddressExportDetailsAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getAddressExportDetailsDto())) {
+            updateAddress(updateAllOrderPageDto.getAddressExportDetailsDto(), order.getId(), uuid);
+        }
+    }
+
+    private void checkEcoNumberFromShopAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getEcoNumberFromShop())) {
+            updateEcoNumberForOrder(updateAllOrderPageDto.getEcoNumberFromShop(), order.getId(), uuid);
+        }
+    }
+
+    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid,
+        String lang) {
+        if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
+            setOrderDetail(
+                order.getId(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                lang,
+                uuid);
+        }
+    }
+
+    private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
+                    dto.getEmployeeId().toString(),
+                    dto.getPositionId(),
+                    uuid));
         }
     }
 }

@@ -12,4 +12,5 @@ public class OrderDetailStatusRequestDto {
     String orderStatus;
     String orderPaymentStatus;
     String adminComment;
+    String cancellationComment;
 }

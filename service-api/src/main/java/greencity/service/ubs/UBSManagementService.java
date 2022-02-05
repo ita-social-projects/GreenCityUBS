@@ -252,4 +252,14 @@ public interface UBSManagementService {
      */
     void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String lang,
         String currentUser);
+
+    /**
+     * This is method which is updates admin page info for all order.
+     *
+     * @param updateAllOrderPageDto {@link UpdateOrderPageAdminDto}.
+     * @param uuid                  {@link String} currentUser.
+     *
+     * @author Max Boiarchuk.
+     */
+    void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang);
 }

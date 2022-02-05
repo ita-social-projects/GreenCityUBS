@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,7 +14,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 @ToString
 @EqualsAndHashCode
-public class Coordinates {
+public class Coordinates implements Serializable {
     @Column(nullable = true)
     private double latitude;
     @Column(nullable = true)
