@@ -24,17 +24,33 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocation,
                 .collect(Collectors.toList()))
             .build());
 
-        List<LocationsDto> locationsDtoList = List.of(LocationsDto.builder()
-            .locationStatus(source.getLocation().getLocationStatus().toString())
+        List<LocationTranslationDto> locationTranslationDtos = source.getLocation().getLocationTranslations().stream()
+            .map(locationTranslation -> LocationTranslationDto.builder()
+                .locationName(locationTranslation.getLocationName())
+                .languageCode(locationTranslation.getLanguage().getCode())
+                .build())
+            .collect(Collectors.toList());
+
+        List<LocationsDto> locationsDtos = List.of(LocationsDto.builder()
             .locationId(source.getLocation().getId())
-            .longitude(source.getLocation().getCoordinates().getLongitude())
             .latitude(source.getLocation().getCoordinates().getLatitude())
-            .locationTranslationDtoList(source.getLocation().getLocationTranslations().stream()
-                .map(locationTranslation -> LocationTranslationDto.builder()
-                    .locationName(locationTranslation.getLocationName())
-                    .languageCode(locationTranslation.getLanguage().getCode())
+            .longitude(source.getLocation().getCoordinates().getLongitude())
+            .locationStatus(source.getLocation().getLocationStatus().toString())
+            .locationTranslationDtoList(locationTranslationDtos)
+            .build());
+
+        List<RegionTranslationDto> regionTranslationDtos =
+            source.getLocation().getRegion().getRegionTranslations().stream()
+                .map(regionTranslation -> RegionTranslationDto.builder()
+                    .regionName(regionTranslation.getName())
+                    .languageCode(regionTranslation.getLanguage().getCode())
                     .build())
-                .collect(Collectors.toList()))
+                .collect(Collectors.toList());
+
+        List<LocationInfoDto> locationInfoDtoList = List.of(LocationInfoDto.builder()
+            .locationsDto(locationsDtos)
+            .regionId(source.getLocation().getRegion().getId())
+            .regionTranslationDtos(regionTranslationDtos)
             .build());
 
         return GetCourierLocationDto.builder()
@@ -45,7 +61,7 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocation,
             .maxPriceOfOrder(source.getMaxPriceOfOrder())
             .minPriceOfOrder(source.getMinPriceOfOrder())
             .courierDtos(courierDtoList)
-            .locationsDtos(locationsDtoList)
+            .locationInfoDtos(locationInfoDtoList)
             .build();
     }
 }
