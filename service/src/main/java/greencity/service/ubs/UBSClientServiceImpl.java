@@ -580,7 +580,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("http://localhost:8050/ubs/receivePayment")
+            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -924,7 +924,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-
     private int reduceOrderSumDueToUsedPoints(int sumToPay, int pointsToUse) {
         if (sumToPay >= pointsToUse) {
             sumToPay -= pointsToUse;
@@ -980,7 +979,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("http://localhost:8050/ubs/receiveLiqPayPayment")
+            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
             .build();
     }
 
@@ -1180,7 +1179,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("http://localhost:8050/ubs/receivePaymentClient")
+            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient")
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1282,7 +1281,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl("http://localhost:8050/ubs/receiveLiqPayPayment")
+            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
             .build();
     }
 
