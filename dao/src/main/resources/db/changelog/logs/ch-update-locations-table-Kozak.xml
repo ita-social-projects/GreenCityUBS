@@ -2,12 +2,15 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet id="Danylko-2" author="Danylko Mykola">
-        <createTable tableName="receiving_stations">
-            <column name="id" autoIncrement="true" startWith="5" type="BIGINT">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="receiving_station" type="VARCHAR(50)"/>
-        </createTable>
+
+    <changeSet id="Natalia-4" author="Kozak">
+        <update tableName="locations">
+            <column name="latitude" value="50.4782"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="locations">
+            <column name="longitude" value="33.5897"/>
+            <where>id=1</where>
+        </update>
     </changeSet>
 </databaseChangeLog>

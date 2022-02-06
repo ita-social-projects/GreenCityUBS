@@ -5,23 +5,18 @@
 
     <changeSet id="Makitra-16" author="Makitra Vadym">
         <insert tableName="positions">
-            <column name="id">1</column>
             <column name="name">Менеджер послуги</column>
         </insert>
         <insert tableName="positions">
-            <column name="id">2</column>
             <column name="name">Менеджер обдзвону</column>
         </insert>
         <insert tableName="positions">
-            <column name="id">3</column>
             <column name="name">Логіст</column>
         </insert>
         <insert tableName="positions">
-            <column name="id">4</column>
             <column name="name">Штурман</column>
         </insert>
         <insert tableName="positions">
-            <column name="id">5</column>
             <column name="name">Водій</column>
         </insert>
     </changeSet>
