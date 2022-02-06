@@ -111,27 +111,6 @@ public class ClientController {
     }
 
     /**
-     * Controller return link fondy payment. Version for Ivano-Frankivsk
-     *
-     * @return {@link OrderFondyClientDto} dto.
-     * @author Sihovskiy Rostyslav
-     */
-    @ApiOperation(value = "return the link for payment")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/processOrderFondyIF")
-    public ResponseEntity<FondyOrderResponse> processOrderFondyForIF(
-        @Valid @RequestBody OrderFondyClientDto dto,
-        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClientForIF(dto, userUuid));
-    }
-
-    /**
      * Controller return link liqpay payment .
      *
      * @return {@link OrderLiqpayClienDto} dto.
@@ -150,26 +129,6 @@ public class ClientController {
         @Valid @RequestBody OrderFondyClientDto dto,
         @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto, userUuid));
-    }
-
-    /**
-     * Controller return link liqpay payment . Version for Ivano-Frankivsk
-     *
-     * @return {@link OrderLiqpayClienDto} dto.
-     * @author Sihovskiy Rostyslav
-     */
-    @ApiOperation(value = "return the link for liqpay payment")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PostMapping("/processOrderLiqpayIF")
-    public ResponseEntity<LiqPayOrderResponse> processOrderLiqpayForIF(@Valid @RequestBody OrderLiqpayClienDto dto)
-        throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClientForIF(dto));
     }
 
     /**
