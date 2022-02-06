@@ -8,6 +8,8 @@
     <insert tableName="locations">
         <column name="id">1</column>
         <column name="location_status">ACTIVE</column>
+        <column name="latitude">50.4782</column>
+        <column name="longitude">33.5897</column>
     </insert>
         <insert tableName="courier">
             <column name="id">1</column>

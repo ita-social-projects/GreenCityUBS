@@ -105,4 +105,6 @@
     <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-bags-and-bags-translations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-schedule-Sannytski.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-region-translations-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-location-translations-Kozak.xml"/>
 </databaseChangeLog>
