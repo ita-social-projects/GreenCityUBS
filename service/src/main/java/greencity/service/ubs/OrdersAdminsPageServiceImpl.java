@@ -45,7 +45,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final EventService eventService;
 
     @Override
-    public TableParamsDTO getParametersForOrdersTable(Long userId) {
+    public TableParamsDTO getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String orderStatus = "orderStatus";
         String needToImplement = "need to implement";
@@ -440,7 +440,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         for (Long orderId : orders) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-            if (order.isBlocked()) {
+            if (order.isBlocked() && !order.getBlockedByEmployee().equals(employee)) {
                 blockedOrderDTOS.add(BlockedOrderDTO
                     .builder().orderId(orderId).userName(String.format("%s %s",
                         order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
