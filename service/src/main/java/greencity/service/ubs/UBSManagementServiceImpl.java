@@ -624,7 +624,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Long confirmWasteWas =
                     updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (entry.getValue().longValue() != confirmWasteWas) {
+                if (confirmWasteWas == null || entry.getValue().longValue() != confirmWasteWas) {
                     Long confirmWaste = confirmWasteWas == null ? 0 : confirmWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
@@ -648,7 +648,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
                     entry.getKey().longValue());
-                if (entry.getValue().longValue() != exporterWasteWas) {
+                if (exporterWasteWas == null || entry.getValue().longValue() != exporterWasteWas) {
                     Long exporterWaste = exporterWasteWas == null ? 0 : exporterWasteWas;
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
