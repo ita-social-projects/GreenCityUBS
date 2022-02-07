@@ -622,17 +622,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                Long confirmWasteWas =
-                    updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (confirmWasteWas == null) {
-                    confirmWasteWas = 0L;
+                Optional<Long> confirmWasteWas = Optional.empty();
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                    confirmWasteWas =
+                        Optional.of(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
                 }
-                if (entry.getValue().longValue() != confirmWasteWas) {
+                if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas)
+                        .append(confirmWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -648,18 +648,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
-                Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
-                    entry.getKey().longValue());
-                if (exporterWasteWas == null) {
-                    exporterWasteWas = 0L;
+                Optional<Long> exporterWasteWas = Optional.empty();
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                    exporterWasteWas =
+                        Optional.of(updateOrderRepository.getExporterWaste(orderId, entry.getKey().longValue()));
                 }
-                if (entry.getValue().longValue() != exporterWasteWas) {
+                if (entry.getValue().longValue() != exporterWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas)
+                        .append(exporterWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
