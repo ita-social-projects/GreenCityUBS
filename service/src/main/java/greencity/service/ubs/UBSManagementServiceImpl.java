@@ -622,8 +622,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                Long confirmWasteWas =
-                    updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
+                Long confirmWasteWas = updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue())
+                    ? updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue())
+                    : null;
                 if (confirmWasteWas == null) {
                     confirmWasteWas = 0L;
                 }
@@ -648,8 +649,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
-                Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
-                    entry.getKey().longValue());
+                Long exporterWasteWas = updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue())
+                    ? updateOrderRepository.getExporterWaste(orderId, entry.getKey().longValue())
+                    : null;
                 if (exporterWasteWas == null) {
                     exporterWasteWas = 0L;
                 }
