@@ -3,6 +3,7 @@ package greencity.service.ubs.maneger;
 import greencity.ModelUtils;
 import greencity.dto.BigOrderTableDTO;
 import greencity.entity.parameters.CustomTableView;
+import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
@@ -115,6 +116,6 @@ class BigOrderTableServiceImplTest {
     }
 
     private OrderSearchCriteria getOrderSearchCriteria() {
-        return new OrderSearchCriteria().setOrderDateFrom("ddd");
+        return new OrderSearchCriteria().setOrderDate(new DateFilter().setFrom("2022-11-05"));
     }
 }
