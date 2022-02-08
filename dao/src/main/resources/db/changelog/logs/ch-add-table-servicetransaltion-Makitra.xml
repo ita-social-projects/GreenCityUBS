@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="Makitra-5" author="Vadym Makitra">
         <createTable tableName="service_translations">
-            <column name="id" autoIncrement="true" type="BIGINT">
+            <column name="id" autoIncrement="true" startWith="5" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(60)">

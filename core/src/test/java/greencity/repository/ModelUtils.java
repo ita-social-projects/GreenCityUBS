@@ -1,11 +1,14 @@
 package greencity.repository;
 
+import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.CourierLocation;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -62,6 +65,29 @@ public class ModelUtils {
             .violations(0)
             .build());
         return users;
+    }
+
+    public static Address getAddress() {
+        return Address.builder()
+            .id(1L)
+            .user(User.builder().id(1L).build())
+            .city("Київ")
+            .addressComment("").coordinates(Coordinates.builder()
+                .latitude(50.446509500000005)
+                .longitude(30.510173).build())
+            .district("Шевченківський")
+            .entranceNumber("2")
+            .houseCorpus("44")
+            .houseNumber("3")
+            .street("Богдана Хмельницького вулиця")
+            .actual(true)
+            .addressStatus(AddressStatus.IN_ORDER)
+            .region("Київська область")
+            .cityEn("Kyiv")
+            .regionEn("Kyiv region")
+            .streetEn("Bohdana Khmelnytskoho Street")
+            .districtEn("Shevchenkivskyi")
+            .build();
     }
 
     public static BigOrderTableViews getBOTViews_82() {
