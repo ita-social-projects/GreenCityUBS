@@ -1636,7 +1636,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getFormedHalfPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
 
         doNothing().when(notificationService).notifyPaidOrder(order);
         doNothing().when(notificationService).notifyHalfPaidPackage(order);
@@ -1651,7 +1651,7 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getCanceledHalfPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
 
         doNothing().when(notificationService).notifyPaidOrder(order);
         doNothing().when(notificationService).notifyHalfPaidPackage(order);

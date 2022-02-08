@@ -699,29 +699,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumConfirmed;
         double totalSumExported;
 
-        for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
-            sumAmount += entry.getValue() * bag
-                .stream()
-                .filter(b -> b.getId().equals(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice();
-        }
-        for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
-            sumConfirmed += entry.getValue() * bag
-                .stream()
-                .filter(b -> b.getId().equals(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice();
-        }
-        for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
-            sumExported += entry.getValue() * bag
-                .stream()
-                .filter(b -> b.getId().equals(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
-                .getFullPrice();
+        if (!bag.isEmpty()) {
+            for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
+                sumAmount += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
+            for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
+                sumConfirmed += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
+            for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
+                sumExported += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
         }
 
         if (!currentCertificate.isEmpty()) {
