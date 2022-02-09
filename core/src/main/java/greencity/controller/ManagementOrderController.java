@@ -10,6 +10,7 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.service.notification.NotificationeService;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
@@ -42,17 +43,20 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
+    private final NotificationeService notificationeService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
-        ViolationService violationService, CoordinateService coordinateService) {
+        ViolationService violationService, CoordinateService coordinateService,
+        NotificationeService notificationeService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
+        this.notificationeService = notificationeService;
     }
 
     /**
@@ -218,7 +222,7 @@ public class ManagementOrderController {
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.addUserViolation(add, files, uuid);
-        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
+        notificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -929,6 +933,31 @@ public class ManagementOrderController {
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
         @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating all order admin page info.
+     *
+     * @param updateAllOrderPageDto {@link UpdateAllOrderPageDto}.
+     * @param uuid                  {@link String} currentUser.
+     * @param lang                  {@link String} language
+     * @author Max Boiarchuk.
+     */
+    @ApiOperation(value = "update all order admin page info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/all-order-page-admin-info")
+    public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
+        @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, @ApiIgnore @CurrentUserUuid String uuid,
+        @RequestParam String lang) {
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

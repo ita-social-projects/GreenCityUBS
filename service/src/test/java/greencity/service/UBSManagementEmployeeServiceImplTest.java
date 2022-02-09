@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
@@ -23,18 +24,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,8 +46,6 @@ class UBSManagementEmployeeServiceImplTest {
     private FileService fileService;
     @Mock
     private ModelMapper modelMapper;
-    @Mock
-    private PhoneNumberFormatterService phoneFormatter;
     @InjectMocks
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
@@ -60,8 +55,6 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployee() {
         Employee employee = getEmployee();
         employee.setId(null);
-        when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
-            .thenReturn(getAddEmployeeDto().getPhoneNumber());
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
@@ -71,8 +64,6 @@ class UBSManagementEmployeeServiceImplTest {
         AddEmployeeDto addEmployeeDto = getAddEmployeeDto();
         EmployeeDto result = employeeService.save(addEmployeeDto, null);
         assertEquals(1L, result.getId());
-        verify(phoneFormatter, times(1))
-            .getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber());
         verify(fileService, never()).upload(null);
         verify(repository, times(1)).existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber());
         verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
@@ -88,8 +79,6 @@ class UBSManagementEmployeeServiceImplTest {
         employee.setId(null);
         AddEmployeeDto employeeDto = getAddEmployeeDto();
         employeeDto.setEmail("test@gmail.com");
-        when(phoneFormatter.getE164PhoneNumberFormat(getAddEmployeeDto().getPhoneNumber()))
-            .thenReturn(getAddEmployeeDto().getPhoneNumber());
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber()))
             .thenReturn(true, false, false, false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(true, false, false);
@@ -127,7 +116,6 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployee() {
-        when(phoneFormatter.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
         when(modelMapper.map(any(), any())).thenReturn(getEmployee(), getEmployeeDto());
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
@@ -146,7 +134,6 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeShouldThrowExceptions() {
-        when(phoneFormatter.getE164PhoneNumberFormat(anyString())).thenReturn(getEmployeeDto().getPhoneNumber());
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
             .thenReturn(getEmployee(), null, null, null);
@@ -378,5 +365,18 @@ class UBSManagementEmployeeServiceImplTest {
         Exception thrown2 = assertThrows(EmployeeIllegalOperationException.class,
             () -> employeeService.deleteEmployeeImage(1L));
         assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
+    }
+
+    @Test
+    void findAllActiveEmployees() {
+        EmployeePage employeePage = new EmployeePage();
+        EmployeeFilterCriteria employeeFilterCriteria = new EmployeeFilterCriteria();
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(
+            Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
+        when(employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria))
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
+        employeeService.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        verify(employeeCriteriaRepository, times(1))
+            .findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 }

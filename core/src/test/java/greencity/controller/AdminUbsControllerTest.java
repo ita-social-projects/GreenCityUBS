@@ -19,7 +19,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 
 import static greencity.ModelUtils.getUuid;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,8 +51,10 @@ class AdminUbsControllerTest {
 
     @Test
     void getTableParameters() throws Exception {
-        mockMvc.perform(get(management + "/tableParams/{userId}", 1))
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        mockMvc.perform(get(management + "/tableParams")
+            .principal(principal))
             .andExpect(status().isOk());
-        verify(ordersAdminsPageService).getParametersForOrdersTable(1L);
+        verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
     }
 }

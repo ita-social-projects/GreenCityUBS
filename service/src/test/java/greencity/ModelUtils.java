@@ -22,6 +22,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.util.Bot;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
@@ -952,6 +953,50 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getUserProfile() {
+        return User.builder()
+            .recipientName("Dima")
+            .recipientSurname("Petrov")
+            .recipientPhone("0666051373")
+            .recipientEmail("petrov@gmail.com")
+            .build();
+    }
+
+    public static PersonalDataDto getPersonalDataDto() {
+        return PersonalDataDto.builder()
+            .id(1L)
+            .firstName("Max")
+            .lastName("B")
+            .phoneNumber("09443332")
+            .email("dsd@gmail.com")
+            .build();
+    }
+
+    public static User getUserPersonalData() {
+        return User.builder()
+            .id(1L)
+            .recipientName("Max")
+            .recipientSurname("B")
+            .recipientPhone("09443332")
+            .recipientEmail("dsd@gmail.com")
+            .build();
+    }
+
+    public static OptionForColumnDTO getOptionForColumnDTO() {
+        return OptionForColumnDTO.builder()
+            .key("1")
+            .en("en")
+            .ua("en")
+            .build();
+    }
+
+    public static ReceivingStationDto getOptionReceivingStationDto() {
+        return ReceivingStationDto.builder()
+            .id(1L)
+            .name("en")
+            .build();
+    }
+
     public static List<Address> addressList() {
         List<Address> list = new ArrayList<>();
         list.add(Address.builder()
@@ -1136,7 +1181,7 @@ public class ModelUtils {
             .recipientSurname("Ivanov")
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("abc")
+            .uuid("uuid")
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .build();
@@ -1372,12 +1417,13 @@ public class ModelUtils {
     }
 
     public static EmployeePositionDtoRequest getEmployeePositionDtoRequest() {
-        Map<PositionDto, List<String>> allPositionsEmployees = new HashMap<>();
+        Map<PositionDto, List<EmployeeNameIdDto>> allPositionsEmployees = new HashMap<>();
         Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
         String value = getEmployee().getFirstName() + " " + getEmployee().getLastName();
-        List<String> valueList = new ArrayList();
-        valueList.add(value);
-        allPositionsEmployees.put(getPositionDto(), valueList);
+        allPositionsEmployees.put(getPositionDto(), new ArrayList<>(Arrays.asList(EmployeeNameIdDto.builder()
+            .id(getPositionDto().getId())
+            .name(value)
+            .build())));
         currentPositionEmployees.put(getPositionDto(), value);
         return EmployeePositionDtoRequest.builder()
             .orderId(1L)
@@ -2456,12 +2502,10 @@ public class ModelUtils {
             .minAmountOfBigBags(2L)
             .maxAmountOfBigBags(20L)
             .courierDtos(getCourierDtoList())
-            .locationsDtos(List.of(LocationsDto.builder()
-                .locationStatus(getLocation().getLocationStatus().toString())
-                .locationId(getLocation().getId())
-                .latitude(1.32d)
-                .longitude(3.34d)
-                .locationTranslationDtoList(getLocationTranslationDto())
+            .locationInfoDtos(List.of(LocationInfoDto.builder()
+                .locationsDto(getLocationsDto())
+                .regionTranslationDtos(getRegionTranslationsDto())
+                .regionId(1L)
                 .build()))
             .build();
     }
@@ -3132,6 +3176,116 @@ public class ModelUtils {
             .columnName("orderStatus")
             .orderId(List.of(1l))
             .newValue("1")
+            .build();
+    }
+
+    public static List<Bot> botList() {
+        List<Bot> botList = new ArrayList<>();
+        botList.add(new Bot()
+            .setType("TELEGRAM")
+            .setLink("https://t.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        botList.add(new Bot()
+            .setType("VIBER")
+            .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
+        return botList;
+    }
+
+    public static UpdateAllOrderPageDto updateAllOrderPageDto(OrderStatus orderStatus) {
+        return UpdateAllOrderPageDto.builder()
+            .orderId(List.of(1L))
+            .generalOrderInfo(OrderDetailStatusRequestDto
+                .builder()
+                .orderStatus(String.valueOf(orderStatus))
+                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
+                .adminComment("aaa")
+                .build())
+            .userInfoDto(UbsCustomersDtoUpdate
+                .builder()
+                .recipientId(2L)
+                .recipientName("aaaaa")
+                .recipientPhoneNumber("085555")
+                .recipientEmail("yura@333gmail.com")
+                .build())
+            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
+                .builder()
+                .addressId(1L)
+                .addressDistrict("aaaaaaa")
+                .addressStreet("aaaaa")
+                .addressEntranceNumber("12")
+                .addressHouseCorpus("123")
+                .addressHouseNumber("121")
+                .addressCity("dsfsdf")
+                .addressRegion("sdfsdfsd")
+                .build())
+            .ecoNumberFromShop(EcoNumberDto.builder()
+                .ecoNumber(Set.of("1111111111"))
+                .build())
+            .exportDetailsDto(ExportDetailsDtoUpdate
+                .builder()
+                .dateExport("1997-12-04T15:40:24")
+                .timeDeliveryFrom("1997-12-04T15:40:24")
+                .timeDeliveryTo("1990-12-11T19:30:30")
+                .receivingStation(String.valueOf(ReceivingStation
+                    .builder()
+                    .id(1L)
+                    .build()))
+                .build())
+            .orderDetailDto(
+                UpdateOrderDetailDto.builder()
+                    .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
+                    .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
+                    .build())
+            .updateResponsibleEmployeeDto(List.of(UpdateResponsibleEmployeeDto.builder()
+                .positionId(2L)
+                .employeeId(2L)
+                .build()))
+            .build();
+    }
+
+    public static Order getOrder2() {
+        return Order.builder()
+            .id(1L)
+            .payment(Lists.newArrayList(Payment.builder()
+                .paymentId("1")
+                .amount(20000L)
+                .currency("UAH")
+                .settlementDate("20.02.1990")
+                .comment("avb")
+                .paymentStatus(PaymentStatus.PAID)
+                .build()))
+            .ubsUser(UBSuser.builder()
+                .firstName("oleh")
+                .lastName("ivanov")
+                .email("mail@mail.ua")
+                .id(1L)
+                .phoneNumber("067894522")
+                .address(Address.builder()
+                    .id(1L)
+                    .city("Lviv")
+                    .street("Levaya")
+                    .district("frankivskiy")
+                    .entranceNumber("5")
+                    .addressComment("near mall")
+                    .houseCorpus("1")
+                    .houseNumber("4")
+                    .coordinates(Coordinates.builder()
+                        .latitude(49.83)
+                        .longitude(23.88)
+                        .build())
+                    .user(User.builder().id(1L).build())
+                    .build())
+                .build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .adminComment("Admin")
+            .cancellationComment("cancelled")
+            .receivingStation("C")
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
+            .cancellationReason(CancellationReason.OUT_OF_CITY)
+            .imageReasonNotTakingBags(List.of("foto"))
+            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+            .additionalOrders(new HashSet<>())
             .build();
     }
 }

@@ -20,6 +20,7 @@ import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
+import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -374,8 +375,9 @@ class UBSClientServiceImplTest {
         Order order = getOrderDoneByUser();
         order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        Locale locale = new Locale("en");
         Exception thrown = assertThrows(BadOrderStatusRequestException.class,
-            () -> ubsService.makeOrderAgain(new Locale("en"), 1L));
+            () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
     }
@@ -482,6 +484,7 @@ class UBSClientServiceImplTest {
 
         List<AddressDto> addressDto = ModelUtils.addressDtoList();
         List<Address> address = ModelUtils.addressList();
+        List<Bot> botList = ModelUtils.botList();
 
         UserProfileUpdateDto userProfileUpdateDto =
             UserProfileUpdateDto.builder().addressDto(addressDto)
@@ -499,6 +502,9 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(address.get(1), AddressDto.class)).thenReturn(addressDto.get(1));
         when(modelMapper.map(user, UserProfileUpdateDto.class)).thenReturn(userProfileUpdateDto);
         ubsService.updateProfileData("87df9ad5-6393-441f-8423-8b2e770b01a8", userProfileUpdateDto);
+        for (Bot bot : botList) {
+            assertNotNull(bot);
+        }
         assertNotNull(userProfileUpdateDto.getAddressDto());
         assertNotNull(userProfileUpdateDto);
         assertNotNull(address);
@@ -512,8 +518,13 @@ class UBSClientServiceImplTest {
         List<AddressDto> addressDto = ModelUtils.addressDtoList();
         userProfileDto.setAddressDto(addressDto);
         List<Address> address = ModelUtils.addressList();
+        List<Bot> botList = ModelUtils.botList();
+        userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
+        for (Bot bot : botList) {
+            assertNotNull(bot);
+        }
         assertNotNull(addressDto);
         assertNotNull(userProfileDto);
         assertNotNull(address);
@@ -892,6 +903,7 @@ class UBSClientServiceImplTest {
         Order order = ModelUtils.getOrder();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         ubsService.deleteOrder(1L);
+        verify(orderRepository).delete(order);
     }
 
     @Test
@@ -1112,53 +1124,6 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
-        verify(restClient).getDataFromLiqPay(any());
-    }
-
-    @Test
-    void processOrderFondyClientForIF() throws Exception {
-        Order order = ModelUtils.getOrderCount();
-        HashMap<Integer, Integer> value = new HashMap<>();
-        value.put(1, 22);
-        order.setAmountOfBagsOrdered(value);
-        order.setPointsToUse(100);
-        User user = ModelUtils.getUser();
-        user.setCurrentPoints(100);
-
-        Bag bag = ModelUtils.bagDtoClient();
-        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
-
-        ubsService.processOrderFondyClientForIF(dto, "uuid");
-
-        verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
-        verify(restClient).getDataFromFondy(any());
-
-    }
-
-    @Test
-    void proccessOrderLiqpayClientForIF() {
-        Order order = ModelUtils.getOrderCount();
-        OrderLiqpayClienDto dto = ModelUtils.getOrderLiqpayClientDto();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(restClient.getDataFromLiqPay(any())).thenReturn("TestValue");
-
-        ubsService.proccessOrderLiqpayClientForIF(dto);
-
-        verify(orderRepository, times(2)).findById(1L);
         verify(restClient).getDataFromLiqPay(any());
     }
 
