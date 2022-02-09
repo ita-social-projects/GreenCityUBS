@@ -25,8 +25,9 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
     /**
      * Method returns all order's data from big order table.
-     *
-     * {@kuzbytMaksym}
+     * 
+     * @return Page
+     * @author Kuzbyt Maksym
      */
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {

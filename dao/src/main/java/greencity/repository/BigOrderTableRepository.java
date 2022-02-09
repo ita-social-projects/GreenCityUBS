@@ -8,7 +8,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 
@@ -31,7 +30,11 @@ public class BigOrderTableRepository {
     }
 
     /**
-     * Method returns page with orders and additional info related to order.
+     * Method returns Page of BigOrderTableViews with orders and additional info
+     * related to order.
+     * 
+     * @return Page
+     * @author Kuzbyt Maksym
      */
     public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria) {
         var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
@@ -56,54 +59,57 @@ public class BigOrderTableRepository {
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot) {
+        var filtersEnum = new HashMap<String, Enum<?>[]>();
+        filtersEnum.put("orderStatus", sc.getOrderStatus());
+        filtersEnum.put("orderPaymentStatus", sc.getOrderPaymentStatus());
+
+        var filtersString = new HashMap<String, String[]>();
+        filtersString.put("region", sc.getRegion());
+        filtersString.put("settlement", sc.getCity());
+        filtersString.put("district", sc.getDistricts());
+
+        var dateFilter = new HashMap<String, DateFilter>();
+        dateFilter.put("orderDate", sc.getOrderDate());
+        dateFilter.put("dateOfExport", sc.getDeliveryDate());
+        dateFilter.put("paymentDate", sc.getPaymentDate());
+
+        var filtersLong = new HashMap<String, Long[]>();
+        filtersLong.put("receivingStationId", sc.getReceivingStation());
+        filtersLong.put("responsibleCallerId", sc.getResponsibleCallerId());
+        filtersLong.put("responsibleLogicManId", sc.getResponsibleLogicManId());
+        filtersLong.put("responsibleNavigatorId", sc.getResponsibleNavigatorId());
+        filtersLong.put("responsibleDriverId", sc.getResponsibleDriverId());
+
         var predicates = new ArrayList<Predicate>();
-        if (nonNull(sc.getOrderStatus())) {
-            predicates.add(filterByEnum(sc.getOrderStatus(), orderRoot, "orderStatus"));
-        }
-        if (nonNull(sc.getOrderPaymentStatus())) {
-            predicates.add(filterByEnum(sc.getOrderPaymentStatus(), orderRoot, "orderPaymentStatus"));
-        }
-        if (nonNull(sc.getRegion())) {
-            predicates.add(filterByStringValue(sc.getRegion(), orderRoot, "region"));
-        }
-        if (nonNull(sc.getCity())) {
-            predicates.add(filterByStringValue(sc.getCity(), orderRoot, "settlement"));
-        }
-        if (nonNull(sc.getDistricts())) {
-            predicates.add(filterByStringValue(sc.getDistricts(), orderRoot, "district"));
-        }
-        if (nonNull(sc.getOrderDate())) {
-            predicates.add(filterByLocalDateValue(sc.getOrderDate(), orderRoot, "orderDate"));
-        }
-        if (nonNull(sc.getDeliveryDate())) {
-            predicates.add(
-                filterByLocalDateValue(sc.getDeliveryDate(), orderRoot, "dateOfExport"));
-        }
-        if (nonNull(sc.getPaymentDate())) {
-            predicates.add(filterByLocalDateValue(sc.getPaymentDate(), orderRoot, "paymentDate"));
-        }
-        if (nonNull(sc.getReceivingStation())) {
-            predicates.add(filteredByLongValue(sc.getReceivingStation(), orderRoot, "receivingStationId"));
-        }
-        if (nonNull(sc.getResponsibleCallerId())) {
-            predicates.add(filteredByLongValue(sc.getResponsibleCallerId(), orderRoot, "responsibleCallerId"));
-        }
-        if (nonNull(sc.getResponsibleLogicManId())) {
-            predicates.add(filteredByLongValue(sc.getResponsibleLogicManId(), orderRoot, "responsibleLogicManId"));
-        }
-        if (nonNull(sc.getResponsibleNavigatorId())) {
-            predicates.add(filteredByLongValue(sc.getResponsibleNavigatorId(), orderRoot, "responsibleNavigatorId"));
-        }
-        if (nonNull(sc.getResponsibleDriverId())) {
-            predicates.add(filteredByLongValue(sc.getResponsibleDriverId(), orderRoot, "responsibleDriverId"));
-        }
+
+        filtersEnum.entrySet().stream()
+            .filter(e -> e.getValue() != null)
+            .map(e -> filter(e.getValue(), orderRoot, e.getKey()))
+            .forEach(predicates::add);
+
+        filtersString.entrySet().stream()
+            .filter(e -> e.getValue() != null)
+            .map(e -> filter(e.getValue(), orderRoot, e.getKey()))
+            .forEach(predicates::add);
+
+        dateFilter.entrySet().stream()
+            .filter(e -> e.getValue() != null)
+            .map(e -> filter(e.getValue(), orderRoot, e.getKey()))
+            .forEach(predicates::add);
+
+        filtersLong.entrySet().stream()
+            .filter(e -> e.getValue() != null)
+            .map(e -> filter(e.getValue(), orderRoot, e.getKey()))
+            .forEach(predicates::add);
+
         if (nonNull(sc.getSearch())) {
             searchOnBigTable(sc.getSearch(), orderRoot, predicates);
         }
+
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
-    private Predicate filterByEnum(Enum<?>[] filter, Root<?> root, String columnName) {
+    private Predicate filter(Enum<?>[] filter, Root<?> root, String columnName) {
         var predicate = criteriaBuilder.in(root.get(columnName).as(String.class));
         Arrays.stream(filter)
             .map(Enum::name)
@@ -111,7 +117,7 @@ public class BigOrderTableRepository {
         return predicate;
     }
 
-    private Predicate filterByStringValue(String[] filter, Root<?> root, String columnName) {
+    private Predicate filter(String[] filter, Root<?> root, String columnName) {
         var predicate = criteriaBuilder.in(criteriaBuilder.upper(root.get(columnName)));
         Arrays.stream(filter)
             .map(String::toUpperCase)
@@ -119,11 +125,12 @@ public class BigOrderTableRepository {
         return predicate;
     }
 
-    private Predicate filterByLocalDateValue(@NotNull DateFilter df, Root<?> root, String columnName) {
+    private Predicate filter(DateFilter df, Root<?> root, String columnName) {
         var column = root.<LocalDate>get(columnName).as(LocalDate.class);
         var to = df.getTo();
         var from = df.getFrom();
         var format = DateTimeFormatter.ofPattern("yyy-MM-d");
+
         if (from == null && to != null) {
             return criteriaBuilder.lessThanOrEqualTo(column, LocalDate.parse(to, format));
         }
@@ -134,7 +141,7 @@ public class BigOrderTableRepository {
             LocalDate.parse(Objects.requireNonNull(to), format));
     }
 
-    private Predicate filteredByLongValue(Long[] id, Root<?> root, String nameColumn) {
+    private Predicate filter(Long[] id, Root<?> root, String nameColumn) {
         var predicate = criteriaBuilder.in(root.<Long>get(nameColumn));
         Arrays.stream(id)
             .forEach(predicate::value);
