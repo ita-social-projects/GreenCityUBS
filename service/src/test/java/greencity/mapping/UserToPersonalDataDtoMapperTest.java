@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
- class UserToPersonalDataDtoMapperTest {
+class UserToPersonalDataDtoMapperTest {
 
     @InjectMocks
     UserToPersonalDataDtoMapper mapper;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         PersonalDataDto expected = ModelUtils.getPersonalDataDto();
         User user = ModelUtils.getUserPersonalData();
 
-        assertEquals(expected,mapper.convert(user));
+        assertEquals(expected, mapper.convert(user));
     }
 
 }

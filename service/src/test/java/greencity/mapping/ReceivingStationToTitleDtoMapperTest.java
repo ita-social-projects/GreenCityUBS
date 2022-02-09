@@ -21,8 +21,8 @@ class ReceivingStationToTitleDtoMapperTest {
         OptionForColumnDTO expected = ModelUtils.getOptionForColumnDTO();
         ReceivingStationDto receivingStationDto = ModelUtils.getOptionReceivingStationDto();
 
-        assertEquals(expected.getEn(),mapper.convert(receivingStationDto).getEn());
-        assertEquals(expected.getKey(),mapper.convert(receivingStationDto).getKey());
-        assertEquals(expected.getUa(),mapper.convert(receivingStationDto).getUa());
+        assertEquals(expected.getEn(), mapper.convert(receivingStationDto).getEn());
+        assertEquals(expected.getKey(), mapper.convert(receivingStationDto).getKey());
+        assertEquals(expected.getUa(), mapper.convert(receivingStationDto).getUa());
     }
 }

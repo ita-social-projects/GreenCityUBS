@@ -13,15 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 class ViolationsInfoDtoMapperTest {
 
-        @InjectMocks
-        private ViolationsInfoDtoMapper mapper;
+    @InjectMocks
+    private ViolationsInfoDtoMapper mapper;
 
-        @Test
-        void convert() {
-            ViolationsInfoDto violationsInfoDto = ViolationsInfoDto.builder().violationsAmount(1).build();
-            User user = User.builder().violations(1).build();
-            assertEquals(violationsInfoDto.getViolationsAmount(),mapper.convert(user).getViolationsAmount());
+    @Test
+    void convert() {
+        ViolationsInfoDto violationsInfoDto = ViolationsInfoDto.builder().violationsAmount(1).build();
+        User user = User.builder().violations(1).build();
+        assertEquals(violationsInfoDto.getViolationsAmount(), mapper.convert(user).getViolationsAmount());
 
-        }
     }
-
+}
