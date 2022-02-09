@@ -953,6 +953,51 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getUserProfile() {
+        return User.builder()
+                .recipientName("Dima")
+                .recipientSurname("Petrov")
+                .recipientPhone("0666051373")
+                .recipientEmail("petrov@gmail.com")
+                .build();
+    }
+
+    public static PersonalDataDto getPersonalDataDto() {
+        return   PersonalDataDto.builder()
+                .id(1L)
+                .firstName("Max")
+                .lastName("B")
+                .phoneNumber("09443332")
+                .email("dsd@gmail.com")
+                .build();
+    }
+
+    public static User getUserPersonalData() {
+        return User.builder()
+                .id(1L)
+                .recipientName("Max")
+                .recipientSurname("B")
+                .recipientPhone("09443332")
+                .recipientEmail("dsd@gmail.com")
+                .build();
+    }
+
+    public static OptionForColumnDTO getOptionForColumnDTO() {
+        return OptionForColumnDTO.builder()
+                .key("1")
+                .en("en")
+                .ua("en")
+                .build();
+    }
+
+
+    public static ReceivingStationDto getOptionReceivingStationDto() {
+        return ReceivingStationDto.builder()
+                .id(1L)
+                .name("en")
+                .build();
+    }
+
     public static List<Address> addressList() {
         List<Address> list = new ArrayList<>();
         list.add(Address.builder()
