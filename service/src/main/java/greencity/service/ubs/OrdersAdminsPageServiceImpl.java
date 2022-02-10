@@ -141,7 +141,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "idOrderFromShop",
                 20, false, true, false, 26, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto(RECEIVING, "Станція приймання", "Receiving station"),
-                    RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
+                RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 orderDetails),
             new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Responsible caller"), CALLER, 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
