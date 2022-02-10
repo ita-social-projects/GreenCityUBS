@@ -4,6 +4,7 @@ import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
@@ -22,6 +23,7 @@ public class BigOrderTableRepository {
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
      */
+    @Autowired
     public BigOrderTableRepository(EntityManager entityManager, CustomCriteriaPredicate customCriteriaPredicate) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -41,8 +43,8 @@ public class BigOrderTableRepository {
 
         var predicate = getPredicate(searchCriteria, orderRoot);
 
-        sort(orderPage, criteriaQuery, orderRoot);
         criteriaQuery.select(orderRoot).where(predicate);
+        sort(orderPage, criteriaQuery, orderRoot);
 
         var typedQuery = entityManager.createQuery(criteriaQuery);
         typedQuery.setFirstResult(orderPage.getPageNumber() * orderPage.getPageSize());
