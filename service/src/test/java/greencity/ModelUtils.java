@@ -2791,177 +2791,101 @@ public class ModelUtils {
             .build();
     }
 
-    public static Page<Order> getPageOrder() {
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
-        Pageable pageable = PageRequest.of(1, 1, sort);
-
-        List<Payment> paymentList = new ArrayList<>();
-        paymentList.add(Payment.builder()
-            .amount(20000L)
-            .settlementDate("30-11-2021")
-            .build());
-        paymentList.add(Payment.builder()
-            .amount(10000L)
-            .settlementDate("30-11-2021")
-            .build());
-
-        Address address = Address.builder()
-            .region("Київська область")
-            .city("Київ")
-            .district("Шевченківський")
-            .houseCorpus("1")
-            .houseNumber("37")
-            .entranceNumber("1")
-            .street("Січових Стрільців")
-            .addressComment("coment")
-            .build();
-        List<Address> addressList = new ArrayList<>();
-        addressList.add(address);
-        UBSuser ubsUser = UBSuser.builder()
-            .address(address)
-            .email("motiy14146@ecofreon.com")
-            .firstName("Uliana")
-            .lastName("Стан")
-            .phoneNumber("+380996755544")
-            .build();
-
-        User user = User.builder()
-            .recipientPhone("996755544")
-            .recipientEmail("motiy14146@ecofreon.com")
-            .violations(1)
-            .recipientName("Uliana")
-            .recipientSurname("Стан")
-            .addresses(addressList)
-            .build();
-
-        Map<Integer, Integer> amountOfBagsOrdered = new HashMap<>();
-        amountOfBagsOrdered.put(120, 1);
-        amountOfBagsOrdered.put(100, 2);
-
-        Certificate certificate = Certificate.builder()
-            .code("5489-2789")
-            .points(100)
-            .build();
-
-        Set<Certificate> certificateSet = new HashSet<>();
-        certificateSet.add(certificate);
-
-        Set<String> additionalOrders = new HashSet<>();
-        additionalOrders.add("3245678765");
-
-        Employee employeeLogicMan = Employee.builder()
-            .id(1L).firstName("Logic").lastName("Man").build();
-        Employee employeeDriver = Employee.builder()
-            .id(2L).firstName("Driver").lastName("Driver").build();
-        Employee employeeCaller = Employee.builder()
-            .id(3L).firstName("Caller").lastName("Caller").build();
-        Employee employeeNavigator = Employee.builder()
-            .id(4L).firstName("Navigator").lastName("Navigator").build();
-
-        Employee employeeBlockedOrder = Employee.builder()
-            .id(5L).firstName("Blocked").lastName("Test").build();
-
-        Position responsibleLogicMan = Position.builder().id(3L).build();
-        Position responsibleDriver = Position.builder().id(5L).build();
-        Position responsibleCaller = Position.builder().id(1L).build();
-        Position responsibleNavigator = Position.builder().id(4L).build();
-
-        Set<EmployeeOrderPosition> employeeOrderPosition = new HashSet<>();
-        employeeOrderPosition.add(EmployeeOrderPosition.builder()
-            .id(1L)
-            .position(responsibleLogicMan)
-            .employee(employeeLogicMan)
-            .build());
-        employeeOrderPosition.add(EmployeeOrderPosition.builder()
-            .id(2L)
-            .position(responsibleDriver)
-            .employee(employeeDriver)
-            .build());
-        employeeOrderPosition.add(EmployeeOrderPosition.builder()
-            .id(3L)
-            .position(responsibleCaller)
-            .employee(employeeCaller)
-            .build());
-        employeeOrderPosition.add(EmployeeOrderPosition.builder()
-            .id(4L)
-            .position(responsibleNavigator)
-            .employee(employeeNavigator)
-            .build());
-
-        List<Order> orderList = new ArrayList<>();
-        orderList.add(Order.builder()
-            .id(3333L)
-            .orderStatus(OrderStatus.FORMED)
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
-            .orderDate(LocalDateTime.of(2021, 12, 8, 15, 59, 52))
-            .payment(paymentList)
-            .ubsUser(ubsUser)
-            .user(user)
-            .amountOfBagsOrdered(amountOfBagsOrdered)
-            .certificates(certificateSet)
-            .pointsToUse(100)
-            .comment("commentForOrderByClient")
-            .deliverFrom(LocalDateTime.of(2021, 12, 8, 15, 59, 52))
-            .deliverTo(LocalDateTime.of(2021, 12, 8, 15, 59, 52))
-            .additionalOrders(additionalOrders)
-            .receivingStation("Саперно-Слобідська")
-            .employeeOrderPositions(employeeOrderPosition)
-            .sumTotalAmountWithoutDiscounts(500L)
-            .note("commentsForOrder")
-            .blocked(true)
-            .blockedByEmployee(employeeBlockedOrder)
-            .build());
-
-        return new PageImpl<>(orderList, pageable, 1L);
+    public static BigOrderTableViews getBigOrderTableViews() {
+        return new BigOrderTableViews()
+            .setId(3333L)
+            .setOrderStatus("FORMED")
+            .setOrderPaymentStatus("PAID")
+            .setOrderDate(LocalDate.of(2021, 12, 8))
+            .setPaymentDate(LocalDate.of(2021, 12, 8))
+            .setClientName("Uliana Стан")
+            .setClientPhoneNumber("+380996755544")
+            .setClientEmail("motiy14146@ecofreon.com")
+            .setSenderName("Uliana Стан")
+            .setSenderPhone("996755544")
+            .setSenderEmail("motiy14146@ecofreon.com")
+            .setViolationsAmount(1)
+            .setRegion("Київська область")
+            .setSettlement("Київ")
+            .setDistrict("Шевченківський")
+            .setAddress("Січових Стрільців, 37, 1, 1")
+            .setCommentToAddressForClient("coment")
+            .setBagAmount("3")
+            .setTotalOrderSum(500L)
+            .setOrderCertificateCode("5489-2789")
+            .setGeneralDiscount(100L)
+            .setAmountDue(0L)
+            .setCommentForOrderByClient("commentForOrderByClient")
+            .setTotalPayment(200L)
+            .setDateOfExport(LocalDate.of(2021, 12, 8))
+            .setTimeOfExport("from 15:59:52 to 15:59:52")
+            .setIdOrderFromShop("3245678765")
+            .setReceivingStation("Саперно-Слобідська")
+            .setResponsibleLogicMan("Logic Man")
+            .setResponsibleDriver("Driver Driver")
+            .setResponsibleCaller("Caller Caller")
+            .setResponsibleNavigator("Navigator Navigator")
+            .setCommentsForOrder("commentsForOrder")
+            .setIsBlocked(true)
+            .setBlockedBy("Blocked Test");
     }
 
-    public static List<BigOrderTableDTO> getBigOrderTableDTO() {
-        BigOrderTableDTO bigOrderTableDTO = BigOrderTableDTO.builder()
-            .id(3333L)
-            .orderStatus("FORMED")
-            .orderPaymentStatus("PAID")
-            .orderDate("2021-12-08T15:59:52")
-            .paymentDate("30-11-2021, 30-11-2021")
-            .clientName("Uliana Стан")
-            .phoneNumber("+380996755544")
-            .email("motiy14146@ecofreon.com")
-            .senderName("Uliana Стан")
-            .senderPhone("996755544")
-            .senderEmail("motiy14146@ecofreon.com")
-            .violationsAmount(1)
-            .region("Київська область")
-            .settlement("Київ")
-            .district("Шевченківський")
-            .address("Січових Стрільців, 37, 1, 1")
-            .commentToAddressForClient("coment")
-            .bagsAmount(3)
-            .totalOrderSum(500L)
-            .orderCertificateCode("5489-2789")
-            .orderCertificatePoints("100")
-            .amountDue(0L)
-            .commentForOrderByClient("commentForOrderByClient")
-            .payment("200, 100")
-            .dateOfExport("2021-12-08")
-            .timeOfExport("from 15:59:52 to 15:59:52")
-            .idOrderFromShop("3245678765")
-            .receivingStation("Саперно-Слобідська")
-            .responsibleLogicMan("Logic Man")
-            .responsibleDriver("Driver Driver")
-            .responsibleCaller("Caller Caller")
-            .responsibleNavigator("Navigator Navigator")
-            .commentsForOrder("commentsForOrder")
-            .isBlocked(true)
-            .blockedBy("Blocked Test")
-            .build();
-        List<BigOrderTableDTO> bigOrderTableDTOList = new ArrayList<>();
-        bigOrderTableDTOList.add(bigOrderTableDTO);
-        return bigOrderTableDTOList;
+    public static List<BigOrderTableViews> getBigOrderTableViewsList() {
+        return Collections.singletonList(getBigOrderTableViews());
+    }
+
+    public static Page<BigOrderTableViews> getBigOrderedTableViewPage() {
+        var sort = Sort.by(Sort.Direction.DESC, "id");
+        var pageable = PageRequest.of(1, 1, sort);
+        return new PageImpl<>(getBigOrderTableViewsList(), pageable, 1L);
+    }
+
+    public static BigOrderTableDTO getBigOrderTableDto() {
+        return new BigOrderTableDTO()
+            .setId(3333L)
+            .setOrderStatus("FORMED")
+            .setOrderPaymentStatus("PAID")
+            .setOrderDate("2021-12-08")
+            .setPaymentDate("2021-12-08")
+            .setClientName("Uliana Стан")
+            .setClientPhone("+380996755544")
+            .setClientEmail("motiy14146@ecofreon.com")
+            .setSenderName("Uliana Стан")
+            .setSenderPhone("996755544")
+            .setSenderEmail("motiy14146@ecofreon.com")
+            .setViolationsAmount(1)
+            .setRegion("Київська область")
+            .setSettlement("Київ")
+            .setDistrict("Шевченківський")
+            .setAddress("Січових Стрільців, 37, 1, 1")
+            .setCommentToAddressForClient("coment")
+            .setBagsAmount("3")
+            .setTotalOrderSum(500L)
+            .setOrderCertificateCode("5489-2789")
+            .setGeneralDiscount(100L)
+            .setAmountDue(0L)
+            .setCommentForOrderByClient("commentForOrderByClient")
+            .setTotalPayment(200L)
+            .setDateOfExport("2021-12-08")
+            .setTimeOfExport("from 15:59:52 to 15:59:52")
+            .setIdOrderFromShop("3245678765")
+            .setReceivingStation("Саперно-Слобідська")
+            .setResponsibleLogicMan("Logic Man")
+            .setResponsibleDriver("Driver Driver")
+            .setResponsibleCaller("Caller Caller")
+            .setResponsibleNavigator("Navigator Navigator")
+            .setCommentsForOrder("commentsForOrder")
+            .setIsBlocked(true)
+            .setBlockedBy("Blocked Test");
+    }
+
+    public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
+        return Collections.singletonList(getBigOrderTableDto());
     }
 
     public static Page<BigOrderTableDTO> getBigOrderTableDTOPage() {
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
-        Pageable pageable = PageRequest.of(1, 1, sort);
-        return new PageImpl<>(getBigOrderTableDTO(), pageable, 1L);
+        var sort = Sort.by(Sort.Direction.DESC, "id");
+        return new PageImpl<>(getBigOrderTableDTOList(), PageRequest.of(1, 1, sort), 1L);
     }
 
     public static Order getOrderForGetOrderStatusData2Test() {
