@@ -43,14 +43,14 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final RestClient restClient;
     private final UserRepository userRepository;
     private final EventService eventService;
-    private final String orderStatus = "orderStatus";
-    private final String dateOfExport = "dateOfExport";
-    private final String receivingStation = "receivingStation";
-    private final String logicMan = "responsibleLogicMan";
-    private final String driver = "responsibleDriver";
-    private final String caller = "responsibleCaller";
-    private final String navigator = "responsibleNavigator";
-    private final String timeOfExport = "timeOfExport";
+    private static final String ORDER_STATUS = "orderStatus";
+    private static final String DATE_OF_EXPORT = "dateOfExport";
+    private static final String RECEIVING = "receivingStation";
+    private static final String LOGIC_MAN = "responsibleLogicMan";
+    private static final String DRIVER = "responsibleDriver";
+    private static final String CALLER = "responsibleCaller";
+    private static final String NAVIGATOR = "responsibleNavigator";
+    private static final String TIME_OF_EXPORT = "timeOfExport";
 
     @Override
     public TableParamsDTO getParametersForOrdersTable(String uuid) {
@@ -71,7 +71,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("id", "Номер замовлення", "Order's number"), "id", 20, true, false, false,
                 1,
                 EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
-            new ColumnDTO(new TitleDto(orderStatus, "Статус замовлення", "Order's status"), orderStatus, 20,
+            new ColumnDTO(new TitleDto(ORDER_STATUS, "Статус замовлення", "Order's status"), ORDER_STATUS, 20,
                 true, true, true, 2, EditType.SELECT, orderStatusListForDevelopStage(), ordersInfo),
             new ColumnDTO(new TitleDto("orderPaymentStatus", "Статус оплати", "Payment status"), "orderPaymentStatus",
                 20,
@@ -133,23 +133,23 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 "totalPayment", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto(dateOfExport, "Дата вивезення", "Date of export"), dateOfExport, 20,
+            new ColumnDTO(new TitleDto(DATE_OF_EXPORT, "Дата вивезення", "Date of export"), DATE_OF_EXPORT, 20,
                 false, true, true, 24, EditType.DATE, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto(timeOfExport, "Час вивезення", "Time of export"), timeOfExport, 20,
+            new ColumnDTO(new TitleDto(RECEIVING, "Час вивезення", "Time of export"), RECEIVING, 20,
                 false, true, false, 25, EditType.TIME, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("idOrderFromShop", "Номер замовлення з магазину", "Id order from shop"),
                 "idOrderFromShop",
                 20, false, true, false, 26, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto(receivingStation, "Станція приймання", "Receiving station"),
-                receivingStation, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
+            new ColumnDTO(new TitleDto(RECEIVING, "Станція приймання", "Receiving station"),
+                    RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
                 orderDetails),
-            new ColumnDTO(new TitleDto(caller, "Менеджер обдзвону", "Responsible caller"), caller, 20,
+            new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Responsible caller"), CALLER, 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
-            new ColumnDTO(new TitleDto(logicMan, "Логіст", "Responsible logic man"), logicMan, 20, false,
+            new ColumnDTO(new TitleDto(LOGIC_MAN, "Логіст", "Responsible logic man"), LOGIC_MAN, 20, false,
                 true, true, 30, EditType.SELECT, logicManList(), responsible),
-            new ColumnDTO(new TitleDto(driver, "Водій", "Responsible driver"), driver, 20, false, true,
+            new ColumnDTO(new TitleDto(DRIVER, "Водій", "Responsible driver"), DRIVER, 20, false, true,
                 true, 31, EditType.SELECT, driverList(), responsible),
-            new ColumnDTO(new TitleDto(navigator, "Штурман", "Responsible navigator"), navigator, 20, false,
+            new ColumnDTO(new TitleDto(NAVIGATOR, "Штурман", "Responsible navigator"), NAVIGATOR, 20, false,
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
             new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"),
                 "commentsForOrder",
@@ -169,13 +169,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(userUuid).getRecipientEmail())
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         switch (columnName) {
-            case orderStatus:
+            case ORDER_STATUS:
                 return createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employeeId));
-            case dateOfExport:
+            case DATE_OF_EXPORT:
                 return createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employeeId));
-            case timeOfExport:
+            case TIME_OF_EXPORT:
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
-            case receivingStation:
+            case RECEIVING:
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
@@ -185,10 +185,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private enum ColumnNameToPosition {
         RESPONSIBLE_MANAGER("responsibleManager", 1L),
-        RESPONSIBLE_CALLER("responsibleCaller", 2L),
-        RESPONSIBLE_LOGICMAN("responsibleLogicMan", 3L),
-        RESPONSIBLE_NAVIGATOR("responsibleNavigator", 4L),
-        RESPONSIBLE_DRIVER("responsibleDriver", 5L);
+        RESPONSIBLE_CALLER(CALLER, 2L),
+        RESPONSIBLE_LOGICMAN(LOGIC_MAN, 3L),
+        RESPONSIBLE_NAVIGATOR(NAVIGATOR, 4L),
+        RESPONSIBLE_DRIVER(DRIVER, 5L);
 
         ColumnNameToPosition(String columnValue, Long positionId) {
             this.columnValue = columnValue;
