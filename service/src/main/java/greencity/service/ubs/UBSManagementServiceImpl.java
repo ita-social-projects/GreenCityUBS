@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 
-
 @Service
 @AllArgsConstructor
 public class UBSManagementServiceImpl implements UBSManagementService {
