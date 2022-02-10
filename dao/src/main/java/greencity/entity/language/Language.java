@@ -1,6 +1,5 @@
 package greencity.entity.language;
 
-import greencity.entity.order.BagTranslation;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.LocationTranslation;
