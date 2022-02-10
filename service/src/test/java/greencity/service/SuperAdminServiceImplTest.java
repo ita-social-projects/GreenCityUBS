@@ -307,7 +307,6 @@ class SuperAdminServiceImplTest {
         BagTranslation bagTranslationTest = BagTranslation.builder()
             .id(2L)
             .bag(Bag.builder().id(2).capacity(120).price(350).build())
-//            .language(Language.builder().id(1L).code("en").build())
             .name("Useless paper")
             .description("Description")
             .build();

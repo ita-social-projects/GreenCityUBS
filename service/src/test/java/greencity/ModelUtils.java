@@ -1878,7 +1878,6 @@ public class ModelUtils {
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
             .description("Test")
-//            .languageId(1L)
             .nameEng("a")
             .name("Test")
             .build());
