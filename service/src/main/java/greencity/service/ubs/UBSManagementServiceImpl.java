@@ -1839,7 +1839,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
                 checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
                 checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid, lang);
+                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid);
                 checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
             } catch (Exception e) {
                 throw new UpdateAdminPageInfoException(e.getMessage());
@@ -1874,8 +1874,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid,
-        String lang) {
+    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid) {
         if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
             setOrderDetail(
                 order.getId(),
