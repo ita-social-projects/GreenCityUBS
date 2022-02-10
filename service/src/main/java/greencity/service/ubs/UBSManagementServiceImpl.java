@@ -563,10 +563,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
@@ -595,10 +595,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
-        Long orderId, User currentUser, String language) {
+        Long orderId, User currentUser) {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Long languageId = languageRepository.findIdByCode(language);
+
         StringBuilder values = new StringBuilder();
         int countOfChanges = 0;
         if (nonNull(exported)) {
@@ -1815,7 +1815,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     orderId,
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                    lang,
                     currentUser);
             }
             if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
@@ -1882,7 +1881,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 order.getId(),
                 updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
                 updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                lang,
                 uuid);
         }
     }
