@@ -73,14 +73,13 @@ class SuperAdminServiceImplTest {
 
         when(userRepository.findByUuid("123233")).thenReturn(user);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
-        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
+//        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(bagRepository.save(bag)).thenReturn(bag);
         when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
         verify(locationRepository).findById(1L);
-        verify(languageRepository).findById(1L);
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
@@ -126,7 +125,7 @@ class SuperAdminServiceImplTest {
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagTranslationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode()))
+        when(bagTranslationRepository.findBagTranslationByBag(bag))
             .thenReturn(bagTranslation);
         when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
@@ -134,7 +133,7 @@ class SuperAdminServiceImplTest {
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
+        verify(bagTranslationRepository).findBagTranslationByBag(bag);
         verify(bagTranslationRepository).save(bagTranslation);
     }
 
@@ -295,11 +294,11 @@ class SuperAdminServiceImplTest {
         CourierTranslation courierTranslationTest =
             ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
-        when(courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(
-            courierTranslationTest.getCourier(), courierTranslationTest.getLanguage().getId()))
+        when(courierTranslationRepository.findCourierTranslationByCourier(
+            courierTranslationTest.getCourier()))
                 .thenReturn(courierTranslationTest);
         assertEquals("LimitDescription",
-            superAdminService.setLimitDescription(10L, "LimitDescription", courierTranslationTest.getLanguage().getId())
+            superAdminService.setLimitDescription(10L, "LimitDescription")
                 .getLimitDescription());
     }
 
@@ -308,7 +307,7 @@ class SuperAdminServiceImplTest {
         BagTranslation bagTranslationTest = BagTranslation.builder()
             .id(2L)
             .bag(Bag.builder().id(2).capacity(120).price(350).build())
-            .language(Language.builder().id(1L).code("en").build())
+//            .language(Language.builder().id(1L).code("en").build())
             .name("Useless paper")
             .description("Description")
             .build();
@@ -419,23 +418,18 @@ class SuperAdminServiceImplTest {
         Bag bag = ModelUtils.bagDto();
         CourierTranslation courierTranslation = CourierTranslation.builder().id(1L).build();
         CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        Language language = ModelUtils.getLanguage();
 
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(
             editTariffInfoDto.getCourierId(), editTariffInfoDto.getLocationId()))
                 .thenReturn(ModelUtils.getCourierLocations());
         when(
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courierLocation.getCourier(), 1L))
+            courierTranslationRepository.findCourierTranslationByCourier(courierLocation.getCourier()))
                 .thenReturn(courierTranslation);
-        when(languageRepository.findById(1L)).thenReturn(Optional.ofNullable(language));
-
         Assertions.assertEquals(editTariffInfoDto, superAdminService.editInfoInTariff(editTariffInfoDto));
 
         verify(bagRepository).findById(1);
-        verify(courierTranslationRepository).findCourierTranslationByCourierAndLanguageId(courierLocation.getCourier(),
-            1L);
-        verify(languageRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourier(courierLocation.getCourier());
         verify(courierLocationRepository).findCourierLocationsLimitsByCourierIdAndLocationId(
             editTariffInfoDto.getCourierId(), editTariffInfoDto.getLocationId());
     }
@@ -446,17 +440,17 @@ class SuperAdminServiceImplTest {
         assertThrows(LocationNotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
     }
 
-    @Test
-    void addTariffServiceException2Test() {
-        User user = ModelUtils.getUser();
-        AddServiceDto dto = ModelUtils.addServiceDto();
-
-        when(userRepository.findByUuid("123233")).thenReturn(user);
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
-        when(locationRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getLocation()));
-
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addTariffService(dto, "123233"));
-    }
+//    @Test
+//    void addTariffServiceException2Test() {
+//        User user = ModelUtils.getUser();
+//        AddServiceDto dto = ModelUtils.addServiceDto();
+//
+//        when(userRepository.findByUuid("123233")).thenReturn(user);
+//        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+//        when(locationRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getLocation()));
+//
+//        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addTariffService(dto, "123233"));
+//    }
 
     @Test
     void createServiceWithTranslationThrowLanguageNotFoundException() {
@@ -551,7 +545,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void setLimitDescriptionExceptiomTest() {
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1", 1l));
+        assertThrows(CourierNotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1"));
     }
 
     @Test
@@ -587,19 +581,6 @@ class SuperAdminServiceImplTest {
         EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
 
         assertThrows(CourierNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
-    }
-
-    @Test
-    void editInfoInTariffThrowLanguageNotFoundExceptionTest() {
-        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
-        Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-
-        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(
-            editTariffInfoDto.getCourierId(), editTariffInfoDto.getLocationId())).thenReturn(courierLocation);
-        when(bagRepository.findById(1)).thenReturn(bag);
-
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
     }
 
     @Test

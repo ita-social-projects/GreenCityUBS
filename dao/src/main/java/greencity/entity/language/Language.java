@@ -29,9 +29,6 @@ public class Language {
     private String code;
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    private List<BagTranslation> bagTranslations;
-
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<ServiceTranslation> serviceTranslations;
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)

@@ -28,6 +28,6 @@ public class BagTranslation {
     @ManyToOne
     private Bag bag;
 
-    @ManyToOne
-    private Language language;
+    @Column(nullable = false, length = 60)
+    private String nameEng;
 }

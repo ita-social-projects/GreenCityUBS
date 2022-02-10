@@ -378,7 +378,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
+            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId()).toString());
+            bagInfoDto.setNameEng(bagTranslationRepository.findNameEngByBagId(bag.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
@@ -616,7 +617,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
@@ -643,7 +644,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
             if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
@@ -924,7 +925,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, order.getId())
+        dto.setName(bagTranslationRepository.findAllByOrder(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));

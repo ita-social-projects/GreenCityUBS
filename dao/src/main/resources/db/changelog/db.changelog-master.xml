@@ -108,4 +108,5 @@
     <include file="db/changelog/logs/ch-insert-into-region-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-location-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-update-locations-table-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
 </databaseChangeLog>
