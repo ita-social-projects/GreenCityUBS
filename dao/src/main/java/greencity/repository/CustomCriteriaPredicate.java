@@ -17,17 +17,16 @@ import java.util.Objects;
 
 @Component
 public class CustomCriteriaPredicate {
-
     private final CriteriaBuilder criteriaBuilder;
 
     /**
-     *
+     * Constructor to initialize CriteriaBuilder.
      */
     public CustomCriteriaPredicate(EntityManager entityManager) {
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
     }
 
-    public Predicate filter(Enum<?>[] filter, Root<?> root, String columnName) {
+    Predicate filter(Enum<?>[] filter, Root<?> root, String columnName) {
         var predicate = criteriaBuilder.in(root.get(columnName).as(String.class));
         Arrays.stream(filter)
             .map(Enum::name)
@@ -35,7 +34,7 @@ public class CustomCriteriaPredicate {
         return predicate;
     }
 
-    public Predicate filter(String[] filter, Root<?> root, String columnName) {
+    Predicate filter(String[] filter, Root<?> root, String columnName) {
         var predicate = criteriaBuilder.in(criteriaBuilder.upper(root.get(columnName)));
         Arrays.stream(filter)
             .map(String::toUpperCase)
@@ -43,7 +42,7 @@ public class CustomCriteriaPredicate {
         return predicate;
     }
 
-    public Predicate filter(DateFilter df, Root<?> root, String columnName) {
+    Predicate filter(DateFilter df, Root<?> root, String columnName) {
         var column = root.<LocalDate>get(columnName).as(LocalDate.class);
         var to = df.getTo();
         var from = df.getFrom();
@@ -59,26 +58,25 @@ public class CustomCriteriaPredicate {
             LocalDate.parse(Objects.requireNonNull(to), format));
     }
 
-    public Predicate filter(Long[] id, Root<?> root, String nameColumn) {
+    Predicate filter(Long[] id, Root<?> root, String nameColumn) {
         var predicate = criteriaBuilder.in(root.<Long>get(nameColumn));
         Arrays.stream(id)
             .forEach(predicate::value);
         return predicate;
     }
 
-    public Predicate search(String[] searchWords, Root<?> root) {
-        var predicates = new ArrayList<Predicate>();
+    Predicate search(String[] searchWords, Root<?> root) {
         var fields = BigOrderTableViews.class.getDeclaredFields();
         var listPredicates = new ArrayList<Predicate>();
 
         for (String searchWord : searchWords) {
             Arrays.stream(fields)
-                    .map(Field::getName)
-                    .map(root::get)
-                    .map(path -> criteriaBuilder.upper(path.as(String.class)))
-                    .map(expression -> criteriaBuilder.like(expression, "%" + searchWord.toUpperCase() + "%"))
-                    .forEach(listPredicates::add);
+                .map(Field::getName)
+                .map(root::get)
+                .map(path -> criteriaBuilder.upper(path.as(String.class)))
+                .map(expression -> criteriaBuilder.like(expression, "%" + searchWord.toUpperCase() + "%"))
+                .forEach(listPredicates::add);
         }
-       return criteriaBuilder.or(listPredicates.toArray(Predicate[]::new));
+        return criteriaBuilder.or(listPredicates.toArray(Predicate[]::new));
     }
 }
