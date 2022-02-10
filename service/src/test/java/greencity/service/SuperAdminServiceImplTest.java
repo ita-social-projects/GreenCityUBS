@@ -440,18 +440,6 @@ class SuperAdminServiceImplTest {
         assertThrows(LocationNotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
     }
 
-//    @Test
-//    void addTariffServiceException2Test() {
-//        User user = ModelUtils.getUser();
-//        AddServiceDto dto = ModelUtils.addServiceDto();
-//
-//        when(userRepository.findByUuid("123233")).thenReturn(user);
-//        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
-//        when(locationRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getLocation()));
-//
-//        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addTariffService(dto, "123233"));
-//    }
-
     @Test
     void createServiceWithTranslationThrowLanguageNotFoundException() {
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
