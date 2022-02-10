@@ -552,7 +552,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderDetailDto dto = new OrderDetailDto();
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        setOrderDetailDto(dto, order, language);
+        setOrderDetailDto(dto, order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -602,10 +602,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         StringBuilder values = new StringBuilder();
         int countOfChanges = 0;
         if (nonNull(exported)) {
-            collectEventAboutExportedWaste(exported, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutExportedWaste(exported, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed)) {
-            collectEventAboutConfirmWaste(confirmed, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutConfirmWaste(confirmed, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed) || nonNull(exported)) {
             eventService.save(values.toString(),
@@ -613,7 +613,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Long languageId, Order order,
+    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
@@ -640,7 +640,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Long languageId, Order order,
+    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
@@ -916,7 +916,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
