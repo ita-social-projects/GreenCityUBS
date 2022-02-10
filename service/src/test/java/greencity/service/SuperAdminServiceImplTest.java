@@ -73,7 +73,6 @@ class SuperAdminServiceImplTest {
 
         when(userRepository.findByUuid("123233")).thenReturn(user);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
-//        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
         when(bagRepository.save(bag)).thenReturn(bag);
         when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
