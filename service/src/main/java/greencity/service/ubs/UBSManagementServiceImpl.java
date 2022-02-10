@@ -9,7 +9,6 @@ import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
-import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -17,8 +16,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -33,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.joining;
+
 
 @Service
 @AllArgsConstructor
@@ -70,7 +66,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
-    private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
 
