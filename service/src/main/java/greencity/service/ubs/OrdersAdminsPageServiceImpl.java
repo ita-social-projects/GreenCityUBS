@@ -135,7 +135,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto(DATE_OF_EXPORT, "Дата вивезення", "Date of export"), DATE_OF_EXPORT, 20,
                 false, true, true, 24, EditType.DATE, new ArrayList<>(), orderDetails),
-            new ColumnDTO(new TitleDto(RECEIVING, "Час вивезення", "Time of export"), RECEIVING, 20,
+            new ColumnDTO(new TitleDto(TIME_OF_EXPORT, "Час вивезення", "Time of export"), TIME_OF_EXPORT, 20,
                 false, true, false, 25, EditType.TIME, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("idOrderFromShop", "Номер замовлення з магазину", "Id order from shop"),
                 "idOrderFromShop",
