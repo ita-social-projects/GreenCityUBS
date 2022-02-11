@@ -21,8 +21,8 @@ public class BagTranslationDto implements Serializable {
     private Integer capacity;
     @NonNull
     private Integer price;
-    @NotNull
-    private String code;
+    @NonNull
+    private String nameEng;
     @NotNull
     private Long locationId;
 }

@@ -1,7 +1,6 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.PositionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,15 +9,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-class PositionDtoMapperTest {
+class BigOrderTableDtoMapperTest {
     @InjectMocks
-    PositionDtoMapper positionDtoMapper;
+    BigOrderTableDtoMapper bigOrderTableDtoMapper;
 
     @Test
     void convert() {
-        PositionDto expected = ModelUtils.getPositionDto();
-        PositionDto actual = positionDtoMapper.convert(ModelUtils.getPosition());
-
-        assertEquals(expected, actual);
+        var bigOrderTableDto = ModelUtils.getBigOrderTableDto();
+        var bigOrderTableView = ModelUtils.getBigOrderTableViews();
+        assertEquals(bigOrderTableDto, bigOrderTableDtoMapper.convert(bigOrderTableView));
     }
+
 }

@@ -2,8 +2,6 @@ package greencity.service.ubs;
 
 import greencity.dto.*;
 import greencity.entity.enums.SortingOrder;
-import greencity.filters.*;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -42,20 +40,6 @@ public interface UBSManagementService {
      */
     PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
         SortingOrder sortingOrder);
-
-    /**
-     * Method save or update view of Orders table.
-     *
-     * @author Sikhovskiy Rostyslav
-     */
-    void changeOrderTableView(String uuid, String titles);
-
-    /**
-     * Method return parameters for custom orders table view.
-     *
-     * @author Sikhovskiy Rostyslav
-     */
-    CustomTableViewDto getCustomTableParameters(String uuid);
 
     /**
      * Method add some points to UserUBS by email.
@@ -106,7 +90,7 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid);
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid);
 
     /**
      * Method that count sum order.
@@ -233,13 +217,6 @@ public interface UBSManagementService {
      * @author Yuriy Bahlay.
      */
     void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid);
-
-    /**
-     * Method returns all order's data from big order table.
-     *
-     * @author Ihor Volianskyi
-     */
-    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid);
 
     /**
      * This is method which is save Admin comment.

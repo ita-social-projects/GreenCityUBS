@@ -15,6 +15,6 @@ public class TariffTranslationDto {
     private String name;
     @NotNull
     private String description;
-    @NotNull
-    private Long languageId;
+    @NonNull
+    private String nameEng;
 }

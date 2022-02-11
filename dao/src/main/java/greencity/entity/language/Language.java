@@ -1,6 +1,5 @@
 package greencity.entity.language;
 
-import greencity.entity.order.BagTranslation;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.LocationTranslation;
@@ -27,9 +26,6 @@ public class Language {
 
     @Column(name = "code", nullable = false, unique = true, length = 35)
     private String code;
-
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    private List<BagTranslation> bagTranslations;
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<ServiceTranslation> serviceTranslations;
