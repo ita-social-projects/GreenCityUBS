@@ -21,7 +21,7 @@ public class GetTariffServiceDto {
     private Integer price;
     private Integer commission;
     private String description;
-    private String languageCode;
+    private String nameEng;
     private Integer fullPrice;
     private Integer id;
     private LocalDate createdAt;

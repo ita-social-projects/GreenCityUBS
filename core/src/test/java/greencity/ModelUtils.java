@@ -356,7 +356,7 @@ public class ModelUtils {
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
             .name("Test")
-            .languageId(1L)
+            .nameEng("a")
             .description("Test")
             .build());
     }
@@ -459,7 +459,6 @@ public class ModelUtils {
             .courierId(3L)
             .bagId(2)
             .limitDescription("dd")
-            .languageId(3L)
             .build();
     }
 

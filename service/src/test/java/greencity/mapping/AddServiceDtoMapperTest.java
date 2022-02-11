@@ -23,8 +23,8 @@ class AddServiceDtoMapperTest {
             mapper.convert(bag).getTariffTranslationDtoList().get(0).getName());
         Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getDescription(),
             mapper.convert(bag).getTariffTranslationDtoList().get(0).getDescription());
-        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getLanguageId(),
-            mapper.convert(bag).getTariffTranslationDtoList().get(0).getLanguageId());
+        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getNameEng(),
+            mapper.convert(bag).getTariffTranslationDtoList().get(0).getNameEng());
         Assertions.assertEquals(150, bag.getFullPrice());
     }
 }

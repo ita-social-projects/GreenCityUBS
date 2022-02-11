@@ -61,9 +61,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .bagTranslations(dto.getTariffTranslationDtoList().stream()
                 .map(tariffTranslationDto -> BagTranslation.builder()
                     .name(tariffTranslationDto.getName())
-                    .language(languageRepository.findById(tariffTranslationDto.getLanguageId()).orElseThrow(
-                        () -> new LanguageNotFoundException(
-                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + tariffTranslationDto.getLanguageId())))
+                    .nameEng(tariffTranslationDto.getNameEng())
                     .description(tariffTranslationDto.getDescription())
                     .build())
                 .collect(Collectors.toList()))
@@ -87,7 +85,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .capacity(bagTranslation.getBag().getCapacity())
             .name(bagTranslation.getName())
             .commission(bagTranslation.getBag().getCommission())
-            .languageCode(bagTranslation.getLanguage().getCode())
+            .nameEng(bagTranslation.getNameEng())
             .fullPrice(bagTranslation.getBag().getFullPrice())
             .id(bagTranslation.getBag().getId())
             .createdAt(bagTranslation.getBag().getCreatedAt())
@@ -118,7 +116,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         bagRepository.save(bag);
         BagTranslation bagTranslation =
-            translationRepository.findBagTranslationByBagAndLanguageCode(bag, dto.getLangCode());
+            translationRepository.findBagTranslationByBag(bag);
         bagTranslation.setName(dto.getName());
         bagTranslation.setDescription(dto.getDescription());
         translationRepository.save(bagTranslation);
@@ -378,11 +376,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription, Long languageId) {
+    public GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription) {
         Courier courier = courierRepository.findById(courierId).orElseThrow(
             () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
         CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courier, languageId);
+            courierTranslationRepository.findCourierTranslationByCourier(courier);
         courierTranslation.setLimitDescription(limitDescription);
         courierTranslationRepository.save(courierTranslation);
         return getAllCouriers(courierTranslation);
@@ -422,16 +420,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         CourierLocation courierLocation = courierLocationRepository
             .findCourierLocationsLimitsByCourierIdAndLocationId(dto.getCourierId(), dto.getLocationId());
         final CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourierAndLanguageId(courierLocation.getCourier(),
-                dto.getLanguageId());
-        final Language language = languageRepository.findById(dto.getLanguageId()).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + dto.getLanguageId()));
+            courierTranslationRepository.findCourierTranslationByCourier(courierLocation.getCourier());
         courierLocation.setCourierLimit(dto.getCourierLimitsBy());
         courierLocation.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBag());
         courierLocation.setMinAmountOfBigBags(dto.getMinAmountOfBigBag());
         courierLocation.setMinPriceOfOrder(dto.getMinAmountOfOrder());
         courierLocation.setMaxPriceOfOrder(dto.getMaxAmountOfOrder());
-        courierTranslation.setLanguage(language);
         courierTranslation.setLimitDescription(dto.getLimitDescription());
         bagRepository.save(bag);
         courierTranslationRepository.save(courierTranslation);

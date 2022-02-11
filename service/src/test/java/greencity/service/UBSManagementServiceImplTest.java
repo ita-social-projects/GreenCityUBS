@@ -656,7 +656,7 @@ class UBSManagementServiceImplTest {
         }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
         when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
-        when(bagTranslationRepository.findAllByLanguageOrder("ua", 1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
+        when(bagTranslationRepository.findAllByOrder(1L)).thenReturn(TEST_BAG_TRANSLATION_LIST);
         when(modelMapper.map(TEST_BAG_TRANSLATION, BagTransDto.class)).thenReturn(TEST_BAG_TRANS_DTO);
         when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
@@ -670,7 +670,7 @@ class UBSManagementServiceImplTest {
         }.getType());
         verify(bagRepository).findBagByOrderId(1L);
         verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
-        verify(bagTranslationRepository).findAllByLanguageOrder("ua", 1L);
+        verify(bagTranslationRepository).findAllByOrder(1L);
         verify(modelMapper).map(TEST_BAG_TRANSLATION, BagTransDto.class);
         verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()));
@@ -840,15 +840,13 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusAdjustmentDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -860,7 +858,6 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -868,7 +865,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -880,15 +877,13 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
 
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
-            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -900,7 +895,6 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusNotTakenOutDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -908,7 +902,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -920,7 +914,6 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusOnThe_RouteDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -928,7 +921,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -940,7 +933,6 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -948,7 +940,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -961,7 +953,6 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -969,7 +960,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -981,7 +972,6 @@ class UBSManagementServiceImplTest {
             .id(42L).build();
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusCanseledDto()));
-        when(languageRepository.findIdByCode("ua")).thenReturn(1L);
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
         when(updateOrderRepository.updateConfirm(anyInt(), anyLong(), anyLong())).thenReturn(true);
@@ -989,7 +979,7 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(1L,
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
-            "ua", "abc");
+            "abc");
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
@@ -1005,7 +995,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
 
         assertThrows(OrderNotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
+            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "abc"));
     }
 
     @Test
@@ -1014,7 +1004,7 @@ class UBSManagementServiceImplTest {
         Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
 
         assertThrows(UserNotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "ua", "abc"));
+            () -> ubsManagementService.setOrderDetail(1L, confirm, exported, "abc"));
     }
 
     @Test
@@ -1338,7 +1328,8 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1356,7 +1347,7 @@ class UBSManagementServiceImplTest {
         verify(bagRepository).findAll();
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(bagTranslationRepository).findNameByBagId(1);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
         verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
             1L);
@@ -1374,7 +1365,8 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1394,7 +1386,7 @@ class UBSManagementServiceImplTest {
         verify(bagRepository).findAll();
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(bagTranslationRepository).findNameByBagId(1);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
         verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
             1L);
@@ -1415,7 +1407,8 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1432,7 +1425,7 @@ class UBSManagementServiceImplTest {
         verify(bagRepository).findAll();
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(ModelUtils.getBaglist().get(0), BagInfoDto.class);
-        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(bagTranslationRepository).findNameByBagId(1);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
         verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(1L,
             1L);
@@ -1453,7 +1446,8 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBag2list());
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(ModelUtils.getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1750,7 +1744,8 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findAll()).thenReturn(getBag2list());
         when(languageRepository.findLanguageByCode("ua")).thenReturn(language);
         when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
-        when(bagTranslationRepository.findNameByBagId(1, 1L)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(6, 0l))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
@@ -1776,7 +1771,7 @@ class UBSManagementServiceImplTest {
         verify(bagRepository).findAll();
         verify(languageRepository).findLanguageByCode("ua");
         verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
-        verify(bagTranslationRepository).findNameByBagId(1, 1L);
+        verify(bagTranslationRepository).findNameByBagId(1);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationByIdAndLanguageId(6, 0L);
         verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
             1L,

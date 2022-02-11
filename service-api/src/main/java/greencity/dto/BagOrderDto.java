@@ -14,5 +14,6 @@ public class BagOrderDto {
     private Integer capacity;
     private Integer price;
     private String name;
+    private String nameEng;
     private Integer bagAmount;
 }
