@@ -20,8 +20,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "users")
-@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot",
-    "viberBot", "lastLocation"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot", "viberBot"})
 @Entity
 public class User {
     @Id

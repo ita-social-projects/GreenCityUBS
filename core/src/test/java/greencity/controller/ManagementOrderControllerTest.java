@@ -4,10 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
+import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
+import greencity.repository.BigOrderTableRepository;
 import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.maneger.BigOrderTableServiceView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +30,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 
 import static greencity.ModelUtils.*;
@@ -45,6 +49,12 @@ class ManagementOrderControllerTest {
     UBSManagementService ubsManagementService;
 
     @Mock
+    private ViolationService violationService;
+
+    @Mock
+    CoordinateService coordinateService;
+
+    @Mock
     CertificateService certificateService;
 
     @Mock
@@ -55,6 +65,9 @@ class ManagementOrderControllerTest {
 
     @InjectMocks
     ManagementOrderController managementOrderController;
+
+    @Mock
+    BigOrderTableServiceView bigOrderTableServiceView;
 
     public static final String contentForaddingcontroller = "{\n"
         + " \"code\": \"1111-2222\",\n" +
@@ -168,18 +181,18 @@ class ManagementOrderControllerTest {
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isNotFound());
 
-        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+        verify(violationService).getViolationDetailsByOrderId(1L);
     }
 
     @Test
     void returnsDetailsAboutViolationWithGivenOrderId() throws Exception {
         ViolationDetailInfoDto violationDetailInfoDto = getViolationDetailInfoDto();
-        when(ubsManagementService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
+        when(violationService.getViolationDetailsByOrderId(1L)).thenReturn(Optional.of(violationDetailInfoDto));
 
         this.mockMvc.perform(get(ubsLink + "/violation-details" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).getViolationDetailsByOrderId(1L);
+        verify(violationService).getViolationDetailsByOrderId(1L);
     }
 
     @Test
@@ -237,7 +250,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(delete(ubsLink + "/delete-violation-from-order" + "/{orderId}", 1L))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).deleteViolation(1L, null);
+        verify(violationService).deleteViolation(1L, null);
     }
 
     @Test
@@ -358,7 +371,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(get(ubsLink + "/all-undelivered"))
             .andExpect(status().isOk());
 
-        verify(ubsManagementService).getAllUndeliveredOrdersWithLiters();
+        verify(coordinateService).getAllUndeliveredOrdersWithLiters();
     }
 
     @Test
@@ -448,4 +461,17 @@ class ManagementOrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    void getUpdateAllOrderPageAdminInfoTest() throws Exception {
+        UpdateAllOrderPageDto dto = ModelUtils.getUpdateAllOrderPageDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String JsonDto = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/all-order-page-admin-info")
+            .content(JsonDto)
+            .principal(principal)
+            .param("lang", "ua")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 }

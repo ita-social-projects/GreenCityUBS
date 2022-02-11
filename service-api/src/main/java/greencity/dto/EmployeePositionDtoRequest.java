@@ -14,6 +14,6 @@ import java.util.Map;
 @ToString
 public class EmployeePositionDtoRequest {
     Long orderId;
-    Map<PositionDto, List<String>> allPositionsEmployees;
+    Map<PositionDto, List<EmployeeNameIdDto>> allPositionsEmployees;
     Map<PositionDto, String> currentPositionEmployees;
 }

@@ -12,6 +12,8 @@
     <artifactId>dao</artifactId>
 
     <dependencies>
+
+
         <!-- database -->
         <dependency>
             <groupId>org.postgresql</groupId>

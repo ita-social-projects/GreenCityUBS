@@ -10,8 +10,12 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.service.notification.NotificationeService;
 import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.maneger.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -38,14 +42,24 @@ import java.util.Set;
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
+    private final CoordinateService coordinateService;
+    private final ViolationService violationService;
+    private final NotificationeService notificationeService;
+    private final BigOrderTableServiceView bigOrderTableService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService) {
+    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
+        ViolationService violationService, CoordinateService coordinateService,
+        NotificationeService notificationeService, BigOrderTableServiceView bigOrderTableService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
+        this.violationService = violationService;
+        this.coordinateService = coordinateService;
+        this.notificationeService = notificationeService;
+        this.bigOrderTableService = bigOrderTableService;
     }
 
     /**
@@ -106,7 +120,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/all-undelivered")
     public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsManagementService.getAllUndeliveredOrdersWithLiters());
+        return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
 
     /**
@@ -127,7 +141,7 @@ public class ManagementOrderController {
     public ResponseEntity<List<GroupedOrderDto>> groupCoords(@RequestParam Double radius,
         @RequestParam(required = false, defaultValue = "3000") Integer litres) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getClusteredCoords(radius, litres));
+            .body(coordinateService.getClusteredCoords(radius, litres));
     }
 
     /**
@@ -147,7 +161,7 @@ public class ManagementOrderController {
         @RequestParam(required = false, defaultValue = "3000") Integer litres,
         @RequestParam(required = false, defaultValue = "0") Double additionalDistance) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
+            .body(coordinateService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
     }
 
     /**
@@ -210,8 +224,8 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.addUserViolation(add, files, uuid);
-        ubsManagementService.sendNotificationAboutViolation(add, locale.getLanguage());
+        violationService.addUserViolation(add, files, uuid);
+        notificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -233,7 +247,7 @@ public class ManagementOrderController {
         OrderSearchCriteria criteria,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrders(page, criteria, uuid));
+            .body(bigOrderTableService.getOrders(page, criteria, uuid));
     }
 
     /**
@@ -253,7 +267,7 @@ public class ManagementOrderController {
     @PutMapping("/changeOrdersTableView")
     public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
         String titles) {
-        ubsManagementService.changeOrderTableView(uuid, titles);
+        bigOrderTableService.changeOrderTableView(uuid, titles);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -273,7 +287,7 @@ public class ManagementOrderController {
     @GetMapping("/getOrdersViewParameters")
     public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getCustomTableParameters(uuid));
+            .body(bigOrderTableService.getCustomTableParameters(uuid));
     }
 
     /**
@@ -421,7 +435,7 @@ public class ManagementOrderController {
     public ResponseEntity<ViolationDetailInfoDto> getViolationDetailsForCurrentOrder(
         @Valid @PathVariable("orderId") Long orderId) {
         Optional<ViolationDetailInfoDto> violationDetailsByOrderId =
-            ubsManagementService.getViolationDetailsByOrderId(orderId);
+            violationService.getViolationDetailsByOrderId(orderId);
         if (violationDetailsByOrderId.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Violation not found");
         } else {
@@ -594,7 +608,7 @@ public class ManagementOrderController {
     @DeleteMapping("/delete-violation-from-order/{orderId}")
     public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.deleteViolation(orderId, uuid);
+        violationService.deleteViolation(orderId, uuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -803,7 +817,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
         @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateUserViolation(add, multipartFiles, uuid);
+        violationService.updateUserViolation(add, multipartFiles, uuid);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -922,6 +936,31 @@ public class ManagementOrderController {
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
         @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating all order admin page info.
+     *
+     * @param updateAllOrderPageDto {@link UpdateAllOrderPageDto}.
+     * @param uuid                  {@link String} currentUser.
+     * @param lang                  {@link String} language
+     * @author Max Boiarchuk.
+     */
+    @ApiOperation(value = "update all order admin page info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/all-order-page-admin-info")
+    public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
+        @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, @ApiIgnore @CurrentUserUuid String uuid,
+        @RequestParam String lang) {
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

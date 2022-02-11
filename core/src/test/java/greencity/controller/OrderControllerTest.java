@@ -3,7 +3,7 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
-import greencity.configuration.GreenCityPropertiesConfig;
+import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
@@ -20,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.lang.reflect.Field;
 import java.security.Principal;
 
 import static greencity.ModelUtils.*;
@@ -223,7 +222,7 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
-        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
+        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
 
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
@@ -265,65 +264,13 @@ class OrderControllerTest {
     }
 
     @Test
-    void processOrderForIFTest() throws Exception {
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String JsonDto = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processOrderIF")
-            .principal(principal)
-            .content(JsonDto)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void receivePaymentForIFTest() throws Exception {
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String paymentResponseJson = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/receivePaymentIF")
-            .content(paymentResponseJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    void processLiqPayOrderForIF() throws Exception {
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processLiqPayOrderIF")
-            .content(orderResponceDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void receiveLiqPayOrderForIF() throws Exception {
-        PaymentResponseDtoLiqPay dto = ModelUtils.getPaymentResponceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String Json = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/receiveLiqPayPaymentIF")
-            .content(Json)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
     void getFondyStatusPayment2() throws Exception {
         mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1))
             .andExpect(status().isOk());
     }
 
     @Mock
-    GreenCityPropertiesConfig greenCityPropertiesConfig;
+    RedirectionConfigProp redirectionConfigProp;
 
     @Test
     void receivePaymentClientTest() throws Exception {
@@ -331,14 +278,16 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
-        when(greenCityPropertiesConfig.getGreenCityClient()).thenReturn("1");
-
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
+    }
 
-        verify(greenCityPropertiesConfig).getGreenCityClient();
+    @Test
+    void getCourierLocations() throws Exception {
+        mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
+            .andExpect(status().isOk());
     }
 }

@@ -356,7 +356,7 @@ public class ModelUtils {
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
             .name("Test")
-            .languageId(1L)
+            .nameEng("a")
             .description("Test")
             .build());
     }
@@ -459,7 +459,6 @@ public class ModelUtils {
             .courierId(3L)
             .bagId(2)
             .limitDescription("dd")
-            .languageId(3L)
             .build();
     }
 
@@ -620,5 +619,11 @@ public class ModelUtils {
             .setBody("test")
             .setNotificationType("UNPAID_ORDER")
             .setSchedule(NOTIFICATION_SCHEDULE_DTO);
+    }
+
+    public static UpdateAllOrderPageDto getUpdateAllOrderPageDto() {
+        return UpdateAllOrderPageDto.builder()
+            .orderId(List.of(1L, 2L, 3L))
+            .build();
     }
 }

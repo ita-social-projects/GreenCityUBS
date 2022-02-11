@@ -8,6 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@EqualsAndHashCode
+
 public class PaymentInfoDto {
     Long id;
     String settlementdate;

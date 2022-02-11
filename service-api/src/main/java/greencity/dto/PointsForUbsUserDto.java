@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 
 public class PointsForUbsUserDto {
     private LocalDateTime dateOfEnrollment;

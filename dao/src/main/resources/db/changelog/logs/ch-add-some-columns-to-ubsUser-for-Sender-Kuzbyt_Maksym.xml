@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Kuzbyt-8" author="Maksym Kuzbyt">
+
+        <addColumn tableName="ubs_user">
+            <column name="sender_first_name" type="varchar(30)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="sender_last_name" type="varchar(30)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="sender_email" type="varchar(50)">
+                    <constraints nullable="true" />
+            </column>
+
+            <column name="sender_phone_number" type="varchar(15)">
+                    <constraints nullable="true" />
+            </column>
+
+        </addColumn>
+
+        <rollback>
+
+            <dropColumn tableName="ubs_user">
+                <column name="sender_first_name"/>
+                <column name="sender_last_name"/>
+                <column name="sender_email"/>
+                <column name="sender_phone_number"/>
+            </dropColumn>
+
+        </rollback>
+
+
+    </changeSet>
+</databaseChangeLog>

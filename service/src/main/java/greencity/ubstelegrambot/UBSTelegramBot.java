@@ -18,9 +18,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 @RequiredArgsConstructor
 public class UBSTelegramBot extends TelegramLongPollingBot {
-    @Value("${ubs.bot.name}")
+    @Value("${greencity.bots.ubs-bot-name}")
     private String botName;
-    @Value("${ubs.bot.token}")
+    @Value("${greencity.bots.ubs-bot-token}")
     private String botToken;
     private final UserRepository userRepository;
     private final TelegramBotRepository telegramBotRepository;

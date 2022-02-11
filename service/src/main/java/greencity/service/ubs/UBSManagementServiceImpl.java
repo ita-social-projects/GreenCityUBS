@@ -6,21 +6,16 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
-import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
-import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
@@ -35,17 +30,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.joining;
 
 @Service
 @AllArgsConstructor
@@ -61,10 +53,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetail updateOrderRepository;
     private final BagsInfoRepo bagsInfoRepository;
-    private final ViolationRepository violationRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
-    private final BigOrderTableRepository bigOrderTableRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
@@ -75,205 +65,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
-    private final CertificateCriteriaRepo certificateCriteriaRepo;
-    private final CustomTableViewRepo customTableViewRepo;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
+
     private final Set<OrderStatus> orderStatusesBeforeShipment =
         EnumSet.of(OrderStatus.FORMED, OrderStatus.CONFIRMED, OrderStatus.ADJUSTMENT);
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
-
+    private final OrdersAdminsPageService ordersAdminsPageService;
+    private static final String FORMAT_DATE = "dd-MM-yyyy";
     @Lazy
     @Autowired
     private UBSClientService ubsClientService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getAllUndeliveredOrdersWithLiters() {
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        List<Order> allOrders = getAllUndeliveredOrders();
-        List<GroupedOrderDto> allOrdersWithLitres = new ArrayList<>();
-        for (Coordinates temp : allCoords) {
-            int currentCoordinatesCapacity =
-                addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            List<Order> currentCoordinatesOrders = allOrders.stream().filter(
-                o -> o.getUbsUser().getAddress().getCoordinates().equals(temp)).collect(Collectors.toList());
-            List<OrderDto> currentCoordinatesOrdersDto = currentCoordinatesOrders.stream()
-                .map(o -> modelMapper.map(o, OrderDto.class)).collect(Collectors.toList());
-            allOrdersWithLitres.add(GroupedOrderDto.builder()
-                .amountOfLitres(currentCoordinatesCapacity)
-                .groupOfOrders(currentCoordinatesOrdersDto)
-                .build());
-        }
-        return allOrdersWithLitres;
-    }
-
-    /**
-     * This method save or update view of orders table.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
-    @Override
-    public void changeOrderTableView(String uuid, String titles) {
-        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
-            customTableViewRepo.update(uuid, titles);
-        } else {
-            CustomTableView customTableView = CustomTableView.builder()
-                .uuid(uuid)
-                .titles(titles)
-                .build();
-            customTableViewRepo.save(customTableView);
-        }
-    }
-
-    /**
-     * This method return parameters for orders table view.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
-    @Override
-    public CustomTableViewDto getCustomTableParameters(String uuid) {
-        if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
-            return castTableViewToDto(customTableViewRepo.findByUuid(uuid).getTitles());
-        } else {
-            return CustomTableViewDto.builder()
-                .titles("")
-                .build();
-        }
-    }
-
-    private CustomTableViewDto castTableViewToDto(String titles) {
-        return CustomTableViewDto.builder()
-            .titles(titles)
-            .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getClusteredCoords(double distance, int litres) {
-        checkIfSpecifiedLitresAndDistancesAreValid(distance, litres);
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(litres);
-        List<GroupedOrderDto> allClusters = new ArrayList<>();
-
-        while (!allCoords.isEmpty()) {
-            Optional<Coordinates> any = allCoords.stream().findAny();
-            mainBlockOfGetClusteredCoords(allCoords, distance, litres, any, allClusters);
-        }
-        return allClusters;
-    }
-
-    private void mainBlockOfGetClusteredCoords(Set<Coordinates> allCoords, double distance,
-        int litres, Optional<Coordinates> any, List<GroupedOrderDto> allClusters) {
-        any.ifPresent(coordinates -> {
-            Coordinates currentlyCoord = coordinates;
-
-            Set<Coordinates> closeRelatives = getCoordinateCloseRelatives(distance,
-                allCoords, currentlyCoord);
-            Coordinates centralCoord = getNewCentralCoordinate(closeRelatives);
-
-            while (!centralCoord.equals(currentlyCoord)) {
-                currentlyCoord = centralCoord;
-                closeRelatives = getCoordinateCloseRelatives(distance, allCoords, currentlyCoord);
-                centralCoord = getNewCentralCoordinate(closeRelatives);
-            }
-            int amountOfLitresInCluster = 0;
-            for (Coordinates current : closeRelatives) {
-                int currentCoordinatesCapacity =
-                    addressRepository.capacity(current.getLatitude(), current.getLongitude());
-                amountOfLitresInCluster += currentCoordinatesCapacity;
-            }
-            if (amountOfLitresInCluster > litres) {
-                List<Coordinates> closeRelativesSorted = new ArrayList<>(closeRelatives);
-                closeRelativesSorted.sort(getComparatorByDistanceFromCenter(centralCoord));
-                int indexOfCoordToBeDeleted = -1;
-
-                while (amountOfLitresInCluster > litres) {
-                    Coordinates coordToBeDeleted = closeRelativesSorted.get(++indexOfCoordToBeDeleted);
-                    int anountOfLitresInCurrentOrder = addressRepository
-                        .capacity(coordToBeDeleted.getLatitude(), coordToBeDeleted.getLongitude());
-                    amountOfLitresInCluster -= anountOfLitresInCurrentOrder;
-                    closeRelatives.remove(coordToBeDeleted);
-                }
-            }
-            for (Coordinates grouped : closeRelatives) {
-                allCoords.remove(grouped);
-            }
-
-            // mapping coordinates to orderDto
-            getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
-                amountOfLitresInCluster, allClusters);
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GroupedOrderDto> getClusteredCoordsAlongWithSpecified(Set<CoordinatesDto> specified,
-        int litres, double additionalDistance) {
-        checkIfSpecifiedLitresAndDistancesAreValid(additionalDistance, litres);
-
-        Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
-        Set<Coordinates> result = specified.stream()
-            .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
-        for (Coordinates temp : result) {
-            if (!allCoords.contains(temp)) {
-                throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
-                    + ", " + temp.getLongitude());
-            }
-        }
-
-        Coordinates centralCoord = getNewCentralCoordinate(result);
-        int specifiedCoordsCapacity = 0;
-        double newRadius = 0;
-        for (Coordinates temp : result) {
-            double distanceFromCentralCoord = distanceBetweenEarthCoordinates(temp.getLatitude(), temp.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude());
-            if (distanceFromCentralCoord > newRadius) {
-                newRadius = distanceFromCentralCoord;
-            }
-            specifiedCoordsCapacity += addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-        }
-        newRadius += additionalDistance;
-
-        List<Coordinates> coordinatesInsideRadiusWithoutSpecifiedCoords = new ArrayList<>();
-        for (Coordinates temp : allCoords) {
-            double distanceFromCentralCoord = distanceBetweenEarthCoordinates(temp.getLatitude(), temp.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude());
-            if (distanceFromCentralCoord < newRadius) {
-                coordinatesInsideRadiusWithoutSpecifiedCoords.add(temp);
-            }
-        }
-        coordinatesInsideRadiusWithoutSpecifiedCoords.removeAll(result);
-
-        coordinatesInsideRadiusWithoutSpecifiedCoords.sort(getComparatorByDistanceFromCenter(centralCoord));
-        int amountOfLitresToFill = litres - specifiedCoordsCapacity;
-        double fill = 0;
-        int allCoordsCapacity = specifiedCoordsCapacity;
-        for (int i = coordinatesInsideRadiusWithoutSpecifiedCoords.size() - 1; i > -1; i--) {
-            Coordinates temp = coordinatesInsideRadiusWithoutSpecifiedCoords.get(i);
-            int capacity = addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            if (fill < amountOfLitresToFill) {
-                if ((fill + capacity) <= amountOfLitresToFill) {
-                    fill += capacity;
-                    allCoordsCapacity += capacity;
-                    result.add(temp);
-                }
-            } else {
-                break;
-            }
-        }
-        List<GroupedOrderDto> groupedOrderDtos = new ArrayList<>();
-        getUndeliveredOrdersByGroupedCoordinates(result,
-            allCoordsCapacity, groupedOrderDtos);
-
-        return groupedOrderDtos;
-    }
 
     /**
      * Method gets all order payments, count paid amount, amount which user should
@@ -402,148 +205,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto;
     }
 
-    /**
-     * Method checks if entered parameters are valid.
-     *
-     * @param distance - preferred amount of litres.
-     * @param litres   - preferred search radius.
-     */
-    private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
-        if (distance < 0 || distance > 20) {
-            throw new IncorrectValueException(INAVALID_DISTANCE_AMOUNT);
-        }
-        if (litres < 0 || litres > 10000) {
-            throw new IncorrectValueException(INAVALID_LITRES_AMOUNT);
-        }
-    }
-
-    /**
-     * Method finds undelivered orders.
-     *
-     * @return List of {@link Order}
-     */
-    private List<Order> getAllUndeliveredOrders() {
-        List<Order> allCoords = orderRepository.undeliveredAddresses();
-        if (allCoords.isEmpty()) {
-            throw new ActiveOrdersNotFoundException(UNDELIVERED_ORDERS_NOT_FOUND);
-        }
-        return allCoords;
-    }
-
-    /**
-     * Method returns coordinates comparator by theirs distance from center of
-     * cluster.
-     *
-     * @param centralCoord {@link Integer}.
-     * @return {@link Comparator} of Coordinates.
-     * @author Oleh Bilonizhka
-     */
-    private Comparator<Coordinates> getComparatorByDistanceFromCenter(Coordinates centralCoord) {
-        return (o1, o2) -> {
-            Double o1Int = distanceBetweenEarthCoordinates(o1.getLatitude(), o1.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude()) * 1000;
-
-            Double o2Int = distanceBetweenEarthCoordinates(o2.getLatitude(), o2.getLongitude(),
-                centralCoord.getLatitude(), centralCoord.getLongitude()) * 1000;
-
-            return o2Int.compareTo(o1Int);
-        };
-    }
-
-    /**
-     * Method defines and returns all coordinates in certain radius.
-     *
-     * @param distance       - preferred distance for clusterization.
-     * @param allCoords      - list of {@link Coordinates} which shows all
-     *                       unclustered coordinates.
-     * @param currentlyCoord - {@link Coordinates} - chosen start coordinates.
-     * @return list of {@link Coordinates} - start coordinates with it's
-     *         distant @relatives.
-     * @author Oleh Bilonizhka
-     */
-    private Set<Coordinates> getCoordinateCloseRelatives(double distance,
-        Set<Coordinates> allCoords, Coordinates currentlyCoord) {
-        Set<Coordinates> coordinateWithCloseRelativesList = new HashSet<>();
-
-        for (Coordinates checked : allCoords) {
-            if (distanceBetweenEarthCoordinates(currentlyCoord.getLatitude(), currentlyCoord.getLongitude(),
-                checked.getLatitude(), checked.getLongitude()) <= distance) {
-                coordinateWithCloseRelativesList.add(checked);
-            }
-        }
-
-        return coordinateWithCloseRelativesList;
-    }
-
-    /**
-     * Method defines new central coordinate for existing ones.
-     *
-     * @param coordinateWithCloseRelatives list of {@link Coordinates}.
-     * @return {@link Coordinates} new central coordinate.
-     * @author Oleh Bilonizhka
-     */
-    private Coordinates getNewCentralCoordinate(Set<Coordinates> coordinateWithCloseRelatives) {
-        double sumLat = 0;
-        double sumLon = 0;
-        int amountOfCoords = coordinateWithCloseRelatives.size();
-
-        for (Coordinates checked : coordinateWithCloseRelatives) {
-            sumLat += checked.getLatitude();
-            sumLon += checked.getLongitude();
-        }
-
-        return new Coordinates(sumLat / amountOfCoords, sumLon / amountOfCoords);
-    }
-
-    /**
-     * Method to convert degrees to radians.
-     *
-     * @param degrees {@link Double} degrees.
-     * @return {@link Double} radians.
-     */
-    private double degreesToRadians(double degrees) {
-        return degrees * Math.PI / 180;
-    }
-
-    /**
-     * Method to determine distance between 2 earth coordinates.
-     *
-     * @param lat1 {@link Double} - latitude of 1 coordinate.
-     * @param lon1 {@link Double} - longitude of 1 coordinate.
-     * @param lat2 {@link Double} - latitude of 2 coordinate.
-     * @param lon2 {@link Double} - longitude of 2 coordinate.
-     * @return {@link Integer} distance in meters.
-     */
-    private double distanceBetweenEarthCoordinates(double lat1, double lon1, double lat2, double lon2) {
-        double earthRadiusKm = 6371;
-
-        double radiansLatitude = degreesToRadians(lat2 - lat1);
-        double radiansLongitude = degreesToRadians(lon2 - lon1);
-
-        lat1 = degreesToRadians(lat1);
-        lat2 = degreesToRadians(lat2);
-
-        double a = Math.sin(radiansLatitude / 2) * Math.sin(radiansLatitude / 2)
-            + Math.sin(radiansLongitude / 2) * Math.sin(radiansLongitude / 2) * Math.cos(lat1) * Math.cos(lat2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return earthRadiusKm * c;
-    }
-
-    private void getUndeliveredOrdersByGroupedCoordinates(Set<Coordinates> closeRelatives, int amountOfLitresInCluster,
-        List<GroupedOrderDto> allClusters) {
-        List<Order> orderslist = new ArrayList<>();
-        for (Coordinates coordinates : closeRelatives) {
-            List<Order> orders =
-                orderRepository.undeliveredOrdersGroupThem(coordinates.getLatitude(), coordinates.getLongitude());
-            orderslist.addAll(orders);
-        }
-        GroupedOrderDto cluster = new GroupedOrderDto();
-        cluster.setGroupOfOrders(
-            orderslist.stream().map(order -> modelMapper.map(order, OrderDto.class)).collect(Collectors.toList()));
-        cluster.setAmountOfLitres(amountOfLitresInCluster);
-        allClusters.add(cluster);
-    }
-
     @Override
     public PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
         SortingOrder sortingOrder) {
@@ -559,40 +220,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
-    }
-
-    @Override
-    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
-            ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
-            User user = order.getUser();
-            Violation violation = violationBuilder(add, order);
-            if (multipartFiles.length > 0) {
-                List<String> images = new LinkedList<>();
-                setImages(multipartFiles, images);
-                violation.setImages(images);
-            }
-            violationRepository.save(violation);
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), order);
-            notificationService.notifyAddViolation(order);
-        } else {
-            throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
-        }
-    }
-
-    private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
-        return Violation.builder()
-            .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
-            .description(add.getViolationDescription())
-            .violationDate(order.getOrderDate())
-            .order(order)
-            .build();
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
@@ -627,37 +254,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(ourUser);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
-        Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
-        UserViolationMailDto mailDto;
-        if (order != null) {
-            mailDto = UserViolationMailDto.builder()
-                .name(order.getUser().getRecipientName())
-                .email(order.getUser().getRecipientEmail())
-                .violationDescription(dto.getViolationDescription())
-                .language(language)
-                .build();
-            restClient.sendViolationOnMail(mailDto);
-        }
-    }
-
-    /**
-     * {@inheritDoc} and {MaksymKuzbyt}
-     */
-    @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
-        Page<Order> orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
-        List<BigOrderTableDTO> orderList = new ArrayList<>();
-
-        orders.forEach(o -> orderList.add(buildBigOrderTableDTO(o)));
-
-        return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());
     }
 
     /**
@@ -712,21 +308,23 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public OrderStatusPageDto getOrderStatusData(Long orderId, String languageCode) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Optional<Order> order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Language language = languageRepository.findLanguageByCode(languageCode);
         Integer fullPrice =
-            serviceRepository.findFullPriceByCourierId(order.get().getCourierLocations().getCourier().getId());
-        Address address = order.isPresent() ? order.get().getUbsUser().getAddress() : new Address();
+            serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId());
+        Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
+            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId()).toString());
+            bagInfoDto.setNameEng(bagTranslationRepository.findNameEngByBagId(bag.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
-            getInfoAboutStatusesAndDateFormed(order, language);
+            getInfoAboutStatusesAndDateFormed(Optional.of(order), language);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
         return OrderStatusPageDto.builder()
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
@@ -734,22 +332,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .orderFullPrice(prices.getSumAmount())
-            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getOverpayment() > 0 ? 0
-                : prices.getTotalSumAmount())
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
-            .amountOfBagsOrdered(order.map(Order::getAmountOfBagsOrdered).orElse(null))
-            .amountOfBagsExported(order.map(Order::getExportedQuantity).orElse(null))
-            .amountOfBagsConfirmed(order.map(Order::getConfirmedQuantity).orElse(null))
-            .numbersFromShop(order.map(Order::getAdditionalOrders).orElse(null))
+            .amountOfBagsOrdered(order.getAmountOfBagsOrdered())
+            .amountOfBagsExported(order.getExportedQuantity())
+            .amountOfBagsConfirmed(order.getConfirmedQuantity())
+            .numbersFromShop(order.getAdditionalOrders())
             .certificates(prices.getCertificate())
             .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
-            .comment(
-                order.orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST)).getComment())
+            .comment(order.getComment())
             .courierPricePerPackage(fullPrice)
-            .courierInfo(modelMapper.map(order.get().getCourierLocations(), CourierInfoDto.class))
+            .courierInfo(modelMapper.map(order.getCourierLocations(), CourierInfoDto.class))
             .build();
     }
 
@@ -896,7 +492,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderDetailDto dto = new OrderDetailDto();
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        setOrderDetailDto(dto, order, language);
+        setOrderDetailDto(dto, order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -907,17 +503,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
                 if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
                     entry.getKey().longValue()))) {
-                    updateOrderRepository.insertNewRecord(orderId,
-                        entry.getKey().longValue());
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
                 updateOrderRepository
                     .updateExporter(entry.getValue(), orderId,
@@ -928,8 +524,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
                     entry.getKey().longValue()))) {
-                    updateOrderRepository.insertNewRecord(orderId,
-                        entry.getKey().longValue());
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
                 updateOrderRepository
                     .updateConfirm(entry.getValue(), orderId,
@@ -939,17 +535,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
-        Long orderId, User currentUser, String language) {
+        Long orderId, User currentUser) {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Long languageId = languageRepository.findIdByCode(language);
+
         StringBuilder values = new StringBuilder();
         int countOfChanges = 0;
         if (nonNull(exported)) {
-            collectEventAboutExportedWaste(exported, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutExportedWaste(exported, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed)) {
-            collectEventAboutConfirmWaste(confirmed, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutConfirmWaste(confirmed, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed) || nonNull(exported)) {
             eventService.save(values.toString(),
@@ -957,49 +553,55 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Long languageId, Order order,
+    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
-                Long confirmWasteWas =
-                    updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue());
-                if (nonNull(confirmWasteWas)
-                    && !confirmWasteWas.equals(entry.getValue().longValue())) {
+                Optional<Long> confirmWasteWas = Optional.empty();
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                    confirmWasteWas =
+                        Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
+                }
+                if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas)
+                        .append(confirmWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
         }
     }
 
-    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Long languageId, Order order,
+    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
             if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
-                Long exporterWasteWas = updateOrderRepository.getExporterWaste(orderId,
-                    entry.getKey().longValue());
-                if (!exporterWasteWas.equals(entry.getValue().longValue())) {
+                Optional<Long> exporterWasteWas = Optional.empty();
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                    exporterWasteWas =
+                        Optional
+                            .ofNullable(updateOrderRepository.getExporterWaste(orderId, entry.getKey().longValue()));
+                }
+                if (entry.getValue().longValue() != exporterWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
                     values.append(bagTranslation).append(" ").append(capacity).append(" л: ")
-                        .append(exporterWasteWas)
+                        .append(exporterWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
@@ -1029,7 +631,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
         List<Bag> bag = bagRepository.findBagByOrderId(id);
-        List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
+        final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         double sumAmount = 0;
         double sumConfirmed = 0;
@@ -1038,19 +640,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumConfirmed;
         double totalSumExported;
 
-        List<Integer> amountValues = new ArrayList<>(order.getAmountOfBagsOrdered().values());
-
-        List<Integer> confirmedValues = new ArrayList<>(order.getConfirmedQuantity().values());
-
-        List<Integer> exportedValues = new ArrayList<>(order.getExportedQuantity().values());
-
-        for (int i = 0; i < bag.size(); i++) {
-            sumAmount += amountValues.get(i) * bag.get(i).getFullPrice();
-            if (!confirmedValues.isEmpty()) {
-                sumConfirmed += confirmedValues.get(i) * bag.get(i).getFullPrice();
+        if (!bag.isEmpty()) {
+            for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
+                sumAmount += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
             }
-            if (!exportedValues.isEmpty()) {
-                sumExported += exportedValues.get(i) * bag.get(i).getFullPrice();
+            for (Map.Entry<Integer, Integer> entry : order.getConfirmedQuantity().entrySet()) {
+                sumConfirmed += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
+            }
+            for (Map.Entry<Integer, Integer> entry : order.getExportedQuantity().entrySet()) {
+                sumExported += entry.getValue() * bag
+                    .stream()
+                    .filter(b -> b.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + entry.getKey()))
+                    .getFullPrice();
             }
         }
 
@@ -1076,10 +689,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             totalSumConfirmed = sumConfirmed - order.getPointsToUse();
             totalSumExported = sumExported - order.getPointsToUse();
         }
-        if (confirmedValues.isEmpty()) {
+        if (order.getConfirmedQuantity().isEmpty()) {
             totalSumConfirmed = 0;
         }
-        if (exportedValues.isEmpty()) {
+        if (order.getExportedQuantity().isEmpty()) {
             totalSumExported = 0;
         }
         dto.setTotalAmount(
@@ -1209,7 +822,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
-                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + order.getCancellationComment(),
+                order.setCancellationComment(dto.getCancellationComment());
+                eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.save(OrderHistory.ORDER_DONE,
@@ -1233,7 +847,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private OrderDetailStatusDto buildStatuses(Order order, Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         String orderDate = order.getOrderDate().toLocalDate().format(formatter);
         return OrderDetailStatusDto.builder()
             .orderStatus(order.getOrderStatus().name())
@@ -1242,53 +856,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    /**
-     * Method returns detailed information about user violation by order id.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link ViolationDetailInfoDto};
-     * @author Rusanovscaia Nadejda
-     */
-    @Override
-    @Transactional
-    public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
-        User user =
-            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
-        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
-            .orderId(orderId)
-            .userName(user.getRecipientName())
-            .violationLevel(v.getViolationLevel())
-            .description(v.getDescription())
-            .images(v.getImages())
-            .violationDate(v.getViolationDate())
-            .build());
-    }
-
-    @Override
-    @Transactional
-    public void deleteViolation(Long id, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Violation> violationOptional = violationRepository.findByOrderId(id);
-        if (violationOptional.isPresent()) {
-            List<String> images = violationOptional.get().getImages();
-            if (!images.isEmpty()) {
-                for (int i = 0; i < images.size(); i++) {
-                    fileService.delete(images.get(i));
-                }
-            }
-            violationRepository.deleteById(violationOptional.get().getId());
-            User user = violationOptional.get().getOrder().getUser();
-            user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
-            userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
-        } else {
-            throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
-        }
-    }
-
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
@@ -1297,7 +865,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, order.getId())
+        dto.setName(bagTranslationRepository.findAllByOrder(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));
@@ -1470,7 +1038,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(a -> a / 100)
             .reduce(Long::sum)
             .orElse(0L);
-        return sumToPay - paymentSum < 0 ? Math.abs(paymentSum - sumToPay) : 0L;
+        Long paymentsWithCertificatesAndPoints = paymentSum
+            + ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
+                + order.getPointsToUse());
+        return sumToPay - paymentsWithCertificatesAndPoints < 0 ? Math.abs(paymentsWithCertificatesAndPoints - sumToPay)
+            : 0L;
     }
 
     /**
@@ -1640,7 +1212,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private ManualPaymentResponseDto buildPaymentResponseDto(Payment payment) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
         return ManualPaymentResponseDto.builder()
             .id(payment.getId())
             .paymentId(payment.getPaymentId())
@@ -1688,11 +1260,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             dto.setCurrentPositionEmployees(currentPositionEmployee);
         }
         List<Position> positions = positionRepository.findAll();
-        Map<PositionDto, List<String>> allPositionEmployee = new HashMap<>();
+        Map<PositionDto, List<EmployeeNameIdDto>> allPositionEmployee = new HashMap<>();
         for (Position position : positions) {
             PositionDto positionDto = PositionDto.builder().id(position.getId()).name(position.getName()).build();
             allPositionEmployee.put(positionDto, employeeRepository.getAllEmployeeByPositionId(position.getId())
-                .stream().map(e -> e.getFirstName() + " " + e.getLastName()).collect(Collectors.toList()));
+                .stream().map(employee -> EmployeeNameIdDto.builder()
+                    .id(employee.getId())
+                    .name(employee.getFirstName() + " " + employee.getLastName())
+                    .build())
+                .collect(Collectors.toList()));
+            dto.setAllPositionsEmployees(allPositionEmployee);
         }
         dto.setAllPositionsEmployees(allPositionEmployee);
 
@@ -1762,47 +1339,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         } else if (position == 5) {
             eventService.save(OrderHistory.UPDATE_MANAGER_DRIVER,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-        }
-    }
-
-    @Override
-    public void updateUserViolation(UpdateViolationToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Violation violation = violationRepository.findByOrderId(add.getOrderID())
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
-        updateViolation(violation, add, multipartFiles);
-        violationRepository.save(violation);
-        eventService.save(OrderHistory.CHANGES_VIOLATION,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
-    }
-
-    private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {
-        violation.setViolationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()));
-        violation.setDescription(add.getViolationDescription());
-        List<String> violationImages = violation.getImages();
-        if (add.getImagesToDelete() != null) {
-            List<String> images = add.getImagesToDelete();
-            for (String image : images) {
-                fileService.delete(image);
-                violationImages.remove(image);
-            }
-        }
-        if (multipartFiles.length > 0) {
-            List<String> images = new LinkedList<>();
-            setImages(multipartFiles, images);
-            if (violation.getImages().isEmpty()) {
-                violation.setImages(images);
-            } else {
-                violation
-                    .setImages(Stream.concat(violationImages.stream(), images.stream()).collect(Collectors.toList()));
-            }
-        }
-    }
-
-    private void setImages(MultipartFile[] multipartFiles, List<String> images) {
-        for (MultipartFile multipartFile : multipartFiles) {
-            images.add(fileService.upload(multipartFile));
         }
     }
 
@@ -1894,232 +1430,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private BigOrderTableDTO buildBigOrderTableDTO(Order order) {
-        Address address = getUbsUserAddress(order);
-        return BigOrderTableDTO.builder()
-            .id(order.getId())
-            .orderStatus(order.getOrderStatus().name())
-            .orderPaymentStatus(order.getOrderPaymentStatus().name())
-            .orderDate(getOrderDate(order))
-            .paymentDate(getPaymentDate(order))
-            .clientName(getClientName(order))
-            .phoneNumber(getPhoneNumber(order))
-            .email(getEmail(order))
-            .senderName(getSenderName(order))
-            .senderPhone(getSenderPhone(order))
-            .senderEmail(getSenderEmail(order))
-            .violationsAmount(getViolations(order))
-            .region(getRegion(address))
-            .settlement(geSettlement(address))
-            .district(getDistrict(address))
-            .address(getAddress(address))
-            .commentToAddressForClient(getCommentToAddreaForClient(address))
-            .bagsAmount(getBagsAmount(order))
-            .totalOrderSum(getTotalOrderSum(order))
-            .orderCertificateCode(getCertificateCode(order))
-            .orderCertificatePoints(getCertificatePoints(order))
-            .amountDue(getAmountDue(order))
-            .commentForOrderByClient(order.getComment())
-            .payment(getPayment(order))
-            .dateOfExport(getDateOfExport(order))
-            .timeOfExport(getTimeOfExport(order))
-            .idOrderFromShop(getIdOrderFromShop(order))
-            .receivingStation(order.getReceivingStation())
-            .responsibleLogicMan(getEmployeeIdByIdPosition(order, 3L))
-            .responsibleDriver(getEmployeeIdByIdPosition(order, 5L))
-            .responsibleCaller(getEmployeeIdByIdPosition(order, 1L))
-            .responsibleNavigator(getEmployeeIdByIdPosition(order, 4L))
-            .commentsForOrder(getCommentsForOrder(order))
-            .isBlocked(order.isBlocked())
-            .blockedBy(getBlockedBy(order))
-            .build();
-    }
-
-    private long getPaymentSum(Order order) {
-        return nonNull(order.getPayment())
-            ? order.getPayment().stream().mapToLong(Payment::getAmount).map(payment -> payment / 100).sum()
-            : 0;
-    }
-
-    private int getCertificatesSum(Order order) {
-        return nonNull(order.getCertificates())
-            ? order.getCertificates().stream().mapToInt(Certificate::getPoints).sum()
-            : 0;
-    }
-
-    private Address getUbsUserAddress(Order order) {
-        if (nonNull(order.getUbsUser()) && nonNull(order.getUbsUser().getAddress())) {
-            return order.getUbsUser().getAddress();
-        }
-        return new Address();
-    }
-
-    private String getClientName(Order order) {
-        if (nonNull(order.getUbsUser())) {
-            return nonNull(order.getUbsUser().getFirstName()) && nonNull(order.getUbsUser().getLastName())
-                ? order.getUbsUser().getFirstName() + " " + order.getUbsUser().getLastName()
-                : "-";
-        }
-        return "-";
-    }
-
-    private String getPhoneNumber(Order order) {
-        return nonNull(order.getUbsUser()) ? order.getUbsUser().getPhoneNumber()
-            : "-";
-    }
-
-    private String getEmail(Order order) {
-        return nonNull(order.getUbsUser()) ? order.getUbsUser().getEmail()
-            : "-";
-    }
-
-    private String getSenderName(Order order) {
-        return nonNull(order.getUser())
-            ? order.getUser().getRecipientName() + " " + order.getUser().getRecipientSurname()
-            : "-";
-    }
-
-    private String getSenderPhone(Order order) {
-        return nonNull(order.getUser()) ? order.getUser().getRecipientPhone()
-            : "-";
-    }
-
-    private String getSenderEmail(Order order) {
-        return nonNull(order.getUser()) ? order.getUser().getRecipientEmail()
-            : "-";
-    }
-
-    private int getViolations(Order order) {
-        return nonNull(order.getUser()) ? order.getUser().getViolations()
-            : 0;
-    }
-
-    private String getRegion(Address address) {
-        return nonNull(address.getRegion()) ? address.getRegion()
-            : "-";
-    }
-
-    private String geSettlement(Address address) {
-        return nonNull(address.getCity()) ? address.getCity()
-            : "-";
-    }
-
-    private String getDistrict(Address address) {
-        return nonNull(address.getDistrict()) ? address.getDistrict()
-            : "-";
-    }
-
-    private String getCommentToAddreaForClient(Address address) {
-        return nonNull(address.getAddressComment()) ? address.getAddressComment()
-            : "-";
-    }
-
-    private String getOrderDate(Order order) {
-        return nonNull(order.getOrderDate()) ? order.getOrderDate().toString()
-            : "-";
-    }
-
-    private String getPaymentDate(Order order) {
-        return nonNull(order.getPayment())
-            ? order.getPayment().stream().map(Payment::getSettlementDate).collect(joining(", "))
-            : "-";
-    }
-
-    private String getAddress(Address address) {
-        if (nonNull(address.getStreet())
-            && !address.getStreet().isBlank()) {
-            StringBuilder addressInfo = new StringBuilder();
-            addressInfo.append(address.getStreet());
-            if (nonNull(address.getHouseNumber())
-                && !address.getHouseNumber().isBlank()) {
-                addressInfo.append(", " + address.getHouseNumber());
-            }
-            if (nonNull(address.getHouseCorpus())
-                && !address.getHouseCorpus().isBlank()) {
-                addressInfo.append(", " + address.getHouseCorpus());
-            }
-            if (nonNull(address.getEntranceNumber())
-                && !address.getEntranceNumber().isBlank()) {
-                addressInfo.append(", " + address.getEntranceNumber());
-            }
-            return addressInfo.toString();
-        }
-        return "-";
-    }
-
-    private Integer getBagsAmount(Order order) {
-        return order.getAmountOfBagsOrdered().values().stream().reduce(0, Integer::sum);
-    }
-
-    private long getTotalOrderSum(Order order) {
-        return nonNull(order.getSumTotalAmountWithoutDiscounts()) ? order.getSumTotalAmountWithoutDiscounts()
-            : 0;
-    }
-
-    private String getCertificateCode(Order order) {
-        return nonNull(order.getCertificates()) ? order.getCertificates().stream().map(Certificate::getCode)
-            .collect(joining("; "))
-            : "-";
-    }
-
-    private String getCertificatePoints(Order order) {
-        return nonNull(order.getCertificates())
-            ? order.getCertificates().stream().map(Certificate::getPoints).map(Objects::toString).collect(joining(", "))
-            : "-";
-    }
-
-    private long getAmountDue(Order order) {
-        return getTotalOrderSum(order) - (getPaymentSum(order) + getCertificatesSum(order) + order.getPointsToUse());
-    }
-
-    private String getDateOfExport(Order order) {
-        return nonNull(order.getDeliverFrom())
-            ? String.format(order.getDeliverFrom().toLocalDate().toString())
-            : "-";
-    }
-
-    private String getTimeOfExport(Order order) {
-        return nonNull(order.getDeliverFrom()) && nonNull(order.getDeliverTo())
-            ? String.format("from %s to %s", order.getDeliverFrom().toLocalTime().toString(),
-                order.getDeliverTo().toLocalTime().toString())
-            : "-";
-    }
-
-    private String getPayment(Order order) {
-        return nonNull(order.getPayment()) ? order.getPayment().stream()
-            .map(Payment::getAmount)
-            .map(amount -> amount / 100)
-            .map(Objects::toString)
-            .collect(joining(", "))
-            : "-";
-    }
-
-    private String getIdOrderFromShop(Order order) {
-        return nonNull(order.getAdditionalOrders()) ? order.getAdditionalOrders().stream().collect(joining(", "))
-            : "-";
-    }
-
-    private String getEmployeeIdByIdPosition(Order order, Long idPosition) {
-        return nonNull(order.getEmployeeOrderPositions()) ? order.getEmployeeOrderPositions().stream()
-            .filter(employeeOrderPosition -> employeeOrderPosition.getPosition().getId().equals(idPosition))
-            .map(EmployeeOrderPosition::getEmployee)
-            .map(e -> e.getFirstName() + " " + e.getLastName())
-            .reduce("", String::concat)
-            : "-";
-    }
-
-    private String getCommentsForOrder(Order order) {
-        return nonNull(order.getNote()) ? order.getNote()
-            : "-";
-    }
-
-    private String getBlockedBy(Order order) {
-        return nonNull(order.getBlockedByEmployee())
-            ? String.format("%s %s", order.getBlockedByEmployee().getFirstName(),
-                order.getBlockedByEmployee().getLastName())
-            : "-";
-    }
-
     /**
      * This is service method which is save adminComment.
      *
@@ -2189,7 +1499,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     /**
      * This is method which is updates admin page info for order.
-     * 
+     *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
      *
@@ -2219,12 +1529,83 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     orderId,
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                    lang,
                     currentUser);
             }
-        } catch (UnexistingOrderException | PaymentNotFoundException | UserNotFoundException | UBSuserNotFoundException
-            | NotFoundOrderAddressException | ReceivingStationNotFoundException | OrderNotFoundException e) {
+            if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+                updateOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                    .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(orderId),
+                        dto.getEmployeeId().toString(),
+                        dto.getPositionId(),
+                        currentUser));
+            }
+        } catch (Exception e) {
             throw new UpdateAdminPageInfoException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang) {
+        for (Long id : updateAllOrderPageDto.getOrderId()) {
+            Order order = orderRepository.findById(id).orElseThrow(
+                () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+            try {
+                checkGeneralOrderInfoAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
+                checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid);
+                checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
+            } catch (Exception e) {
+                throw new UpdateAdminPageInfoException(e.getMessage());
+            }
+        }
+    }
+
+    private void checkGeneralOrderInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto,
+        Order order, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getGeneralOrderInfo())) {
+            updateOrderDetailStatus(order.getId(), updateAllOrderPageDto.getGeneralOrderInfo(), uuid);
+        }
+    }
+
+    private void checkUserInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUserInfoDto())) {
+            ubsClientService.updateUbsUserInfoInOrder(updateAllOrderPageDto.getUserInfoDto(), uuid);
+        }
+    }
+
+    private void checkAddressExportDetailsAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getAddressExportDetailsDto())) {
+            updateAddress(updateAllOrderPageDto.getAddressExportDetailsDto(), order.getId(), uuid);
+        }
+    }
+
+    private void checkEcoNumberFromShopAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getEcoNumberFromShop())) {
+            updateEcoNumberForOrder(updateAllOrderPageDto.getEcoNumberFromShop(), order.getId(), uuid);
+        }
+    }
+
+    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid) {
+        if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
+            setOrderDetail(
+                order.getId(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
+                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
+                uuid);
+        }
+    }
+
+    private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
+        String uuid) {
+        if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
+            updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
+                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
+                    dto.getEmployeeId().toString(),
+                    dto.getPositionId(),
+                    uuid));
         }
     }
 }
