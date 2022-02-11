@@ -356,9 +356,9 @@ class SuperAdminController {
     })
     @PatchMapping("/setLimitDescription/{courierId}")
     public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
-        @PathVariable Long courierId, String limitDescription, Long languageId) {
+        @PathVariable Long courierId, String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(superAdminService.setLimitDescription(courierId, limitDescription, languageId));
+            .body(superAdminService.setLimitDescription(courierId, limitDescription));
     }
 
     /**

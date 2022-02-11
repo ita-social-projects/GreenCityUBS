@@ -6,11 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CourierTranslationRepository extends JpaRepository<CourierTranslation, Long> {
     /**
-     * Find courier translation by courier and language id.
+     * Find courier translation by courier.
      *
-     * @param courier    {@link Courier}
-     * @param languageId - id of current language.
+     * @param courier {@link Courier}
      * @return {@link CourierTranslation}
      */
-    CourierTranslation findCourierTranslationByCourierAndLanguageId(Courier courier, Long languageId);
+    CourierTranslation findCourierTranslationByCourier(Courier courier);
 }

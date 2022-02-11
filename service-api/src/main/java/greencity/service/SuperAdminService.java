@@ -151,11 +151,10 @@ public interface SuperAdminService {
      *
      * @param courierId        - id of courier
      * @param limitDescription - new limit description.
-     * @param languageId       - id of current language.
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription, Long languageId);
+    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription);
 
     /**
      * Method for include bag into minimum set of package.

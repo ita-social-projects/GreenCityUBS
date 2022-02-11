@@ -90,7 +90,7 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid);
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid);
 
     /**
      * Method that count sum order.
