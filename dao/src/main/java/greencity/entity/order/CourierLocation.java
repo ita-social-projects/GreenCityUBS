@@ -1,6 +1,7 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.LocationStatus;
 import greencity.entity.user.Location;
 import lombok.*;
 
@@ -45,4 +46,11 @@ public class CourierLocation {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courierLocations")
     List<Order> orders;
+
+    @ManyToOne
+    TariffsInfo tariffsInfo;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    LocationStatus locationStatus;
 }

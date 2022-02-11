@@ -4,6 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.*;
 import greencity.entity.order.Courier;
+import greencity.entity.order.TariffsInfo;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -445,5 +446,22 @@ class SuperAdminController {
     public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
         superAdminService.addLocationToCourier(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for get all tariff's info.
+     *
+     * @return {@link GetTariffsInfoDto}
+     * @author Bohdan Melnyk
+     */
+    @ApiOperation(value = "Get all info about tariffs.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getAllTariffs")
+    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
     }
 }

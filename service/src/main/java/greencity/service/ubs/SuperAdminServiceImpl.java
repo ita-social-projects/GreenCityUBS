@@ -36,6 +36,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final CourierLocationRepository courierLocationRepository;
     private final RegionRepository regionRepository;
     private final RegionTranslationRepository regionTranslationRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -145,7 +146,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .capacity(dto.getCapacity())
             .createdAt(LocalDate.now())
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courier(courier)
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
                     .description(serviceTranslationDto.getDescription())
@@ -182,7 +182,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .editedAt(serviceTranslation.getService().getEditedAt())
             .editedBy(serviceTranslation.getService().getEditedBy())
             .languageCode(serviceTranslation.getLanguage().getCode())
-            .courierId(serviceTranslation.getService().getCourier().getId())
             .build();
     }
 
@@ -457,6 +456,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courierLocation.setCourier(tryToFindCourierById(dto.getCourierId()));
         courierLocation.setLocation(tryToFindLocationById(dto.getLocationId()));
         courierLocationRepository.save(courierLocation);
+    }
+
+    @Override
+    public List<GetTariffsInfoDto> getAllTariffsInfo() {
+        List<TariffsInfo> tariffsInfos = tariffsInfoRepository.findAll();
+        return tariffsInfoRepository.findAll()
+            .stream()
+            .map(i -> modelMapper.map(i, GetTariffsInfoDto.class))
+            .collect(Collectors.toList());
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {

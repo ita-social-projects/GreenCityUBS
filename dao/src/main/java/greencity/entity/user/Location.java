@@ -4,14 +4,15 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.CourierLocation;
+import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@EqualsAndHashCode(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
-@ToString(exclude = {"user", "courierLocations", "bags", "locationTranslations"})
+@EqualsAndHashCode(exclude = {"user", "courierLocations", "bags", "locationTranslations", "receivingStations"})
+@ToString(exclude = {"user", "courierLocations", "bags", "locationTranslations", "receivingStations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
