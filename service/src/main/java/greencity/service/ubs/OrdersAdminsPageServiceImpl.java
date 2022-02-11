@@ -83,7 +83,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("clientName", "Ім'я замовника", "Client name"), "clientName", 20,
                 false, true, false, 6, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
-            new ColumnDTO(new TitleDto("clientPhoneNumber", "Телефон замовника", "Phone number"), "clientPhoneNumber",
+            new ColumnDTO(new TitleDto("clientPhone", "Телефон замовника", "Phone number"), "clientPhoneNumber",
                 20, false, true, false, 7, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("clientEmail", "Email замовника", "Client email"), "clientEmail", 20,
                 false, true, false, 8, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
