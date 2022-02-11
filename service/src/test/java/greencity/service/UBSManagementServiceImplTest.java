@@ -1797,7 +1797,7 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
-                user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
 
     }
 
@@ -1819,7 +1819,7 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
-                user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
+            user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
     }
 
     @Test
