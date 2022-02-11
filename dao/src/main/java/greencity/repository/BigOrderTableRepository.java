@@ -68,7 +68,7 @@ public class BigOrderTableRepository {
         getPredicateByDateFilter(predicates, sc, orderRoot);
         getPredicateByLongValue(predicates, sc, orderRoot);
 
-        if (nonNull(sc.getSearch())) {
+        if (nonNull(sc.getSearch()) && !sc.getSearch()[0].isEmpty()) {
             predicates.add(criteriaPredicate.search(sc.getSearch(), orderRoot));
         }
 
