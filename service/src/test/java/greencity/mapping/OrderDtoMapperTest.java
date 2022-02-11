@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderDtoMapperTest {
+class OrderDtoMapperTest {
 
     @InjectMocks
     OrderDtoMapper orderDtoMapper;

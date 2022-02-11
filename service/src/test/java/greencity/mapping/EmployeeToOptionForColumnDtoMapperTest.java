@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
-public class EmployeeToOptionForColumnDtoMapperTest {
+class EmployeeToOptionForColumnDtoMapperTest {
 
     @InjectMocks
     EmployeeToOptionForColumnDtoMapper employeeToOptionForColumnDtoMapper;
