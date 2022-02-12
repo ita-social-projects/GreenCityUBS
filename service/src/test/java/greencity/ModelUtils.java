@@ -732,6 +732,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static CertificateDtoForAdding getCertificateDtoForAdding() {
+        return CertificateDtoForAdding.builder()
+            .code("1111-1234")
+            .monthCount(0)
+            .points(10)
+            .build();
+    }
+
     public static Certificate getCertificate() {
         return Certificate.builder()
             .code("1111-1234")
