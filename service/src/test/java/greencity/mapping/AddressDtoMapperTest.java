@@ -10,11 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AddressDtoMapperTest {
+class AddressDtoMapperTest {
 
     @InjectMocks
     private AddressDtoMapper addressDtoMapper;
@@ -34,7 +34,7 @@ public class AddressDtoMapperTest {
         assertEquals(expectedAddress.getHouseCorpus(), actualAddress.getHouseCorpus());
         assertEquals(expectedAddress.getCoordinates(), actualAddress.getCoordinates());
         assertEquals(expectedAddress.getActual(), actualAddress.getActual());
-        assertFalse(Objects.equals(expectedAddress.getAddressStatus(), actualAddress.getAddressStatus()));
+        assertNotEquals(expectedAddress.getAddressStatus(), actualAddress.getAddressStatus());
     }
 
 }

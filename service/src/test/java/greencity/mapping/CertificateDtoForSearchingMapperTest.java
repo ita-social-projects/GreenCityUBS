@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class CertificateDtoForSearchingMapperTest {
+class CertificateDtoForSearchingMapperTest {
     @InjectMocks
     CertificateDtoForSearchingMapper certificateDtoForSearchingMapper;
 
@@ -25,7 +25,7 @@ public class CertificateDtoForSearchingMapperTest {
         assertEquals(expected.getExpirationDate(), certificateDtoForSearching.getExpirationDate());
         assertEquals(expected.getPoints(), certificateDtoForSearching.getPoints());
         assertEquals(expected.getDateOfUse(), certificateDtoForSearching.getDateOfUse());
-        assertEquals(expected.getOrder(), certificateDtoForSearching.getOrderId());
+        assertEquals(null, certificateDtoForSearching.getOrderId());
     }
 
     @Test

@@ -8,13 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class BagMappingMapperTest {
+class BagMappingMapperTest {
     @InjectMocks
     BagMappingMapper bagMappingMapper;
 
@@ -25,7 +26,7 @@ public class BagMappingMapperTest {
         order.setExportedQuantity(new HashMap<>());
         order.setConfirmedQuantity(new HashMap<>());
         List<BagMappingDto> list = bagMappingMapper.convert(order);
-        assertTrue(list.size() == 0);
+        assertEquals(0, list.size());
     }
 
     @Test
@@ -45,10 +46,10 @@ public class BagMappingMapperTest {
         order.setConfirmedQuantity(confirmedQuantity);
 
         List<BagMappingDto> list = bagMappingMapper.convert(order);
-        assertTrue(list.size() == 1);
-        assertTrue(list.get(0).getAmount() == 1);
-        assertTrue(list.get(0).getConfirmed() == 1);
-        assertTrue(list.get(0).getExported() == 1);
+        assertEquals(1, list.size());
+        assertEquals(1, list.get(0).getAmount());
+        assertEquals(1, list.get(0).getConfirmed());
+        assertEquals(1, list.get(0).getExported());
     }
 
 }

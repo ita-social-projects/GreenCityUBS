@@ -11,7 +11,7 @@ import greencity.dto.CertificateDtoForAdding;
 import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
-public class CertificateDtoForAddingMapperTest {
+class CertificateDtoForAddingMapperTest {
     @InjectMocks
     CertificateDtoForAddingMapper certificateDtoForAddingMapper;
 
