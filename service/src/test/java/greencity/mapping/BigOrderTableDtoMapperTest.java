@@ -20,4 +20,10 @@ class BigOrderTableDtoMapperTest {
         assertEquals(bigOrderTableDto, bigOrderTableDtoMapper.convert(bigOrderTableView));
     }
 
+    @Test
+    void convertNullDateValue() {
+        var bigOrderTableDto = ModelUtils.getBigOrderTableDtoByDateNullTest();
+        var bigOrderTableView = ModelUtils.getBigOrderTableViewsByDateNullTest();
+        assertEquals(bigOrderTableDto, bigOrderTableDtoMapper.convert(bigOrderTableView));
+    }
 }

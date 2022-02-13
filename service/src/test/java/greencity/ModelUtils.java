@@ -2888,6 +2888,20 @@ public class ModelUtils {
             .setBlockedBy("Blocked Test");
     }
 
+    public static BigOrderTableDTO getBigOrderTableDtoByDateNullTest() {
+        return new BigOrderTableDTO()
+            .setOrderDate("")
+            .setPaymentDate("")
+            .setDateOfExport("");
+    }
+
+    public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
+        return new BigOrderTableViews()
+            .setOrderDate(null)
+            .setPaymentDate(null)
+            .setDateOfExport(null);
+    }
+
     public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
         return Collections.singletonList(getBigOrderTableDto());
     }
