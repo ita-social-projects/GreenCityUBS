@@ -12,7 +12,7 @@ public class CourierInfoDtoMapper extends AbstractConverter<CourierLocation, Cou
             .maxAmountOfBigBags(courierLocation.getMaxAmountOfBigBags())
             .maxPriceOfOrder(courierLocation.getMaxPriceOfOrder())
             .minAmountOfBigBags(courierLocation.getMinAmountOfBigBags())
-            .minPriceOfOrder(courierLocation.getMaxPriceOfOrder())
+            .minPriceOfOrder(courierLocation.getMinPriceOfOrder())
             .build();
     }
 }

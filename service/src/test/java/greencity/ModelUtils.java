@@ -732,6 +732,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static CertificateDtoForAdding getCertificateDtoForAdding() {
+        return CertificateDtoForAdding.builder()
+            .code("1111-1234")
+            .monthCount(0)
+            .points(10)
+            .build();
+    }
+
     public static Certificate getCertificate() {
         return Certificate.builder()
             .code("1111-1234")
@@ -1267,7 +1275,7 @@ public class ModelUtils {
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
                 .build())
-            .language(Language.builder().id(1L).code("en").build())
+            .nameEng("a")
             .name("Useless paper")
             .build();
     }
@@ -1279,6 +1287,7 @@ public class ModelUtils {
             .capacity(120)
             .bagAmount(1)
             .name("Useless paper")
+            .nameEng("a")
             .build();
     }
 
@@ -1877,7 +1886,7 @@ public class ModelUtils {
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
             .description("Test")
-            .languageId(1L)
+            .nameEng("a")
             .name("Test")
             .build());
     }
@@ -1919,7 +1928,7 @@ public class ModelUtils {
     public static GetTariffServiceDto getTariffServiceDto() {
         return GetTariffServiceDto.builder()
             .fullPrice(300)
-            .languageCode("ua")
+            .nameEng("a")
             .capacity(120)
             .commission(50)
             .description("description")
@@ -1959,7 +1968,7 @@ public class ModelUtils {
         return BagTranslation.builder()
             .id(1L)
             .bag(getBag().get())
-            .language(Language.builder().id(1L).code("ua").build())
+            .nameEng("a")
             .name("Бавовняна сумка")
             .description("Description")
             .build();
@@ -2005,7 +2014,7 @@ public class ModelUtils {
         return List.of(BagTranslation.builder()
             .description("Test")
             .name("Test")
-            .language(getLanguage())
+            .nameEng("a")
             .build());
     }
 
@@ -2224,6 +2233,7 @@ public class ModelUtils {
         return BagInfoDto.builder()
             .id(1)
             .name("name")
+            .nameEng("name")
             .price(100)
             .capacity(10)
             .build();
@@ -2408,7 +2418,7 @@ public class ModelUtils {
                     .locationStatus(LocationStatus.ACTIVE)
                     .build())
                 .build())
-            .language(Language.builder().id(1L).build())
+            .nameEng("a")
             .build();
     }
 
@@ -2417,7 +2427,6 @@ public class ModelUtils {
             .bagId(1)
             .courierId(1L)
             .courierLimitsBy(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .languageId(1L)
             .limitDescription("dd")
             .maxAmountOfBigBag(1L)
             .minAmountOfBigBag(1L)
@@ -2877,6 +2886,20 @@ public class ModelUtils {
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
+    }
+
+    public static BigOrderTableDTO getBigOrderTableDtoByDateNullTest() {
+        return new BigOrderTableDTO()
+            .setOrderDate("")
+            .setPaymentDate("")
+            .setDateOfExport("");
+    }
+
+    public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
+        return new BigOrderTableViews()
+            .setOrderDate(null)
+            .setPaymentDate(null)
+            .setDateOfExport(null);
     }
 
     public static List<BigOrderTableDTO> getBigOrderTableDTOList() {

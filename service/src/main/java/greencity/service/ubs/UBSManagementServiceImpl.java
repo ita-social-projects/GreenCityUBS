@@ -318,7 +318,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId(), language.getId()).toString());
+            bagInfoDto.setName(bagTranslationRepository.findNameByBagId(bag.getId()).toString());
+            bagInfoDto.setNameEng(bagTranslationRepository.findNameEngByBagId(bag.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
         UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
@@ -491,7 +492,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         OrderDetailDto dto = new OrderDetailDto();
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        setOrderDetailDto(dto, order, language);
+        setOrderDetailDto(dto, order);
         return modelMapper.map(dto, new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType());
     }
@@ -502,10 +503,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String language, String uuid) {
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser, language);
+        collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
@@ -534,17 +535,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
-        Long orderId, User currentUser, String language) {
+        Long orderId, User currentUser) {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Long languageId = languageRepository.findIdByCode(language);
+
         StringBuilder values = new StringBuilder();
         int countOfChanges = 0;
         if (nonNull(exported)) {
-            collectEventAboutExportedWaste(exported, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutExportedWaste(exported, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed)) {
-            collectEventAboutConfirmWaste(confirmed, languageId, order, orderId, countOfChanges, values);
+            collectEventAboutConfirmWaste(confirmed, order, orderId, countOfChanges, values);
         }
         if (nonNull(confirmed) || nonNull(exported)) {
             eventService.save(values.toString(),
@@ -552,11 +553,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Long languageId, Order order,
+    private void collectEventAboutConfirmWaste(Map<Integer, Integer> confirmed, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
@@ -579,11 +580,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Long languageId, Order order,
+    private void collectEventAboutExportedWaste(Map<Integer, Integer> exported, Order order,
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey(), languageId);
+            StringBuilder bagTranslation = bagTranslationRepository.findNameByBagId(entry.getKey());
             if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
@@ -855,7 +856,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order, String language) {
+    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
@@ -864,7 +865,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByLanguageOrder(language, order.getId())
+        dto.setName(bagTranslationRepository.findAllByOrder(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));
@@ -1528,7 +1529,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     orderId,
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
                     updateOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                    lang,
                     currentUser);
             }
             if (nonNull(updateOrderPageDto.getUpdateResponsibleEmployeeDto())) {
@@ -1553,7 +1553,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
                 checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
                 checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid, lang);
+                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid);
                 checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
             } catch (Exception e) {
                 throw new UpdateAdminPageInfoException(e.getMessage());
@@ -1588,14 +1588,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid,
-        String lang) {
+    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid) {
         if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
             setOrderDetail(
                 order.getId(),
                 updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
                 updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                lang,
                 uuid);
         }
     }

@@ -352,14 +352,14 @@ class UBSClientServiceImplTest {
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(bagTranslationRepository.findAllByLanguageOrder("en", 1L))
+        when(bagTranslationRepository.findAllByOrder(1L))
             .thenReturn(List.of(getBagTranslation()));
 
         MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
 
         assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
-        verify(bagTranslationRepository, times(1)).findAllByLanguageOrder("en", 1L);
+        verify(bagTranslationRepository, times(1)).findAllByOrder(1L);
     }
 
     @Test
