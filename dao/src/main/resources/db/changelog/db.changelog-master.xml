@@ -112,4 +112,7 @@
     <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
+    <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-notification-templates-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-courier-translations-Kozak.xml"/>
 </databaseChangeLog>

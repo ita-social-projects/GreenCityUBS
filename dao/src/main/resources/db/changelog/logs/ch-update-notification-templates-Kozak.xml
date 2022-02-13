@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Natalia-5" author="Kozak">
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=3</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=4</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=5</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=6</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=7</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=8</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=9</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=12</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=13</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="notification_receiver_type" value="SITE"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
