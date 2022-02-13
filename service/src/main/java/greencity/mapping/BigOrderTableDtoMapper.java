@@ -3,7 +3,10 @@ package greencity.mapping;
 import greencity.dto.BigOrderTableDTO;
 import greencity.entity.order.BigOrderTableViews;
 import org.modelmapper.AbstractConverter;
+import org.springframework.stereotype.Component;
 
+import static java.util.Objects.nonNull;
+@Component
 public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews, BigOrderTableDTO> {
     @Override
     protected BigOrderTableDTO convert(BigOrderTableViews bigViews) {
@@ -11,11 +14,11 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setId(bigViews.getId())
             .setOrderStatus(bigViews.getOrderStatus())
             .setOrderPaymentStatus(bigViews.getOrderPaymentStatus())
-            .setOrderDate(bigViews.getOrderDate().toString())
-            .setPaymentDate(bigViews.getPaymentDate().toString())
+            .setOrderDate(nonNull(bigViews.getOrderDate()) ? bigViews.getOrderDate().toString() : "")
+            .setPaymentDate(nonNull(bigViews.getPaymentDate()) ? bigViews.getPaymentDate().toString() : "")
             .setClientName(bigViews.getClientName())
-            .setClientPhone(bigViews.getClientPhoneNumber())
             .setClientEmail(bigViews.getClientEmail())
+            .setClientPhone(bigViews.getClientPhoneNumber())
             .setSenderName(bigViews.getSenderName())
             .setSenderPhone(bigViews.getSenderPhone())
             .setSenderEmail(bigViews.getSenderEmail())
@@ -33,7 +36,7 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setGeneralDiscount(bigViews.getGeneralDiscount())
             .setAmountDue(bigViews.getAmountDue())
             .setTotalPayment(bigViews.getTotalPayment())
-            .setDateOfExport(bigViews.getDateOfExport().toString())
+            .setDateOfExport(nonNull(bigViews.getDateOfExport()) ? bigViews.getDateOfExport().toString() : "")
             .setTimeOfExport(bigViews.getTimeOfExport())
             .setIdOrderFromShop(bigViews.getIdOrderFromShop())
             .setResponsibleNavigator(bigViews.getResponsibleNavigator())
