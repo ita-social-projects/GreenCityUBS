@@ -6,6 +6,7 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.nonNull;
+
 @Component
 public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews, BigOrderTableDTO> {
     @Override
