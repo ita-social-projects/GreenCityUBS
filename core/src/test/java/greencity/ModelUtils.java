@@ -626,4 +626,13 @@ public class ModelUtils {
             .orderId(List.of(1L, 2L, 3L))
             .build();
     }
+
+    public static addBonusesToUserDto getAddBonusesToUserDto() {
+        return addBonusesToUserDto.builder()
+            .paymentId("5")
+            .receiptLink("test")
+            .settlementdate("test")
+            .amount(500L)
+            .build();
+    }
 }
