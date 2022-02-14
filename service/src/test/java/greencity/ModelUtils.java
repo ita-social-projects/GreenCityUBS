@@ -732,6 +732,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static CertificateDtoForAdding getCertificateDtoForAdding() {
+        return CertificateDtoForAdding.builder()
+            .code("1111-1234")
+            .monthCount(0)
+            .points(10)
+            .build();
+    }
+
     public static Certificate getCertificate() {
         return Certificate.builder()
             .code("1111-1234")
@@ -2878,6 +2886,20 @@ public class ModelUtils {
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
+    }
+
+    public static BigOrderTableDTO getBigOrderTableDtoByDateNullTest() {
+        return new BigOrderTableDTO()
+            .setOrderDate("")
+            .setPaymentDate("")
+            .setDateOfExport("");
+    }
+
+    public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
+        return new BigOrderTableViews()
+            .setOrderDate(null)
+            .setPaymentDate(null)
+            .setDateOfExport(null);
     }
 
     public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
