@@ -206,7 +206,8 @@ public class ModelUtils {
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
             .orders(Lists.newArrayList(getOrder()))
-            .recipientName("Alan Po")
+            .recipientName("Alan")
+            .recipientSurname("Po")
             .uuid("abc")
             .build();
     }
