@@ -40,4 +40,8 @@ public class Violation {
     @Column(nullable = false, name = "violation_level", length = 15)
     @Enumerated(EnumType.STRING)
     private ViolationLevel violationLevel;
+
+    @ManyToOne
+    @JoinColumn(name = "added_by_user_id")
+    private User addedByUser;
 }

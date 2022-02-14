@@ -115,4 +115,5 @@
     <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-notification-templates-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-courier-translations-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-added-by-user-id-to-violations-description-mapping-Yezenitskyi.xml"/>
 </databaseChangeLog>

@@ -12,7 +12,6 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
-import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -20,10 +19,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.util.Bot;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
@@ -35,7 +31,6 @@ import java.util.*;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.nonNull;
 
 public class ModelUtils {
 
@@ -1116,6 +1111,7 @@ public class ModelUtils {
             .description("violation1")
             .violationDate(localdatetime)
             .images(new LinkedList<>())
+            .addedByUser(getTestUser())
             .build();
     }
 
@@ -1140,7 +1136,7 @@ public class ModelUtils {
             16, 13, 00, 00);
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
-            .userName("Alan Po")
+            .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
             .images(new ArrayList<>())
