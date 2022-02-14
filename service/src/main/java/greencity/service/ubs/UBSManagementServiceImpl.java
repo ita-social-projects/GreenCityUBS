@@ -1610,8 +1610,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void addBonusesToUser(addBonusesToUserDto addBonusesToUserDto,
-        Long orderId) {
+    public void addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
+                                 Long orderId) {
         User currentUser = userRepository.findUserByOrderId(orderId)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)

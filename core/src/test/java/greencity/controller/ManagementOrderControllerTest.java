@@ -475,7 +475,7 @@ class ManagementOrderControllerTest {
 
     @Test
     void addPaymentDiscountTest() throws Exception {
-        addBonusesToUserDto orderPaymentDiscountDto = getAddBonusesToUserDto();
+        AddBonusesToUserDto orderPaymentDiscountDto = getAddBonusesToUserDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonDto = objectMapper.writeValueAsString(orderPaymentDiscountDto);
 

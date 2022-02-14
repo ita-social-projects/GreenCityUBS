@@ -643,8 +643,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static addBonusesToUserDto getAddBonusesToUserDto() {
-        return addBonusesToUserDto.builder()
+    public static AddBonusesToUserDto getAddBonusesToUserDto() {
+        return AddBonusesToUserDto.builder()
             .paymentId("5")
             .receiptLink("test")
             .settlementdate("test")

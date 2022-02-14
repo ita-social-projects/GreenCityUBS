@@ -968,7 +968,7 @@ public class ManagementOrderController {
      * Controller for adding bonuses to user.
      *
      * @param orderId             {@link Long}.
-     * @param addBonusesToUserDto {@link addBonusesToUserDto}.
+     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
      *
      * @author Pavlo Hural.
      */
@@ -980,8 +980,8 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping(value = "/add-bonuses-user/{id}")
-    public ResponseEntity<addBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
-        @RequestBody @Valid addBonusesToUserDto addBonusesToUserDto) {
+    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
+                                                                @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto) {
         ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

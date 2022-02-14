@@ -264,10 +264,10 @@ public interface UBSManagementService {
     /**
      * Method that add bonuses to user.
      *
-     * @param orderPaymentBonusesDto {@link addBonusesToUserDto}.
+     * @param orderPaymentBonusesDto {@link AddBonusesToUserDto}.
      * @param orderId                {@link Long}.
      *
      * @author Pavlo Hural.
      */
-    void addBonusesToUser(addBonusesToUserDto orderPaymentBonusesDto, Long orderId);
+    void addBonusesToUser(AddBonusesToUserDto orderPaymentBonusesDto, Long orderId);
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class addBonusesToUserDto {
+public class AddBonusesToUserDto {
     private Long amount;
     private String receiptLink;
     private String settlementdate;
