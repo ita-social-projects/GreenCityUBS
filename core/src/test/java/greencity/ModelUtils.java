@@ -10,6 +10,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -624,6 +625,21 @@ public class ModelUtils {
     public static UpdateAllOrderPageDto getUpdateAllOrderPageDto() {
         return UpdateAllOrderPageDto.builder()
             .orderId(List.of(1L, 2L, 3L))
+            .build();
+    }
+
+    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDTO.builder()
+            .orderId(List.of(1L))
+            .columnName("name")
+            .newValue("1")
+            .build();
+    }
+
+    public static ChangeOrderResponseDTO getChangeOrderResponseDTO() {
+        return ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(List.of(1L))
             .build();
     }
 }
