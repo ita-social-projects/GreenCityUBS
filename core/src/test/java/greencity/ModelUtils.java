@@ -290,7 +290,7 @@ public class ModelUtils {
 
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
-            .userName("Alan Po")
+            .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
