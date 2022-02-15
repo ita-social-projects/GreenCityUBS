@@ -1853,7 +1853,7 @@ class UBSManagementServiceImplTest {
         verify(userRepository).findUserByOrderId(1L);
         verify(orderRepository, times(2)).findById(1L);
         verify(userRepository).save(user);
-        verify(orderRepository).save(order);
+
     }
 
     @Test
