@@ -12,7 +12,6 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
-import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.*;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -20,10 +19,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.util.Bot;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
@@ -35,7 +31,6 @@ import java.util.*;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.nonNull;
 
 public class ModelUtils {
 
@@ -168,6 +163,10 @@ public class ModelUtils {
             .pointsToUse(700)
             .shouldBePaid(true)
             .personalData(PersonalDataDto.builder()
+                .senderEmail("test@email.ua")
+                .senderPhoneNumber("+380974563223")
+                .senderLastName("TestLast")
+                .senderFirstName("TestFirst")
                 .firstName("oleh")
                 .lastName("ivanov")
                 .id(13L)
@@ -185,6 +184,10 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
+            .senderEmail("test@email.ua")
+            .senderPhoneNumber("+380974563223")
+            .senderLastName("TestLast")
+            .senderFirstName("TestFirst")
             .address(Address.builder()
                 .id(1L)
                 .user(null)
@@ -211,7 +214,8 @@ public class ModelUtils {
             .changeOfPointsList(Lists.newArrayList(getChangeOfPoints()))
             .currentPoints(getChangeOfPoints().getAmount())
             .orders(Lists.newArrayList(getOrder()))
-            .recipientName("Alan Po")
+            .recipientName("Alan")
+            .recipientSurname("Po")
             .uuid("abc")
             .build();
     }
@@ -232,7 +236,6 @@ public class ModelUtils {
                 .paymentId("1")
                 .amount(20000L)
                 .currency("UAH")
-                .settlementDate("20.02.1990")
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
@@ -1116,6 +1119,7 @@ public class ModelUtils {
             .description("violation1")
             .violationDate(localdatetime)
             .images(new LinkedList<>())
+            .addedByUser(getTestUser())
             .build();
     }
 
@@ -1140,7 +1144,7 @@ public class ModelUtils {
             16, 13, 00, 00);
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
-            .userName("Alan Po")
+            .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
             .images(new ArrayList<>())
@@ -1176,6 +1180,7 @@ public class ModelUtils {
             .responseStatus("approved")
             .order(getOrder())
             .paymentId("1")
+            .settlementDate(LocalDate.now().toString())
             .fee(0L)
             .build();
     }
