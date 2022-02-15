@@ -1610,15 +1610,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
+    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId) {
         User currentUser = userRepository.findUserByOrderId(orderId)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
-        Long amount = addBonusesToUserDto.getAmount() - order.getPointsToUse();
-        currentUser.setCurrentPoints(Math.toIntExact(amount));
+        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, addBonusesToUserDto.getAmount());
+        Long overpayment = paymentTableInfoDto.getOverpayment() - addBonusesToUserDto.getAmount();
+        Long paidAmount = paymentTableInfoDto.getPaidAmount() - addBonusesToUserDto.getAmount();
+
+        currentUser.setCurrentPoints(Math.toIntExact(addBonusesToUserDto.getAmount()));
+        paymentTableInfoDto.setOverpayment(overpayment);
+        paymentTableInfoDto.setPaidAmount(paidAmount);
         userRepository.save(currentUser);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        List<Payment> payment = order.getPayment();
+
+        return AddBonusesToUserDto.builder()
+            .amount(addBonusesToUserDto.getAmount())
+            .settlementdate(payment.get(0).getSettlementDate())
+            .receiptLink(payment.get(0).getReceiptLink())
+            .paymentId(payment.get(0).getPaymentId())
+            .build();
     }
 }

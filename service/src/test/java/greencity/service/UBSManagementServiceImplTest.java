@@ -1851,8 +1851,9 @@ class UBSManagementServiceImplTest {
         ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
 
         verify(userRepository).findUserByOrderId(1L);
-        verify(orderRepository).findById(1L);
+        verify(orderRepository, times(2)).findById(1L);
         verify(userRepository).save(user);
+        verify(orderRepository).save(order);
     }
 
     @Test
