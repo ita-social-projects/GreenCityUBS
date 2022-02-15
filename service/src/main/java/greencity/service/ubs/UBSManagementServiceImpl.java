@@ -1625,7 +1625,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         userRepository.save(currentUser);
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         List<Payment> payment = order.getPayment();
 
         return AddBonusesToUserDto.builder()
