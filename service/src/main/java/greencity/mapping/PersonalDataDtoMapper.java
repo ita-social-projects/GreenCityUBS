@@ -26,6 +26,10 @@ public class PersonalDataDtoMapper extends AbstractConverter<UBSuser, PersonalDa
             .phoneNumber(ubsUser.getPhoneNumber())
             .email(ubsUser.getEmail())
             .addressComment(ubsUser.getAddress().getAddressComment())
+            .senderLastName(ubsUser.getSenderLastName())
+            .senderFirstName(ubsUser.getSenderFirstName())
+            .senderPhoneNumber(ubsUser.getSenderPhoneNumber())
+            .senderEmail(ubsUser.getSenderEmail())
             .build();
     }
 }
