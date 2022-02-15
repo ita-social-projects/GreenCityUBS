@@ -3238,10 +3238,10 @@ public class ModelUtils {
 
     public static AddBonusesToUserDto getAddBonusesToUserDto() {
         return AddBonusesToUserDto.builder()
-                .paymentId("5")
-                .receiptLink("test")
-                .settlementdate("test")
-                .amount(1000L)
-                .build();
+            .paymentId("5")
+            .receiptLink("test")
+            .settlementdate("test")
+            .amount(1000L)
+            .build();
     }
 }

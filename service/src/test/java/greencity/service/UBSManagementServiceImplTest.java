@@ -1848,7 +1848,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(),1L);
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
 
         verify(userRepository).findUserByOrderId(1L);
         verify(orderRepository).findById(1L);
