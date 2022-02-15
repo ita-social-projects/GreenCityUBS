@@ -118,7 +118,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date())
+            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
             .fee(Long.valueOf(dto.getFee()))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
@@ -551,6 +551,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
         order.setUser(currentUser);
+        order.setSumTotalAmountWithoutDiscounts(
+            (long) formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
 
         Payment payment = Payment.builder()
             .amount((long) (sumToPay * 100))

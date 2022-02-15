@@ -20,6 +20,7 @@ class PersonalDataDtoMapperTest {
         UBSuser ubSuser = ModelUtils.getUBSuser();
         PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
         ubSuser.setId(13L);
+        expected.setUbsUserId(null);
 
         assertEquals(expected, personalDataDtoMapper.convert(ubSuser));
     }
