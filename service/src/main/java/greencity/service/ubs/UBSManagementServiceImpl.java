@@ -1616,8 +1616,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Integer bonuses = Math.toIntExact(order.getSumTotalAmountWithoutDiscounts() - addBonusesToUserDto.getAmount());
-        currentUser.setCurrentPoints(bonuses);
+
+        Long amount = addBonusesToUserDto.getAmount() - order.getPointsToUse();
+        currentUser.setCurrentPoints(Math.toIntExact(amount));
         userRepository.save(currentUser);
     }
 }

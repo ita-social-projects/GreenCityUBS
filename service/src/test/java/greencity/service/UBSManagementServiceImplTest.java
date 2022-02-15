@@ -1840,4 +1840,26 @@ class UBSManagementServiceImplTest {
         });
     }
 
+    @Test
+    void addBonusesToUserTest() {
+        User user = getTestUser();
+        Order order = getOrder2();
+
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(),1L);
+
+        verify(userRepository).findUserByOrderId(1L);
+        verify(orderRepository).findById(1L);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void addBonusesToUserWithoutUserTest() {
+        when(userRepository.findUserByOrderId(20L)).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> {
+            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 20L);
+        });
+    }
 }

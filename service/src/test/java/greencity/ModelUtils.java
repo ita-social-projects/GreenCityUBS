@@ -3235,4 +3235,13 @@ public class ModelUtils {
             .additionalOrders(new HashSet<>())
             .build();
     }
+
+    public static AddBonusesToUserDto getAddBonusesToUserDto() {
+        return AddBonusesToUserDto.builder()
+                .paymentId("5")
+                .receiptLink("test")
+                .settlementdate("test")
+                .amount(1000L)
+                .build();
+    }
 }
