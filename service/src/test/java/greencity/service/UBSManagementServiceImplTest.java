@@ -1858,8 +1858,9 @@ class UBSManagementServiceImplTest {
     @Test
     void addBonusesToUserWithoutUserTest() {
         when(userRepository.findUserByOrderId(20L)).thenReturn(Optional.empty());
+        AddBonusesToUserDto dto = getAddBonusesToUserDto();
         assertThrows(UserNotFoundException.class, () -> {
-            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 20L);
+            ubsManagementService.addBonusesToUser(dto, 20L);
         });
     }
 }
