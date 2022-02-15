@@ -963,4 +963,26 @@ public class ManagementOrderController {
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    /**
+     * Controller for adding bonuses to user.
+     *
+     * @param orderId             {@link Long}.
+     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
+     *
+     * @author Pavlo Hural.
+     */
+    @ApiOperation(value = "add bonuses to user")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PostMapping(value = "/add-bonuses-user/{id}")
+    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
+        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto) {
+        ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

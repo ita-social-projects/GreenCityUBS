@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.*;
-import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.repository.BigOrderTableRepository;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
@@ -473,5 +471,19 @@ class ManagementOrderControllerTest {
             .param("lang", "ua")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void addPaymentDiscountTest() throws Exception {
+        AddBonusesToUserDto orderPaymentDiscountDto = getAddBonusesToUserDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonDto = objectMapper.writeValueAsString(orderPaymentDiscountDto);
+
+        mockMvc.perform(post(ubsLink + "/add-bonuses-user/{id}", 1L)
+            .content(jsonDto)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+
     }
 }
