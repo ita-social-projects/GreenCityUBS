@@ -642,4 +642,13 @@ public class ModelUtils {
             .unresolvedGoalsOrderId(List.of(1L))
             .build();
     }
+
+    public static AddBonusesToUserDto getAddBonusesToUserDto() {
+        return AddBonusesToUserDto.builder()
+            .paymentId("5")
+            .receiptLink("test")
+            .settlementdate("test")
+            .amount(500L)
+            .build();
+    }
 }

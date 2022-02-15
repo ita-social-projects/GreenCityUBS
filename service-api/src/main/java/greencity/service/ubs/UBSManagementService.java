@@ -260,4 +260,14 @@ public interface UBSManagementService {
      * @author Max Boiarchuk.
      */
     void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang);
+
+    /**
+     * Method that add bonuses to user.
+     *
+     * @param orderPaymentBonusesDto {@link AddBonusesToUserDto}.
+     * @param orderId                {@link Long}.
+     *
+     * @author Pavlo Hural.
+     */
+    void addBonusesToUser(AddBonusesToUserDto orderPaymentBonusesDto, Long orderId);
 }
