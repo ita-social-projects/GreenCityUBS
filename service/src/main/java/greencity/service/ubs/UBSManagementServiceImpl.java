@@ -1614,25 +1614,34 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId) {
         User currentUser = userRepository.findUserByOrderId(orderId)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-
-        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, addBonusesToUserDto.getAmount());
-        Long overpayment = paymentTableInfoDto.getOverpayment() - addBonusesToUserDto.getAmount();
-        Long paidAmount = paymentTableInfoDto.getPaidAmount() - addBonusesToUserDto.getAmount();
-
-        currentUser.setCurrentPoints(Math.toIntExact(addBonusesToUserDto.getAmount()));
-        paymentTableInfoDto.setOverpayment(overpayment);
-        paymentTableInfoDto.setPaidAmount(paidAmount);
-        userRepository.save(currentUser);
-
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        List<Payment> payment = order.getPayment();
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+        Payment payment = Payment.builder()
+            .amount(addBonusesToUserDto.getAmount())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .paymentStatus(PaymentStatus.PAID)
+            .order(order)
+            .settlementDate(addBonusesToUserDto.getSettlementdate())
+            .orderStatus("approved")
+            .currency("UAH")
+            .build();
+
+        List<Payment> payments = order.getPayment();
+        payments.add(payment);
+        Integer bonuses = order.getPointsToUse() - addBonusesToUserDto.getAmount().intValue();
+        order.setPointsToUse(bonuses);
+        currentUser.setCurrentPoints(bonuses);
+        paymentRepository.save(payment);
+        orderRepository.save(order);
+        userRepository.save(currentUser);
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
-            .settlementdate(payment.get(0).getSettlementDate())
-            .receiptLink(payment.get(0).getReceiptLink())
-            .paymentId(payment.get(0).getPaymentId())
+            .settlementdate(addBonusesToUserDto.getSettlementdate())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
     }
 }
