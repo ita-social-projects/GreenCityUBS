@@ -1610,15 +1610,38 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public void addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
+    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId) {
         User currentUser = userRepository.findUserByOrderId(orderId)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        Long amount = addBonusesToUserDto.getAmount() - order.getPointsToUse();
-        currentUser.setCurrentPoints(Math.toIntExact(amount));
+        Payment payment = Payment.builder()
+            .amount(addBonusesToUserDto.getAmount())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .paymentStatus(PaymentStatus.PAID)
+            .order(order)
+            .settlementDate(addBonusesToUserDto.getSettlementdate())
+            .orderStatus("approved")
+            .currency("UAH")
+            .build();
+
+        List<Payment> payments = order.getPayment();
+        payments.add(payment);
+        Integer bonuses = order.getPointsToUse() - addBonusesToUserDto.getAmount().intValue();
+        order.setPointsToUse(bonuses);
+        currentUser.setCurrentPoints(bonuses);
+        paymentRepository.save(payment);
+        orderRepository.save(order);
         userRepository.save(currentUser);
+
+        return AddBonusesToUserDto.builder()
+            .amount(addBonusesToUserDto.getAmount())
+            .settlementdate(addBonusesToUserDto.getSettlementdate())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .build();
     }
 }
