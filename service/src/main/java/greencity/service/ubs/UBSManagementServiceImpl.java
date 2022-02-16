@@ -1608,4 +1608,31 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     uuid));
         }
     }
+
+    @Override
+    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
+        Long orderId) {
+        User currentUser = userRepository.findUserByOrderId(orderId)
+            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+
+        List<Payment> payments = order.getPayment();
+        Long paidAmount = calculatePaidAmount(order);
+        paidAmount = paidAmount - addBonusesToUserDto.getAmount();
+        payments.get(0).setAmount(paidAmount);
+
+        Integer bonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
+        currentUser.setCurrentPoints(bonuses);
+        order.setPayment(payments);
+        orderRepository.save(order);
+        userRepository.save(currentUser);
+
+        return AddBonusesToUserDto.builder()
+            .amount(addBonusesToUserDto.getAmount())
+            .settlementdate(addBonusesToUserDto.getSettlementdate())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .build();
+    }
 }

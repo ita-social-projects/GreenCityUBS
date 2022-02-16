@@ -310,9 +310,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification) {
         executor.execute(() -> {
+            sendEmailNotification(notification);
             viberService.sendNotification(notification);
             telegramService.sendNotification(notification);
-            sendEmailNotification(notification);
         });
     }
 

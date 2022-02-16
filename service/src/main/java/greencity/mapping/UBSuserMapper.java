@@ -25,6 +25,10 @@ public class UBSuserMapper extends AbstractConverter<PersonalDataDto, UBSuser> {
             .lastName(personalDataDto.getLastName())
             .email(personalDataDto.getEmail())
             .phoneNumber(personalDataDto.getPhoneNumber())
+            .senderFirstName(personalDataDto.getSenderFirstName())
+            .senderLastName(personalDataDto.getSenderLastName())
+            .senderPhoneNumber(personalDataDto.getSenderPhoneNumber())
+            .senderEmail(personalDataDto.getSenderEmail())
             .build();
     }
 }
