@@ -1617,23 +1617,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        Payment payment = Payment.builder()
-            .amount(addBonusesToUserDto.getAmount())
-            .paymentId(addBonusesToUserDto.getPaymentId())
-            .receiptLink(addBonusesToUserDto.getReceiptLink())
-            .paymentStatus(PaymentStatus.PAID)
-            .order(order)
-            .settlementDate(addBonusesToUserDto.getSettlementdate())
-            .orderStatus("approved")
-            .currency("UAH")
-            .build();
-
         List<Payment> payments = order.getPayment();
-        payments.add(payment);
-        Integer bonuses = order.getPointsToUse() - addBonusesToUserDto.getAmount().intValue();
-        order.setPointsToUse(bonuses);
+        Long paidAmount = calculatePaidAmount(order);
+        paidAmount = paidAmount - addBonusesToUserDto.getAmount();
+        payments.get(0).setAmount(paidAmount);
+
+        Integer bonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
         currentUser.setCurrentPoints(bonuses);
-        paymentRepository.save(payment);
+        order.setPayment(payments);
         orderRepository.save(order);
         userRepository.save(currentUser);
 
