@@ -30,6 +30,7 @@ import java.util.List;
 
 import static greencity.ModelUtils.getUuid;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -243,5 +244,20 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllTariffsInfoTest() throws Exception {
+        GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(getTariffsInfoDto);
+
+        Mockito.when(superAdminService.getAllTariffsInfo()).thenReturn(List.of(ModelUtils.getAllTariffsInfoDto()));
+
+        mockMvc.perform(get(ubsLink + "/getAllTariffs")
+                        .content(result)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }

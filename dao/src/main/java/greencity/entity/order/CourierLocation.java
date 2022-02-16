@@ -49,8 +49,4 @@ public class CourierLocation {
 
     @ManyToOne
     TariffsInfo tariffsInfo;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    LocationStatus locationStatus;
 }

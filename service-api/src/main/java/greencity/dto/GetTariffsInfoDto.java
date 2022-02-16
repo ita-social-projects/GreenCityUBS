@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -24,4 +25,5 @@ public class GetTariffsInfoDto {
     private List<CourierTranslationDto> courierTranslationDtos;
     private String locationStatus;
     private String creator;
+    private LocalDate createdAt;
 }

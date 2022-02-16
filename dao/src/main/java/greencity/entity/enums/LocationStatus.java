@@ -1,7 +1,7 @@
 package greencity.entity.enums;
 
 public enum LocationStatus {
-    ACTIVE("Активний"), DEACTIVATED("Неактивний");
+    ACTIVE("Активно"), DEACTIVATED("Неактивно");
 
     private String status;
 

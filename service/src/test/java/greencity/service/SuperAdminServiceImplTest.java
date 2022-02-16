@@ -64,6 +64,8 @@ class SuperAdminServiceImplTest {
     private RegionRepository regionRepository;
     @Mock
     private RegionTranslationRepository regionTranslationRepository;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -660,5 +662,14 @@ class SuperAdminServiceImplTest {
         verify(modelMapper).map(dto, CourierLocation.class);
         verify(courierRepository).findById(1L);
         verify(locationRepository).findById(1L);
+    }
+
+    @Test
+    void getAllTariffsInfoTest() {
+        when(tariffsInfoRepository.findAll()).thenReturn(List.of(ModelUtils.getTariffsInfo()));
+
+        List<GetTariffsInfoDto> tariffsInfos = superAdminService.getAllTariffsInfo();
+
+        verify(tariffsInfoRepository).findAll();
     }
 }

@@ -454,7 +454,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo() {
-        List<TariffsInfo> tariffsInfos = tariffsInfoRepository.findAll();
         return tariffsInfoRepository.findAll()
             .stream()
             .map(i -> modelMapper.map(i, GetTariffsInfoDto.class))

@@ -94,6 +94,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
         getTariffsInfoDto.setCourierTranslationDtos(courierTranslationDtos);
         getTariffsInfoDto
             .setCreator(source.getCreator().getRecipientName() + " " + source.getCreator().getRecipientSurname());
+        getTariffsInfoDto.setCreatedAt(source.getCreatedAt());
         return getTariffsInfoDto;
     }
 }
