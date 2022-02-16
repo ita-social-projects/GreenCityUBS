@@ -10,6 +10,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -290,7 +291,7 @@ public class ModelUtils {
 
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
-            .userName("Alan Po")
+            .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
             .violationDate(localdatetime)
@@ -628,45 +629,69 @@ public class ModelUtils {
             .build();
     }
 
-    public static RegionTranslationDto getSingleRegionTranslationDto(){
-        return RegionTranslationDto.builder()
-                .regionName("Lviv")
-                .languageCode("ua")
-                .build();
+    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDTO.builder()
+            .orderId(List.of(1L))
+            .columnName("name")
+            .newValue("1")
+            .build();
     }
 
-    public static LocationTranslationDto getLocationTranslationDto(){
+    public static ChangeOrderResponseDTO getChangeOrderResponseDTO() {
+        return ChangeOrderResponseDTO.builder()
+            .httpStatus(HttpStatus.OK)
+            .unresolvedGoalsOrderId(List.of(1L))
+            .build();
+    }
+
+    public static AddBonusesToUserDto getAddBonusesToUserDto() {
+        return AddBonusesToUserDto.builder()
+            .paymentId("5")
+            .receiptLink("test")
+            .settlementdate("test")
+            .amount(500L)
+            .build();
+    }
+
+    public static RegionTranslationDto getSingleRegionTranslationDto() {
+        return RegionTranslationDto.builder()
+            .regionName("Lviv")
+            .languageCode("ua")
+            .build();
+    }
+
+    public static LocationTranslationDto getLocationTranslationDto() {
         return LocationTranslationDto.builder()
-                .locationName("Lviv")
-                .languageCode("ua")
-                .build();
+            .locationName("Lviv")
+            .languageCode("ua")
+            .build();
     }
 
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         LocationsDto locationsDto = LocationsDto.builder()
-                .locationId(1L)
-                .locationTranslationDtoList(List.of(getLocationTranslationDto()))
-                .locationStatus("ACTIVE")
-                .latitude(100.0)
-                .longitude(100.0)
-                .build();
+            .locationId(1L)
+            .locationTranslationDtoList(List.of(getLocationTranslationDto()))
+            .locationStatus("ACTIVE")
+            .latitude(100.0)
+            .longitude(100.0)
+            .build();
         LocationInfoDto locationInfoDto = LocationInfoDto.builder()
-                .locationsDto(List.of(locationsDto))
-                .regionId(1L)
-                .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
-                .build();
+            .locationsDto(List.of(locationsDto))
+            .regionId(1L)
+            .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
+            .build();
         return GetTariffsInfoDto.builder()
-                .locationInfoDto(locationInfoDto)
-                .cardId(1L)
-                .receivingStationDto(getReceivingStationDto())
-                .courierTranslationDtos(List.of(CourierTranslationDto.builder()
-                        .name("UBS")
-                        .languageCode("ua")
-                        .limitDescription("blablabla")
-                        .build()))
-                .createdAt(LocalDate.of(22, 2, 12))
-                .creator("Me")
-                .locationStatus("ACTIVE")
-                .build();
+            .locationInfoDto(locationInfoDto)
+            .cardId(1L)
+            .receivingStationDto(getReceivingStationDto())
+            .courierTranslationDtos(List.of(CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("ua")
+                .limitDescription("blablabla")
+                .build()))
+            .createdAt(LocalDate.of(22, 2, 12))
+            .creator("Me")
+            .locationStatus("ACTIVE")
+            .build();
     }
 }

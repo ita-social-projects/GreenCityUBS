@@ -12,10 +12,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = "email")
+@EqualsAndHashCode
 @ToString
 public class PersonalDataDto implements Serializable {
-    @NotBlank
     @Email
     private String email;
     @NotBlank
@@ -30,6 +29,10 @@ public class PersonalDataDto implements Serializable {
     @NotBlank
     @ValidPhoneNumber
     private String phoneNumber;
+    private String senderFirstName;
+    private String senderLastName;
+    private String senderEmail;
+    private String senderPhoneNumber;
 
     @Length(max = 200)
     private String addressComment;

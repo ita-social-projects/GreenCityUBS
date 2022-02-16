@@ -112,7 +112,6 @@
     <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
-
     <include file="db/changelog/logs/20220902-ch-add-table-tariffs-info-Melnyk.xml"/>
     <include file="db/changelog/logs/20223101-ch-add-column-tariffs-info-id-Melnyk.xml"/>
     <include file="db/changelog/logs/20221002-ch-add-column-creator-id-in-tariffs-info-table-Melnyk.xml"/>

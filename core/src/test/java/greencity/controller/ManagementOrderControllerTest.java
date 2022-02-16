@@ -474,4 +474,18 @@ class ManagementOrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
+
+    @Test
+    void addPaymentDiscountTest() throws Exception {
+        AddBonusesToUserDto addBonusesToUserDto = getAddBonusesToUserDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonDto = objectMapper.writeValueAsString(addBonusesToUserDto);
+
+        mockMvc.perform(post(ubsLink + "/add-bonuses-user/{id}", 1L)
+            .content(jsonDto)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+
+    }
 }

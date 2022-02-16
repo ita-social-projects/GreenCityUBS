@@ -1,9 +1,10 @@
 package greencity.controller;
 
+import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
-
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.*;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
-
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
-
+import java.util.ArrayList;
+import java.util.List;
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -37,8 +39,7 @@ class AdminUbsControllerTest {
     @InjectMocks
     AdminUbsController adminUbsController;
 
-    private Principal principal = getUuid();
-
+    private final Principal principal = getUuid();
     @Mock
     RestClient restClient;
 
@@ -57,4 +58,58 @@ class AdminUbsControllerTest {
             .andExpect(status().isOk());
         verify(ordersAdminsPageService).getParametersForOrdersTable("35467585763t4sfgchjfuyetf");
     }
+
+    @Test
+    void saveNewValueFromOrdersTableTest() throws Exception {
+        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        ChangeOrderResponseDTO changeOrderResponseDTO = ModelUtils.getChangeOrderResponseDTO();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        when(ordersAdminsPageService.chooseOrdersDataSwitcher(null, dto)).thenReturn(changeOrderResponseDTO);
+
+        mockMvc.perform(put(management + "/changingOrder")
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
+            .content(json))
+            .andExpect(status().isOk());
+
+        verify(ordersAdminsPageService).chooseOrdersDataSwitcher(null, dto);
+    }
+
+    @Test
+    void getAllOrdersForUserTest() throws Exception {
+        List<Long> listOfOrdersId = List.of(1L);
+        List<Long> unblockedOrdersId = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(listOfOrdersId);
+
+        when(ordersAdminsPageService.unblockOrder(null, listOfOrdersId)).thenReturn(unblockedOrdersId);
+
+        mockMvc.perform(put(management + "/unblockOrders")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isOk());
+
+        verify(ordersAdminsPageService).unblockOrder(null, listOfOrdersId);
+    }
+
+    @Test
+    void blockOrdersTest() throws Exception {
+        List<BlockedOrderDTO> dto = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        when(ordersAdminsPageService.requestToBlockOrder(null, List.of())).thenReturn(dto);
+
+        mockMvc.perform(put(management + "/blockOrders")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isOk());
+
+        verify(ordersAdminsPageService).requestToBlockOrder(null, List.of());
+    }
+
 }

@@ -16,10 +16,10 @@ import java.util.List;
 @EqualsAndHashCode
 public class ViolationDetailInfoDto {
     private Long orderId;
-    private String userName;
     private ViolationLevel violationLevel;
     private String description;
     @Nullable
     private List<String> images;
     private LocalDateTime violationDate;
+    private String addedByUser;
 }
