@@ -943,6 +943,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid) {
+        ReceivingStation station = receivingStationRepository.findById(dto.getReceivingStationId())
+            .orElseThrow(() -> new ReceivingStationNotFoundException(
+                RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getReceivingStationId()));
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
@@ -967,9 +970,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
                 order.setDeliverTo(dateAndTimeDeliveryTo);
             }
-            order.setReceivingStation(dto.getReceivingStation());
+            order.setReceivingStation(station);
             orderRepository.save(order);
-            final String receivingStationValue = order.getReceivingStation();
+            final String receivingStationValue = order.getReceivingStation().getName();
             final LocalDateTime deliverFrom = order.getDeliverFrom();
             collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
         }
@@ -1002,7 +1005,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 + "T" + order.getDeliverFrom().toLocalTime() : null)
             .timeDeliveryFrom(order.getDeliverFrom() != null ? order.getDeliverFrom().toString() : null)
             .timeDeliveryTo(order.getDeliverTo() != null ? order.getDeliverTo().toString() : null)
-            .receivingStation(order.getReceivingStation())
+            .receivingStation(order.getReceivingStation().getName())
             .build();
     }
 
