@@ -653,45 +653,45 @@ public class ModelUtils {
             .build();
     }
 
-    public static RegionTranslationDto getSingleRegionTranslationDto(){
+    public static RegionTranslationDto getSingleRegionTranslationDto() {
         return RegionTranslationDto.builder()
-                .regionName("Lviv")
-                .languageCode("ua")
-                .build();
+            .regionName("Lviv")
+            .languageCode("ua")
+            .build();
     }
 
-    public static LocationTranslationDto getLocationTranslationDto(){
+    public static LocationTranslationDto getLocationTranslationDto() {
         return LocationTranslationDto.builder()
-                .locationName("Lviv")
-                .languageCode("ua")
-                .build();
+            .locationName("Lviv")
+            .languageCode("ua")
+            .build();
     }
 
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         LocationsDto locationsDto = LocationsDto.builder()
-                .locationId(1L)
-                .locationTranslationDtoList(List.of(getLocationTranslationDto()))
-                .locationStatus("ACTIVE")
-                .latitude(100.0)
-                .longitude(100.0)
-                .build();
+            .locationId(1L)
+            .locationTranslationDtoList(List.of(getLocationTranslationDto()))
+            .locationStatus("ACTIVE")
+            .latitude(100.0)
+            .longitude(100.0)
+            .build();
         LocationInfoDto locationInfoDto = LocationInfoDto.builder()
-                .locationsDto(List.of(locationsDto))
-                .regionId(1L)
-                .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
-                .build();
+            .locationsDto(List.of(locationsDto))
+            .regionId(1L)
+            .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
+            .build();
         return GetTariffsInfoDto.builder()
-                .locationInfoDto(locationInfoDto)
-                .cardId(1L)
-                .receivingStationDto(getReceivingStationDto())
-                .courierTranslationDtos(List.of(CourierTranslationDto.builder()
-                        .name("UBS")
-                        .languageCode("ua")
-                        .limitDescription("blablabla")
-                        .build()))
-                .createdAt(LocalDate.of(22, 2, 12))
-                .creator("Me")
-                .locationStatus("ACTIVE")
-                .build();
+            .locationInfoDto(locationInfoDto)
+            .cardId(1L)
+            .receivingStationDto(getReceivingStationDto())
+            .courierTranslationDtos(List.of(CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("ua")
+                .limitDescription("blablabla")
+                .build()))
+            .createdAt(LocalDate.of(22, 2, 12))
+            .creator("Me")
+            .locationStatus("ACTIVE")
+            .build();
     }
 }
