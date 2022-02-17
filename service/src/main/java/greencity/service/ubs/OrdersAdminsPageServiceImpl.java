@@ -56,9 +56,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     public TableParamsDTO getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
+        String exportAddress = "EXPORT_ADDRESS";
         String orderDetails = "ORDERS_DETAILS";
-        String certificateStr = "CERTIFICATE";
-
+        String exportDetails = "EXPORT_DETAILS";
         String responsible = "RESPONSIBLE";
 
         OrderPage orderPage = new OrderPage();
@@ -97,20 +97,20 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("violationsAmount", "Кількість порушень клієнта", "Violations"),
                 "violationsAmount", 20, false, true, false, 12, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("region", "Область", "Region"), "region", 20, false,
-                true, false, 35, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+                true, false, 35, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("settlement", "Населений пункт", "Settlement"), "settlement", 20,
                 false,
-                true, false, 36, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+                true, false, 36, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("district", "Район", "District"), "district", 20, false,
-                true, false, 37, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+                true, false, 37, EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(new TitleDto("address", "Адреса", "Address"), "address", 20, false, true,
                 false, 15,
-                EditType.READ_ONLY, new ArrayList<>(), orderDetails),
+                EditType.READ_ONLY, new ArrayList<>(), exportAddress),
             new ColumnDTO(
                 new TitleDto("commentToAddressForClient", "Коментар до адреси від клієнта",
                     "Comment to address for client"),
                 "commentToAddressForClient", 20, false, true, false, 16, EditType.READ_ONLY, new ArrayList<>(),
-                orderDetails),
+                exportAddress),
             new ColumnDTO(new TitleDto("bagsAmount", "К-сть пакетів", "Bags amount"), "bagAmount", 20, false, true,
                 false,
                 17,
@@ -119,11 +119,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 20, false, true, false, 18, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("orderCertificateCode", "Номер сертифікату", "Order certificate code"),
                 "orderCertificateCode",
-                20, false, true, false, 19, EditType.READ_ONLY, new ArrayList<>(), certificateStr),
+                20, false, true, false, 19, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("generalDiscount", "Загальна знижка", "General discount"),
-                "generalDiscount", 20, false, true, false, 20, EditType.READ_ONLY, new ArrayList<>(), certificateStr),
+                "generalDiscount", 20, false, true, false, 20, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("amountDue", "Сума до оплати", "Amount due"), "amountDue", 20,
-                false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), certificateStr),
+                false, true, false, 21, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(
                 new TitleDto("commentForOrderByClient", "Коментар до замовлення від клієнта",
                     "Comment for order by client"),
@@ -134,15 +134,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto(DATE_OF_EXPORT, "Дата вивезення", "Date of export"), DATE_OF_EXPORT, 20,
-                false, true, true, 24, EditType.DATE, new ArrayList<>(), orderDetails),
+                false, true, true, 24, EditType.DATE, new ArrayList<>(), exportDetails),
             new ColumnDTO(new TitleDto(TIME_OF_EXPORT, "Час вивезення", "Time of export"), TIME_OF_EXPORT, 20,
-                false, true, false, 25, EditType.TIME, new ArrayList<>(), orderDetails),
+                false, true, false, 25, EditType.TIME, new ArrayList<>(), exportDetails),
             new ColumnDTO(new TitleDto("idOrderFromShop", "Номер замовлення з магазину", "Id order from shop"),
                 "idOrderFromShop",
                 20, false, true, false, 26, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto(RECEIVING, "Станція приймання", "Receiving station"),
                 RECEIVING, 20, false, true, true, 27, EditType.SELECT, receivingStationList(),
-                orderDetails),
+                exportDetails),
             new ColumnDTO(new TitleDto(CALLER, "Менеджер обдзвону", "Responsible caller"), CALLER, 20,
                 false, true, true, 29, EditType.SELECT, callerList(), responsible),
             new ColumnDTO(new TitleDto(LOGIC_MAN, "Логіст", "Responsible logic man"), LOGIC_MAN, 20, false,
@@ -244,9 +244,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(
             new TitleDto("ORDERS_INFO", "Інформація про замовлення", "order info"),
             new TitleDto("CUSTOMERS_INFO", "Інформація про клієнта", "customers info"),
+            new TitleDto("EXPORT_ADDRESS", "Адреса вивезення", "export address"),
             new TitleDto("ORDERS_DETAILS", "Деталі замовлення", "orders details"),
-            new TitleDto("CERTIFICATE", "Сертифікат", "certificate"),
-            new TitleDto("RESPONSIBLE", "Відповідальні", "responsible persons"))));
+            new TitleDto("EXPORT_DETAILS", "Деталі вивезення", "export details"),
+            new TitleDto("RESPONSIBLE", "Відповідальні особи", "responsible persons"))));
     }
 
     private List<OptionForColumnDTO> receivingStationList() {

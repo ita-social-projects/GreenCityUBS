@@ -1864,7 +1864,9 @@ class UBSManagementServiceImplTest {
 
         verify(userRepository).findUserByOrderId(1L);
         verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
         verify(userRepository).save(user);
+
     }
 
     @Test
