@@ -116,9 +116,9 @@
     <include file="db/changelog/logs/ch-insert-into-notification-templates-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-courier-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-added-by-user-id-to-violations-description-mapping-Yezenitskyi.xml"/>
-
     <include file="db/changelog/logs/20220902-ch-add-table-tariffs-info-Melnyk.xml"/>
     <include file="db/changelog/logs/20223101-ch-add-column-tariffs-info-id-Melnyk.xml"/>
     <include file="db/changelog/logs/20221002-ch-add-column-creator-id-in-tariffs-info-table-Melnyk.xml"/>
     <include file="db/changelog/logs/20221102-ch-add-column-created-at-into-tariffs-info-table-Melnyk.xml"/>
 </databaseChangeLog>
+

@@ -168,6 +168,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private GetServiceDto getService(ServiceTranslation serviceTranslation) {
         return GetServiceDto.builder()
+            .courierId(serviceTranslation.getService().getCourier().getId())
             .description(serviceTranslation.getDescription())
             .price(serviceTranslation.getService().getBasePrice())
             .capacity(serviceTranslation.getService().getCapacity())

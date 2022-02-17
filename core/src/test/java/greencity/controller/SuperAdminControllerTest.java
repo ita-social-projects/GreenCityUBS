@@ -256,8 +256,8 @@ class SuperAdminControllerTest {
         Mockito.when(superAdminService.getAllTariffsInfo()).thenReturn(List.of(ModelUtils.getAllTariffsInfoDto()));
 
         mockMvc.perform(get(ubsLink + "/getAllTariffs")
-                        .content(result)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .content(result)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }
