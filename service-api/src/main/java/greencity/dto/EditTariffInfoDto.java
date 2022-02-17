@@ -20,6 +20,5 @@ public class EditTariffInfoDto {
     private Long courierId;
     private Integer bagId;
     private String limitDescription;
-    private Long languageId;
     private Long locationId;
 }

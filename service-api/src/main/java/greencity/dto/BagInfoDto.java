@@ -13,4 +13,5 @@ public class BagInfoDto {
     Integer price;
     Integer id;
     String name;
+    String nameEng;
 }

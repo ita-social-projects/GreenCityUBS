@@ -108,4 +108,12 @@
     <include file="db/changelog/logs/ch-insert-into-region-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-location-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-update-locations-table-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-receiving_station_id-to-orders-Kuzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-some-columns-to-ubsUser-for-Sender-Kuzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-add-big_order_table-view-Kuzbyt_Maksym.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-language_id-in-table-bag_translations-Boiarchuk.xml"/>
+    <include file="db/changelog/logs/ch-update-notification-templates-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-notification-templates-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-courier-translations-Kozak.xml"/>
+    <include file="db/changelog/logs/ch-add-column-added-by-user-id-to-violations-description-mapping-Yezenitskyi.xml"/>
 </databaseChangeLog>

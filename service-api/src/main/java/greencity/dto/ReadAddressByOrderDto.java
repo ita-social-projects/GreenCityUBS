@@ -10,6 +10,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
+
 public class ReadAddressByOrderDto implements Serializable {
     @Length(max = 30)
     private String district;

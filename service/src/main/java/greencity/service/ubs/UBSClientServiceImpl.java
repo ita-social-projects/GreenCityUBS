@@ -118,7 +118,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date())
+            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
             .fee(Long.valueOf(dto.getFee()))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
@@ -148,7 +148,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .capacity(bt.getBag().getCapacity())
             .price(bt.getBag().getFullPrice())
             .name(bt.getName())
-            .code(bt.getLanguage().getCode())
+            .nameEng(bt.getNameEng())
             .locationId(bt.getBag().getLocation().getId())
             .build();
     }
@@ -430,7 +430,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            List<BagTranslation> bags = bagTranslationRepository.findAllByLanguageOrder(locale.getLanguage(), orderId);
+            List<BagTranslation> bags = bagTranslationRepository.findAllByOrder(orderId);
             return buildOrderBagDto(order, bags);
         } else {
             throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
@@ -456,6 +456,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             bagOrderDtoList.add(BagOrderDto.builder()
                 .bagId(bag.getBag().getId())
                 .name(bag.getName())
+                .nameEng(bag.getNameEng())
                 .capacity(bag.getBag().getCapacity())
                 .price(bag.getBag().getPrice())
                 .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
@@ -550,6 +551,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
         order.setUser(currentUser);
+        order.setSumTotalAmountWithoutDiscounts(
+            (long) formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
 
         Payment payment = Payment.builder()
             .amount((long) (sumToPay * 100))

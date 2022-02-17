@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Kuzbyt-7" author="Maksym Kuzbyt">
+        <addColumn tableName="orders">
+            <column name="receiving_station_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="receiving_station_id"
+                                 baseTableName="orders"
+                                 constraintName="fk_receiving_station"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"
+        />
+
+        <rollback>
+            <dropForeignKeyConstraint  baseTableCatalogName="receiving_station_id"
+                                       baseTableName="orders"
+                                       constraintName="fk_receiving_station"/>
+            <dropColumn tableName="ubs_user">
+                <column name="receiving_station_id"/>
+            </dropColumn>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

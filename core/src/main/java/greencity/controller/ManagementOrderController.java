@@ -15,6 +15,7 @@ import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.maneger.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -44,6 +45,7 @@ public class ManagementOrderController {
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
     private final NotificationeService notificationeService;
+    private final BigOrderTableServiceView bigOrderTableService;
 
     /**
      * Constructor with parameters.
@@ -51,12 +53,13 @@ public class ManagementOrderController {
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
         ViolationService violationService, CoordinateService coordinateService,
-        NotificationeService notificationeService) {
+        NotificationeService notificationeService, BigOrderTableServiceView bigOrderTableService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
         this.notificationeService = notificationeService;
+        this.bigOrderTableService = bigOrderTableService;
     }
 
     /**
@@ -244,7 +247,7 @@ public class ManagementOrderController {
         OrderSearchCriteria criteria,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrders(page, criteria, uuid));
+            .body(bigOrderTableService.getOrders(page, criteria, uuid));
     }
 
     /**
@@ -264,7 +267,7 @@ public class ManagementOrderController {
     @PutMapping("/changeOrdersTableView")
     public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
         String titles) {
-        ubsManagementService.changeOrderTableView(uuid, titles);
+        bigOrderTableService.changeOrderTableView(uuid, titles);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -284,7 +287,7 @@ public class ManagementOrderController {
     @GetMapping("/getOrdersViewParameters")
     public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getCustomTableParameters(uuid));
+            .body(bigOrderTableService.getCustomTableParameters(uuid));
     }
 
     /**
@@ -959,5 +962,27 @@ public class ManagementOrderController {
         @RequestParam String lang) {
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for adding bonuses to user.
+     *
+     * @param orderId             {@link Long}.
+     * @param addBonusesToUserDto {@link AddBonusesToUserDto}.
+     *
+     * @author Pavlo Hural.
+     */
+    @ApiOperation(value = "add bonuses to user")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PostMapping(value = "/add-bonuses-user/{id}")
+    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
+        @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId));
     }
 }

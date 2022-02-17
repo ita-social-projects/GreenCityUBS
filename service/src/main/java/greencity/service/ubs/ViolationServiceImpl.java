@@ -85,7 +85,7 @@ public class ViolationServiceImpl implements ViolationService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
-            Violation violation = violationBuilder(add, order);
+            Violation violation = violationBuilder(add, order, currentUser);
             if (multipartFiles.length > 0) {
                 List<String> images = new LinkedList<>();
                 setImages(multipartFiles, images);
@@ -102,12 +102,13 @@ public class ViolationServiceImpl implements ViolationService {
         }
     }
 
-    private Violation violationBuilder(AddingViolationsToUserDto add, Order order) {
+    private Violation violationBuilder(AddingViolationsToUserDto add, Order order, User addedByUser) {
         return Violation.builder()
             .violationLevel(ViolationLevel.valueOf(add.getViolationLevel().toUpperCase()))
             .description(add.getViolationDescription())
             .violationDate(order.getOrderDate())
             .order(order)
+            .addedByUser(addedByUser)
             .build();
     }
 
@@ -122,15 +123,21 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     @Transactional
     public Optional<ViolationDetailInfoDto> getViolationDetailsByOrderId(Long orderId) {
-        User user =
-            userRepository.findUserByOrderId(orderId).orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
-        return violationRepository.findByOrderId(orderId).map(v -> ViolationDetailInfoDto.builder()
+        Optional<Violation> optionalViolation = violationRepository.findByOrderId(orderId);
+        if (optionalViolation.isEmpty()) {
+            return Optional.empty();
+        }
+        Violation violation = optionalViolation.get();
+        User addedByUser = userRepository.findById(violation.getAddedByUser().getId())
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
+
+        return Optional.of(ViolationDetailInfoDto.builder()
             .orderId(orderId)
-            .userName(user.getRecipientName())
-            .violationLevel(v.getViolationLevel())
-            .description(v.getDescription())
-            .images(v.getImages())
-            .violationDate(v.getViolationDate())
+            .violationLevel(violation.getViolationLevel())
+            .description(violation.getDescription())
+            .images(violation.getImages())
+            .violationDate(violation.getViolationDate())
+            .addedByUser(String.join(" ", addedByUser.getRecipientName(), addedByUser.getRecipientSurname()))
             .build());
     }
 

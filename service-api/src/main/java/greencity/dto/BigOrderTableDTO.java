@@ -3,15 +3,9 @@ package greencity.dto;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@Setter
-@Builder
-@ToString
-@EqualsAndHashCode
+@Data
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,8 +16,8 @@ public class BigOrderTableDTO {
     private String orderDate;
     private String paymentDate;
     private String clientName;
-    private String phoneNumber;
-    private String email;
+    private String clientPhone;
+    private String clientEmail;
     private String senderName;
     private String senderPhone;
     private String senderEmail;
@@ -33,13 +27,13 @@ public class BigOrderTableDTO {
     private String district;
     private String address;
     private String commentToAddressForClient;
-    private Integer bagsAmount;
+    private String bagsAmount;
     private Long totalOrderSum;
     private String orderCertificateCode;
-    private String orderCertificatePoints;
+    private Long generalDiscount;
     private Long amountDue;
     private String commentForOrderByClient;
-    private String payment;
+    private Long totalPayment;
     private String dateOfExport;
     private String timeOfExport;
     private String idOrderFromShop;

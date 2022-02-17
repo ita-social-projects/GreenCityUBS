@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Max-i1" author="Boiarchuk">
+
+        <dropColumn tableName="bag_translations">
+            <column name="language_id"/>
+        </dropColumn>
+
+        <addColumn tableName="bag_translations">
+            <column name="name_eng" type="VARCHAR(60)"/>
+        </addColumn>
+
+        <update tableName="bag_translations" >
+            <column name="name_eng" value="Safe waste"/>
+            <where>id=1</where>
+        </update>
+
+        <update tableName="bag_translations" >
+            <column name="name_eng" value="Textile waste"/>
+            <where>id=2</where>
+        </update>
+
+        <update tableName="bag_translations" >
+            <column name="name_eng" value="Textile waste"/>
+            <where>id=3</where>
+        </update>
+
+    <rollback>
+       <addColumn tableName="bag_translations">
+          <column name ="language_id" type="bigint">
+             <constraints nullable="false" foreignKeyName="fk_bag_translations_to_languages" references="languages(id)"/>
+          </column>
+     </addColumn>
+    </rollback>
+    
+    <rollback>
+       <dropColumn columnName="name_eng" tableName="bag_translations"/>
+    </rollback>
+
+    </changeSet>
+</databaseChangeLog>
