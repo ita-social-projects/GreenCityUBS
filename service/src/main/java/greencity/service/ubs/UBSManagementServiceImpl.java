@@ -1617,16 +1617,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        List<Payment> payments = order.getPayment();
-        Long paidAmount = calculatePaidAmount(order);
-        paidAmount = paidAmount - addBonusesToUserDto.getAmount();
-        payments.get(0).setAmount(paidAmount);
+        CounterOrderDetailsDto dto = getPriceDetails(orderId);
+        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, dto.getTotalSumAmount().longValue());
+        Long overpayment = paymentTableInfoDto.getOverpayment() * 100;
+        Long bonuses = addBonusesToUserDto.getAmount() * 100;
 
-        Integer bonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-        currentUser.setCurrentPoints(bonuses);
-        order.setPayment(payments);
-        orderRepository.save(order);
-        userRepository.save(currentUser);
+        if (overpayment >= 0 && overpayment >= bonuses) {
+            List<Payment> payments = order.getPayment();
+            for (Payment payment : payments) {
+                if (payment.getAmount() > bonuses) {
+                    Long pay = payment.getAmount() - bonuses;
+                    payment.setAmount(pay);
+                    break;
+                } else {
+                    Long changeOfBonuses = bonuses - payment.getAmount();
+                    payment.setAmount(0L);
+                    bonuses = changeOfBonuses;
+                }
+            }
+            Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
+            currentUser.setCurrentPoints(userBonuses);
+            userRepository.save(currentUser);
+        }
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
