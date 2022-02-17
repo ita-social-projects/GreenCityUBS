@@ -1633,7 +1633,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     Long changeOfBonuses = bonuses - payment.getAmount();
                     payment.setAmount(0L);
                     bonuses = changeOfBonuses;
-                    if(bonuses == 0){
+                    if (bonuses == 0) {
                         break;
                     }
                 }
