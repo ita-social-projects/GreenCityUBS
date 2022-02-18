@@ -3,7 +3,6 @@ package greencity.service;
 import greencity.dto.*;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
-import greencity.entity.order.TariffsInfo;
 
 import java.util.List;
 

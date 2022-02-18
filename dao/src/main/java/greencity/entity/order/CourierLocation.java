@@ -1,7 +1,6 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.LocationStatus;
 import greencity.entity.user.Location;
 import lombok.*;
 

@@ -4,7 +4,6 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.CourierLocation;
-import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
 
 import javax.persistence.*;
