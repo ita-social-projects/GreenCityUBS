@@ -1856,15 +1856,17 @@ class UBSManagementServiceImplTest {
     void addBonusesToUserTest() {
         User user = getTestUser();
         Order order = getOrder2();
+        order.setConfirmedQuantity(Map.of(1, 2));
+        order.setExportedQuantity(Map.of(1, 1));
+        order.setAmountOfBagsOrdered(Map.of(1, 1));
 
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
         ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
 
         verify(userRepository).findUserByOrderId(1L);
-        verify(orderRepository).findById(1L);
-        verify(orderRepository).save(order);
+        verify(orderRepository, times(2)).findById(1L);
         verify(userRepository).save(user);
 
     }
