@@ -377,13 +377,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         ReceivingStation station = receivingStationRepository.getOne(Long.parseLong(value));
         List<Long> unresolvedGoals = new ArrayList<>();
         if (ordersId.isEmpty()) {
-            orderRepository.changeReceivingStationForAllOrders(station.getName(), employeeId);
+            orderRepository.changeReceivingStationForAllOrders(station.getId(), employeeId);
         }
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                existedOrder.setReceivingStation(station.getName());
+                existedOrder.setReceivingStation(station);
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);

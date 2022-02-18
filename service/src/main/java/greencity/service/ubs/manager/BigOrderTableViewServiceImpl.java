@@ -23,12 +23,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final CustomTableViewRepo customTableViewRepo;
     private final ModelMapper modelMapper;
 
-    /**
-     * Method returns all order's data from big order table.
-     * 
-     * @return Page
-     * @author Kuzbyt Maksym
-     */
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
         var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria);
@@ -37,11 +31,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
         return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());
     }
 
-    /**
-     * This method save or update view of orders table.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
     @Override
     public void changeOrderTableView(String uuid, String titles) {
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {
@@ -55,11 +44,6 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
         }
     }
 
-    /**
-     * This method return parameters for orders table view.
-     *
-     * @author Sikhovskiy Rostyslav.
-     */
     @Override
     public CustomTableViewDto getCustomTableParameters(String uuid) {
         if (Boolean.TRUE.equals(customTableViewRepo.existsByUuid(uuid))) {

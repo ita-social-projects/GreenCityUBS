@@ -11,5 +11,5 @@ public class ExportDetailsDtoUpdate {
     String dateExport;
     String timeDeliveryFrom;
     String timeDeliveryTo;
-    String receivingStation;
+    Long receivingStationId;
 }
