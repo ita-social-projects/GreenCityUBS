@@ -1003,7 +1003,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 + "T" + order.getDeliverFrom().toLocalTime() : null)
             .timeDeliveryFrom(order.getDeliverFrom() != null ? order.getDeliverFrom().toString() : null)
             .timeDeliveryTo(order.getDeliverTo() != null ? order.getDeliverTo().toString() : null)
-            .receivingStation(order.getReceivingStation().getName())
+            .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation().getName() : null)
             .build();
     }
 
