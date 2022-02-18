@@ -240,7 +240,7 @@ class OrdersAdminsPageServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(order);
         when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
 
-        ordersAdminsPageService.receivingStationForDevelopStage(List.of(1l),"1",1L);
+        ordersAdminsPageService.receivingStationForDevelopStage(List.of(1l), "1", 1L);
         verify(orderRepository).save(order.get());
     }
 
