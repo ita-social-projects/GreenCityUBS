@@ -234,6 +234,17 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void receivingStationForDevelopStage() {
+        Optional<Order> order = Optional.of(ModelUtils.getOrder());
+
+        when(orderRepository.findById(1L)).thenReturn(order);
+        when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
+
+        ordersAdminsPageService.receivingStationForDevelopStage(List.of(1l),"1",1L);
+        verify(orderRepository).save(order.get());
+    }
+
+    @Test
     void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
         String uuid = "uuid";
         RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();

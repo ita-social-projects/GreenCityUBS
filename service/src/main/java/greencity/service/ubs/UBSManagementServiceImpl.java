@@ -950,32 +950,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        order.setReceivingStation(station);
         List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
         if (receivingStation.isEmpty()) {
             throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
         }
-        if (dto != null) {
-            String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
-            String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
-            String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
-            if (dateExport != null) {
-                String[] date = dateExport.split("T");
-                order.setDateOfExport(LocalDate.parse(date[0]));
-            }
-            if (timeDeliveryFrom != null) {
-                LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
-                order.setDeliverFrom(dateTime);
-            }
-            if (timeDeliveryTo != null) {
-                LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
-                order.setDeliverTo(dateAndTimeDeliveryTo);
-            }
-            order.setReceivingStation(station);
-            orderRepository.save(order);
-            final String receivingStationValue = order.getReceivingStation().getName();
-            final LocalDateTime deliverFrom = order.getDeliverFrom();
-            collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
+        String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
+        String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
+        String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
+        if (dateExport != null) {
+            String[] date = dateExport.split("T");
+            order.setDateOfExport(LocalDate.parse(date[0]));
         }
+        if (timeDeliveryFrom != null) {
+            LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
+            order.setDeliverFrom(dateTime);
+        }
+        if (timeDeliveryTo != null) {
+            LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
+            order.setDeliverTo(dateAndTimeDeliveryTo);
+        }
+        orderRepository.save(order);
+        final String receivingStationValue = order.getReceivingStation().getName();
+        final LocalDateTime deliverFrom = order.getDeliverFrom();
+        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
         return buildExportDto(order, receivingStation);
     }
 
