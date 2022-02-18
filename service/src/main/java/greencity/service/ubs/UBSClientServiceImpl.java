@@ -580,7 +580,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .responseUrl("http://176.107.187.64:8050/ubs/receivePayment")
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -979,7 +979,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
+            .resultUrl("http://176.107.187.64:8050/ubs/receiveLiqPayPayment")
             .build();
     }
 
@@ -1179,7 +1179,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient")
+            .responseUrl("http://176.107.187.64:8050/ubs/receivePaymentClient")
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1278,7 +1278,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
+            .resultUrl("http://176.107.187.64:8050/ubs/receiveLiqPayPayment")
             .build();
     }
 
