@@ -6,8 +6,6 @@ import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import org.springframework.http.HttpStatus;
@@ -175,24 +173,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Employee getEmployee() {
-        return Employee.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePosition(Set.of(Position.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStation(Set.of(ReceivingStation.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
-            .build();
-    }
-
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("customer name")
@@ -255,24 +235,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static Position getPosition() {
-        return Position.builder()
-            .id(1L)
-            .name("Водій")
-            .build();
-    }
-
     public static PositionDto getPositionDto() {
         return PositionDto.builder()
             .id(1L)
             .name("Водій")
-            .build();
-    }
-
-    public static ReceivingStation getReceivingStation() {
-        return ReceivingStation.builder()
-            .id(1L)
-            .name("Петрівка")
             .build();
     }
 
@@ -321,17 +287,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static ManualPaymentResponseDto getResponseDto() {
-        return ManualPaymentResponseDto.builder()
-            .amount(500l)
-            .settlementdate("09-02-2021")
-            .paymentId("10l")
-            .currentDate("10-02-2021")
-            .receiptLink("somelink.com")
-            .imagePath("imagepath")
-            .build();
-    }
-
     public static ManualPaymentRequestDto getRequestDto() {
         return ManualPaymentRequestDto.builder()
             .amount(500l)
@@ -345,12 +300,6 @@ public class ModelUtils {
         return OrderCancellationReasonDto.builder()
             .cancellationReason(CancellationReason.OTHER)
             .cancellationComment("Garbage disappeared")
-            .build();
-    }
-
-    public static LocationIdDto getLocationIdDto() {
-        return LocationIdDto.builder()
-            .locationId(1l)
             .build();
     }
 
@@ -493,66 +442,6 @@ public class ModelUtils {
             .orderId(1L)
             .pointsToUse(100)
             .certificates(Collections.emptySet())
-            .build();
-    }
-
-    public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
-        return UpdateOrderPageAdminDto.builder()
-            .generalOrderInfo(OrderDetailStatusRequestDto
-                .builder()
-                .orderStatus(String.valueOf(OrderStatus.CONFIRMED))
-                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .adminComment("aaa")
-                .build())
-            .userInfoDto(UbsCustomersDtoUpdate
-                .builder()
-                .recipientId(2L)
-                .recipientName("aaaaa")
-                .recipientPhoneNumber("085555")
-                .recipientEmail("yura@333gmail.com")
-                .build())
-            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
-                .builder()
-                .addressId(1L)
-                .addressDistrict("aaaaaaa")
-                .addressStreet("aaaaa")
-                .addressEntranceNumber("12")
-                .addressHouseCorpus("123")
-                .addressHouseNumber("121")
-                .addressCity("dsfsdf")
-                .addressRegion("sdfsdfsd")
-                .build())
-            .ecoNumberFromShop(EcoNumberDto
-                .builder()
-                .ecoNumber(Set.of("1111"))
-                .build())
-            .exportDetailsDto(ExportDetailsDtoUpdate
-                .builder()
-                .dateExport("20-12-2001")
-                .timeDeliveryFrom("20:20:20")
-                .timeDeliveryTo("20:20:20")
-                .receivingStation(String.valueOf(ReceivingStation
-                    .builder()
-                    .id(1L)
-                    .build()))
-                .build())
-            .orderDetailDto(
-                UpdateOrderDetailDto.builder()
-                    .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
-                    .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
-                    .build())
-            .build();
-    }
-
-    public static LocationCreateDto getLocationCreateDto() {
-        return LocationCreateDto.builder()
-            .addLocationDtoList(List.of(getAddLocationTranslationDto())).build();
-    }
-
-    public static AddLocationTranslationDto getAddLocationTranslationDto() {
-        return AddLocationTranslationDto.builder()
-            .locationName("Test")
-            .languageCode("ua")
             .build();
     }
 

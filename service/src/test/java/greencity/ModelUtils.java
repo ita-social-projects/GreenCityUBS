@@ -266,7 +266,10 @@ public class ModelUtils {
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
-            .receivingStation("C")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
@@ -313,7 +316,10 @@ public class ModelUtils {
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
-            .receivingStation("C")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
@@ -355,7 +361,10 @@ public class ModelUtils {
             .deliverFrom(LocalDateTime.of(1997, 12, 4, 15, 40, 24))
             .dateOfExport(LocalDate.of(1997, 12, 4))
             .deliverTo(LocalDateTime.of(1990, 12, 11, 19, 30, 30))
-            .receivingStation("Petrivka")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .build();
     }
@@ -398,7 +407,7 @@ public class ModelUtils {
             .dateExport("1997-12-04T15:40:24")
             .timeDeliveryFrom("1997-12-04T15:40:24")
             .timeDeliveryTo("1990-12-11T19:30:30")
-            .receivingStation("Petrivka")
+            .receivingStation("Саперно-Слобідська")
             .allReceivingStations(List.of("a", "b"))
             .build();
     }
@@ -408,7 +417,7 @@ public class ModelUtils {
             .dateExport("1997-12-04T15:40:24")
             .timeDeliveryFrom("1997-12-04T15:40:24")
             .timeDeliveryTo("1990-12-11T19:30:30")
-            .receivingStation("Petrivka")
+            .receivingStationId(1L)
             .build();
     }
 
@@ -2335,10 +2344,7 @@ public class ModelUtils {
                 .dateExport("1997-12-04T15:40:24")
                 .timeDeliveryFrom("1997-12-04T15:40:24")
                 .timeDeliveryTo("1990-12-11T19:30:30")
-                .receivingStation(String.valueOf(ReceivingStation
-                    .builder()
-                    .id(1L)
-                    .build()))
+                .receivingStationId(1L)
                 .build())
             .orderDetailDto(
                 UpdateOrderDetailDto.builder()
@@ -2963,7 +2969,10 @@ public class ModelUtils {
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
-            .receivingStation("C")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
@@ -3177,10 +3186,7 @@ public class ModelUtils {
                 .dateExport("1997-12-04T15:40:24")
                 .timeDeliveryFrom("1997-12-04T15:40:24")
                 .timeDeliveryTo("1990-12-11T19:30:30")
-                .receivingStation(String.valueOf(ReceivingStation
-                    .builder()
-                    .id(1L)
-                    .build()))
+                .receivingStationId(1L)
                 .build())
             .orderDetailDto(
                 UpdateOrderDetailDto.builder()
@@ -3232,7 +3238,10 @@ public class ModelUtils {
             .pointsToUse(700)
             .adminComment("Admin")
             .cancellationComment("cancelled")
-            .receivingStation("C")
+            .receivingStation(ReceivingStation.builder()
+                .id(1L)
+                .name("Саперно-Слобідська")
+                .build())
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
