@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @Builder
 @EqualsAndHashCode(exclude = {"allReceivingStations"})
+@ToString
 public class ExportDetailsDto {
     String dateExport;
     String timeDeliveryFrom;

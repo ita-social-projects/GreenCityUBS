@@ -7,6 +7,7 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.filters.StringListConverter;
 import lombok.*;
@@ -105,8 +106,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderPaymentStatus orderPaymentStatus;
 
-    @Column(name = "receiving_station", length = 50)
-    private String receivingStation;
+    @ManyToOne
+    @JoinColumn(name = "receiving_station_id")
+    private ReceivingStation receivingStation;
 
     private String note;
 

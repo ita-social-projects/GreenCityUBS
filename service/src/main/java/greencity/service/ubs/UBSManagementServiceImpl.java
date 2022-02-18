@@ -943,36 +943,37 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid) {
+        ReceivingStation station = receivingStationRepository.findById(dto.getReceivingStationId())
+            .orElseThrow(() -> new ReceivingStationNotFoundException(
+                RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getReceivingStationId()));
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        order.setReceivingStation(station);
         List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
         if (receivingStation.isEmpty()) {
             throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
         }
-        if (dto != null) {
-            String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
-            String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
-            String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
-            if (dateExport != null) {
-                String[] date = dateExport.split("T");
-                order.setDateOfExport(LocalDate.parse(date[0]));
-            }
-            if (timeDeliveryFrom != null) {
-                LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
-                order.setDeliverFrom(dateTime);
-            }
-            if (timeDeliveryTo != null) {
-                LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
-                order.setDeliverTo(dateAndTimeDeliveryTo);
-            }
-            order.setReceivingStation(dto.getReceivingStation());
-            orderRepository.save(order);
-            final String receivingStationValue = order.getReceivingStation();
-            final LocalDateTime deliverFrom = order.getDeliverFrom();
-            collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
+        String dateExport = dto.getDateExport() != null ? dto.getDateExport() : null;
+        String timeDeliveryFrom = dto.getTimeDeliveryFrom() != null ? dto.getTimeDeliveryFrom() : null;
+        String timeDeliveryTo = dto.getTimeDeliveryTo() != null ? dto.getTimeDeliveryTo() : null;
+        if (dateExport != null) {
+            String[] date = dateExport.split("T");
+            order.setDateOfExport(LocalDate.parse(date[0]));
         }
+        if (timeDeliveryFrom != null) {
+            LocalDateTime dateTime = LocalDateTime.parse(timeDeliveryFrom);
+            order.setDeliverFrom(dateTime);
+        }
+        if (timeDeliveryTo != null) {
+            LocalDateTime dateAndTimeDeliveryTo = LocalDateTime.parse(timeDeliveryTo);
+            order.setDeliverTo(dateAndTimeDeliveryTo);
+        }
+        orderRepository.save(order);
+        final String receivingStationValue = order.getReceivingStation().getName();
+        final LocalDateTime deliverFrom = order.getDeliverFrom();
+        collectEventsAboutOrderExportDetails(receivingStationValue, deliverFrom, order, currentUser);
         return buildExportDto(order, receivingStation);
     }
 
@@ -1002,7 +1003,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 + "T" + order.getDeliverFrom().toLocalTime() : null)
             .timeDeliveryFrom(order.getDeliverFrom() != null ? order.getDeliverFrom().toString() : null)
             .timeDeliveryTo(order.getDeliverTo() != null ? order.getDeliverTo().toString() : null)
-            .receivingStation(order.getReceivingStation())
+            .receivingStation(order.getReceivingStation().getName())
             .build();
     }
 
@@ -1617,16 +1618,28 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        List<Payment> payments = order.getPayment();
-        Long paidAmount = calculatePaidAmount(order);
-        paidAmount = paidAmount - addBonusesToUserDto.getAmount();
-        payments.get(0).setAmount(paidAmount);
+        CounterOrderDetailsDto dto = getPriceDetails(orderId);
+        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, dto.getTotalSumAmount().longValue());
+        Long overpayment = paymentTableInfoDto.getOverpayment() * 100;
+        Long bonuses = addBonusesToUserDto.getAmount() * 100;
 
-        Integer bonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-        currentUser.setCurrentPoints(bonuses);
-        order.setPayment(payments);
-        orderRepository.save(order);
-        userRepository.save(currentUser);
+        if (overpayment >= 0 && overpayment >= bonuses) {
+            List<Payment> payments = order.getPayment();
+            for (Payment payment : payments) {
+                if (payment.getAmount() > bonuses) {
+                    Long pay = payment.getAmount() - bonuses;
+                    payment.setAmount(pay);
+                    break;
+                } else {
+                    Long changeOfBonuses = bonuses - payment.getAmount();
+                    payment.setAmount(0L);
+                    bonuses = changeOfBonuses;
+                }
+            }
+            Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
+            currentUser.setCurrentPoints(userBonuses);
+            userRepository.save(currentUser);
+        }
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())

@@ -196,7 +196,6 @@ class SuperAdminServiceImplTest {
         Service service = ModelUtils.getService();
         ServiceTranslation serviceTranslation = ModelUtils.getServiceTranslation();
 
-        when(courierRepository.findById(courier.getId())).thenReturn(Optional.of(courier));
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(languageRepository.findById(language.getId())).thenReturn(Optional.of(language));
         when(serviceRepository.save(service)).thenReturn(service);
@@ -206,7 +205,6 @@ class SuperAdminServiceImplTest {
 
         assertEquals(createServiceDto, superAdminService.addService(createServiceDto, user.getUuid()));
 
-        verify(courierRepository).findById(courier.getId());
         verify(userRepository).findByUuid(user.getUuid());
         verify(languageRepository).findById(language.getId());
         verify(serviceRepository).save(service);
@@ -446,7 +444,7 @@ class SuperAdminServiceImplTest {
         Courier courier = ModelUtils.getCourier();
         User user = ModelUtils.getUser();
 
-        when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
+        lenient().when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
         assertThrows(LanguageNotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
@@ -569,16 +567,6 @@ class SuperAdminServiceImplTest {
         EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
 
         assertThrows(CourierNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
-    }
-
-    @Test
-    void addServiceThrowCourierNotFoundException() {
-        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
-        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.addService(dto, "123321"));
-
-        verify(courierRepository).findById(1L);
     }
 
     @Test

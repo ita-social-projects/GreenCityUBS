@@ -176,9 +176,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @author Liubomyr Pater.
      */
     @Modifying
-    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION = :receiving_station WHERE employee_id = :employee_id",
+    @Query(value = "UPDATE ORDERS SET RECEIVING_STATION_ID = :receiving_station WHERE employee_id = :employee_id",
         nativeQuery = true)
-    void changeReceivingStationForAllOrders(@Param("receiving_station") String station,
+    void changeReceivingStationForAllOrders(@Param("receiving_station") Long stationId,
         @Param("employee_id") Long employeeId);
 
     /**

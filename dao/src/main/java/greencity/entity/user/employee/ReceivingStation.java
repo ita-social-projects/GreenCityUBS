@@ -1,9 +1,11 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -27,4 +29,7 @@ public class ReceivingStation {
 
     @ManyToMany(mappedBy = "receivingStation")
     private Set<Employee> employees;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "receivingStation")
+    private List<Order> orders;
 }
