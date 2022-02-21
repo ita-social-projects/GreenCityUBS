@@ -12,6 +12,7 @@ import greencity.entity.order.CourierLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
+import greencity.exceptions.RegionNotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +62,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
 
         final LocationInfoDto locationInfoDto = LocationInfoDto.builder()
             .locationsDto(locationDtos)
-            .regionId(regions.stream().findAny().get().getId())
+            .regionId(regions.stream().findAny().orElseThrow(() -> new RegionNotFoundException("Region not found")).getId())
             .regionTranslationDtos(regionNames)
             .build();
 

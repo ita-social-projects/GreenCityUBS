@@ -59,5 +59,5 @@ public class Bag {
     private List<BagTranslation> bagTranslations;
 
     @ManyToOne
-    TariffsInfo tariffsInfo;
+    private TariffsInfo tariffsInfo;
 }

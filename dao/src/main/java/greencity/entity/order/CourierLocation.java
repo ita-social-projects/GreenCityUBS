@@ -47,5 +47,5 @@ public class CourierLocation {
     List<Order> orders;
 
     @ManyToOne
-    TariffsInfo tariffsInfo;
+    private TariffsInfo tariffsInfo;
 }

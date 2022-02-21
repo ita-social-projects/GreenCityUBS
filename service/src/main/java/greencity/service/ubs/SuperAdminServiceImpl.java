@@ -502,7 +502,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public List<GetTariffsInfoDto> getAllTariffsInfo() {
         return tariffsInfoRepository.findAll()
             .stream()
-            .map(i -> modelMapper.map(i, GetTariffsInfoDto.class))
+            .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .collect(Collectors.toList());
     }
 

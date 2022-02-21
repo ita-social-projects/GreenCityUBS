@@ -13,11 +13,5 @@
             </column>
 
         </createTable>
-
-<!--        <addForeignKeyConstraint baseColumnNames="tariffs_info_id"-->
-<!--                                 baseTableName="courier_locations"-->
-<!--                                 referencedColumnNames="id"-->
-<!--                                 referencedTableName="tariffs_info"-->
-<!--                                 constraintName="blabla"/>-->
     </changeSet>
 </databaseChangeLog>
