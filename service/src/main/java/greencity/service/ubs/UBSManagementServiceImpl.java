@@ -1618,28 +1618,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        CounterOrderDetailsDto dto = getPriceDetails(orderId);
-        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, dto.getTotalSumAmount().longValue());
-        Long overpayment = paymentTableInfoDto.getOverpayment() * 100;
-        Long bonuses = addBonusesToUserDto.getAmount() * 100;
-
-        if (overpayment >= 0 && overpayment >= bonuses) {
-            List<Payment> payments = order.getPayment();
-            for (Payment payment : payments) {
-                if (payment.getAmount() > bonuses) {
-                    Long pay = payment.getAmount() - bonuses;
-                    payment.setAmount(pay);
-                    break;
-                } else {
-                    Long changeOfBonuses = bonuses - payment.getAmount();
-                    payment.setAmount(0L);
-                    bonuses = changeOfBonuses;
-                }
-            }
-            Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-            currentUser.setCurrentPoints(userBonuses);
-            userRepository.save(currentUser);
-        }
+        Long bonuses = addBonusesToUserDto.getAmount() * (-100);
+        List<Payment> payments = order.getPayment();
+        Payment payment = Payment.builder()
+            .amount(bonuses)
+            .settlementDate(addBonusesToUserDto.getSettlementdate())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .order(order)
+            .currency("UAH")
+            .orderStatus(String.valueOf(OrderStatus.FORMED))
+            .paymentStatus(PaymentStatus.PAID)
+            .build();
+        payments.add(payment);
+        order.setPayment(payments);
+        Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
+        currentUser.setCurrentPoints(userBonuses);
+        orderRepository.save(order);
+        userRepository.save(currentUser);
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
