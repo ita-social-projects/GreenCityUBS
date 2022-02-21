@@ -62,7 +62,8 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
 
         final LocationInfoDto locationInfoDto = LocationInfoDto.builder()
             .locationsDto(locationDtos)
-            .regionId(regions.stream().findAny().orElseThrow(() -> new RegionNotFoundException("Region not found")).getId())
+            .regionId(
+                regions.stream().findAny().orElseThrow(() -> new RegionNotFoundException("Region not found")).getId())
             .regionTranslationDtos(regionNames)
             .build();
 
