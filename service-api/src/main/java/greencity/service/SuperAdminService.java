@@ -196,4 +196,11 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      */
     void addLocationToCourier(NewLocationForCourierDto dto);
+
+    /**
+     * Method for getting all info about tariffs.
+     *
+     * @return {@link GetTariffsInfoDto}
+     */
+    List<GetTariffsInfoDto> getAllTariffsInfo();
 }
