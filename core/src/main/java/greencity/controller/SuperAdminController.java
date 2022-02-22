@@ -459,7 +459,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/getAllTariffs")
+    @GetMapping("/tariffs/all")
     public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
     }
