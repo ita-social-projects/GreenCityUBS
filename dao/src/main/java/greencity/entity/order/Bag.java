@@ -57,4 +57,7 @@ public class Bag {
 
     @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BagTranslation> bagTranslations;
+
+    @ManyToOne
+    private TariffsInfo tariffsInfo;
 }
