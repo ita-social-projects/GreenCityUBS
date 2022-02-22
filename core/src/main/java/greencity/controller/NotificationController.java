@@ -8,7 +8,9 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
+import greencity.dto.UpdateNotificationTemplatesDto;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.NotificationTemplatesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -20,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
 import java.util.Locale;
 
 @RestController
@@ -27,13 +30,16 @@ import java.util.Locale;
 @Validated
 public class NotificationController {
     private final NotificationService notificationService;
+    private final NotificationTemplatesService notificationTemplatesService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService,
+        NotificationTemplatesService notificationTemplatesService) {
         this.notificationService = notificationService;
+        this.notificationTemplatesService = notificationTemplatesService;
     }
 
     /**
@@ -99,5 +105,37 @@ public class NotificationController {
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationService.getUnreadenNotifications(userUuid));
+    }
+
+    @ApiOperation(value = "Update body in notification template for SITE notifications")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping(value = "/updateTemplateForSITE")
+    public ResponseEntity<HttpStatus> updateNotificationTemplateForSITE(
+        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {
+        notificationTemplatesService.updateNotificationTemplateForSITE(updateNotificationTemplatesDto.getBody(),
+            updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @ApiOperation(value = "Update body in notification template for OTHER notifications")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping(value = "/updateTemplateForOTHER")
+    public ResponseEntity<HttpStatus> updateNotificationTemplateForOTHER(
+        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {
+        notificationTemplatesService.updateNotificationTemplateForOTHER(updateNotificationTemplatesDto.getBody(),
+            updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
