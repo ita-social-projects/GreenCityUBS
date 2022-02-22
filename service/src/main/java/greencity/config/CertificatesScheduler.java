@@ -20,7 +20,8 @@ public class CertificatesScheduler {
      * Method checks all certificates id DB and change status those whose expiration
      * date has expired.
      */
-    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Kiev")
+    @Scheduled(cron = "${greencity.schedule-constants.certificates-scheduler.cron}",
+        zone = "${greencity.schedule-constants.zone}")
     public void checkCertificatesForActuality() {
         log.info("Changing certificates status if expiration date has expired");
         certificatesActualityService.checkCertificatesForActuality();
