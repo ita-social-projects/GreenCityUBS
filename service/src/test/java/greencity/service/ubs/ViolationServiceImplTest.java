@@ -150,7 +150,7 @@ class ViolationServiceImplTest {
     void returnsViolationDetailsByOrderId() {
         Violation violation = ModelUtils.getViolation();
         Optional<ViolationDetailInfoDto> expected = Optional.of(ModelUtils.getViolationDetailInfoDto());
-        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(violation.getOrder().getUser()));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(violation.getAddedByUser()));
         when(violationRepository.findByOrderId(1L)).thenReturn(Optional.of(violation));
         Optional<ViolationDetailInfoDto> actual = violationService.getViolationDetailsByOrderId(1L);
 

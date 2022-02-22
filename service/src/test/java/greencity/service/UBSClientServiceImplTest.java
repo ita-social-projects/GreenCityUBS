@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -104,6 +105,7 @@ class UBSClientServiceImplTest {
         dto.setAmount(95000);
         dto.setPayment_id(1);
         dto.setCurrency("UAH");
+        dto.setSettlement_date("");
         dto.setFee(0);
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
@@ -125,6 +127,7 @@ class UBSClientServiceImplTest {
         dto.setAmount(95000);
         dto.setPayment_id(1);
         dto.setCurrency("UAH");
+        dto.setSettlement_date("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
@@ -791,7 +794,7 @@ class UBSClientServiceImplTest {
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
-        verify(bagRepository).findById(3);
+        verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
@@ -1118,7 +1121,7 @@ class UBSClientServiceImplTest {
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
-        verify(bagRepository).findById(3);
+        verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);

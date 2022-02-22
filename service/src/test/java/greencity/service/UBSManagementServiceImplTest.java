@@ -187,7 +187,8 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrderExportDetails();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
+        List<ReceivingStation> stations =
+            Arrays.asList(new ReceivingStation().setName("a"), new ReceivingStation().setName("b"));
         when(receivingStationRepository.findAll()).thenReturn(stations);
 
         assertEquals(expected, ubsManagementService.getOrderExportDetails(1L));
@@ -200,6 +201,8 @@ class UBSManagementServiceImplTest {
         ExportDetailsDtoUpdate dto = ModelUtils.getExportDetailsRequest();
         Order order = ModelUtils.getOrderExportDetails();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
 
         List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
         when(receivingStationRepository.findAll()).thenReturn(stations);
@@ -216,7 +219,8 @@ class UBSManagementServiceImplTest {
         ExportDetailsDtoUpdate dto = ModelUtils.getExportDetailsRequest();
         Order order = ModelUtils.getOrderExportDetailsWithNullValues();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         List<ReceivingStation> stations = Arrays.asList(new ReceivingStation());
         when(receivingStationRepository.findAll()).thenReturn(stations);
 
@@ -1210,7 +1214,8 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.of(TEST_ADDRESS));
         when(receivingStationRepository.findAll())
             .thenReturn(List.of(ModelUtils.getReceivingStation()));
-
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageAdminDto, 1L, "en", "abc");
         UpdateOrderPageAdminDto emptyDto = new UpdateOrderPageAdminDto();
         ubsManagementService.updateOrderAdminPageInfo(emptyDto, 1L, "en", "abc");
@@ -1466,7 +1471,8 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
-
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(receivingStations);
@@ -1481,8 +1487,9 @@ class UBSManagementServiceImplTest {
         Order order = getOrder();
         order.setDeliverFrom(null);
         List<ReceivingStation> receivingStations = List.of(getReceivingStation());
-        ExportDetailsDtoUpdate emptyDetails = ExportDetailsDtoUpdate.builder().build();
-
+        ExportDetailsDtoUpdate emptyDetails = ExportDetailsDtoUpdate.builder().receivingStationId(1L).build();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(receivingStations);
@@ -1493,8 +1500,9 @@ class UBSManagementServiceImplTest {
 
     @Test
     void updateOrderExportDetailsUserNotFoundExceptionTest() {
-        User user = getTestUser();
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
             () -> ubsManagementService.updateOrderExportDetails(1L, testDetails, "abc"));
@@ -1504,6 +1512,8 @@ class UBSManagementServiceImplTest {
     void updateOrderExportDetailsUnexistingOrderExceptionTest() {
         User user = getTestUser();
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(UnexistingOrderException.class,
@@ -1515,6 +1525,8 @@ class UBSManagementServiceImplTest {
         User user = getTestUser();
         Order order = getOrder();
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
+        var receivingStation = ModelUtils.getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(receivingStationRepository.findAll()).thenReturn(Collections.emptyList());
@@ -1840,4 +1852,27 @@ class UBSManagementServiceImplTest {
         });
     }
 
+    @Test
+    void addBonusesToUserTest() {
+        User user = getTestUser();
+        Order order = getOrder2();
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
+
+        verify(userRepository).findUserByOrderId(1L);
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void addBonusesToUserWithoutUserTest() {
+        when(userRepository.findUserByOrderId(20L)).thenReturn(Optional.empty());
+        AddBonusesToUserDto dto = getAddBonusesToUserDto();
+        assertThrows(UserNotFoundException.class, () -> {
+            ubsManagementService.addBonusesToUser(dto, 20L);
+        });
+    }
 }
