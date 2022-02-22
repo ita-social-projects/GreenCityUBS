@@ -2639,7 +2639,8 @@ public class ModelUtils {
             .setId(1L)
             .setBody("test")
             .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER);
+            .setNotificationType(NotificationType.UNPAID_ORDER)
+            .setLanguage(new Language().setId(1L));
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
@@ -3256,6 +3257,14 @@ public class ModelUtils {
             .receiptLink("test")
             .settlementdate("test")
             .amount(1000L)
+            .build();
+    }
+
+    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
+        return UpdateNotificationTemplatesDto.builder()
+            .body("test")
+            .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .languageId(1)
             .build();
     }
 }

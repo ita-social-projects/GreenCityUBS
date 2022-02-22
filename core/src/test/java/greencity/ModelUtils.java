@@ -2,10 +2,7 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CancellationReason;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.*;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import org.springframework.http.HttpStatus;
@@ -538,6 +535,14 @@ public class ModelUtils {
             .receiptLink("test")
             .settlementdate("test")
             .amount(500L)
+            .build();
+    }
+
+    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
+        return UpdateNotificationTemplatesDto.builder()
+            .body("You have unpaid order")
+            .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .languageId(1)
             .build();
     }
 }

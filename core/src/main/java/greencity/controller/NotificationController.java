@@ -107,6 +107,12 @@ public class NotificationController {
             .body(notificationService.getUnreadenNotifications(userUuid));
     }
 
+    /**
+     * Controller updates body in notification templates for receiving type SITE.
+     *
+     * @author Natalia Kozak
+     */
+
     @ApiOperation(value = "Update body in notification template for SITE notifications")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
@@ -122,6 +128,12 @@ public class NotificationController {
             updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    /**
+     * Controller updates body in notification templates for receiving type OTHER.
+     *
+     * @author Natalia Kozak
+     */
 
     @ApiOperation(value = "Update body in notification template for OTHER notifications")
     @ApiResponses(value = {

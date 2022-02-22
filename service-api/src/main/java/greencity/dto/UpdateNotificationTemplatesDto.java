@@ -1,12 +1,14 @@
 package greencity.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
 @Builder
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class UpdateNotificationTemplatesDto {
     @NotNull
     String body;
