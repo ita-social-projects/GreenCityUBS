@@ -1,17 +1,64 @@
 package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.*;
+import greencity.dto.AddLocationTranslationDto;
+import greencity.dto.AddServiceDto;
+import greencity.dto.CreateCourierDto;
+import greencity.dto.CreateServiceDto;
+import greencity.dto.EditAmountOfBagDto;
+import greencity.dto.EditPriceOfOrder;
+import greencity.dto.EditServiceDto;
+import greencity.dto.EditTariffInfoDto;
+import greencity.dto.EditTariffServiceDto;
+import greencity.dto.GetCourierLocationDto;
+import greencity.dto.GetCourierTranslationsDto;
+import greencity.dto.GetServiceDto;
+import greencity.dto.GetTariffServiceDto;
+import greencity.dto.GetTariffsInfoDto;
+import greencity.dto.LocationCreateDto;
+import greencity.dto.LocationInfoDto;
+import greencity.dto.NewLocationForCourierDto;
+import greencity.dto.RegionTranslationDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
-import greencity.entity.order.*;
-import greencity.entity.user.*;
-import greencity.exceptions.*;
-import greencity.repository.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Courier;
+import greencity.entity.order.CourierLocation;
+import greencity.entity.order.CourierTranslation;
+import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
+import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
+import greencity.entity.user.Region;
+import greencity.entity.user.RegionTranslation;
+import greencity.entity.user.User;
+import greencity.exceptions.BagNotFoundException;
+import greencity.exceptions.BagWithThisStatusAlreadySetException;
+import greencity.exceptions.CourierNotFoundException;
+import greencity.exceptions.LanguageNotFoundException;
+import greencity.exceptions.LocationAlreadyCreatedException;
+import greencity.exceptions.LocationNotFoundException;
+import greencity.exceptions.LocationStatusAlreadyExistException;
+import greencity.exceptions.ServiceNotFoundException;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.CourierLocationRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.CourierTranslationRepository;
+import greencity.repository.LanguageRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.LocationTranslationRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.RegionTranslationRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.ServiceTranslationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -36,6 +83,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final CourierLocationRepository courierLocationRepository;
     private final RegionRepository regionRepository;
     private final RegionTranslationRepository regionTranslationRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -134,8 +182,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createServiceWithTranslation(CreateServiceDto dto, User user) {
-        Courier courier = courierRepository.findById(dto.getCourierId()).orElseThrow(() -> new CourierNotFoundException(
-            ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + dto.getCourierId()));
         Service service = Service.builder()
             .basePrice(dto.getPrice())
             .commission(dto.getCommission())
@@ -143,7 +189,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .capacity(dto.getCapacity())
             .createdAt(LocalDate.now())
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courier(courier)
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
                     .description(serviceTranslationDto.getDescription())
@@ -168,6 +213,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private GetServiceDto getService(ServiceTranslation serviceTranslation) {
         return GetServiceDto.builder()
+            .courierId(serviceTranslation.getService().getCourier().getId())
             .description(serviceTranslation.getDescription())
             .price(serviceTranslation.getService().getBasePrice())
             .capacity(serviceTranslation.getService().getCapacity())
@@ -180,7 +226,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .editedAt(serviceTranslation.getService().getEditedAt())
             .editedBy(serviceTranslation.getService().getEditedBy())
             .languageCode(serviceTranslation.getLanguage().getCode())
-            .courierId(serviceTranslation.getService().getCourier().getId())
             .build();
     }
 
@@ -451,6 +496,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courierLocation.setCourier(tryToFindCourierById(dto.getCourierId()));
         courierLocation.setLocation(tryToFindLocationById(dto.getLocationId()));
         courierLocationRepository.save(courierLocation);
+    }
+
+    @Override
+    public List<GetTariffsInfoDto> getAllTariffsInfo() {
+        return tariffsInfoRepository.findAll()
+            .stream()
+            .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
+            .collect(Collectors.toList());
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {

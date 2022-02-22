@@ -45,4 +45,7 @@ public class CourierLocation {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courierLocations")
     List<Order> orders;
+
+    @ManyToOne
+    private TariffsInfo tariffsInfo;
 }

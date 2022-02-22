@@ -1,6 +1,7 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
+import greencity.entity.order.TariffsInfo;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,6 +23,9 @@ public class ReceivingStation {
 
     @Column(length = 50, nullable = false, unique = true)
     private String name;
+
+    @OneToOne
+    private TariffsInfo tariffsInfo;
 
     @ManyToMany(mappedBy = "receivingStation")
     private Set<Employee> employees;
