@@ -19,7 +19,7 @@ public class ReceivingStationDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String name;
 
-    private String  createdBy;
+    private String createdBy;
 
     private LocalDate createDate;
 }

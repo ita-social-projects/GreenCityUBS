@@ -5,7 +5,7 @@ package greencity.exceptions;
  *
  * @author Max Bohonko
  */
-public class UserDoesNotHaveDefinedName extends RuntimeException{
+public class UserDoesNotHaveDefinedName extends RuntimeException {
     /**
      * Constructor.
      */

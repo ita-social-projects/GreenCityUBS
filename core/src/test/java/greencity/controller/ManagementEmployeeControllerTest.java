@@ -49,10 +49,6 @@ class ManagementEmployeeControllerTest {
     private final String UPDATE_POSITION_LINK = "/update-position";
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
     private final String DELETE_POSITION_LINK = "/delete-position/";
-    private final String SAVE_STATION_LINK = "/create-receiving-station";
-    private final String UPDATE_STATION_LINK = "/update-receiving-station";
-    private final String GET_ALL_STATIONS_LINK = "/get-all-receiving-station";
-    private final String DELETE_STATION_LINK = "/delete-receiving-station/";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
 
     private MockMvc mockMvc;

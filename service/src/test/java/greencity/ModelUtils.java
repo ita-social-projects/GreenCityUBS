@@ -1098,6 +1098,8 @@ public class ModelUtils {
         return ReceivingStation.builder()
             .id(1L)
             .name("Петрівка")
+            .createDate(LocalDate.EPOCH)
+            .createdBy(getUser())
             .build();
     }
 
@@ -2125,8 +2127,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-                .nameUa("nameUa")
-                .nameEn("nameEn")
+            .nameUa("nameUa")
+            .nameEn("nameEn")
             .build();
     }
 
@@ -2139,9 +2141,9 @@ public class ModelUtils {
 
     public static Language getEnLanguage() {
         return Language.builder()
-                .id(2L)
-                .code("en")
-                .build();
+            .id(2L)
+            .code("en")
+            .build();
     }
 
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
@@ -2156,11 +2158,10 @@ public class ModelUtils {
             .name("Test")
             .language(ModelUtils.getLanguage())
             .build(),
-                CourierTranslation.builder()
-                        .name("Test")
-                        .language(ModelUtils.getEnLanguage())
-                        .build()
-        );
+            CourierTranslation.builder()
+                .name("Test")
+                .language(ModelUtils.getEnLanguage())
+                .build());
     }
 
     public static List<OrderInfoDto> getOrderInfoDto() {
@@ -2566,8 +2567,8 @@ public class ModelUtils {
 
     public static CreateCourierDto createCourier() {
         return CreateCourierDto.builder()
-                .nameEn("nameEn")
-                .nameUa("nameUa")
+            .nameEn("nameEn")
+            .nameUa("nameUa")
             .build();
     }
 
@@ -2768,9 +2769,14 @@ public class ModelUtils {
     }
 
     public static List<CourierTranslationDto> getCourierTranslationDtoList() {
-        return List.of(CourierTranslationDto.builder()
-            .name("Test")
-            .languageCode("ua").build());
+        return List.of(
+            CourierTranslationDto.builder()
+                .name("Test")
+                .languageCode("ua").build(),
+            CourierTranslationDto.builder()
+                .name("Test")
+                .languageCode("en")
+                .build());
     }
 
     public static Location getLocationForCreateRegion() {

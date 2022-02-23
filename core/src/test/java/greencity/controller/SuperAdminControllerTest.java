@@ -8,7 +8,6 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.LocationAlreadyCreatedException;
-import greencity.exceptions.LocationNotFoundException;
 import greencity.service.SuperAdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +26,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,7 +65,7 @@ class SuperAdminControllerTest {
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(restClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
-                .setValidator(mockValidator)
+            .setValidator(mockValidator)
             .build();
     }
 
@@ -242,32 +238,15 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void createCourierInterceptExceptionTest() throws Exception {
-        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String requestedJson = objectMapper.writeValueAsString(dto);
-
-        Mockito.when(superAdminService.createCourier(dto, ModelUtils.getUuid().toString())).thenThrow(LocationNotFoundException.class);
-
-        mockMvc.perform(post(ubsLink + "/createCourier")
-            .principal(principal)
-            .content(requestedJson)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
     void createReceivingStation() throws Exception {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
         mockMvc.perform(post(ubsLink + "/create-receiving-station")
-                        .principal(principal)
-                        .content(requestedJson)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
-       // verify(superAdminService, times(1)).createReceivingStation(any(AddingReceivingStationDto.class), anyString());
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
     }
 
     @Test
@@ -277,10 +256,10 @@ class SuperAdminControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/update-receiving-station")
-                        .principal(principal)
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(superAdminService, times(1)).updateReceivingStation(dto);
     }
@@ -288,13 +267,14 @@ class SuperAdminControllerTest {
     @Test
     void getAllReceivingStation() throws Exception {
         mockMvc.perform(get(ubsLink + "/get-all-receiving-station")
-                .principal(principal)).andExpect(status().isOk());
+            .principal(principal)).andExpect(status().isOk());
         verify(superAdminService, times(1)).getAllReceivingStations();
     }
 
     @Test
     void deleteReceivingStation() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/delete-receiving-station" + "/1").principal(principal)).andExpect(status().isOk());
+        mockMvc.perform(delete(ubsLink + "/delete-receiving-station" + "/1").principal(principal))
+            .andExpect(status().isOk());
         verify(superAdminService, times(1)).deleteReceivingStation(1L);
     }
 }

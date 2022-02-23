@@ -26,11 +26,13 @@ class CreateCourierDtoMapperTest {
 
         List<CourierTranslation> courierTranslations = courier.getCourierTranslationList();
 
-        String en = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("en")).findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+        String en = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("en"))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
 
-        String ua = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("ua")).findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+        String ua = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("ua"))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
 
         CreateCourierDto createCourierDto = mapper.convert(courier);
         Assertions.assertEquals(createCourierDto.getNameUa(), ua);

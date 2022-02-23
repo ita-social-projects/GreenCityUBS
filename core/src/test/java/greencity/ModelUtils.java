@@ -479,8 +479,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-                .nameEn("nameEn")
-                .nameUa("nameUa")
+            .nameEn("nameEn")
+            .nameUa("nameUa")
             .build();
     }
 

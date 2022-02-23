@@ -132,8 +132,7 @@ public interface SuperAdminService {
     /**
      * Method for getting all couriers.
      *
-     * @return {@link CourierDto}
-     * * @author Max Bohonko
+     * @return {@link CourierDto} * @author Max Bohonko
      */
     List<CourierDto> getAllCouriers();
 
@@ -244,4 +243,3 @@ public interface SuperAdminService {
      */
     void deleteReceivingStation(Long id);
 }
-

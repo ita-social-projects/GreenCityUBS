@@ -19,15 +19,17 @@ public class CreateCourierDtoMapper extends AbstractConverter<Courier, CreateCou
     protected CreateCourierDto convert(Courier source) {
         List<CourierTranslation> courierTranslations = source.getCourierTranslationList();
 
-        String en = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("en")).findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+        String en = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("en"))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
 
-        String ua = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("ua")).findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+        String ua = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("ua"))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
 
         return CreateCourierDto.builder()
-                .nameEn(en)
-                .nameUa(ua)
-                .build();
+            .nameEn(en)
+            .nameUa(ua)
+            .build();
     }
 }

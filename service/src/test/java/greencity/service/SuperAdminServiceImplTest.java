@@ -219,20 +219,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void createCourierThrowException_LocationNotFoundException() {
-        CreateCourierDto createCourierDto = ModelUtils.createCourier();
-        Language language = ModelUtils.getLanguage();
-        when(languageRepository.findById(any())).thenReturn(Optional.of(language));
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
-    }
-
-    @Test
-    void createCourierThrowException_LanguageNotFoundException() {
-        CreateCourierDto createCourierDto = ModelUtils.createCourier();
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
-    }
-
-    @Test
     void getAllCouriers() {
         when(courierLocationRepository.findAllInfoAboutCourier()).thenReturn(List.of(ModelUtils.getCourierLocations()));
         when(modelMapper.map(ModelUtils.getCourierLocations(), GetCourierLocationDto.class))
@@ -276,22 +262,23 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         CourierLocation courierLocation = ModelUtils.getCourierLocations();
 
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
-        when(languageRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLanguage()));
-        when(courierRepository.save(courier)).thenReturn(courier);
-        when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
+        when(languageRepository.findLanguageByCode("en")).thenReturn(ModelUtils.getEnLanguage());
+        when(languageRepository.findLanguageByCode("ua")).thenReturn(ModelUtils.getLanguage());
+        when(courierRepository.save(any())).thenReturn(courier);
+        when(courierTranslationRepository.saveAll(any()))
             .thenReturn(ModelUtils.getCourierTranslations());
-        when(courierLocationRepository.saveAll(courier.getCourierLocations())).thenReturn(List.of(courierLocation));
-        when(modelMapper.map(courier, CreateCourierDto.class)).thenReturn(createCourierDto);
+        when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
 
-        assertEquals(createCourierDto, superAdminService.createCourier(createCourierDto,  ModelUtils.TEST_USER.getUuid()));
+        assertEquals(createCourierDto,
+            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
 
-        verify(locationRepository).findById(1L);
-        verify(languageRepository).findById(1L);
-        verify(courierRepository).save(courier);
-        verify(courierTranslationRepository).saveAll(courier.getCourierTranslationList());
-        verify(courierLocationRepository).saveAll(courier.getCourierLocations());
-        verify(modelMapper).map(courier, CreateCourierDto.class);
+        verify(languageRepository).findLanguageByCode("en");
+        verify(languageRepository).findLanguageByCode("ua");
+        verify(courierRepository).save(any());
+        verify(courierTranslationRepository).saveAll(any());
+        verify(modelMapper).map(any(), eq(CreateCourierDto.class));
     }
 
     @Test
@@ -655,13 +642,12 @@ class SuperAdminServiceImplTest {
         verify(locationRepository).findById(1L);
     }
 
-
     @Test
     void CreateReceivingStation() {
         AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
-                .thenReturn(getReceivingStationDto());
+            .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
 
         superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid());
@@ -669,36 +655,27 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
         verify(receivingStationRepository, times(1)).save(any());
         verify(modelMapper, times(1))
-                .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+            .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
 
         Exception thrown = assertThrows(ReceivingStationValidationException.class,
-                () -> superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid()));
+            () -> superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid()));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
-                + stationDto.getName());
+            + stationDto.getName());
     }
 
     @Test
     void updateReceivingStation() {
         ReceivingStationDto stationDto = getReceivingStationDto();
-        when(receivingStationRepository.existsById(stationDto.getId())).thenReturn(true, true, false);
-        when(receivingStationRepository.existsReceivingStationByName(stationDto.getName()))
-                .thenReturn(false, true);
-        when(modelMapper.map(any(), any())).thenReturn(getReceivingStation(), stationDto);
+
+        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getReceivingStation()));
+        when(receivingStationRepository.save(any())).thenReturn(ModelUtils.getReceivingStation());
+        when(modelMapper.map(any(), eq(ReceivingStationDto.class))).thenReturn(ModelUtils.getReceivingStationDto());
 
         superAdminService.updateReceivingStation(stationDto);
 
-        verify(receivingStationRepository, times(1)).existsById(stationDto.getId());
-        verify(receivingStationRepository, times(1)).existsReceivingStationByName(stationDto.getName());
-        verify(modelMapper, times(2)).map(any(), any());
-
-        Exception thrown = assertThrows(ReceivingStationValidationException.class,
-                () -> superAdminService.updateReceivingStation(stationDto));
-        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
-                () -> superAdminService.updateReceivingStation(stationDto));
-
-        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + stationDto.getId());
-        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
-                + stationDto.getName());
+        verify(receivingStationRepository).findById(anyLong());
+        verify(receivingStationRepository).save(any());
+        verify(modelMapper).map(any(), eq(ReceivingStationDto.class));
     }
 
     @Test
@@ -725,12 +702,12 @@ class SuperAdminServiceImplTest {
 
         station.setEmployees(Set.of(getEmployee()));
         Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
-                () -> superAdminService.deleteReceivingStation(1L));
+            () -> superAdminService.deleteReceivingStation(1L));
 
         when(receivingStationRepository.findById(2L)).thenReturn(Optional.empty());
 
         Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
-                () -> superAdminService.deleteReceivingStation(2L));
+            () -> superAdminService.deleteReceivingStation(2L));
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
         assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());

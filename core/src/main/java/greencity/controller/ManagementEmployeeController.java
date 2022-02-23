@@ -218,7 +218,6 @@ public class ManagementEmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
     /**
      * Controller deletes employee image.
      *

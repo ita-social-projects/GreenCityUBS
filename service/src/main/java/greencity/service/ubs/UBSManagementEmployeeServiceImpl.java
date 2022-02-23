@@ -175,8 +175,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         throw new PositionValidationException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
     }
 
-
-
     private Position buildPosition(AddingPositionDto dto) {
         return Position.builder()
             .name(dto.getName())

@@ -48,8 +48,6 @@ public interface UBSManagementEmployeeService {
      */
     PositionDto update(PositionDto dto);
 
-
-
     /**
      * Method deletes employee from database by id.
      *
@@ -67,8 +65,6 @@ public interface UBSManagementEmployeeService {
      */
     PositionDto create(AddingPositionDto dto);
 
-
-
     /**
      * Method gets all positions.
      *
@@ -84,7 +80,6 @@ public interface UBSManagementEmployeeService {
      * @author Mykola Danylko
      */
     void deletePosition(Long id);
-
 
     /**
      * Method deletes employee image.
