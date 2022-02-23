@@ -3292,7 +3292,6 @@ public class ModelUtils {
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
-                .limitDescription("blablabla")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Taras")

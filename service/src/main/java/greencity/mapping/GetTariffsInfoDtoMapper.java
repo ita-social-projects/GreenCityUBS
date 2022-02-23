@@ -77,7 +77,6 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                 .map(courierTranslation -> CourierTranslationDto.builder()
                     .name(courierTranslation.getName())
                     .languageCode(courierTranslation.getLanguage().getCode())
-                    .limitDescription(courierTranslation.getLimitDescription())
                     .build())
                 .collect(Collectors.toList());
             courierTranslationDtos.addAll(courierTranslationDtosList);
