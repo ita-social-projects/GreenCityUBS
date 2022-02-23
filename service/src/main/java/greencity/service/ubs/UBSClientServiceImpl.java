@@ -769,6 +769,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
         if (nonNull(changeOfPointsList)) {
             bonusForUbsUser = changeOfPointsList.stream()
+                .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
                 .collect(Collectors.toList());
         }
