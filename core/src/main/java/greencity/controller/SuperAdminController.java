@@ -554,4 +554,21 @@ class SuperAdminController {
         superAdminService.deleteReceivingStation(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    /**
+     * Controller for get all tariff's info.
+     *
+     * @return {@link GetTariffsInfoDto}
+     * @author Bohdan Melnyk
+     */
+    @ApiOperation(value = "Get all info about tariffs.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/tariffs/all")
+    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
+    }
 }

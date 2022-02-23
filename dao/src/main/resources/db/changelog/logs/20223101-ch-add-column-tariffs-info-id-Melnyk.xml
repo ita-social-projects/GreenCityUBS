@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="20223101-ch-add-column-tariffs-info-id-Melnyk" author="Bohdan Melnyk">
+
+        <addColumn tableName="bag">
+            <column name="tariffs_info_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id"
+                                 baseTableName="bag"
+                                 referencedColumnNames="id"
+                                 referencedTableName="tariffs_info"
+                                 constraintName="fk3kikhat62f7s1gei1srru7ymb"/>
+
+        <addColumn tableName="courier_locations">
+            <column name="tariffs_info_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id"
+                                 baseTableName="courier_locations"
+                                 referencedColumnNames="id"
+                                 referencedTableName="tariffs_info"
+                                 constraintName="fk5gitj77m0u7qxi68lnnlc2ur0"/>
+
+        <addColumn tableName="receiving_stations">
+            <column name="tariffs_info_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id"
+                                 baseTableName="receiving_stations"
+                                 referencedColumnNames="id"
+                                 referencedTableName="tariffs_info"
+                                 constraintName="fkd8n0aixyu0xes812ls9nnjwtw"/>
+
+        <addColumn tableName="service">
+            <column name="tariffs_info_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="tariffs_info_id"
+                                 baseTableName="service"
+                                 referencedColumnNames="id"
+                                 referencedTableName="tariffs_info"
+                                 constraintName="fk81wr5kagcci5f66dfx3s1p0ht"/>
+
+    </changeSet>
+</databaseChangeLog>

@@ -33,6 +33,7 @@ import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -276,5 +277,20 @@ class SuperAdminControllerTest {
         mockMvc.perform(delete(ubsLink + "/delete-receiving-station" + "/1").principal(principal))
             .andExpect(status().isOk());
         verify(superAdminService, times(1)).deleteReceivingStation(1L);
+    }
+
+    @Test
+    void getAllTariffsInfoTest() throws Exception {
+        GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(getTariffsInfoDto);
+
+        Mockito.when(superAdminService.getAllTariffsInfo()).thenReturn(List.of(ModelUtils.getAllTariffsInfoDto()));
+
+        mockMvc.perform(get(ubsLink + "/tariffs/all")
+            .content(result)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }

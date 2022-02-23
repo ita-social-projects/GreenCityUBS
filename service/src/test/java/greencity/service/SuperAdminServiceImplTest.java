@@ -70,6 +70,8 @@ class SuperAdminServiceImplTest {
     private RegionTranslationRepository regionTranslationRepository;
     @Mock
     private ReceivingStationRepository receivingStationRepository;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -200,7 +202,6 @@ class SuperAdminServiceImplTest {
         Service service = ModelUtils.getService();
         ServiceTranslation serviceTranslation = ModelUtils.getServiceTranslation();
 
-        when(courierRepository.findById(courier.getId())).thenReturn(Optional.of(courier));
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(languageRepository.findById(language.getId())).thenReturn(Optional.of(language));
         when(serviceRepository.save(service)).thenReturn(service);
@@ -210,7 +211,6 @@ class SuperAdminServiceImplTest {
 
         assertEquals(createServiceDto, superAdminService.addService(createServiceDto, user.getUuid()));
 
-        verify(courierRepository).findById(courier.getId());
         verify(userRepository).findByUuid(user.getUuid());
         verify(languageRepository).findById(language.getId());
         verify(serviceRepository).save(service);
@@ -424,7 +424,7 @@ class SuperAdminServiceImplTest {
         Courier courier = ModelUtils.getCourier();
         User user = ModelUtils.getUser();
 
-        when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
+        lenient().when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
         assertThrows(LanguageNotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
@@ -550,16 +550,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void addServiceThrowCourierNotFoundException() {
-        CreateServiceDto dto = ModelUtils.getCreateServiceDto();
-        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.addService(dto, "123321"));
-
-        verify(courierRepository).findById(1L);
-    }
-
-    @Test
     void deleteCourierTest() {
         Courier courier = ModelUtils.getCourier();
         ;
@@ -640,6 +630,15 @@ class SuperAdminServiceImplTest {
         verify(modelMapper).map(dto, CourierLocation.class);
         verify(courierRepository).findById(1L);
         verify(locationRepository).findById(1L);
+    }
+
+    @Test
+    void getAllTariffsInfoTest() {
+        when(tariffsInfoRepository.findAll()).thenReturn(List.of(ModelUtils.getTariffsInfo()));
+
+        List<GetTariffsInfoDto> tariffsInfos = superAdminService.getAllTariffsInfo();
+
+        verify(tariffsInfoRepository).findAll();
     }
 
     @Test

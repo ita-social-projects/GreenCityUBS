@@ -13,9 +13,9 @@ import java.util.List;
 @Setter
 @Builder
 @EqualsAndHashCode(
-    exclude = {"serviceTranslations", "courier"})
+    exclude = {"serviceTranslations", "courier", "tariffsInfo"})
 @ToString(
-    exclude = {"serviceTranslations", "courier"})
+    exclude = {"serviceTranslations", "courier", "tariffsInfo"})
 @Table(name = "service")
 
 public class Service {
@@ -52,4 +52,7 @@ public class Service {
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<ServiceTranslation> serviceTranslations;
+
+    @ManyToOne
+    private TariffsInfo tariffsInfo;
 }

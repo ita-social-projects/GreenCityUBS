@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="20223101-ch-add-table-tariffs-info-Melnyk" author="Bohdan Melnyk">
+        <createTable tableName="tariffs_info">
+            <column name="id" autoIncrement="true" type="bigint">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="location_status" type="VARCHAR" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

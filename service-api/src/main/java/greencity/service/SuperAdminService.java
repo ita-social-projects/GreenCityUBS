@@ -214,6 +214,13 @@ public interface SuperAdminService {
     void addLocationToCourier(NewLocationForCourierDto dto);
 
     /**
+     * Method for getting all info about tariffs.
+     *
+     * @return {@link GetTariffsInfoDto}
+     */
+    List<GetTariffsInfoDto> getAllTariffsInfo();
+
+    /**
      * Method creates new receiving station.
      *
      * @param dto {@link AddingReceivingStationDto}

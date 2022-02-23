@@ -130,6 +130,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/client/**",
                 "/notifications/**")
             .hasAnyRole("USER", "ADMIN")
+            .antMatchers(HttpMethod.PUT,
+                "/notifications/updateTemplateForOTHER",
+                "/notifications/updateTemplateForSITE")
+            .hasAnyRole("ADMIN")
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/**",
                 UBS_LINK + "/client/**",

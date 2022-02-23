@@ -2,6 +2,7 @@ package greencity.entity.user;
 
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -67,4 +68,7 @@ public class User {
 
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator")
+    private List<TariffsInfo> tariffsInfos;
 }

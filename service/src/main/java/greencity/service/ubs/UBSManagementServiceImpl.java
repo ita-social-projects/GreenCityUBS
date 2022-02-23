@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -822,6 +823,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
@@ -898,6 +900,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             address.setHouseCorpus(dto.getAddressHouseCorpus());
         }
         return address;
+    }
+
+    private void returnAllPointsFromOrder(Order order) {
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        order.setPointsToUse(0);
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
     }
 
     /**
@@ -1618,28 +1644,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
 
-        CounterOrderDetailsDto dto = getPriceDetails(orderId);
-        PaymentTableInfoDto paymentTableInfoDto = getPaymentInfo(orderId, dto.getTotalSumAmount().longValue());
-        Long overpayment = paymentTableInfoDto.getOverpayment() * 100;
-        Long bonuses = addBonusesToUserDto.getAmount() * 100;
-
-        if (overpayment >= 0 && overpayment >= bonuses) {
-            List<Payment> payments = order.getPayment();
-            for (Payment payment : payments) {
-                if (payment.getAmount() > bonuses) {
-                    Long pay = payment.getAmount() - bonuses;
-                    payment.setAmount(pay);
-                    break;
-                } else {
-                    Long changeOfBonuses = bonuses - payment.getAmount();
-                    payment.setAmount(0L);
-                    bonuses = changeOfBonuses;
-                }
-            }
-            Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-            currentUser.setCurrentPoints(userBonuses);
-            userRepository.save(currentUser);
-        }
+        Long bonuses = addBonusesToUserDto.getAmount() * (-100);
+        List<Payment> payments = order.getPayment();
+        Payment payment = Payment.builder()
+            .amount(bonuses)
+            .settlementDate(addBonusesToUserDto.getSettlementdate())
+            .paymentId(addBonusesToUserDto.getPaymentId())
+            .receiptLink(addBonusesToUserDto.getReceiptLink())
+            .order(order)
+            .currency("UAH")
+            .orderStatus(String.valueOf(OrderStatus.FORMED))
+            .paymentStatus(PaymentStatus.PAID)
+            .build();
+        payments.add(payment);
+        order.setPayment(payments);
+        Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
+        currentUser.setCurrentPoints(userBonuses);
+        orderRepository.save(order);
+        userRepository.save(currentUser);
 
         return AddBonusesToUserDto.builder()
             .amount(addBonusesToUserDto.getAmount())
