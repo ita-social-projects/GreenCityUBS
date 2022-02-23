@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -822,6 +823,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                returnAllPointsFromOrder(id);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
@@ -1643,5 +1645,35 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .receiptLink(addBonusesToUserDto.getReceiptLink())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void returnAllPointsFromOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        order.setPointsToUse(0);
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
     }
 }

@@ -62,9 +62,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
     private final OrderUtils orderUtils;
-    @Lazy
-    @Autowired
-    private UBSManagementService ubsManagementService;
+    private final UBSManagementService ubsManagementService;
     private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
     @Value("${greencity.payment.fondy-payment-key}")
@@ -408,8 +406,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (order.getOrderStatus() == OrderStatus.FORMED) {
             order.setOrderStatus(OrderStatus.CANCELED);
-            order.getUser().setCurrentPoints(order.getUser().getCurrentPoints() + order.getPointsToUse());
-            order.setPointsToUse(0);
+            ubsManagementService.returnAllPointsFromOrder(orderId);
             order.setAmountOfBagsOrdered(Collections.emptyMap());
             order.getPayment().forEach(p -> p.setAmount(0L));
             order = orderRepository.save(order);

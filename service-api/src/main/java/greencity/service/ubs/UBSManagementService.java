@@ -270,4 +270,13 @@ public interface UBSManagementService {
      * @author Pavlo Hural.
      */
     AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+
+    /**
+     * Method returns all points from order back to user.
+     *
+     * @param orderId {@link Long}.
+     *
+     * @author Andrii Yezenitskyi.
+     */
+    void returnAllPointsFromOrder(Long orderId);
 }

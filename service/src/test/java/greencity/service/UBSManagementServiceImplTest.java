@@ -1681,7 +1681,7 @@ class UBSManagementServiceImplTest {
 
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
 
-        verify(orderRepository, times(5)).findById(1L);
+        verify(orderRepository, times(6)).findById(1L);
         verify(paymentRepository, times(2)).paymentInfo(1L);
         verify(addressRepository).findById(1L);
     }
