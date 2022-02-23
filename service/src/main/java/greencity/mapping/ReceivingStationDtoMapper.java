@@ -22,6 +22,8 @@ public class ReceivingStationDtoMapper extends AbstractConverter<ReceivingStatio
         return ReceivingStationDto.builder()
             .id(receivingStation.getId())
             .name(receivingStation.getName())
+                .createDate(receivingStation.getCreateDate())
+                .createdBy(receivingStation.getCreatedBy().getRecipientName() + " " + receivingStation.getCreatedBy().getRecipientSurname())
             .build();
     }
 }

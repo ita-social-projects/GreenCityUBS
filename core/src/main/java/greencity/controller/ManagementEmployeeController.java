@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.*;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -216,79 +218,6 @@ public class ManagementEmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * Controller creates employee receiving station.
-     *
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Create employee receiving station")
-    @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReceivingStationDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PostMapping("/create-receiving-station")
-    public ResponseEntity<ReceivingStationDto> createReceivingStation(@Valid AddingReceivingStationDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
-    }
-
-    /**
-     * Controller updates employee receiving station.
-     *
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Update employee receiving station")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
-        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
-    })
-    @PutMapping("/update-receiving-station")
-    public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
-    }
-
-    /**
-     * Controller gets all employee receiving stations.
-     *
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Get all employee receiving stations")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto[].class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/get-all-receiving-station")
-    public ResponseEntity<List<ReceivingStationDto>> getAllReceivingStation() {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllReceivingStation());
-    }
-
-    /**
-     * Controller deletes employee receiving station.
-     *
-     * @author Mykola Danylko.
-     */
-    @ApiOperation(value = "Deletes employee receiving station")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @DeleteMapping("/delete-receiving-station/{id}")
-    public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
-        employeeService.deleteReceivingStation(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 
     /**
      * Controller deletes employee image.

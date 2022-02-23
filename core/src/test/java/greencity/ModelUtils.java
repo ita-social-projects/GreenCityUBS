@@ -479,14 +479,13 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .createCourierTranslationDtos(getCreateCourierTranslationDto())
-            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+                .nameEn("nameEn")
+                .nameUa("nameUa")
             .build();
     }
 
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-            .limitDescription("Test")
             .languageId(1L)
             .name("Test")
             .build());

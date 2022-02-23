@@ -1,9 +1,11 @@
 package greencity.entity.order;
 
 import greencity.entity.enums.CourierStatus;
+import greencity.entity.user.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -31,4 +33,9 @@ public class Courier {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courier")
     List<Service> services;
+
+    @ManyToOne
+    private User createdBy;
+
+    private LocalDate createDate;
 }

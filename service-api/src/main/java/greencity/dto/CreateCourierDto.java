@@ -13,7 +13,8 @@ import java.util.List;
 @ToString
 public class CreateCourierDto {
     @NotNull
-    List<LimitsDto> createCourierLimitsDto;
+    private String nameEn;
+
     @NotNull
-    List<CreateCourierTranslationDto> createCourierTranslationDtos;
+    private String nameUa;
 }

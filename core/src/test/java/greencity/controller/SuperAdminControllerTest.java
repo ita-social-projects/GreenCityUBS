@@ -24,11 +24,18 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.Validator;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
+import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,6 +49,9 @@ class SuperAdminControllerTest {
 
     @Mock
     SuperAdminService superAdminService;
+
+    @Mock
+    private Validator mockValidator;
 
     @InjectMocks
     SuperAdminController superAdminController;
@@ -59,6 +69,7 @@ class SuperAdminControllerTest {
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(restClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+                .setValidator(mockValidator)
             .build();
     }
 
@@ -236,12 +247,54 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
 
-        Mockito.when(superAdminService.createCourier(dto)).thenThrow(LocationNotFoundException.class);
+        Mockito.when(superAdminService.createCourier(dto, ModelUtils.getUuid().toString())).thenThrow(LocationNotFoundException.class);
 
         mockMvc.perform(post(ubsLink + "/createCourier")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createReceivingStation() throws Exception {
+        AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(post(ubsLink + "/create-receiving-station")
+                        .principal(principal)
+                        .content(requestedJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+       // verify(superAdminService, times(1)).createReceivingStation(any(AddingReceivingStationDto.class), anyString());
+    }
+
+    @Test
+    void updateReceivingStation() throws Exception {
+        ReceivingStationDto dto = getReceivingStationDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/update-receiving-station")
+                        .principal(principal)
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(superAdminService, times(1)).updateReceivingStation(dto);
+    }
+
+    @Test
+    void getAllReceivingStation() throws Exception {
+        mockMvc.perform(get(ubsLink + "/get-all-receiving-station")
+                .principal(principal)).andExpect(status().isOk());
+        verify(superAdminService, times(1)).getAllReceivingStations();
+    }
+
+    @Test
+    void deleteReceivingStation() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/delete-receiving-station" + "/1").principal(principal)).andExpect(status().isOk());
+        verify(superAdminService, times(1)).deleteReceivingStation(1L);
     }
 }

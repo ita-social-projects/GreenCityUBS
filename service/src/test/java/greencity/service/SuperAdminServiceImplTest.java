@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
@@ -12,6 +13,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
@@ -26,7 +28,9 @@ import org.modelmapper.ModelMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,6 +68,8 @@ class SuperAdminServiceImplTest {
     private RegionRepository regionRepository;
     @Mock
     private RegionTranslationRepository regionTranslationRepository;
+    @Mock
+    private ReceivingStationRepository receivingStationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -217,13 +223,13 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.createCourier();
         Language language = ModelUtils.getLanguage();
         when(languageRepository.findById(any())).thenReturn(Optional.of(language));
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.createCourier(createCourierDto));
+        assertThrows(LocationNotFoundException.class, () -> superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
     }
 
     @Test
     void createCourierThrowException_LanguageNotFoundException() {
         CreateCourierDto createCourierDto = ModelUtils.createCourier();
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.createCourier(createCourierDto));
+        assertThrows(LanguageNotFoundException.class, () -> superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
     }
 
     @Test
@@ -232,7 +238,7 @@ class SuperAdminServiceImplTest {
         when(modelMapper.map(ModelUtils.getCourierLocations(), GetCourierLocationDto.class))
             .thenReturn(ModelUtils.getCourierLocationsDto());
 
-        assertEquals(List.of(ModelUtils.getCourierLocationsDto()), superAdminService.getAllCouriers());
+        assertEquals(List.of(ModelUtils.getCourierLocationsDto()), superAdminService.getAllCouriersAndLocations());
     }
 
     @Test
@@ -278,7 +284,7 @@ class SuperAdminServiceImplTest {
         when(courierLocationRepository.saveAll(courier.getCourierLocations())).thenReturn(List.of(courierLocation));
         when(modelMapper.map(courier, CreateCourierDto.class)).thenReturn(createCourierDto);
 
-        assertEquals(createCourierDto, superAdminService.createCourier(createCourierDto));
+        assertEquals(createCourierDto, superAdminService.createCourier(createCourierDto,  ModelUtils.TEST_USER.getUuid()));
 
         verify(locationRepository).findById(1L);
         verify(languageRepository).findById(1L);
@@ -286,19 +292,6 @@ class SuperAdminServiceImplTest {
         verify(courierTranslationRepository).saveAll(courier.getCourierTranslationList());
         verify(courierLocationRepository).saveAll(courier.getCourierLocations());
         verify(modelMapper).map(courier, CreateCourierDto.class);
-    }
-
-    @Test
-    void setLimitDescription() {
-        CourierTranslation courierTranslationTest =
-            ModelUtils.getCourierTranslation(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
-        when(courierRepository.findById(10L)).thenReturn(Optional.of(courierTranslationTest.getCourier()));
-        when(courierTranslationRepository.findCourierTranslationByCourier(
-            courierTranslationTest.getCourier()))
-                .thenReturn(courierTranslationTest);
-        assertEquals("LimitDescription",
-            superAdminService.setLimitDescription(10L, "LimitDescription")
-                .getLimitDescription());
     }
 
     @Test
@@ -661,4 +654,86 @@ class SuperAdminServiceImplTest {
         verify(courierRepository).findById(1L);
         verify(locationRepository).findById(1L);
     }
+
+
+    @Test
+    void CreateReceivingStation() {
+        AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
+        when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
+        lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
+                .thenReturn(getReceivingStationDto());
+        when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
+
+        superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid());
+
+        verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
+        verify(receivingStationRepository, times(1)).save(any());
+        verify(modelMapper, times(1))
+                .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+
+        Exception thrown = assertThrows(ReceivingStationValidationException.class,
+                () -> superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid()));
+        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
+                + stationDto.getName());
+    }
+
+    @Test
+    void updateReceivingStation() {
+        ReceivingStationDto stationDto = getReceivingStationDto();
+        when(receivingStationRepository.existsById(stationDto.getId())).thenReturn(true, true, false);
+        when(receivingStationRepository.existsReceivingStationByName(stationDto.getName()))
+                .thenReturn(false, true);
+        when(modelMapper.map(any(), any())).thenReturn(getReceivingStation(), stationDto);
+
+        superAdminService.updateReceivingStation(stationDto);
+
+        verify(receivingStationRepository, times(1)).existsById(stationDto.getId());
+        verify(receivingStationRepository, times(1)).existsReceivingStationByName(stationDto.getName());
+        verify(modelMapper, times(2)).map(any(), any());
+
+        Exception thrown = assertThrows(ReceivingStationValidationException.class,
+                () -> superAdminService.updateReceivingStation(stationDto));
+        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
+                () -> superAdminService.updateReceivingStation(stationDto));
+
+        assertEquals(thrown1.getMessage(), ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + stationDto.getId());
+        assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
+                + stationDto.getName());
+    }
+
+    @Test
+    void getAllReceivingStation() {
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
+        when(modelMapper.map(any(), any())).thenReturn(getReceivingStationDto());
+
+        List<ReceivingStationDto> stationDtos = superAdminService.getAllReceivingStations();
+
+        assertEquals(1, stationDtos.size());
+
+        verify(receivingStationRepository, times(1)).findAll();
+    }
+
+    @Test
+    void deleteReceivingStation() {
+        ReceivingStation station = getReceivingStation();
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(station));
+
+        superAdminService.deleteReceivingStation(1L);
+
+        verify(receivingStationRepository, times(1)).findById(1L);
+        verify(receivingStationRepository, times(1)).delete(station);
+
+        station.setEmployees(Set.of(getEmployee()));
+        Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
+                () -> superAdminService.deleteReceivingStation(1L));
+
+        when(receivingStationRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
+                () -> superAdminService.deleteReceivingStation(2L));
+
+        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
+        assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());
+    }
+
 }

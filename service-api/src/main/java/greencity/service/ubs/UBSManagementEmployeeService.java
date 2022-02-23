@@ -48,14 +48,7 @@ public interface UBSManagementEmployeeService {
      */
     PositionDto update(PositionDto dto);
 
-    /**
-     * Method updates information about receiving station.
-     *
-     * @param dto {@link ReceivingStationDto}
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    ReceivingStationDto update(ReceivingStationDto dto);
+
 
     /**
      * Method deletes employee from database by id.
@@ -74,14 +67,7 @@ public interface UBSManagementEmployeeService {
      */
     PositionDto create(AddingPositionDto dto);
 
-    /**
-     * Method creates new receiving station.
-     *
-     * @param dto {@link AddingReceivingStationDto}
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    ReceivingStationDto create(AddingReceivingStationDto dto);
+
 
     /**
      * Method gets all positions.
@@ -92,14 +78,6 @@ public interface UBSManagementEmployeeService {
     List<PositionDto> getAllPositions();
 
     /**
-     * Method gets all receiving stations.
-     *
-     * @return {@link ReceivingStationDto}
-     * @author Mykola Danylko
-     */
-    List<ReceivingStationDto> getAllReceivingStation();
-
-    /**
      * Method deletes position by id.
      *
      * @param id {@link Long} position's id.
@@ -107,13 +85,6 @@ public interface UBSManagementEmployeeService {
      */
     void deletePosition(Long id);
 
-    /**
-     * Method deletes receiving station by id.
-     * 
-     * @param id {@link Long} receiving station's id
-     * @author Mykola Danylko
-     */
-    void deleteReceivingStation(Long id);
 
     /**
      * Method deletes employee image.

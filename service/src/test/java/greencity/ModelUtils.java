@@ -2019,7 +2019,6 @@ public class ModelUtils {
             .id(1L)
             .language(Language.builder().id(1L).code("ua").build())
             .name("name")
-            .limitDescription("limitDescription")
             .courier(getCourier(courierLimit))
             .build();
     }
@@ -2126,8 +2125,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .createCourierTranslationDtos(getCreateCourierTranslationDto())
-            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+                .nameUa("nameUa")
+                .nameEn("nameEn")
             .build();
     }
 
@@ -2138,9 +2137,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Language getEnLanguage() {
+        return Language.builder()
+                .id(2L)
+                .code("en")
+                .build();
+    }
+
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-            .limitDescription("Test")
             .languageId(1L)
             .name("Test")
             .build());
@@ -2148,10 +2153,14 @@ public class ModelUtils {
 
     public static List<CourierTranslation> getCourierTranslations() {
         return List.of(CourierTranslation.builder()
-            .limitDescription("Test")
             .name("Test")
             .language(ModelUtils.getLanguage())
-            .build());
+            .build(),
+                CourierTranslation.builder()
+                        .name("Test")
+                        .language(ModelUtils.getEnLanguage())
+                        .build()
+        );
     }
 
     public static List<OrderInfoDto> getOrderInfoDto() {
@@ -2453,7 +2462,6 @@ public class ModelUtils {
             .id(1L)
             .courierTranslationList(List.of(CourierTranslation.builder()
                 .id(1L)
-                .limitDescription("dd")
                 .name("mark")
                 .build()))
             .courierStatus(CourierStatus.ACTIVE)
@@ -2558,16 +2566,8 @@ public class ModelUtils {
 
     public static CreateCourierDto createCourier() {
         return CreateCourierDto.builder()
-            .createCourierLimitsDto(List.of(LimitsDto.builder()
-                .minPriceOfOrder(500L)
-                .maxPriceOfOrder(500000L)
-                .minAmountOfBigBags(2L)
-                .maxAmountOfBigBags(50L)
-                .build()))
-            .createCourierTranslationDtos(List.of(CreateCourierTranslationDto.builder()
-                .name("Test")
-                .limitDescription("Test")
-                .build()))
+                .nameEn("nameEn")
+                .nameUa("nameUa")
             .build();
     }
 
@@ -2770,7 +2770,6 @@ public class ModelUtils {
     public static List<CourierTranslationDto> getCourierTranslationDtoList() {
         return List.of(CourierTranslationDto.builder()
             .name("Test")
-            .limitDescription("Test")
             .languageCode("ua").build());
     }
 

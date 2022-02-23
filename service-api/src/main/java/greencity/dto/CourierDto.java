@@ -2,6 +2,7 @@ package greencity.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -14,4 +15,6 @@ public class CourierDto {
     private Long courierId;
     private String courierStatus;
     private List<CourierTranslationDto> courierTranslationDtos;
+    private LocalDate createDate;
+    private String createdBy;
 }

@@ -1,13 +1,18 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.CreateCourierDto;
 import greencity.entity.order.Courier;
+import greencity.entity.order.CourierTranslation;
+import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCourierDtoMapperTest {
@@ -19,11 +24,15 @@ class CreateCourierDtoMapperTest {
         Courier courier = ModelUtils.getCourier();
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
 
-        Assertions.assertEquals(dto.getCreateCourierTranslationDtos().get(0).getName(),
-            mapper.convert(courier).getCreateCourierTranslationDtos().get(0).getName());
-        Assertions.assertEquals(dto.getCreateCourierTranslationDtos().get(0).getLimitDescription(),
-            mapper.convert(courier).getCreateCourierTranslationDtos().get(0).getLimitDescription());
-        Assertions.assertEquals(dto.getCreateCourierTranslationDtos().get(0).getLanguageId(),
-            mapper.convert(courier).getCreateCourierTranslationDtos().get(0).getLanguageId());
+        List<CourierTranslation> courierTranslations = courier.getCourierTranslationList();
+
+        String en = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("en")).findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+
+        String ua = courierTranslations.stream().filter(translation -> translation.getLanguage().getCode().equals("ua")).findFirst()
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE)).getName();
+
+        CreateCourierDto createCourierDto = mapper.convert(courier);
+        Assertions.assertEquals(createCourierDto.getNameUa(), ua);
     }
 }
