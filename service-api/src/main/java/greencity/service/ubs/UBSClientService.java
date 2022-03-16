@@ -102,15 +102,6 @@ public interface UBSClientService {
     List<OrderClientDto> getAllOrdersDoneByUser(String uuid);
 
     /**
-     * Method cancels order with status FORMED.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link OrderClientDto} that contains client's order;
-     * @author Danylko Mykola
-     */
-    OrderClientDto cancelFormedOrder(Long orderId);
-
-    /**
      * Method creates the same order again if order's status is ON_THE_ROUTE,
      * CONFIRMED or DONE.
      *

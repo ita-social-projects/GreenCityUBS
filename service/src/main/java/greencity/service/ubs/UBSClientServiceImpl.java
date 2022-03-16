@@ -404,49 +404,6 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public OrderClientDto cancelFormedOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(
-            () -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (order.getOrderStatus() == OrderStatus.FORMED) {
-            order.setOrderStatus(OrderStatus.CANCELED);
-            returnAllPointsFromOrder(order);
-            order.setAmountOfBagsOrdered(Collections.emptyMap());
-            order.getPayment().forEach(p -> p.setAmount(0L));
-            order = orderRepository.save(order);
-            return modelMapper.map(order, OrderClientDto.class);
-        } else {
-            throw new BadOrderStatusRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
-        }
-    }
-
-    private void returnAllPointsFromOrder(Order order) {
-        Integer pointsToReturn = order.getPointsToUse();
-        if (isNull(pointsToReturn) || pointsToReturn == 0) {
-            return;
-        }
-        User user = order.getUser();
-        if (isNull(user.getCurrentPoints())) {
-            user.setCurrentPoints(0);
-        }
-        order.setPointsToUse(0);
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
-        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
-            .amount(pointsToReturn)
-            .date(LocalDateTime.now())
-            .order(order)
-            .user(user)
-            .build();
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
-        user.getChangeOfPointsList().add(changeOfPoints);
-        userRepository.save(user);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     @Transactional
     public MakeOrderAgainDto makeOrderAgain(Locale locale, Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -769,6 +726,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<PointsForUbsUserDto> bonusForUbsUser = new ArrayList<>();
         if (nonNull(changeOfPointsList)) {
             bonusForUbsUser = changeOfPointsList.stream()
+                .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
                 .collect(Collectors.toList());
         }
