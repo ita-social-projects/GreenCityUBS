@@ -64,7 +64,7 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-orders-data/{lang}")
-    public ResponseEntity<List<OrderStatusPageDto>> getAllDataForOrder(
+    public ResponseEntity<List<OrderStatusForUserDto>> getAllDataForOrder(
         @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang));
     }

@@ -6,10 +6,7 @@ import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
@@ -30,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
@@ -93,6 +91,10 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private CourierLocationRepository courierLocationRepository;
+    @Mock
+    private OrderStatusTranslationRepository orderStatusTranslationRepository;
+    @Mock
+    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
 
     @Test
     @Transactional
@@ -1184,5 +1186,32 @@ class UBSClientServiceImplTest {
         ubsService.getUserPoint("uuid");
 
         verify(userRepository).findByUuid("uuid");
+    }
+
+    @Test
+    void getOrderForUserTest() {
+        List<OrderStatusForUserDto> expectedList = new ArrayList<>(List.of(ModelUtils.getOrderStatusDto()));
+        List<Order> orderList = new ArrayList<>();
+        Order order = ModelUtils.getOrderTest();
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+
+        when(orderRepository.findAllOrdersByUserUuid("2c5ff668-caa2-4392-a84e-af18e44bbefa")).thenReturn(orderList);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
+                .thenReturn(Optional.of(getStatusTranslation()));
+        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue(), 1L)).thenReturn("Оплачено");
+
+        List<OrderStatusForUserDto> actualList =
+            ubsService.getOrdersForUser("2c5ff668-caa2-4392-a84e-af18e44bbefa", 1L);
+
+        assertEquals(expectedList.size(), actualList.size());
+        verify(orderStatusTranslationRepository)
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
+        verify(orderRepository).findAllOrdersByUserUuid("2c5ff668-caa2-4392-a84e-af18e44bbefa");
+
     }
 }
