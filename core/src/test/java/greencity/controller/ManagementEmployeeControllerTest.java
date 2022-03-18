@@ -5,7 +5,6 @@ import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
-import greencity.entity.enums.SortingOrder;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSManagementEmployeeService;
@@ -16,9 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -48,10 +44,6 @@ class ManagementEmployeeControllerTest {
     private final String UPDATE_POSITION_LINK = "/update-position";
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
     private final String DELETE_POSITION_LINK = "/delete-position/";
-    private final String SAVE_STATION_LINK = "/create-receiving-station";
-    private final String UPDATE_STATION_LINK = "/update-receiving-station";
-    private final String GET_ALL_STATIONS_LINK = "/get-all-receiving-station";
-    private final String DELETE_STATION_LINK = "/delete-receiving-station/";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
 
     private MockMvc mockMvc;
@@ -202,48 +194,5 @@ class ManagementEmployeeControllerTest {
     void deletePosition() throws Exception {
         mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deletePosition(1L);
-    }
-
-    @Test
-    void createReceivingStation() throws Exception {
-        AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Петрівка").build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(UBS_LINK + SAVE_STATION_LINK)
-            .principal(principal)
-            .content(json)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
-        verify(service, times(1)).create(any(AddingReceivingStationDto.class));
-    }
-
-    @Test
-    void updateReceivingStation() throws Exception {
-        ReceivingStationDto dto = getReceivingStationDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(put(UBS_LINK + UPDATE_STATION_LINK)
-            .principal(principal)
-            .content(json)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(service, times(1)).update(dto);
-    }
-
-    @Test
-    void getAllReceivingStation() throws Exception {
-        mockMvc.perform(get(UBS_LINK + GET_ALL_STATIONS_LINK)
-            .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).getAllReceivingStation();
-    }
-
-    @Test
-    void deleteReceivingStation() throws Exception {
-        mockMvc.perform(delete(UBS_LINK + DELETE_STATION_LINK + "/1").principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).deleteReceivingStation(1L);
     }
 }

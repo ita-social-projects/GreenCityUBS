@@ -3,7 +3,6 @@ package greencity.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -13,7 +12,8 @@ import java.util.List;
 @ToString
 public class CreateCourierDto {
     @NotNull
-    List<LimitsDto> createCourierLimitsDto;
+    private String nameEn;
+
     @NotNull
-    List<CreateCourierTranslationDto> createCourierTranslationDtos;
+    private String nameUa;
 }

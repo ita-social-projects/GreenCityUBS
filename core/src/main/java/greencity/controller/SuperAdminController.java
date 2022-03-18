@@ -53,7 +53,7 @@ class SuperAdminController {
 
     /**
      * Controller for get all info about tariff.
-     * 
+     *
      * @return {@link GetTariffServiceDto} list of all tariff service.
      * @author Vadym Makitra.
      */
@@ -134,7 +134,7 @@ class SuperAdminController {
 
     /**
      * Controller for getting all info about service.
-     * 
+     *
      * @return {@link GetServiceDto}
      * @author Vadym Makitra
      */
@@ -191,7 +191,7 @@ class SuperAdminController {
 
     /**
      * Get all info about locations, and min amount of bag for locations.
-     * 
+     *
      * @return {@link LocationInfoDto}
      * @author Vadym Makitra
      */
@@ -208,7 +208,7 @@ class SuperAdminController {
 
     /**
      * Create new Location.
-     * 
+     *
      * @param dto {@link LocationCreateDto}
      * @return {@link LocationInfoDto}
      * @author Vadym Makitra
@@ -229,7 +229,7 @@ class SuperAdminController {
 
     /**
      * Controller for deactivating location byb Id.
-     * 
+     *
      * @param id - id of location
      * @return {@link LocationInfoDto}
      * @author Vadym Makitra
@@ -249,7 +249,7 @@ class SuperAdminController {
 
     /**
      * Controller for activating location by Id.
-     * 
+     *
      * @param id - id location
      * @return {@link LocationInfoDto}
      * @author Vadym Makitra
@@ -282,25 +282,62 @@ class SuperAdminController {
     })
     @PostMapping("/createCourier")
     public ResponseEntity<CreateCourierDto> addService(
-        @Valid @RequestBody CreateCourierDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.createCourier(dto));
+        @Valid @RequestBody CreateCourierDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.createCourier(dto, uuid));
+    }
+
+    /**
+     * Controller updates courier.
+     *
+     * @return {@link CourierDto}
+     */
+    @ApiOperation(value = "Update courier")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CourierDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-courier")
+    public ResponseEntity<CourierDto> updateCourier(@RequestBody @Valid CourierDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateCourier(dto));
     }
 
     /**
      * Controller for get all info about couriers.
      *
+     * @return {@link CourierDto}
+     * @author Max Bohonko
+     */
+    @ApiOperation(value = "Get all info about couriers")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = CourierDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getCouriers")
+    public ResponseEntity<List<CourierDto>> getAllCouriers() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
+    }
+
+    /**
+     * Controller for get all info about couriers' locations.
+     *
      * @return {@link GetCourierTranslationsDto}
      * @author Vadym Makitra
      */
-    @ApiOperation(value = "Get all info about couriers")
+    @ApiOperation(value = "Get all info about couriers' locations")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/getCouriers")
-    public ResponseEntity<List<GetCourierLocationDto>> getAllCouriers() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
+    @GetMapping("/getCouriersLocations")
+    public ResponseEntity<List<GetCourierLocationDto>> getAllCouriersLocations() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriersAndLocations());
     }
 
     /**
@@ -445,6 +482,77 @@ class SuperAdminController {
     public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
         superAdminService.addLocationToCourier(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller creates employee receiving station.
+     *
+     * @return {@link ReceivingStationDto}
+     */
+    @ApiOperation(value = "Create employee receiving station")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ReceivingStationDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PostMapping("/create-receiving-station")
+    public ResponseEntity<ReceivingStationDto> createReceivingStation(@Valid AddingReceivingStationDto dto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.createReceivingStation(dto, uuid));
+    }
+
+    /**
+     * Controller updates receiving station.
+     *
+     * @return {@link ReceivingStationDto}
+     */
+    @ApiOperation(value = "Update employee receiving station")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
+    })
+    @PutMapping("/update-receiving-station")
+    public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateReceivingStation(dto));
+    }
+
+    /**
+     * Controller gets all employee receiving stations.
+     *
+     * @return {@link ReceivingStationDto}
+     */
+    @ApiOperation(value = "Get all employee receiving stations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ReceivingStationDto[].class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/get-all-receiving-station")
+    public ResponseEntity<List<ReceivingStationDto>> getAllReceivingStation() {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllReceivingStations());
+    }
+
+    /**
+     * Controller deletes employee receiving station.
+     *
+     */
+    @ApiOperation(value = "Deletes employee receiving station")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/delete-receiving-station/{id}")
+    public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
+        superAdminService.deleteReceivingStation(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

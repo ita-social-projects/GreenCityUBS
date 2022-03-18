@@ -9,7 +9,7 @@ import java.util.List;
 public interface SuperAdminService {
     /**
      * Methods that add new Service.
-     * 
+     *
      * @param dto  {@link AddServiceDto}
      * @param uuid {@link String} - uuid current user.
      * @return {@link GetTariffServiceDto}
@@ -19,7 +19,7 @@ public interface SuperAdminService {
 
     /**
      * Method return All Tariff Service.
-     * 
+     *
      * @return {@link GetTariffServiceDto} - returned list of Tariff Service.
      * @author Vadym Makitra
      */
@@ -27,7 +27,7 @@ public interface SuperAdminService {
 
     /**
      * Method for delete tariff service by Id.
-     * 
+     *
      * @param id - Tariff Service Id.
      * @author Vadym Makitra
      */
@@ -35,7 +35,7 @@ public interface SuperAdminService {
 
     /**
      * Method for edit tariff service by Id.
-     * 
+     *
      * @param dto  {@link EditTariffServiceDto}
      * @param id   {@link Long} - selected tariff id.
      * @param uuid {@link String} - current user;
@@ -46,7 +46,7 @@ public interface SuperAdminService {
 
     /**
      * Method for add new Service.
-     * 
+     *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
      * @return {@link Service}
@@ -56,7 +56,7 @@ public interface SuperAdminService {
 
     /**
      * Method for get All service.
-     * 
+     *
      * @return {@link GetServiceDto}
      * @author Vadym Makitra
      */
@@ -118,21 +118,37 @@ public interface SuperAdminService {
      * @return {@link Courier}
      * @author Vadym Makitra
      */
-    CreateCourierDto createCourier(CreateCourierDto dto);
+    CreateCourierDto createCourier(CreateCourierDto dto, String uuid);
 
     /**
-     * Method for getting all info about couriers.
-     * 
+     * Method for updating courier.
+     *
+     * @param dto {@link CourierDto} - parameters that's user entered.
+     * @return {@link CourierDto}
+     * @author Max Bohonko
+     */
+    public CourierDto updateCourier(CourierDto dto);
+
+    /**
+     * Method for getting all couriers.
+     *
+     * @return {@link CourierDto} * @author Max Bohonko
+     */
+    List<CourierDto> getAllCouriers();
+
+    /**
+     * Method for getting all info about courier's locations.
+     *
      * @return {@link GetCourierTranslationsDto}
      */
-    List<GetCourierLocationDto> getAllCouriers();
+    List<GetCourierLocationDto> getAllCouriersAndLocations();
 
     /**
      * Method for set courier limit by sum of order.
      *
      * @param id  - id of courier
      * @param dto {@link EditPriceOfOrder}
-     * 
+     *
      * @author Vadym Makitra
      */
     void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
@@ -176,7 +192,7 @@ public interface SuperAdminService {
 
     /**
      * Method for edit info about tariff.
-     * 
+     *
      * @param dto {@link EditTariffInfoDto}
      * @return {@link EditTariffInfoDto}
      */
@@ -184,7 +200,7 @@ public interface SuperAdminService {
 
     /**
      * Method for delete courier.
-     * 
+     *
      * @param id - courier Id.
      */
     void deleteCourier(Long id);
@@ -203,4 +219,34 @@ public interface SuperAdminService {
      * @return {@link GetTariffsInfoDto}
      */
     List<GetTariffsInfoDto> getAllTariffsInfo();
+
+    /**
+     * Method creates new receiving station.
+     *
+     * @param dto {@link AddingReceivingStationDto}
+     * @return {@link ReceivingStationDto}
+     */
+    ReceivingStationDto createReceivingStation(AddingReceivingStationDto dto, String uuid);
+
+    /**
+     * Method gets all receiving stations.
+     *
+     * @return {@link ReceivingStationDto}
+     */
+    List<ReceivingStationDto> getAllReceivingStations();
+
+    /**
+     * Method updates information about receiving station.
+     *
+     * @param dto {@link ReceivingStationDto}
+     * @return {@link ReceivingStationDto}
+     */
+    ReceivingStationDto updateReceivingStation(ReceivingStationDto dto);
+
+    /**
+     * Method deletes receiving station by id.
+     *
+     * @param id {@link Long} receiving station's id
+     */
+    void deleteReceivingStation(Long id);
 }
