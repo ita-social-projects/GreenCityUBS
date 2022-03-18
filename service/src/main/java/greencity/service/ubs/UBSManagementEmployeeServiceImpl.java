@@ -4,10 +4,8 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.EmployeeStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -3,15 +3,12 @@ package greencity.mapping;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierLocation;
 import greencity.entity.order.CourierTranslation;
 import greencity.exceptions.NotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CreateCourierDtoMapper extends AbstractConverter<Courier, CreateCourierDto> {
