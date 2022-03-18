@@ -93,6 +93,8 @@ public final class ErrorMessage {
     public static final String REGION_IS_NOT_FOUND = "Region with chosen name doesn't exist ";
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
+    public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
+    public static final String USER_DOES_NOT_HAVE_DEFINED_NAME = "User doesn't have defined name or surname";
 
     /**
      * Constructor.

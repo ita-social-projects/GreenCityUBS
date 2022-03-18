@@ -15,6 +15,7 @@ import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
+import greencity.service.SuperAdminService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final RestClient restClient;
     private final UserRepository userRepository;
     private final EventService eventService;
+    private final SuperAdminService superAdminService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -251,7 +253,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> receivingStationList() {
-        List<ReceivingStationDto> receivingStations = employeeService.getAllReceivingStation();
+        List<ReceivingStationDto> receivingStations = superAdminService.getAllReceivingStations();
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (ReceivingStationDto r : receivingStations) {
             optionForColumnDTOS.add(modelMapper.map(r, OptionForColumnDTO.class));

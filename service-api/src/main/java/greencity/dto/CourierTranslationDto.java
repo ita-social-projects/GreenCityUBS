@@ -10,6 +10,5 @@ import lombok.*;
 @Builder
 public class CourierTranslationDto {
     private String name;
-    private String limitDescription;
     private String languageCode;
 }

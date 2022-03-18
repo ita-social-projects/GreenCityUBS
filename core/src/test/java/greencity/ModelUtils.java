@@ -477,14 +477,13 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .createCourierTranslationDtos(getCreateCourierTranslationDto())
-            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+            .nameEn("nameEn")
+            .nameUa("nameUa")
             .build();
     }
 
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-            .limitDescription("Test")
             .languageId(1L)
             .name("Test")
             .build());
@@ -573,7 +572,6 @@ public class ModelUtils {
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
-                .limitDescription("blablabla")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")

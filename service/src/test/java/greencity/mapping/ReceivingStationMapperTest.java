@@ -21,7 +21,7 @@ class ReceivingStationMapperTest {
         ReceivingStation expected = ModelUtils.getReceivingStation();
         ReceivingStationDto receivingStationDto = ModelUtils.getReceivingStationDto();
 
-        assertEquals(expected, mapper.convert(receivingStationDto));
+        assertEquals(expected.getName(), mapper.convert(receivingStationDto).getName());
     }
 
 }
