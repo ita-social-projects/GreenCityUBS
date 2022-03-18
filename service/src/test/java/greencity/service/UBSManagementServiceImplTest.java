@@ -523,6 +523,7 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getOrderStatus(), producedObjectCancelled.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObjectCancelled.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectCancelled.getDate());
+        assertEquals(0, order.getPointsToUse());
 
         testOrderDetail.setOrderStatus(OrderStatus.DONE.toString());
         expectedObject.setOrderStatus(OrderStatus.DONE.toString());
