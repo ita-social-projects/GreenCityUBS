@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="changeSetForCourier" author="Max Bohonko">
+        <addColumn tableName="courier">
+        <column name="create_date" type="DATE">
+            <constraints nullable="true"/>
+        </column>
+        </addColumn>
+
+        <addColumn tableName="courier">
+        <column name="created_by_id"  type="BIGINT">
+            <constraints foreignKeyName="FK_user_id" references="users(id)"/>
+        </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="changeSetForReceivingStation" author="Max Bohonko">
+        <addColumn tableName="receiving_stations">
+            <column name="create_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="receiving_stations">
+            <column name="created_by_id"  type="BIGINT">
+                <constraints foreignKeyName="FK_created_by" references="users(id)"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>
