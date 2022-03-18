@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.annotations.ApiPageable;
-import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.*;
@@ -19,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
