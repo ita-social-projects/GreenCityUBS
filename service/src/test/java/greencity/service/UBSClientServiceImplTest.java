@@ -312,40 +312,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void cancelFormedOrder() {
-        Order order = getFormedOrder();
-        OrderClientDto expected = getOrderClientDto();
-        expected.setOrderStatus(OrderStatus.CANCELED);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-        when(modelMapper.map(order, OrderClientDto.class)).thenReturn(expected);
-
-        OrderClientDto result = ubsService.cancelFormedOrder(1L);
-
-        verify(orderRepository, times(1)).findById(1L);
-        verify(orderRepository, times(1)).save(order);
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void cancelFormedOrderShouldThrowOrderNotFoundException() {
-        Exception thrown = assertThrows(OrderNotFoundException.class,
-            () -> ubsService.cancelFormedOrder(1L));
-        assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
-    }
-
-    @Test
-    void cancelFormedOrderShouldThrowBadOrderStatusException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDoneByUser()));
-        Exception thrown = assertThrows(BadOrderStatusRequestException.class,
-            () -> ubsService.cancelFormedOrder(1L));
-        assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
-            + getOrderDoneByUser().getOrderStatus());
-    }
-
-    @Test
     void makeOrderAgain() {
         MakeOrderAgainDto dto = MakeOrderAgainDto.builder()
             .orderId(1L)
@@ -1184,5 +1150,25 @@ class UBSClientServiceImplTest {
         ubsService.getUserPoint("uuid");
 
         verify(userRepository).findByUuid("uuid");
+    }
+
+    @Test
+    void findAllCurrentPointsForUser() {
+        User user = ModelUtils.getTestUser();
+        user.setCurrentPoints(100);
+        user.getChangeOfPointsList().get(0).setAmount(100);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+
+        AllPointsUserDto pointsDTO = ubsService.findAllCurrentPointsForUser(user.getUuid());
+
+        assertEquals(user.getCurrentPoints(), pointsDTO.getUserBonuses());
+
+        user.setCurrentPoints(null);
+        user.setChangeOfPointsList(null);
+
+        pointsDTO = ubsService.findAllCurrentPointsForUser(user.getUuid());
+
+        assertEquals(0, pointsDTO.getUserBonuses());
     }
 }
