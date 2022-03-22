@@ -78,21 +78,6 @@ class ClientControllerTest {
     }
 
     @Test
-    void cancelFormedOrder() throws Exception {
-        OrderClientDto dto = getOrderClientDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(patch(ubsLink + "/" + 1L + cancelFormedOrderLink)
-            .principal(principal)
-            .content(responseJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService, times(1)).cancelFormedOrder(1L);
-    }
-
-    @Test
     void makeOrderAgain() throws Exception {
         OrderBagDto dto = OrderBagDto.builder()
             .id(1)

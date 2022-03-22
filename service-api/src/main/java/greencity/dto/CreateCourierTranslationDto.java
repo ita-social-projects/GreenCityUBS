@@ -15,6 +15,4 @@ public class CreateCourierTranslationDto {
     private String name;
     @NotNull
     private Long languageId;
-    @NotNull
-    private String limitDescription;
 }

@@ -143,11 +143,13 @@ class OrderControllerTest {
     @Test
     void getOrderDetailsByOrderId() throws Exception {
         UserInfoDto userInfoDto = getUserInfoDto();
-        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L)).thenReturn(userInfoDto);
-        mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L))
+        when(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, null)).thenReturn(userInfoDto);
+        mockMvc.perform(get(ubsLink + "/user-info" + "/{orderId}", 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getUserAndUserUbsAndViolationsInfoByOrderId(1L);
+        verify(ubsClientService).getUserAndUserUbsAndViolationsInfoByOrderId(1L, null);
     }
 
     @Test
@@ -167,34 +169,41 @@ class OrderControllerTest {
     @Test
     void getsCancellationReason() throws Exception {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        when(ubsClientService.getOrderCancellationReason(anyLong())).thenReturn(dto);
-        mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L))
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
+
+        mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
+            .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).getOrderCancellationReason(1L);
+        verify(ubsClientService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
     void updatesCancellationReason() throws Exception {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        when(ubsClientService.updateOrderCancellationReason(anyLong(), any())).thenReturn(dto);
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ubsClientService.updateOrderCancellationReason(anyLong(), any(), anyString())).thenReturn(dto);
         mockMvc.perform(post(ubsLink + "/order/{id}/cancellation/", 1L)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).updateOrderCancellationReason(anyLong(), anyObject());
+        verify(ubsClientService).updateOrderCancellationReason(anyLong(), any(), anyString());
     }
 
     @Test
     void testGetOrderHistoryByOrderId() throws Exception {
-        when(ubsClientService.getAllEventsForOrder(1L))
+        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(ubsClientService.getAllEventsForOrder(1L, "35467585763t4sfgchjfuyetf"))
             .thenReturn(ModelUtils.getListEventsDTOS());
-        mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L))
+        mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L)
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
-            .getAllEventsForOrder(1L);
+            .getAllEventsForOrder(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test

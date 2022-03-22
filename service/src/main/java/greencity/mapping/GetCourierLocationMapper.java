@@ -19,7 +19,6 @@ public class GetCourierLocationMapper extends AbstractConverter<CourierLocation,
                 .map(courierTranslation -> CourierTranslationDto.builder()
                     .languageCode(courierTranslation.getLanguage().getCode())
                     .name(courierTranslation.getName())
-                    .limitDescription(courierTranslation.getLimitDescription())
                     .build())
                 .collect(Collectors.toList()))
             .build());

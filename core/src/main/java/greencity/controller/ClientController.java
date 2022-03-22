@@ -133,27 +133,6 @@ public class ClientController {
     }
 
     /**
-     * Controller cancel order with status FORMED.
-     *
-     * @param orderId {@link Long} - order id.
-     * @return {@link HttpStatus} - http status.
-     * @author Danylko Mykola
-     */
-    @ApiOperation(value = "Cancel order with status FORMED")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @PatchMapping("/{id}/cancel-formed-order")
-    public ResponseEntity<OrderClientDto> cancelFormedOrder(
-        @PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.cancelFormedOrder(orderId));
-    }
-
-    /**
      * Controller that make order again if our status of Order is ON_THE_ROUTE,
      * CONFIRMED, DONE.
      *

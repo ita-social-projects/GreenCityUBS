@@ -2,10 +2,7 @@ package greencity;
 
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CancellationReason;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.*;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import org.springframework.http.HttpStatus;
@@ -480,14 +477,13 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .createCourierTranslationDtos(getCreateCourierTranslationDto())
-            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+            .nameEn("nameEn")
+            .nameUa("nameUa")
             .build();
     }
 
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-            .limitDescription("Test")
             .languageId(1L)
             .name("Test")
             .build());
@@ -576,11 +572,18 @@ public class ModelUtils {
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
-                .limitDescription("blablabla")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")
             .locationStatus("ACTIVE")
+            .build();
+    }
+
+    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
+        return UpdateNotificationTemplatesDto.builder()
+            .body("You have unpaid order")
+            .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .languageId(1)
             .build();
     }
 }

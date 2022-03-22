@@ -4,16 +4,16 @@ import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @Builder
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
-public class CreateCourierDto {
+public class UpdateNotificationTemplatesDto {
     @NotNull
-    private String nameEn;
-
+    String body;
     @NotNull
-    private String nameUa;
+    String notificationType;
+    @NotNull
+    long languageId;
 }

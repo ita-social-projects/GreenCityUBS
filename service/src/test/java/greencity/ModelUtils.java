@@ -1098,6 +1098,8 @@ public class ModelUtils {
         return ReceivingStation.builder()
             .id(1L)
             .name("Петрівка")
+            .createDate(LocalDate.EPOCH)
+            .createdBy(getUser())
             .build();
     }
 
@@ -2019,7 +2021,6 @@ public class ModelUtils {
             .id(1L)
             .language(Language.builder().id(1L).code("ua").build())
             .name("name")
-            .limitDescription("limitDescription")
             .courier(getCourier(courierLimit))
             .build();
     }
@@ -2126,8 +2127,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .createCourierTranslationDtos(getCreateCourierTranslationDto())
-            .createCourierLimitsDto(List.of(getCourierLimitsDto()))
+            .nameUa("nameUa")
+            .nameEn("nameEn")
             .build();
     }
 
@@ -2138,9 +2139,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Language getEnLanguage() {
+        return Language.builder()
+            .id(2L)
+            .code("en")
+            .build();
+    }
+
     public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
         return List.of(CreateCourierTranslationDto.builder()
-            .limitDescription("Test")
             .languageId(1L)
             .name("Test")
             .build());
@@ -2148,10 +2155,13 @@ public class ModelUtils {
 
     public static List<CourierTranslation> getCourierTranslations() {
         return List.of(CourierTranslation.builder()
-            .limitDescription("Test")
             .name("Test")
             .language(ModelUtils.getLanguage())
-            .build());
+            .build(),
+            CourierTranslation.builder()
+                .name("Test")
+                .language(ModelUtils.getEnLanguage())
+                .build());
     }
 
     public static List<OrderInfoDto> getOrderInfoDto() {
@@ -2453,7 +2463,6 @@ public class ModelUtils {
             .id(1L)
             .courierTranslationList(List.of(CourierTranslation.builder()
                 .id(1L)
-                .limitDescription("dd")
                 .name("mark")
                 .build()))
             .courierStatus(CourierStatus.ACTIVE)
@@ -2558,16 +2567,8 @@ public class ModelUtils {
 
     public static CreateCourierDto createCourier() {
         return CreateCourierDto.builder()
-            .createCourierLimitsDto(List.of(LimitsDto.builder()
-                .minPriceOfOrder(500L)
-                .maxPriceOfOrder(500000L)
-                .minAmountOfBigBags(2L)
-                .maxAmountOfBigBags(50L)
-                .build()))
-            .createCourierTranslationDtos(List.of(CreateCourierTranslationDto.builder()
-                .name("Test")
-                .limitDescription("Test")
-                .build()))
+            .nameEn("nameEn")
+            .nameUa("nameUa")
             .build();
     }
 
@@ -2639,7 +2640,8 @@ public class ModelUtils {
             .setId(1L)
             .setBody("test")
             .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER);
+            .setNotificationType(NotificationType.UNPAID_ORDER)
+            .setLanguage(new Language().setId(1L));
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
@@ -2768,10 +2770,14 @@ public class ModelUtils {
     }
 
     public static List<CourierTranslationDto> getCourierTranslationDtoList() {
-        return List.of(CourierTranslationDto.builder()
-            .name("Test")
-            .limitDescription("Test")
-            .languageCode("ua").build());
+        return List.of(
+            CourierTranslationDto.builder()
+                .name("Test")
+                .languageCode("ua").build(),
+            CourierTranslationDto.builder()
+                .name("Test")
+                .languageCode("en")
+                .build());
     }
 
     public static Location getLocationForCreateRegion() {
@@ -3286,7 +3292,6 @@ public class ModelUtils {
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
-                .limitDescription("blablabla")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Taras")
@@ -3303,6 +3308,14 @@ public class ModelUtils {
             .setCourierLocations(List.of(getCourierLocations()))
             .setReceivingStations(getReceivingStation());
         return tariffsInfo;
+    }
+
+    public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
+        return UpdateNotificationTemplatesDto.builder()
+            .body("test")
+            .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .languageId(1)
+            .build();
     }
 
     public static OrderStatusForUserDto getOrderStatusDto() {

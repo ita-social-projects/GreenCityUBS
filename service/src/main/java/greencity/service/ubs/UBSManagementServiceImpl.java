@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -322,7 +323,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             bagInfoDto.setNameEng(bagTranslationRepository.findNameEngByBagId(bag.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
-        UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        UserInfoDto userInfoDto =
+            ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order), language);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);
@@ -822,6 +824,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
@@ -898,6 +901,30 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             address.setHouseCorpus(dto.getAddressHouseCorpus());
         }
         return address;
+    }
+
+    private void returnAllPointsFromOrder(Order order) {
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        order.setPointsToUse(0);
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
     }
 
     /**

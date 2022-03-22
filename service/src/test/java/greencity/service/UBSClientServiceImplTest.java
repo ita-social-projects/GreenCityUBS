@@ -1194,6 +1194,68 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void findAllCurrentPointsForUser() {
+        User user = ModelUtils.getTestUser();
+        user.setCurrentPoints(100);
+        user.getChangeOfPointsList().get(0).setAmount(100);
+
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+
+        AllPointsUserDto pointsDTO = ubsService.findAllCurrentPointsForUser(user.getUuid());
+
+        assertEquals(user.getCurrentPoints(), pointsDTO.getUserBonuses());
+
+        user.setCurrentPoints(null);
+        user.setChangeOfPointsList(null);
+
+        pointsDTO = ubsService.findAllCurrentPointsForUser(user.getUuid());
+
+        assertEquals(0, pointsDTO.getUserBonuses());
+    }
+
+    @Test
+    void getPaymentResponseFromFondy() {
+        Order order = ModelUtils.getOrder();
+        FondyPaymentResponse expected = FondyPaymentResponse.builder()
+            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .build();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
+
+        assertEquals(expected, ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
+    }
+
+    @Test
+    void getPaymentResponseFromFondyOrderNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, "abc");
+        });
+    }
+
+    @Test
+    void getPaymentResponseFromFondyAccessDeniedException() {
+        Order order = ModelUtils.getOrder();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getTestUser());
+
+        assertThrows(AccessDeniedException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, "abc");
+        });
+    }
+
+    @Test
+    void getLiqPayStatusAccessDeniedException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+        assertThrows(AccessDeniedException.class, () -> {
+            ubsService.getLiqPayStatus(1L, "abc");
+        });
+    }
+
+    @Test
     void getOrderForUserTest() {
         List<OrderStatusForUserDto> expectedList = new ArrayList<>(List.of(ModelUtils.getOrderStatusDto()));
         List<Order> orderList = new ArrayList<>();
