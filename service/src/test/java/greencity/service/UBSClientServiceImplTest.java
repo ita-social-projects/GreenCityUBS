@@ -404,7 +404,7 @@ class UBSClientServiceImplTest {
     void getUserAndUserUbsAndViolationsInfoByOrderIdOrderNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString()));
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
@@ -412,7 +412,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
-            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString()));
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
     @Test
@@ -711,7 +711,7 @@ class UBSClientServiceImplTest {
     void updateOrderCancellationReasonOrderNotFoundException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, getCancellationDto(), "abc"));
+            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
     }
 
     @Test
@@ -719,7 +719,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class,
-            () -> ubsService.updateOrderCancellationReason(1L, getCancellationDto(), "abc"));
+            () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
     }
 
     @Test
@@ -1240,7 +1240,7 @@ class UBSClientServiceImplTest {
     void getPaymentResponseFromFondyOrderNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class, () -> {
-            ubsService.getPaymentResponseFromFondy(1L, anyString());
+            ubsService.getPaymentResponseFromFondy(1L, "abc");
         });
     }
 
@@ -1252,7 +1252,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getTestUser());
 
         assertThrows(AccessDeniedException.class, () -> {
-            ubsService.getPaymentResponseFromFondy(1L, anyString());
+            ubsService.getPaymentResponseFromFondy(1L, "abc");
         });
     }
 
@@ -1261,7 +1261,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
         when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         assertThrows(AccessDeniedException.class, () -> {
-            ubsService.getLiqPayStatus(1L, anyString());
+            ubsService.getLiqPayStatus(1L, "abc");
         });
     }
 }
