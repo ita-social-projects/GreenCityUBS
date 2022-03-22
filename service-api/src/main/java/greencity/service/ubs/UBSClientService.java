@@ -4,6 +4,7 @@ import greencity.dto.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Locale;
@@ -126,7 +127,7 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Oleksandr Khomiakov
      */
-    List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId);
+    List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page);
 
     /**
      * Method returns list all bonuses of user.

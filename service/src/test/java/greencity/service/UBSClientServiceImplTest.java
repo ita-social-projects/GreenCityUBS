@@ -26,6 +26,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
@@ -51,6 +54,8 @@ class UBSClientServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private BagRepository bagRepository;
+    @Mock
+    private OrdersForUserRepository ordersForUserRepository;
     @Mock
     private UBSuserRepository ubsUserRepository;
     @Mock
@@ -1195,23 +1200,15 @@ class UBSClientServiceImplTest {
         Order order = ModelUtils.getOrderTest();
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
+        Page<Order> page = Page.empty();
+        Pageable pageable = PageRequest.of(1, 10);
 
-        when(orderRepository.findAllOrdersByUserUuid("2c5ff668-caa2-4392-a84e-af18e44bbefa")).thenReturn(orderList);
-        when(orderStatusTranslationRepository
-            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
-                .thenReturn(Optional.of(getStatusTranslation()));
-        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-            (long) order.getOrderPaymentStatus().getStatusValue(), 1L)).thenReturn("Оплачено");
+        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, "2c5ff668-caa2-4392-a84e-af18e44bbefa"))
+            .thenReturn(page);
 
         List<OrderStatusForUserDto> actualList =
-            ubsService.getOrdersForUser("2c5ff668-caa2-4392-a84e-af18e44bbefa", 1L);
+            ubsService.getOrdersForUser("2c5ff668-caa2-4392-a84e-af18e44bbefa", 1L, pageable);
 
-        assertEquals(expectedList.size(), actualList.size());
-        verify(orderStatusTranslationRepository)
-            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
-        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-            (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
-        verify(orderRepository).findAllOrdersByUserUuid("2c5ff668-caa2-4392-a84e-af18e44bbefa");
-
+        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, "2c5ff668-caa2-4392-a84e-af18e44bbefa");
     }
 }

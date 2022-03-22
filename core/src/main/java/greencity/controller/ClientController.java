@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,8 +66,8 @@ public class ClientController {
     })
     @GetMapping("/get-all-orders-data/{lang}")
     public ResponseEntity<List<OrderStatusForUserDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang));
+        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang, @ApiIgnore Pageable page) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang, page));
     }
 
     /**

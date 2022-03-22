@@ -24,6 +24,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -57,6 +60,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
+    private final OrdersForUserRepository ordersForUserRepository;
     private final AddressRepository addressRepo;
     private final RestClient restClient;
     private final PaymentRepository paymentRepository;
@@ -445,13 +449,16 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
 
     @Override
-    public List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId) {
-        List<Order> orders = orderRepository.findAllOrdersByUserUuid(uuid);
+    public List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
+        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
+        Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
+        List<Order> orders = orderPages.getContent();
+
         List<OrderStatusForUserDto> dtos = new ArrayList<>();
 
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
-            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
             Optional<OrderStatusTranslation> orderStatusTranslation = orderStatusTranslationRepository
                 .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId);
             String paymentStatusTranslation = orderPaymentStatusTranslationRepository
@@ -506,14 +513,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
+    private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
         bags.forEach(bag -> {
             BagForUserDto bagDto = new BagForUserDto();
             bagDto.setCount(amountOfBags.get(bag.getId()));
-            bagDto.setService(bag.getBagTranslations().get(1).getName());
+            List<BagTranslation> translations = bag.getBagTranslations();
+            if (languageId == 2) {
+                bagDto.setService(translations.get(0).getName());
+            } else {
+                bagDto.setService(translations.get(1).getName());
+            }
             bagDto.setCapacity(bag.getCapacity());
             bagDto.setPrice(bag.getFullPrice());
             bagForUserDtos.add(bagDto);
