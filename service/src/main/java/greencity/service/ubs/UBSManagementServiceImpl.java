@@ -323,7 +323,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             bagInfoDto.setNameEng(bagTranslationRepository.findNameEngByBagId(bag.getId()).toString());
             bagInfo.add(bagInfoDto);
         });
-        UserInfoDto userInfoDto = ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId);
+        UserInfoDto userInfoDto =
+            ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order), language);
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(address);

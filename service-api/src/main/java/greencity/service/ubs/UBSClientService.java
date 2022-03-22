@@ -57,10 +57,12 @@ public interface UBSClientService {
     /**
      * Method get status of order from db by id.
      *
+     * @param orderId {@link Long} order id;
+     * @param uuid    current {@link User}'s uuid;
      * @return - payment status
      * @author Vadym Makitra
      */
-    FondyPaymentResponse getPaymentResponseFromFondy(Long orderId);
+    FondyPaymentResponse getPaymentResponseFromFondy(Long orderId, String uuid);
 
     /**
      * Methods return list of all user addresses.
@@ -132,10 +134,11 @@ public interface UBSClientService {
      * Method returns info about user, ubsUser and user violations by order orderId.
      *
      * @param orderId of {@link Long} order id;
+     * @param uuid    current {@link User}'s uuid;
      * @return {@link UserInfoDto};
      * @author Rusanovscaia Nadejda
      */
-    UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId);
+    UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid);
 
     /**
      * Method updates ubs_user information order in order.
@@ -189,32 +192,35 @@ public interface UBSClientService {
      * Method returns cancellation reason and comment.
      *
      * @param orderId {@link Long};
+     * @param uuid    current {@link User}'s uuid;
      * @return {@link OrderCancellationReasonDto} dto that contains cancellation
      *         reason and comment;
      *
      * @author Oleksandr Khomiakov
      */
-    OrderCancellationReasonDto getOrderCancellationReason(Long orderId);
+    OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);
 
     /**
      * Method updates cancellation reason and comment.
      *
-     * @param id  {@link Long};
-     * @param dto {@link OrderCancellationReasonDto};
+     * @param id   {@link Long};
+     * @param dto  {@link OrderCancellationReasonDto};
+     * @param uuid current {@link User}'s uuid;
      * @return {@link OrderCancellationReasonDto} dto that contains cancellation
      *         reason and comment;
      * @author Oleksandr Khomiakov
      */
-    OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto);
+    OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto, String uuid);
 
     /**
      * Methods for finding all events for Order.
      *
      * @param orderId {@link Long} id.
+     * @param uuid    current {@link User}'s uuid;
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId);
+    List<EventDto> getAllEventsForOrder(Long orderId, String uuid);
 
     /**
      * Methods for converting UserProfileDTO to PersonalDataDTO.
@@ -265,10 +271,11 @@ public interface UBSClientService {
      * Method for get info about payment status from LiqPay.
      * 
      * @param orderId - current order id.
+     * @param uuid    current {@link User}'s uuid;
      * @return {@link Map}
      * @author Vadym Makitra
      */
-    Map<String, Object> getLiqPayStatus(Long orderId) throws Exception;
+    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws Exception;
 
     /**
      * Method for delete user order.

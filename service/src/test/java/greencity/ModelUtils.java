@@ -127,6 +127,7 @@ public class ModelUtils {
                     .eventDate(LocalDateTime.now())
                     .authorName("Igor")
                     .build()))
+            .user(getTestUser())
             .build());
     }
 
