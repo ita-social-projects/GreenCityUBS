@@ -250,9 +250,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public FondyPaymentResponse getPaymentResponseFromFondy(Long id) {
+    public FondyPaymentResponse getPaymentResponseFromFondy(Long id, String uuid) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
+        }
         return getFondyPaymentResponse(order);
     }
 
@@ -367,7 +370,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
+            throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
         address.setAddressStatus(AddressStatus.DELETED);
         addressRepo.save(address);
@@ -452,17 +455,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     /**
-     * Method returns info about user, ubsUser and user violations by order orderId.
-     *
-     * @param orderId of {@link Long} order id;
-     * @return {@link UserInfoDto};
-     * @author Rusanovscaia Nadejda
+     * {@inheritDoc}
      */
     @Override
     @Transactional
-    public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId) {
+    public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        User user = userRepository.findByUuid(uuid);
+        if (!order.getUser().equals(user)) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
+        }
         return UserInfoDto.builder()
             .customerName(order.getUser().getRecipientName())
             .customerSurName(order.getUser().getRecipientSurname())
@@ -739,10 +742,13 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrder(Long orderId) {
+    public List<EventDto> getAllEventsForOrder(Long orderId, String uuid) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+        if (!order.get().getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_EVENT_HISTORY);
         }
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
@@ -824,9 +830,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId) {
+    public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
+        }
         return OrderCancellationReasonDto.builder()
             .cancellationReason(order.getCancellationReason())
             .cancellationComment(order.getCancellationComment())
@@ -834,9 +843,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderCancellationReasonDto updateOrderCancellationReason(long id, OrderCancellationReasonDto dto) {
+    public OrderCancellationReasonDto updateOrderCancellationReason(
+        long id, OrderCancellationReasonDto dto, String uuid) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
+        }
         order.setCancellationReason(dto.getCancellationReason());
         order.setCancellationComment(dto.getCancellationComment());
         order.setId(id);
@@ -1006,9 +1019,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public Map<String, Object> getLiqPayStatus(Long orderId) throws Exception {
+    public Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws Exception {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
+            throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
+        }
         StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
         Map<String, Object> response = restClient.getStatusFromLiqPay(dto);
         @Nullable
@@ -1268,7 +1284,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<CourierLocation> courierLocations =
             courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(courierId, LANG_CODE);
         if (courierLocations.isEmpty()) {
-            throw new CourierLocationException(COURIER_LOCATION_DATA_IS_NOT_VALID);
+            throw new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
         return courierLocations.stream()
             .map(courierLocation -> modelMapper.map(courierLocation, GetCourierLocationDto.class))

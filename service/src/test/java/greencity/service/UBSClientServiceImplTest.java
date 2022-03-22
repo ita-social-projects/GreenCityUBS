@@ -366,13 +366,6 @@ class UBSClientServiceImplTest {
         assertEquals(ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
 
-    void getsUserAndUserUbsAndViolationsInfoByOrderIdThrowOrderNotFoundException() {
-        when(orderRepository.findById(1L))
-            .thenThrow(OrderNotFoundException.class);
-        assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L));
-    }
-
     @Test
     void markUserAsDeactivatedByIdThrowsNotFoundException() {
         Exception thrown = assertThrows(NotFoundException.class,
@@ -394,16 +387,32 @@ class UBSClientServiceImplTest {
         UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
         expectedResult.setRecipientId(1L);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetails().getUser());
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L);
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
 
         verify(orderRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).countTotalUsersViolations(1L);
         verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
 
         assertEquals(expectedResult, actual);
+    }
+
+    @Test
+    void getUserAndUserUbsAndViolationsInfoByOrderIdOrderNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString()));
+    }
+
+    @Test
+    void getUserAndUserUbsAndViolationsInfoByOrderIdAccessDeniedException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+        assertThrows(AccessDeniedException.class,
+            () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString()));
     }
 
     @Test
@@ -623,11 +632,11 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testDeleteUnexistingAddressForCurrentUser() {
+    void testDeleteAddressForWrongUser() {
         Address address = getTestAddresses(new User()).get(0);
         when(addressRepository.findById(42L)).thenReturn(Optional.of(address));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(null);
-        assertThrows(NotFoundOrderAddressException.class,
+        assertThrows(AccessDeniedException.class,
             () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
 
@@ -659,11 +668,27 @@ class UBSClientServiceImplTest {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
         Order orderDto = ModelUtils.getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
-        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L);
+        assert orderDto != null;
+        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
+        OrderCancellationReasonDto result = ubsService.getOrderCancellationReason(1L, anyString());
 
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
         assertEquals(dto.getCancellationComment(), result.getCancellationComment());
+    }
 
+    @Test
+    void getOrderCancellationReasonOrderNotFoundException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsService.getOrderCancellationReason(1L, "abc"));
+    }
+
+    @Test
+    void getOrderCancellationReasonAccessDeniedException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+        assertThrows(AccessDeniedException.class,
+            () -> ubsService.getOrderCancellationReason(1L, "abc"));
     }
 
     @Test
@@ -671,40 +696,66 @@ class UBSClientServiceImplTest {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
         Order orderDto = ModelUtils.getOrderTest();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(orderDto));
+        assert orderDto != null;
+        when(userRepository.findByUuid(anyString())).thenReturn(orderDto.getUser());
         when(orderRepository.save(any())).thenReturn(orderDto);
-        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto);
+        OrderCancellationReasonDto result = ubsService.updateOrderCancellationReason(1L, dto, anyString());
 
         assertEquals(dto.getCancellationReason(), result.getCancellationReason());
         assertEquals(dto.getCancellationComment(), result.getCancellationComment());
-        assert orderDto != null;
         verify(orderRepository).save(orderDto);
         verify(orderRepository).findById(1L);
+    }
+
+    @Test
+    void updateOrderCancellationReasonOrderNotFoundException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class,
+            () -> ubsService.updateOrderCancellationReason(1L, getCancellationDto(), "abc"));
+    }
+
+    @Test
+    void updateOrderCancellationReasonAccessDeniedException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(getOrderTest()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+        assertThrows(AccessDeniedException.class,
+            () -> ubsService.updateOrderCancellationReason(1L, getCancellationDto(), "abc"));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = ModelUtils.getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L));
+        assertEquals(eventDTOS, ubsService.getAllEventsForOrder(1L, anyString()));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L));
+            () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
         assertThrows(EventsNotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L));
+            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+    }
+
+    @Test
+    void getAllEventsForOrderAccessDeniedException() {
+        when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
+        when(userRepository.findByUuid(anyString())).thenReturn(getUser());
+        assertThrows(AccessDeniedException.class,
+            () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
     @Test
@@ -1112,10 +1163,10 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getCourierLocationByCourierIdAndLanguageCodeThrowsCourierLocationException() {
+    void getCourierLocationByCourierIdAndLanguageCodeThrowsCourierNotFoundException() {
         when(courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(1L, "ua"))
             .thenReturn(Collections.emptyList());
-        assertThrows(CourierLocationException.class, () -> ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
+        assertThrows(CourierNotFoundException.class, () -> ubsService.getCourierLocationByCourierIdAndLanguageCode(1L));
     }
 
     @Test
@@ -1170,5 +1221,47 @@ class UBSClientServiceImplTest {
         pointsDTO = ubsService.findAllCurrentPointsForUser(user.getUuid());
 
         assertEquals(0, pointsDTO.getUserBonuses());
+    }
+
+    @Test
+    void getPaymentResponseFromFondy() {
+        Order order = ModelUtils.getOrder();
+        FondyPaymentResponse expected = FondyPaymentResponse.builder()
+            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .build();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(order.getUser().getUuid())).thenReturn(order.getUser());
+
+        assertEquals(expected, ubsService.getPaymentResponseFromFondy(1L, order.getUser().getUuid()));
+    }
+
+    @Test
+    void getPaymentResponseFromFondyOrderNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, anyString());
+        });
+    }
+
+    @Test
+    void getPaymentResponseFromFondyAccessDeniedException() {
+        Order order = ModelUtils.getOrder();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getTestUser());
+
+        assertThrows(AccessDeniedException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, anyString());
+        });
+    }
+
+    @Test
+    void getLiqPayStatusAccessDeniedException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
+        assertThrows(AccessDeniedException.class, () -> {
+            ubsService.getLiqPayStatus(1L, anyString());
+        });
     }
 }
