@@ -122,8 +122,8 @@ class ClientControllerTest {
     @Test
     void getAllDataForOrderTest() throws Exception {
         mockMvc = MockMvcBuilders.standaloneSetup(clientController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build();
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .build();
 
         this.mockMvc.perform(get(ubsLink + "/get-all-orders-data/{lang}", 1)
             .principal(principal)

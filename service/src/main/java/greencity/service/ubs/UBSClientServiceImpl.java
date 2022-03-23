@@ -441,32 +441,32 @@ public class UBSClientServiceImpl implements UBSClientService {
             List<Payment> payments = order.getPayment();
             List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
             Optional<OrderStatusTranslation> orderStatusTranslation = orderStatusTranslationRepository
-                    .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId);
+                .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId);
             String paymentStatusTranslation = orderPaymentStatusTranslationRepository
-                    .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                            Long.valueOf(order.getOrderPaymentStatus().getStatusValue()), languageId);
+                .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                    Long.valueOf(order.getOrderPaymentStatus().getStatusValue()), languageId);
 
             Integer totalSum = bagForUserDtos.stream()
-                    .map(BagForUserDto::getTotalPrice)
-                    .reduce(0, Integer::sum);
+                .map(BagForUserDto::getTotalPrice)
+                .reduce(0, Integer::sum);
 
             OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
-                    .id(order.getId())
-                    .dateForm(order.getOrderDate())
-                    .orderStatus(orderStatusTranslation.get().getName())
-                    .datePaid(order.getOrderDate())
-                    .orderComment(order.getComment())
-                    .bags(bagForUserDtos)
-                    .additionalOrders(order.getAdditionalOrders())
-                    .amountBeforePayment(totalSum.doubleValue() - order.getPointsToUse())
-                    .paidAmount(countPaidAmount(payments).doubleValue())
-                    .orderFullPrice(totalSum.doubleValue())
-                    .bonuses(order.getPointsToUse().doubleValue())
-                    .certificate(order.getCertificates())
-                    .sender(senderInfoDtoBuilder(order))
-                    .address(addressInfoDtoBuilder(order))
-                    .paymentStatus(paymentStatusTranslation)
-                    .build();
+                .id(order.getId())
+                .dateForm(order.getOrderDate())
+                .orderStatus(orderStatusTranslation.get().getName())
+                .datePaid(order.getOrderDate())
+                .orderComment(order.getComment())
+                .bags(bagForUserDtos)
+                .additionalOrders(order.getAdditionalOrders())
+                .amountBeforePayment(totalSum.doubleValue() - order.getPointsToUse())
+                .paidAmount(countPaidAmount(payments).doubleValue())
+                .orderFullPrice(totalSum.doubleValue())
+                .bonuses(order.getPointsToUse().doubleValue())
+                .certificate(order.getCertificates())
+                .sender(senderInfoDtoBuilder(order))
+                .address(addressInfoDtoBuilder(order))
+                .paymentStatus(paymentStatusTranslation)
+                .build();
 
             dtos.add(orderStatusForUserDto);
         }
@@ -476,22 +476,22 @@ public class UBSClientServiceImpl implements UBSClientService {
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
         UBSuser sender = order.getUbsUser();
         return SenderInfoDto.builder()
-                .senderName(sender.getFirstName())
-                .senderSurname(sender.getLastName())
-                .senderEmail(sender.getEmail())
-                .senderPhone(sender.getPhoneNumber())
-                .build();
+            .senderName(sender.getFirstName())
+            .senderSurname(sender.getLastName())
+            .senderEmail(sender.getEmail())
+            .senderPhone(sender.getPhoneNumber())
+            .build();
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
         Address address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
-                .addressCity(address.getCity())
-                .addressComment(address.getAddressComment())
-                .addressDistinct(address.getDistrict())
-                .addressRegion(address.getRegion())
-                .addressStreet(address.getStreet())
-                .build();
+            .addressCity(address.getCity())
+            .addressComment(address.getAddressComment())
+            .addressDistinct(address.getDistrict())
+            .addressRegion(address.getRegion())
+            .addressStreet(address.getStreet())
+            .build();
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
@@ -517,9 +517,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Long countPaidAmount(List<Payment> payments) {
         return payments.stream()
-                .map(Payment::getAmount)
-                .map(amount -> amount / 100)
-                .reduce(0L, Long::sum);
+            .map(Payment::getAmount)
+            .map(amount -> amount / 100)
+            .reduce(0L, Long::sum);
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {

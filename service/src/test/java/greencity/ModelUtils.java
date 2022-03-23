@@ -3318,22 +3318,23 @@ public class ModelUtils {
             .languageId(1)
             .build();
     }
+
     public static OrderStatusForUserDto getOrderStatusDto() {
 
         SenderInfoDto senderInfoDto = SenderInfoDto.builder()
-                .senderName("TestName")
-                .senderSurname("TestSurName")
-                .senderPhone("38099884433")
-                .senderEmail("test@mail.com")
-                .build();
+            .senderName("TestName")
+            .senderSurname("TestSurName")
+            .senderPhone("38099884433")
+            .senderEmail("test@mail.com")
+            .build();
 
         AddressInfoDto addressInfoDto = AddressInfoDto.builder()
-                .addressStreet("StreetTest")
-                .addressDistinct("AdressDistinctTest")
-                .addressRegion("TestRegion")
-                .addressComment("TestComment")
-                .addressCity("TestCity")
-                .build();
+            .addressStreet("StreetTest")
+            .addressDistinct("AdressDistinctTest")
+            .addressRegion("TestRegion")
+            .addressComment("TestComment")
+            .addressCity("TestCity")
+            .build();
 
         BagForUserDto bagForUserDto = new BagForUserDto();
         bagForUserDto.setTotalPrice(900);
@@ -3343,20 +3344,20 @@ public class ModelUtils {
         bagForUserDto.setService("Safe Waste");
 
         return OrderStatusForUserDto.builder()
-                .id(1L)
-                .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
-                .datePaid(LocalDateTime.now())
-                .amountBeforePayment(500d)
-                .bonuses(100d)
-                .orderFullPrice(400d)
-                .orderComment("abc")
-                .paymentStatus(PaymentStatus.PAID.toString())
-                .sender(senderInfoDto)
-                .address(addressInfoDto)
-                .orderStatus(OrderStatus.FORMED.toString())
-                .bags(List.of(bagForUserDto))
-                .certificate(Collections.emptySet())
-                .additionalOrders(Collections.emptySet())
-                .build();
+            .id(1L)
+            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
+            .datePaid(LocalDateTime.now())
+            .amountBeforePayment(500d)
+            .bonuses(100d)
+            .orderFullPrice(400d)
+            .orderComment("abc")
+            .paymentStatus(PaymentStatus.PAID.toString())
+            .sender(senderInfoDto)
+            .address(addressInfoDto)
+            .orderStatus(OrderStatus.FORMED.toString())
+            .bags(List.of(bagForUserDto))
+            .certificate(Collections.emptySet())
+            .additionalOrders(Collections.emptySet())
+            .build();
     }
 }

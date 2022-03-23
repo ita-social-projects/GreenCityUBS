@@ -1278,7 +1278,7 @@ class UBSClientServiceImplTest {
         Pageable pageable = PageRequest.of(1, 10);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, "2c5ff668-caa2-4392-a84e-af18e44bbefa"))
-                .thenReturn(page);
+            .thenReturn(page);
 
         ubsService.getOrdersForUser("2c5ff668-caa2-4392-a84e-af18e44bbefa", 1L, pageable);
 

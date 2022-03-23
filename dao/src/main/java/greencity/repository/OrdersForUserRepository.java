@@ -46,8 +46,8 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      *
      */
     @Query(value = "SELECT * FROM orders as o "
-            + "JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
-            + "JOIN users as u ON ubs.users_id = u.id "
-            + "WHERE u.uuid = :uuid", nativeQuery = true)
+        + "JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
+        + "JOIN users as u ON ubs.users_id = u.id "
+        + "WHERE u.uuid = :uuid", nativeQuery = true)
     Page<Order> findAllOrdersByUserUuid(Pageable pageable, @Param("uuid") String uuid);
 }
