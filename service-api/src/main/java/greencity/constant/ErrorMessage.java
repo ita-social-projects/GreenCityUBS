@@ -95,6 +95,12 @@ public final class ErrorMessage {
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String USER_DOES_NOT_HAVE_DEFINED_NAME = "User doesn't have defined name or surname";
+    public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
+    public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
+    public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
+    public static final String CANNOT_ACCESS_EVENT_HISTORY = "Cannot access another user's event history";
+    public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
+        "Cannot access another user's order cancellation reason";
 
     /**
      * Constructor.

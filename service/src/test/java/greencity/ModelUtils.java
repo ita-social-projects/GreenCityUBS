@@ -127,6 +127,7 @@ public class ModelUtils {
                     .eventDate(LocalDateTime.now())
                     .authorName("Igor")
                     .build()))
+            .user(getTestUser())
             .build());
     }
 
@@ -3315,6 +3316,48 @@ public class ModelUtils {
             .body("test")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
             .languageId(1)
+            .build();
+    }
+
+    public static OrderStatusForUserDto getOrderStatusDto() {
+
+        SenderInfoDto senderInfoDto = SenderInfoDto.builder()
+            .senderName("TestName")
+            .senderSurname("TestSurName")
+            .senderPhone("38099884433")
+            .senderEmail("test@mail.com")
+            .build();
+
+        AddressInfoDto addressInfoDto = AddressInfoDto.builder()
+            .addressStreet("StreetTest")
+            .addressDistinct("AdressDistinctTest")
+            .addressRegion("TestRegion")
+            .addressComment("TestComment")
+            .addressCity("TestCity")
+            .build();
+
+        BagForUserDto bagForUserDto = new BagForUserDto();
+        bagForUserDto.setTotalPrice(900);
+        bagForUserDto.setCount(3);
+        bagForUserDto.setCapacity(200);
+        bagForUserDto.setPrice(300);
+        bagForUserDto.setService("Safe Waste");
+
+        return OrderStatusForUserDto.builder()
+            .id(1L)
+            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
+            .datePaid(LocalDateTime.now())
+            .amountBeforePayment(500d)
+            .bonuses(100d)
+            .orderFullPrice(400d)
+            .orderComment("abc")
+            .paymentStatus(PaymentStatus.PAID.toString())
+            .sender(senderInfoDto)
+            .address(addressInfoDto)
+            .orderStatus(OrderStatus.FORMED.toString())
+            .bags(List.of(bagForUserDto))
+            .certificate(Collections.emptySet())
+            .additionalOrders(Collections.emptySet())
             .build();
     }
 }
