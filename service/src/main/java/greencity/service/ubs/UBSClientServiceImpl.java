@@ -440,11 +440,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
             List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
-            Optional<OrderStatusTranslation> orderStatusTranslation = orderStatusTranslationRepository
-                .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId);
+            OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
+                .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId)
+                .orElse(orderStatusTranslationRepository.getOne(1L));
             String paymentStatusTranslation = orderPaymentStatusTranslationRepository
                 .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                    Long.valueOf(order.getOrderPaymentStatus().getStatusValue()), languageId);
+                    (long) order.getOrderPaymentStatus().getStatusValue(), languageId);
 
             Integer totalSum = bagForUserDtos.stream()
                 .map(BagForUserDto::getTotalPrice)
@@ -453,7 +454,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
                 .id(order.getId())
                 .dateForm(order.getOrderDate())
-                .orderStatus(orderStatusTranslation.get().getName())
+                .orderStatus(orderStatusTranslation.getName())
                 .datePaid(order.getOrderDate())
                 .orderComment(order.getComment())
                 .bags(bagForUserDtos)

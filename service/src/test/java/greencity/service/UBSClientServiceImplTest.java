@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,6 +96,10 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private CourierLocationRepository courierLocationRepository;
+    @Mock
+    private OrderStatusTranslationRepository orderStatusTranslationRepository;
+    @Mock
+    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
 
     @Test
     @Transactional
@@ -1269,19 +1274,33 @@ class UBSClientServiceImplTest {
 
     @Test
     void getOrderForUserTest() {
-        List<OrderStatusForUserDto> expectedList = new ArrayList<>(List.of(ModelUtils.getOrderStatusDto()));
-        List<Order> orderList = new ArrayList<>();
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
         Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+        order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        List<Order> orderList = new ArrayList<>();
         orderList.add(order);
-        Page<Order> page = Page.empty();
         Pageable pageable = PageRequest.of(1, 10);
+        Page<Order> page = new PageImpl<>(orderList);
 
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, "2c5ff668-caa2-4392-a84e-af18e44bbefa"))
+        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue(), 1L))
+                .thenReturn(orderPaymentStatusTranslation.getTranslationValue());
 
-        ubsService.getOrdersForUser("2c5ff668-caa2-4392-a84e-af18e44bbefa", 1L, pageable);
+        ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
 
-        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, "2c5ff668-caa2-4392-a84e-af18e44bbefa");
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+            .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
+        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
     }
 }
