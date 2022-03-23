@@ -6,10 +6,7 @@ import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
@@ -29,6 +26,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -84,6 +85,8 @@ class UBSClientServiceImplTest {
     @Mock
     private EventService eventService;
     @Mock
+    private OrdersForUserRepository ordersForUserRepository;
+    @Mock
     private LocationTranslationRepository locationTranslationRepository;
     @Mock
     private CourierRepository courierRepository;
@@ -93,6 +96,10 @@ class UBSClientServiceImplTest {
     private UBSManagementService ubsManagementService;
     @Mock
     private CourierLocationRepository courierLocationRepository;
+    @Mock
+    private OrderStatusTranslationRepository orderStatusTranslationRepository;
+    @Mock
+    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
 
     @Test
     @Transactional
@@ -1263,5 +1270,37 @@ class UBSClientServiceImplTest {
         assertThrows(AccessDeniedException.class, () -> {
             ubsService.getLiqPayStatus(1L, "abc");
         });
+    }
+
+    @Test
+    void getOrderForUserTest() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+        order.setUser(user);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(order);
+        Pageable pageable = PageRequest.of(1, 10);
+        Page<Order> page = new PageImpl<>(orderList);
+
+        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+            .thenReturn(page);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue(), 1L))
+                .thenReturn(orderPaymentStatusTranslation.getTranslationValue());
+
+        ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
+
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+            .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
+        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
     }
 }

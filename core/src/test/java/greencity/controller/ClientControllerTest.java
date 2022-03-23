@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -120,12 +121,14 @@ class ClientControllerTest {
 
     @Test
     void getAllDataForOrderTest() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(clientController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .build();
+
         this.mockMvc.perform(get(ubsLink + "/get-all-orders-data/{lang}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-
-        verify(ubsClientService).getOrdersForUser(null, 1L);
     }
 
     @Test
