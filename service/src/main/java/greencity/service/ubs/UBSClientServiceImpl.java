@@ -23,6 +23,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -61,6 +64,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
+    private final OrdersForUserRepository ordersForUserRepository;
+    private final OrderStatusTranslationRepository orderStatusTranslationRepository;
+    private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final OrderUtils orderUtils;
     @Lazy
     @Autowired
@@ -424,13 +430,96 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
 
-    @Override
-    public List<OrderStatusPageDto> getOrdersForUser(String uuid, Long languageId) {
-        List<Order> orders = orderRepository.getAllOrdersOfUser(uuid);
-        List<OrderStatusPageDto> dto = new ArrayList<>();
-        orders.forEach(order -> dto.add(ubsManagementService.getOrderStatusData(order.getId(),
-            languageRepository.findById(languageId).get().getCode())));
-        return dto;
+    public List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
+        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
+        Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
+        List<Order> orders = orderPages.getContent();
+
+        List<OrderStatusForUserDto> dtos = new ArrayList<>();
+
+        for (Order order : orders) {
+            List<Payment> payments = order.getPayment();
+            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
+            Optional<OrderStatusTranslation> orderStatusTranslation = orderStatusTranslationRepository
+                    .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId);
+            String paymentStatusTranslation = orderPaymentStatusTranslationRepository
+                    .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                            Long.valueOf(order.getOrderPaymentStatus().getStatusValue()), languageId);
+
+            Integer totalSum = bagForUserDtos.stream()
+                    .map(BagForUserDto::getTotalPrice)
+                    .reduce(0, Integer::sum);
+
+            OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
+                    .id(order.getId())
+                    .dateForm(order.getOrderDate())
+                    .orderStatus(orderStatusTranslation.get().getName())
+                    .datePaid(order.getOrderDate())
+                    .orderComment(order.getComment())
+                    .bags(bagForUserDtos)
+                    .additionalOrders(order.getAdditionalOrders())
+                    .amountBeforePayment(totalSum.doubleValue() - order.getPointsToUse())
+                    .paidAmount(countPaidAmount(payments).doubleValue())
+                    .orderFullPrice(totalSum.doubleValue())
+                    .bonuses(order.getPointsToUse().doubleValue())
+                    .certificate(order.getCertificates())
+                    .sender(senderInfoDtoBuilder(order))
+                    .address(addressInfoDtoBuilder(order))
+                    .paymentStatus(paymentStatusTranslation)
+                    .build();
+
+            dtos.add(orderStatusForUserDto);
+        }
+        return dtos;
+    }
+
+    private SenderInfoDto senderInfoDtoBuilder(Order order) {
+        UBSuser sender = order.getUbsUser();
+        return SenderInfoDto.builder()
+                .senderName(sender.getFirstName())
+                .senderSurname(sender.getLastName())
+                .senderEmail(sender.getEmail())
+                .senderPhone(sender.getPhoneNumber())
+                .build();
+    }
+
+    private AddressInfoDto addressInfoDtoBuilder(Order order) {
+        Address address = order.getUbsUser().getAddress();
+        return AddressInfoDto.builder()
+                .addressCity(address.getCity())
+                .addressComment(address.getAddressComment())
+                .addressDistinct(address.getDistrict())
+                .addressRegion(address.getRegion())
+                .addressStreet(address.getStreet())
+                .build();
+    }
+
+    private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
+        List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
+        Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
+        List<BagForUserDto> bagForUserDtos = new ArrayList<>();
+        bags.forEach(bag -> {
+            BagForUserDto bagDto = new BagForUserDto();
+            bagDto.setCount(amountOfBags.get(bag.getId()));
+            List<BagTranslation> translations = bag.getBagTranslations();
+            if (languageId == 2) {
+                bagDto.setService(translations.get(0).getName());
+            } else {
+                bagDto.setService(translations.get(1).getName());
+            }
+            bagDto.setCapacity(bag.getCapacity());
+            bagDto.setPrice(bag.getFullPrice());
+            bagForUserDtos.add(bagDto);
+            bagDto.setTotalPrice(amountOfBags.get(bag.getId()) * bag.getFullPrice());
+        });
+        return bagForUserDtos;
+    }
+
+    private Long countPaidAmount(List<Payment> payments) {
+        return payments.stream()
+                .map(Payment::getAmount)
+                .map(amount -> amount / 100)
+                .reduce(0L, Long::sum);
     }
 
     private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
