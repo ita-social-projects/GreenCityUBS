@@ -1278,23 +1278,15 @@ class UBSClientServiceImplTest {
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
         Order order = ModelUtils.getOrderTest();
         User user = ModelUtils.getTestUser();
-        BagTranslation bagTranslation = ModelUtils.getBagTranslation();
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setAmountOfBagsOrdered(Map.of(1, 1));
         List<Order> orderList = new ArrayList<>();
-        Bag bag = ModelUtils.getTariffBag();
-        bag.setId(1);
-        bag.setBagTranslations(List.of(bagTranslation));
-        List<Bag> bags = new ArrayList<>();
-        bags.add(bag);
         orderList.add(order);
         Pageable pageable = PageRequest.of(1, 10);
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
                 .thenReturn(Optional.of(orderStatusTranslation));
@@ -1310,6 +1302,6 @@ class UBSClientServiceImplTest {
             .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                 (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
         verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
-        verify(bagRepository).findBagByOrderId(order.getId());
+
     }
 }
