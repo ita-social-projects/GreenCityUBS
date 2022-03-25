@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -430,7 +431,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
 
-    public List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
+    public PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
         List<Order> orders = orderPages.getContent();
@@ -471,7 +472,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
             dtos.add(orderStatusForUserDto);
         }
-        return dtos;
+
+        return new PageableDto<>(
+            dtos,
+            orderPages.getTotalElements(),
+            orderPages.getPageable().getPageNumber(),
+            orderPages.getTotalPages());
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
@@ -503,7 +509,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             BagForUserDto bagDto = new BagForUserDto();
             bagDto.setCount(amountOfBags.get(bag.getId()));
             List<BagTranslation> translations = bag.getBagTranslations();
-            if (languageId == 2) {
+            if (translations.size() == 1) {
+                bagDto.setService(translations.get(0).getName());
+            } else if (languageId == 2) {
                 bagDto.setService(translations.get(0).getName());
             } else {
                 bagDto.setService(translations.get(1).getName());

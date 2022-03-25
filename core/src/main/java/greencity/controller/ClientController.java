@@ -1,5 +1,7 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
+import greencity.annotations.ApiPageableWithLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
@@ -65,7 +67,8 @@ public class ClientController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-orders-data/{lang}")
-    public ResponseEntity<List<OrderStatusForUserDto>> getAllDataForOrder(
+    @ApiPageable
+    public ResponseEntity<PageableDto<OrderStatusForUserDto>> getAllDataForOrder(
         @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang, @ApiIgnore Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang, page));
     }
