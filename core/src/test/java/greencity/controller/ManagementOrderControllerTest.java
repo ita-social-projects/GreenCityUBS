@@ -488,4 +488,10 @@ class ManagementOrderControllerTest {
             .andExpect(status().isCreated());
 
     }
+
+    @Test
+    void returnMoneyAsPoints() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/return-money-as-points" + "/{orderId}", 1L))
+            .andExpect(status().isCreated());
+    }
 }

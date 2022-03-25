@@ -1671,4 +1671,33 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void returnMoneyAsPointsForCancelledOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        if (order.getOrderStatus() != OrderStatus.CANCELED) {
+            throw new BadOrderStatusRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus().toString());
+        }
+        if (order.getPayment() == null || order.getPayment().isEmpty()) {
+            return;
+        }
+
+        int pointsToReturn = 0;
+        for (Payment payment : order.getPayment()) {
+            if (payment.getPaymentStatus() == PaymentStatus.PAID && payment.getAmount() > 0) {
+                pointsToReturn += payment.getAmount() / 100;
+                payment.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED);
+            }
+        }
+
+        if (order.getUser().getCurrentPoints() == null) {
+            order.getUser().setCurrentPoints(0);
+        }
+        order.getUser().setCurrentPoints(order.getUser().getCurrentPoints() + pointsToReturn);
+        orderRepository.save(order);
+    }
 }

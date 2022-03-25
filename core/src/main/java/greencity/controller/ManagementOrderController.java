@@ -985,4 +985,26 @@ public class ManagementOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId));
     }
+
+    /**
+     * Controller for returning money as points to user for cancelled order.
+     *
+     * @param orderId {@link Long}.
+     *
+     * @author Andrii Yezenitskyi.
+     */
+    @ApiOperation(value = "Returns money as points to user for cancelled order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("/return-money-as-points/{orderId}")
+    public ResponseEntity<OrderDetailStatusDto> returnMoneyAsPoints(
+        @Valid @PathVariable("orderId") Long orderId) {
+        ubsManagementService.returnMoneyAsPointsForCancelledOrder(orderId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

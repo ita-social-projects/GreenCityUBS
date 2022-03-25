@@ -270,4 +270,13 @@ public interface UBSManagementService {
      * @author Pavlo Hural.
      */
     AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+
+    /**
+     * Returns money as points to user for cancelled order.
+     *
+     * @param orderId {@link Long}.
+     *
+     * @author Andrii Yezenitskyi.
+     */
+    void returnMoneyAsPointsForCancelledOrder(Long orderId);
 }

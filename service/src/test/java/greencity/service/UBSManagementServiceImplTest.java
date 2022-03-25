@@ -8,6 +8,7 @@ import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
@@ -1875,5 +1876,100 @@ class UBSManagementServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> {
             ubsManagementService.addBonusesToUser(dto, 20L);
         });
+    }
+
+    @Test
+    void returnMoneyAsPointsForCancelledOrder() {
+        Order order = getCanceledPaidOrder();
+
+        Payment paidPayment = getPayment();
+        Payment halfPaidPayment = getPayment();
+        halfPaidPayment.setPaymentStatus(PaymentStatus.HALF_PAID);
+        Payment unpaidPayment = getPayment();
+        unpaidPayment.setPaymentStatus(PaymentStatus.UNPAID);
+        Payment refundedPayment = getPayment();
+        refundedPayment.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED);
+
+        order.setPayment(Arrays.asList(paidPayment, halfPaidPayment, unpaidPayment, refundedPayment));
+        int expectedPoints = (int) (order.getUser().getCurrentPoints() + paidPayment.getAmount() / 100);
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+
+        assertEquals(expectedPoints, order.getUser().getCurrentPoints());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    void returnMoneyAsPointsForCancelledOrderOrderNotFoundException() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+    }
+
+    @Test
+    void returnMoneyAsPointsForCancelledOrderBadOrderStatusRequestException() {
+        Order order = getOrder();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        order.setOrderStatus(OrderStatus.FORMED);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.ADJUSTMENT);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.DONE);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+
+        order.setOrderStatus(OrderStatus.NOT_TAKEN_OUT);
+        assertThrows(BadOrderStatusRequestException.class, () -> {
+            ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        });
+    }
+
+    @Test
+    void returnMoneyAsPointsForCancelledOrderWithEmptyPayment() {
+        Order order = getCanceledPaidOrder();
+        order.setPayment(null);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+        verify(orderRepository, never()).save(order);
+    }
+
+    @Test
+    void returnMoneyAsPointsForCancelledOrderWithNullUserCurrentPoints() {
+        Order order = getCanceledPaidOrder();
+        order.getUser().setCurrentPoints(null);
+        int expectedPoints = (int) (order.getPayment().get(0).getAmount() / 100);
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+
+        assertEquals(expectedPoints, order.getUser().getCurrentPoints());
+        verify(orderRepository).save(order);
     }
 }
