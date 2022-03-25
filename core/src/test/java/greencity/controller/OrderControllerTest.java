@@ -263,7 +263,7 @@ class OrderControllerTest {
 
     @Test
     void deleteOrderAddressTest() throws Exception {
-        mockMvc.perform(post("/ubs" + "/{id}" + "/delete-order-address", 1L))
+        mockMvc.perform(delete("/ubs" + "/{id}" + "/delete-order-address", 1L))
             .andExpect(status().isOk());
     }
 

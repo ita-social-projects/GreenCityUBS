@@ -199,7 +199,7 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/{id}/delete-order-address")
+    @DeleteMapping("/{id}/delete-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> deleteOrderAddress(
         @Valid @PathVariable("id") Long id,
         @ApiIgnore @CurrentUserUuid String uuid) {
