@@ -44,8 +44,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -1889,8 +1888,11 @@ class UBSManagementServiceImplTest {
         unpaidPayment.setPaymentStatus(PaymentStatus.UNPAID);
         Payment refundedPayment = getPayment();
         refundedPayment.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED);
+        Payment emptyPayment = getPayment();
+        emptyPayment.setAmount(0L);
 
-        order.setPayment(Arrays.asList(paidPayment, halfPaidPayment, unpaidPayment, refundedPayment));
+        order.setPayment(Arrays.asList(
+            paidPayment, halfPaidPayment, unpaidPayment, refundedPayment, emptyPayment));
         int expectedPoints = (int) (order.getUser().getCurrentPoints() + paidPayment.getAmount() / 100);
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
@@ -1953,9 +1955,14 @@ class UBSManagementServiceImplTest {
     @Test
     void returnMoneyAsPointsForCancelledOrderWithEmptyPayment() {
         Order order = getCanceledPaidOrder();
-        order.setPayment(null);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        order.setPayment(null);
         ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+
+        order.setPayment(new ArrayList<>());
+        ubsManagementService.returnMoneyAsPointsForCancelledOrder(1L);
+
         verify(orderRepository, never()).save(order);
     }
 
