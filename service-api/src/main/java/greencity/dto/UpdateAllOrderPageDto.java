@@ -11,11 +11,6 @@ import java.util.List;
 @Builder
 public class UpdateAllOrderPageDto {
     private List<Long> orderId;
-    private OrderDetailStatusRequestDto generalOrderInfo;
-    private UbsCustomersDtoUpdate userInfoDto;
-    private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
-    private EcoNumberDto ecoNumberFromShop;
     private ExportDetailsDtoUpdate exportDetailsDto;
-    private UpdateOrderDetailDto orderDetailDto;
     private List<UpdateResponsibleEmployeeDto> updateResponsibleEmployeeDto;
 }
