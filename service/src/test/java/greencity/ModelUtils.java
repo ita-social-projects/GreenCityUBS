@@ -3356,7 +3356,7 @@ public class ModelUtils {
             .address(addressInfoDto)
             .orderStatus(OrderStatus.FORMED.toString())
             .bags(List.of(bagForUserDto))
-            .certificate(Collections.emptySet())
+            .certificate(Collections.emptyList())
             .additionalOrders(Collections.emptySet())
             .build();
     }

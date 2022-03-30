@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
+import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -439,7 +440,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
-            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
+            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
             OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
                 .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId)
                 .orElse(orderStatusTranslationRepository.getOne(1L));
@@ -447,23 +448,21 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                     (long) order.getOrderPaymentStatus().getStatusValue(), languageId);
 
-            Integer totalSum = bagForUserDtos.stream()
-                .map(BagForUserDto::getTotalPrice)
-                .reduce(0, Integer::sum);
+            CounterOrderDetailsDto prices = ubsManagementService.getOrderSumDetails(order.getId());
 
             OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
                 .id(order.getId())
                 .dateForm(order.getOrderDate())
-                .orderStatus(orderStatusTranslation.getName())
                 .datePaid(order.getOrderDate())
+                .orderStatus(orderStatusTranslation.getName())
                 .orderComment(order.getComment())
                 .bags(bagForUserDtos)
                 .additionalOrders(order.getAdditionalOrders())
-                .amountBeforePayment(totalSum.doubleValue() - order.getPointsToUse())
+                .amountBeforePayment(prices.getTotalSumAmount() - countPaidAmount(payments).doubleValue())
                 .paidAmount(countPaidAmount(payments).doubleValue())
-                .orderFullPrice(totalSum.doubleValue())
-                .bonuses(order.getPointsToUse().doubleValue())
-                .certificate(order.getCertificates())
+                .orderFullPrice(prices.getSumAmount())
+                .bonuses(prices.getBonus())
+                .certificate(prices.getCertificate())
                 .sender(senderInfoDtoBuilder(order))
                 .address(addressInfoDtoBuilder(order))
                 .paymentStatus(paymentStatusTranslation)
@@ -500,7 +499,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
+    private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
@@ -508,17 +507,13 @@ public class UBSClientServiceImpl implements UBSClientService {
             BagForUserDto bagDto = new BagForUserDto();
             bagDto.setCount(amountOfBags.get(bag.getId()));
             List<BagTranslation> translations = bag.getBagTranslations();
-            if (translations.size() == 1) {
-                bagDto.setService(translations.get(0).getName());
-            } else if (languageId == 2) {
-                bagDto.setService(translations.get(0).getName());
-            } else {
-                bagDto.setService(translations.get(1).getName());
-            }
+            bagDto.setServiceEng(translations.get(0).getName());
+            bagDto.setService(translations.get(1).getName());
             bagDto.setCapacity(bag.getCapacity());
             bagDto.setPrice(bag.getFullPrice());
-            bagForUserDtos.add(bagDto);
             bagDto.setTotalPrice(amountOfBags.get(bag.getId()) * bag.getFullPrice());
+            bagForUserDtos.add(bagDto);
+
         });
         return bagForUserDtos;
     }

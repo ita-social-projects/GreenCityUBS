@@ -1,6 +1,6 @@
 package greencity.dto;
 
-import greencity.entity.order.Certificate;
+
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class OrderStatusForUserDto {
     private List<BagForUserDto> bags;
     private String orderComment;
     private Double bonuses;
-    private Set<Certificate> certificate;
+    private List<String> certificate;
     private Set<String> additionalOrders;
     private SenderInfoDto sender;
     private AddressInfoDto address;

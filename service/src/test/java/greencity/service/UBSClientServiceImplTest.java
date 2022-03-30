@@ -1276,6 +1276,7 @@ class UBSClientServiceImplTest {
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        CounterOrderDetailsDto price = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getOrderTest();
         User user = ModelUtils.getTestUser();
         order.setUser(user);
@@ -1293,6 +1294,7 @@ class UBSClientServiceImplTest {
         when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
             (long) order.getOrderPaymentStatus().getStatusValue(), 1L))
                 .thenReturn(orderPaymentStatusTranslation.getTranslationValue());
+        when(ubsManagementService.getOrderSumDetails(order.getId())).thenReturn(price);
 
         ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
 
