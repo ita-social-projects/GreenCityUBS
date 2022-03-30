@@ -1577,52 +1577,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Order order = orderRepository.findById(id).orElseThrow(
                 () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
             try {
-                checkGeneralOrderInfoAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
-                checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid);
                 checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
             } catch (Exception e) {
                 throw new UpdateAdminPageInfoException(e.getMessage());
             }
-        }
-    }
-
-    private void checkGeneralOrderInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto,
-        Order order, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getGeneralOrderInfo())) {
-            updateOrderDetailStatus(order.getId(), updateAllOrderPageDto.getGeneralOrderInfo(), uuid);
-        }
-    }
-
-    private void checkUserInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getUserInfoDto())) {
-            ubsClientService.updateUbsUserInfoInOrder(updateAllOrderPageDto.getUserInfoDto(), uuid);
-        }
-    }
-
-    private void checkAddressExportDetailsAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
-        String uuid) {
-        if (nonNull(updateAllOrderPageDto.getAddressExportDetailsDto())) {
-            updateAddress(updateAllOrderPageDto.getAddressExportDetailsDto(), order.getId(), uuid);
-        }
-    }
-
-    private void checkEcoNumberFromShopAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
-        String uuid) {
-        if (nonNull(updateAllOrderPageDto.getEcoNumberFromShop())) {
-            updateEcoNumberForOrder(updateAllOrderPageDto.getEcoNumberFromShop(), order.getId(), uuid);
-        }
-    }
-
-    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
-            setOrderDetail(
-                order.getId(),
-                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                uuid);
         }
     }
 
