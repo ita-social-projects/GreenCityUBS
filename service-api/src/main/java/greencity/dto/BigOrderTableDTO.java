@@ -38,10 +38,10 @@ public class BigOrderTableDTO {
     private String timeOfExport;
     private String idOrderFromShop;
     private String receivingStation;
-    private String responsibleLogicMan;
-    private String responsibleDriver;
-    private String responsibleCaller;
-    private String responsibleNavigator;
+    private Long responsibleLogicMan;
+    private Long responsibleDriver;
+    private Long responsibleCaller;
+    private Long responsibleNavigator;
     private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
