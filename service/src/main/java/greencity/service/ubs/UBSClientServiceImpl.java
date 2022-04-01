@@ -7,6 +7,8 @@ import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
+import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -57,6 +59,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
     private final BagTranslationRepository bagTranslationRepository;
+    private final LocationTranslationRepository locationTranslationRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -431,6 +434,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
 
+    @Override
     public PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
@@ -440,15 +444,22 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
-            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
             OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
                 .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId)
                 .orElse(orderStatusTranslationRepository.getOne(1L));
             String paymentStatusTranslation = orderPaymentStatusTranslationRepository
                 .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                     (long) order.getOrderPaymentStatus().getStatusValue(), languageId);
+            if (paymentStatusTranslation.isEmpty()) {
+                paymentStatusTranslation = orderPaymentStatusTranslationRepository
+                    .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                        (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
+            }
 
-            CounterOrderDetailsDto prices = ubsManagementService.getOrderSumDetails(order.getId());
+            Double fullPrice = Double.valueOf(bagForUserDtos.stream()
+                .map(BagForUserDto::getTotalPrice)
+                .reduce(0, Integer::sum));
 
             OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
                 .id(order.getId())
@@ -458,11 +469,11 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .orderComment(order.getComment())
                 .bags(bagForUserDtos)
                 .additionalOrders(order.getAdditionalOrders())
-                .amountBeforePayment(prices.getTotalSumAmount() - countPaidAmount(payments).doubleValue())
+                .amountBeforePayment(fullPrice - order.getPointsToUse())
                 .paidAmount(countPaidAmount(payments).doubleValue())
-                .orderFullPrice(prices.getSumAmount())
-                .bonuses(prices.getBonus())
-                .certificate(prices.getCertificate())
+                .orderFullPrice(fullPrice)
+                .bonuses(order.getPointsToUse().doubleValue())
+                .certificate(getCertificate(order.getCertificates()))
                 .sender(senderInfoDtoBuilder(order))
                 .address(addressInfoDtoBuilder(order))
                 .paymentStatus(paymentStatusTranslation)
@@ -476,6 +487,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPages.getTotalElements(),
             orderPages.getPageable().getPageNumber(),
             orderPages.getTotalPages());
+    }
+
+    private List<CertificateDto> getCertificate(Set<Certificate> certificates) {
+        List<CertificateDto> dto = new ArrayList<>();
+        for (Certificate certificate : certificates) {
+            CertificateDto certificateDto = CertificateDto.builder()
+                .certificateDate(certificate.getCreationDate())
+                .certificateStatus(certificate.getCertificateStatus().name())
+                .certificatePoints(certificate.getPoints())
+                .code(certificate.getCode())
+                .build();
+            dto.add(certificateDto);
+        }
+        return dto;
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
@@ -499,21 +524,21 @@ public class UBSClientServiceImpl implements UBSClientService {
             .build();
     }
 
-    private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
+    private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
         bags.forEach(bag -> {
-            BagForUserDto bagDto = new BagForUserDto();
+            BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
+            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag(bag);
+            if (languageId == 1) {
+                bagDto.setService(bagTranslation.getName());
+            } else {
+                bagDto.setService(bagTranslation.getNameEng());
+            }
             bagDto.setCount(amountOfBags.get(bag.getId()));
-            List<BagTranslation> translations = bag.getBagTranslations();
-            bagDto.setServiceEng(translations.get(0).getName());
-            bagDto.setService(translations.get(1).getName());
-            bagDto.setCapacity(bag.getCapacity());
-            bagDto.setPrice(bag.getFullPrice());
             bagDto.setTotalPrice(amountOfBags.get(bag.getId()) * bag.getFullPrice());
             bagForUserDtos.add(bagDto);
-
         });
         return bagForUserDtos;
     }

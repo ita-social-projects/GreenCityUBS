@@ -3340,7 +3340,7 @@ public class ModelUtils {
         bagForUserDto.setTotalPrice(900);
         bagForUserDto.setCount(3);
         bagForUserDto.setCapacity(200);
-        bagForUserDto.setPrice(300);
+        bagForUserDto.setFullPrice(300);
         bagForUserDto.setService("Safe Waste");
 
         return OrderStatusForUserDto.builder()
