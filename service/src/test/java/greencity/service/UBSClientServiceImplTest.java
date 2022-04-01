@@ -1277,13 +1277,12 @@ class UBSClientServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
         Order order = ModelUtils.getOrderTest();
-
         User user = ModelUtils.getTestUser();
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         List<Order> orderList = new ArrayList<>();
         orderList.add(order);
-        Pageable pageable = PageRequest.of(1, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
@@ -1295,8 +1294,10 @@ class UBSClientServiceImplTest {
             (long) order.getOrderPaymentStatus().getStatusValue(), 1L))
                 .thenReturn(orderPaymentStatusTranslation.getTranslationValue());
 
-        ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
+        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
 
+        assertEquals(dto.getTotalElements(), orderList.size());
+        assertEquals(dto.getPage().get(0).getId(), order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
