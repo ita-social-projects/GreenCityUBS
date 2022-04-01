@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
@@ -1304,6 +1305,33 @@ class UBSClientServiceImplTest {
             .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
                 (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
         verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
+
+    }
+
+    @Test
+    void getOrderForUserWithInvalidLangId() {
+        Order order = ModelUtils.getOrder();
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        orderStatusTranslation.setName("FORMED");
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setOrderStatus(OrderStatus.FORMED);
+        User user = ModelUtils.getTestUser();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> page = new PageImpl<>(List.of(order), pageable, 1);
+        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+            .thenReturn(page);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 3L))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository
+            .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
+                (long) order.getOrderPaymentStatus().getStatusValue(), 3L))
+                    .thenReturn(order.getOrderPaymentStatus().name());
+
+        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser("abc", 3L, pageable);
+
+        assertEquals(dto.getPage().get(0).getOrderStatus(), order.getOrderStatus().name());
+        assertEquals(dto.getPage().get(0).getPaymentStatus(), order.getOrderPaymentStatus().name());
 
     }
 }
