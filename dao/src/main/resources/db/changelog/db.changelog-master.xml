@@ -121,5 +121,6 @@
     <include file="db/changelog/logs/20221002-ch-add-column-creator-id-in-tariffs-info-table-Melnyk.xml"/>
     <include file="db/changelog/logs/20221102-ch-add-column-created-at-into-tariffs-info-table-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-for-receiving-stations-and-couriers-Bohonko.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table-view-Yezenitskyi.xml"/>
 </databaseChangeLog>
 

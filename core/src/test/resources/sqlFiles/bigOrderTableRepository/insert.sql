@@ -66,32 +66,32 @@ INSERT INTO public.employees (id, first_name, last_name, phone_number, email, im
 
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (1, 82, 2, 3);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (2, 82, 3, 4);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (4, 82, 15, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (4, 82, 15, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (3, 82, 10, 5);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (5, 83, 3, 3);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (6, 83, 2, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (6, 83, 2, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (7, 83, 10, 4);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (8, 83, 15, 5);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (9, 86, 3, 3);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (10, 86, 15, 4);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (11, 86, 10, 5);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (12, 86, 2, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (12, 86, 2, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (13, 87, 15, 4);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (14, 87, 10, 5);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (15, 87, 2, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (15, 87, 2, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (16, 87, 3, 3);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (17, 88, 3, 4);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (18, 88, 15, 5);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (19, 88, 2, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (19, 88, 2, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (20, 88, 10, 3);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (21, 90, 2, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (21, 90, 2, 2);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (22, 90, 3, 3);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (23, 90, 10, 4);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (24, 90, 15, 5);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (25, 93, 2, 5);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (26, 93, 3, 3);
 INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (27, 93, 10, 4);
-INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (28, 93, 15, 1);
+INSERT INTO public.employee_order_position (id, order_id, employee_id, position_id) VALUES (28, 93, 15, 2);
 
 INSERT INTO public.receiving_stations (id, name) VALUES (2, 'Грибовицька');
 

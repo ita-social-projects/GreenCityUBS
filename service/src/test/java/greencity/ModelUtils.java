@@ -2847,7 +2847,7 @@ public class ModelUtils {
             .setDateOfExport(LocalDate.of(2021, 12, 8))
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
-            .setReceivingStation("Саперно-Слобідська")
+            .setReceivingStationId(1L)
             .setResponsibleLogicManId(1L)
             .setResponsibleDriverId(1L)
             .setResponsibleCallerId(1L)
@@ -2896,11 +2896,11 @@ public class ModelUtils {
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
-            .setReceivingStation("Саперно-Слобідська")
-            .setResponsibleLogicMan(1L)
-            .setResponsibleDriver(1L)
-            .setResponsibleCaller(1L)
-            .setResponsibleNavigator(1L)
+            .setReceivingStation("1")
+            .setResponsibleLogicMan("1")
+            .setResponsibleDriver("1")
+            .setResponsibleCaller("1")
+            .setResponsibleNavigator("1")
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
@@ -2910,14 +2910,24 @@ public class ModelUtils {
         return new BigOrderTableDTO()
             .setOrderDate("")
             .setPaymentDate("")
-            .setDateOfExport("");
+            .setDateOfExport("")
+            .setReceivingStation("")
+            .setResponsibleCaller("")
+            .setResponsibleDriver("")
+            .setResponsibleLogicMan("")
+            .setResponsibleNavigator("");
     }
 
     public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
         return new BigOrderTableViews()
             .setOrderDate(null)
             .setPaymentDate(null)
-            .setDateOfExport(null);
+            .setDateOfExport(null)
+            .setReceivingStation(null)
+            .setResponsibleCaller(null)
+            .setResponsibleDriver(null)
+            .setResponsibleLogicMan(null)
+            .setResponsibleNavigator(null);
     }
 
     public static List<BigOrderTableDTO> getBigOrderTableDTOList() {

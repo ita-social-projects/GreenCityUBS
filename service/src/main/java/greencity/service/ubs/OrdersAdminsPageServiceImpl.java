@@ -311,6 +311,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 if (existedOrder.getOrderStatus().checkPossibleStatus(value)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
+                    removePickUpDetailsAndResponsibleEmployees(existedOrder);
                 } else {
                     throw new BadOrderStatusRequestException(
                         "Such desired status isn't applicable with current status!");
@@ -323,6 +324,20 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             }
         }
         return unresolvedGoals;
+    }
+
+    private void removePickUpDetailsAndResponsibleEmployees(Order order) {
+        if (OrderStatus.FORMED.equals(order.getOrderStatus())
+            || OrderStatus.BROUGHT_IT_HIMSELF.equals(order.getOrderStatus())
+            || OrderStatus.NOT_TAKEN_OUT.equals(order.getOrderStatus())
+            || OrderStatus.CANCELED.equals(order.getOrderStatus())) {
+            order.setDateOfExport(null);
+            order.setDeliverFrom(null);
+            order.setDeliverTo(null);
+            order.setReceivingStation(null);
+            employeeOrderPositionRepository.deleteAll(order.getEmployeeOrderPositions());
+            order.setEmployeeOrderPositions(null);
+        }
     }
 
     @Override
