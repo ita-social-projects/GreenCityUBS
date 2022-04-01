@@ -1330,7 +1330,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
-            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
+            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 1) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
@@ -1355,7 +1355,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private void collectEventsAboutUpdatingEmployeesAssignedForOrder(Long position, Order order, User currentUser) {
-        if (position == 1) {
+        if (position == 2) {
             eventService.save(OrderHistory.UPDATE_MANAGER_CALL,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {
@@ -1419,7 +1419,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 Long positionForEmployee =
                     employeeRepository.findPositionForEmployee(assignForOrderEmployee.getEmployeeId())
                         .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
-                if (positionForEmployee != 2) {
+                if (positionForEmployee != 1) {
                     EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
                         .order(order)
                         .employee(employeeForAssigning)
@@ -1443,7 +1443,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private void collectsEventsAboutAssigningEmployees(Long position, User currentUser, Order order) {
-        if (position == 1) {
+        if (position == 2) {
             eventService.save(OrderHistory.ASSIGN_CALL_MANAGER,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {

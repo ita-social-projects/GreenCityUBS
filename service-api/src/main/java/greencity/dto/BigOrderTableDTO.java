@@ -37,7 +37,7 @@ public class BigOrderTableDTO {
     private String dateOfExport;
     private String timeOfExport;
     private String idOrderFromShop;
-    private String receivingStation;
+    private Long receivingStation;
     private Long responsibleLogicMan;
     private Long responsibleDriver;
     private Long responsibleCaller;

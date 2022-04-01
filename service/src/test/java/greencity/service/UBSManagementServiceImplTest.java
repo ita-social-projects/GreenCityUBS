@@ -756,7 +756,7 @@ class UBSManagementServiceImplTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"1, Змінено менеджера обдзвону",
+    @CsvSource({"2, Змінено менеджера обдзвону",
         "3, Змінено логіста",
         "4, Змінено штурмана",
         "5, Змінено водія"})
@@ -1082,14 +1082,14 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeOrderPositionRepository.existsByOrderIdAndEmployeeId(1L, 1L)).thenReturn(false);
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(2L));
+        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(1L));
         AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
         assertThrows(EmployeeIsNotAssigned.class,
             () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
     }
 
     @ParameterizedTest
-    @CsvSource({"1, Закріплено менеджера обдзвону",
+    @CsvSource({"2, Закріплено менеджера обдзвону",
         "3, Закріплено логіста",
         "4, Закріплено штурмана",
         "5, Закріплено водія"})

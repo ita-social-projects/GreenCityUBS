@@ -44,7 +44,7 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setResponsibleLogicMan(bigViews.getResponsibleLogicManId())
             .setResponsibleDriver(bigViews.getResponsibleDriverId())
             .setResponsibleCaller(bigViews.getResponsibleCallerId())
-            .setReceivingStation(bigViews.getReceivingStation())
+            .setReceivingStation(bigViews.getReceivingStationId())
             .setIsBlocked(bigViews.getIsBlocked())
             .setBlockedBy(bigViews.getBlockedBy());
     }
