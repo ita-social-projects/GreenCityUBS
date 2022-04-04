@@ -1577,6 +1577,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Order order = orderRepository.findById(id).orElseThrow(
                 () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
             try {
+                updateOrderExportDetails(id, updateAllOrderPageDto.getExportDetailsDto(), uuid);
                 checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
             } catch (Exception e) {
                 throw new UpdateAdminPageInfoException(e.getMessage());
@@ -1588,10 +1589,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String uuid) {
         if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
             updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
-                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
-                    dto.getEmployeeId().toString(),
-                    dto.getPositionId(),
-                    uuid));
+                .forEach(dto -> {
+                    if (nonNull(dto.getEmployeeId()) && nonNull(dto.getPositionId())) {
+                        ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
+                            dto.getEmployeeId().toString(),
+                            dto.getPositionId(),
+                            uuid);
+                    }
+                });
         }
     }
 
