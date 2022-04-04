@@ -1616,6 +1616,9 @@ class UBSManagementServiceImplTest {
         order.setOrderDate(LocalDateTime.now());
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(getReceivingStation()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(getUser()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         UpdateAllOrderPageDto expectedObject = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
         UpdateAllOrderPageDto actual = ModelUtils.updateAllOrderPageDto(OrderStatus.CONFIRMED);
@@ -1673,10 +1676,13 @@ class UBSManagementServiceImplTest {
         UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(getReceivingStation()));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(getUser()));
+        when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua");
 
-        verify(orderRepository).findById(1L);
+        verify(orderRepository, times(2)).findById(1L);
     }
 
     @Test
