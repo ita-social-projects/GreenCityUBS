@@ -65,7 +65,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
-    private final LanguageRepository languageRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
 
@@ -392,8 +391,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String currentOrderStatusTranslationEng =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
                 : "order status english not found";
+
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = null;
+        Order currentOrder = new Order();
         if (order.isPresent()) {
+            currentOrder = order.get();
             currentOrderStatusPaymentTranslation =
                 orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
                     (long) order.get().getOrderPaymentStatus().getStatusValue());
@@ -401,8 +403,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return GeneralOrderInfo.builder()
             .id(order.isPresent() ? order.get().getId() : 0)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
-            .orderStatusesDtos(getOrderStatusesTranslation(order.orElse(null)))
-            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(order.orElse(null)))
+            .orderStatusesDtos(getOrderStatusesTranslation(currentOrder))
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(currentOrder))
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
             .orderPaymentStatusName(
@@ -428,7 +430,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderStatusTranslation> orderStatusTranslations =
             orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue());
-        if (!orderStatusTranslations.isEmpty() && order != null) {
+        if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
                 setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
