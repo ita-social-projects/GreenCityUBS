@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.dto.RequestToChangeOrdersDataDTO;
+import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.user.User;
@@ -18,18 +19,19 @@ import greencity.service.ubs.OrdersAdminsPageServiceImpl;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -87,12 +89,91 @@ class OrdersAdminsPageServiceImplTest {
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
-    @Test
-    void orderStatusForDevelopStage() {
+    @ParameterizedTest
+    @CsvSource({
+        "FORMED, ADJUSTMENT",
+        "ADJUSTMENT, CONFIRMED",
+        "CONFIRMED, ON_THE_ROUTE",
+        "ON_THE_ROUTE, DONE"
+    })
+    void orderStatusForDevelopStage(String oldStatus, String newStatus) {
         Order order = ModelUtils.getOrder();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "aa", 1L);
-        verify(orderRepository).findById(1L);
+        order.setOrderStatus(OrderStatus.valueOf(oldStatus))
+            .setDateOfExport(LocalDate.now())
+            .setDeliverFrom(LocalDateTime.now())
+            .setDeliverTo(LocalDateTime.now())
+            .setEmployeeOrderPositions(Set.of(new EmployeeOrderPosition(
+                1L,
+                ModelUtils.getEmployee(),
+                ModelUtils.getPosition(),
+                order)));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+
+        assertNotNull(order.getDateOfExport());
+        assertNotNull(order.getDeliverFrom());
+        assertNotNull(order.getDeliverTo());
+        assertNotNull(order.getReceivingStation());
+        assertNotNull(order.getEmployeeOrderPositions());
+
+        verify(orderRepository).save(order);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "CONFIRMED, FORMED",
+        "FORMED, BROUGHT_IT_HIMSELF",
+        "ON_THE_ROUTE, NOT_TAKEN_OUT",
+        "FORMED, CANCELED"
+    })
+    void orderStatusForDevelopStageErasedPickUpDetailsAndResponsibleEmployees(String oldStatus, String newStatus) {
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.valueOf(oldStatus))
+            .setDateOfExport(LocalDate.now())
+            .setDeliverFrom(LocalDateTime.now())
+            .setDeliverTo(LocalDateTime.now())
+            .setEmployeeOrderPositions(Set.of(new EmployeeOrderPosition(
+                1L,
+                ModelUtils.getEmployee(),
+                ModelUtils.getPosition(),
+                order)));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
+
+        assertNull(order.getDateOfExport());
+        assertNull(order.getDeliverFrom());
+        assertNull(order.getDeliverTo());
+        assertNull(order.getReceivingStation());
+        assertNull(order.getEmployeeOrderPositions());
+
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    void orderStatusForDevelopStageWithEmptyOrderId() {
+        ordersAdminsPageService.orderStatusForDevelopStage(Collections.emptyList(), "", 1L);
+
+        verify(orderRepository).changeStatusForAllOrders("", 1L);
+        verify(orderRepository).unblockAllOrders(1L);
+    }
+
+    @Test
+    void orderStatusForDevelopStageEntityNotFoundException() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        assertEquals(List.of(1L),
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", 1L));
+    }
+
+    @Test
+    void orderStatusForDevelopStageBadOrderStatusRequestException() {
+        when(orderRepository.findById(1L))
+            .thenReturn(Optional.of(ModelUtils.getOrder().setOrderStatus(OrderStatus.FORMED)));
+        assertEquals(List.of(1L),
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", 1L));
     }
 
     @Test

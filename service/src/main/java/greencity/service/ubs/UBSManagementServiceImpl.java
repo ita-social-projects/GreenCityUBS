@@ -1334,7 +1334,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
                 employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
-            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 2) {
+            if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 1) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
             employeeOrderPositions.add(EmployeeOrderPosition.builder()
@@ -1359,7 +1359,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private void collectEventsAboutUpdatingEmployeesAssignedForOrder(Long position, Order order, User currentUser) {
-        if (position == 1) {
+        if (position == 2) {
             eventService.save(OrderHistory.UPDATE_MANAGER_CALL,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {
@@ -1423,7 +1423,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 Long positionForEmployee =
                     employeeRepository.findPositionForEmployee(assignForOrderEmployee.getEmployeeId())
                         .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND));
-                if (positionForEmployee != 2) {
+                if (positionForEmployee != 1) {
                     EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
                         .order(order)
                         .employee(employeeForAssigning)
@@ -1447,7 +1447,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay.
      */
     private void collectsEventsAboutAssigningEmployees(Long position, User currentUser, Order order) {
-        if (position == 1) {
+        if (position == 2) {
             eventService.save(OrderHistory.ASSIGN_CALL_MANAGER,
                 currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
         } else if (position == 3) {
@@ -1581,11 +1581,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Order order = orderRepository.findById(id).orElseThrow(
                 () -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
             try {
-                checkGeneralOrderInfoAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkUserInfoAndUpdate(updateAllOrderPageDto, uuid);
-                checkAddressExportDetailsAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkEcoNumberFromShopAndUpdate(updateAllOrderPageDto, order, uuid);
-                checkOrderDetailDtoAndUpdate(updateAllOrderPageDto, order, uuid);
+                updateOrderExportDetails(id, updateAllOrderPageDto.getExportDetailsDto(), uuid);
                 checkUpdateResponsibleEmployeeDto(updateAllOrderPageDto, order, uuid);
             } catch (Exception e) {
                 throw new UpdateAdminPageInfoException(e.getMessage());
@@ -1593,51 +1589,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkGeneralOrderInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto,
-        Order order, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getGeneralOrderInfo())) {
-            updateOrderDetailStatus(order.getId(), updateAllOrderPageDto.getGeneralOrderInfo(), uuid);
-        }
-    }
-
-    private void checkUserInfoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getUserInfoDto())) {
-            ubsClientService.updateUbsUserInfoInOrder(updateAllOrderPageDto.getUserInfoDto(), uuid);
-        }
-    }
-
-    private void checkAddressExportDetailsAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
-        String uuid) {
-        if (nonNull(updateAllOrderPageDto.getAddressExportDetailsDto())) {
-            updateAddress(updateAllOrderPageDto.getAddressExportDetailsDto(), order.getId(), uuid);
-        }
-    }
-
-    private void checkEcoNumberFromShopAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
-        String uuid) {
-        if (nonNull(updateAllOrderPageDto.getEcoNumberFromShop())) {
-            updateEcoNumberForOrder(updateAllOrderPageDto.getEcoNumberFromShop(), order.getId(), uuid);
-        }
-    }
-
-    private void checkOrderDetailDtoAndUpdate(UpdateAllOrderPageDto updateAllOrderPageDto, Order order, String uuid) {
-        if (nonNull(updateAllOrderPageDto.getOrderDetailDto())) {
-            setOrderDetail(
-                order.getId(),
-                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsConfirmed(),
-                updateAllOrderPageDto.getOrderDetailDto().getAmountOfBagsExported(),
-                uuid);
-        }
-    }
-
     private void checkUpdateResponsibleEmployeeDto(UpdateAllOrderPageDto updateAllOrderPageDto, Order order,
         String uuid) {
         if (nonNull(updateAllOrderPageDto.getUpdateResponsibleEmployeeDto())) {
             updateAllOrderPageDto.getUpdateResponsibleEmployeeDto().stream()
-                .forEach(dto -> ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
-                    dto.getEmployeeId().toString(),
-                    dto.getPositionId(),
-                    uuid));
+                .forEach(dto -> {
+                    if (nonNull(dto.getEmployeeId()) && nonNull(dto.getPositionId())) {
+                        ordersAdminsPageService.responsibleEmployee(List.of(order.getId()),
+                            dto.getEmployeeId().toString(),
+                            dto.getPositionId(),
+                            uuid);
+                    }
+                });
         }
     }
 

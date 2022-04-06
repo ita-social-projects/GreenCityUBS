@@ -2844,11 +2844,11 @@ public class ModelUtils {
             .setDateOfExport(LocalDate.of(2021, 12, 8))
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
-            .setReceivingStation("Саперно-Слобідська")
-            .setResponsibleLogicMan("Logic Man")
-            .setResponsibleDriver("Driver Driver")
-            .setResponsibleCaller("Caller Caller")
-            .setResponsibleNavigator("Navigator Navigator")
+            .setReceivingStationId(1L)
+            .setResponsibleLogicManId(1L)
+            .setResponsibleDriverId(1L)
+            .setResponsibleCallerId(1L)
+            .setResponsibleNavigatorId(1L)
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
@@ -2893,11 +2893,11 @@ public class ModelUtils {
             .setDateOfExport("2021-12-08")
             .setTimeOfExport("from 15:59:52 to 15:59:52")
             .setIdOrderFromShop("3245678765")
-            .setReceivingStation("Саперно-Слобідська")
-            .setResponsibleLogicMan("Logic Man")
-            .setResponsibleDriver("Driver Driver")
-            .setResponsibleCaller("Caller Caller")
-            .setResponsibleNavigator("Navigator Navigator")
+            .setReceivingStation("1")
+            .setResponsibleLogicMan("1")
+            .setResponsibleDriver("1")
+            .setResponsibleCaller("1")
+            .setResponsibleNavigator("1")
             .setCommentsForOrder("commentsForOrder")
             .setIsBlocked(true)
             .setBlockedBy("Blocked Test");
@@ -2907,14 +2907,24 @@ public class ModelUtils {
         return new BigOrderTableDTO()
             .setOrderDate("")
             .setPaymentDate("")
-            .setDateOfExport("");
+            .setDateOfExport("")
+            .setReceivingStation("")
+            .setResponsibleCaller("")
+            .setResponsibleDriver("")
+            .setResponsibleLogicMan("")
+            .setResponsibleNavigator("");
     }
 
     public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
         return new BigOrderTableViews()
             .setOrderDate(null)
             .setPaymentDate(null)
-            .setDateOfExport(null);
+            .setDateOfExport(null)
+            .setReceivingStation(null)
+            .setResponsibleCaller(null)
+            .setResponsibleDriver(null)
+            .setResponsibleLogicMan(null)
+            .setResponsibleNavigator(null);
     }
 
     public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
@@ -3158,33 +3168,6 @@ public class ModelUtils {
     public static UpdateAllOrderPageDto updateAllOrderPageDto(OrderStatus orderStatus) {
         return UpdateAllOrderPageDto.builder()
             .orderId(List.of(1L))
-            .generalOrderInfo(OrderDetailStatusRequestDto
-                .builder()
-                .orderStatus(String.valueOf(orderStatus))
-                .orderPaymentStatus(String.valueOf(PaymentStatus.PAID))
-                .adminComment("aaa")
-                .build())
-            .userInfoDto(UbsCustomersDtoUpdate
-                .builder()
-                .recipientId(2L)
-                .recipientName("aaaaa")
-                .recipientPhoneNumber("085555")
-                .recipientEmail("yura@333gmail.com")
-                .build())
-            .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
-                .builder()
-                .addressId(1L)
-                .addressDistrict("aaaaaaa")
-                .addressStreet("aaaaa")
-                .addressEntranceNumber("12")
-                .addressHouseCorpus("123")
-                .addressHouseNumber("121")
-                .addressCity("dsfsdf")
-                .addressRegion("sdfsdfsd")
-                .build())
-            .ecoNumberFromShop(EcoNumberDto.builder()
-                .ecoNumber(Set.of("1111111111"))
-                .build())
             .exportDetailsDto(ExportDetailsDtoUpdate
                 .builder()
                 .dateExport("1997-12-04T15:40:24")
@@ -3192,11 +3175,6 @@ public class ModelUtils {
                 .timeDeliveryTo("1990-12-11T19:30:30")
                 .receivingStationId(1L)
                 .build())
-            .orderDetailDto(
-                UpdateOrderDetailDto.builder()
-                    .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
-                    .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
-                    .build())
             .updateResponsibleEmployeeDto(List.of(UpdateResponsibleEmployeeDto.builder()
                 .positionId(2L)
                 .employeeId(2L)
