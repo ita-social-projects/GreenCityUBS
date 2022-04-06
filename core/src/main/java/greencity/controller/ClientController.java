@@ -54,7 +54,7 @@ public class ClientController {
     /**
      * Controller for getting all user orders.
      *
-     * @return {@link List OrderStatusPageDto}.
+     * @return {@link List OrderStatusForUserDto}.
      * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for logged user")
@@ -65,11 +65,11 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all-orders-data/{lang}")
+    @GetMapping("/get-all-orders-data")
     @ApiPageable
     public ResponseEntity<PageableDto<OrderStatusForUserDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang, @ApiIgnore Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang, page));
+        @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page));
     }
 
     /**

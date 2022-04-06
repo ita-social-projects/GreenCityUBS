@@ -17,7 +17,9 @@ public class OrderStatusForUserDto {
     private LocalDateTime dateForm;
     private LocalDateTime datePaid;
     private String orderStatus;
+    private String orderStatusEng;
     private String paymentStatus;
+    private String paymentStatusEng;
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;

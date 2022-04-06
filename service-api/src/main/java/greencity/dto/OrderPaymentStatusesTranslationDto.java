@@ -11,4 +11,5 @@ import lombok.*;
 public class OrderPaymentStatusesTranslationDto {
     private String key;
     private String translation;
+    private String translationEng;
 }

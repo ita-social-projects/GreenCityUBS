@@ -2251,7 +2251,7 @@ public class ModelUtils {
     }
 
     public static OrderStatusTranslation getStatusTranslation() {
-        return OrderStatusTranslation.builder().id(6L).statusId(2L).languageId(1L).name("name").build();
+        return OrderStatusTranslation.builder().id(6L).statusId(2L).name("name").build();
     }
 
     public static BagInfoDto getBagInfoDto() {
@@ -2286,7 +2286,6 @@ public class ModelUtils {
             .id(1L)
             .orderPaymentStatusId(1L)
             .translationValue("Abc")
-            .languageId(1L)
             .build();
     }
 
@@ -2594,7 +2593,6 @@ public class ModelUtils {
         return OrderStatusTranslation
             .builder()
             .statusId(1L)
-            .languageId(1L)
             .id(1L)
             .name("ua")
             .build();
@@ -2604,7 +2602,6 @@ public class ModelUtils {
         return OrderStatusTranslation
             .builder()
             .statusId(1L)
-            .languageId(2L)
             .id(1L)
             .name("en")
             .build();
@@ -3328,12 +3325,23 @@ public class ModelUtils {
             .senderEmail("test@mail.com")
             .build();
 
+        CertificateDto certificateDto = CertificateDto.builder()
+            .certificatePoints(300)
+            .certificateDate(LocalDate.now())
+            .code("200")
+            .certificateStatus("ACTIVE")
+            .build();
+
         AddressInfoDto addressInfoDto = AddressInfoDto.builder()
             .addressStreet("StreetTest")
             .addressDistinct("AdressDistinctTest")
             .addressRegion("TestRegion")
             .addressComment("TestComment")
             .addressCity("TestCity")
+            .addressStreetEng("StreetEng")
+            .addressDistinctEng("DisticntEng")
+            .addressCityEng("CityEng")
+            .addressRegionEng("RegionEng")
             .build();
 
         BagForUserDto bagForUserDto = new BagForUserDto();
@@ -3341,7 +3349,8 @@ public class ModelUtils {
         bagForUserDto.setCount(3);
         bagForUserDto.setCapacity(200);
         bagForUserDto.setFullPrice(300);
-        bagForUserDto.setService("Safe Waste");
+        bagForUserDto.setService("Безпечні Відходи");
+        bagForUserDto.setServiceEng("Safe Waste");
 
         return OrderStatusForUserDto.builder()
             .id(1L)
@@ -3354,9 +3363,11 @@ public class ModelUtils {
             .paymentStatus(PaymentStatus.PAID.toString())
             .sender(senderInfoDto)
             .address(addressInfoDto)
+            .paymentStatusEng(PaymentStatus.PAID.toString())
             .orderStatus(OrderStatus.FORMED.toString())
+            .orderStatusEng(OrderStatus.FORMED.toString())
             .bags(List.of(bagForUserDto))
-            .certificate(Collections.emptyList())
+            .certificate(List.of(certificateDto))
             .additionalOrders(Collections.emptySet())
             .build();
     }

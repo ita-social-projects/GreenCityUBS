@@ -432,7 +432,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
 
     @Override
-    public PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page) {
+    public PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Pageable page) {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
         List<Order> orders = orderPages.getContent();
@@ -441,18 +441,13 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
-            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order, languageId);
+            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
             OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-                .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), languageId)
+                .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
                 .orElse(orderStatusTranslationRepository.getOne(1L));
-            String paymentStatusTranslation = orderPaymentStatusTranslationRepository
-                .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                    (long) order.getOrderPaymentStatus().getStatusValue(), languageId);
-            if (paymentStatusTranslation.isEmpty()) {
-                paymentStatusTranslation = orderPaymentStatusTranslationRepository
-                    .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                        (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
-            }
+            OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
+                .findByOrderPaymentStatusIdAndTranslationValue(
+                    (long) order.getOrderPaymentStatus().getStatusValue());
 
             Double fullPrice = Double.valueOf(bagForUserDtos.stream()
                 .map(BagForUserDto::getTotalPrice)
@@ -463,6 +458,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .dateForm(order.getOrderDate())
                 .datePaid(order.getOrderDate())
                 .orderStatus(orderStatusTranslation.getName())
+                .orderStatusEng(orderStatusTranslation.getNameEng())
                 .orderComment(order.getComment())
                 .bags(bagForUserDtos)
                 .additionalOrders(order.getAdditionalOrders())
@@ -473,7 +469,8 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .certificate(getCertificate(order.getCertificates()))
                 .sender(senderInfoDtoBuilder(order))
                 .address(addressInfoDtoBuilder(order))
-                .paymentStatus(paymentStatusTranslation)
+                .paymentStatus(paymentStatusTranslation.getTranslationValue())
+                .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
                 .build();
 
             dtos.add(orderStatusForUserDto);
@@ -514,25 +511,26 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
+            .addressCityEng(address.getCityEn())
             .addressComment(address.getAddressComment())
             .addressDistinct(address.getDistrict())
+            .addressDistinctEng(address.getDistrictEn())
             .addressRegion(address.getRegion())
+            .addressRegionEng(address.getRegionEn())
             .addressStreet(address.getStreet())
+            .addressStreetEng(address.getStreetEn())
             .build();
     }
 
-    private List<BagForUserDto> bagForUserDtosBuilder(Order order, Long languageId) {
+    private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
         bags.forEach(bag -> {
             BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
             BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag(bag);
-            if (languageId == 1) {
-                bagDto.setService(bagTranslation.getName());
-            } else {
-                bagDto.setService(bagTranslation.getNameEng());
-            }
+            bagDto.setService(bagTranslation.getName());
+            bagDto.setServiceEng(bagTranslation.getNameEng());
             bagDto.setCount(amountOfBags.get(bag.getId()));
             bagDto.setTotalPrice(amountOfBags.get(bag.getId()) * bag.getFullPrice());
             bagForUserDtos.add(bagDto);
@@ -1101,9 +1099,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
-        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId,
-            languageRepository.findById(languageId)
-                .orElseThrow(() -> new LanguageNotFoundException(LANGUAGE_IS_NOT_FOUND_BY_ID + languageId)).getCode());
+        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId);
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
         amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));

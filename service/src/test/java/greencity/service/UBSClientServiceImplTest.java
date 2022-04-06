@@ -22,6 +22,7 @@ import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,7 +37,6 @@ import org.springframework.ui.Model;
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1277,61 +1277,53 @@ class UBSClientServiceImplTest {
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        OrderStatusForUserDto orderStatusForUserDto = ModelUtils.getOrderStatusDto();
+        BagTranslation translation = ModelUtils.getBagTranslation();
         Order order = ModelUtils.getOrderTest();
         User user = ModelUtils.getTestUser();
+        Bag bag = ModelUtils.bagDto();
+
+        List<Bag> bags = new ArrayList<>();
+        List<Order> orderList = new ArrayList<>();
+
+        BagForUserDto bagForUserDto = orderStatusForUserDto.getBags().get(0);
+        bag.setCapacity(120);
+        bag.setFullPrice(1200);
+        order.setAmountOfBagsOrdered(Map.of(1, 10));
+        bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        List<Order> orderList = new ArrayList<>();
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
+        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+        when(bagTranslationRepository.findBagTranslationByBag(bag)).thenReturn(translation);
         when(orderStatusTranslationRepository
-            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L))
+            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
-        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-            (long) order.getOrderPaymentStatus().getStatusValue(), 1L))
-                .thenReturn(orderPaymentStatusTranslation.getTranslationValue());
+        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue()))
+                .thenReturn(orderPaymentStatusTranslation);
 
-        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), 1L, pageable);
+        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable);
 
         assertEquals(dto.getTotalElements(), orderList.size());
         assertEquals(dto.getPage().get(0).getId(), order.getId());
+
+        verify(bagTranslationRepository, times(bags.size())).findBagTranslationByBag(bag);
+        verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
+        verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
-            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 1L);
+            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
-            .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                (long) order.getOrderPaymentStatus().getStatusValue(), 1L);
+            .findByOrderPaymentStatusIdAndTranslationValue(
+                (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
 
     }
 
-    @Test
-    void getOrderForUserWithInvalidLangId() {
-        Order order = ModelUtils.getOrder();
-        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        orderStatusTranslation.setName("FORMED");
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.setOrderStatus(OrderStatus.FORMED);
-        User user = ModelUtils.getTestUser();
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Order> page = new PageImpl<>(List.of(order), pageable, 1);
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
-            .thenReturn(page);
-        when(orderStatusTranslationRepository
-            .getOrderStatusTranslationByIdAndLanguageId(order.getOrderStatus().getNumValue(), 3L))
-                .thenReturn(Optional.of(orderStatusTranslation));
-        when(orderPaymentStatusTranslationRepository
-            .findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(
-                (long) order.getOrderPaymentStatus().getStatusValue(), 3L))
-                    .thenReturn(order.getOrderPaymentStatus().name());
-
-        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser("abc", 3L, pageable);
-
-        assertEquals(dto.getPage().get(0).getOrderStatus(), order.getOrderStatus().name());
-        assertEquals(dto.getPage().get(0).getPaymentStatus(), order.getOrderPaymentStatus().name());
-
-    }
 }

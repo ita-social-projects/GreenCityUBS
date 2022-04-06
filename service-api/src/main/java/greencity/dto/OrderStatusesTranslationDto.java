@@ -11,5 +11,6 @@ import lombok.*;
 public class OrderStatusesTranslationDto {
     private String key;
     private String translation;
+    private String translationEng;
     private Boolean ableActualChange;
 }

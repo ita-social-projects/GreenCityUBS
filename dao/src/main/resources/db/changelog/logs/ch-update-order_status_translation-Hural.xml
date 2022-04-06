@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Hural-2" author="Pavlo Hural">
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Formed"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Adjustment"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Brought by himself"/>
+            <where>id=3</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Confirmed"/>
+            <where>id=4</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Оn the route"/>
+            <where>id=5</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Done"/>
+            <where>id=6</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Not taken out"/>
+            <where>id=7</where>
+        </update>
+        <update tableName="order_status_translations">
+            <column name="name_eng" value="Canceled"/>
+            <where>id=8</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="Hural-5" author="Pavlo Hural">
+        <delete tableName="order_status_translations">
+            <where>id=9</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=10</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=11</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=12</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=13</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=14</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=15</where>
+        </delete>
+        <delete tableName="order_status_translations">
+            <where>id=16</where>
+        </delete>
+    </changeSet>
+</databaseChangeLog>
