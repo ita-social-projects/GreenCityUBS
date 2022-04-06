@@ -7,7 +7,6 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
-import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -392,7 +391,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
                 : "order status english not found";
 
-        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = null;
+        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = new OrderPaymentStatusTranslation();
         Order currentOrder = new Order();
         if (order.isPresent()) {
             currentOrder = order.get();
@@ -407,13 +406,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(currentOrder))
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
-            .orderPaymentStatusName(
-                Optional.of(Objects.requireNonNull(currentOrderStatusPaymentTranslation.getTranslationValue()))
-                    .orElse(null))
+            .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
             .orderPaymentStatusNameEng(currentOrderStatusPaymentTranslation.getTranslationsValueEng())
             .orderStatusName(currentOrderStatusTranslation)
             .orderStatusNameEng(currentOrderStatusTranslationEng)
-            .adminComment(order.get().getAdminComment())
+            .adminComment(currentOrder.getAdminComment())
             .build();
     }
 
