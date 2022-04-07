@@ -626,7 +626,6 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(addressDtos.get(1));
 
-        address.setAddressStatus(AddressStatus.DELETED);
         ubsService.deleteCurrentAddressForOrder(address.getId(), uuid);
         verify(addressRepository, times(1)).save(address);
     }
@@ -634,6 +633,15 @@ class UBSClientServiceImplTest {
     @Test
     void testDeleteUnexistingAddress() {
         when(addressRepository.findById(42L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundOrderAddressException.class,
+            () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void testDeleteDeletedAddress() {
+        Address address = getTestAddresses(getTestUser()).get(0);
+        address.setAddressStatus(AddressStatus.DELETED);
+        when(addressRepository.findById(42L)).thenReturn(Optional.of(address));
         assertThrows(NotFoundOrderAddressException.class,
             () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
