@@ -336,4 +336,6 @@ public interface UBSClientService {
      * @author Max Boiarchuk
      */
     UserPointDto getUserPoint(String uuid);
+
+    List<AllActiveLocationsDto> getAllActiveLocations();
 }

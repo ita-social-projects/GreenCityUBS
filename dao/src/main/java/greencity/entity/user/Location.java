@@ -10,8 +10,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@EqualsAndHashCode(exclude = {"courierLocations", "bags", "locationTranslations"})
-@ToString(exclude = {"courierLocations", "bags", "locationTranslations"})
+@EqualsAndHashCode(exclude = {"courierLocations", "bags"})
+@ToString(exclude = {"courierLocations", "bags"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -27,6 +27,12 @@ public class Location {
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
 
+    @Column(name = "name_Uk")
+    private String nameUk;
+
+    @Column(name = "name_En")
+    private String nameEn;
+
     @Embedded
     private Coordinates coordinates;
 
@@ -35,10 +41,10 @@ public class Location {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Bag> bags;
-
+/*-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<LocationTranslation> locationTranslations;
-
+*/
     @ManyToOne
     private Region region;
 }

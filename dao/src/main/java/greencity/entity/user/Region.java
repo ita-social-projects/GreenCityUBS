@@ -11,8 +11,8 @@ import java.util.List;
 @Setter
 @Builder
 @Table(name = "regions")
-@EqualsAndHashCode(exclude = {"locations", "regionTranslations"})
-@ToString(exclude = {"locations", "regionTranslations"})
+@EqualsAndHashCode(exclude = {"locations"})
+@ToString(exclude = {"locations"})
 @Entity
 public class Region {
     @Id
@@ -22,6 +22,13 @@ public class Region {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "region")
     private List<Location> locations;
 
+    @Column(name = "name_uk")
+    private String ukrName;
+
+    @Column(name = "name_en")
+    private String enName;
+/*-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "region")
     private List<RegionTranslation> regionTranslations;
+ */
 }

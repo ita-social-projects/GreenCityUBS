@@ -468,4 +468,18 @@ public class OrderController {
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+
+    @ApiOperation(value = "Get all location where courier is working")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/allLocations")
+    public ResponseEntity<List<AllActiveLocationsDto>> getAllActiveLocatins() {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.getAllActiveLocations());
+    }
 }
