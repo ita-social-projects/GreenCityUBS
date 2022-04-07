@@ -133,4 +133,22 @@ public class ViberServiceImplTest {
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
         viberService.sendNotification(notification);
     }
+
+    @Test
+    public void setWebHook() {
+        viberService.setWebhook();
+        verify(viberClient).updateWebHook(any());
+    }
+
+    @Test
+    public void removeWebHook() {
+        viberService.removeWebHook();
+        verify(viberClient).updateWebHook(any());
+    }
+
+    @Test
+    public void getAccountInfo() {
+        viberService.getAccountInfo();
+        verify(viberClient).getAccountInfo();
+    }
 }
