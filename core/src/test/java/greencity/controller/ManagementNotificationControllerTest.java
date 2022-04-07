@@ -2,12 +2,12 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
+import greencity.service.UserRemoteService;
 import greencity.service.notification.NotificationeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,14 +45,14 @@ class ManagementNotificationControllerTest {
     private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final Principal principal = getUuid();
     @Mock
-    RestClient restClient;
+    UserRemoteService userRemoteService;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient))
+                new UserArgumentResolver(userRemoteService))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }

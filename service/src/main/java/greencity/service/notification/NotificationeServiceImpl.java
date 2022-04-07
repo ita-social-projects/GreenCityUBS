@@ -1,6 +1,5 @@
 package greencity.service.notification;
 
-import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.enums.NotificationType;
@@ -11,6 +10,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
+import greencity.service.UserRemoteService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ public class NotificationeServiceImpl implements NotificationeService {
     private final ModelMapper modelMapper;
     private final NotificationScheduleRepo scheduleRepo;
     private final OrderRepository orderRepository;
-    private final RestClient restClient;
+    private final UserRemoteService userRemoteService;
 
     /**
      * {@inheritDoc}
@@ -102,7 +102,7 @@ public class NotificationeServiceImpl implements NotificationeService {
                 .violationDescription(dto.getViolationDescription())
                 .language(language)
                 .build();
-            restClient.sendViolationOnMail(mailDto);
+            userRemoteService.sendViolationOnMail(mailDto);
         }
     }
 }

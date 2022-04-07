@@ -1,8 +1,8 @@
 package greencity.security.filters;
 
-import greencity.client.RestClient;
 import greencity.dto.UserVO;
 import greencity.security.JwtTool;
+import greencity.service.UserRemoteService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class AccessTokenAuthenticationFilterTest {
     @Mock
     AuthenticationManager authenticationManager;
     @Mock
-    RestClient restClient;
+    UserRemoteService userRemoteService;
 
     @InjectMocks
     private AccessTokenAuthenticationFilter authenticationFilter;
@@ -68,7 +68,7 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(authenticationManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(restClient.findNotDeactivatedByEmail("test@mail.com"))
+        when(userRemoteService.findNotDeactivatedByEmail("test@mail.com"))
             .thenReturn(Optional.of(UserVO.builder().id(1L).build()));
         doNothing().when(chain).doFilter(request, response);
 
@@ -94,7 +94,7 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
         when(authenticationManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(restClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
+        when(userRemoteService.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
         authenticationFilter.doFilterInternal(request, response, chain);
         assertTrue(systemOutContent.toString().contains("Access denied with token: "));
     }
