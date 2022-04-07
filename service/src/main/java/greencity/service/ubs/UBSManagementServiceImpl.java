@@ -18,6 +18,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
+import greencity.service.UserRemoteService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -47,7 +48,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
-    private final RestClient restClient;
+    private final UserRemoteService userRemoteService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
@@ -217,7 +218,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ViolationsInfoDto getAllUserViolations(String email) {
-        String uuidId = restClient.findUuidByEmail(email);
+        String uuidId = userRemoteService.findUuidByEmail(email);
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
@@ -241,7 +242,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto) {
-        String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
+        String ourUUid = userRemoteService.findUuidByEmail(addingPointsToUserDto.getEmail());
         User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (ourUser.getCurrentPoints() == null) {

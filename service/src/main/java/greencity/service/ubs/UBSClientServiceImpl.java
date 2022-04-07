@@ -12,6 +12,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.UAPhoneNumberUtil;
+import greencity.service.UserRemoteService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -60,7 +61,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
-    private final RestClient restClient;
+    private final RestClient restClient; // TODO delete this
+    private final UserRemoteService userRemoteService;
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
@@ -896,7 +898,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private User createUserByUuidIfUserDoesNotExist(String uuid) {
         User user = userRepository.findByUuid(uuid);
         if (user == null) {
-            UbsCustomersDto ubsCustomersDto = restClient.findUserByUUid(uuid)
+            UbsCustomersDto ubsCustomersDto = userRemoteService.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
             return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
@@ -909,7 +911,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void markUserAsDeactivated(Long id) {
         User user =
             userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        restClient.markUserDeactivated(user.getUuid());
+        userRemoteService.markUserDeactivated(user.getUuid());
     }
 
     @Override

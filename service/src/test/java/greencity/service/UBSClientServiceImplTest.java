@@ -64,7 +64,9 @@ class UBSClientServiceImplTest {
     @Mock
     EntityManager entityManager;
     @Mock
-    private RestClient restClient;
+    private RestClient restClient; // TODO delete this
+    @Mock
+    private UserRemoteService userRemoteService;
     @Mock
     private AddressRepository addressRepository;
     @Mock
@@ -385,7 +387,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
         ubsService.markUserAsDeactivated(1L);
         verify(userRepository).findById(1L);
-        verify(restClient).markUserDeactivated(user.getUuid());
+        verify(userRemoteService).markUserDeactivated(user.getUuid());
     }
 
     @Test

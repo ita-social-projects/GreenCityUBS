@@ -4,6 +4,7 @@ import greencity.client.RestClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
+import greencity.service.UserRemoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,15 +35,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String UBS_LINK = "/ubs";
     private static final String ADMIN_LINK = "/admin";
     private final JwtTool jwtTool;
-    private final RestClient restClient;
+    private final UserRemoteService userRemoteService;
 
     /**
      * Constructor.
      */
     @Autowired
-    public SecurityConfig(JwtTool jwtTool, RestClient restClient) {
+    public SecurityConfig(JwtTool jwtTool, UserRemoteService userRemoteService) {
         this.jwtTool = jwtTool;
-        this.restClient = restClient;
+        this.userRemoteService = userRemoteService;
     }
 
     /**
@@ -68,7 +69,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .addFilterBefore(
-                new AccessTokenAuthenticationFilter(jwtTool, authenticationManager(), restClient),
+                new AccessTokenAuthenticationFilter(jwtTool, authenticationManager(), userRemoteService),
                 UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling()
             .authenticationEntryPoint((req, resp, exc) -> resp.sendError(SC_UNAUTHORIZED, "Authorize first."))
