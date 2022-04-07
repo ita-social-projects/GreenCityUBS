@@ -266,7 +266,7 @@ public interface UBSClientService {
      * @return {@link OrderStatusPageDto}.
      * @author Igor Boykov
      */
-    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId);
+    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId);
 
     /**
      * Method for get info about payment status from LiqPay.

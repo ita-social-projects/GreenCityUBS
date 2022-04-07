@@ -1098,7 +1098,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId) {
+    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId) {
         OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId);
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();

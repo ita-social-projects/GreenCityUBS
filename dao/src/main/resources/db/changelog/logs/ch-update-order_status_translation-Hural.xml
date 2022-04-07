@@ -64,4 +64,16 @@
             <where>id=16</where>
         </delete>
     </changeSet>
+
+    <changeSet id="Hural-6" author="Pavlo Hural">
+        <delete tableName="bag_translations">
+            <where>id=4</where>
+        </delete>
+        <delete tableName="bag_translations">
+            <where>id=5</where>
+        </delete>
+        <delete tableName="bag_translations">
+            <where>id=6</where>
+        </delete>
+    </changeSet>
 </databaseChangeLog>
