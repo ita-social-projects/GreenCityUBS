@@ -6,6 +6,7 @@ import greencity.constant.OrderHistory;
 import greencity.dto.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -41,6 +42,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -68,6 +70,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final OrderUtils orderUtils;
+    private final LocationRepository locationRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -1490,4 +1493,26 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         return linkTemplate;
     }
+
+    public List<AllActiveLocationsDto> getAllActiveLocations() {
+        List<Location> locations = locationRepository.findAllActive();
+        Map<RegionDto, List<LocationsDtos>> map = locations.stream()
+                .collect(Collectors.toMap(x -> modelMapper.map(x, RegionDto.class),
+                        x -> new ArrayList(List.of(modelMapper.map(x, LocationsDtos.class))),
+                        (x, y) -> {x.addAll(y); return new ArrayList<LocationsDtos>(x);})
+        );
+
+        List<AllActiveLocationsDto> result = map.entrySet().stream()
+                .map(x -> AllActiveLocationsDto.builder()
+                        .regionId(x.getKey().getRegionId())
+                        .nameEn(x.getKey().getNameEn())
+                        .nameUk(x.getKey().getNameUk())
+                        .locations(x.getValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+
 }
