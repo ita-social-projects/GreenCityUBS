@@ -1260,6 +1260,19 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getPaymentResponseFromFondyPaymentNotFoundException() {
+        Order order = getOrder().setPayment(Collections.emptyList());
+        String uuid = order.getUser().getUuid();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(uuid)).thenReturn(order.getUser());
+
+        assertThrows(PaymentNotFoundException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, uuid);
+        });
+    }
+
+    @Test
     void getPaymentResponseFromFondyAccessDeniedException() {
         Order order = ModelUtils.getOrder();
 
