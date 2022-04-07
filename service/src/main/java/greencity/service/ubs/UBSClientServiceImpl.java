@@ -262,12 +262,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
         }
+        if (order.getPayment().isEmpty()) {
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
+        }
         return getFondyPaymentResponse(order);
     }
 
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
+        Payment payment = order.getPayment().get(order.getPayment().size() - 1);
         return FondyPaymentResponse.builder()
-            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .paymentStatus(payment.getResponseStatus())
             .build();
     }
 

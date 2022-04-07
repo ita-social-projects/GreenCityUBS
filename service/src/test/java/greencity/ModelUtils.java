@@ -408,8 +408,8 @@ public class ModelUtils {
             .dateExport("1997-12-04T15:40:24")
             .timeDeliveryFrom("1997-12-04T15:40:24")
             .timeDeliveryTo("1990-12-11T19:30:30")
-            .receivingStation("Саперно-Слобідська")
-            .allReceivingStations(List.of("a", "b"))
+            .receivingStationId(1L)
+            .allReceivingStations(List.of(getReceivingStationDto(), getReceivingStationDto()))
             .build();
     }
 

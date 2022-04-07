@@ -15,6 +15,6 @@ public class ExportDetailsDto {
     String dateExport;
     String timeDeliveryFrom;
     String timeDeliveryTo;
-    String receivingStation;
-    List<String> allReceivingStations;
+    Long receivingStationId;
+    List<ReceivingStationDto> allReceivingStations;
 }

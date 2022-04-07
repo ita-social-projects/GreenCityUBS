@@ -1023,14 +1023,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStation) {
+    private ExportDetailsDto buildExportDto(Order order, List<ReceivingStation> receivingStations) {
         return ExportDetailsDto.builder()
-            .allReceivingStations(receivingStation.stream().map(ReceivingStation::getName).collect(Collectors.toList()))
+            .allReceivingStations(
+                receivingStations.stream()
+                    .map(receivingStation -> modelMapper.map(receivingStation, ReceivingStationDto.class))
+                    .collect(Collectors.toList()))
             .dateExport(order.getDateOfExport() != null && order.getDeliverFrom() != null ? order.getDateOfExport()
                 + "T" + order.getDeliverFrom().toLocalTime() : null)
             .timeDeliveryFrom(order.getDeliverFrom() != null ? order.getDeliverFrom().toString() : null)
             .timeDeliveryTo(order.getDeliverTo() != null ? order.getDeliverTo().toString() : null)
-            .receivingStation(nonNull(order.getReceivingStation()) ? order.getReceivingStation().getName() : null)
+            .receivingStationId(nonNull(order.getReceivingStation()) ? order.getReceivingStation().getId() : null)
             .build();
     }
 
