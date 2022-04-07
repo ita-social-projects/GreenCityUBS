@@ -27,12 +27,12 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
     void deletePaymentById(Long paymentId);
 
     /**
-     * This method find payment by order.
-     * 
+     * This method finds all payments by order.
+     *
      * @param order {@link Order}
-     * @return {@link Payment}
+     * @return {@link List} of {@link Payment}
      */
-    Payment findPaymentByOrder(Order order);
+    List<Payment> findAllByOrder(Order order);
 
     /**
      * This method find amount by orderId.
