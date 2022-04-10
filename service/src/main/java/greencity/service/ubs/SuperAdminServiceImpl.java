@@ -368,24 +368,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
         return modelMapper.map(courier, CourierDto.class);
     }
-//    @Override
-//    public CourierDto updateCourier(CourierDto dto) {
-//        Courier courier = courierRepository.findById(dto.getCourierId())
-//            .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-//        List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
-//        List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
-//        for (CourierTranslation temp : listToUpdate) {
-//            for (CourierTranslationDto tempDto : updatedList) {
-//                if (temp.getLanguage().getCode().equals(tempDto.getLanguageCode())) {
-//                    temp.setName(tempDto.getName());
-//                }
-//            }
-//        };
-//        courier.setCourierStatus(CourierStatus.valueOf(dto.getCourierStatus()));
-//        courierRepository.save(courier);
-//        courierTranslationRepository.saveAll(courier.getCourierTranslationList());
-//        return modelMapper.map(courier, CourierDto.class);
-//    }
 
     @Override
     public List<CourierDto> getAllCouriers() {
