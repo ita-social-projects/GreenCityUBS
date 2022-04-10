@@ -352,17 +352,40 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public CourierDto updateCourier(CourierDto dto) {
+    public CourierDto updateCourier(UpdateCourierDto dto) {
         Courier courier = courierRepository.findById(dto.getCourierId())
             .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-        courier.setCourierTranslationList(dto.getCourierTranslationDtos().stream()
-            .map(courierTranslationDto -> modelMapper.map(courierTranslationDto, CourierTranslation.class))
-            .collect(Collectors.toList()));
-        courier.setCourierStatus(CourierStatus.valueOf(dto.getCourierStatus()));
+        List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
+        List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
+        for (CourierTranslation temp : listToUpdate) {
+            for (CourierTranslationDto tempDto : updatedList) {
+                if (temp.getLanguage().getCode().equals(tempDto.getLanguageCode())) {
+                    temp.setName(tempDto.getName());
+                }
+            }
+        }
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
         return modelMapper.map(courier, CourierDto.class);
     }
+//    @Override
+//    public CourierDto updateCourier(CourierDto dto) {
+//        Courier courier = courierRepository.findById(dto.getCourierId())
+//            .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+//        List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
+//        List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
+//        for (CourierTranslation temp : listToUpdate) {
+//            for (CourierTranslationDto tempDto : updatedList) {
+//                if (temp.getLanguage().getCode().equals(tempDto.getLanguageCode())) {
+//                    temp.setName(tempDto.getName());
+//                }
+//            }
+//        };
+//        courier.setCourierStatus(CourierStatus.valueOf(dto.getCourierStatus()));
+//        courierRepository.save(courier);
+//        courierTranslationRepository.saveAll(courier.getCourierTranslationList());
+//        return modelMapper.map(courier, CourierDto.class);
+//    }
 
     @Override
     public List<CourierDto> getAllCouriers() {
