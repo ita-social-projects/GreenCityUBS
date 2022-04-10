@@ -357,10 +357,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
         List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
         List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
-        for (CourierTranslation temp : listToUpdate) {
-            for (CourierTranslationDto tempDto : updatedList) {
-                if (temp.getLanguage().getCode().equals(tempDto.getLanguageCode())) {
-                    temp.setName(tempDto.getName());
+        for (CourierTranslation originalCourierTranslation : listToUpdate) {
+            for (CourierTranslationDto dtoCourierTranslation : updatedList) {
+                if (originalCourierTranslation.getLanguage().getCode().equals(dtoCourierTranslation.getLanguageCode())) {
+                    originalCourierTranslation.setName(dtoCourierTranslation.getName());
                 }
             }
         }
