@@ -263,11 +263,9 @@ public class CoordinateServiceImpl implements CoordinateService {
         Set<Coordinates> allCoords = addressRepository.undeliveredOrdersCoords();
         Set<Coordinates> result = specified.stream()
             .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
-        for (Coordinates temp : result) {
-            if (!allCoords.contains(temp)) {
-                throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
-                    + ", " + temp.getLongitude());
-            }
+        for (Coordinates temp : result.stream().filter(t -> !allCoords.contains(t)).collect(Collectors.toSet())) {
+            throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
+                + ", " + temp.getLongitude());
         }
 
         Coordinates centralCoord = getNewCentralCoordinate(result);
