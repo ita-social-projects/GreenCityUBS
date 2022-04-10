@@ -94,12 +94,6 @@ public class EncryptionUtil {
         }
     }
 
-    private static void checkDouble(Double number, StringBuilder stringBuilder) {
-        if (number != null && number != 0d) {
-            stringBuilder.append("|" + number);
-        }
-    }
-
     private static void checkIntegerInclude0(Integer number, StringBuilder stringBuilder) {
         if (number != null) {
             stringBuilder.append("|" + number);
