@@ -187,8 +187,9 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrderExportDetails();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
+
         List<ReceivingStation> stations =
-            Arrays.asList(new ReceivingStation().setName("a"), new ReceivingStation().setName("b"));
+            Arrays.asList(ReceivingStation.builder().name("a").build(), ReceivingStation.builder().name("b").build());
         when(receivingStationRepository.findAll()).thenReturn(stations);
 
         assertEquals(expected, ubsManagementService.getOrderExportDetails(1L));
@@ -465,7 +466,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void updateOrderDetailStatus() {
+    void updateOrderDetailStatusFirst() {
         User user = ModelUtils.getTestUser();
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
@@ -543,24 +544,46 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getPaymentStatus(), producedObjectBroughtItHimself.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
+        verify(eventService, times(1))
+                .save("Статус Замовлення - Узгодження",
+                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+        verify(eventService, times(1))
+                .save("Статус Замовлення - Підтверджено",
+                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+        verify(eventService, times(1))
+                .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
+                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+
+    }
+    @Test
+    void updateOrderDetailStatusSecond() {
+        User user = ModelUtils.getTestUser();
+        user.setRecipientName("Петро");
+        user.setRecipientSurname("Петренко");
+        when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
+        Order order = user.getOrders().get(0);
+        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
+
+        List<Payment> payment = new ArrayList<>();
+        payment.add(Payment.builder().build());
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.saveAll(any())).thenReturn(payment);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
+        OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
+        OrderDetailStatusDto producedObject = ubsManagementService
+                .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
         testOrderDetail.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         expectedObject.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         OrderDetailStatusDto producedObjectOnTheRoute = ubsManagementService
-            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+                .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
 
         assertEquals(expectedObject.getOrderStatus(), producedObjectOnTheRoute.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObjectOnTheRoute.getPaymentStatus());
         assertEquals(expectedObject.getDate(), producedObjectOnTheRoute.getDate());
-
-        verify(eventService, times(1))
-            .save("Статус Замовлення - Узгодження",
-                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
-        verify(eventService, times(1))
-            .save("Статус Замовлення - Підтверджено",
-                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
-        verify(eventService, times(1))
-            .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
-                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
     }
 
     @Test
