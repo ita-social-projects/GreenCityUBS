@@ -262,12 +262,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
         }
+        if (order.getPayment().isEmpty()) {
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
+        }
         return getFondyPaymentResponse(order);
     }
 
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
+        Payment payment = order.getPayment().get(order.getPayment().size() - 1);
         return FondyPaymentResponse.builder()
-            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .paymentStatus(payment.getResponseStatus())
             .build();
     }
 
@@ -375,6 +379,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderWithAddressesResponseDto deleteCurrentAddressForOrder(Long addressId, String uuid) {
         Address address = addressRepo.findById(addressId).orElseThrow(
             () -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
+            throw new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId);
+        }
         if (!address.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
@@ -1131,7 +1138,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (map == null) {
             return null;
         }
-        Payment payment = paymentRepository.findPaymentByOrder(order);
+        List<Payment> payments = paymentRepository.findAllByOrder(order);
+        Payment payment = payments.get(payments.size() - 1);
         String status = (String) map.get("status");
         if (status.equals("success")) {
             payment.setResponseStatus(status);
