@@ -774,9 +774,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         int sumToPay = 0;
 
         for (Map.Entry<Integer, Integer> temp : getOrderBagsAndQuantity.entrySet()) {
-            Integer amount = getOrderBagsAndQuantity.get(temp);
+            Integer amount = getOrderBagsAndQuantity.get(temp.getKey());
             Bag bag = bagRepository.findById(temp.getKey())
-                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp));
+                .orElseThrow(() -> new BagNotFoundException(BAG_NOT_FOUND + temp.getKey()));
             sumToPay += bag.getFullPrice() * amount;
         }
         return sumToPay;
