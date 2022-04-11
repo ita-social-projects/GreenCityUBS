@@ -610,6 +610,52 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void saveCurrentAddressForOrderWithDeletedAddress() {
+        User user = getTestUser();
+        List<Address> addresses = getTestAddresses(user);
+        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
+            .id(1L)
+            .addressComment("comment")
+            .build();
+        Address deletedAddress = Address.builder()
+            .id(1L)
+            .user(user)
+            .addressStatus(AddressStatus.DELETED)
+            .build();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
+
+        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
+
+        verify(addressRepository, times(addresses.size() + 1)).save(any());
+    }
+
+    @Test
+    void saveCurrentAddressForOrderWithAnotherUser() {
+        User user = getTestUser();
+        User anotherUser = getUser().setId(2L);
+        List<Address> addresses = getTestAddresses(anotherUser);
+        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
+            .id(13L)
+            .addressComment("comment")
+            .build();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)));
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
+
+        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
+
+        verify(addressRepository, times(addresses.size() + 1)).save(any());
+    }
+
+    @Test
     void testDeleteCurrentAddressForOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
@@ -1256,6 +1302,19 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(OrderNotFoundException.class, () -> {
             ubsService.getPaymentResponseFromFondy(1L, "abc");
+        });
+    }
+
+    @Test
+    void getPaymentResponseFromFondyPaymentNotFoundException() {
+        Order order = getOrder().setPayment(Collections.emptyList());
+        String uuid = order.getUser().getUuid();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(uuid)).thenReturn(order.getUser());
+
+        assertThrows(PaymentNotFoundException.class, () -> {
+            ubsService.getPaymentResponseFromFondy(1L, uuid);
         });
     }
 

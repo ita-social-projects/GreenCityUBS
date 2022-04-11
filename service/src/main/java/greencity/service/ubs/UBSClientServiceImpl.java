@@ -262,12 +262,16 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
         }
+        if (order.getPayment().isEmpty()) {
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND + id);
+        }
         return getFondyPaymentResponse(order);
     }
 
     private FondyPaymentResponse getFondyPaymentResponse(Order order) {
+        Payment payment = order.getPayment().get(order.getPayment().size() - 1);
         return FondyPaymentResponse.builder()
-            .paymentStatus(order.getPayment().get(0).getResponseStatus())
+            .paymentStatus(payment.getResponseStatus())
             .build();
     }
 
@@ -313,7 +317,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
-        List<Address> addresses = addressRepo.findAllByUserId(userRepository.findByUuid(uuid).getId());
+        User currentUser = userRepository.findByUuid(uuid);
+        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
         if (addresses != null) {
             boolean exist = addresses.stream()
                 .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
@@ -329,42 +334,26 @@ public class UBSClientServiceImpl implements UBSClientService {
                 addressRepo.save(u);
             });
         }
-        Address address;
-        Address forOrderAfterUpdate;
-        if (dtoRequest.getId() != 0) {
-            address = addressRepo.findById(dtoRequest.getId()).orElse(null);
-            forOrderAfterUpdate = modelMapper.map(dtoRequest, Address.class);
-            if (address != null && address.getAddressStatus().equals(AddressStatus.DELETED)) {
-                address = null;
-            }
-        } else {
-            forOrderAfterUpdate = null;
+
+        Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+        if (address != null && AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
 
-        if (address == null || !address.getUser().equals(userRepository.findByUuid(uuid))) {
-            address = modelMapper.map(dtoRequest, Address.class);
-            address.setId(null);
-            address.setUser(userRepository.findByUuid(uuid));
-            address.setActual(true);
-            address.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(address);
-        } else {
-            if (address.getAddressStatus().equals(AddressStatus.IN_ORDER)) {
-                forOrderAfterUpdate.setId(null);
-                forOrderAfterUpdate.setActual(true);
-                forOrderAfterUpdate.setUser(address.getUser());
-                forOrderAfterUpdate.setAddressStatus(address.getAddressStatus());
-                forOrderAfterUpdate.setAddressComment(address.getAddressComment());
+        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : AddressStatus.NEW;
+        final User addressUser = address != null ? address.getUser() : currentUser;
 
-                address.getUbsUsers().forEach(u -> u.setAddress(addressRepo.save(forOrderAfterUpdate)));
-            }
-            address = modelMapper.map(dtoRequest, Address.class);
-            address.setUser(userRepository.findByUuid(uuid));
-            address.setActual(true);
-            address.setAddressStatus(AddressStatus.NEW);
-            addressRepo.save(address);
+        address = modelMapper.map(dtoRequest, Address.class);
+
+        if (!addressUser.equals(currentUser)) {
+            address.setId(null);
         }
+
+        address.setUser(addressUser);
+        address.setActual(true);
+        address.setAddressStatus(addressStatus);
+        addressRepo.save(address);
+
         return findAllAddressesForCurrentOrder(uuid);
     }
 

@@ -228,8 +228,8 @@ public class ModelUtils {
             .dateExport("20-12-2001")
             .timeDeliveryFrom("20:20:20")
             .timeDeliveryTo("20:20:20")
-            .receivingStation("Petrivka")
-            .allReceivingStations(Arrays.asList("a,b,v"))
+            .receivingStationId(1L)
+            .allReceivingStations(Arrays.asList(getReceivingStationDto()))
             .build();
     }
 
