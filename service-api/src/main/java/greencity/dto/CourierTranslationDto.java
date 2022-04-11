@@ -8,10 +8,10 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 @Builder
+/**
+ * {@inheritDoc}
+ */
 public class CourierTranslationDto {
     private String name;
     private String languageCode;
-
-    public CourierTranslationDto(Object o) {
-    }
 }

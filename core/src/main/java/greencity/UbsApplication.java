@@ -8,7 +8,6 @@ import org.telegram.telegrambots.ApiContextInitializer;
 
 @SpringBootApplication
 public class UbsApplication {
-
     /**
      * Main method of SpringBoot app.
      */
