@@ -10,12 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateCourierDtoMapperTest {
+class UpdateCourierDtoMapperTest {
     @InjectMocks
     UpdateCourierDtoMapper updateCourierDtoMapper;
 
     @Test
-    public void convert() {
+    void convert() {
         UpdateCourierDto expected = ModelUtils.UPDATE_COURIER_DTO;
         Courier actual = ModelUtils.getCourier();
 

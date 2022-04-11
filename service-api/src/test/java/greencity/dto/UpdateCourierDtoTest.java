@@ -7,17 +7,17 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UpdateCourierDtoTest {
+class UpdateCourierDtoTest {
 
     @Test
-    public void test() {
+    void test() {
         UpdateCourierDto testEntity1 = new UpdateCourierDto();
         UpdateCourierDto testEntity2 = new UpdateCourierDto(1L, null);
 
         assertNotNull(testEntity1);
         assertNotNull(testEntity2);
 
-        assertFalse(testEntity1.equals(testEntity2));
+        assertNotEquals(testEntity1, testEntity2);
 
         assertNotNull(UpdateCourierDto.builder()
             .courierId(2L)
