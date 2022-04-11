@@ -336,7 +336,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
-        if (address != null && address.getAddressStatus().equals(AddressStatus.DELETED)) {
+        if (address != null && AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
 
