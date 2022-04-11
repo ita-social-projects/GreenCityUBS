@@ -4,15 +4,16 @@ import java.util.Arrays;
 
 // if values changed, change in order_status_translations table is required
 public enum OrderStatus {
-    FORMED(1, "ADJUSTMENT", "CANCELED", "BROUGHT_IT_HIMSELF"),
-    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", "CANCELED", "CONFIRMED"),
+    FORMED(1, "ADJUSTMENT", OrderStatus.CANCELED_STR, "BROUGHT_IT_HIMSELF"),
+    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR, "CONFIRMED"),
     BROUGHT_IT_HIMSELF(3, "DONE"),
-    CONFIRMED(4, "CANCELED", "FORMED", "ON_THE_ROUTE"),
+    CONFIRMED(4, OrderStatus.CANCELED_STR, "FORMED", "ON_THE_ROUTE"),
     ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
     DONE(6, "DONE"),
     NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
-    CANCELED(8, "CANCELED");
+    CANCELED(8, OrderStatus.CANCELED_STR);
 
+    private static final String CANCELED_STR = "CANCELED";
     private int statusValue;
     private String[] possibleStatus;
 
