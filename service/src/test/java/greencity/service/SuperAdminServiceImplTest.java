@@ -15,6 +15,7 @@ import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
+import greencity.mapping.CourierDtoMapper;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -710,6 +716,79 @@ class SuperAdminServiceImplTest {
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
         assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());
+    }
+
+    @Test
+    void updateCourierTest() {
+        Courier courier = getCourier();
+
+        List starterList = List.of(CourierTranslation.builder()
+            .id(1L)
+            .language(getLanguage())
+            .name("Тест")
+            .courier(courier)
+            .build(),
+            CourierTranslation.builder()
+                .id(2L)
+                .language(getEnLanguage())
+                .name("Test")
+                .courier(courier)
+                .build());
+
+        courier.setCourierTranslationList(starterList);
+
+        List listToSave = List.of(CourierTranslation.builder()
+            .id(1L)
+            .language(getLanguage())
+            .name("УБС")
+            .courier(courier)
+            .build(),
+            CourierTranslation.builder()
+                .id(2L)
+                .language(getEnLanguage())
+                .name("UBS")
+                .courier(courier)
+                .build());
+
+        List dtoList = List.of(CourierTranslationDto.builder()
+            .name("УБС")
+            .languageCode("ua")
+            .build(),
+            CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("en")
+                .build());
+        UpdateCourierDto dto = UpdateCourierDto.builder()
+            .courierId(1L)
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        Courier courierToSave = Courier.builder()
+            .id(courier.getId())
+            .courierStatus(courier.getCourierStatus())
+            .courierLocations(courier.getCourierLocations())
+            .courierTranslationList(listToSave)
+            .build();
+        CourierDto courierDto = CourierDto.builder()
+            .courierId(courier.getId())
+            .courierStatus("Active")
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
+        when(courierRepository.save(courier)).thenReturn(courierToSave);
+        when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
+            .thenReturn(listToSave);
+        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
+
+        CourierDto actual = superAdminService.updateCourier(dto);
+        CourierDto expected = CourierDto.builder()
+            .courierId(getCourier().getId())
+            .courierStatus("Active")
+            .courierTranslationDtos(dto.getCourierTranslationDtos())
+            .build();
+
+        assertEquals(expected, actual);
     }
 
 }

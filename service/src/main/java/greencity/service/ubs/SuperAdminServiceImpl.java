@@ -359,7 +359,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
         for (CourierTranslation originalCourierTranslation : listToUpdate) {
             for (CourierTranslationDto dtoCourierTranslation : updatedList) {
-                if (originalCourierTranslation.getLanguage().getCode().equals(dtoCourierTranslation.getLanguageCode())) {
+                if (originalCourierTranslation.getLanguage().getCode()
+                    .equals(dtoCourierTranslation.getLanguageCode())) {
                     originalCourierTranslation.setName(dtoCourierTranslation.getName());
                 }
             }

@@ -11,4 +11,7 @@ import lombok.*;
 public class CourierTranslationDto {
     private String name;
     private String languageCode;
+
+    public CourierTranslationDto(Object o) {
+    }
 }

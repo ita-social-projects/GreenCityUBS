@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -263,6 +264,33 @@ class SuperAdminControllerTest {
             .andExpect(status().isOk());
 
         verify(superAdminService, times(1)).updateReceivingStation(dto);
+    }
+
+    @Test
+    void updateCourierTest() throws Exception {
+        List dtoList = List.of(CourierTranslationDto.builder()
+            .name("УБС")
+            .languageCode("ua")
+            .build(),
+            CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("en")
+                .build());
+        UpdateCourierDto dto = UpdateCourierDto.builder()
+            .courierId(1L)
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/update-courier")
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(superAdminService, times(1)).updateCourier(dto);
     }
 
     @Test
