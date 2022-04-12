@@ -15,8 +15,8 @@ public class CourierTranslationDtoMapper extends AbstractConverter<CourierTransl
     protected CourierTranslationDto convert(CourierTranslation source) {
         return CourierTranslationDto.builder()
             .languageCode(Optional.ofNullable(source.getLanguage())
-                    .map(language -> language.getCode())
-                    .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)))
+                .map(language -> language.getCode())
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)))
             .name(source.getName())
             .build();
     }

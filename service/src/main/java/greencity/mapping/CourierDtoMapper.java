@@ -28,8 +28,8 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
                     .collect(Collectors.toList()))
             .createDate(source.getCreateDate())
             .createdBy(Optional.ofNullable(source.getCreatedBy())
-                    .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
-                    .orElseThrow(() -> new UserNotFoundException(ErrorMessage.CANNOT_FIND_USER_WHICH_CREATED_COURIER)))
+                .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.CANNOT_FIND_USER_WHICH_CREATED_COURIER)))
             .build();
     }
 }
