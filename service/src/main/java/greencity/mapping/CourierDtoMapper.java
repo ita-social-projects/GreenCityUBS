@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
     @Override
     protected CourierDto convert(Courier source) {
-
         return CourierDto.builder()
             .courierId(source.getId())
             .courierStatus(source.getCourierStatus().toString())
