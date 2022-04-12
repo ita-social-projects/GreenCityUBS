@@ -145,6 +145,10 @@ class CoordinateServiceImplTest {
         Coordinates coord = ModelUtils.getCoordinates();
         Set<Coordinates> result = new HashSet<>();
         result.add(coord);
+        for (int i = 0; i < 10; i++) {
+            Coordinates coordinates = Coordinates.builder().latitude(49.84 + i/100d).longitude(23.88).build();
+            result.add(coordinates);
+        }
         List<Order> orderList = new ArrayList<>();
         orderList.add(ModelUtils.getOrderTest());
         when(addressRepository.undeliveredOrdersCoords()).thenReturn(result);
@@ -163,7 +167,7 @@ class CoordinateServiceImplTest {
         });
         GroupedOrderDto groupedOrderDto = coordinateService
             .getClusteredCoordsAlongWithSpecified(ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
-        assertEquals(300, groupedOrderDto.getAmountOfLitres());
+        assertEquals(3000, groupedOrderDto.getAmountOfLitres());
         assertEquals(groupedOrderDto.getGroupOfOrders().get(0), getOrderDto());
     }
 
