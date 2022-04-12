@@ -266,7 +266,7 @@ public class CoordinateServiceImpl implements CoordinateService {
         for (Coordinates temp : result) {
             if (!allCoords.contains(temp)) {
                 throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
-                        + ", " + temp.getLongitude());
+                    + ", " + temp.getLongitude());
             }
         }
 
