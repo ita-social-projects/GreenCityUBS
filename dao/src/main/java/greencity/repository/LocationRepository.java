@@ -27,8 +27,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * FROM locations as l "
-            + "join location_translations lt on l.id = lt.location_id "
-            + "where lt.location_name = :locationName")
+            + "WHERE l.name_En = :locationName "
+            + "OR l.name_Uk = :locationName")
     Optional<Location> findLocationByName(@Param("locationName") String locationName);
 
     /**

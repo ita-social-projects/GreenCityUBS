@@ -20,7 +20,7 @@ import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
+//import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;

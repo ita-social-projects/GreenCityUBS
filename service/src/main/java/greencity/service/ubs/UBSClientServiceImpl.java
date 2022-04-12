@@ -55,7 +55,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;

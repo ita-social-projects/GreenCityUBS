@@ -17,7 +17,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * from regions r "
-            + "join region_translations rt on r.id = rt.region_id "
-            + "where rt.name = :name")
+            + "where r.name_en = :name "
+            + "OR r.name_uk = :name")
     Optional<Region> findRegionByName(@Param("name") String name);
 }
