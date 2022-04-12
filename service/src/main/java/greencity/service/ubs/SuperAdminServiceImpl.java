@@ -16,9 +16,9 @@ import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.Service;
 import greencity.entity.order.ServiceTranslation;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
+//import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.Region;
-import greencity.entity.user.RegionTranslation;
+//import greencity.entity.user.RegionTranslation;
 import greencity.entity.user.User;
 import greencity.exceptions.*;
 import greencity.entity.user.employee.ReceivingStation;
@@ -41,12 +41,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
     private final LanguageRepository languageRepository;
-    private final LocationTranslationRepository locationTranslationRepository;
+    //private final LocationTranslationRepository locationTranslationRepository;
     private final CourierRepository courierRepository;
     private final CourierTranslationRepository courierTranslationRepository;
     private final CourierLocationRepository courierLocationRepository;
     private final RegionRepository regionRepository;
-    private final RegionTranslationRepository regionTranslationRepository;
+    //private final RegionTranslationRepository regionTranslationRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
@@ -238,11 +238,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             checkIfLocationAlreadyCreated(locationCreateDto.getAddLocationDtoList());
 
             Location location = createNewLocation(locationCreateDto);
+            /*-
             location.getLocationTranslations()
                 .forEach(locationTranslation -> locationTranslation.setLocation(location));
-
+            */
             locationRepository.save(location);
-            locationTranslationRepository.saveAll(location.getLocationTranslations());
+            //locationTranslationRepository.saveAll(location.getLocationTranslations());
         });
     }
 
@@ -250,20 +251,27 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
             .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
-            .locationTranslations(dto.getAddLocationDtoList()
+                .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst().get().getLocationName())
+                .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst().get().getLocationName())
+            /*-
+                .locationTranslations(dto.getAddLocationDtoList()
                 .stream()
                 .map(this::addTranslationToLocation)
                 .collect(Collectors.toList()))
+
+             */
             .region(checkIfRegionAlreadyCreated(dto))
             .build();
     }
 
+    /*-
     private LocationTranslation addTranslationToLocation(AddLocationTranslationDto locationTranslationDto) {
         return LocationTranslation.builder()
             .locationName(locationTranslationDto.getLocationName())
             .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
             .build();
     }
+     */
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
         dto.forEach(locationTranslationDto -> {
@@ -287,7 +295,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             region = createRegionWithTranslation(dto);
 
             regionRepository.save(region);
-            regionTranslationRepository.saveAll(region.getRegionTranslations());
+            //regionTranslationRepository.saveAll(region.getRegionTranslations());
         }
         return region;
     }
@@ -492,18 +500,23 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         Region region = createNewRegion(dto);
-        region.getRegionTranslations().forEach(regionTranslation -> regionTranslation.setRegion(region));
+        //region.getRegionTranslations().forEach(regionTranslation -> regionTranslation.setRegion(region));
         return region;
     }
 
     private Region createNewRegion(LocationCreateDto dto) {
-        return Region.builder().regionTranslations(
+        return Region.builder()
+                .enName(dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst().get().getRegionName())
+                .ukrName(dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst().get().getRegionName())
+                /*-
+                .regionTranslations(
             dto.getRegionTranslationDtos().stream()
                 .map(regionTranslationDto -> RegionTranslation.builder()
                     .language(getLanguageByCode(regionTranslationDto.getLanguageCode()))
                     .name(regionTranslationDto.getRegionName())
                     .build())
                 .collect(Collectors.toList()))
+                 */
             .build();
     }
 

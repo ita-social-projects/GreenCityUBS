@@ -14,20 +14,28 @@ import java.util.stream.Collectors;
 public class LocationCreateDtoMapper extends AbstractConverter<Location, LocationCreateDto> {
     @Override
     protected LocationCreateDto convert(Location source) {
-        List<AddLocationTranslationDto> locationTranslationDtoList = source.getLocationTranslations().stream()
+        List<AddLocationTranslationDto> locationTranslationDtoList = List.of(
+                AddLocationTranslationDto.builder().languageCode("ua").locationName(source.getNameUk()).build(),
+                AddLocationTranslationDto.builder().languageCode("en").locationName(source.getNameEn()).build());
+                /*-
+                source.getLocationTranslations().stream()
             .map(locationTranslation -> AddLocationTranslationDto.builder()
                 .languageCode(locationTranslation.getLanguage().getCode())
                 .locationName(locationTranslation.getLocationName())
                 .build())
             .collect(Collectors.toList());
-
-        List<RegionTranslationDto> regionTranslationDtoList = source.getRegion().getRegionTranslations().stream()
+*/
+        List<RegionTranslationDto> regionTranslationDtoList = List.of(
+                RegionTranslationDto.builder().languageCode("ua").regionName(source.getRegion().getUkrName()).build(),
+                RegionTranslationDto.builder().languageCode("en").regionName(source.getRegion().getEnName()).build());
+                /*-
+                source.getRegion().getRegionTranslations().stream()
             .map(regionTranslation -> RegionTranslationDto.builder()
                 .regionName(regionTranslation.getName())
                 .languageCode(regionTranslation.getLanguage().getCode())
                 .build())
             .collect(Collectors.toList());
-
+*/
         return LocationCreateDto.builder()
             .addLocationDtoList(locationTranslationDtoList)
             .longitude(source.getCoordinates().getLongitude())

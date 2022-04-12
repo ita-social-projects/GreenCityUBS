@@ -21,21 +21,16 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
                 .longitude(location.getCoordinates().getLongitude())
                 .latitude(location.getCoordinates().getLatitude())
                 .locationStatus(location.getLocationStatus().toString())
-                .locationTranslationDtoList(location.getLocationTranslations().stream()
-                    .map(locationTranslation -> LocationTranslationDto.builder()
-                        .languageCode(locationTranslation.getLanguage().getCode())
-                        .locationName(locationTranslation.getLocationName())
-                        .build())
-                    .collect(Collectors.toList()))
+                .locationTranslationDtoList(List.of(
+                        LocationTranslationDto.builder().locationName(location.getNameUk()).languageCode("ua").build(),
+                        LocationTranslationDto.builder().locationName(location.getNameEn()).languageCode("en").build()))
                 .build())
             .collect(Collectors.toList());
 
-        List<RegionTranslationDto> regionTranslationDtoList = source.getRegionTranslations().stream()
-            .map(regionTranslation -> RegionTranslationDto.builder()
-                .regionName(regionTranslation.getName())
-                .languageCode(regionTranslation.getLanguage().getCode())
-                .build())
-            .collect(Collectors.toList());
+        List<RegionTranslationDto> regionTranslationDtoList = List.of(
+                RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode("ua").build(),
+                RegionTranslationDto.builder().regionName(source.getEnName()).languageCode("en").build());
+
 
         return LocationInfoDto.builder()
             .regionId(source.getId())
