@@ -187,7 +187,6 @@ class UBSManagementServiceImplTest {
         Order order = ModelUtils.getOrderExportDetails();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-
         List<ReceivingStation> stations =
             Arrays.asList(ReceivingStation.builder().name("a").build(), ReceivingStation.builder().name("b").build());
         when(receivingStationRepository.findAll()).thenReturn(stations);
@@ -545,16 +544,17 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getDate(), producedObjectBroughtItHimself.getDate());
 
         verify(eventService, times(1))
-                .save("Статус Замовлення - Узгодження",
-                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+            .save("Статус Замовлення - Узгодження",
+                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
-                .save("Статус Замовлення - Підтверджено",
-                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+            .save("Статус Замовлення - Підтверджено",
+                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
         verify(eventService, times(1))
-                .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
-                        user.getRecipientName() + "  " + user.getRecipientSurname(), order);
+            .save("Статус Замовлення - Скасовано" + "  " + order.getCancellationComment(),
+                user.getRecipientName() + "  " + user.getRecipientSurname(), order);
 
     }
+
     @Test
     void updateOrderDetailStatusSecond() {
         User user = ModelUtils.getTestUser();
@@ -575,11 +575,11 @@ class UBSManagementServiceImplTest {
         OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
         OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
         OrderDetailStatusDto producedObject = ubsManagementService
-                .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
         testOrderDetail.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         expectedObject.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         OrderDetailStatusDto producedObjectOnTheRoute = ubsManagementService
-                .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
 
         assertEquals(expectedObject.getOrderStatus(), producedObjectOnTheRoute.getOrderStatus());
         assertEquals(expectedObject.getPaymentStatus(), producedObjectOnTheRoute.getPaymentStatus());
