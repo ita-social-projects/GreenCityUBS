@@ -127,7 +127,7 @@ public interface SuperAdminService {
      * @return {@link CourierDto}
      * @author Max Bohonko
      */
-    public CourierDto updateCourier(UpdateCourierDto dto);
+    public CourierDto updateCourier(CourierUpdateDto dto);
 
     /**
      * Method for getting all couriers.

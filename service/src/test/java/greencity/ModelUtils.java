@@ -98,10 +98,10 @@ public class ModelUtils {
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
     public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
         getRequestToChangeOrdersDataDTO();
-    public static final UpdateCourierDto UPDATE_COURIER_DTO = getUpdateCourierDto();
+    public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
-    public static UpdateCourierDto getUpdateCourierDto() {
-        return UpdateCourierDto.builder()
+    public static CourierUpdateDto getUpdateCourierDto() {
+        return CourierUpdateDto.builder()
             .courierId(1L)
             .courierTranslationDtos(getCourierTranslationDtoList())
             .build();

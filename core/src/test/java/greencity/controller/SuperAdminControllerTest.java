@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -10,6 +9,7 @@ import greencity.dto.*;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.LocationAlreadyCreatedException;
 import greencity.service.SuperAdminService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,6 @@ import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -267,7 +266,8 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void updateCourierTest() throws Exception {
+    @SneakyThrows
+    void updateCourierTest() {
         List dtoList = List.of(CourierTranslationDto.builder()
             .name("УБС")
             .languageCode("ua")
@@ -276,7 +276,7 @@ class SuperAdminControllerTest {
                 .name("UBS")
                 .languageCode("en")
                 .build());
-        UpdateCourierDto dto = UpdateCourierDto.builder()
+        CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
             .courierTranslationDtos(dtoList)
             .build();

@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.UpdateCourierDto;
+import greencity.dto.CourierUpdateDto;
 import greencity.entity.order.Courier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class UpdateCourierDtoMapperTest {
 
     @Test
     void convert() {
-        UpdateCourierDto expected = ModelUtils.UPDATE_COURIER_DTO;
+        CourierUpdateDto expected = ModelUtils.UPDATE_COURIER_DTO;
         Courier actual = ModelUtils.getCourier();
 
         assertEquals(expected.getCourierId(), updateCourierDtoMapper.convert(actual).getCourierId());

@@ -14,7 +14,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class UpdateCourierDto {
+public class CourierUpdateDto {
     private Long courierId;
     private List<CourierTranslationDto> courierTranslationDtos;
 }

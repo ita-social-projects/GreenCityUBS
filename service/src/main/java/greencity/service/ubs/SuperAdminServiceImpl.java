@@ -352,7 +352,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public CourierDto updateCourier(UpdateCourierDto dto) {
+    public CourierDto updateCourier(CourierUpdateDto dto) {
         Courier courier = courierRepository.findById(dto.getCourierId())
             .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
         List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();

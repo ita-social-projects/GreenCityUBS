@@ -302,7 +302,7 @@ class SuperAdminController {
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PutMapping("/update-courier")
-    public ResponseEntity<CourierDto> updateCourier(@RequestBody @Valid UpdateCourierDto dto) {
+    public ResponseEntity<CourierDto> updateCourier(@RequestBody @Valid CourierUpdateDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateCourier(dto));
     }
 

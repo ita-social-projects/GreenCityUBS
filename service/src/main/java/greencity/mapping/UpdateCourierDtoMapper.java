@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.UpdateCourierDto;
+import greencity.dto.CourierUpdateDto;
 import greencity.dto.CourierTranslationDto;
 import greencity.entity.order.Courier;
 import org.modelmapper.AbstractConverter;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class UpdateCourierDtoMapper extends AbstractConverter<Courier, UpdateCourierDto> {
+public class UpdateCourierDtoMapper extends AbstractConverter<Courier, CourierUpdateDto> {
     @Override
-    protected UpdateCourierDto convert(Courier source) {
-        return UpdateCourierDto.builder()
+    protected CourierUpdateDto convert(Courier source) {
+        return CourierUpdateDto.builder()
             .courierId(source.getId())
             .courierTranslationDtos(source.getCourierTranslationList().stream()
                 .map(courierTranslation -> CourierTranslationDto.builder()
