@@ -146,7 +146,7 @@ class CoordinateServiceImplTest {
         Set<Coordinates> result = new HashSet<>();
         result.add(coord);
         for (int i = 0; i < 10; i++) {
-            Coordinates coordinates = Coordinates.builder().latitude(49.84 + i/100d).longitude(23.88).build();
+            Coordinates coordinates = Coordinates.builder().latitude(49.84 + i / 100d).longitude(23.88).build();
             result.add(coordinates);
         }
         List<Order> orderList = new ArrayList<>();
