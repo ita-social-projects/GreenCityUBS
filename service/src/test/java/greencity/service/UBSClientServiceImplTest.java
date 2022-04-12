@@ -22,7 +22,6 @@ import greencity.util.EncryptionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,7 +31,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
@@ -1277,7 +1275,7 @@ class UBSClientServiceImplTest {
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
-        OrderStatusForUserDto orderStatusForUserDto = ModelUtils.getOrderStatusDto();
+        OrdersDataForUserDto ordersDataForUserDto = ModelUtils.getOrderStatusDto();
         BagTranslation translation = ModelUtils.getBagTranslation();
         Order order = ModelUtils.getOrderTest();
         User user = ModelUtils.getTestUser();
@@ -1286,7 +1284,7 @@ class UBSClientServiceImplTest {
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
-        BagForUserDto bagForUserDto = orderStatusForUserDto.getBags().get(0);
+        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
         bag.setFullPrice(1200);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
@@ -1309,7 +1307,7 @@ class UBSClientServiceImplTest {
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
 
-        PageableDto<OrderStatusForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable);
+        PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable);
 
         assertEquals(dto.getTotalElements(), orderList.size());
         assertEquals(dto.getPage().get(0).getId(), order.getId());

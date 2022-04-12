@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode
 
-public class OrderStatusForUserDto {
+public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;
     private LocalDateTime datePaid;

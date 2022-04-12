@@ -120,7 +120,7 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Oleksandr Khomiakov
      */
-    PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Pageable page);
+    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page);
 
     /**
      * Method returns list all bonuses of user.

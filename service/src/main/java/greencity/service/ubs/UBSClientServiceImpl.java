@@ -432,12 +432,12 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
 
     @Override
-    public PageableDto<OrderStatusForUserDto> getOrdersForUser(String uuid, Pageable page) {
+    public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page) {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
         List<Order> orders = orderPages.getContent();
 
-        List<OrderStatusForUserDto> dtos = new ArrayList<>();
+        List<OrdersDataForUserDto> dtos = new ArrayList<>();
 
         for (Order order : orders) {
             List<Payment> payments = order.getPayment();
@@ -453,7 +453,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(BagForUserDto::getTotalPrice)
                 .reduce(0, Integer::sum));
 
-            OrderStatusForUserDto orderStatusForUserDto = OrderStatusForUserDto.builder()
+            OrdersDataForUserDto ordersDataForUserDto = OrdersDataForUserDto.builder()
                 .id(order.getId())
                 .dateForm(order.getOrderDate())
                 .datePaid(order.getOrderDate())
@@ -473,7 +473,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
                 .build();
 
-            dtos.add(orderStatusForUserDto);
+            dtos.add(ordersDataForUserDto);
         }
 
         return new PageableDto<>(

@@ -3294,7 +3294,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderStatusForUserDto getOrderStatusDto() {
+    public static OrdersDataForUserDto getOrderStatusDto() {
 
         SenderInfoDto senderInfoDto = SenderInfoDto.builder()
             .senderName("TestName")
@@ -3330,7 +3330,7 @@ public class ModelUtils {
         bagForUserDto.setService("Безпечні Відходи");
         bagForUserDto.setServiceEng("Safe Waste");
 
-        return OrderStatusForUserDto.builder()
+        return OrdersDataForUserDto.builder()
             .id(1L)
             .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
             .datePaid(LocalDateTime.now())

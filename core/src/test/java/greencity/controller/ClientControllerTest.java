@@ -125,7 +125,7 @@ class ClientControllerTest {
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
             .build();
 
-        this.mockMvc.perform(get(ubsLink + "/get-all-orders-data", 1)
+        this.mockMvc.perform(get(ubsLink + "/orders-data", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());

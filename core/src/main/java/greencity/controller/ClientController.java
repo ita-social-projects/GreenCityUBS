@@ -65,9 +65,9 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all-orders-data")
+    @GetMapping("/orders-data")
     @ApiPageable
-    public ResponseEntity<PageableDto<OrderStatusForUserDto>> getAllDataForOrder(
+    public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
         @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page));
     }
