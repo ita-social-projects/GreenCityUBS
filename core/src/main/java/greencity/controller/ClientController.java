@@ -65,7 +65,7 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/orders-data")
+    @GetMapping("/get-user-orders")
     @ApiPageable
     public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
         @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page) {
