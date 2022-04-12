@@ -358,12 +358,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
         List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
         for (CourierTranslation originalCourierTranslation : listToUpdate) {
-            for (CourierTranslationDto dtoCourierTranslation : updatedList) {
-                if (originalCourierTranslation.getLanguage().getCode()
-                    .equals(dtoCourierTranslation.getLanguageCode())) {
-                    originalCourierTranslation.setName(dtoCourierTranslation.getName());
-                }
-            }
+            originalCourierTranslation.setName(updatedList.stream()
+                .filter(translationDto -> translationDto.getLanguageCode()
+                    .equals(originalCourierTranslation.getLanguage()
+                        .getCode()))
+                .findFirst()
+                .map(CourierTranslationDto::getName)
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)));
         }
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
