@@ -39,7 +39,8 @@ stages:
         scriptType: 'bash'
         scriptLocation: inlineScript
         inlineScript: |
-          az keyvault secret download --name $(jsonSecret) --vault-name $(azKeyVault) --file $(jsonFile)
+          az keyvault secret list
+#          az keyvault secret download --name $(jsonSecret) --vault-name $(azKeyVault) --file $(jsonFile)
           
     - task: AzureKeyVault@1
       displayName: Get FTP credentials from Azure Key Vault
