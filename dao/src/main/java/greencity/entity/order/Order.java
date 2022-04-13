@@ -153,9 +153,12 @@ public class Order {
 
     @Column(name = "counter_order_payment_id")
     private Long counterOrderPaymentId;
-
+    /*-
     @ManyToOne
     CourierLocation courierLocations;
+    */
+    @ManyToOne
+    private TariffsInfo tariffsInfo;
 
     @Column(name = "sum_total_amount_without_discounts")
     private Long sumTotalAmountWithoutDiscounts;

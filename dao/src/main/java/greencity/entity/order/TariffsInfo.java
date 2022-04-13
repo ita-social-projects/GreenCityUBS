@@ -1,6 +1,8 @@
 package greencity.entity.order;
 
+import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.LocationStatus;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.AllArgsConstructor;
@@ -32,15 +34,17 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"services", "services", "bags", "receivingStations", "courierLocations"})
-@EqualsAndHashCode(exclude = {"services", "services", "bags", "receivingStations", "courierLocations"})
+@ToString(exclude = {"services", "services", "bags", "receivingStations", "locations", "orders"})
+@EqualsAndHashCode(exclude = {"services", "services", "bags", "receivingStations", "locations", "orders"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /*-
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tariffsInfo")
     private List<CourierLocation> courierLocations;
+    */
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Service> services;
@@ -60,4 +64,29 @@ public class TariffsInfo {
 
     @Column(nullable = false)
     private LocalDate createdAt;
+
+    @Column
+    private Long minAmountOfBigBags;
+
+    @Column
+    private Long maxAmountOfBigBags;
+
+    @Column
+    private Long minPriceOfOrder;
+
+    @Column
+    private Long maxPriceOfOrder;
+
+    @Column(name = "courier_limits")
+    @Enumerated(EnumType.STRING)
+    private CourierLimit courierLimit;
+
+    @ManyToOne
+    Courier courier;
+
+    @OneToMany
+    List<Location> locations;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
+    List<Order> orders;
 }
