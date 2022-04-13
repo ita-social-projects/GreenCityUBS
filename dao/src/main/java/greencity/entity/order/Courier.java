@@ -25,11 +25,15 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     private CourierStatus courierStatus;
 
+    /*-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
     private List<CourierLocation> courierLocations;
-
+    */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslationList;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
+    private List<TariffsInfo> tariffsInfoList;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courier")
     List<Service> services;

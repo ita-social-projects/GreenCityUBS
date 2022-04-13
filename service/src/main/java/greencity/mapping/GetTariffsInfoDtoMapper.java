@@ -51,13 +51,19 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .collect(Collectors.toList());
         List<RegionTranslationDto> regionNames = new ArrayList<>();
         for (Region r : regions) {
-            List<RegionTranslationDto> regionTranslationDtos = r.getRegionTranslations().stream()
+            List<RegionTranslationDto> regionTranslationDtos = List.of(
+                    RegionTranslationDto.builder().languageCode("ua").regionName(r.getUkrName()).build(),
+                    RegionTranslationDto.builder().languageCode("en").regionName(r.getEnName()).build());
+                    /*-
+                    r.getRegionTranslations().stream()
                 .map(regionTranslation -> RegionTranslationDto.builder()
                     .regionName(regionTranslation.getName())
                     .languageCode(regionTranslation.getLanguage().getCode())
                     .build())
                 .collect(Collectors.toList());
+                */
             regionNames.addAll(regionTranslationDtos);
+
         }
 
         final LocationInfoDto locationInfoDto = LocationInfoDto.builder()

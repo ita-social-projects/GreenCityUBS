@@ -4,6 +4,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.CourierLocation;
+import greencity.entity.order.TariffsInfo;
 import lombok.*;
 
 import javax.persistence.*;
@@ -35,10 +36,10 @@ public class Location {
 
     @Embedded
     private Coordinates coordinates;
-
+    /*-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
     List<CourierLocation> courierLocations;
-
+    */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
     List<Bag> bags;
 /*-
@@ -47,4 +48,7 @@ public class Location {
 */
     @ManyToOne
     private Region region;
+
+    @ManyToOne
+    TariffsInfo tariffsInfo;
 }
