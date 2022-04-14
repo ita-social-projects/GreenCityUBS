@@ -3,7 +3,6 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
-import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
@@ -710,6 +709,79 @@ class SuperAdminServiceImplTest {
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
         assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());
+    }
+
+    @Test
+    void updateCourierTest() {
+        Courier courier = getCourier();
+
+        List starterList = List.of(CourierTranslation.builder()
+            .id(1L)
+            .language(getLanguage())
+            .name("Тест")
+            .courier(courier)
+            .build(),
+            CourierTranslation.builder()
+                .id(2L)
+                .language(getEnLanguage())
+                .name("Test")
+                .courier(courier)
+                .build());
+
+        courier.setCourierTranslationList(starterList);
+
+        List listToSave = List.of(CourierTranslation.builder()
+            .id(1L)
+            .language(getLanguage())
+            .name("УБС")
+            .courier(courier)
+            .build(),
+            CourierTranslation.builder()
+                .id(2L)
+                .language(getEnLanguage())
+                .name("UBS")
+                .courier(courier)
+                .build());
+
+        List dtoList = List.of(CourierTranslationDto.builder()
+            .name("УБС")
+            .languageCode("ua")
+            .build(),
+            CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("en")
+                .build());
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        Courier courierToSave = Courier.builder()
+            .id(courier.getId())
+            .courierStatus(courier.getCourierStatus())
+            .courierLocations(courier.getCourierLocations())
+            .courierTranslationList(listToSave)
+            .build();
+        CourierDto courierDto = CourierDto.builder()
+            .courierId(courier.getId())
+            .courierStatus("Active")
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
+        when(courierRepository.save(courier)).thenReturn(courierToSave);
+        when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
+            .thenReturn(listToSave);
+        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
+
+        CourierDto actual = superAdminService.updateCourier(dto);
+        CourierDto expected = CourierDto.builder()
+            .courierId(getCourier().getId())
+            .courierStatus("Active")
+            .courierTranslationDtos(dto.getCourierTranslationDtos())
+            .build();
+
+        assertEquals(expected, actual);
     }
 
 }

@@ -8,6 +8,7 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 @Builder
+
 public class CourierTranslationDto {
     private String name;
     private String languageCode;
