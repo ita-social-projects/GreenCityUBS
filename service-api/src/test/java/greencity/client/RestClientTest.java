@@ -49,6 +49,20 @@ class RestClientTest {
     }
 
     @Test
+    void findUuidByEmail() {
+        String accessToken = "accessToken";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(AUTHORIZATION, accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        when(httpServletRequest.getHeader(AUTHORIZATION)).thenReturn(accessToken);
+        when(restTemplate.exchange(greenCityUserServerAddress +
+            "/user/findUuidByEmail" + "?email=" + "taras@gmail.com", HttpMethod.GET,
+            entity, String.class)).thenReturn(ResponseEntity.ok("13L"));
+
+        assertEquals("13L", restClient.findUuidByEmail("taras@gmail.com"));
+    }
+
+    @Test
     void findNotDeactivatedByEmail() {
         String email = "test@gmail.com";
         String accessToken = "accessToken";

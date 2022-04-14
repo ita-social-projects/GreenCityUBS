@@ -34,7 +34,7 @@ public class RestClient {
     private String viberBotToken;
     @Value("${greencity.bots.viber-bot-url}")
     private String viberBotUrl;
-    private static final String orderId = "order_id";
+    private static final String ORDER_ID = "order_id";
     private final HttpServletRequest httpServletRequest;
     @Autowired
     LiqPay liqPay;
@@ -50,7 +50,7 @@ public class RestClient {
         request.put("amount", dto.getAmount());
         request.put("currency", dto.getCurrency());
         request.put("order_desc", dto.getOrderDescription());
-        request.put(orderId, dto.getOrderId());
+        request.put(ORDER_ID, dto.getOrderId());
         request.put("merchant_id", dto.getMerchantId());
         request.put("response_url", dto.getResponseUrl());
         request.put("signature", dto.getSignature());
@@ -97,7 +97,7 @@ public class RestClient {
     public String findUuidByEmail(String email) {
         HttpEntity<String> entity = new HttpEntity<>(setHeader());
         return restTemplate.exchange(greenCityUserServerAddress
-            + "/user/findUuidByEmail" + "?email=" + email, HttpMethod.GET, entity, String.class)
+            + "/user/findUuidByEmail?email=" + email, HttpMethod.GET, entity, String.class)
             .getBody();
     }
 
@@ -267,7 +267,7 @@ public class RestClient {
         params.put("amount", dto.getAmount().toString());
         params.put("currency", dto.getCurrency());
         params.put("description", dto.getDescription());
-        params.put(orderId, dto.getOrderId());
+        params.put(ORDER_ID, dto.getOrderId());
         params.put("version", dto.getVersion().toString());
         params.put("public_key", dto.getPublicKey());
         params.put("language", dto.getLanguage());
@@ -287,7 +287,7 @@ public class RestClient {
         HashMap<String, String> params = new HashMap<>();
         params.put("action", dto.getAction());
         params.put("version", dto.getVersion().toString());
-        params.put(orderId, dto.getOrderId());
+        params.put(ORDER_ID, dto.getOrderId());
         return liqPay.api("request", params);
     }
 }
