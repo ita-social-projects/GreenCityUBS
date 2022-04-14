@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
@@ -562,7 +563,7 @@ class UBSManagementServiceImplTest {
         user.setRecipientSurname("Петренко");
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         Order order = user.getOrders().get(0);
-        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
+        order.setOrderDate((LocalDateTime.now()));
 
         List<Payment> payment = new ArrayList<>();
         payment.add(Payment.builder().build());
@@ -574,8 +575,8 @@ class UBSManagementServiceImplTest {
 
         OrderDetailStatusRequestDto testOrderDetail = ModelUtils.getTestOrderDetailStatusRequestDto();
         OrderDetailStatusDto expectedObject = ModelUtils.getTestOrderDetailStatusDto();
-        OrderDetailStatusDto producedObject = ubsManagementService
-            .updateOrderDetailStatus(order.getId(), testOrderDetail, "abc");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        expectedObject.setDate(LocalDateTime.now().format(formatter));
         testOrderDetail.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         expectedObject.setOrderStatus(OrderStatus.ON_THE_ROUTE.toString());
         OrderDetailStatusDto producedObjectOnTheRoute = ubsManagementService
