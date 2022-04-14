@@ -9,6 +9,7 @@ import greencity.dto.*;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.LocationAlreadyCreatedException;
 import greencity.service.SuperAdminService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,6 @@ import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -263,6 +263,34 @@ class SuperAdminControllerTest {
             .andExpect(status().isOk());
 
         verify(superAdminService, times(1)).updateReceivingStation(dto);
+    }
+
+    @Test
+    @SneakyThrows
+    void updateCourierTest() {
+        List dtoList = List.of(CourierTranslationDto.builder()
+            .name("УБС")
+            .languageCode("ua")
+            .build(),
+            CourierTranslationDto.builder()
+                .name("UBS")
+                .languageCode("en")
+                .build());
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .courierTranslationDtos(dtoList)
+            .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(ubsLink + "/update-courier")
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(superAdminService, times(1)).updateCourier(dto);
     }
 
     @Test

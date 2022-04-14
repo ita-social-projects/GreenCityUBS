@@ -101,6 +101,8 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_EVENT_HISTORY = "Cannot access another user's event history";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
+    public static final String CANNOT_FIND_USER_WHICH_CREATED_COURIER = "Cannot find user which created courier";
+    public static final String CANNOT_FIND_LANGUAGE_OF_TRANSLATION = "Cannot find language of translation";
 
     /**
      * Constructor.

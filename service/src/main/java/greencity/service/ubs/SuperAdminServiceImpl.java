@@ -352,13 +352,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public CourierDto updateCourier(CourierDto dto) {
+    public CourierDto updateCourier(CourierUpdateDto dto) {
         Courier courier = courierRepository.findById(dto.getCourierId())
             .orElseThrow(() -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-        courier.setCourierTranslationList(dto.getCourierTranslationDtos().stream()
-            .map(courierTranslationDto -> modelMapper.map(courierTranslationDto, CourierTranslation.class))
-            .collect(Collectors.toList()));
-        courier.setCourierStatus(CourierStatus.valueOf(dto.getCourierStatus()));
+        List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
+        List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
+        for (CourierTranslation originalCourierTranslation : listToUpdate) {
+            originalCourierTranslation.setName(updatedList.stream()
+                .filter(translationDto -> translationDto.getLanguageCode()
+                    .equals(originalCourierTranslation.getLanguage()
+                        .getCode()))
+                .findFirst()
+                .map(CourierTranslationDto::getName)
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)));
+        }
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
         return modelMapper.map(courier, CourierDto.class);
