@@ -300,14 +300,13 @@ public class CoordinateServiceImpl implements CoordinateService {
         for (int i = coordinatesInsideRadiusWithoutSpecifiedCoords.size() - 1; i > -1; i--) {
             Coordinates temp = coordinatesInsideRadiusWithoutSpecifiedCoords.get(i);
             int capacity = addressRepository.capacity(temp.getLatitude(), temp.getLongitude());
-            if (fill < amountOfLitresToFill) {
-                if ((fill + capacity) <= amountOfLitresToFill) {
-                    fill += capacity;
-                    allCoordsCapacity += capacity;
-                    result.add(temp);
-                }
-            } else {
+
+            if (fill >= amountOfLitresToFill) {
                 break;
+            } else if ((fill + capacity) <= amountOfLitresToFill) {
+                fill += capacity;
+                allCoordsCapacity += capacity;
+                result.add(temp);
             }
         }
         List<GroupedOrderDto> groupedOrderDtos = new ArrayList<>();

@@ -63,7 +63,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private static final String defaultImagePath = AppConstant.DEFAULT_IMAGE;
+    private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
     private final EventService eventService;
     private final LanguageRepository languageRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
@@ -707,19 +707,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.getExportedQuantity().values()
                 .stream().reduce(Integer::sum).orElse(0).doubleValue());
 
-        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported,
-            order);
+        setDtoInfoFromOrder(dto, order);
+        setDtoInfo(dto, sumAmount, sumExported, sumConfirmed, totalSumAmount, totalSumConfirmed, totalSumExported);
         return dto;
     }
 
-    private void setDtoInfo(CounterOrderDetailsDto dto, double sumAmount, double sumExported, double sumConfirmed,
-        double totalSumAmount, double totalSumConfirmed, double totalSumExported, Order order) {
-        dto.setSumAmount(sumAmount);
-        dto.setSumConfirmed(sumConfirmed);
-        dto.setSumExported(sumExported);
+    private void setDtoInfoFromOrder(CounterOrderDetailsDto dto, Order order) {
         dto.setOrderComment(order.getComment());
         dto.setNumberOrderFromShop(order.getAdditionalOrders());
         dto.setBonus(order.getPointsToUse().doubleValue());
+    }
+
+    private void setDtoInfo(CounterOrderDetailsDto dto, double sumAmount, double sumExported, double sumConfirmed,
+        double totalSumAmount, double totalSumConfirmed, double totalSumExported) {
+        dto.setSumAmount(sumAmount);
+        dto.setSumConfirmed(sumConfirmed);
+        dto.setSumExported(sumExported);
         dto.setTotalSumAmount(totalSumAmount);
         dto.setTotalSumConfirmed(totalSumConfirmed);
         dto.setTotalSumExported(totalSumExported);
@@ -1382,7 +1385,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             if (image != null) {
                 pictures.add(fileService.upload(image));
             } else {
-                pictures.add(defaultImagePath);
+                pictures.add(DEFAULT_IMAGE_PATH);
             }
         }
         ReasonNotTakeBagDto dto = new ReasonNotTakeBagDto();

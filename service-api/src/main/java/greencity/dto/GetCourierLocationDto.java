@@ -1,6 +1,5 @@
 package greencity.dto;
 
-import greencity.entity.user.Region;
 import lombok.*;
 
 import java.util.List;
