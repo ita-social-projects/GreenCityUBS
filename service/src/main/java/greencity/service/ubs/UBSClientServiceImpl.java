@@ -11,12 +11,15 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
+import greencity.service.FondyService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.service.UserRemoteService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -31,6 +34,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import javax.ws.rs.client.ResponseProcessingException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -63,6 +67,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final RestClient restClient; // TODO delete this
     private final UserRemoteService userRemoteService;
+    private final FondyService fondyService;
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
@@ -245,11 +250,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-            String html = restClient.getDataFromFondy(paymentRequestDto);
-
-            Document doc = Jsoup.parse(html);
-            Elements links = doc.select("a[href]");
-            String link = links.attr("href");
+            String link = getLinkFromFondyCheckoutResponse(fondyService.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
         }
     }
@@ -1188,7 +1189,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception {
+    public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
         Order order = findByIdOrderForClient(dto);
         User currentUser = findByIdUserForClient(uuid);
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
@@ -1241,9 +1242,19 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String formedLink(Order order, Integer sumToPay) {
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
-        Document doc = Jsoup.parse(restClient.getDataFromFondy(paymentRequestDto));
-        Elements links = doc.select("a[href]");
-        return links.attr("href");
+        return getLinkFromFondyCheckoutResponse(fondyService.getCheckoutResponse(paymentRequestDto));
+    }
+
+    private String getLinkFromFondyCheckoutResponse(String fondyResponse) {
+        JSONObject json = new JSONObject(fondyResponse);
+        if (!json.has("response")) {
+            throw new PaymentValidationException("Wrong response");
+        }
+        JSONObject response = json.getJSONObject("response");
+        if ("success".equals(response.getString("response_status"))) {
+            return response.getString("checkout_url");
+        }
+        throw new PaymentValidationException(response.getString("error_message"));
     }
 
     private Order incrementCounter(Order order) {

@@ -68,6 +68,8 @@ class UBSClientServiceImplTest {
     @Mock
     private UserRemoteService userRemoteService;
     @Mock
+    private FondyService fondyService;
+    @Mock
     private AddressRepository addressRepository;
     @Mock
     private OrderRepository orderRepository;
@@ -205,7 +207,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
@@ -1003,12 +1005,12 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
-        verify(restClient).getDataFromFondy(any());
+        verify(fondyService).getCheckoutResponse(any());
 
     }
 
@@ -1080,7 +1082,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(restClient.getDataFromFondy(any())).thenReturn("TestValue");
+        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
