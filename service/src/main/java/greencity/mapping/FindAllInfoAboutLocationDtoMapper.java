@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region, LocationInfoDto> {
+
+    private static final String UALangCode = "ua";
+    private static final String ENLangCode = "en";
+
     @Override
     protected LocationInfoDto convert(Region source) {
         List<LocationsDto> locationsDtoList = source.getLocations().stream()
@@ -22,14 +26,14 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
                 .latitude(location.getCoordinates().getLatitude())
                 .locationStatus(location.getLocationStatus().toString())
                 .locationTranslationDtoList(List.of(
-                        LocationTranslationDto.builder().locationName(location.getNameUk()).languageCode("ua").build(),
-                        LocationTranslationDto.builder().locationName(location.getNameEn()).languageCode("en").build()))
+                        LocationTranslationDto.builder().locationName(location.getNameUk()).languageCode(UALangCode).build(),
+                        LocationTranslationDto.builder().locationName(location.getNameEn()).languageCode(ENLangCode).build()))
                 .build())
             .collect(Collectors.toList());
 
         List<RegionTranslationDto> regionTranslationDtoList = List.of(
-                RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode("ua").build(),
-                RegionTranslationDto.builder().regionName(source.getEnName()).languageCode("en").build());
+                RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode(UALangCode).build(),
+                RegionTranslationDto.builder().regionName(source.getEnName()).languageCode(ENLangCode).build());
 
 
         return LocationInfoDto.builder()

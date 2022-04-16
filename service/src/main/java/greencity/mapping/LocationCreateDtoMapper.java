@@ -12,11 +12,15 @@ import java.util.stream.Collectors;
 
 @Component
 public class LocationCreateDtoMapper extends AbstractConverter<Location, LocationCreateDto> {
+
+    private static final String UALangCode = "ua";
+    private static final String ENLangCode = "en";
+
     @Override
     protected LocationCreateDto convert(Location source) {
         List<AddLocationTranslationDto> locationTranslationDtoList = List.of(
-                AddLocationTranslationDto.builder().languageCode("ua").locationName(source.getNameUk()).build(),
-                AddLocationTranslationDto.builder().languageCode("en").locationName(source.getNameEn()).build());
+                AddLocationTranslationDto.builder().languageCode(UALangCode).locationName(source.getNameUk()).build(),
+                AddLocationTranslationDto.builder().languageCode(ENLangCode).locationName(source.getNameEn()).build());
                 /*-
                 source.getLocationTranslations().stream()
             .map(locationTranslation -> AddLocationTranslationDto.builder()
@@ -26,8 +30,8 @@ public class LocationCreateDtoMapper extends AbstractConverter<Location, Locatio
             .collect(Collectors.toList());
 */
         List<RegionTranslationDto> regionTranslationDtoList = List.of(
-                RegionTranslationDto.builder().languageCode("ua").regionName(source.getRegion().getUkrName()).build(),
-                RegionTranslationDto.builder().languageCode("en").regionName(source.getRegion().getEnName()).build());
+                RegionTranslationDto.builder().languageCode(UALangCode).regionName(source.getRegion().getUkrName()).build(),
+                RegionTranslationDto.builder().languageCode(ENLangCode).regionName(source.getRegion().getEnName()).build());
                 /*-
                 source.getRegion().getRegionTranslations().stream()
             .map(regionTranslation -> RegionTranslationDto.builder()
