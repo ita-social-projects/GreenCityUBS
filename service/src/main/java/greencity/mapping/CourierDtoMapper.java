@@ -8,6 +8,7 @@ import greencity.exceptions.UserNotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
     @Override
     protected CourierDto convert(Courier source) {
+        LocalDate createdAt = source.getCreateDate();
         return CourierDto.builder()
             .courierId(source.getId())
             .courierStatus(source.getCourierStatus().toString())
@@ -25,7 +27,7 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
                         .name(courierTranslation.getName())
                         .build())
                     .collect(Collectors.toList()))
-            .createDate(source.getCreateDate())
+            .createDate(source.getCreateDate() != null ? createdAt : LocalDate.now())
             .createdBy(Optional.ofNullable(source.getCreatedBy())
                 .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.CANNOT_FIND_USER_WHICH_CREATED_COURIER)))
