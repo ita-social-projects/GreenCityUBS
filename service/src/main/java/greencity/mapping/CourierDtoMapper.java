@@ -30,7 +30,7 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
             .createDate(source.getCreateDate() != null ? createdAt : LocalDate.now())
             .createdBy(Optional.ofNullable(source.getCreatedBy())
                 .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
-                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.CANNOT_FIND_USER_WHICH_CREATED_COURIER)))
+                .orElse(" "))
             .build();
     }
 }
