@@ -16,4 +16,5 @@ public class LocationToLocationsDtosMapper extends AbstractConverter<Location, L
                 .nameEn(location.getNameEn())
                 .build();
     }
+
 }

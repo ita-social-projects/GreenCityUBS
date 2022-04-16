@@ -12,6 +12,16 @@
                    catalogName="greencityubs"
                    schemaName="public"
                 tableName="region_translations"/>
+        
+        <dropTable cascadeConstraints="true"
+                   catalogName="greencityubs"
+                   schemaName="public"
+                   tableName="courier_locations"/>
+        
+        <dropColumn tableName="orders"
+                    columnName="courier_locations_id"/>
 
     </changeSet>
+    
+    
 </databaseChangeLog>

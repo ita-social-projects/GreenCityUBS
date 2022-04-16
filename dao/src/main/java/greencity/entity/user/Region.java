@@ -31,4 +31,5 @@ public class Region {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "region")
     private List<RegionTranslation> regionTranslations;
  */
+
 }
