@@ -246,6 +246,8 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
+        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+
         mockMvc.perform(post(ubsLink + "/receivePayment")
             .content(paymentResponseJson)
             .principal(principal)
@@ -286,6 +288,8 @@ class OrderControllerTest {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
+
+        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
 
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)

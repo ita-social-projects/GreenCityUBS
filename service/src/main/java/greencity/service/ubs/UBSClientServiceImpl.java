@@ -94,12 +94,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final String RESULT_URL_LIQPAY = "https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment";
+    private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
+        "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
+    private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
 
     @Override
     @Transactional
     public void validatePayment(PaymentResponseDto dto) {
         Payment orderPayment = mapPayment(dto);
-        String[] ids = dto.getOrder_id().split("_");
+        String[] ids = dto.getOrderId().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         checkResponseStatusFailure(dto, orderPayment, order);
@@ -112,23 +116,23 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setFee(0);
         }
         return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
+            .id(Long.valueOf(dto.getOrderId().substring(dto.getOrderId().indexOf("_") + 1)))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
+            .orderStatus(dto.getOrderStatus())
+            .responseStatus(dto.getResponseStatus())
+            .senderCellPhone(dto.getSenderCellPhone())
+            .senderAccount(dto.getSenderAccount())
+            .maskedCard(dto.getMaskedCard())
+            .cardType(dto.getCardType())
+            .responseCode(dto.getResponseCode())
+            .responseDescription(dto.getResponseDescription())
+            .orderTime(dto.getOrderTime())
+            .settlementDate(dto.getSettlementDate().isEmpty() ? LocalDate.now().toString() : dto.getSettlementDate())
             .fee(Long.valueOf(dto.getFee()))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
+            .paymentSystem(dto.getPaymentSystem())
+            .senderEmail(dto.getSenderEmail())
+            .paymentId(String.valueOf(dto.getPaymentId()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
@@ -645,7 +649,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePayment")
+            .responseUrl(RESULT_URL_FONDY)
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -828,9 +832,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
-        if (!order.get().getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_EVENT_HISTORY);
         }
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
         if (orderEvents.isEmpty()) {
@@ -1055,7 +1056,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
+            .resultUrl(RESULT_URL_LIQPAY)
             .build();
     }
 
@@ -1259,7 +1260,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl("https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient")
+            .responseUrl(RESULT_URL_FOR_PERSONAL_CABINET_OF_USER)
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1358,7 +1359,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl("https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment")
+            .resultUrl(RESULT_URL_LIQPAY)
             .build();
     }
 
@@ -1399,30 +1400,30 @@ public class UBSClientServiceImpl implements UBSClientService {
                 + order.getPayment().get(lastNumber).getId()))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date())
+            .orderStatus(dto.getOrderStatus())
+            .responseStatus(dto.getResponseStatus())
+            .senderCellPhone(dto.getSenderCellPhone())
+            .senderAccount(dto.getSenderAccount())
+            .maskedCard(dto.getMaskedCard())
+            .cardType(dto.getCardType())
+            .responseCode(dto.getResponseCode())
+            .responseDescription(dto.getResponseDescription())
+            .orderTime(dto.getOrderTime())
+            .settlementDate(dto.getSettlementDate())
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
+            .paymentSystem(dto.getPaymentSystem())
+            .senderEmail(dto.getSenderEmail())
+            .paymentId(String.valueOf(dto.getPaymentId()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
 
     private String[] orderIdInfo(PaymentResponseDto dto) {
-        return dto.getOrder_id().split("_");
+        return dto.getOrderId().split("_");
     }
 
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getResponse_status().equals(FAILED_STATUS)) {
+        if (dto.getResponseStatus().equals(FAILED_STATUS)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(orderPayment);
@@ -1437,8 +1438,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
-            orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
+        if (dto.getOrderStatus().equals(APPROVED_STATUS)) {
+            orderPayment.setPaymentId(String.valueOf(dto.getPaymentId()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);

@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -106,13 +105,13 @@ class UBSClientServiceImplTest {
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         dto.setAmount(95000);
-        dto.setPayment_id(1);
+        dto.setPaymentId(1);
         dto.setCurrency("UAH");
-        dto.setSettlement_date("");
+        dto.setSettlementDate("");
         dto.setFee(0);
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
@@ -128,13 +127,13 @@ class UBSClientServiceImplTest {
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         dto.setAmount(95000);
-        dto.setPayment_id(1);
+        dto.setPaymentId(1);
         dto.setCurrency("UAH");
-        dto.setSettlement_date("");
+        dto.setSettlementDate("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
@@ -787,7 +786,6 @@ class UBSClientServiceImplTest {
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = ModelUtils.getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(orderEvents);
         List<EventDto> eventDTOS = orderEvents.stream()
             .map(event -> modelMapper.map(event, EventDto.class))
@@ -805,17 +803,8 @@ class UBSClientServiceImplTest {
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
         assertThrows(EventsNotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
-    }
-
-    @Test
-    void getAllEventsForOrderAccessDeniedException() {
-        when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
-        when(userRepository.findByUuid(anyString())).thenReturn(getUser());
-        assertThrows(AccessDeniedException.class,
             () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
