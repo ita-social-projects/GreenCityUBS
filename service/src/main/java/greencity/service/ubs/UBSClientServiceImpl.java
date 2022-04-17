@@ -902,7 +902,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
                 .dateOfRegistration(LocalDate.now()).build());
         }
-        return user;
+        return user;<<<<<<< small_changes
     }
 
     @Override
@@ -920,7 +920,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
         return OrderCancellationReasonDto.builder()
-            .cancellationReason(order.getCancellationReason())
+            .cancellationReason(order.getCancellationReason())<<<<<<< small_changes
             .cancellationComment(order.getCancellationComment())
             .build();
     }
