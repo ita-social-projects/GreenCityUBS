@@ -920,7 +920,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
         return OrderCancellationReasonDto.builder()
-            .cancellationReason(order.getCancellationReason())<<<<<<< small_changes
+            .cancellationReason(order.getCancellationReason())
             .cancellationComment(order.getCancellationComment())
             .build();
     }
