@@ -1,5 +1,6 @@
 package greencity;
 
+import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -584,5 +585,11 @@ public class ModelUtils {
             .notificationType(NotificationType.UNPAID_ORDER.toString())
             .languageId(1)
             .build();
+    }
+
+    public static RedirectionConfigProp getRedirectionConfig(){
+        return new RedirectionConfigProp()
+            .setGreenCityClient("123")
+            .setUserServerAddress("123");
     }
 }

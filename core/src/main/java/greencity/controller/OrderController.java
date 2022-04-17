@@ -30,7 +30,7 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private static final RedirectionConfigProp redirectionConfigProp = new RedirectionConfigProp();
+    private static RedirectionConfigProp redirectionConfigProp;
 
     /**
      * Constructor with parameters.
@@ -38,6 +38,7 @@ public class OrderController {
     @Autowired
     public OrderController(UBSClientService ubsClientService) {
         this.ubsClientService = ubsClientService;
+        redirectionConfigProp = new RedirectionConfigProp();
     }
 
     /**
