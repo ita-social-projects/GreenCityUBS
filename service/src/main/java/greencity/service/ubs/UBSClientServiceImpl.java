@@ -902,7 +902,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
                 .dateOfRegistration(LocalDate.now()).build());
         }
-        return user;<<<<<<< small_changes
+        return user;
     }
 
     @Override
