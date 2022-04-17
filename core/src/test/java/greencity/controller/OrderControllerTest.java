@@ -1,13 +1,8 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.ModelUtils;
-import greencity.client.RestClient;
-import greencity.configuration.RedirectionConfigProp;
-import greencity.configuration.SecurityConfig;
-import greencity.converters.UserArgumentResolver;
-import greencity.dto.*;
-import greencity.service.ubs.UBSClientService;
+import java.security.Principal;
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +15,42 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.security.Principal;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import greencity.ModelUtils;
+import greencity.client.RestClient;
+import greencity.configuration.RedirectionConfigProp;
+import greencity.configuration.SecurityConfig;
+import greencity.converters.UserArgumentResolver;
+import greencity.dto.OrderAddressDtoRequest;
+import greencity.dto.OrderCancellationReasonDto;
+import greencity.dto.OrderResponseDto;
+import greencity.dto.PaymentResponseDto;
+import greencity.dto.PaymentResponseDtoLiqPay;
+import greencity.dto.UbsCustomersDto;
+import greencity.dto.UbsCustomersDtoUpdate;
+import greencity.dto.UserInfoDto;
+import greencity.service.ubs.UBSClientService;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getRedirectionConfig;
+import static greencity.ModelUtils.getUbsCustomersDto;
+import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
+import static greencity.ModelUtils.getUserInfoDto;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -231,7 +255,7 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String gotInfo = objectMapper.writeValueAsString(dto);
 
-        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+        setRedirectionConfigProp();
 
         mockMvc.perform(post(ubsLink + "/receiveLiqPayPayment")
             .content(gotInfo)
@@ -246,7 +270,7 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
-        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+        setRedirectionConfigProp();
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
             .content(paymentResponseJson)
@@ -289,7 +313,7 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String paymentResponseJson = objectMapper.writeValueAsString(dto);
 
-        when(redirectionConfigProp.getGreenCityClient()).thenReturn("1");
+        setRedirectionConfigProp();
 
         mockMvc.perform(post(ubsLink + "/receivePaymentClient")
             .content(paymentResponseJson)
@@ -302,5 +326,20 @@ class OrderControllerTest {
     void getCourierLocations() throws Exception {
         mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
             .andExpect(status().isOk());
+    }
+
+    private void setRedirectionConfigProp() {
+        RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
+
+        Arrays.stream(OrderController.class.getDeclaredFields())
+            .filter(field -> field.getName().equals("redirectionConfigProp"))
+            .forEach(field -> {
+                field.setAccessible(true);
+                try {
+                    field.set(orderController, redirectionConfigProp);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            });
     }
 }

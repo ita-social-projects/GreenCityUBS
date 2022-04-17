@@ -1409,7 +1409,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponseCode())
             .responseDescription(dto.getResponseDescription())
             .orderTime(dto.getOrderTime())
-            .settlementDate(dto.getSettlementDate())
+            .settlementDate(dto.getSettlementDate().isEmpty() ? LocalDate.now().toString() : dto.getSettlementDate())
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPaymentSystem())
             .senderEmail(dto.getSenderEmail())
