@@ -1,9 +1,9 @@
 package greencity;
 
+import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
-import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import org.springframework.http.HttpStatus;
 
@@ -412,10 +412,10 @@ public class ModelUtils {
 
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
-            .order_id("1")
-            .merchant_id(1)
-            .actual_amount(1)
-            .actual_currency("1")
+            .orderId("1")
+            .merchantId(1)
+            .actualAmount(1)
+            .actualCurrency("1")
             .amount(1)
             .build();
     }
@@ -585,5 +585,11 @@ public class ModelUtils {
             .notificationType(NotificationType.UNPAID_ORDER.toString())
             .languageId(1)
             .build();
+    }
+
+    public static RedirectionConfigProp getRedirectionConfig() {
+        return new RedirectionConfigProp()
+            .setGreenCityClient("123")
+            .setUserServerAddress("123");
     }
 }

@@ -30,15 +30,15 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private final RedirectionConfigProp redirectionConfigProp;
+    private static RedirectionConfigProp redirectionConfigProp;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
+    public OrderController(UBSClientService ubsClientService) {
         this.ubsClientService = ubsClientService;
-        this.redirectionConfigProp = redirectionConfigProp;
+        redirectionConfigProp = new RedirectionConfigProp();
     }
 
     /**
@@ -142,7 +142,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -447,7 +447,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            response.sendRedirect("https://ita-social-projects.github.io/GreenCityClient/#/ubs/confirm");
+            response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
