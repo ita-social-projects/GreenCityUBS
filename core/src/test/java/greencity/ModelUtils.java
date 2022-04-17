@@ -587,7 +587,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static RedirectionConfigProp getRedirectionConfig(){
+    public static RedirectionConfigProp getRedirectionConfig() {
         return new RedirectionConfigProp()
             .setGreenCityClient("123")
             .setUserServerAddress("123");

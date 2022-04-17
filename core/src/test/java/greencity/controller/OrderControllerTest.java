@@ -312,14 +312,15 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
-    private void setRedirectionConfigProp(){
+    private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
 
-        Arrays.stream(OrderController.class.getDeclaredFields()).filter(field -> field.getName().equals("redirectionConfigProp"))
+        Arrays.stream(OrderController.class.getDeclaredFields())
+            .filter(field -> field.getName().equals("redirectionConfigProp"))
             .forEach(field -> {
                 field.setAccessible(true);
                 try {
-                    field.set(orderController,redirectionConfigProp);
+                    field.set(orderController, redirectionConfigProp);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
