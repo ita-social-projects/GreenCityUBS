@@ -1,7 +1,6 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.client.RestClient;
 import greencity.dto.RequestToChangeOrdersDataDTO;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -32,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,8 +52,6 @@ class OrdersAdminsPageServiceImplTest {
     private EmployeeOrderPositionRepository employeeOrderPositionRepository;
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
-    @Mock
-    private RestClient restClient;
     @Mock
     private UserRepository userRepository;
     @Mock

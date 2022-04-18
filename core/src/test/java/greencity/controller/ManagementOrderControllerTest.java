@@ -2,17 +2,15 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.RestClient;
+import greencity.service.ubs.LiqPayService;
 import greencity.dto.*;
-import greencity.entity.order.BigOrderTableViews;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import greencity.repository.BigOrderTableRepository;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
-import greencity.service.ubs.maneger.BigOrderTableServiceView;
+import greencity.service.ubs.manager.BigOrderTableServiceView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +56,7 @@ class ManagementOrderControllerTest {
     CertificateService certificateService;
 
     @Mock
-    RestClient restClient;
+    LiqPayService liqPayService;
 
     @Mock
     private Validator mockValidator;

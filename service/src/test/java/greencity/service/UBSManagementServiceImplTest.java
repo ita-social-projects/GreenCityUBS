@@ -2,6 +2,7 @@ package greencity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
@@ -86,7 +87,7 @@ class UBSManagementServiceImplTest {
     private BagTranslationRepository bagTranslationRepository;
 
     @Mock
-    private UserRemoteService userRemoteService;
+    private UserRemoteClient userRemoteClient;
 
     @Mock(lenient = true)
     private NotificationServiceImpl notificationService;
@@ -739,7 +740,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkGetAllUserViolations() {
         User user = ModelUtils.getUser();
-        user.setUuid(userRemoteService.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setViolations(1);
 
         ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
@@ -764,7 +765,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testAddPointsToUser() {
         User user = ModelUtils.getTestUser();
-        user.setUuid(userRemoteService.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setCurrentPoints(1);
 
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
@@ -1712,7 +1713,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testAddPointsToUserWhenCurrentPointIsNull() {
         User user = ModelUtils.getTestUser();
-        user.setUuid(userRemoteService.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setCurrentPoints(null);
 
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));

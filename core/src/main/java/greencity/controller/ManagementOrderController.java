@@ -15,7 +15,7 @@ import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
-import greencity.service.ubs.maneger.BigOrderTableServiceView;
+import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;

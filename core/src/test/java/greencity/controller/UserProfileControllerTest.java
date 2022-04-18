@@ -7,7 +7,7 @@ import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddressDto;
 import greencity.dto.UserProfileDto;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,14 +42,14 @@ class UserProfileControllerTest {
     UserProfileController userProfileController;
 
     @Mock
-    UserRemoteService userRemoteService;
+    UserRemoteClient userRemoteClient;
 
     private Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userProfileController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteService))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
 

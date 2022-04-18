@@ -2,7 +2,8 @@ package greencity.service;
 
 import com.liqpay.LiqPay;
 import greencity.ModelUtils;
-import greencity.client.RestClient;
+import greencity.client.FondyClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
@@ -15,6 +16,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
+import greencity.service.ubs.LiqPayService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
@@ -60,15 +62,11 @@ class UBSClientServiceImplTest {
     @Mock
     private CertificateRepository certificateRepository;
     @Mock
-    private LocationRepository locationRepository;
+    private LiqPayService liqPayService;
     @Mock
-    EntityManager entityManager;
+    private UserRemoteClient userRemoteClient;
     @Mock
-    private RestClient restClient; // TODO delete this
-    @Mock
-    private UserRemoteService userRemoteService;
-    @Mock
-    private FondyService fondyService;
+    private FondyClient fondyClient;
     @Mock
     private AddressRepository addressRepository;
     @Mock
@@ -207,7 +205,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
@@ -389,7 +387,7 @@ class UBSClientServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
         ubsService.markUserAsDeactivated(1L);
         verify(userRepository).findById(1L);
-        verify(userRemoteService).markUserDeactivated(user.getUuid());
+        verify(userRemoteClient).markUserDeactivated(user.getUuid());
     }
 
     @Test
@@ -861,7 +859,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
+        when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
@@ -871,7 +869,7 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
-        verify(restClient).getDataFromLiqPay(any());
+        verify(liqPayService).getCheckoutResponse(any());
     }
 
     @Test
@@ -1005,12 +1003,12 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
         verify(encryptionUtil).formRequestSignature(any(), eq(null), eq("1"));
-        verify(fondyService).getCheckoutResponse(any());
+        verify(fondyClient).getCheckoutResponse(any());
 
     }
 
@@ -1026,13 +1024,13 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(100);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        when(restClient.getDataFromLiqPay(any())).thenReturn("TestValue");
+        when(liqPayService.getCheckoutResponse(any())).thenReturn("TestValue");
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
         ubsService.proccessOrderLiqpayClient(dto, "uuid");
 
         verify(orderRepository, times(2)).findById(1L);
-        verify(restClient).getDataFromLiqPay(any());
+        verify(liqPayService).getCheckoutResponse(any());
     }
 
     @Test
@@ -1082,7 +1080,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyService.getCheckoutResponse(any())).thenReturn("TestValue");
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
@@ -1188,7 +1186,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(restClient.getDataFromLiqPay(any())).thenReturn("Test");
+        when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
         assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
 
@@ -1198,7 +1196,7 @@ class UBSClientServiceImplTest {
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
-        verify(restClient).getDataFromLiqPay(any());
+        verify(liqPayService).getCheckoutResponse(any());
     }
 
     @Test

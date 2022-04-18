@@ -10,7 +10,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ public class NotificationeServiceImpl implements NotificationeService {
     private final ModelMapper modelMapper;
     private final NotificationScheduleRepo scheduleRepo;
     private final OrderRepository orderRepository;
-    private final UserRemoteService userRemoteService;
+    private final UserRemoteClient userRemoteClient;
 
     /**
      * {@inheritDoc}
@@ -102,7 +102,7 @@ public class NotificationeServiceImpl implements NotificationeService {
                 .violationDescription(dto.getViolationDescription())
                 .language(language)
                 .build();
-            userRemoteService.sendViolationOnMail(mailDto);
+            userRemoteClient.sendViolationOnMail(mailDto);
         }
     }
 }

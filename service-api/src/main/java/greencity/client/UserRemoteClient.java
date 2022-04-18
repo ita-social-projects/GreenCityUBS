@@ -1,23 +1,24 @@
-package greencity.service;
+package greencity.client;
 
 import greencity.dto.UbsCustomersDto;
 import greencity.dto.UserVO;
 import greencity.dto.UserViolationMailDto;
 import greencity.entity.user.User;
+import greencity.client.config.UserRemoteClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 /**
- * Service to get info about {@link User} from remote server.
+ * Client for getting info about {@link User} from GreenCityUser server.
  *
  * @author Andrii Yezenitskyi
  */
-@FeignClient(name = "user-remote-service",
+@FeignClient(name = "user-remote-client",
     url = "${greencity.redirect.user-server-address}",
-    configuration = UserRemoteServiceAuthorizationSetter.class)
-public interface UserRemoteService {
+    configuration = UserRemoteClientInterceptor.class)
+public interface UserRemoteClient {
     String EMAIL = "email";
     String UUID = "uuid";
 
@@ -46,7 +47,7 @@ public interface UserRemoteService {
      * @return {@link Optional} of {@link UbsCustomersDto}.
      */
     @GetMapping("/user/findByUuId")
-    Optional<UbsCustomersDto> findUserByUuid(@RequestParam(UUID) String uuid);
+    Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
 
     /**
      * Send request to greenCityUser to send a violation email.

@@ -7,7 +7,6 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
-import greencity.service.ubs.maneger.BigOrderTableServiceView;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;

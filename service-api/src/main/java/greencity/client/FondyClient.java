@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.client;
 
 import greencity.dto.PaymentRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * Service for interacting with Fondy API.
+ * Client for interacting with Fondy API.
  *
  * @author Andrii Yezenitskyi
  */
-@FeignClient(name = "fondy-service",
+@FeignClient(name = "fondy-client",
     url = "https://pay.fondy.eu/api")
-public interface FondyService {
+public interface FondyClient {
     /**
      * Returns response from Fondy checkout. <br>
      * Response contains: "response_status" ("success" or "failure") and

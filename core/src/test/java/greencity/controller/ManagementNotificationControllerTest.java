@@ -7,7 +7,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import greencity.service.notification.NotificationeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,14 +45,14 @@ class ManagementNotificationControllerTest {
     private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final Principal principal = getUuid();
     @Mock
-    UserRemoteService userRemoteService;
+    UserRemoteClient userRemoteClient;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteService))
+                new UserArgumentResolver(userRemoteClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }

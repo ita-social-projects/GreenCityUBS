@@ -170,10 +170,11 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- feign -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-openfeign-core</artifactId>
-            <version>2.1.5.RELEASE</version>
+            <version>${spring-cloud-openfeign.version}</version>
         </dependency>
     </dependencies>
 

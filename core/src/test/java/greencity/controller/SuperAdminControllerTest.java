@@ -8,7 +8,7 @@ import greencity.dto.*;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.LocationAlreadyCreatedException;
 import greencity.service.SuperAdminService;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class SuperAdminControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    UserRemoteService userRemoteService;
+    UserRemoteClient userRemoteClient;
 
     @Mock
     SuperAdminService superAdminService;
@@ -64,7 +64,7 @@ class SuperAdminControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteService))
+                new UserArgumentResolver(userRemoteClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .setValidator(mockValidator)
             .build();
