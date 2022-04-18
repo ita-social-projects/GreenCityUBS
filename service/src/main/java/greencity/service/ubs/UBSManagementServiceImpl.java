@@ -973,14 +973,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public ExportDetailsDto updateOrderExportDetails(Long id, ExportDetailsDtoUpdate dto, String uuid) {
-        ReceivingStation station = receivingStationRepository.findById(dto.getReceivingStationId())
-            .orElseThrow(() -> new ReceivingStationNotFoundException(
-                RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getReceivingStationId()));
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new UnexistingOrderException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        order.setReceivingStation(station);
+        if (nonNull(dto.getReceivingStationId())) {
+            ReceivingStation station = receivingStationRepository.findById(dto.getReceivingStationId())
+                .orElseThrow(() -> new ReceivingStationNotFoundException(
+                    RECEIVING_STATION_NOT_FOUND_BY_ID + dto.getReceivingStationId()));
+            order.setReceivingStation(station);
+        }
         List<ReceivingStation> receivingStation = receivingStationRepository.findAll();
         if (receivingStation.isEmpty()) {
             throw new ReceivingStationNotFoundException(RECEIVING_STATION_NOT_FOUND);
