@@ -3346,4 +3346,13 @@ public class ModelUtils {
             .additionalOrders(Collections.emptySet())
             .build();
     }
+
+    public static String getSuccessfulFondyResponse() {
+        return "{\n" +
+            "  \"response\":{\n" +
+            "    \"response_status\":\"success\",\n" +
+            "    \"checkout_url\":\"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390\"\n" +
+            "  }\n" +
+            "}";
+    }
 }

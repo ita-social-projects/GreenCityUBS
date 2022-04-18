@@ -13,7 +13,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.OrderRepository;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ class NotificationeServiceImplTest {
     @Mock(lenient = true)
     OrderRepository orderRepository;
     @Mock
-    UserRemoteService userRemoteService;
+    UserRemoteClient userRemoteClient;
 
     @Test
     void findAll() {
@@ -105,7 +105,7 @@ class NotificationeServiceImplTest {
             new UserViolationMailDto(order.getUser().getRecipientName(), order.getUser().getRecipientEmail(), "ua",
                 addingViolationsToUserDto.getViolationDescription());
         notificationService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(userRemoteService, times(1)).sendViolationOnMail(mailDto);
+        verify(userRemoteClient, times(1)).sendViolationOnMail(mailDto);
     }
 
     @Test
@@ -114,6 +114,6 @@ class NotificationeServiceImplTest {
             new AddingViolationsToUserDto();
         when(orderRepository.findById(addingViolationsToUserDto.getOrderID())).thenReturn(Optional.empty());
         notificationService.sendNotificationAboutViolation(addingViolationsToUserDto, "ua");
-        verify(userRemoteService, times(0)).sendViolationOnMail(new UserViolationMailDto());
+        verify(userRemoteClient, times(0)).sendViolationOnMail(new UserViolationMailDto());
     }
 }

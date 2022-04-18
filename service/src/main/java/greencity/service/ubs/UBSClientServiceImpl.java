@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
@@ -11,18 +10,14 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
-import greencity.service.FondyService;
+import greencity.client.FondyClient;
 import greencity.service.UAPhoneNumberUtil;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +29,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-import javax.ws.rs.client.ResponseProcessingException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -65,9 +59,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepo;
-    private final RestClient restClient; // TODO delete this
-    private final UserRemoteService userRemoteService;
-    private final FondyService fondyService;
+    private final LiqPayService liqPayService;
+    private final UserRemoteClient userRemoteClient;
+    private final FondyClient fondyClient;
     private final PaymentRepository paymentRepository;
     private final EncryptionUtil encryptionUtil;
     private final EventRepository eventRepository;
@@ -250,7 +244,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
-            String link = getLinkFromFondyCheckoutResponse(fondyService.getCheckoutResponse(paymentRequestDto));
+            String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
         }
     }
@@ -899,7 +893,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private User createUserByUuidIfUserDoesNotExist(String uuid) {
         User user = userRepository.findByUuid(uuid);
         if (user == null) {
-            UbsCustomersDto ubsCustomersDto = userRemoteService.findUserByUuid(uuid)
+            UbsCustomersDto ubsCustomersDto = userRemoteClient.findByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Such UUID have not been found"));
             return userRepository.save(User.builder().currentPoints(0).violations(0).uuid(uuid)
                 .recipientEmail(ubsCustomersDto.getEmail()).recipientName("")
@@ -912,7 +906,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public void markUserAsDeactivated(Long id) {
         User user =
             userRepository.findById(id).orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        userRemoteService.markUserDeactivated(user.getUuid());
+        userRemoteClient.markUserDeactivated(user.getUuid());
     }
 
     @Override
@@ -997,7 +991,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return buildOrderResponseWithoutButton(order);
         } else {
             PaymentRequestDtoLiqPay paymentRequestDto = formLiqPayPaymentRequest(order.getId(), sumToPay);
-            String liqPayData = restClient.getDataFromLiqPay(paymentRequestDto);
+            String liqPayData = liqPayService.getCheckoutResponse(paymentRequestDto);
             return buildOrderResponse(order, liqPayData
                 .replace("\"", "")
                 .replace("\n", ""));
@@ -1105,14 +1099,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws Exception {
+    public Map<String, Object> getLiqPayStatus(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_PAYMENT_STATUS);
         }
         StatusRequestDtoLiqPay dto = getStatusFromLiqPay(order);
-        Map<String, Object> response = restClient.getStatusFromLiqPay(dto);
+        Map<String, Object> response = liqPayService.getPaymentStatus(dto);
         @Nullable
         Payment payment = converterMapToEntity(response, order);
         if (payment == null) {
@@ -1242,7 +1236,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String formedLink(Order order, Integer sumToPay) {
         Order increment = incrementCounter(order);
         PaymentRequestDto paymentRequestDto = formPayment(increment.getId(), sumToPay);
-        return getLinkFromFondyCheckoutResponse(fondyService.getCheckoutResponse(paymentRequestDto));
+        return getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
     }
 
     private String getLinkFromFondyCheckoutResponse(String fondyResponse) {
@@ -1353,7 +1347,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private LiqPayOrderResponse linkButton(Order order, Integer sumToPay) {
         Order order1 = incrementCounter(order);
         PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = formLiqPayPayment(order1.getId(), sumToPay);
-        return buildOrderResponse(order1, restClient.getDataFromLiqPay(paymentRequestDtoLiqPay)
+        return buildOrderResponse(order1, liqPayService.getCheckoutResponse(paymentRequestDtoLiqPay)
             .replace("\"", "")
             .replace("\n", ""));
     }

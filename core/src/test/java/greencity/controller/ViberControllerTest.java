@@ -1,7 +1,7 @@
 package greencity.controller;
 
 import greencity.converters.UserArgumentResolver;
-import greencity.service.UserRemoteService;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.ViberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class ViberControllerTest {
     ViberService viberService;
 
     @Mock
-    UserRemoteService userRemoteService;
+    UserRemoteClient userRemoteClient;
 
     @InjectMocks
     ViberController viberController;
@@ -35,7 +35,7 @@ class ViberControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(viberController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteService))
+                new UserArgumentResolver(userRemoteClient))
             .build();
     }
 
