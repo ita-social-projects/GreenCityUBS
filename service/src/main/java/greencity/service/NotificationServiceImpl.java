@@ -120,15 +120,15 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder().key("date")
             .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("dd-MM"))
-                : null)
+                : "")
             .build());
         parameters.add(NotificationParameter.builder().key("startTime")
             .value(order.getDeliverFrom() != null ? order.getDeliverFrom().format(DateTimeFormatter.ofPattern("hh:mm"))
-                : null)
+                : "")
             .build());
         parameters.add(NotificationParameter.builder().key("endTime")
             .value(
-                order.getDeliverTo() != null ? order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm")) : null)
+                order.getDeliverTo() != null ? order.getDeliverTo().format(DateTimeFormatter.ofPattern("hh:mm")) : "")
             .build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
             .value("+380638175035, +380931038987").build());
