@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author Andrii Yezenitskyi
  */
 @FeignClient(name = "fondy-client",
-    url = "https://pay.fondy.eu/api")
+    url = "${greencity.external.fondy-api-url}")
 public interface FondyClient {
     /**
      * Returns response from Fondy checkout. <br>

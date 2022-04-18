@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @author Andrii Yezenitskyi
  */
 @FeignClient(name = "viber-client",
-    url = "https://chatapi.viber.com",
+    url = "${greencity.external.viber-api-url}",
     configuration = ViberClientInterceptor.class)
 public interface ViberClient {
     /**
@@ -21,7 +21,7 @@ public interface ViberClient {
      *
      * @return {@link String} - raw JSON with status and additional details.
      */
-    @PostMapping("/pa/get_account_info")
+    @PostMapping("/get_account_info")
     ResponseEntity<String> getAccountInfo();
 
     /**
@@ -31,7 +31,7 @@ public interface ViberClient {
      *
      * @return {@link String} - raw JSON with status and additional details.
      */
-    @PostMapping("/pa/set_webhook")
+    @PostMapping("/set_webhook")
     ResponseEntity<String> updateWebHook(WebhookDto dto);
 
     /**
@@ -41,6 +41,6 @@ public interface ViberClient {
      *
      * @return {@link String} - raw JSON with status and additional details.
      */
-    @PostMapping("/pa/send_message")
+    @PostMapping("/send_message")
     ResponseEntity<String> sendMessage(SendMessageToUserDto message);
 }
