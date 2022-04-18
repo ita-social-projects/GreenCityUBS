@@ -439,42 +439,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
 
-        for (Order order : orders) {
-            List<Payment> payments = order.getPayment();
-            List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
-            OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-                .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
-                .orElse(orderStatusTranslationRepository.getOne(1L));
-            OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-                .findByOrderPaymentStatusIdAndTranslationValue(
-                    (long) order.getOrderPaymentStatus().getStatusValue());
-
-            Double fullPrice = Double.valueOf(bagForUserDtos.stream()
-                .map(BagForUserDto::getTotalPrice)
-                .reduce(0, Integer::sum));
-
-            OrdersDataForUserDto ordersDataForUserDto = OrdersDataForUserDto.builder()
-                .id(order.getId())
-                .dateForm(order.getOrderDate())
-                .datePaid(order.getOrderDate())
-                .orderStatus(orderStatusTranslation.getName())
-                .orderStatusEng(orderStatusTranslation.getNameEng())
-                .orderComment(order.getComment())
-                .bags(bagForUserDtos)
-                .additionalOrders(order.getAdditionalOrders())
-                .amountBeforePayment(fullPrice - order.getPointsToUse())
-                .paidAmount(countPaidAmount(payments).doubleValue())
-                .orderFullPrice(fullPrice)
-                .bonuses(order.getPointsToUse().doubleValue())
-                .certificate(getCertificate(order.getCertificates()))
-                .sender(senderInfoDtoBuilder(order))
-                .address(addressInfoDtoBuilder(order))
-                .paymentStatus(paymentStatusTranslation.getTranslationValue())
-                .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
-                .build();
-
-            dtos.add(ordersDataForUserDto);
-        }
+        orders.forEach(order -> dtos.add(getOrdersData(order)));
 
         return new PageableDto<>(
             dtos,
@@ -483,18 +448,45 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPages.getTotalPages());
     }
 
-    private List<CertificateDto> getCertificate(Set<Certificate> certificates) {
-        List<CertificateDto> dto = new ArrayList<>();
-        for (Certificate certificate : certificates) {
-            CertificateDto certificateDto = CertificateDto.builder()
-                .certificateDate(certificate.getCreationDate())
-                .certificateStatus(certificate.getCertificateStatus().name())
-                .certificatePoints(certificate.getPoints())
-                .code(certificate.getCode())
-                .build();
-            dto.add(certificateDto);
-        }
-        return dto;
+    private OrdersDataForUserDto getOrdersData(Order order) {
+        List<Payment> payments = order.getPayment();
+        List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+        OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
+            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
+            .orElse(orderStatusTranslationRepository.getOne(1L));
+        OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
+            .findByOrderPaymentStatusIdAndTranslationValue(
+                (long) order.getOrderPaymentStatus().getStatusValue());
+
+        Double fullPrice = Double.valueOf(bagForUserDtos.stream()
+            .map(BagForUserDto::getTotalPrice)
+            .reduce(0, Integer::sum));
+
+        List<CertificateDto> certificateDtos = order.getCertificates().stream()
+            .map(certificate -> {
+                return modelMapper.map(certificate, CertificateDto.class);
+            })
+            .collect(Collectors.toList());
+
+        return OrdersDataForUserDto.builder()
+            .id(order.getId())
+            .dateForm(order.getOrderDate())
+            .datePaid(order.getOrderDate())
+            .orderStatus(orderStatusTranslation.getName())
+            .orderStatusEng(orderStatusTranslation.getNameEng())
+            .orderComment(order.getComment())
+            .bags(bagForUserDtos)
+            .additionalOrders(order.getAdditionalOrders())
+            .amountBeforePayment(fullPrice - order.getPointsToUse())
+            .paidAmount(countPaidAmount(payments).doubleValue())
+            .orderFullPrice(fullPrice)
+            .certificate(certificateDtos)
+            .bonuses(order.getPointsToUse().doubleValue())
+            .sender(senderInfoDtoBuilder(order))
+            .address(addressInfoDtoBuilder(order))
+            .paymentStatus(paymentStatusTranslation.getTranslationValue())
+            .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
+            .build();
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {

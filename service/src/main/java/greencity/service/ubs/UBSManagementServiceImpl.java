@@ -386,13 +386,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Optional<OrderStatusTranslation> orderStatusTranslation =
             orderStatusTranslationRepository.getOrderStatusTranslationById(orderStatus.getNumValue());
         String currentOrderStatusTranslation =
-            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : "order status not found";
+            orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
         String currentOrderStatusTranslationEng =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
-                : "order status english not found";
+                : orderStatus.name();
 
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = new OrderPaymentStatusTranslation();
         Order currentOrder = new Order();
+
         if (order.isPresent()) {
             currentOrder = order.get();
             currentOrderStatusPaymentTranslation =
@@ -431,8 +432,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
                 setValueForOrderStatusIsCancelledOrDoneAsTrue(orderStatusTranslation, orderStatusesTranslationDto);
-                orderStatusesTranslationDto.setTranslation(orderStatusTranslation.getName());
-                orderStatusesTranslationDto.setTranslationEng(orderStatusTranslation.getNameEng());
+                orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
+                orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
                 if (!Objects.equals(OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId()),
                     "")) {
                     OrderStatus.getConvertedEnumFromLongToEnum(orderStatusTranslation.getStatusId());
@@ -475,8 +476,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
-                translationDto.setTranslation(orderStatusPaymentTranslation.getTranslationValue());
-                translationDto.setTranslationEng(orderStatusPaymentTranslation.getTranslationsValueEng());
+                translationDto.setUa(orderStatusPaymentTranslation.getTranslationValue());
+                translationDto.setEng(orderStatusPaymentTranslation.getTranslationsValueEng());
                 if (!Objects.equals(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(
                     orderStatusPaymentTranslation.getOrderPaymentStatusId()), "")) {
                     translationDto.setKey(OrderPaymentStatus.getConvertedEnumFromLongToEnumAboutOrderPaymentStatus(

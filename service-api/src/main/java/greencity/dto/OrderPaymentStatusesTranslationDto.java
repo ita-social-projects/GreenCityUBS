@@ -10,6 +10,6 @@ import lombok.*;
 @EqualsAndHashCode
 public class OrderPaymentStatusesTranslationDto {
     private String key;
-    private String translation;
-    private String translationEng;
+    private String ua;
+    private String eng;
 }

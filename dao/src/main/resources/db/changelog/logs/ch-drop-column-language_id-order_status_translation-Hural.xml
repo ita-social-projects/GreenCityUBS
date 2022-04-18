@@ -11,9 +11,7 @@
         <addColumn tableName="order_status_translations">
             <column name="name_eng" type="VARCHAR(60)"/>
         </addColumn>
-    </changeSet>
 
-    <changeSet id="Pavlo-2" author="Pavlo Hural">
         <dropColumn tableName="order_payment_status_translations">
             <column name="language_id"/>
         </dropColumn>
@@ -22,6 +20,5 @@
             <column name="translation_value_eng" type="VARCHAR(60)" />
         </addColumn>
     </changeSet>
-
 </databaseChangeLog>
 
