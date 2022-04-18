@@ -1526,8 +1526,6 @@ class UBSManagementServiceImplTest {
     @Test
     void updateOrderExportDetailsUserNotFoundExceptionTest() {
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
-        var receivingStation = ModelUtils.getReceivingStation();
-        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
             () -> ubsManagementService.updateOrderExportDetails(1L, testDetails, "abc"));
@@ -1537,8 +1535,6 @@ class UBSManagementServiceImplTest {
     void updateOrderExportDetailsUnexistingOrderExceptionTest() {
         User user = getTestUser();
         ExportDetailsDtoUpdate testDetails = getExportDetailsRequest();
-        var receivingStation = ModelUtils.getReceivingStation();
-        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(UnexistingOrderException.class,
