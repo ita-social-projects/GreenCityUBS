@@ -1,10 +1,10 @@
 package greencity.controller;
 
 import greencity.ModelUtils;
-import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,18 +41,18 @@ class AdminUbsControllerTest {
 
     private final Principal principal = getUuid();
     @Mock
-    RestClient restClient;
+    UserRemoteClient userRemoteClient;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(adminUbsController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(restClient))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
 
     @Test
     void getTableParameters() throws Exception {
-        when(restClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         mockMvc.perform(get(management + "/tableParams")
             .principal(principal))
             .andExpect(status().isOk());

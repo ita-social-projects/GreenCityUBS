@@ -2,7 +2,7 @@ package greencity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.RestClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
@@ -11,7 +11,6 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
-import greencity.entity.parameters.CustomTableView;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -19,8 +18,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.ubs.*;
 import org.junit.jupiter.api.Assertions;
@@ -90,7 +87,7 @@ class UBSManagementServiceImplTest {
     private BagTranslationRepository bagTranslationRepository;
 
     @Mock
-    private RestClient restClient;
+    private UserRemoteClient userRemoteClient;
 
     @Mock(lenient = true)
     private NotificationServiceImpl notificationService;
@@ -743,7 +740,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkGetAllUserViolations() {
         User user = ModelUtils.getUser();
-        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setViolations(1);
 
         ViolationsInfoDto expected = modelMapper.map(user, ViolationsInfoDto.class);
@@ -768,7 +765,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testAddPointsToUser() {
         User user = ModelUtils.getTestUser();
-        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setCurrentPoints(1);
 
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
@@ -1716,7 +1713,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testAddPointsToUserWhenCurrentPointIsNull() {
         User user = ModelUtils.getTestUser();
-        user.setUuid(restClient.findUuidByEmail(user.getRecipientEmail()));
+        user.setUuid(userRemoteClient.findUuidByEmail(user.getRecipientEmail()));
         user.setCurrentPoints(null);
 
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));

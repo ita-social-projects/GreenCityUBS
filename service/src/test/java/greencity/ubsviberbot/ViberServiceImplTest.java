@@ -1,7 +1,7 @@
 package greencity.ubsviberbot;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.client.RestClient;
+import greencity.client.ViberClient;
 import greencity.dto.LanguageVO;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
@@ -41,7 +41,7 @@ public class ViberServiceImplTest {
     private OutOfRequestRestClient outOfRequestRestClient;
 
     @Mock
-    private RestClient restClient;
+    private ViberClient viberClient;
 
     @Mock
     UserRepository userRepository;
@@ -119,18 +119,36 @@ public class ViberServiceImplTest {
             .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
             .build();
 
-        when(restClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
+        when(viberClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
 
         viberService.sendNotification(notification);
 
         verify(outOfRequestRestClient).findUserByEmail(notification.getUser().getRecipientEmail());
-        verify(restClient).sendMessage(any());
+        verify(viberClient).sendMessage(any());
     }
 
     @Test(expected = MessageWasNotSend.class)
     public void testViberException() {
         prepareTest();
-        when(restClient.sendMessage(any())).thenThrow(new RuntimeException());
+        when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
         viberService.sendNotification(notification);
+    }
+
+    @Test
+    public void setWebHook() {
+        viberService.setWebhook();
+        verify(viberClient).updateWebHook(any());
+    }
+
+    @Test
+    public void removeWebHook() {
+        viberService.removeWebHook();
+        verify(viberClient).updateWebHook(any());
+    }
+
+    @Test
+    public void getAccountInfo() {
+        viberService.getAccountInfo();
+        verify(viberClient).getAccountInfo();
     }
 }

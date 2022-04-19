@@ -1,10 +1,11 @@
 package greencity.configuration;
 
-import greencity.client.RestClient;
 import greencity.converters.UserArgumentResolver;
+import greencity.client.UserRemoteClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -20,8 +21,9 @@ import java.util.concurrent.Executors;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+    @Lazy
     @Autowired
-    private RestClient restClient;
+    private UserRemoteClient userRemoteClient;
 
     /**
      * Method to get single threaded executor.
@@ -65,7 +67,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new UserArgumentResolver(restClient));
+        resolvers.add(new UserArgumentResolver(userRemoteClient));
     }
 
     /**

@@ -1,4 +1,4 @@
-package greencity.service.ubs.maneger;
+package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
 import greencity.dto.BigOrderTableDTO;
@@ -8,7 +8,6 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
-import greencity.service.ubs.manager.BigOrderTableViewServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
