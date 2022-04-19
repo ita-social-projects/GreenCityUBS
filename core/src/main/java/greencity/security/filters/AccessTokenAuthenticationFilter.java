@@ -1,8 +1,8 @@
 package greencity.security.filters;
 
-import greencity.client.RestClient;
 import greencity.dto.UserVO;
 import greencity.security.JwtTool;
+import greencity.client.UserRemoteClient;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,16 +28,16 @@ import java.util.Optional;
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
-    private final RestClient restClient;
+    private final UserRemoteClient userRemoteClient;
 
     /**
      * Constructor.
      */
     public AccessTokenAuthenticationFilter(JwtTool jwtTool, AuthenticationManager authenticationManager,
-        RestClient restClient) {
+        UserRemoteClient userRemoteClient) {
         this.jwtTool = jwtTool;
         this.authenticationManager = authenticationManager;
-        this.restClient = restClient;
+        this.userRemoteClient = userRemoteClient;
     }
 
     private String extractToken(HttpServletRequest request) {
@@ -64,7 +64,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                 Optional<UserVO> user =
-                    restClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
+                    userRemoteClient.findNotDeactivatedByEmail((String) authentication.getPrincipal());
                 if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
                     SecurityContextHolder.getContext().setAuthentication(authentication);

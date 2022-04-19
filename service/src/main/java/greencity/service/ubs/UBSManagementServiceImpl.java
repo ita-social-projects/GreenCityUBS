@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -18,6 +17,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
+import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -47,7 +47,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
-    private final RestClient restClient;
+    private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
@@ -217,7 +217,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     @Override
     public ViolationsInfoDto getAllUserViolations(String email) {
-        String uuidId = restClient.findUuidByEmail(email);
+        String uuidId = userRemoteClient.findUuidByEmail(email);
         User user = userRepository.findUserByUuid(uuidId).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         return modelMapper.map(user, ViolationsInfoDto.class);
@@ -241,7 +241,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public void addPointsToUser(AddingPointsToUserDto addingPointsToUserDto) {
-        String ourUUid = restClient.findUuidByEmail(addingPointsToUserDto.getEmail());
+        String ourUUid = userRemoteClient.findUuidByEmail(addingPointsToUserDto.getEmail());
         User ourUser = userRepository.findUserByUuid(ourUUid).orElseThrow(() -> new UnexistingUuidExeption(
             USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (ourUser.getCurrentPoints() == null) {

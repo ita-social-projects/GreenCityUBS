@@ -1,11 +1,13 @@
 package greencity.ubsviberbot;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.client.RestClient;
+import greencity.client.ViberClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.NotificationDto;
 import greencity.dto.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
+import greencity.dto.viber.dto.WebhookDto;
+import greencity.dto.viber.enums.EventTypes;
 import greencity.dto.viber.enums.MessageType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -21,10 +23,12 @@ import greencity.service.NotificationServiceImpl;
 import greencity.service.ubs.ViberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static greencity.entity.enums.NotificationReceiverType.OTHER;
 
@@ -32,18 +36,26 @@ import static greencity.entity.enums.NotificationReceiverType.OTHER;
 @RequiredArgsConstructor
 @Slf4j
 public class ViberServiceImpl implements ViberService {
-    private final RestClient restClient;
+    private final ViberClient viberClient;
     private final OutOfRequestRestClient outOfRequestRestClient;
     private final UserRepository userRepository;
     private final ViberBotRepository viberBotRepository;
     private final NotificationTemplateRepository templateRepository;
+    @Value("${greencity.bots.viber-bot-url}")
+    private String viberBotUrl;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public ResponseEntity<String> setWebhook() {
-        return restClient.setWebhook();
+        WebhookDto setWebhookDto = WebhookDto.builder()
+            .url(viberBotUrl)
+            .eventTypes(Set.of(
+                EventTypes.delivered, EventTypes.seen, EventTypes.failed, EventTypes.subscribed,
+                EventTypes.unsubscribed, EventTypes.conversation_started))
+            .build();
+        return viberClient.updateWebHook(setWebhookDto);
     }
 
     /**
@@ -51,7 +63,9 @@ public class ViberServiceImpl implements ViberService {
      */
     @Override
     public ResponseEntity<String> removeWebHook() {
-        return restClient.removeWebHook();
+        WebhookDto removeWebhookDto = WebhookDto.builder()
+            .url("").build();
+        return viberClient.updateWebHook(removeWebhookDto);
     }
 
     /**
@@ -59,7 +73,7 @@ public class ViberServiceImpl implements ViberService {
      */
     @Override
     public ResponseEntity<String> getAccountInfo() {
-        return restClient.getAccountInfo();
+        return viberClient.getAccountInfo();
     }
 
     /**
@@ -117,7 +131,7 @@ public class ViberServiceImpl implements ViberService {
 
     private void sendMessageToUser(SendMessageToUserDto sendMessageToUserDto) {
         try {
-            restClient.sendMessage(sendMessageToUserDto);
+            viberClient.sendMessage(sendMessageToUserDto);
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             log.error(ErrorMessage.INTERRUPTED_EXCEPTION);

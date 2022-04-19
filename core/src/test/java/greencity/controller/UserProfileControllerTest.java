@@ -2,12 +2,12 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddressDto;
 import greencity.dto.UserProfileDto;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,14 +42,14 @@ class UserProfileControllerTest {
     UserProfileController userProfileController;
 
     @Mock
-    RestClient restClient;
+    UserRemoteClient userRemoteClient;
 
     private Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userProfileController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(restClient))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
 

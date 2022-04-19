@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.client.RestClient;
 import greencity.dto.*;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
@@ -16,6 +15,7 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
+import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -41,7 +41,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
-    private final RestClient restClient;
+    private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final EventService eventService;
     private final SuperAdminService superAdminService;
@@ -459,7 +459,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
-        String email = restClient.findUserByUUid(userUuid)
+        String email = userRemoteClient.findByUuid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
@@ -486,7 +486,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
-        String email = restClient.findUserByUUid(userUuid)
+        String email = userRemoteClient.findByUuid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));

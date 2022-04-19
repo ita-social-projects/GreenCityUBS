@@ -1,12 +1,12 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.client.RestClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.*;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class ManagementEmployeeControllerTest {
     private UBSManagementEmployeeService service;
 
     @Mock
-    RestClient restClient;
+    UserRemoteClient userRemoteClient;
     @Mock
     private Validator mockValidator;
 
@@ -64,7 +64,7 @@ class ManagementEmployeeControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(restClient))
+                new UserArgumentResolver(userRemoteClient))
             .setValidator(mockValidator)
             .build();
     }

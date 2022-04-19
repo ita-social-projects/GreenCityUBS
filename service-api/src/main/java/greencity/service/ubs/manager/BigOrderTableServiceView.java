@@ -1,4 +1,4 @@
-package greencity.service.ubs.maneger;
+package greencity.service.ubs.manager;
 
 import greencity.dto.BigOrderTableDTO;
 import greencity.dto.CustomTableViewDto;
