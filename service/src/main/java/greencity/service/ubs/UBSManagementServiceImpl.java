@@ -391,15 +391,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getNameEng()
                 : orderStatus.name();
 
-        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = new OrderPaymentStatusTranslation();
-        Order currentOrder = new Order();
+        OrderPaymentStatus orderStatusPayment = order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
+        Order currentOrder = order.orElse(null);
+        OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
+                .findByOrderPaymentStatusIdAndTranslationValue((long) orderStatusPayment.getStatusValue());
 
-        if (order.isPresent()) {
-            currentOrder = order.get();
-            currentOrderStatusPaymentTranslation =
-                orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
-                    (long) order.get().getOrderPaymentStatus().getStatusValue());
-        }
         return GeneralOrderInfo.builder()
             .id(order.isPresent() ? order.get().getId() : 0)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
