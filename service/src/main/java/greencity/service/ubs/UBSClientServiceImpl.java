@@ -468,6 +468,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             })
             .collect(Collectors.toList());
 
+        Double amountBeforePayment =
+            fullPrice - order.getPointsToUse() - countPaidAmount(payments) - countCertificatesBonuses(certificateDtos);
+
         return OrdersDataForUserDto.builder()
             .id(order.getId())
             .dateForm(order.getOrderDate())
@@ -477,7 +480,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderComment(order.getComment())
             .bags(bagForUserDtos)
             .additionalOrders(order.getAdditionalOrders())
-            .amountBeforePayment(fullPrice - order.getPointsToUse())
+            .amountBeforePayment(amountBeforePayment)
             .paidAmount(countPaidAmount(payments).doubleValue())
             .orderFullPrice(fullPrice)
             .certificate(certificateDtos)
@@ -487,6 +490,12 @@ public class UBSClientServiceImpl implements UBSClientService {
             .paymentStatus(paymentStatusTranslation.getTranslationValue())
             .paymentStatusEng(paymentStatusTranslation.getTranslationsValueEng())
             .build();
+    }
+
+    private Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
+        return certificateDtos.stream()
+            .map(CertificateDto::getPoints)
+            .reduce(0, Integer::sum);
     }
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {

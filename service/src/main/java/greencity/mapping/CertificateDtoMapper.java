@@ -9,8 +9,8 @@ public class CertificateDtoMapper extends AbstractConverter<Certificate, Certifi
     protected CertificateDto convert(Certificate certificate) {
         return CertificateDto.builder()
             .certificateStatus(certificate.getCertificateStatus().name())
-            .certificateDate(certificate.getCreationDate())
-            .certificatePoints(certificate.getPoints())
+            .creationDate(certificate.getCreationDate())
+            .points(certificate.getPoints())
             .code(certificate.getCode()).build();
     }
 }

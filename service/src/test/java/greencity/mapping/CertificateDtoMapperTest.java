@@ -20,8 +20,8 @@ class CertificateDtoMapperTest {
         CertificateDto certificateDto = certificateDtoMapper.convert(certificate);
 
         Assertions.assertEquals(certificate.getCode(), certificateDto.getCode());
-        Assertions.assertEquals(certificate.getPoints(), certificateDto.getCertificatePoints());
-        Assertions.assertEquals(certificate.getCreationDate(), certificateDto.getCertificateDate());
+        Assertions.assertEquals(certificate.getPoints(), certificateDto.getPoints());
+        Assertions.assertEquals(certificate.getCreationDate(), certificateDto.getCreationDate());
         Assertions.assertEquals(certificate.getCertificateStatus().name(), certificateDto.getCertificateStatus());
     }
 }
