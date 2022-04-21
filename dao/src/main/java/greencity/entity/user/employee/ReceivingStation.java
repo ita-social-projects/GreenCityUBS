@@ -26,8 +26,8 @@ public class ReceivingStation {
     @Column(length = 50, nullable = false, unique = true)
     private String name;
 
-    @OneToOne
-    private TariffsInfo tariffsInfo;
+    @ManyToMany(mappedBy = "receivingStationList")
+    private Set<TariffsInfo> tariffsInfo;
 
     @ManyToMany(mappedBy = "receivingStation")
     private Set<Employee> employees;

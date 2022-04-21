@@ -5,11 +5,11 @@
     <changeSet id="2022-03-30-ch-add-columns-nameEn-and-nameUk-to-Locations-Fedorko" author="Yurii Fedorko">
 
         <addColumn tableName="locations">
-            <column name="name_Uk" type="VARCHAR"></column>
+            <column name="name_uk" type="VARCHAR"></column>
         </addColumn>
 
         <addColumn tableName="locations">
-            <column name="name_En" type="VARCHAR"></column>
+            <column name="name_en" type="VARCHAR"></column>
         </addColumn>
 
     </changeSet>

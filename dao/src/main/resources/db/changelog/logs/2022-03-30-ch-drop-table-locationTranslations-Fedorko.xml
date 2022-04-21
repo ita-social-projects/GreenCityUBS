@@ -8,6 +8,7 @@
                    catalogName="greencityubs"
                    schemaName="public"
                 tableName="location_translations"/>
+
         <dropTable cascadeConstraints="true"
                    catalogName="greencityubs"
                    schemaName="public"

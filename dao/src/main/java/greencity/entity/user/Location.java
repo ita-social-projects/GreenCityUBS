@@ -27,10 +27,10 @@ public class Location {
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
 
-    @Column(name = "name_Uk")
+    @Column(name = "name_uk")
     private String nameUk;
 
-    @Column(name = "name_En")
+    @Column(name = "name_en")
     private String nameEn;
 
     @Embedded
@@ -48,7 +48,10 @@ public class Location {
     @ManyToOne
     private Region region;
 
-    @ManyToOne
-    TariffsInfo tariffsInfo;
+    @ManyToMany
+    @JoinTable(name = "location_tariffs",
+      joinColumns = @JoinColumn(name = "location_id"),
+      inverseJoinColumns = @JoinColumn(name = "tariffs_info_id"))
+    List<TariffsInfo> tariffsInfoList;
 
 }

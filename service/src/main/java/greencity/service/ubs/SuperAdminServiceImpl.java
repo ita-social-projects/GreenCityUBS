@@ -22,7 +22,7 @@ import greencity.entity.language.Language;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierLocation;
+//import greencity.entity.order.CourierLocation;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.Service;
 import greencity.entity.order.ServiceTranslation;
@@ -55,7 +55,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     //private final LocationTranslationRepository locationTranslationRepository;
     private final CourierRepository courierRepository;
     private final CourierTranslationRepository courierTranslationRepository;
-    private final CourierLocationRepository courierLocationRepository;
+    //private final CourierLocationRepository courierLocationRepository;
     private final RegionRepository regionRepository;
     //private final RegionTranslationRepository regionTranslationRepository;
     private final ReceivingStationRepository receivingStationRepository;
@@ -285,6 +285,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
      */
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
+        Location location = locationRepository.findLocationByName(
+                dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst().get().getLocationName(),
+                dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst().get().getLocationName())
+                .orElse(null);
+        if (location != null) {
+            throw new LocationAlreadyCreatedException("The location with name: "
+                    + dto.get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+        }
+        /*-
         dto.forEach(locationTranslationDto -> {
             Location location =
                 locationRepository.findLocationByName(locationTranslationDto.getLocationName()).orElse(null);
@@ -293,6 +302,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                     + locationTranslationDto.getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
             }
         });
+
+         */
     }
 
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {

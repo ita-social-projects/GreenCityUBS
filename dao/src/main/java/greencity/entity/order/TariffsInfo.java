@@ -12,21 +12,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tariffs_info")
@@ -34,8 +23,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"services", "services", "bags", "receivingStations", "locations", "orders"})
-@EqualsAndHashCode(exclude = {"services", "services", "bags", "receivingStations", "locations", "orders"})
+@ToString(exclude = {"services", "services", "bags", "receivingStationList", "locations", "orders"})
+@EqualsAndHashCode(exclude = {"services", "services", "bags", "receivingStationList", "locations", "orders"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,8 +41,12 @@ public class TariffsInfo {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo", fetch = FetchType.LAZY)
     private List<Bag> bags;
 
-    @OneToOne(mappedBy = "tariffsInfo")
-    private ReceivingStation receivingStations;
+    //@OneToOne(mappedBy = "tariffsInfo")
+    @ManyToMany
+    @JoinTable(name = "station_tariffs",
+        joinColumns = @JoinColumn(name = "tariffs_info_id"),
+        inverseJoinColumns = @JoinColumn(name = "receiving_station_id"))
+    private Set<ReceivingStation> receivingStationList;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -65,16 +58,16 @@ public class TariffsInfo {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column
+    @Column(name="min_amount_of_big_bags")
     private Long minAmountOfBigBags;
 
-    @Column
+    @Column(name="max_amount_of_big_bags")
     private Long maxAmountOfBigBags;
 
-    @Column
+    @Column(name="min_price_of_order")
     private Long minPriceOfOrder;
 
-    @Column
+    @Column(name="max_price_of_order")
     private Long maxPriceOfOrder;
 
     @Column(name = "courier_limits")
@@ -84,8 +77,11 @@ public class TariffsInfo {
     @ManyToOne
     Courier courier;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
-    List<Location> locations;
+    @ManyToMany
+    @JoinTable(name = "location_tariffs",
+            joinColumns = @JoinColumn(name = "tariffs_info_id"),
+            inverseJoinColumns = @JoinColumn(name = "location_id"))
+    Set<Location> locations;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     List<Order> orders;
