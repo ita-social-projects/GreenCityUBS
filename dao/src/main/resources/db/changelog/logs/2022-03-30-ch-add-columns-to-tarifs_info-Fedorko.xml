@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="2022-03-30-ch-add-columns-to-tariffs_info-Fedorko" author="Yurii Fedorko">
+
+        <addColumn tableName="tariffs_info">
+            <column name="min_amount_of_big_bags" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tariffs_info">
+            <column name="max_amount_of_big_bags" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tariffs_info">
+            <column name="min_price_of_order" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tariffs_info">
+            <column name="max_price_of_order" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tariffs_info">
+            <column name="courier_limits" defaultValue="LIMIT_BY_AMOUNT_OF_BAG" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tariffs_info">
+            <column name="courier_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="courier_id"
+                                 constraintName="fk_tariffs_info_to_courier"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addColumn tableName="locations">
+            <column name="tariffs_info_id" type="bigint"></column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="locations"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_location_to_tariffs_info"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addColumn tableName="orders">
+            <column name="tariffs_info_id" type="bigint"></column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_orders_to_tariffs_info"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+        
+    </changeSet>
+</databaseChangeLog>
