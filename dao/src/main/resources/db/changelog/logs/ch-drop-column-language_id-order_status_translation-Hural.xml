@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Pavlo-1" author="Pavlo Hural">
+        <dropColumn tableName="order_status_translations">
+            <column name="language_id"/>
+        </dropColumn>
+
+        <addColumn tableName="order_status_translations">
+            <column name="name_eng" type="VARCHAR(60)"/>
+        </addColumn>
+
+        <dropColumn tableName="order_payment_status_translations">
+            <column name="language_id"/>
+        </dropColumn>
+
+        <addColumn tableName="order_payment_status_translations">
+            <column name="translation_value_eng" type="VARCHAR(60)" />
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
+

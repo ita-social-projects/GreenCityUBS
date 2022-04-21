@@ -20,7 +20,9 @@ public class GeneralOrderInfo {
     private List<OrderPaymentStatusesTranslationDto> orderPaymentStatusesDto;
     private OrderStatus orderStatus;
     private String orderStatusName;
+    private String orderStatusNameEng;
     private OrderPaymentStatus orderPaymentStatus;
     private String orderPaymentStatusName;
+    private String orderPaymentStatusNameEng;
     private String adminComment;
 }

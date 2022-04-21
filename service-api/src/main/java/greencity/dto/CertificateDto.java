@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 public class CertificateDto {
     private String certificateStatus;
-    private Integer certificatePoints;
-    private LocalDate certificateDate;
+    private Integer points;
+    private LocalDate creationDate;
     private String code;
 }

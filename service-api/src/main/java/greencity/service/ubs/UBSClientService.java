@@ -120,7 +120,7 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Oleksandr Khomiakov
      */
-    List<OrderStatusForUserDto> getOrdersForUser(String uuid, Long languageId, Pageable page);
+    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page);
 
     /**
      * Method returns list all bonuses of user.
@@ -266,7 +266,7 @@ public interface UBSClientService {
      * @return {@link OrderStatusPageDto}.
      * @author Igor Boykov
      */
-    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, Long languageId);
+    OrderStatusPageDto getOrderInfoForSurcharge(Long orderId);
 
     /**
      * Method for get info about payment status from LiqPay.
