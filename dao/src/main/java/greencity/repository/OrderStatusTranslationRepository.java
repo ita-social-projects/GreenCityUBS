@@ -36,6 +36,6 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      *
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderStatusTranslation AS ort WHERE ort.statusId = :statusId")
+    @Query("SELECT ort FROM OrderStatusTranslation AS ort")
     List<OrderStatusTranslation> getOrderStatusTranslationsId(@Param("statusId") Long statusId);
 }
