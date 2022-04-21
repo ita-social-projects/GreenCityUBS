@@ -424,7 +424,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private List<OrderStatusesTranslationDto> getOrderStatusesTranslation(Order order) {
         List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderStatusTranslation> orderStatusTranslations =
-            orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue());
+            orderStatusTranslationRepository.getOrderStatusTranslations((long) order.getOrderStatus().getNumValue());
         if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();

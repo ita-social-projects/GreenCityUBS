@@ -22,7 +22,7 @@ public interface OrderPaymentStatusTranslationRepository
      * @return {@link List}.
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort WHERE ort.orderPaymentStatusId = :paymentId")
+    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort")
     List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslations(
         @Param("paymentId") Long paymentId);
 
