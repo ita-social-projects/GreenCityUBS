@@ -16,28 +16,27 @@ import java.util.List;
 public interface OrderPaymentStatusTranslationRepository
     extends JpaRepository<OrderPaymentStatusTranslation, Long> {
     /**
-     * This method which is list payment statuses found by languageId.
+     * This method which is list payment statuses found by paymentId.
      *
-     * @param languageId {@link Long}.
+     * @param paymentId {@link Long}.
      * @return {@link List}.
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort WHERE ort.languageId = :languageId")
-    List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslationsByLanguageId(
-        @Param("languageId") Long languageId);
+    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort WHERE ort.orderPaymentStatusId = :paymentId")
+    List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslations(
+        @Param("paymentId") Long paymentId);
 
     /**
      * This is method which is find order payment status by paymentId and
      * languageId.
      *
      * @param paymentStatusId {@link Long}.
-     * @param languageId      {@link Long}.
      * @return {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort.translationValue FROM OrderPaymentStatusTranslation AS ort "
-        + "WHERE ort.orderPaymentStatusId = :paymentStatusId AND ort.languageId = :languageId")
-    String findByOrderPaymentStatusIdAndLanguageIdAAndTranslationValue(@Param("paymentStatusId") Long paymentStatusId,
-        @Param("languageId") Long languageId);
+    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort "
+        + "WHERE ort.orderPaymentStatusId = :paymentStatusId")
+    OrderPaymentStatusTranslation findByOrderPaymentStatusIdAndTranslationValue(
+        @Param("paymentStatusId") Long paymentStatusId);
 }

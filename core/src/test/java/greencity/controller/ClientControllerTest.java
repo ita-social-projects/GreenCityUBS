@@ -105,8 +105,8 @@ class ClientControllerTest {
 
     @Test
     void getDataForOrderStatusPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}/{langId}", 1L, 2L));
-        verify(ubsClientService).getOrderInfoForSurcharge(1L, 2L);
+        this.mockMvc.perform(get(ubsLink + "/get-data-for-order-surcharge/{id}", 1L));
+        verify(ubsClientService).getOrderInfoForSurcharge(1L);
     }
 
     @Test
@@ -125,7 +125,7 @@ class ClientControllerTest {
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
             .build();
 
-        this.mockMvc.perform(get(ubsLink + "/get-all-orders-data/{lang}", 1)
+        this.mockMvc.perform(get(ubsLink + "/user-orders", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());

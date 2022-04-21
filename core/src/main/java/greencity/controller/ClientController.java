@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
@@ -53,7 +54,7 @@ public class ClientController {
     /**
      * Controller for getting all user orders.
      *
-     * @return {@link List OrderStatusPageDto}.
+     * @return {@link List OrderStatusForUserDto}.
      * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for logged user")
@@ -61,13 +62,13 @@ public class ClientController {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/get-all-orders-data/{lang}")
-    public ResponseEntity<List<OrderStatusForUserDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long lang, @ApiIgnore Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, lang, page));
+    @GetMapping("/user-orders")
+    @ApiPageable
+    public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
+        @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page));
     }
 
     /**
@@ -206,11 +207,11 @@ public class ClientController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-data-for-order-surcharge/{id}/{langId}")
+    @GetMapping("/get-data-for-order-surcharge/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
-        @PathVariable(name = "id") Long orderId, @PathVariable(name = "langId") Long languageId) {
+        @PathVariable(name = "id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getOrderInfoForSurcharge(orderId, languageId));
+            .body(ubsClientService.getOrderInfoForSurcharge(orderId));
     }
 
     /**

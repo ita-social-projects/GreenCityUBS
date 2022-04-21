@@ -65,7 +65,7 @@ class OrdersAdminsPageServiceImplTest {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 1L))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
@@ -76,10 +76,10 @@ class OrdersAdminsPageServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 1L))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationByIdAndLanguageId(1, 2L))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));

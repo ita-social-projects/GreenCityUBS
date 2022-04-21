@@ -122,5 +122,7 @@
     <include file="db/changelog/logs/20221102-ch-add-column-created-at-into-tariffs-info-table-Melnyk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-for-receiving-stations-and-couriers-Bohonko.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Yezenitskyi.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-language_id-order_status_translation-Hural.xml"/>
+    <include file="db/changelog/logs/ch-update-order_status_translation-Hural.xml"/>
 </databaseChangeLog>
 

@@ -19,9 +19,9 @@ public class OrderPaymentStatusTranslation {
     @Column(name = "translation_value", length = 30)
     private String translationValue;
 
+    @Column(name = "translation_value_eng", length = 30)
+    private String translationsValueEng;
+
     @Column(name = "order_payment_status_id")
     private Long orderPaymentStatusId;
-
-    @Column(name = "language_id")
-    private Long languageId;
 }
