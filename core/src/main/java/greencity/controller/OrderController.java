@@ -30,15 +30,15 @@ import java.util.Map;
 @Validated
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private static RedirectionConfigProp redirectionConfigProp;
+    private final RedirectionConfigProp redirectionConfigProp;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService) {
+    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
         this.ubsClientService = ubsClientService;
-        redirectionConfigProp = new RedirectionConfigProp();
+        this.redirectionConfigProp = redirectionConfigProp;
     }
 
     /**
