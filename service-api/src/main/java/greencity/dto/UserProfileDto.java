@@ -31,4 +31,5 @@ public class UserProfileDto {
     private String recipientPhone;
     private List<AddressDto> addressDto;
     private List<Bot> botList;
+    private Boolean hasPassword;
 }
