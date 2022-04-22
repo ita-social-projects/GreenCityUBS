@@ -32,7 +32,6 @@ public class OrderController {
     private final UBSClientService ubsClientService;
     private final RedirectionConfigProp redirectionConfigProp;
 
-
     /**
      * Constructor with parameters.
      */
@@ -41,7 +40,6 @@ public class OrderController {
         this.ubsClientService = ubsClientService;
         this.redirectionConfigProp = redirectionConfigProp;
     }
-
 
     /**
      * Controller returns all available bags and bonus points of current user.
