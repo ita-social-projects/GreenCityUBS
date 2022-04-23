@@ -77,7 +77,7 @@ public interface UBSClientService {
     /**
      * Method that save address for current user.
      *
-     * @param dtoRequest {@link OrderAddressDtoRequest} information about address;
+     * @param requestDto {@link CreateAddressRequestDto} information about address;
      * @param uuid       current {@link User}'s uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
      *         save address;

@@ -12,7 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id","actual"})
+@EqualsAndHashCode(exclude = {"id", "actual"})
 @ToString
 @Builder
 public class OrderAddressDtoRequest {

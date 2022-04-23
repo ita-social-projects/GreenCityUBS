@@ -567,94 +567,82 @@ class UBSClientServiceImplTest {
         return Arrays.asList(addressDto1, addressDto2);
     }
 
-/*    @Test
-    void testSaveCurrentAddressForOrder() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-        User user = new User();
-        user.setId(13L);
-        List<Address> addresses = getTestAddresses(user);
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-
-        addresses.get(0).setActual(false);
-        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
-
-        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
-        dtoRequest.setId(42L);
-        when(addressRepository.findById(dtoRequest.getId())).thenReturn(Optional.of(addresses.get(0)));
-        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
-
-        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER); // AddressStatus.DELETED
-
-        ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
-
-        verify(addressRepository, times(1)).save(addresses.get(0));
-    }
-
-    @Test
-    void testSaveCurrentAddressForOrderThrows() {
-        String uuid = "35467585763t4sfgchjfuyetf";
-        User user = new User();
-        user.setId(13L);
-        List<Address> addresses = getTestAddresses(user);
-
-        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
-        dtoRequest.setId(42L);
-
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
-
-        assertThrows(AddressAlreadyExistException.class,
-            () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
-    }
-
-    @Test
-    void saveCurrentAddressForOrderWithDeletedAddress() {
-        User user = getTestUser();
-        List<Address> addresses = getTestAddresses(user);
-        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
-            .id(1L)
-            .addressComment("comment")
-            .build();
-        Address deletedAddress = Address.builder()
-            .id(1L)
-            .user(user)
-            .addressStatus(AddressStatus.DELETED)
-            .build();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
-        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
-
-        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-
-        verify(addressRepository, times(addresses.size() + 1)).save(any());
-    }
-
-    @Test
-    void saveCurrentAddressForOrderWithAnotherUser() {
-        User user = getTestUser();
-        User anotherUser = getUser().setId(2L);
-        List<Address> addresses = getTestAddresses(anotherUser);
-        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
-            .id(13L)
-            .addressComment("comment")
-            .build();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)));
-        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
-        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
-
-        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-
-        verify(addressRepository, times(addresses.size() + 1)).save(any());
-    }*/
+    /*
+     * @Test void testSaveCurrentAddressForOrder() { String uuid =
+     * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
+     * List<Address> addresses = getTestAddresses(user);
+     * when(userRepository.findByUuid(uuid)).thenReturn(user);
+     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+     * when(modelMapper.map(any(),
+     * eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST)
+     * ;
+     * 
+     * addresses.get(0).setActual(false);
+     * when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+     * 
+     * OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+     * dtoRequest.setId(42L);
+     * when(addressRepository.findById(dtoRequest.getId())).thenReturn(Optional.of(
+     * addresses.get(0))); when(modelMapper.map(dtoRequest,
+     * Address.class)).thenReturn(new Address());
+     * 
+     * addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER); //
+     * AddressStatus.DELETED
+     * 
+     * ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
+     * 
+     * verify(addressRepository, times(1)).save(addresses.get(0)); }
+     * 
+     * @Test void testSaveCurrentAddressForOrderThrows() { String uuid =
+     * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
+     * List<Address> addresses = getTestAddresses(user);
+     * 
+     * OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+     * dtoRequest.setId(42L);
+     * 
+     * when(userRepository.findByUuid(uuid)).thenReturn(user);
+     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+     * when(modelMapper.map(any(),
+     * eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
+     * 
+     * assertThrows(AddressAlreadyExistException.class, () ->
+     * ubsService.saveCurrentAddressForOrder(dtoRequest, uuid)); }
+     * 
+     * @Test void saveCurrentAddressForOrderWithDeletedAddress() { User user =
+     * getTestUser(); List<Address> addresses = getTestAddresses(user);
+     * OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder() .id(1L)
+     * .addressComment("comment") .build(); Address deletedAddress =
+     * Address.builder() .id(1L) .user(user) .addressStatus(AddressStatus.DELETED)
+     * .build();
+     * 
+     * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+     * when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
+     * when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new
+     * OrderAddressDtoRequest()); when(modelMapper.map(dtoRequest,
+     * Address.class)).thenReturn(new Address());
+     * 
+     * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
+     * 
+     * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
+     * 
+     * @Test void saveCurrentAddressForOrderWithAnotherUser() { User user =
+     * getTestUser(); User anotherUser = getUser().setId(2L); List<Address>
+     * addresses = getTestAddresses(anotherUser); OrderAddressDtoRequest dtoRequest
+     * = OrderAddressDtoRequest.builder() .id(13L) .addressComment("comment")
+     * .build();
+     * 
+     * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+     * when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)
+     * )); when(modelMapper.map(any(),
+     * eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
+     * when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
+     * 
+     * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
+     * 
+     * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
+     */
 
     @Test
     void testDeleteCurrentAddressForOrder() {

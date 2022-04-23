@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
@@ -96,7 +94,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
     @Value("${greencity.authorization.googleApiKey}")
-    private String GOOGLE_API_KEY;
+    private String googleApiKey;
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
     private final EventService eventService;
@@ -327,7 +325,8 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto, String uuid) {
+    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto,
+        String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
@@ -373,9 +372,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
-    private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest){
-        List<Locale> locales = List.of(new Locale("uk"),new Locale("en"));
-        GeoApiContext context = new GeoApiContext.Builder().apiKey(GOOGLE_API_KEY).build();
+    private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest) {
+        List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
+        GeoApiContext context = new GeoApiContext.Builder().apiKey(googleApiKey).build();
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
         locales.forEach(locale -> {
@@ -384,7 +383,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .address(searchRequest).language(locale.getLanguage()).await();
                 Collections.addAll(geocodingResults, results);
             } catch (IOException | InterruptedException | ApiException e) {
-                throw new RuntimeException( e.getMessage());
+                throw new RuntimeException(e.getMessage());
             }
         });
         return getLocationDto(geocodingResults);
@@ -433,23 +432,26 @@ public class UBSClientServiceImpl implements UBSClientService {
         });
 
         Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
+            Arrays.stream(addressComponent.types)
+                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
                 .forEach(type -> orderAddressDtoRequest.setRegion(addressComponent.longName));
         });
 
         Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
+            Arrays.stream(addressComponent.types)
+                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
                 .forEach(type -> orderAddressDtoRequest.setRegionEn(addressComponent.longName));
         });
 
         double latitude = ukrLang.geometry.location.lat;
         double longitude = ukrLang.geometry.location.lng;
-        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude,longitude));
+        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
         return orderAddressDtoRequest;
     }
 
-    private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest, CreateAddressRequestDto addressRequestDto) {
+    private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest,
+        CreateAddressRequestDto addressRequestDto) {
         if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
             dtoRequest.setRegion(addressRequestDto.getRegionUa());
             dtoRequest.setRegionEn(addressRequestDto.getRegionEng());
