@@ -83,7 +83,7 @@ public interface UBSClientService {
      *         save address;
      * @author Veremchuk Zakhar
      */
-    OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid);
+    OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
 
     /**
      * Method that delete user address.

@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
+import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -40,6 +43,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -55,7 +66,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
     private final BagTranslationRepository bagTranslationRepository;
-    private final LocationTranslationRepository locationTranslationRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -69,11 +79,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrdersForUserRepository ordersForUserRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-    private final OrderUtils orderUtils;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    private final LanguageRepository languageRepository;
     private final CourierLocationRepository courierLocationRepository;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
@@ -87,6 +95,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
+    @Value("${greencity.authorization.googleApiKey}")
+    private String GOOGLE_API_KEY;
     private static final Integer BAG_CAPACITY = 120;
     public static final String LANG_CODE = "ua";
     private final EventService eventService;
@@ -317,15 +327,19 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid) {
+    public OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto addressRequestDto, String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+
+        OrderAddressDtoRequest dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
+        checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDto);
+
         if (addresses != null) {
             boolean exist = addresses.stream()
-                .filter(a -> !a.getAddressStatus().equals(AddressStatus.DELETED))
-                .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
-                .anyMatch(d -> d.equals(dtoRequest));
+                .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
+                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
+                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
             if (exist) {
                 throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
@@ -357,6 +371,102 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest){
+        List<Locale> locales = List.of(new Locale("uk"),new Locale("en"));
+        GeoApiContext context = new GeoApiContext.Builder().apiKey(GOOGLE_API_KEY).build();
+        List<GeocodingResult> geocodingResults = new ArrayList<>();
+
+        locales.forEach(locale -> {
+            try {
+                GeocodingResult[] results = GeocodingApi.newRequest(context)
+                    .address(searchRequest).language(locale.getLanguage()).await();
+                Collections.addAll(geocodingResults, results);
+            } catch (IOException | InterruptedException | ApiException e) {
+                throw new RuntimeException( e.getMessage());
+            }
+        });
+        return getLocationDto(geocodingResults);
+    }
+
+    private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
+        OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
+        GeocodingResult ukrLang = geocodingResults.get(0);
+        GeocodingResult engLang = geocodingResults.get(1);
+
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
+                .forEach(type -> orderAddressDtoRequest.setCity(addressComponent.longName));
+        });
+        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
+                .forEach(type -> orderAddressDtoRequest.setCityEn(addressComponent.longName));
+        });
+
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
+                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
+        });
+
+        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
+                .forEach(type -> orderAddressDtoRequest.setStreetEn(addressComponent.longName));
+        });
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
+                .forEach(type -> orderAddressDtoRequest.setStreet(addressComponent.longName));
+        });
+
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
+                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
+        });
+
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
+                .forEach(type -> orderAddressDtoRequest.setDistrict(addressComponent.longName));
+        });
+        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
+                .forEach(type -> orderAddressDtoRequest.setDistrictEn(addressComponent.longName));
+        });
+
+        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
+                .forEach(type -> orderAddressDtoRequest.setRegion(addressComponent.longName));
+        });
+
+        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
+            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
+                .forEach(type -> orderAddressDtoRequest.setRegionEn(addressComponent.longName));
+        });
+
+        double latitude = ukrLang.geometry.location.lat;
+        double longitude = ukrLang.geometry.location.lng;
+        orderAddressDtoRequest.setCoordinates(new Coordinates(latitude,longitude));
+
+        return orderAddressDtoRequest;
+    }
+
+    private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest, CreateAddressRequestDto addressRequestDto) {
+        if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
+            dtoRequest.setRegion(addressRequestDto.getRegionUa());
+            dtoRequest.setRegionEn(addressRequestDto.getRegionEng());
+        }
+
+        if (dtoRequest.getDistrict() == null && dtoRequest.getDistrictEn() == null) {
+            dtoRequest.setDistrict(addressRequestDto.getDistrictUa());
+            dtoRequest.setDistrictEn(addressRequestDto.getDistrictEng());
+        }
+
+        if (dtoRequest.getHouseNumber() == null) {
+            dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
+        }
+        dtoRequest.setEntranceNumber(addressRequestDto.getEntranceNumber());
+        dtoRequest.setHouseCorpus(addressRequestDto.getHouseCorpus());
+        dtoRequest.setAddressComment(addressRequestDto.getAddressComment());
+        dtoRequest.setId(0L);
     }
 
     /**

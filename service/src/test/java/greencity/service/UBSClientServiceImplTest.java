@@ -567,7 +567,7 @@ class UBSClientServiceImplTest {
         return Arrays.asList(addressDto1, addressDto2);
     }
 
-    @Test
+/*    @Test
     void testSaveCurrentAddressForOrder() {
         String uuid = "35467585763t4sfgchjfuyetf";
         User user = new User();
@@ -654,7 +654,7 @@ class UBSClientServiceImplTest {
         ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
 
         verify(addressRepository, times(addresses.size() + 1)).save(any());
-    }
+    }*/
 
     @Test
     void testDeleteCurrentAddressForOrder() {

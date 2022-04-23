@@ -179,7 +179,7 @@ public class OrderController {
     })
     @PostMapping("/save-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> saveAddressForOrder(
-        @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
+        @Valid @RequestBody CreateAddressRequestDto dtoRequest,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsClientService.saveCurrentAddressForOrder(dtoRequest, uuid));
