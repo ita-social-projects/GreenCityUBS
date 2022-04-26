@@ -9,6 +9,8 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.client.UserRemoteClient;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,10 @@ class OrderControllerTest {
     @Mock
     UserRemoteClient userRemoteClient;
 
+    @Mock
+    OrderRepository orderRepository;
+    @Mock
+    NotificationService notificationService;
     @InjectMocks
     OrderController orderController;
 
