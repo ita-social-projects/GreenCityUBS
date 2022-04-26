@@ -147,7 +147,7 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        @RequestBody PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
             notifyPaidOrder(dto.getOrder_id());
@@ -453,7 +453,7 @@ public class OrderController {
     })
     @PostMapping("/receivePaymentClient")
     public ResponseEntity<HttpStatus> receivePaymentClient(
-        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        @RequestBody PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
             notifyPaidOrder(dto.getOrder_id());

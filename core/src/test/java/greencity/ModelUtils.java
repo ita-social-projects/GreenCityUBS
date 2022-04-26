@@ -412,7 +412,7 @@ public class ModelUtils {
 
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
-            .order_id("1")
+            .order_id("1_1")
             .merchant_id(1)
             .actual_amount(1)
             .actual_currency("1")
