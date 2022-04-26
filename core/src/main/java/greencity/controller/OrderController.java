@@ -463,7 +463,8 @@ public class OrderController {
     }
 
     private void notifyPaidOrder(String orderId) {
-        if (orderRepository.findById(Long.valueOf(orderId.split("_")[0])).isPresent())
+        if (orderRepository.findById(Long.valueOf(orderId.split("_")[0])).isPresent()) {
             notificationService.notifyPaidOrder(orderRepository.findById(Long.valueOf(orderId.split("_")[0])).get());
+        }
     }
 }
