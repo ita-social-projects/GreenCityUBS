@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
+import greencity.dto.PaymentResponseDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
@@ -14,8 +15,10 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,8 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Method;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -74,6 +79,7 @@ class NotificationeServiceImplTest {
     @Mock
     private ExecutorService executorService;
 
+    @Spy
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
@@ -145,6 +151,16 @@ class NotificationeServiceImplTest {
 
             verify(userNotificationRepository, times(1)).save(TEST_USER_NOTIFICATION);
 
+        }
+
+        @Test
+        @SneakyThrows
+        void notifyPaidOrder() {
+            Order order = Order.builder().id(1L).build();
+            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+            PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
+            notificationService.notifyPaidOrder(dto);
+            verify(notificationService).notifyPaidOrder(order);
         }
 
         @Test
