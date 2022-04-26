@@ -461,7 +461,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
     private void notifyPaidOrder(String orderId) {
-        if (orderRepository.findById(1L).isPresent())
+        if (orderRepository.findById(Long.valueOf(orderId.split("_")[0])).isPresent())
             notificationService.notifyPaidOrder(orderRepository.findById(Long.valueOf(orderId.split("_")[0])).get());
     }
 }

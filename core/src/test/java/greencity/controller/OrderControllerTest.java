@@ -1,7 +1,10 @@
 package greencity.controller;
 
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
@@ -9,9 +12,11 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.client.UserRemoteClient;
+import greencity.entity.order.Order;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -332,6 +337,19 @@ class OrderControllerTest {
         mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
             .andExpect(status().isOk());
     }
+
+    @Test
+    @SneakyThrows
+    void notifyPaidOrder() {
+        Order order = Order.builder().id(1L).build();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        Method method = OrderController.class.getDeclaredMethod("notifyPaidOrder", String.class);
+        method.setAccessible(true);
+        method.invoke(orderController, "1_1");
+        verify(notificationService).notifyPaidOrder(order);
+    }
+
+
 
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
