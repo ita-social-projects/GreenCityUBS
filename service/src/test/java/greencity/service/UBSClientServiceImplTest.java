@@ -507,6 +507,7 @@ class UBSClientServiceImplTest {
         List<Bot> botList = ModelUtils.botList();
         userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
+        when(userRemoteClient.hasPassword()).thenReturn(new HasPasswordDto(true));
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
         for (Bot bot : botList) {
             assertNotNull(bot);

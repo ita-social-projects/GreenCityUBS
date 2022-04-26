@@ -3,6 +3,7 @@ package greencity.client;
 import greencity.dto.UbsCustomersDto;
 import greencity.dto.UserVO;
 import greencity.dto.UserViolationMailDto;
+import greencity.dto.HasPasswordDto;
 import greencity.entity.user.User;
 import greencity.client.config.UserRemoteClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -64,4 +65,12 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/markUserAsDeactivated")
     void markUserDeactivated(@RequestParam(UUID) String uuid);
+
+    /**
+     * Checks if current user has a password set.
+     *
+     * @return {@link HasPasswordDto} with {@link Boolean} field.
+     */
+    @GetMapping("/ownSecurity/has-password")
+    HasPasswordDto hasPassword();
 }
