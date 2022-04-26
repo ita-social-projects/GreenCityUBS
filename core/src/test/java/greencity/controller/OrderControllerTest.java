@@ -349,8 +349,6 @@ class OrderControllerTest {
         verify(notificationService).notifyPaidOrder(order);
     }
 
-
-
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
 

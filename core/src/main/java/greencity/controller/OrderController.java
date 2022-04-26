@@ -41,13 +41,14 @@ public class OrderController {
      */
     @Autowired
     public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
-                NotificationService notificationService,
-                OrderRepository orderRepository) {
+        NotificationService notificationService,
+        OrderRepository orderRepository) {
         this.ubsClientService = ubsClientService;
         this.redirectionConfigProp = redirectionConfigProp;
         this.notificationService = notificationService;
         this.orderRepository = orderRepository;
     }
+
     /**
      * Controller returns all available bags and bonus points of current user.
      * {@link greencity.dto.UserVO}.
@@ -460,6 +461,7 @@ public class OrderController {
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     private void notifyPaidOrder(String orderId) {
         if (orderRepository.findById(Long.valueOf(orderId.split("_")[0])).isPresent())
             notificationService.notifyPaidOrder(orderRepository.findById(Long.valueOf(orderId.split("_")[0])).get());
