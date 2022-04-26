@@ -7,6 +7,8 @@ import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
 import greencity.entity.user.User;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,14 +33,20 @@ import java.util.Map;
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final RedirectionConfigProp redirectionConfigProp;
+    private final NotificationService notificationService;
+    private final OrderRepository orderRepository;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
+    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
+        NotificationService notificationService,
+        OrderRepository orderRepository) {
         this.ubsClientService = ubsClientService;
         this.redirectionConfigProp = redirectionConfigProp;
+        this.notificationService = notificationService;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -142,6 +150,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
+            notifyPaidOrder(dto.getOrder_id());
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -447,8 +456,13 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
+            notifyPaidOrder(dto.getOrder_id());
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private void notifyPaidOrder(String orderId) {
+        notificationService.notifyPaidOrder(orderRepository.findById(Long.valueOf(orderId.split("_")[0])).get());
     }
 }
