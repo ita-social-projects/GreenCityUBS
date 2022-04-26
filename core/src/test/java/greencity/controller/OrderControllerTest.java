@@ -338,17 +338,6 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
-    @Test
-    @SneakyThrows
-    void notifyPaidOrder() {
-        Order order = Order.builder().id(1L).build();
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        Method method = OrderController.class.getDeclaredMethod("notifyPaidOrder", String.class);
-        method.setAccessible(true);
-        method.invoke(orderController, "1_1");
-        verify(notificationService).notifyPaidOrder(order);
-    }
-
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
 
