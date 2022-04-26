@@ -6,6 +6,7 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
+import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.NotificationService;
@@ -26,6 +27,7 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ubs")
@@ -463,8 +465,9 @@ public class OrderController {
     }
 
     private void notifyPaidOrder(String orderId) {
-        if (orderRepository.findById(Long.valueOf(orderId.split("_")[0])).isPresent()) {
-            notificationService.notifyPaidOrder(orderRepository.findById(Long.valueOf(orderId.split("_")[0])).get());
+        Optional<Order> orderOptional = orderRepository.findById(Long.valueOf(orderId.split("_")[0]));
+        if (orderOptional.isPresent()) {
+            notificationService.notifyPaidOrder(orderOptional.get());
         }
     }
 }
