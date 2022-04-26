@@ -112,6 +112,17 @@ public class NotificationServiceImpl implements NotificationService {
         sendNotificationsForBotsAndEmail(notification);
     }
 
+    @Override
+    public void notifyPaidOrder(PaymentResponseDto dto) {
+        if (dto.getOrder_id() != null) {
+            Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
+            Optional<Order> orderOptional = orderRepository.findById(orderId);
+            if (orderOptional.isPresent()) {
+                notifyPaidOrder(orderOptional.get());
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

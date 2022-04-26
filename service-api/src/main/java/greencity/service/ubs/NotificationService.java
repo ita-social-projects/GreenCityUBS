@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.NotificationDto;
 import greencity.dto.NotificationShortDto;
 import greencity.dto.PageableDto;
+import greencity.dto.PaymentResponseDto;
 import greencity.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
@@ -20,6 +21,13 @@ public interface NotificationService {
      * @author Ann Sakhno
      */
     void notifyPaidOrder(Order order);
+
+    /**
+     * Method that creates notification for paid order from PaymentResponseDto.
+     *
+     * @author Danylo Hlynskyi
+     */
+    void notifyPaidOrder(PaymentResponseDto dto);
 
     /**
      * Method that creates notification for courier.

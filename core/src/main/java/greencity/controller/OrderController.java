@@ -6,9 +6,7 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.*;
-import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.repository.OrderRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +25,6 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/ubs")
@@ -36,19 +33,16 @@ public class OrderController {
     private final UBSClientService ubsClientService;
     private final RedirectionConfigProp redirectionConfigProp;
     private final NotificationService notificationService;
-    private final OrderRepository orderRepository;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
     public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
-        NotificationService notificationService,
-        OrderRepository orderRepository) {
+        NotificationService notificationService) {
         this.ubsClientService = ubsClientService;
         this.redirectionConfigProp = redirectionConfigProp;
         this.notificationService = notificationService;
-        this.orderRepository = orderRepository;
     }
 
     /**
@@ -149,10 +143,10 @@ public class OrderController {
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<HttpStatus> receivePayment(
-        @RequestBody PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notifyPaidOrder(dto.getOrder_id());
+            notificationService.notifyPaidOrder(dto);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -455,19 +449,12 @@ public class OrderController {
     })
     @PostMapping("/receivePaymentClient")
     public ResponseEntity<HttpStatus> receivePaymentClient(
-        @RequestBody PaymentResponseDto dto, HttpServletResponse response) throws IOException {
+        PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
-            notifyPaidOrder(dto.getOrder_id());
+            notificationService.notifyPaidOrder(dto);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    private void notifyPaidOrder(String orderId) {
-        Optional<Order> orderOptional = orderRepository.findById(Long.valueOf(orderId.split("_")[0]));
-        if (orderOptional.isPresent()) {
-            notificationService.notifyPaidOrder(orderOptional.get());
-        }
     }
 }
