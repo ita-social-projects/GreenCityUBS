@@ -215,6 +215,18 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    public void notifyBonusesFromCanceledOrder(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder().key("returnedPayment")
+                .value(String.valueOf(order.getPointsToUse())).build());
+
+        fillAdnSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void notifyAddViolation(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         violationRepository.findByOrderId(order.getId())
