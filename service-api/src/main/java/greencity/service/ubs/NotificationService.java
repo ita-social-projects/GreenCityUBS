@@ -51,6 +51,13 @@ public interface NotificationService {
     void notifyBonuses(Order order, Long overpayment);
 
     /**
+     * Method that creates notification for users bonuses from cancelled order.
+     *
+     * @author Danylo Hlynskyi
+     */
+    void notifyBonusesFromCanceledOrder(Order order);
+
+    /**
      * Method that creates notification for new violations.
      *
      * @author Ann Sakhno
