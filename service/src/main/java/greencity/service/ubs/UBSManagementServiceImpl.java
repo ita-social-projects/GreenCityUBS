@@ -828,6 +828,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                notificationService.notifyBonuses(order, order.getPointsToUse().longValue());
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),
