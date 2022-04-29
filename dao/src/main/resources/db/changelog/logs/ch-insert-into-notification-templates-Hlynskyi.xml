@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Hlynskyi-1" author="Danylo Hlynskyi">
+        <insert tableName="notification_templates">
+            <column name="language_id">1</column>
+            <column name="notification_type">BONUSES_FROM_CANCELLED_ORDER</column>
+            <column name="title">Нараховано бонуси</column>
+            <column name="body">Вітання! Переплата у розмірі ${returnedPayment} грн зарахована на Ваш бонусний рахунок</column>
+            <column name="notification_receiver_type">SITE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_id">2</column>
+            <column name="notification_type">BONUSES_FROM_CANCELLED_ORDER</column>
+            <column name="title">Unpaid order</column>
+            <column name="body">Hello! Overpayment in the amount of ${returnedPayment} UAH is credited to your bonus account</column>
+            <column name="notification_receiver_type">SITE</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_id">1</column>
+            <column name="notification_type">BONUSES_FROM_CANCELLED_ORDER</column>
+            <column name="title">Нараховано бонуси</column>
+            <column name="body">Вітання! Переплата у розмірі ${returnedPayment} грн зарахована на Ваш бонусний рахунок</column>
+            <column name="notification_receiver_type">OTHER</column>
+        </insert>
+        <insert tableName="notification_templates">
+            <column name="language_id">2</column>
+            <column name="notification_type">BONUSES_FROM_CANCELLED_ORDER</column>
+            <column name="title">Unpaid order</column>
+            <column name="body">Hello! Overpayment in the amount of ${returnedPayment} UAH is credited to your bonus account</column>
+            <column name="notification_receiver_type">OTHER</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

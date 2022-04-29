@@ -55,11 +55,14 @@ public class ModelUtils {
     public static final Order TEST_ORDER_2 = createTestOrder2();
     public static final Order TEST_ORDER_3 = createTestOrder3();
     public static final Order TEST_ORDER_4 = createTestOrder4();
+    public static final Order TEST_ORDER_5 = createTestOrder5();
     public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET = createNotificationParameterSet();
+    public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET2 = createNotificationParameterSet2();
     public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
     public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
     public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
+    public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
@@ -1835,6 +1838,12 @@ public class ModelUtils {
             .build();
     }
 
+    private static Order createTestOrder5() {
+        return Order.builder().id(45L).user(User.builder().id(42L).build())
+            .orderDate(LocalDateTime.now()).pointsToUse(200)
+            .build();
+    }
+
     private static UserNotification createUserNotification3() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
@@ -1852,6 +1861,14 @@ public class ModelUtils {
         return userNotification;
     }
 
+    private static UserNotification createUserNotification5() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.BONUSES_FROM_CANCELLED_ORDER);
+        userNotification.setUser(TEST_ORDER_5.getUser());
+        userNotification.setOrder(TEST_ORDER_5);
+        return userNotification;
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet() {
         Set<NotificationParameter> parameters = new HashSet<>();
 
@@ -1861,6 +1878,15 @@ public class ModelUtils {
             .value(String.valueOf(0)).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(String.valueOf(0)).build());
+
+        return parameters;
+    }
+
+    private static Set<NotificationParameter> createNotificationParameterSet2() {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder().key("returnedPayment")
+            .value(String.valueOf(200L)).build());
 
         return parameters;
     }
