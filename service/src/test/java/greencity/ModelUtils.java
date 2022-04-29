@@ -1840,8 +1840,8 @@ public class ModelUtils {
 
     private static Order createTestOrder5() {
         return Order.builder().id(45L).user(User.builder().id(42L).build())
-                .orderDate(LocalDateTime.now()).pointsToUse(200)
-                .build();
+            .orderDate(LocalDateTime.now()).pointsToUse(200)
+            .build();
     }
 
     private static UserNotification createUserNotification3() {
@@ -1860,6 +1860,7 @@ public class ModelUtils {
         userNotification.setOrder(TEST_ORDER_3);
         return userNotification;
     }
+
     private static UserNotification createUserNotification5() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.BONUSES_FROM_CANCELLED_ORDER);
@@ -1885,7 +1886,7 @@ public class ModelUtils {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder().key("returnedPayment")
-                .value(String.valueOf(200L)).build());
+            .value(String.valueOf(200L)).build());
 
         return parameters;
     }

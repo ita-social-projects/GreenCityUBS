@@ -221,18 +221,18 @@ class NotificationeServiceImplTest {
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_5)).thenReturn(TEST_USER_NOTIFICATION_5);
 
             TEST_NOTIFICATION_PARAMETER_SET2
-                    .forEach(parameter -> parameter.setUserNotification(TEST_USER_NOTIFICATION_5));
+                .forEach(parameter -> parameter.setUserNotification(TEST_USER_NOTIFICATION_5));
 
             when(notificationParameterRepository.saveAll(TEST_NOTIFICATION_PARAMETER_SET2))
-                    .thenReturn(new LinkedList<>(TEST_NOTIFICATION_PARAMETER_SET2));
+                .thenReturn(new LinkedList<>(TEST_NOTIFICATION_PARAMETER_SET2));
 
             notificationService.notifyBonusesFromCanceledOrder(TEST_ORDER_5);
-
 
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(TEST_NOTIFICATION_PARAMETER_SET2);
 
         }
+
         @Test
         void testNotifyAddViolation() {
             when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(TEST_VIOLATION));

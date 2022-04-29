@@ -219,10 +219,11 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder().key("returnedPayment")
-                .value(String.valueOf(order.getPointsToUse())).build());
+            .value(String.valueOf(order.getPointsToUse())).build());
 
         fillAdnSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
     }
+
     /**
      * {@inheritDoc}
      */
