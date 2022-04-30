@@ -1,7 +1,5 @@
 package greencity.dto.order;
 
-import greencity.dto.order.OrderPaymentStatusesTranslationDto;
-import greencity.dto.order.OrderStatusesTranslationDto;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import lombok.*;

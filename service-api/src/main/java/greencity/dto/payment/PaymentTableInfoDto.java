@@ -1,6 +1,5 @@
 package greencity.dto.payment;
 
-import greencity.dto.payment.PaymentInfoDto;
 import lombok.*;
 
 import java.util.List;

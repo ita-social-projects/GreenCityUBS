@@ -1,6 +1,5 @@
 package greencity.dto.notification;
 
-import greencity.dto.notification.NotificationScheduleDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

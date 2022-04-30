@@ -1,6 +1,5 @@
 package greencity.dto.courier;
 
-import greencity.dto.courier.CourierDto;
 import lombok.*;
 
 import java.util.List;
