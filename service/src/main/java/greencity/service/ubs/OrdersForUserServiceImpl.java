@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
-import greencity.dto.UserOrdersDto;
-import greencity.dto.UserWithOrdersDto;
+import greencity.dto.order.UserOrdersDto;
+import greencity.dto.order.UserWithOrdersDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;

@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.CourierInfoDto;
+import greencity.dto.courier.CourierInfoDto;
 import greencity.entity.order.CourierLocation;
 import org.modelmapper.AbstractConverter;
 

@@ -3,6 +3,31 @@ package greencity;
 import com.google.common.collect.Lists;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
+import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressInfoDto;
+import greencity.dto.bag.*;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.certificate.CertificateDtoForAdding;
+import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.courier.*;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.*;
+import greencity.dto.location.*;
+import greencity.dto.notification.*;
+import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.*;
+import greencity.dto.position.PositionDto;
+import greencity.dto.service.*;
+import greencity.dto.table.UbsTableCreationDto;
+import greencity.dto.tariff.*;
+import greencity.dto.user.*;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.UserViolationMailDto;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
@@ -99,7 +124,7 @@ public class ModelUtils {
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
-    public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
+    public static final RequestToChangeOrdersDataDto REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
         getRequestToChangeOrdersDataDTO();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
@@ -3180,8 +3205,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
-        return RequestToChangeOrdersDataDTO.builder()
+    public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDto.builder()
             .columnName("orderStatus")
             .orderId(List.of(1l))
             .newValue("1")

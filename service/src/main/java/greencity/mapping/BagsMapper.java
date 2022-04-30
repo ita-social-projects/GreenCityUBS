@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.BagTransDto;
+import greencity.dto.bag.BagTransDto;
 import greencity.entity.order.BagTranslation;
 import org.modelmapper.AbstractConverter;
 

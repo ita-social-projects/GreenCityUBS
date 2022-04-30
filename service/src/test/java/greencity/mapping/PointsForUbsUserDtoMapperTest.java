@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.PointsForUbsUserDto;
+import greencity.dto.user.PointsForUbsUserDto;
 import greencity.entity.order.ChangeOfPoints;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

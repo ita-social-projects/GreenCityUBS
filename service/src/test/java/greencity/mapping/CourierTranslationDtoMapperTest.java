@@ -2,7 +2,7 @@ package greencity.mapping;
 
 import static greencity.ModelUtils.getLanguage;
 
-import greencity.dto.CourierTranslationDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.CourierTranslation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;

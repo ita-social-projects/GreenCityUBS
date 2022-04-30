@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.ServiceTranslationDto;
+import greencity.dto.service.ServiceTranslationDto;
 import greencity.entity.order.ServiceTranslation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

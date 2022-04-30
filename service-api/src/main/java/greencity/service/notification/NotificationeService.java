@@ -1,8 +1,8 @@
 package greencity.service.notification;
 
-import greencity.dto.AddingViolationsToUserDto;
-import greencity.dto.NotificationTemplateDto;
-import greencity.dto.PageableDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.pageble.PageableDto;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationeService {

@@ -1,8 +1,8 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.GroupedOrderDto;
-import greencity.dto.OrderDto;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.OrderDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.exceptions.ActiveOrdersNotFoundException;

@@ -1,9 +1,9 @@
 package greencity.service.ubs;
 
-import greencity.dto.BlockedOrderDTO;
-import greencity.dto.ChangeOrderResponseDTO;
-import greencity.dto.RequestToChangeOrdersDataDTO;
-import greencity.dto.TableParamsDTO;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.TableParamsDto;
 
 import java.util.List;
 
@@ -14,17 +14,17 @@ public interface OrdersAdminsPageService {
      * @param userId of {@link String} administrator's uuId;
      * @author Liubomyr Pater
      */
-    TableParamsDTO getParametersForOrdersTable(String userId);
+    TableParamsDto getParametersForOrdersTable(String userId);
 
     /**
      * Method that return.
      *
      * @param userUuid                     of {@link String}
-     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDTO}
+     * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDto}
      * @author Liubomyr Pater
      */
     ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
-        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO);
+        RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO);
 
     /**
      * Method that return a list of orders which are block already.
@@ -33,7 +33,7 @@ public interface OrdersAdminsPageService {
      * @param orders   of {@link List}
      * @author Liubomyr Pater
      */
-    List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders);
+    List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders);
 
     /**
      * Method that return list of unblocked orders.

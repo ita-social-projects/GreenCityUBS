@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.OrderResponseDto;
+import greencity.dto.order.OrderResponseDto;
 import greencity.entity.order.Order;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

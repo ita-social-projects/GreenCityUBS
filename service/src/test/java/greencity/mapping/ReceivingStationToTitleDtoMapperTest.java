@@ -2,7 +2,7 @@ package greencity.mapping;
 
 import greencity.ModelUtils;
 import greencity.dto.OptionForColumnDTO;
-import greencity.dto.ReceivingStationDto;
+import greencity.dto.courier.ReceivingStationDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

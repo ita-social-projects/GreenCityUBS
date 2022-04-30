@@ -1,6 +1,9 @@
 package greencity.service.ubs;
 
-import greencity.dto.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.position.AddingPositionDto;
+import greencity.dto.position.PositionDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.Page;

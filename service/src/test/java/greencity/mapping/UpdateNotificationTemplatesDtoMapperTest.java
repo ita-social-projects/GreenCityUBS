@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.entity.notifications.NotificationTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,7 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.RequestToChangeOrdersDataDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderStatusTranslation;
@@ -286,7 +286,7 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void chooseOrdersDataSwitcherTest() {
         String uuid = "uuid";
-        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<User> user = Optional.of(ModelUtils.getUser());
 
@@ -324,7 +324,7 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
         String uuid = "uuid";
-        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());

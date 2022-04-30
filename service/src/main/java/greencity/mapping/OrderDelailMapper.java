@@ -1,7 +1,7 @@
 package greencity.mapping;
 
-import greencity.dto.OrderDetailDto;
-import greencity.dto.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 

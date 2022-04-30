@@ -1,8 +1,8 @@
 package greencity.service.ubs;
 
 import com.liqpay.LiqPay;
-import greencity.dto.PaymentRequestDtoLiqPay;
-import greencity.dto.StatusRequestDtoLiqPay;
+import greencity.dto.payment.PaymentRequestDtoLiqPay;
+import greencity.dto.payment.StatusRequestDtoLiqPay;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

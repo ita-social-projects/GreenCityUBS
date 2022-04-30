@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.PointsForUbsUserDto;
+import greencity.dto.user.PointsForUbsUserDto;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Payment;
 import org.modelmapper.AbstractConverter;

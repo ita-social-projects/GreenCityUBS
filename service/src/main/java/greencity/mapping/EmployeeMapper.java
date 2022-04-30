@@ -1,8 +1,8 @@
 package greencity.mapping;
 
-import greencity.dto.EmployeeDto;
-import greencity.dto.PositionDto;
-import greencity.dto.ReceivingStationDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.position.PositionDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

@@ -5,7 +5,18 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
-import greencity.dto.*;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.location.GetCourierLocationDto;
+import greencity.dto.order.*;
+import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
@@ -47,7 +58,7 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user.
-     * {@link greencity.dto.UserVO}.
+     * {@link UserVO}.
      *
      * @param userUuid {@link UserVO} id.
      * @return {@link UserPointsAndAllBagsDto}.
