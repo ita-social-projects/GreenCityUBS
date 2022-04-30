@@ -118,8 +118,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyPaidOrder(PaymentResponseDto dto) {
-        if (dto.getOrderId() != null) {
-            Long orderId = Long.valueOf(dto.getOrderId().split("_")[0]);
+        if (dto.getOrder_id() != null) {
+            Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
             Optional<Order> orderOptional = orderRepository.findById(orderId);
             if (orderOptional.isPresent()) {
                 notifyPaidOrder(orderOptional.get());

@@ -1,6 +1,5 @@
 package greencity.dto.payment;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -11,91 +10,64 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @ToString
 public class PaymentResponseDto {
+    // CHECKSTYLE:OFF
     @Length(max = 1024)
-    @JsonProperty("order_id")
-    private String orderId;
-    @JsonProperty("merchant_id")
-    private Integer merchantId;
+    private String order_id;
+    private Integer merchant_id;
     private Integer amount;
     @Length(max = 3)
     private String currency;
     @Length(max = 50)
-    @JsonProperty("order_status")
-    private String orderStatus;
+    private String order_status;
     @Length(max = 50)
-    @JsonProperty("responseStatus")
-    private String responseStatus;
+    private String response_status;
     @Length(max = 40)
     private String signature;
     @Length(max = 50)
-    @JsonProperty("tran_type")
-    private String tranType;
+    private String tran_type;
     @Length(max = 16)
-    @JsonProperty("sender_cell_phone")
-    private String senderCellPhone;
+    private String sender_cell_phone;
     @Length(max = 50)
-    @JsonProperty("sender_account")
-    private String senderAccount;
+    private String sender_account;
     @Length(max = 19)
-    @JsonProperty("masked_card")
-    private String maskedCard;
-    @JsonProperty("card_bin")
-    private Integer cardBin;
+    private String masked_card;
+    private Integer card_bin;
     @Length(max = 50)
-    @JsonProperty("card_type")
-    private String cardType;
+    private String card_type;
     @Length(max = 50)
     private String rrn;
     @Length(max = 6)
-    @JsonProperty("approval_code")
-    private String approvalCode;
-    @JsonProperty("response_code")
-    private Integer responseCode;
+    private String approval_code;
+    private Integer response_code;
     @Length(max = 1024)
-    @JsonProperty("response_description")
-    private String responseDescription;
-    @JsonProperty("reversal_amount")
-    private Integer reversalAmount;
-    @JsonProperty("settlement_amount")
-    private Integer settlementAmount;
+    private String response_description;
+    private Integer reversal_amount;
+    private Integer settlement_amount;
     @Length(max = 3)
-    @JsonProperty("settlement_currency")
-    private String settlementCurrency;
+    private String settlement_currency;
     @Length(max = 19)
-    @JsonProperty("order_time")
-    private String orderTime;
+    private String order_time;
     @Length(max = 10)
-    @JsonProperty("settlement_date")
-    private String settlementDate;
+    private String settlement_date;
     private Integer eci;
     private Integer fee;
     @Length(max = 50)
-    @JsonProperty("payment_system")
-    private String paymentSystem;
+    private String payment_system;
     @Length(max = 254)
-    @JsonProperty("sender_email")
-    private String senderEmail;
-    @JsonProperty("payment_id")
-    private Integer paymentId;
-    @JsonProperty("actual_amount")
-    private Integer actualAmount;
+    private String sender_email;
+    private Integer payment_id;
+    private Integer actual_amount;
     @Length(max = 3)
-    @JsonProperty("actual_currency")
-    private String actualCurrency;
+    private String actual_currency;
     @Length(max = 1024)
-    @JsonProperty("product_id")
-    private String productId;
+    private String product_id;
     @Length(max = 2048)
-    @JsonProperty("merchant_data")
-    private String merchantData;
+    private String merchant_data;
     @Length(max = 50)
-    @JsonProperty("verification_status")
-    private String verificationStatus;
+    private String verification_status;
     @Length(max = 40)
     private String rectoken;
     @Length(max = 19)
-    @JsonProperty("rectoken_lifetime")
-    private String rectokenLifetime;
-    @JsonProperty("parent_order_id")
-    private Integer parentOrderId;
+    private String rectoken_lifetime;
+    private Integer parent_order_id;
 }
