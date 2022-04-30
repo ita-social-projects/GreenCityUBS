@@ -117,13 +117,13 @@ class UBSClientServiceImplTest {
     void testValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         dto.setAmount(95000);
-        dto.setPayment_id(1);
+        dto.setPaymentId(1);
         dto.setCurrency("UAH");
-        dto.setSettlement_date("");
+        dto.setSettlementDate("");
         dto.setFee(0);
         Payment payment = getPayment();
         when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(true);
@@ -139,13 +139,13 @@ class UBSClientServiceImplTest {
     void unvalidValidatePayment() {
         PaymentResponseDto dto = new PaymentResponseDto();
         Order order = getOrder();
-        dto.setOrder_id(order.getId().toString());
-        dto.setResponse_status("approved");
-        dto.setOrder_status("approved");
+        dto.setOrderId(order.getId().toString());
+        dto.setResponseStatus("approved");
+        dto.setOrderStatus("approved");
         dto.setAmount(95000);
-        dto.setPayment_id(1);
+        dto.setPaymentId(1);
         dto.setCurrency("UAH");
-        dto.setSettlement_date("");
+        dto.setSettlementDate("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
         assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));

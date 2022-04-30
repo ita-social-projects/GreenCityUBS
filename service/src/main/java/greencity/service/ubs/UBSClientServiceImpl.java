@@ -119,7 +119,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public void validatePayment(PaymentResponseDto dto) {
         Payment orderPayment = mapPayment(dto);
-        String[] ids = dto.getOrder_id().split("_");
+        String[] ids = dto.getOrderId().split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
             .orElseThrow(() -> new PaymentValidationException(PAYMENT_VALIDATION_ERROR));
         checkResponseStatusFailure(dto, orderPayment, order);
@@ -132,23 +132,23 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setFee(0);
         }
         return Payment.builder()
-            .id(Long.valueOf(dto.getOrder_id().substring(dto.getOrder_id().indexOf("_") + 1)))
+            .id(Long.valueOf(dto.getOrderId().substring(dto.getOrderId().indexOf("_") + 1)))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
+            .orderStatus(dto.getOrderStatus())
+            .responseStatus(dto.getResponseStatus())
+            .senderCellPhone(dto.getSenderCellPhone())
+            .senderAccount(dto.getSenderAccount())
+            .maskedCard(dto.getMaskedCard())
+            .cardType(dto.getCardType())
+            .responseCode(dto.getResponseCode())
+            .responseDescription(dto.getResponseDescription())
+            .orderTime(dto.getOrderTime())
+            .settlementDate(dto.getSettlementDate().isEmpty() ? LocalDate.now().toString() : dto.getSettlementDate())
             .fee(Long.valueOf(dto.getFee()))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
+            .paymentSystem(dto.getPaymentSystem())
+            .senderEmail(dto.getSenderEmail())
+            .paymentId(String.valueOf(dto.getPaymentId()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
@@ -1443,30 +1443,30 @@ public class UBSClientServiceImpl implements UBSClientService {
                 + order.getPayment().get(lastNumber).getId()))
             .currency(dto.getCurrency())
             .amount(Long.valueOf(dto.getAmount()))
-            .orderStatus(dto.getOrder_status())
-            .responseStatus(dto.getResponse_status())
-            .senderCellPhone(dto.getSender_cell_phone())
-            .senderAccount(dto.getSender_account())
-            .maskedCard(dto.getMasked_card())
-            .cardType(dto.getCard_type())
-            .responseCode(dto.getResponse_code())
-            .responseDescription(dto.getResponse_description())
-            .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
+            .orderStatus(dto.getOrderStatus())
+            .responseStatus(dto.getResponseStatus())
+            .senderCellPhone(dto.getSenderCellPhone())
+            .senderAccount(dto.getSenderAccount())
+            .maskedCard(dto.getMaskedCard())
+            .cardType(dto.getCardType())
+            .responseCode(dto.getResponseCode())
+            .responseDescription(dto.getResponseDescription())
+            .orderTime(dto.getOrderTime())
+            .settlementDate(dto.getSettlementDate().isEmpty() ? LocalDate.now().toString() : dto.getSettlementDate())
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
-            .paymentSystem(dto.getPayment_system())
-            .senderEmail(dto.getSender_email())
-            .paymentId(String.valueOf(dto.getPayment_id()))
+            .paymentSystem(dto.getPaymentSystem())
+            .senderEmail(dto.getSenderEmail())
+            .paymentId(String.valueOf(dto.getPaymentId()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
     }
 
     private String[] orderIdInfo(PaymentResponseDto dto) {
-        return dto.getOrder_id().split("_");
+        return dto.getOrderId().split("_");
     }
 
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getResponse_status().equals(FAILED_STATUS)) {
+        if (dto.getResponseStatus().equals(FAILED_STATUS)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(orderPayment);
@@ -1481,8 +1481,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkOrderStatusApproved(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getOrder_status().equals(APPROVED_STATUS)) {
-            orderPayment.setPaymentId(String.valueOf(dto.getPayment_id()));
+        if (dto.getOrderStatus().equals(APPROVED_STATUS)) {
+            orderPayment.setPaymentId(String.valueOf(dto.getPaymentId()));
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);

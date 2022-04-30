@@ -156,7 +156,7 @@ class NotificationeServiceImplTest {
         void notifyPaidOrder() {
             Order order = Order.builder().id(1L).build();
             when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-            PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
+            PaymentResponseDto dto = PaymentResponseDto.builder().orderId("1_1").build();
             notificationService.notifyPaidOrder(dto);
             verify(notificationService).notifyPaidOrder(order);
         }
