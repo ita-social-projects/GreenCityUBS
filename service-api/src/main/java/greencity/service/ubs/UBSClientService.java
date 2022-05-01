@@ -86,6 +86,17 @@ public interface UBSClientService {
     OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
 
     /**
+     * Method that update address for current user.
+     *
+     * @param requestDto {@link OrderAddressDtoRequest} information about address;
+     * @param uuid       current {@link User}'s uuid;
+     * @return {@link OrderAddressDtoRequest} contains all information needed for
+     *         update address;
+     * @author Oleg Postolovskyi
+     */
+    OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest requestDto, String uuid);
+
+    /**
      * Method that delete user address.
      *
      * @param addressId of {@link Long} address id;

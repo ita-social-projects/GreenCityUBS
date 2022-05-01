@@ -45,6 +45,8 @@ public class OrderAddressDtoRequest {
 
     private String addressComment;
 
+    private String searchAddress;
+
     private Coordinates coordinates;
 
     private Boolean actual;

@@ -23,21 +23,20 @@ public class CreateAddressRequestDto {
     private String searchAddress;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
     @NotEmpty(message = "name must not be empty")
-    private String districtEng;
+    private String districtEn;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
     @NotEmpty(message = "name must not be empty")
-    private String districtUa;
+    private String district;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
     @NotEmpty(message = "name must not be empty")
-    private String regionEng;
+    private String regionEn;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
     @NotEmpty(message = "name must not be empty")
-    private String regionUa;
+    private String region;
     @Min(1)
     private String houseNumber;
     private String entranceNumber;
     private String houseCorpus;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ 0-9']*", message = "use only English,or Ukrainian latter")
-    @NotEmpty(message = "name must not be empty")
     private String addressComment;
 }

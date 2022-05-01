@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -332,31 +333,60 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
-        checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDto);
+        OrderAddressDtoRequest addressRequestDtoForNullCheck = modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
+        addressRequestDtoForNullCheck.setId(0L);
+        checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDtoForNullCheck);
 
         if (addresses != null) {
-            boolean exist = addresses.stream()
-                .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
-                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
-                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+            checkIfAddressExist(addresses, dtoRequest);
 
-            if (exist) {
-                throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
-            }
-
-            addresses.forEach(u -> {
-                u.setActual(false);
-                addressRepo.save(u);
+            addresses.forEach(addressItem -> {
+                addressItem.setActual(false);
+                addressRepo.save(addressItem);
             });
         }
 
-        Address address = addressRepo.findById(dtoRequest.getId()).orElse(null);
+        Address address = modelMapper.map(dtoRequest, Address.class);
+
+        address.setUser(currentUser);
+        address.setActual(true);
+        address.setAddressStatus(AddressStatus.NEW);
+        addressRepo.save(address);
+
+        return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
+                                                                      String uuid) {
+        createUserByUuidIfUserDoesNotExist(uuid);
+        User currentUser = userRepository.findByUuid(uuid);
+        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+
+        OrderAddressDtoRequest dtoRequest;
+        if (addressRequestDto.getSearchAddress() != null) {
+            dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
+            checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDto);
+        } else {
+            dtoRequest = addressRequestDto;
+        }
+
+        if (addresses != null) {
+            checkIfAddressExist(addresses, dtoRequest);
+        }
+
+        Address address = addressRepo.findById(dtoRequest.getId())
+                .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
         if (address != null && AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
 
-        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : AddressStatus.NEW;
-        final User addressUser = address != null ? address.getUser() : currentUser;
+        final AddressStatus addressStatus = address.getAddressStatus();
+        final User addressUser = address.getUser();
+        final Boolean addressActual = address.getActual();
 
         address = modelMapper.map(dtoRequest, Address.class);
 
@@ -365,11 +395,22 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         address.setUser(addressUser);
-        address.setActual(true);
         address.setAddressStatus(addressStatus);
+        address.setActual(addressActual);
         addressRepo.save(address);
 
         return findAllAddressesForCurrentOrder(uuid);
+    }
+
+    private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
+        boolean exist = addresses.stream()
+                .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
+                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
+                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+
+        if (exist) {
+            throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
+        }
     }
 
     private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest) {
@@ -451,24 +492,25 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest,
-        CreateAddressRequestDto addressRequestDto) {
+                                                 OrderAddressDtoRequest addressRequestDto) {
         if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
-            dtoRequest.setRegion(addressRequestDto.getRegionUa());
-            dtoRequest.setRegionEn(addressRequestDto.getRegionEng());
+            dtoRequest.setRegion(addressRequestDto.getRegion());
+            dtoRequest.setRegionEn(addressRequestDto.getRegionEn());
         }
 
         if (dtoRequest.getDistrict() == null && dtoRequest.getDistrictEn() == null) {
-            dtoRequest.setDistrict(addressRequestDto.getDistrictUa());
-            dtoRequest.setDistrictEn(addressRequestDto.getDistrictEng());
+            dtoRequest.setDistrict(addressRequestDto.getDistrict());
+            dtoRequest.setDistrictEn(addressRequestDto.getDistrictEn());
         }
 
         if (dtoRequest.getHouseNumber() == null) {
             dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
         }
+
         dtoRequest.setEntranceNumber(addressRequestDto.getEntranceNumber());
         dtoRequest.setHouseCorpus(addressRequestDto.getHouseCorpus());
         dtoRequest.setAddressComment(addressRequestDto.getAddressComment());
-        dtoRequest.setId(0L);
+        dtoRequest.setId(addressRequestDto.getId());
     }
 
     /**
@@ -485,6 +527,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_DELETE_ADDRESS);
         }
         address.setAddressStatus(AddressStatus.DELETED);
+        address.setActual(false);
         addressRepo.save(address);
         return findAllAddressesForCurrentOrder(uuid);
     }

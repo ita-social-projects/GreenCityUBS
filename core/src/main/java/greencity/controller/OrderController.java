@@ -167,7 +167,7 @@ public class OrderController {
     /**
      * Controller save address for current order.
      *
-     * @param dtoRequest {@link OrderAddressDtoRequest}.
+     * @param dtoRequest {@link CreateAddressRequestDto}.
      * @param uuid       {@link UserVO} id.
      * @return {@link HttpStatus} - http status.
      */
@@ -183,6 +183,29 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsClientService.saveCurrentAddressForOrder(dtoRequest, uuid));
+    }
+
+    /**
+     * Controller update address for current order.
+     *
+     * @param dtoRequest {@link OrderAddressDtoRequest}.
+     * @param uuid       {@link UserVO} id.
+     * @return {@link HttpStatus} - http status.
+     */
+    @ApiOperation(value = "Update order address")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderWithAddressesResponseDto.class),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/update-order-address")
+    public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
+            @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
+            @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid));
     }
 
     /**
