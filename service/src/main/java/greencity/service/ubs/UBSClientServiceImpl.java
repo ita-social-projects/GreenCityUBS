@@ -333,7 +333,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
-        OrderAddressDtoRequest addressRequestDtoForNullCheck = modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
+        OrderAddressDtoRequest addressRequestDtoForNullCheck =
+            modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
         addressRequestDtoForNullCheck.setId(0L);
         checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDtoForNullCheck);
 
@@ -361,7 +362,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest addressRequestDto,
-                                                                      String uuid) {
+        String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
@@ -379,7 +380,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         Address address = addressRepo.findById(dtoRequest.getId())
-                .orElseThrow(() -> new NotFoundOrderAddressException(ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
+            .orElseThrow(() -> new NotFoundOrderAddressException(
+                ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
         if (address != null && AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
@@ -404,9 +406,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
-                .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
-                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
-                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+            .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
+            .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
+            .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
         if (exist) {
             throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
@@ -492,7 +494,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest,
-                                                 OrderAddressDtoRequest addressRequestDto) {
+        OrderAddressDtoRequest addressRequestDto) {
         if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
             dtoRequest.setRegion(addressRequestDto.getRegion());
             dtoRequest.setRegionEn(addressRequestDto.getRegionEn());
