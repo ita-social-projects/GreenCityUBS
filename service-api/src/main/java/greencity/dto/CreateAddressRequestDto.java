@@ -18,25 +18,27 @@ import lombok.ToString;
 @ToString
 @Builder
 public class CreateAddressRequestDto {
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ,0-9']*", message = "use only English,or Ukrainian latter")
-    @NotEmpty(message = "name must not be empty")
+    private final static String VALIDATION_MESSAGE= "use only English,or Ukrainian latter";
+    private final static String NOT_EMPTY_MESSAGE = "name must not be empty";
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ,0-9']*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_MESSAGE)
     private String searchAddress;
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_MESSAGE)
+    private String districtEng;
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_MESSAGE)
+    private String districtUa;
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = "name must not be empty")
-    private String districtEn;
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
-    @NotEmpty(message = "name must not be empty")
-    private String district;
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
-    @NotEmpty(message = "name must not be empty")
-    private String regionEn;
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = "use only English,or Ukrainian latter")
-    @NotEmpty(message = "name must not be empty")
-    private String region;
+    private String regionEng;
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
+    @NotEmpty(message = NOT_EMPTY_MESSAGE)
+    private String regionUa;
     @Min(1)
     private String houseNumber;
     private String entranceNumber;
     private String houseCorpus;
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ 0-9']*", message = "use only English,or Ukrainian latter")
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ 0-9']*", message = VALIDATION_MESSAGE)
     private String addressComment;
 }
