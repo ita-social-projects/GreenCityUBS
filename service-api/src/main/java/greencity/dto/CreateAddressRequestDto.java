@@ -18,23 +18,23 @@ import lombok.ToString;
 @ToString
 @Builder
 public class CreateAddressRequestDto {
-    private final static String VALIDATION_MESSAGE= "use only English,or Ukrainian latter";
+    private final static String VALIDATION_MESSAGE = "use only English,or Ukrainian latter";
     private final static String NOT_EMPTY_MESSAGE = "name must not be empty";
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ,0-9']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_MESSAGE)
     private String searchAddress;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_MESSAGE)
-    private String districtEng;
+    private String districtEn;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_MESSAGE)
-    private String districtUa;
+    private String district;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = "name must not be empty")
-    private String regionEng;
+    private String regionEn;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_MESSAGE)
-    private String regionUa;
+    private String region;
     @Min(1)
     private String houseNumber;
     private String entranceNumber;

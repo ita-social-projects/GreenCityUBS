@@ -17,7 +17,7 @@ public class GoogleApiConfiguration {
      * @return {@link GeoApiContext}
      */
     @Bean
-    GeoApiContext context(){
+    GeoApiContext context() {
         return new GeoApiContext.Builder().apiKey(GOOGLE_API_KEY).build();
     }
 }

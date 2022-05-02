@@ -112,7 +112,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
         "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
     private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
-    private static  final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
+    private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     @Override
     @Transactional
