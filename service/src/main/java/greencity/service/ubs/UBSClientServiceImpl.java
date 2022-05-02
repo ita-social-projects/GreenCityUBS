@@ -40,9 +40,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
@@ -77,6 +79,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrdersForUserRepository ordersForUserRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    private final GeoApiContext context;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -108,6 +111,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
         "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
     private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
+    private static  final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     @Override
     @Transactional
@@ -373,8 +377,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest) {
-        List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
-        GeoApiContext context = new GeoApiContext.Builder().apiKey(googleApiKey).build();
         List<GeocodingResult> geocodingResults = new ArrayList<>();
 
         locales.forEach(locale -> {
