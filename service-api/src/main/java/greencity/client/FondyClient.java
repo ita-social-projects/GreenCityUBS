@@ -1,6 +1,6 @@
 package greencity.client;
 
-import greencity.dto.PaymentRequestDto;
+import greencity.dto.payment.PaymentRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

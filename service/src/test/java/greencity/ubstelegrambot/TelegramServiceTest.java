@@ -1,9 +1,9 @@
 package greencity.ubstelegrambot;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.dto.LanguageVO;
-import greencity.dto.NotificationDto;
-import greencity.dto.UserVO;
+import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;

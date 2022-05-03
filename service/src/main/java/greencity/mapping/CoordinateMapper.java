@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.CoordinatesDto;
+import greencity.dto.location.CoordinatesDto;
 import greencity.entity.coords.Coordinates;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

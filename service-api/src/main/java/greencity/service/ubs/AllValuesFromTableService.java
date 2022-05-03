@@ -1,6 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.GetAllFieldsMainDto;
+import greencity.dto.table.GetAllFieldsMainDto;
 
 import java.util.List;
 

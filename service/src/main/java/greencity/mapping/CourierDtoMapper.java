@@ -1,10 +1,8 @@
 package greencity.mapping;
 
-import greencity.constant.ErrorMessage;
-import greencity.dto.CourierDto;
-import greencity.dto.CourierTranslationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.Courier;
-import greencity.exceptions.UserNotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 

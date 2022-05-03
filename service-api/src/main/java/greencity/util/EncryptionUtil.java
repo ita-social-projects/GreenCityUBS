@@ -1,9 +1,9 @@
 package greencity.util;
 
 import com.liqpay.LiqPayUtil;
-import greencity.dto.PaymentRequestDto;
-import greencity.dto.PaymentRequestDtoLiqPay;
-import greencity.dto.PaymentResponseDto;
+import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentRequestDtoLiqPay;
+import greencity.dto.payment.PaymentResponseDto;
 import lombok.ToString;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;

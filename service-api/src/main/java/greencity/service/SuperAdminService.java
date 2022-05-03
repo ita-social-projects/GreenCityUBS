@@ -1,6 +1,19 @@
 package greencity.service;
 
-import greencity.dto.*;
+import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.courier.*;
+import greencity.dto.location.GetCourierLocationDto;
+import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
+import greencity.dto.order.EditPriceOfOrder;
+import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.tariff.EditTariffInfoDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 

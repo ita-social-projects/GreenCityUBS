@@ -1,7 +1,7 @@
 package greencity.client;
 
-import greencity.dto.NotificationDto;
-import greencity.dto.UserVO;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

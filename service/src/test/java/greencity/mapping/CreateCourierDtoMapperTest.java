@@ -2,7 +2,7 @@ package greencity.mapping;
 
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
-import greencity.dto.CreateCourierDto;
+import greencity.dto.courier.CreateCourierDto;
 import greencity.entity.order.Courier;
 import greencity.entity.order.CourierTranslation;
 import greencity.exceptions.NotFoundException;

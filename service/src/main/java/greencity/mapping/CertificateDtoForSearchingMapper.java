@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.CertificateDtoForSearching;
+import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.entity.order.Certificate;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.entity.notifications.NotificationTemplate;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

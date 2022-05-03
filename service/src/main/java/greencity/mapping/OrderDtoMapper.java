@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.OrderClientForDto;
+import greencity.dto.order.OrderClientForDto;
 
 import greencity.entity.order.Order;
 import org.modelmapper.AbstractConverter;

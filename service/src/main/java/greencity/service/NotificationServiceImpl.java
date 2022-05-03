@@ -1,7 +1,11 @@
 package greencity.service;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.dto.*;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;

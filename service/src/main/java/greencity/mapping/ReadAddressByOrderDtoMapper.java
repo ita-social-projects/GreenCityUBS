@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.ReadAddressByOrderDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.entity.user.ubs.Address;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

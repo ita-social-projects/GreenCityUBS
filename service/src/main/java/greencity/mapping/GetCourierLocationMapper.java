@@ -1,6 +1,8 @@
 package greencity.mapping;
 
-import greencity.dto.*;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.location.*;
 import greencity.entity.order.CourierLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

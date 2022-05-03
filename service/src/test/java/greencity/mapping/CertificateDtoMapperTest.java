@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.CertificateDto;
+import greencity.dto.certificate.CertificateDto;
 import greencity.entity.order.Certificate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

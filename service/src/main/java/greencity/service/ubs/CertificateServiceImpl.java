@@ -1,8 +1,8 @@
 package greencity.service.ubs;
 
-import greencity.dto.CertificateDtoForAdding;
-import greencity.dto.CertificateDtoForSearching;
-import greencity.dto.PageableDto;
+import greencity.dto.certificate.CertificateDtoForAdding;
+import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Certificate;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;

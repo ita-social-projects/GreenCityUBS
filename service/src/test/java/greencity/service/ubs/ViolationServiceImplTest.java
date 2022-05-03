@@ -1,9 +1,9 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.dto.AddingViolationsToUserDto;
-import greencity.dto.UpdateViolationToUserDto;
-import greencity.dto.ViolationDetailInfoDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;

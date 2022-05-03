@@ -1,7 +1,7 @@
 package greencity.mapping;
 
-import greencity.dto.AddressDto;
-import greencity.dto.UserProfileUpdateDto;
+import greencity.dto.address.AddressDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;

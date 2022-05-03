@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.AddressDto;
+import greencity.dto.address.AddressDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.user.ubs.Address;

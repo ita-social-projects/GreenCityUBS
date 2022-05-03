@@ -4,7 +4,11 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
-import greencity.dto.*;
+import greencity.dto.order.*;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserVO;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -215,8 +219,7 @@ public class ClientController {
     }
 
     /**
-     * Controller returns bonus points of current user.
-     * {@link greencity.dto.UserVO}.
+     * Controller returns bonus points of current user. {@link UserVO}.
      *
      * @param userUuid {@link String} uuid.
      * @return {@link UserPointDto}.
