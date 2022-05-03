@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
-import greencity.dto.CoordinatesDto;
-import greencity.dto.GroupedOrderDto;
+import greencity.dto.location.CoordinatesDto;
+import greencity.dto.order.GroupedOrderDto;
 import lombok.NonNull;
 
 import java.util.List;

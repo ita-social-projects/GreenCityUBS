@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.OrderClientForDto;
+import greencity.dto.order.OrderClientForDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import org.junit.jupiter.api.Assertions;

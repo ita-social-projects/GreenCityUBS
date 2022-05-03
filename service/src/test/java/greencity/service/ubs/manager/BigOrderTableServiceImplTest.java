@@ -1,7 +1,7 @@
 package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
-import greencity.dto.BigOrderTableDTO;
+import greencity.dto.order.BigOrderTableDTO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;

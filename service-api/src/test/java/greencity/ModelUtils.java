@@ -1,8 +1,8 @@
 package greencity;
 
-import greencity.dto.UbsTableCreationDto;
-import greencity.dto.UserVO;
-import greencity.dto.UserViolationMailDto;
+import greencity.dto.table.UbsTableCreationDto;
+import greencity.dto.user.UserVO;
+import greencity.dto.violation.UserViolationMailDto;
 
 public class ModelUtils {
 

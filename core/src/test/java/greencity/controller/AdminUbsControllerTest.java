@@ -3,8 +3,10 @@ package greencity.controller;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.*;
 import greencity.client.UserRemoteClient;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +63,7 @@ class AdminUbsControllerTest {
 
     @Test
     void saveNewValueFromOrdersTableTest() throws Exception {
-        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         ChangeOrderResponseDTO changeOrderResponseDTO = ModelUtils.getChangeOrderResponseDTO();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
@@ -97,7 +99,7 @@ class AdminUbsControllerTest {
 
     @Test
     void blockOrdersTest() throws Exception {
-        List<BlockedOrderDTO> dto = new ArrayList<>();
+        List<BlockedOrderDto> dto = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 

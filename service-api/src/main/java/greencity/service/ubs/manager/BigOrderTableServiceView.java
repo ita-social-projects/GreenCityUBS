@@ -1,7 +1,7 @@
 package greencity.service.ubs.manager;
 
-import greencity.dto.BigOrderTableDTO;
-import greencity.dto.CustomTableViewDto;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.table.CustomTableViewDto;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import org.springframework.data.domain.Page;

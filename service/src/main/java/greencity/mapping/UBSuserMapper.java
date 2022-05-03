@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.PersonalDataDto;
+import greencity.dto.user.PersonalDataDto;
 import greencity.entity.user.ubs.UBSuser;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

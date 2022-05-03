@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.NewLocationForCourierDto;
+import greencity.dto.courier.NewLocationForCourierDto;
 import greencity.entity.order.CourierLocation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

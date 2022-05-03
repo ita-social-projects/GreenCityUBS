@@ -2,8 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
-import greencity.dto.NotificationTemplateDto;
-import greencity.dto.PageableDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

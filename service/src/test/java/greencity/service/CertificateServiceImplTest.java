@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.dto.CertificateDtoForAdding;
+import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.entity.order.Certificate;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
 import greencity.client.UserRemoteClient;

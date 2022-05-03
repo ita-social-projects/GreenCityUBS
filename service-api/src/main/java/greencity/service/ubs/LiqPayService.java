@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
-import greencity.dto.PaymentRequestDtoLiqPay;
-import greencity.dto.StatusRequestDtoLiqPay;
+import greencity.dto.payment.PaymentRequestDtoLiqPay;
+import greencity.dto.payment.StatusRequestDtoLiqPay;
 
 import java.util.Map;
 

@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.CourierUpdateDto;
+import greencity.dto.courier.CourierUpdateDto;
 import greencity.entity.order.Courier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;

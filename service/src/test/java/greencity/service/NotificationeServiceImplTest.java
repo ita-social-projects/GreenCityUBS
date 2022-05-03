@@ -1,9 +1,9 @@
 package greencity.service;
 
-import greencity.dto.NotificationDto;
-import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
-import greencity.dto.PaymentResponseDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
@@ -15,7 +15,6 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
-import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
 import lombok.SneakyThrows;
@@ -29,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Method;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;

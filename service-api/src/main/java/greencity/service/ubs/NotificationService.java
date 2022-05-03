@@ -1,9 +1,9 @@
 package greencity.service.ubs;
 
-import greencity.dto.NotificationDto;
-import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
-import greencity.dto.PaymentResponseDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
