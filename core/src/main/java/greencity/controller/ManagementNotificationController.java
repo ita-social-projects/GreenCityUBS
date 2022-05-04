@@ -4,7 +4,7 @@ import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.NotificationTemplateDto;
 import greencity.dto.PageableDto;
-import greencity.service.notification.NotificationeService;
+import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -21,7 +21,7 @@ import javax.validation.Valid;
 @RequestMapping("/admin/notification")
 @RequiredArgsConstructor
 public class ManagementNotificationController {
-    private final NotificationeService notificationeService;
+    private final NotificationTemplateService notificationTemplateService;
 
     /**
      * Controller that returns all notification templates.
@@ -40,7 +40,7 @@ public class ManagementNotificationController {
     @ApiPageable
     public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationeService.findAll(pageable));
+            .body(notificationTemplateService.findAll(pageable));
     }
 
     /**
@@ -59,7 +59,7 @@ public class ManagementNotificationController {
     @PutMapping
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
         @RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
-        notificationeService.update(notificationTemplateDto);
+        notificationTemplateService.update(notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -79,6 +79,6 @@ public class ManagementNotificationController {
     @GetMapping("/{id}")
     public ResponseEntity<NotificationTemplateDto> getNotificationTemplate(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationeService.findById(id));
+            .body(notificationTemplateService.findById(id));
     }
 }

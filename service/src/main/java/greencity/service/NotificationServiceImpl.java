@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.client.OutOfRequestRestClient;
+import greencity.client.UserRemoteClient;
 import greencity.dto.*;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
@@ -13,12 +13,12 @@ import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
+import greencity.service.notification.NotificationProvider;
 import greencity.service.ubs.NotificationService;
-import greencity.ubstelegrambot.TelegramService;
-import greencity.ubsviberbot.ViberServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -39,8 +39,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
-import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.*;
 import static greencity.entity.enums.NotificationReceiverType.OTHER;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static java.util.stream.Collectors.toMap;
@@ -57,10 +56,9 @@ public class NotificationServiceImpl implements NotificationService {
     private ViolationRepository violationRepository;
     private NotificationParameterRepository notificationParameterRepository;
     private Clock clock;
-    private ViberServiceImpl viberService;
-    private TelegramService telegramService;
+    private List<NotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
-    private final OutOfRequestRestClient restClient;
+    private final UserRemoteClient userRemoteClient;
 
     @Autowired
     @Qualifier("singleThreadedExecutor")
@@ -228,13 +226,14 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyAddViolation(Order order) {
+    public void notifyAddViolation(Long orderId) {
         Set<NotificationParameter> parameters = new HashSet<>();
-        violationRepository.findByOrderId(order.getId())
-            .ifPresent(value -> parameters.add(NotificationParameter.builder()
-                .key("violationDescription")
-                .value(value.getDescription()).build()));
-        fillAdnSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
+        Violation violation = violationRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
+        parameters.add(NotificationParameter.builder()
+            .key("violationDescription")
+            .value(violation.getDescription()).build());
+        fillAdnSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
     }
 
     /**
@@ -335,17 +334,17 @@ public class NotificationServiceImpl implements NotificationService {
     private void sendNotificationsForBotsAndEmail(UserNotification notification) {
         executor.execute(() -> {
             sendEmailNotification(notification);
-            viberService.sendNotification(notification);
-            telegramService.sendNotification(notification);
+            notificationProviders.forEach(notificationProvider -> notificationProvider.sendNotification(notification));
         });
     }
 
     private void sendEmailNotification(UserNotification notification) {
-        UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
+        UserVO userVO =
+            userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
             .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 
-        restClient.sendEmailNotification(notificationDto, userVO.getEmail());
+        userRemoteClient.sendEmailNotification(notificationDto, userVO.getEmail());
     }
 
     /**

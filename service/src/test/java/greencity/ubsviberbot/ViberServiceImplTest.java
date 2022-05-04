@@ -1,6 +1,6 @@
 package greencity.ubsviberbot;
 
-import greencity.client.OutOfRequestRestClient;
+import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.dto.LanguageVO;
 import greencity.dto.NotificationDto;
@@ -38,7 +38,7 @@ public class ViberServiceImplTest {
     private NotificationTemplateRepository templateRepository;
 
     @Mock
-    private OutOfRequestRestClient outOfRequestRestClient;
+    private UserRemoteClient userRemoteClient;;
 
     @Mock
     private ViberClient viberClient;
@@ -78,7 +78,7 @@ public class ViberServiceImplTest {
                 notification.getNotificationType(),
                 "en", OTHER)).thenReturn(Optional.of(template));
 
-        when(outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()))
+        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
     }
 
@@ -123,7 +123,7 @@ public class ViberServiceImplTest {
 
         viberService.sendNotification(notification);
 
-        verify(outOfRequestRestClient).findUserByEmail(notification.getUser().getRecipientEmail());
+        verify(userRemoteClient).findNotDeactivatedByEmail(notification.getUser().getRecipientEmail());
         verify(viberClient).sendMessage(any());
     }
 

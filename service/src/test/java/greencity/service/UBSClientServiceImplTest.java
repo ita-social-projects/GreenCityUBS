@@ -34,7 +34,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -507,7 +506,7 @@ class UBSClientServiceImplTest {
         List<Bot> botList = ModelUtils.botList();
         userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(userRemoteClient.hasPassword()).thenReturn(new HasPasswordDto(true));
+        when(userRemoteClient.getPasswordStatus()).thenReturn(new PasswordStatusDto(true));
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
         for (Bot bot : botList) {
             assertNotNull(bot);

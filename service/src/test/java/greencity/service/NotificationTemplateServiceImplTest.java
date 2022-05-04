@@ -13,6 +13,7 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
@@ -43,7 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NotificationeServiceImplTest {
+class NotificationTemplateServiceImplTest {
     private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
 
     @Mock
@@ -235,14 +236,15 @@ class NotificationeServiceImplTest {
 
         @Test
         void testNotifyAddViolation() {
-            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(TEST_VIOLATION));
+            Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
+            when(violationRepository.findByOrderId(TEST_ORDER_4.getId())).thenReturn(Optional.of(violation));
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
             TEST_NOTIFICATION_PARAMETER.setUserNotification(TEST_USER_NOTIFICATION_3);
             when(notificationParameterRepository.saveAll(Collections.singleton(TEST_NOTIFICATION_PARAMETER)))
                 .thenReturn(Collections.singletonList(TEST_NOTIFICATION_PARAMETER));
             TEST_NOTIFICATION_PARAMETER.setUserNotification(TEST_USER_NOTIFICATION_3);
 
-            notificationService.notifyAddViolation(TEST_ORDER_4);
+            notificationService.notifyAddViolation(TEST_ORDER_4.getId());
 
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(Collections.singleton(TEST_NOTIFICATION_PARAMETER));

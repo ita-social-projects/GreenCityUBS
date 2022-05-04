@@ -1,16 +1,15 @@
 package greencity.service.notification;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.*;
+import greencity.dto.NotificationScheduleDto;
+import greencity.dto.NotificationTemplateDto;
+import greencity.dto.PageableDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
-import greencity.entity.order.Order;
 import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.repository.OrderRepository;
-import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -26,12 +25,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @AllArgsConstructor
-public class NotificationeServiceImpl implements NotificationeService {
+public class NotificationTemplateServiceImpl implements NotificationTemplateService {
     private NotificationTemplateRepository notificationTemplateRepository;
     private final ModelMapper modelMapper;
     private final NotificationScheduleRepo scheduleRepo;
-    private final OrderRepository orderRepository;
-    private final UserRemoteClient userRemoteClient;
 
     /**
      * {@inheritDoc}
@@ -86,23 +83,5 @@ public class NotificationeServiceImpl implements NotificationeService {
     private NotificationScheduleDto getScheduleDto(NotificationTemplate notificationTemplate) {
         return modelMapper.map(scheduleRepo.getOne(
             notificationTemplate.getNotificationType()), NotificationScheduleDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language) {
-        Order order = orderRepository.findById(dto.getOrderID()).orElse(null);
-        UserViolationMailDto mailDto;
-        if (order != null) {
-            mailDto = UserViolationMailDto.builder()
-                .name(order.getUser().getRecipientName())
-                .email(order.getUser().getRecipientEmail())
-                .violationDescription(dto.getViolationDescription())
-                .language(language)
-                .build();
-            userRemoteClient.sendViolationOnMail(mailDto);
-        }
     }
 }

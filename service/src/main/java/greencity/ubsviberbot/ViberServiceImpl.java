@@ -1,6 +1,6 @@
 package greencity.ubsviberbot;
 
-import greencity.client.OutOfRequestRestClient;
+import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.NotificationDto;
@@ -20,6 +20,7 @@ import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.NotificationServiceImpl;
+import greencity.service.notification.NotificationProvider;
 import greencity.service.ubs.ViberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,9 @@ import static greencity.entity.enums.NotificationReceiverType.OTHER;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ViberServiceImpl implements ViberService {
+public class ViberServiceImpl implements ViberService, NotificationProvider {
     private final ViberClient viberClient;
-    private final OutOfRequestRestClient outOfRequestRestClient;
+    private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final ViberBotRepository viberBotRepository;
     private final NotificationTemplateRepository templateRepository;
@@ -147,7 +148,7 @@ public class ViberServiceImpl implements ViberService {
     @Override
     public void sendNotification(UserNotification notification) {
         UserVO userVO =
-            outOfRequestRestClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
+            userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
         NotificationDto notificationDto = NotificationServiceImpl
             .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 

@@ -96,7 +96,7 @@ public class ViolationServiceImpl implements ViolationService {
             userRepository.save(user);
             eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
-            notificationService.notifyAddViolation(order);
+            notificationService.notifyAddViolation(order.getId());
         } else {
             throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
         }

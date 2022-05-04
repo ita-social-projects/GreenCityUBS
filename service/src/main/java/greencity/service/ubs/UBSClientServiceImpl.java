@@ -902,7 +902,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .collect(Collectors.toList());
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
-        userProfileDto.setHasPassword(userRemoteClient.hasPassword().getHasPassword());
+        userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
         return userProfileDto;
     }
 
