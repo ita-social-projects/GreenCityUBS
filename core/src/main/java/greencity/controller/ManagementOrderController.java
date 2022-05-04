@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ValidLanguage;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
@@ -12,7 +11,6 @@ import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.order.*;
-import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
@@ -50,7 +48,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -61,7 +58,6 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
-    private final NotificationService notificationService;
     private final BigOrderTableServiceView bigOrderTableService;
 
     /**
@@ -70,12 +66,11 @@ public class ManagementOrderController {
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
         ViolationService violationService, CoordinateService coordinateService,
-        NotificationService notificationService, BigOrderTableServiceView bigOrderTableService) {
+        BigOrderTableServiceView bigOrderTableService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
-        this.notificationService = notificationService;
         this.bigOrderTableService = bigOrderTableService;
     }
 
