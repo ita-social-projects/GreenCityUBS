@@ -218,10 +218,9 @@ public class ManagementOrderController {
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
+        @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.addUserViolation(add, files, uuid);
-        // notificationService.notifyAddViolation(add.getOrderID());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
