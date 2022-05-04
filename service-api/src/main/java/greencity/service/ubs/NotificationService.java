@@ -62,7 +62,7 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    void notifyAddViolation(Order order);
+    void notifyAddViolation(Long orderId);
 
     /**
      * Method that creates notification for inactive users.

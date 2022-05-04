@@ -1,11 +1,13 @@
 package greencity.service.notification;
 
+import greencity.dto.NotificationTemplateDto;
+import greencity.dto.PageableDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.pageble.PageableDto;
 import org.springframework.data.domain.Pageable;
 
-public interface NotificationeService {
+public interface NotificationTemplateService {
     /**
      * Method that update notification template.
      *
@@ -26,12 +28,4 @@ public interface NotificationeService {
      * @author Dima Sannytski
      */
     NotificationTemplateDto findById(Long id);
-
-    /**
-     * Method for send email with description to user.
-     *
-     * @param dto {@link AddingViolationsToUserDto } order id with description.
-     * @author Veremchuk Zakhar.
-     */
-    void sendNotificationAboutViolation(AddingViolationsToUserDto dto, String language);
 }

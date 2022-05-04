@@ -51,14 +51,6 @@ public interface UserRemoteClient {
     Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
 
     /**
-     * Send request to greenCityUser to send a violation email.
-     *
-     * @param message {@link UserViolationMailDto} violation details.
-     */
-    @PostMapping("/email/sendUserViolation")
-    void sendViolationOnMail(UserViolationMailDto message);
-
-    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
      * @param uuid {@link User}'s UUID.
@@ -67,10 +59,19 @@ public interface UserRemoteClient {
     void markUserDeactivated(@RequestParam(UUID) String uuid);
 
     /**
-     * Checks if current user has a password set.
+     * Gets current user's password status.
      *
-     * @return {@link HasPasswordDto} with {@link Boolean} field.
+     * @return {@link PasswordStatusDto}.
      */
-    @GetMapping("/ownSecurity/has-password")
-    HasPasswordDto hasPassword();
+    @GetMapping("/ownSecurity/password-status")
+    PasswordStatusDto getPasswordStatus();
+
+    /**
+     * Sends an email notification for user.
+     *
+     * @param notification {@link NotificationDto} - notification details.
+     * @param email        {@link String} user's email.
+     */
+    @PostMapping("/email/notification")
+    void sendEmailNotification(NotificationDto notification, @RequestParam(EMAIL) String email);
 }

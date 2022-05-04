@@ -1,13 +1,15 @@
 package greencity.ubstelegrambot;
 
-import greencity.client.OutOfRequestRestClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.UserNotification;
 import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.NotificationServiceImpl;
+import greencity.service.notification.NotificationProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,9 @@ import static greencity.entity.enums.NotificationReceiverType.OTHER;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TelegramService {
+public class TelegramService implements NotificationProvider {
     private final UBSTelegramBot ubsTelegramBot;
-    private final OutOfRequestRestClient restClient;
+    private final UserRemoteClient userRemoteClient;
     private final NotificationTemplateRepository templateRepository;
 
     private void sendMessageToUser(SendMessage sendMessage) {
@@ -40,8 +42,10 @@ public class TelegramService {
     /**
      * The method sends notifications to users.
      */
+    @Override
     public void sendNotification(UserNotification notification) {
-        UserVO userVO = restClient.findUserByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
+        UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail())
+            .orElseThrow(() -> new UserNotFoundException("User with this email does not exits"));
         NotificationDto notificationDto = NotificationServiceImpl
             .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
 

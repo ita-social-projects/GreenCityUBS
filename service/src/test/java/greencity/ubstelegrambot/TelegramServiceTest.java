@@ -4,6 +4,10 @@ import greencity.client.OutOfRequestRestClient;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
+import greencity.client.UserRemoteClient;
+import greencity.dto.LanguageVO;
+import greencity.dto.NotificationDto;
+import greencity.dto.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -32,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class TelegramServiceTest {
 
     @Mock
-    private OutOfRequestRestClient restClient;
+    private UserRemoteClient userRemoteClient;
 
     @Mock
     private NotificationTemplateRepository templateRepository;
@@ -69,7 +73,7 @@ public class TelegramServiceTest {
                 notification.getNotificationType(),
                 "en", OTHER)).thenReturn(Optional.of(template));
 
-        when(restClient.findUserByEmail(notification.getUser().getRecipientEmail()))
+        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
     }
 
@@ -87,7 +91,7 @@ public class TelegramServiceTest {
 
         telegramService.sendNotification(notification);
 
-        verify(restClient).findUserByEmail(notification.getUser().getRecipientEmail());
+        verify(userRemoteClient).findNotDeactivatedByEmail(notification.getUser().getRecipientEmail());
         verify(ubsTelegramBot).execute(sendMessage);
     }
 

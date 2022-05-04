@@ -31,11 +31,7 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.service.notification.NotificationeService;
-import greencity.service.ubs.CertificateService;
-import greencity.service.ubs.CoordinateService;
-import greencity.service.ubs.UBSManagementService;
-import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.*;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -65,7 +61,7 @@ public class ManagementOrderController {
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
-    private final NotificationeService notificationeService;
+    private final NotificationService notificationService;
     private final BigOrderTableServiceView bigOrderTableService;
 
     /**
@@ -74,12 +70,12 @@ public class ManagementOrderController {
     @Autowired
     public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
         ViolationService violationService, CoordinateService coordinateService,
-        NotificationeService notificationeService, BigOrderTableServiceView bigOrderTableService) {
+        NotificationService notificationService, BigOrderTableServiceView bigOrderTableService) {
         this.ubsManagementService = ubsManagementService;
         this.certificateService = certificateService;
         this.violationService = violationService;
         this.coordinateService = coordinateService;
-        this.notificationeService = notificationeService;
+        this.notificationService = notificationService;
         this.bigOrderTableService = bigOrderTableService;
     }
 
@@ -246,7 +242,7 @@ public class ManagementOrderController {
         @ApiIgnore @ValidLanguage Locale locale, @RequestPart(required = false) @Nullable MultipartFile[] files,
         @ApiIgnore @CurrentUserUuid String uuid) {
         violationService.addUserViolation(add, files, uuid);
-        notificationeService.sendNotificationAboutViolation(add, locale.getLanguage());
+        // notificationService.notifyAddViolation(add.getOrderID());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
