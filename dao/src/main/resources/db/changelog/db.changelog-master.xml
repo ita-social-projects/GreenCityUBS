@@ -124,5 +124,6 @@
     <include file="db/changelog/logs/ch-update_big_order_table-view-Yezenitskyi.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-order_status_translation-Hural.xml"/>
     <include file="db/changelog/logs/ch-update-order_status_translation-Hural.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-notification-templates-Hlynskyi.xml"/>
 </databaseChangeLog>
 

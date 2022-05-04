@@ -1,7 +1,11 @@
 package greencity.service;
 
 import greencity.client.OutOfRequestRestClient;
-import greencity.dto.*;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -112,6 +116,17 @@ public class NotificationServiceImpl implements NotificationService {
         sendNotificationsForBotsAndEmail(notification);
     }
 
+    @Override
+    public void notifyPaidOrder(PaymentResponseDto dto) {
+        if (dto.getOrder_id() != null) {
+            Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
+            Optional<Order> orderOptional = orderRepository.findById(orderId);
+            if (orderOptional.isPresent()) {
+                notifyPaidOrder(orderOptional.get());
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -198,6 +213,19 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(paidBags.toString()).build());
         fillAdnSendNotification(parameters, order, NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void notifyBonusesFromCanceledOrder(Order order) {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder().key("returnedPayment")
+            .value(String.valueOf(order.getPointsToUse())).build());
+
+        fillAdnSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
     }
 
     /**

@@ -1,7 +1,11 @@
 package greencity.service.notification;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.*;
+import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UserViolationMailDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.order.Order;

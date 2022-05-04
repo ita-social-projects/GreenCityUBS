@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import greencity.dto.CertificateDtoForAdding;
+import greencity.dto.certificate.CertificateDtoForAdding;
 import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)

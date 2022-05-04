@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.UserProfileUpdateDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

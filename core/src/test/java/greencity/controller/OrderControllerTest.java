@@ -9,6 +9,8 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.client.UserRemoteClient;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,14 +24,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import greencity.dto.OrderAddressDtoRequest;
-import greencity.dto.OrderCancellationReasonDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PaymentResponseDtoLiqPay;
-import greencity.dto.UbsCustomersDto;
-import greencity.dto.UbsCustomersDtoUpdate;
-import greencity.dto.UserInfoDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.user.UserInfoDto;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -64,6 +66,10 @@ class OrderControllerTest {
     @Mock
     UserRemoteClient userRemoteClient;
 
+    @Mock
+    OrderRepository orderRepository;
+    @Mock
+    NotificationService notificationService;
     @InjectMocks
     OrderController orderController;
 

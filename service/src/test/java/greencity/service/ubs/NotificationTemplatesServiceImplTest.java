@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.dto.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.entity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.NotificationTemplatesServiceImpl;

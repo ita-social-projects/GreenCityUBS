@@ -1,12 +1,12 @@
 package greencity.mapping;
 
-import greencity.dto.CourierTranslationDto;
-import greencity.dto.GetTariffsInfoDto;
-import greencity.dto.LocationInfoDto;
-import greencity.dto.LocationTranslationDto;
-import greencity.dto.LocationsDto;
-import greencity.dto.ReceivingStationDto;
-import greencity.dto.RegionTranslationDto;
+import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.location.LocationInfoDto;
+import greencity.dto.location.LocationTranslationDto;
+import greencity.dto.location.LocationsDto;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.location.RegionTranslationDto;
 import greencity.entity.order.Courier;
 import greencity.entity.order.CourierLocation;
 import greencity.entity.order.TariffsInfo;

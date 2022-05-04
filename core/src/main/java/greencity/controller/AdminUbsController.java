@@ -3,7 +3,10 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.*;
+import greencity.dto.order.*;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.table.TableParamsDto;
+import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.entity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
@@ -81,7 +84,7 @@ public class AdminUbsController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/tableParams")
-    public ResponseEntity<TableParamsDTO> getTableParameters(
+    public ResponseEntity<TableParamsDto> getTableParameters(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK).body(ordersAdminsPageService.getParametersForOrdersTable(userUuid));
     }
@@ -100,7 +103,7 @@ public class AdminUbsController {
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        @Valid @RequestBody RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         ChangeOrderResponseDTO changeOrderResponseDTO =
             ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
@@ -119,10 +122,10 @@ public class AdminUbsController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PutMapping("/blockOrders")
-    public ResponseEntity<List<BlockedOrderDTO>> blockOrders(
+    public ResponseEntity<List<BlockedOrderDto>> blockOrders(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @RequestBody List<Long> listOfOrdersId) {
-        List<BlockedOrderDTO> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
+        List<BlockedOrderDto> blockedOrderDTOS = ordersAdminsPageService.requestToBlockOrder(userUuid, listOfOrdersId);
         return ResponseEntity.status(HttpStatus.OK).body(blockedOrderDTOS);
     }
 

@@ -1,10 +1,8 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.AddressDto;
+import greencity.dto.address.AddressDto;
 import greencity.entity.user.ubs.Address;
-
-import java.util.Objects;
 
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;

@@ -4,7 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
-import greencity.dto.*;
+import greencity.dto.address.AddressExportDetailsDto;
+import greencity.dto.bag.*;
+import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.courier.CourierInfoDto;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.*;
+import greencity.dto.position.PositionDto;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.AddingPointsToUserDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
@@ -828,6 +844,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                notificationService.notifyBonusesFromCanceledOrder(order);
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),

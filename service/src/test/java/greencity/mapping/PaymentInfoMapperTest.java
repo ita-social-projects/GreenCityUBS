@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.PaymentInfoDto;
+import greencity.dto.payment.PaymentInfoDto;
 import greencity.entity.order.Payment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

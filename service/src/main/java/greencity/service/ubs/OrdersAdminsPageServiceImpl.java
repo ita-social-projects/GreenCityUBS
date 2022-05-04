@@ -1,6 +1,12 @@
 package greencity.service.ubs;
 
 import greencity.dto.*;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.ColumnDTO;
+import greencity.dto.table.TableParamsDto;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -55,7 +61,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String TIME_OF_EXPORT = "timeOfExport";
 
     @Override
-    public TableParamsDTO getParametersForOrdersTable(String uuid) {
+    public TableParamsDto getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
         String exportAddress = "EXPORT_ADDRESS";
@@ -159,12 +165,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
                 orderDetails))));
-        return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
+        return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
     @Override
     public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
-        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
@@ -458,12 +464,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
+    public synchronized List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders) {
         String email = userRemoteClient.findByUuid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
+        List<BlockedOrderDto> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
             orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
@@ -471,7 +477,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
             if (order.isBlocked() && !order.getBlockedByEmployee().equals(employee)) {
-                blockedOrderDTOS.add(BlockedOrderDTO
+                blockedOrderDTOS.add(BlockedOrderDto
                     .builder().orderId(orderId).userName(String.format("%s %s",
                         order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
                     .build());

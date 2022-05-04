@@ -1,9 +1,9 @@
 package greencity.service.ubs;
 
-import greencity.dto.AddingViolationsToUserDto;
-import greencity.dto.UpdateViolationToUserDto;
-import greencity.dto.UserViolationsWithUserName;
-import greencity.dto.ViolationDetailInfoDto;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.UserViolationsWithUserName;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.enums.SortingOrder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;

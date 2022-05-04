@@ -2,8 +2,8 @@ package greencity.ubstelegrambot;
 
 import greencity.client.OutOfRequestRestClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.NotificationDto;
-import greencity.dto.UserVO;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.notifications.UserNotification;
 import greencity.exceptions.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;

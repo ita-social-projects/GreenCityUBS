@@ -5,8 +5,20 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
 import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
-import greencity.dto.*;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.location.GetCourierLocationDto;
+import greencity.dto.order.*;
+import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,19 +43,22 @@ import java.util.Map;
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final RedirectionConfigProp redirectionConfigProp;
+    private final NotificationService notificationService;
 
     /**
      * Constructor with parameters.
      */
     @Autowired
-    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp) {
+    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
+        NotificationService notificationService) {
         this.ubsClientService = ubsClientService;
         this.redirectionConfigProp = redirectionConfigProp;
+        this.notificationService = notificationService;
     }
 
     /**
      * Controller returns all available bags and bonus points of current user.
-     * {@link greencity.dto.UserVO}.
+     * {@link UserVO}.
      *
      * @param userUuid {@link UserVO} id.
      * @return {@link UserPointsAndAllBagsDto}.
@@ -142,6 +157,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePayment(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
+            notificationService.notifyPaidOrder(dto);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -447,6 +463,7 @@ public class OrderController {
         PaymentResponseDto dto, HttpServletResponse response) throws IOException {
         ubsClientService.validatePaymentClient(dto);
         if (HttpStatus.OK.is2xxSuccessful()) {
+            notificationService.notifyPaidOrder(dto);
             response.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
         return ResponseEntity.status(HttpStatus.OK).build();

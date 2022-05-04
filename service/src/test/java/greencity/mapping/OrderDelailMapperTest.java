@@ -1,6 +1,10 @@
 package greencity.mapping;
 
-import greencity.dto.*;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

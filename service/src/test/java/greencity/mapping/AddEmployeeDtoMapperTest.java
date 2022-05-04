@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.AddEmployeeDto;
+import greencity.dto.employee.AddEmployeeDto;
 import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

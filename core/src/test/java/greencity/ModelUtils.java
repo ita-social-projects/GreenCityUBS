@@ -1,7 +1,35 @@
 package greencity;
 
 import greencity.configuration.RedirectionConfigProp;
-import greencity.dto.*;
+import greencity.dto.address.AddressDto;
+import greencity.dto.bag.BagDto;
+import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.courier.*;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.location.*;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
+import greencity.dto.order.*;
+import greencity.dto.payment.ManualPaymentRequestDto;
+import greencity.dto.payment.OverpaymentInfoRequestDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.position.PositionDto;
+import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
+import greencity.dto.service.ServiceTranslationDto;
+import greencity.dto.tariff.EditTariffInfoDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.user.*;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.user.ubs.Address;
@@ -412,7 +440,7 @@ public class ModelUtils {
 
     public static PaymentResponseDto getPaymentResponseDto() {
         return PaymentResponseDto.builder()
-            .order_id("1")
+            .order_id("1_1")
             .merchant_id(1)
             .actual_amount(1)
             .actual_currency("1")
@@ -514,8 +542,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
-        return RequestToChangeOrdersDataDTO.builder()
+    public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDto.builder()
             .orderId(List.of(1L))
             .columnName("name")
             .newValue("1")

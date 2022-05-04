@@ -1,8 +1,9 @@
 package greencity.service;
 
-import greencity.dto.NotificationDto;
-import greencity.dto.NotificationShortDto;
-import greencity.dto.PageableDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
@@ -16,6 +17,7 @@ import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
@@ -74,6 +77,7 @@ class NotificationeServiceImplTest {
     @Mock
     private ExecutorService executorService;
 
+    @Spy
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
@@ -148,6 +152,16 @@ class NotificationeServiceImplTest {
         }
 
         @Test
+        @SneakyThrows
+        void notifyPaidOrder() {
+            Order order = Order.builder().id(1L).build();
+            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+            PaymentResponseDto dto = PaymentResponseDto.builder().order_id("1_1").build();
+            notificationService.notifyPaidOrder(dto);
+            verify(notificationService).notifyPaidOrder(order);
+        }
+
+        @Test
         void testNotifyCourierItineraryFormed() {
             Order order = Order.builder().id(44L).user(User.builder().id(42L).build())
                 .deliverFrom(LocalDateTime.now(fixedClock).plusDays(1))
@@ -198,6 +212,23 @@ class NotificationeServiceImplTest {
 
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(TEST_NOTIFICATION_PARAMETER_SET);
+        }
+
+        @Test
+        void testNotifyBonusesFromCanceledOrder() {
+            when(userNotificationRepository.save(TEST_USER_NOTIFICATION_5)).thenReturn(TEST_USER_NOTIFICATION_5);
+
+            TEST_NOTIFICATION_PARAMETER_SET2
+                .forEach(parameter -> parameter.setUserNotification(TEST_USER_NOTIFICATION_5));
+
+            when(notificationParameterRepository.saveAll(TEST_NOTIFICATION_PARAMETER_SET2))
+                .thenReturn(new LinkedList<>(TEST_NOTIFICATION_PARAMETER_SET2));
+
+            notificationService.notifyBonusesFromCanceledOrder(TEST_ORDER_5);
+
+            verify(userNotificationRepository).save(any());
+            verify(notificationParameterRepository).saveAll(TEST_NOTIFICATION_PARAMETER_SET2);
+
         }
 
         @Test

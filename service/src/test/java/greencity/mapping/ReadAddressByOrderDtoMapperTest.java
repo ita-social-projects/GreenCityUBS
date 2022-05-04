@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.ReadAddressByOrderDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.entity.user.ubs.Address;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
