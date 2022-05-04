@@ -11,7 +11,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-
 public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;
@@ -20,12 +19,14 @@ public class OrdersDataForUserDto {
     private String orderStatusEng;
     private String paymentStatus;
     private String paymentStatusEng;
-    private Double paidAmount;
     private Double orderFullPrice;
-    private Double amountBeforePayment;
+    private Double orderDiscountedPrice;
+    private Double orderCertificateDiscount;
+    private Double orderBonusDiscount;
+    private Double paidAmount;
+    private Double amountToPay;
     private List<BagForUserDto> bags;
     private String orderComment;
-    private Double bonuses;
     private List<CertificateDto> certificate;
     private Set<String> additionalOrders;
     private SenderInfoDto sender;

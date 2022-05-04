@@ -444,26 +444,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     private OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+        List<CertificateDto> certificateDtos = order.getCertificates().stream()
+            .map(certificate -> {
+                return modelMapper.map(certificate, CertificateDto.class);
+            })
+            .collect(Collectors.toList());
+        double amountToPay =
+            order.getSumTotalAmountWithoutDiscounts().doubleValue() - order.getPointsToUse() - countPaidAmount(payments)
+                - countCertificatesBonuses(certificateDtos);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
             .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
             .orElse(orderStatusTranslationRepository.getOne(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
             .findByOrderPaymentStatusIdAndTranslationValue(
                 (long) order.getOrderPaymentStatus().getStatusValue());
-
-        Double fullPrice = Double.valueOf(bagForUserDtos.stream()
-            .map(BagForUserDto::getTotalPrice)
-            .reduce(0, Integer::sum));
-
-        List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> {
-                return modelMapper.map(certificate, CertificateDto.class);
-            })
-            .collect(Collectors.toList());
-
-        Double amountBeforePayment =
-            fullPrice - order.getPointsToUse() - countPaidAmount(payments) - countCertificatesBonuses(certificateDtos);
-
         return OrdersDataForUserDto.builder()
             .id(order.getId())
             .dateForm(order.getOrderDate())
@@ -472,12 +466,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderStatusEng(orderStatusTranslation.getNameEng())
             .orderComment(order.getComment())
             .bags(bagForUserDtos)
+            .orderCertificateDiscount(countCertificatesBonuses(certificateDtos).doubleValue())
             .additionalOrders(order.getAdditionalOrders())
-            .amountBeforePayment(amountBeforePayment)
+            .amountToPay(amountToPay <= 0 ? 0 : amountToPay)
             .paidAmount(countPaidAmount(payments).doubleValue())
-            .orderFullPrice(fullPrice)
+            .orderFullPrice(order.getSumTotalAmountWithoutDiscounts().doubleValue())
             .certificate(certificateDtos)
-            .bonuses(order.getPointsToUse().doubleValue())
+            .orderDiscountedPrice(order.getSumTotalAmountWithoutDiscounts() - order.getPointsToUse()
+                - countCertificatesBonuses(certificateDtos).doubleValue())
+            .orderBonusDiscount(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
             .address(addressInfoDtoBuilder(order))
             .paymentStatus(paymentStatusTranslation.getTranslationValue())

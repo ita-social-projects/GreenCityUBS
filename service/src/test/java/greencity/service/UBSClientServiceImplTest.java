@@ -1348,6 +1348,7 @@ class UBSClientServiceImplTest {
         bag.setCapacity(120);
         bag.setFullPrice(1200);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
+        order.setSumTotalAmountWithoutDiscounts(1200L);
         bags.add(bag);
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
