@@ -5,6 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;

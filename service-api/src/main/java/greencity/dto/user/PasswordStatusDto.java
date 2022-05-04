@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.user;
 
 import lombok.*;
 

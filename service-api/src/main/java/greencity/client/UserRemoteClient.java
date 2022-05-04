@@ -1,9 +1,9 @@
 package greencity.client;
 
+import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
-import greencity.dto.violation.UserViolationMailDto;
-import greencity.dto.user.HasPasswordDto;
 import greencity.entity.user.User;
 import greencity.client.config.UserRemoteClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
