@@ -5,6 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
@@ -517,7 +518,7 @@ class UBSClientServiceImplTest {
         List<Bot> botList = ModelUtils.botList();
         userProfileDto.setBotList(botList);
         when(modelMapper.map(user, UserProfileDto.class)).thenReturn(userProfileDto);
-        when(userRemoteClient.hasPassword()).thenReturn(new HasPasswordDto(true));
+        when(userRemoteClient.getPasswordStatus()).thenReturn(new PasswordStatusDto(true));
         assertEquals(userProfileDto, ubsService.getProfileData(user.getUuid()));
         for (Bot bot : botList) {
             assertNotNull(bot);
