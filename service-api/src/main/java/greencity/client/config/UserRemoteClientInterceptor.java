@@ -21,7 +21,7 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
     @Value("${greencity.authorization.service-email}")
     private String serviceEmail;
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER = "Bearer ";
+    private static final String TOKEN_FORMAT = "Bearer %s";
 
     /**
      * Sets <em>Authorization</em> header with access token for request.
@@ -46,6 +46,6 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
      * @return {@link String} - access token.
      */
     private String createAccessTokenForService() {
-        return BEARER + jwtTool.createAccessToken(serviceEmail, 1);
+        return String.format(TOKEN_FORMAT, jwtTool.createAccessToken(serviceEmail, 1));
     }
 }
