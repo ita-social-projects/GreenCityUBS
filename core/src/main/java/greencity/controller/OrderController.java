@@ -200,7 +200,7 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/update-order-address")
+    @PutMapping("/update-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
         @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
         @ApiIgnore @CurrentUserUuid String uuid) {
