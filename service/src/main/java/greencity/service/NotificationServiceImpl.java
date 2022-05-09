@@ -5,7 +5,6 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationReceiverType;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.enums.OrderPaymentStatus;
@@ -21,7 +20,7 @@ import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.NotificationNotFoundException;
 import greencity.repository.*;
-import greencity.service.notification.NotificationProvider;
+import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
-import static greencity.entity.enums.NotificationReceiverType.OTHER;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static java.util.stream.Collectors.toMap;
 
@@ -60,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
     private ViolationRepository violationRepository;
     private NotificationParameterRepository notificationParameterRepository;
     private Clock clock;
-    private List<NotificationProvider> notificationProviders;
+    private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
     private final UserRemoteClient userRemoteClient;
 
@@ -336,19 +334,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void sendNotificationsForBotsAndEmail(UserNotification notification) {
-        executor.execute(() -> {
-            sendEmailNotification(notification);
-            notificationProviders.forEach(notificationProvider -> notificationProvider.sendNotification(notification));
-        });
-    }
-
-    private void sendEmailNotification(UserNotification notification) {
-        UserVO userVO =
-            userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
-        NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
-
-        userRemoteClient.sendEmailNotification(notificationDto, userVO.getEmail());
+        executor.execute(() -> notificationProviders.forEach(provider -> provider.sendNotification(notification)));
     }
 
     /**

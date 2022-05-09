@@ -9,14 +9,14 @@ public interface ViberService {
      *
      * @return {@link String} - which contains the status of success or failure.
      */
-    ResponseEntity<String> setWebhook();
+    String setWebhook();
 
     /**
      * The method removes Viber bot url.
      *
      * @return {@link String} - which contains the status of success or failure.
      */
-    ResponseEntity<String> removeWebHook();
+    String removeWebHook();
 
     /**
      * The method allows to see info about Viber bot.
@@ -24,7 +24,7 @@ public interface ViberService {
      * @return @return {@link String} - which contains the status of success or
      *         failure.
      */
-    ResponseEntity<String> getAccountInfo();
+    String getAccountInfo();
 
     /**
      * The method sends a welcome message to user and is performed pre-registration

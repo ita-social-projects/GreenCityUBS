@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.user.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.dto.WebhookDto;
 import greencity.dto.viber.enums.EventTypes;
@@ -19,62 +18,108 @@ import greencity.exceptions.ViberBotAlreadyConnected;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
-import greencity.service.NotificationServiceImpl;
-import greencity.service.notification.NotificationProvider;
+import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.ViberService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Set;
 
-import static greencity.entity.enums.NotificationReceiverType.OTHER;
-
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class ViberServiceImpl implements ViberService, NotificationProvider {
+public class ViberServiceImpl extends AbstractNotificationProvider implements ViberService {
+    public static final String WEBHOOK_FIELD = "webhook";
+    public static final String STATUS_FIELD = "status";
+    public static final String STATUS_SUCCESS = "0";
     private final ViberClient viberClient;
-    private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final ViberBotRepository viberBotRepository;
-    private final NotificationTemplateRepository templateRepository;
     @Value("${greencity.bots.viber-bot-url}")
     private String viberBotUrl;
+
+    /**
+     * Constructor with super() call.
+     */
+    @Autowired
+    public ViberServiceImpl(ViberClient viberClient,
+        UserRemoteClient userRemoteClient,
+        UserRepository userRepository,
+        ViberBotRepository viberBotRepository,
+        NotificationTemplateRepository templateRepository) {
+        super(userRemoteClient, templateRepository);
+        this.viberClient = viberClient;
+        this.userRepository = userRepository;
+        this.viberBotRepository = viberBotRepository;
+    }
+
+    /**
+     * Sets the webhook if the right one is not already set.
+     */
+    @Override
+    protected void init() {
+        if (!isRightWebhookSet()) {
+            setWebhook();
+        }
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResponseEntity<String> setWebhook() {
+    public boolean isEnabled(User user) {
+        if (Objects.isNull(user) || Objects.isNull(user.getViberBot())) {
+            return false;
+        }
+        return Objects.nonNull(user.getViberBot().getIsNotify()) && user.getViberBot().getIsNotify();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    private boolean isRightWebhookSet() {
+        JSONObject accountInfo = new JSONObject(getAccountInfo());
+        return accountInfo.has(WEBHOOK_FIELD) && viberBotUrl.equals(accountInfo.get(WEBHOOK_FIELD).toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String setWebhook() {
         WebhookDto setWebhookDto = WebhookDto.builder()
             .url(viberBotUrl)
             .eventTypes(Set.of(
                 EventTypes.delivered, EventTypes.seen, EventTypes.failed, EventTypes.subscribed,
                 EventTypes.unsubscribed, EventTypes.conversation_started))
             .build();
-        return viberClient.updateWebHook(setWebhookDto);
+
+        JSONObject response = new JSONObject(viberClient.updateWebHook(setWebhookDto));
+        if (response.has(STATUS_FIELD) && STATUS_SUCCESS.equals(response.get(STATUS_FIELD).toString())) {
+            return response.toString();
+        }
+        throw new RuntimeException("Could not set webhook");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResponseEntity<String> removeWebHook() {
+    public String removeWebHook() {
         WebhookDto removeWebhookDto = WebhookDto.builder()
             .url("").build();
-        return viberClient.updateWebHook(removeWebhookDto);
+        return viberClient.updateWebHook(removeWebhookDto).getBody();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResponseEntity<String> getAccountInfo() {
-        return viberClient.getAccountInfo();
+    public String getAccountInfo() {
+        return viberClient.getAccountInfo().getBody();
     }
 
     /**
@@ -146,22 +191,14 @@ public class ViberServiceImpl implements ViberService, NotificationProvider {
      * {@inheritDoc}
      */
     @Override
-    public void sendNotification(UserNotification notification) {
-        UserVO userVO =
-            userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()).orElseThrow();
-        NotificationDto notificationDto = NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
-
-        if (Objects.nonNull(notification.getUser().getViberBot())
-            && Objects.nonNull(notification.getUser().getViberBot().getChatId())) {
-            SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
-                .receiver(notification.getUser().getViberBot().getChatId())
-                .type(MessageType.text)
-                .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
-                .build();
-            log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
-                notification.getNotificationType());
-            sendMessageToUser(sendMessageToUserDto);
-        }
+    protected void sendNotification(UserNotification notification, NotificationDto notificationDto) {
+        SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
+            .receiver(notification.getUser().getViberBot().getChatId())
+            .type(MessageType.text)
+            .text(notificationDto.getTitle() + "\n\n" + notificationDto.getBody())
+            .build();
+        log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
+            notification.getNotificationType());
+        sendMessageToUser(sendMessageToUserDto);
     }
 }
