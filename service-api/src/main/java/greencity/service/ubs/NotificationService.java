@@ -99,4 +99,14 @@ public interface NotificationService {
      * @author Igor Boykov
      */
     long getUnreadenNotifications(String userUuid);
+
+    /**
+     * Method return notification about bonuses for canceled order.
+     *
+     * @param uuid     User uuid.
+     * @param language language.
+     *
+     * @author Pavlo Hural.
+     */
+    NotificationDto getNotificationBonusesForCanceledOrder(String uuid, String language);
 }

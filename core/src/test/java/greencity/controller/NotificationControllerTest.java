@@ -110,4 +110,12 @@ class NotificationControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void getNotificationAboutCanceledOrderTest() throws Exception {
+        mockMvc.perform(post(notificationLink + "/bonusesCanceledOrder")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
 }

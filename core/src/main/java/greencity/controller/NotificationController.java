@@ -150,4 +150,29 @@ public class NotificationController {
             updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    /**
+     * Controller return notification that bonuses from canceled order is accrued.
+     *
+     * @param userUuid users uuid.
+     * @param locale   language.
+     *
+     * @author Pavlo Hural
+     */
+
+    @ApiOperation(value = "Return notification about bonuses from canceled order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping(value = "/bonusesCanceledOrder")
+    public ResponseEntity<NotificationDto> getNotificationAboutCanceledOrder(
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @ApiIgnore @ValidLanguage Locale locale) {
+        return ResponseEntity.status(HttpStatus.OK).body(notificationService
+            .getNotificationBonusesForCanceledOrder(userUuid, locale.getLanguage()));
+    }
 }

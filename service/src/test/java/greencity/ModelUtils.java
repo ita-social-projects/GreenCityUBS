@@ -88,6 +88,7 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
+    public static final UserNotification TEST_USER_NOTIFICATION_6 = createUserNotification6();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
@@ -1890,6 +1891,14 @@ public class ModelUtils {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.BONUSES_FROM_CANCELLED_ORDER);
         userNotification.setUser(TEST_ORDER_5.getUser());
+        userNotification.setOrder(TEST_ORDER_5);
+        return userNotification;
+    }
+
+    private static UserNotification createUserNotification6() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.BONUSES_FROM_CANCELLED_ORDER);
+        userNotification.setUser(TEST_USER);
         userNotification.setOrder(TEST_ORDER_5);
         return userNotification;
     }

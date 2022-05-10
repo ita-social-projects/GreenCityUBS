@@ -375,4 +375,19 @@ class NotificationTemplateServiceImplTest {
         assertThrows(NotificationNotFoundException.class,
             () -> notificationService.getNotification("testtest", 1L, "ua"));
     }
+
+    @Test
+    void getNotificationBonusesForCanceledOrderTest() {
+        when(userRepository.findByUuid("Test")).thenReturn(TEST_USER);
+        when(userNotificationRepository.findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(
+            TEST_USER, NotificationType.BONUSES_FROM_CANCELLED_ORDER))
+                .thenReturn(Optional.of(TEST_USER_NOTIFICATION_6));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+            NotificationType.BONUSES_FROM_CANCELLED_ORDER, "en", SITE))
+                .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+
+        NotificationDto actual = notificationService.getNotificationBonusesForCanceledOrder("Test", "en");
+
+        assertEquals(TEST_NOTIFICATION_DTO, actual);
+    }
 }

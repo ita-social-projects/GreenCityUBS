@@ -302,6 +302,20 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    public NotificationDto getNotificationBonusesForCanceledOrder(String uuid, String language) {
+        User user = userRepository.findByUuid(uuid);
+        UserNotification notification = userNotificationRepository
+            .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
+                NotificationType.BONUSES_FROM_CANCELLED_ORDER)
+            .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
+
+        return createNotificationDto(notification, language, SITE, templateRepository);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public NotificationDto getNotification(String uuid, Long id, String language) {
         UserNotification notification = userNotificationRepository.findById(id)
             .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
