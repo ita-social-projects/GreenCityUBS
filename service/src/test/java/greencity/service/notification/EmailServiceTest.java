@@ -36,11 +36,6 @@ class EmailServiceTest {
     }
 
     @Test
-    void init() {
-        emailService.init();
-    }
-
-    @Test
     void sendNotification() {
         UserNotification notification = ModelUtils.TEST_USER_NOTIFICATION;
         NotificationDto notificationDto = ModelUtils.TEST_NOTIFICATION_DTO;

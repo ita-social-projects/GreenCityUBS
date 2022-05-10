@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -172,17 +173,25 @@ class ViberServiceImplTest {
 
     @Test
     void init() {
-        ResponseEntity<String> noWebhookResponse = ResponseEntity.ok().body("");
+        ReflectionTestUtils.setField(viberService, "viberBotUrl", "https://right.webhook.com");
+
+        ResponseEntity<String> noWebhookResponse = ResponseEntity.ok().body("{}");
         when(viberClient.getAccountInfo()).thenReturn(noWebhookResponse);
         viberService.init();
 
-        ResponseEntity<String> wrongWebhookResponse = ResponseEntity.ok().body("\"webhook\":\"https://123.com\"");
+        ResponseEntity<String> wrongWebhookResponse = ResponseEntity.ok().body("{\n" +
+            "\"webhook\":\"https://wrong.webhook.com\"\n" +
+            "}");
         when(viberClient.getAccountInfo()).thenReturn(wrongWebhookResponse);
         viberService.init();
 
-        ResponseEntity<String> rightWebhookResponse = ResponseEntity.ok().body("\"webhook\":\"https://123.com\"");
+        ResponseEntity<String> rightWebhookResponse = ResponseEntity.ok().body("{\n" +
+            "\"webhook\":\"https://right.webhook.com\"\n" +
+            "}");
         when(viberClient.getAccountInfo()).thenReturn(rightWebhookResponse);
         viberService.init();
+
+        verify(viberClient, times(2)).updateWebHook(any());
     }
 
     @Test

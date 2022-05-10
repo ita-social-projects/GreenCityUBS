@@ -80,7 +80,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
      * {@inheritDoc}
      */
     private boolean isRightWebhookSet() {
-        JSONObject accountInfo = new JSONObject(getAccountInfo());
+        JSONObject accountInfo = new JSONObject(getAccountInfo().getBody());
         return accountInfo.has(WEBHOOK_FIELD) && viberBotUrl.equals(accountInfo.get(WEBHOOK_FIELD).toString());
     }
 
