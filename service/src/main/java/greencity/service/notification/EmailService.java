@@ -28,7 +28,10 @@ public class EmailService extends AbstractNotificationProvider {
      */
     @Override
     public boolean isEnabled(User user) {
-        return Objects.nonNull(user);
+        if (Objects.isNull(user)) {
+            return false;
+        }
+        return Objects.nonNull(user.getRecipientEmail());
     }
 
     /**

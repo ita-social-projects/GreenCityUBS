@@ -12,6 +12,7 @@ import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
@@ -28,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ViberServiceImplTest {
+class ViberServiceImplTest {
 
     @Mock
     private NotificationTemplateRepository templateRepository;
@@ -115,6 +117,29 @@ public class ViberServiceImplTest {
     }
 
     @Test
+    void sendNotificationNotEnabled() {
+        notification.getUser().getViberBot().setIsNotify(false);
+
+        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(userVO));
+        when(templateRepository
+            .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+                notification.getNotificationType(), userVO.getLanguageVO().getCode(), OTHER))
+                    .thenReturn(Optional.of(template));
+
+        viberService.sendNotification(notification);
+
+        verify(viberClient, never()).sendMessage(any());
+    }
+
+    @Test
+    void sendNotificationUserNotFoundException() {
+        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification));
+    }
+
+    @Test
     void testViberException() {
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.of(userVO));
@@ -143,5 +168,34 @@ public class ViberServiceImplTest {
     void getAccountInfo() {
         viberService.getAccountInfo();
         verify(viberClient).getAccountInfo();
+    }
+
+    @Test
+    void init() {
+        ResponseEntity<String> noWebhookResponse = ResponseEntity.ok().body("");
+        when(viberClient.getAccountInfo()).thenReturn(noWebhookResponse);
+        viberService.init();
+
+        ResponseEntity<String> wrongWebhookResponse = ResponseEntity.ok().body("\"webhook\":\"https://123.com\"");
+        when(viberClient.getAccountInfo()).thenReturn(wrongWebhookResponse);
+        viberService.init();
+
+        ResponseEntity<String> rightWebhookResponse = ResponseEntity.ok().body("\"webhook\":\"https://123.com\"");
+        when(viberClient.getAccountInfo()).thenReturn(rightWebhookResponse);
+        viberService.init();
+    }
+
+    @Test
+    void isEnabled() {
+        assertFalse(viberService.isEnabled(null));
+
+        User user = new User();
+        assertFalse(viberService.isEnabled(user));
+
+        user.setViberBot(new ViberBot(1L, "123", false, user));
+        assertFalse(viberService.isEnabled(user));
+
+        user.getViberBot().setIsNotify(true);
+        assertTrue(viberService.isEnabled(user));
     }
 }
