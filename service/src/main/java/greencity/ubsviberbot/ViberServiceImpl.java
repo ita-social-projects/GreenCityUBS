@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -33,8 +34,6 @@ import java.util.Set;
 @Slf4j
 public class ViberServiceImpl extends AbstractNotificationProvider implements ViberService {
     public static final String WEBHOOK_FIELD = "webhook";
-    public static final String STATUS_FIELD = "status";
-    public static final String STATUS_SUCCESS = "0";
     private final ViberClient viberClient;
     private final UserRepository userRepository;
     private final ViberBotRepository viberBotRepository;
@@ -89,37 +88,32 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
      * {@inheritDoc}
      */
     @Override
-    public String setWebhook() {
+    public ResponseEntity<String> setWebhook() {
         WebhookDto setWebhookDto = WebhookDto.builder()
             .url(viberBotUrl)
             .eventTypes(Set.of(
                 EventTypes.delivered, EventTypes.seen, EventTypes.failed, EventTypes.subscribed,
                 EventTypes.unsubscribed, EventTypes.conversation_started))
             .build();
-
-        JSONObject response = new JSONObject(viberClient.updateWebHook(setWebhookDto));
-        if (response.has(STATUS_FIELD) && STATUS_SUCCESS.equals(response.get(STATUS_FIELD).toString())) {
-            return response.toString();
-        }
-        throw new RuntimeException("Could not set webhook");
+        return viberClient.updateWebHook(setWebhookDto);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String removeWebHook() {
+    public ResponseEntity<String> removeWebHook() {
         WebhookDto removeWebhookDto = WebhookDto.builder()
             .url("").build();
-        return viberClient.updateWebHook(removeWebhookDto).getBody();
+        return viberClient.updateWebHook(removeWebhookDto);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getAccountInfo() {
-        return viberClient.getAccountInfo().getBody();
+    public ResponseEntity<String> getAccountInfo() {
+        return viberClient.getAccountInfo();
     }
 
     /**

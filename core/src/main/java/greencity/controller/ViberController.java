@@ -24,7 +24,7 @@ public class ViberController {
      */
     @GetMapping(value = "/setwebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> setWebHook() {
-        return ResponseEntity.ok().body(viberService.setWebhook());
+        return viberService.setWebhook();
     }
 
     /**
@@ -34,7 +34,7 @@ public class ViberController {
      */
     @GetMapping(value = "/removewebhook", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> removeWebHook() {
-        return ResponseEntity.ok().body(viberService.removeWebHook());
+        return viberService.removeWebHook();
     }
 
     /**
@@ -62,6 +62,6 @@ public class ViberController {
      */
     @GetMapping(value = "/accountinfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> getAccountInfo() {
-        return ResponseEntity.ok().body(viberService.getAccountInfo());
+        return viberService.getAccountInfo();
     }
 }
