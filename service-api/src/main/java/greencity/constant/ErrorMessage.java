@@ -87,7 +87,7 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
     public static final String CANNOT_FIND_LANGUAGE_OF_TRANSLATION = "Cannot find language of translation";
-    public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXITS = "User with this email does not exits: ";
+    public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST ="User with this email does not exist: ";
 
     /**
      * Constructor.
