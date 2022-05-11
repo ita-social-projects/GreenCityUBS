@@ -836,6 +836,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 eventService.save(OrderHistory.ORDER_ADJUSTMENT,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.save(OrderHistory.ORDER_CONFIRMED,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
@@ -843,7 +844,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED && order.getPointsToUse() != 0) {
                 notificationService.notifyBonusesFromCanceledOrder(order);
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
