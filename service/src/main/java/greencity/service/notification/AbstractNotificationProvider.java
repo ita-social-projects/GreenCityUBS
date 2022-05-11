@@ -66,7 +66,7 @@ public abstract class AbstractNotificationProvider {
     protected NotificationDto createNotificationDto(UserNotification notification) {
         UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail())
             .orElseThrow(() -> new UserNotFoundException(
-                ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXITS + notification.getUser().getRecipientEmail()));
+                ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + notification.getUser().getRecipientEmail()));
         return NotificationServiceImpl
             .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
     }
