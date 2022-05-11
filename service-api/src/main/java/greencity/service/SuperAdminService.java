@@ -137,32 +137,6 @@ public interface SuperAdminService {
     List<CourierDto> getAllCouriers();
 
     /**
-     * Method for getting all info about courier's locations.
-     *
-     * @return {@link GetCourierTranslationsDto}
-     */
-    // List<GetCourierLocationDto> getAllCouriersAndLocations();
-
-    /**
-     * Method for set courier limit by sum of order.
-     *
-     * @param id  - id of courier
-     * @param dto {@link EditPriceOfOrder}
-     *
-     * @author Vadym Makitra
-     */
-    // void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
-
-    /**
-     * Method for set courier limit by amount of bag.
-     *
-     * @param id  - id of courier.
-     * @param dto {@link EditAmountOfBagDto}
-     * @author Vadym Makitra
-     */
-    // void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
-
-    /**
      * Method for edit limit description.
      *
      * @param courierId        - id of courier
@@ -191,27 +165,11 @@ public interface SuperAdminService {
     GetTariffServiceDto excludeBag(Integer id);
 
     /**
-     * Method for edit info about tariff.
-     *
-     * @param dto {@link EditTariffInfoDto}
-     * @return {@link EditTariffInfoDto}
-     */
-    // EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
-
-    /**
      * Method for delete courier.
      *
      * @param id - courier Id.
      */
     void deleteCourier(Long id);
-
-    /**
-     * Method for add new location to courier.
-     *
-     * @param dto {@link NewLocationForCourierDto}
-     * @author Vadym Makitra
-     */
-    // void addLocationToCourier(NewLocationForCourierDto dto);
 
     /**
      * Method for getting all info about tariffs.
