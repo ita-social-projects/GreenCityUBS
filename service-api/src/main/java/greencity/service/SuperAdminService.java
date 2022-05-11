@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.GetCourierLocationDto;

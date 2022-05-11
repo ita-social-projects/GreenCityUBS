@@ -5,13 +5,15 @@ import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.location.GetCourierLocationDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
@@ -110,6 +112,8 @@ class UBSClientServiceImplTest {
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
+    @Mock
+    private LocationRepository locationRepository;
 
     @Test
     @Transactional

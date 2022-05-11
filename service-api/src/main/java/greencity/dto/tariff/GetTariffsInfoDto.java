@@ -1,8 +1,9 @@
 package greencity.dto.tariff;
 
+import greencity.dto.LocationsDtos;
+import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.location.LocationInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

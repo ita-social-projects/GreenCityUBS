@@ -1,5 +1,7 @@
 package greencity.mapping;
 
+import greencity.dto.LocationsDtos;
+import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.courier.ReceivingStationDto;

@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.GetCourierLocationDto;
@@ -604,7 +605,6 @@ class SuperAdminServiceImplTest {
         Courier courierToSave = Courier.builder()
             .id(courier.getId())
             .courierStatus(courier.getCourierStatus())
-            .courierLocations(courier.getCourierLocations())
             .courierTranslationList(listToSave)
             .build();
         CourierDto courierDto = CourierDto.builder()

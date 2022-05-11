@@ -1,6 +1,7 @@
 package greencity;
 
 import greencity.configuration.RedirectionConfigProp;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.EditAmountOfBagDto;
