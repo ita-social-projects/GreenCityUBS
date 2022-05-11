@@ -10,7 +10,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffInfoDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -439,27 +438,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
-        Region region = createNewRegion(dto);
-        return region;
-    }
-
-    private Region createNewRegion(LocationCreateDto dto) {
         return Region.builder()
             .enName(dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
                 .get().getRegionName())
             .ukrName(dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
                 .get().getRegionName())
             .build();
-    }
-
-    private Language getLanguageByCode(String languageCode) {
-        return languageRepository.findLanguageByLanguageCode(languageCode).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + languageCode));
-    }
-
-    private Courier tryToFindCourierById(Long id) {
-        return courierRepository.findById(id).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
     }
 
     private Location tryToFindLocationById(Long id) {
@@ -541,7 +525,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
-        Region region = regionRepository.findById(addNewTariffDto.getRegionId())
+        regionRepository.findById(addNewTariffDto.getRegionId())
             .orElseThrow(() -> new RegionNotFoundException(
                 "Region with id " + addNewTariffDto.getRegionId() + " does not exist!"));
         TariffsInfo tariffsInfo = TariffsInfo.builder()

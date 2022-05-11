@@ -29,6 +29,7 @@ public class Location {
 
     @Column(name = "name_uk")
     private String nameUk;
+
     @Column(name = "name_en")
     private String nameEn;
 

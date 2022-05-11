@@ -1,5 +1,7 @@
 package greencity.service.ubs;
 
+import greencity.client.FondyClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
@@ -12,7 +14,6 @@ import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.location.GetCourierLocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
@@ -26,9 +27,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
-import greencity.client.FondyClient;
 import greencity.service.UAPhoneNumberUtil;
-import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -1525,10 +1524,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Location> locations = locationRepository.findAllActive();
         Map<RegionDto, List<LocationsDtos>> map = locations.stream()
             .collect(Collectors.toMap(x -> modelMapper.map(x, RegionDto.class),
-                x -> new ArrayList(List.of(modelMapper.map(x, LocationsDtos.class))),
+                x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
                 (x, y) -> {
                     x.addAll(y);
-                    return new ArrayList<LocationsDtos>(x);
+                    return new ArrayList<>(x);
                 }));
 
         return map.entrySet().stream()
@@ -1550,7 +1549,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return orderCourierPopUpDto;
         }
         Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
-        if (lastOrder.isPresent() && !changeLoc.isPresent()) {
+        if (lastOrder.isPresent()) {
             orderCourierPopUpDto.setOrderIsPresent(true);
             orderCourierPopUpDto.setTariffsForLocationDto(
                 modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrder(lastOrder.get().getId()),

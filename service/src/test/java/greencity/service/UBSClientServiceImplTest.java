@@ -1403,7 +1403,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(list.get(0), LocationsDtos.class))
             .thenReturn(LocationsDtos.builder().locationId(1L).nameEn("Kyiv").nameUk("Київ").build());
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrdering("35467585763t4sfgchjfuyetf", Optional.of("w"));
-        assertEquals(dto.getAllActiveLocationsDtos().size(), 1);
+        assertEquals(1, dto.getAllActiveLocationsDtos().size());
         assertFalse(dto.getOrderIsPresent());
 
     }

@@ -28,14 +28,6 @@ public class Language {
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<ServiceTranslation> serviceTranslations;
 
-    /*-
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    private List<LocationTranslation> locationTranslations;
-    */
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslations;
-    /*-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "language")
-    private List<RegionTranslation> regionTranslations;
-    */
 }
