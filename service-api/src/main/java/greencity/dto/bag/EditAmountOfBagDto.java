@@ -2,6 +2,7 @@ package greencity.dto.bag;
 
 import lombok.*;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -11,9 +12,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class EditAmountOfBagDto {
     @NotNull
+    @Min(1)
     private Long minAmountOfBigBags;
     @NotNull
+    @Min(1)
     private Long maxAmountOfBigBags;
-    @NotNull
     private Long locationId;
 }

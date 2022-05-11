@@ -6,25 +6,21 @@
 
         <addColumn tableName="tariffs_info">
             <column name="min_amount_of_big_bags" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
 
         <addColumn tableName="tariffs_info">
             <column name="max_amount_of_big_bags" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
 
         <addColumn tableName="tariffs_info">
             <column name="min_price_of_order" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
 
         <addColumn tableName="tariffs_info">
             <column name="max_price_of_order" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
 
@@ -44,16 +40,6 @@
                                  baseColumnNames="courier_id"
                                  constraintName="fk_tariffs_info_to_courier"
                                  referencedTableName="courier"
-                                 referencedColumnNames="id"/>
-
-        <addColumn tableName="locations">
-            <column name="tariffs_info_id" type="bigint"></column>
-        </addColumn>
-
-        <addForeignKeyConstraint baseTableName="locations"
-                                 baseColumnNames="tariffs_info_id"
-                                 constraintName="fk_location_to_tariffs_info"
-                                 referencedTableName="tariffs_info"
                                  referencedColumnNames="id"/>
 
         <addColumn tableName="orders">

@@ -337,62 +337,6 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for get all info about couriers' locations.
-     *
-     * @return {@link GetCourierTranslationsDto}
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Get all info about couriers' locations")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @GetMapping("/getCouriersLocations")
-    public ResponseEntity<List<GetCourierLocationDto>> getAllCouriersLocations() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriersAndLocations());
-    }
-
-    /**
-     * Controller for set amount of sum.
-     *
-     * @param id  - id of courier.
-     * @param dto {@link EditPriceOfOrder} - entered info about new Price.
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Set limit by amount of sum")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PatchMapping("/setAmountOfSum/{id}")
-    public ResponseEntity<HttpStatuses> setAmountOfBag(
-        @PathVariable Long id, @RequestBody EditPriceOfOrder dto) {
-        superAdminService.setCourierLimitBySumOfOrder(id, dto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller for set amount of bag.
-     *
-     * @return {@link GetCourierTranslationsDto}
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Set limit by amount of bag")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PatchMapping("/setAmountOfBag/{id}")
-    public ResponseEntity<HttpStatus> setAmountOfSum(
-        @PathVariable Long id, @RequestBody EditAmountOfBagDto dto) {
-        superAdminService.setCourierLimitByAmountOfBag(id, dto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
      * Controller for set limit description.
      *
      * @return {@link GetCourierTranslationsDto}
@@ -448,23 +392,6 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for editing info about tariff.
-     *
-     * @param dto {@link EditTariffInfoDto}
-     * @return {@link EditTariffInfoDto} - info about entered value.
-     */
-    @ApiOperation(value = "Edit info About Tariff")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EditTariffInfoDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PatchMapping("/editInfoAboutTariff")
-    public ResponseEntity<EditTariffInfoDto> editInfoInTariff(@RequestBody EditTariffInfoDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editInfoInTariff(dto));
-    }
-
-    /**
      * Controller for delete courier's.
      *
      * @param id - courier id that will need to be deleted;
@@ -479,22 +406,6 @@ class SuperAdminController {
     public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
         superAdminService.deleteCourier(id);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    /**
-     * Controller for add new locations for courier's.
-     *
-     */
-    @ApiOperation(value = "Controller for add new locations for courier's.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
-    @PutMapping("/courier/location")
-    public ResponseEntity<HttpStatuses> addNewLocationForCourier(@RequestBody NewLocationForCourierDto dto) {
-        superAdminService.addLocationToCourier(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -583,5 +494,60 @@ class SuperAdminController {
     @GetMapping("/tariffs/all")
     public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
+    }
+
+    /**
+     * Controller for add new tariff info.
+     *
+     * @return {@link GetTariffsInfoDto}
+     * @author Yurii Fedorko
+     */
+    @ApiOperation(value = "Add new tariff.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PostMapping("/add-new-tariff")
+    public ResponseEntity<HttpStatus> addNewTariff(@RequestBody @Valid AddNewTariffDto addNewTariffDto,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        superAdminService.addNewTariff(addNewTariffDto, uuid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating TariffsInfo and setting courierLimit by amount of
+     * bags.
+     *
+     * @author Yurii Fedorko
+     */
+    @PatchMapping("/setLimitsByAmountOfBags/{tariffId}")
+    public ResponseEntity<HttpStatus> setLimitsByAmountOfBags(@Valid @PathVariable Long tariffId,
+        @Valid @RequestBody EditAmountOfBagDto dto) {
+        superAdminService.setTariffLimitByAmountOfBags(tariffId, dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
+     * Controller for updating TariffsInfo and setting courierLimit by sum of Order.
+     *
+     * @author Yurii Fedorko
+     */
+    @PatchMapping("/setLimitsBySumOfOrder/{tariffId}")
+    public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
+        @Valid @RequestBody EditPriceOfOrder dto) {
+        superAdminService.setTariffLimitBySumOfOrder(tariffId, dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
+     * Controller for deleting or deactivation of TariffsInfo.
+     *
+     * @author Yurii Fedorko
+     */
+    @PutMapping("/deactivateTariff/{tariffId}")
+    public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
     }
 }

@@ -195,6 +195,7 @@ public class ModelUtils {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
+            .locationId(1L)
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
@@ -361,14 +362,14 @@ public class ModelUtils {
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .courierLocations(CourierLocation.builder()
+            .tariffsInfo(TariffsInfo.builder()
                 .courier(Courier.builder()
                     .id(1L)
                     .build())
                 .id(1L)
-                .location(Location.builder()
+                .locations(Set.of(Location.builder()
                     .id(1L)
-                    .build())
+                    .build()))
                 .maxAmountOfBigBags(2L)
                 .maxPriceOfOrder(500000L)
                 .minAmountOfBigBags(99L)
@@ -1648,47 +1649,23 @@ public class ModelUtils {
 
     public static Location getLastLocation() {
         return Location.builder()
-            .id(1l).locationTranslations(List.of(LocationTranslation.builder()
-                .location(getLocation())
-                .locationName("Name1")
-                .language(Language.builder()
-                    .code("ua").build())
-                .build()))
+            .id(1l)
+            .nameUk("київ")
+            .nameEn("Kyiv")
+            .locationStatus(LocationStatus.ACTIVE)
+            .coordinates(Coordinates.builder().latitude(100.00).longitude(100.00).build())
             .build();
     }
 
     public static List<Location> getLocationList() {
-        List list = new ArrayList();
-        Location location = Location.builder()
-            .id(2l)
-            .locationTranslations(List.of(LocationTranslation.builder()
-                .locationName("Name2").location(getLocation())
-                .language(Language.builder().code("ua")
-                    .build())
-                .build()))
-            .build();
-        list.add(getLastLocation());
-        list.add(location);
-        return list;
-    }
-
-    public static List<LocationTranslation> getLocationTranslationList() {
-        return List.of(LocationTranslation.builder()
-            .locationName("Київ")
-            .language(getLanguage())
-            .location(Location.builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
-            .build(),
-            LocationTranslation.builder()
-                .locationName("Name2")
-                .language(getLanguage())
-                .location(Location.builder()
-                    .id(2L)
-                    .locationStatus(LocationStatus.ACTIVE)
-                    .build())
-                .build());
+        return List.of(Location.builder()
+            .locationStatus(LocationStatus.ACTIVE)
+            .nameEn("Kyiv")
+            .id(1L)
+            .nameUk("Київ")
+            .region(getRegion())
+            .coordinates(getCoordinates())
+            .build());
     }
 
     public static List<LocationResponseDto> getLocationResponseDtoList() {
@@ -2053,7 +2030,8 @@ public class ModelUtils {
     public static Location getLocation() {
         return Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
-            .locationTranslations(getLocationTranslationList())
+            .nameEn("Kyiv")
+            .nameUk("Київ")
             .coordinates(Coordinates.builder()
                 .longitude(3.34d)
                 .latitude(1.32d).build())
@@ -2072,7 +2050,6 @@ public class ModelUtils {
             .id(1L)
             .courierStatus(CourierStatus.ACTIVE)
             .courierTranslationList(getCourierTranslations())
-            .courierLocations(List.of(getCourierLocations()))
             .build();
     }
 
@@ -2450,16 +2427,8 @@ public class ModelUtils {
         return Location.builder()
             .id(1L)
             .locationStatus(LocationStatus.DEACTIVATED)
-            .locationTranslations(List.of(LocationTranslation.builder().id(1L).build()))
-            .build();
-    }
-
-    public static LocationTranslation getLocationTranslation() {
-        return LocationTranslation
-            .builder()
-            .id(1l)
-            .location(Location.builder().locationStatus(LocationStatus.DEACTIVATED).build())
-            .language(Language.builder().code("ua").build())
+            .nameUk("Київ")
+            .nameEn("Kyiv")
             .build();
     }
 
@@ -2563,22 +2532,6 @@ public class ModelUtils {
             .description("Test")
             .languageId(1L)
             .name("Test")
-            .build();
-    }
-
-    public static CourierLocation getCourierLocations() {
-        return CourierLocation.builder()
-            .maxAmountOfBigBags(20L)
-            .minAmountOfBigBags(2L)
-            .maxPriceOfOrder(20000L)
-            .minPriceOfOrder(500L)
-            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .location(getLocation())
-            .courier(Courier.builder()
-                .id(1L)
-                .courierStatus(CourierStatus.ACTIVE)
-                .courierTranslationList(getCourierTranslations())
-                .build())
             .build();
     }
 
@@ -2728,23 +2681,16 @@ public class ModelUtils {
     public static List<Region> getAllRegion() {
         return List.of(Region.builder()
             .id(1L)
-            .regionTranslations(getRegionTranslationsList())
+            .ukrName("Київська область")
+            .enName("Kyiv region")
             .locations(getLocationList())
             .build());
     }
 
-    public static List<RegionTranslation> getRegionTranslationsList() {
-        return List.of(RegionTranslation.builder()
-            .name("Київська область")
-            .language(getLanguage())
-            .build());
-    }
-
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
-        return List.of(RegionTranslationDto.builder()
-            .languageCode("ua")
-            .regionName("Київська область")
-            .build());
+        return List.of(
+            RegionTranslationDto.builder().languageCode("ua").regionName("Київська область").build(),
+            RegionTranslationDto.builder().regionName("Kyiv region").languageCode("en").build());
     }
 
     public static List<LocationCreateDto> getLocationCreateDtoList() {
@@ -2757,16 +2703,16 @@ public class ModelUtils {
     }
 
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
-        return List.of(AddLocationTranslationDto.builder()
-            .locationName("Київ")
-            .languageCode("ua")
-            .build());
+        return List.of(
+            AddLocationTranslationDto.builder().locationName("Київ").languageCode("ua").build(),
+            AddLocationTranslationDto.builder().locationName("Kyiv").languageCode("en").build());
     }
 
     public static Region getRegion() {
         return Region.builder()
             .id(1L)
-            .regionTranslations(getRegionTranslationsList())
+            .ukrName("Київська область")
+            .enName("Kyiv region")
             .locations(List.of(getLocation()))
             .build();
     }
@@ -2774,7 +2720,8 @@ public class ModelUtils {
     public static Region getRegionForMapper() {
         return Region.builder()
             .id(1L)
-            .regionTranslations(getRegionTranslationsList())
+            .ukrName("Київська область")
+            .enName("Kyiv region")
             .build();
     }
 
@@ -2814,8 +2761,8 @@ public class ModelUtils {
             .languageCode("ua")
             .build(),
             LocationTranslationDto.builder()
-                .locationName("Name2")
-                .languageCode("ua").build());
+                .locationName("Kyiv")
+                .languageCode("en").build());
     }
 
     public static List<CourierDto> getCourierDtoList() {
@@ -2840,14 +2787,11 @@ public class ModelUtils {
     public static Location getLocationForCreateRegion() {
         return Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
-            .locationTranslations(List.of(LocationTranslation.builder().locationName("Київ").build()))
+            .nameUk("Київ").nameEn("Kyiv")
             .coordinates(Coordinates.builder()
                 .longitude(3.34d)
                 .latitude(1.32d).build())
-            .region(Region.builder()
-                .regionTranslations(getRegionTranslationsList())
-                .locations(List.of(getLocation()))
-                .build())
+            .region(Region.builder().id(1L).enName("Kyiv region").ukrName("Київська область").build())
             .build();
     }
 
@@ -3049,19 +2993,21 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
-            .courierLocations(CourierLocation.builder()
+
+            .tariffsInfo(TariffsInfo.builder()
                 .courier(Courier.builder()
                     .id(1L)
                     .build())
                 .id(1L)
-                .location(Location.builder()
+                .locations(Set.of(Location.builder()
                     .id(1L)
-                    .build())
+                    .build()))
                 .maxAmountOfBigBags(2L)
                 .maxPriceOfOrder(500000L)
                 .minAmountOfBigBags(99L)
                 .minPriceOfOrder(500L)
                 .build())
+
             .build();
     }
 
@@ -3321,28 +3267,23 @@ public class ModelUtils {
             .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
             .build();
         return GetTariffsInfoDto.builder()
-            .locationInfoDto(locationInfoDto)
             .cardId(1L)
-            .receivingStationDto(getReceivingStationDto())
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Taras")
-            .locationStatus("ACTIVE")
             .build();
     }
 
     public static TariffsInfo getTariffsInfo() {
-        TariffsInfo tariffsInfo = new TariffsInfo();
-        tariffsInfo
-            .setCreator(getUser())
-            .setId(1L)
-            .setLocationStatus(LocationStatus.ACTIVE)
-            .setCourierLocations(List.of(getCourierLocations()))
-            .setReceivingStations(getReceivingStation());
-        return tariffsInfo;
+        return TariffsInfo.builder().id(1L).courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .maxAmountOfBigBags(20L)
+            .maxPriceOfOrder(20000L)
+            .minAmountOfBigBags(2L)
+            .minPriceOfOrder(500L)
+            .build();
     }
 
     public static UpdateNotificationTemplatesDto getUpdateNotificationTemplatesDto() {
@@ -3407,6 +3348,73 @@ public class ModelUtils {
             .certificate(List.of(certificateDto))
             .additionalOrders(Collections.emptySet())
             .build();
+    }
+
+    public static TariffsInfo getTariffInfo() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courier(ModelUtils.getCourier())
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .locations(Set.of(Location.builder()
+                .id(1L)
+                .region(ModelUtils.getRegion())
+                .nameUk("Київ")
+                .nameEn("Kyiv")
+                .coordinates(ModelUtils.getCoordinates())
+                .build()))
+            .locationStatus(LocationStatus.ACTIVE)
+            .creator(ModelUtils.getUser())
+            .createdAt(LocalDate.of(2022, 10, 20))
+            .maxAmountOfBigBags(100L)
+            .minAmountOfBigBags(2L)
+            .maxPriceOfOrder(50000L)
+            .minPriceOfOrder(500L)
+            .orders(Collections.emptyList())
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
+            .build();
+    }
+
+    public static TariffsInfo getTariffInfoWithLimitOfBags() {
+        return TariffsInfo.builder()
+            .id(1L)
+            .courier(ModelUtils.getCourier())
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+            .locations(Set.of(Location.builder()
+                .id(1L)
+                .region(ModelUtils.getRegion())
+                .nameUk("Київ")
+                .nameEn("Kyiv")
+                .coordinates(ModelUtils.getCoordinates())
+                .build()))
+            .locationStatus(LocationStatus.ACTIVE)
+            .creator(ModelUtils.getUser())
+            .createdAt(LocalDate.of(2022, 10, 20))
+            .maxAmountOfBigBags(100L)
+            .minAmountOfBigBags(5L)
+            .maxPriceOfOrder(50000L)
+            .minPriceOfOrder(500L)
+            .orders(List.of(ModelUtils.getOrder()))
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
+            .build();
+    }
+
+    public static AddNewTariffDto getAddNewTariffDto() {
+        return AddNewTariffDto.builder()
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(List.of(1L))
+            .regionId(1L)
+            .build();
+    }
+
+    private static EditAmountOfBagDto getEditAmountOfBagDto() {
+        return EditAmountOfBagDto.builder().maxAmountOfBigBags(500L).minAmountOfBigBags(100L).build();
     }
 
     public static String getSuccessfulFondyResponse() {

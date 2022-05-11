@@ -36,6 +36,7 @@ import javax.validation.constraints.Pattern;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ubs")
@@ -424,28 +425,6 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting all information about courier,courier limits,and
-     * courier locations.
-     *
-     * @param courierId - id of current courier
-     * @return {@link GetCourierLocationDto}
-     * @author Vadym Makitra
-     */
-    @ApiOperation(value = "Get all location where courier is working")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierLocationDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping(value = "/courier/{courierId}")
-    public ResponseEntity<List<GetCourierLocationDto>> getCourierLocations(
-        @PathVariable Long courierId) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getCourierLocationByCourierIdAndLanguageCode(courierId));
-    }
-
-    /**
      * Controller checks if received data Client is valid and stores payment info if
      * is.
      *
@@ -469,17 +448,47 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
+    /**
+     * Controller for getting all Active Locations if user haven't made any order
+     * before. If user has made an order before controller returns info about tariff
+     * by which it was made Controller is used to get all active Locations if user
+     * want to change location to make an order
+     *
+     * @param changeLoc - optional param. If it is present controller will return
+     *                  info about locations
+     * @param uuid      - user's uuid
+     * @return {@link OrderCourierPopUpDto}
+     */
     @ApiOperation(value = "Get all location where courier is working")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/allLocations")
-    public ResponseEntity<List<AllActiveLocationsDto>> getAllActiveLocatins() {
+    public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocatins(
+        @RequestParam Optional<String> changeLoc,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsClientService.getAllActiveLocations());
+            .body(ubsClientService.getInfoForCourierOrdering(uuid, changeLoc));
+    }
+
+    /**
+     * Controller for getting info about tariff for location.
+     *
+     * @param locationId - id of location
+     * @return {@link OrderCourierPopUpDto}
+     */
+    @ApiOperation(value = "Get tariff for location and courier")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/tariffinfo-for-location/{locationId}")
+    public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(@Valid @PathVariable Long locationId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffInfoForLocation(locationId));
     }
 }

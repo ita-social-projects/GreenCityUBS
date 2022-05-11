@@ -153,10 +153,7 @@ public class Order {
 
     @Column(name = "counter_order_payment_id")
     private Long counterOrderPaymentId;
-    /*-
-    @ManyToOne
-    CourierLocation courierLocations;
-    */
+
     @ManyToOne
     private TariffsInfo tariffsInfo;
 

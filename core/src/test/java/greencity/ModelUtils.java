@@ -594,16 +594,16 @@ public class ModelUtils {
             .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
             .build();
         return GetTariffsInfoDto.builder()
-            .locationInfoDto(locationInfoDto)
+            // .locationInfoDto(locationInfoDto)
             .cardId(1L)
-            .receivingStationDto(getReceivingStationDto())
+            // .receivingStationDto(getReceivingStationDto())
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")
-            .locationStatus("ACTIVE")
+            // .locationStatus("ACTIVE")
             .build();
     }
 
@@ -612,6 +612,15 @@ public class ModelUtils {
             .body("You have unpaid order")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
             .languageId(1)
+            .build();
+    }
+
+    public static AddNewTariffDto getAddNewTariffDto() {
+        return AddNewTariffDto.builder()
+            .regionId(1L)
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(List.of(1L))
             .build();
     }
 

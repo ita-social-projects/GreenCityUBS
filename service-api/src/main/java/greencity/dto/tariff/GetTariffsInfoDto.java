@@ -23,10 +23,16 @@ import java.util.List;
 @Builder
 public class GetTariffsInfoDto {
     private Long cardId;
-    private LocationInfoDto locationInfoDto;
-    private ReceivingStationDto receivingStationDto;
+    private RegionDto regionDto;
+    private List<LocationsDtos> locationInfoDtos;
+    private List<ReceivingStationDto> receivingStationDtos;
     private List<CourierTranslationDto> courierTranslationDtos;
-    private String locationStatus;
+    private String tariffStatus;
     private String creator;
     private LocalDate createdAt;
+    private String courierLimit;
+    private Long minAmountOfBags;
+    private Long maxAmountOfBags;
+    private Long minPriceOfOrder;
+    private Long maxPriceOfOrder;
 }

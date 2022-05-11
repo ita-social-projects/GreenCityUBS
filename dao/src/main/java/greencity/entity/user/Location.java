@@ -10,8 +10,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@EqualsAndHashCode(exclude = {"courierLocations", "bags"})
-@ToString(exclude = {"courierLocations", "bags"})
+@EqualsAndHashCode(exclude = {"bags", "tariffsInfoList"})
+@ToString(exclude = {"bags", "tariffsInfoList"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -29,29 +29,18 @@ public class Location {
 
     @Column(name = "name_uk")
     private String nameUk;
-
     @Column(name = "name_en")
     private String nameEn;
 
     @Embedded
     private Coordinates coordinates;
-    /*-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
-    List<CourierLocation> courierLocations;
-    */
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
-    List<Bag> bags;
-/*-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
-    List<LocationTranslation> locationTranslations;
-*/
+    private List<Bag> bags;
+
     @ManyToOne
     private Region region;
 
-    @ManyToMany
-    @JoinTable(name = "location_tariffs",
-      joinColumns = @JoinColumn(name = "location_id"),
-      inverseJoinColumns = @JoinColumn(name = "tariffs_info_id"))
-    List<TariffsInfo> tariffsInfoList;
-
+    @ManyToMany(mappedBy = "locations", cascade = CascadeType.ALL)
+    private List<TariffsInfo> tariffsInfoList;
 }
