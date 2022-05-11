@@ -13,7 +13,7 @@ VALUES (1, 'ivan@gmail.com', 'Ivan', 'Ivanov', '++380981099667', 1, 1);
 INSERT INTO public.orders (id, comment, deliver_from, deliver_to, note, order_date, order_status, points_to_use,
                            receiving_station, ubs_user_id, users_id, order_payment_status, cancellation_reason,
                            cancellation_comment, reason_not_taking_bag_description, image_reason_not_taking_bags,
-                           date_of_export, employee_id, blocked, admin_comment, counter_order_payment_id, courier_locations_id,
+                           date_of_export, employee_id, blocked, admin_comment, counter_order_payment_id, tariffs_info_id,
                            sum_total_amount_without_discounts)
 VALUES (1, '', null, null, null, '2022-01-22 18:25:05.536212', 'FORMED', 0, null, 1, 1, 'PAID', null, null, null, '', null, null, false, '', null, 1, null);
 
