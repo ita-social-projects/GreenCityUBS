@@ -9,6 +9,7 @@ import greencity.dto.*;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.LocationAlreadyCreatedException;
 import greencity.service.SuperAdminService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,7 +107,7 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
-
+    /*-
     @Test
     void editInfoAboutTariff() throws Exception {
         EditTariffInfoDto dto = ModelUtils.getEditTariffInfoDto();
@@ -118,7 +119,7 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
-
+    
     @Test
     void setAmountOfSum() throws Exception {
         EditAmountOfBagDto dto = ModelUtils.getAmountOfSum();
@@ -130,6 +131,7 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+     */
 
     @Test
     void editService() throws Exception {
@@ -211,19 +213,20 @@ class SuperAdminControllerTest {
     void activateException() throws Exception {
         mockMvc.perform(patch(ubsLink + "/activeLocations/" + 1L)).andExpect(status().isOk());
     }
-
+    /*-
     @Test
     void addNewLocationForCourier() throws Exception {
         NewLocationForCourierDto dto = ModelUtils.getNewLocationForCourierDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
-
+    
         mockMvc.perform(put(ubsLink + "/courier/location")
             .principal(principal)
             .content(requestJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
+     */
 
     @Test
     void createCourierTest() throws Exception {
@@ -292,5 +295,51 @@ class SuperAdminControllerTest {
             .content(result)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @SneakyThrows
+    void addNewTariffTest() {
+        var dto = ModelUtils.getAddNewTariffDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    @SneakyThrows
+    void editInfoAboutTariff() {
+        var dto = EditPriceOfOrder.builder().maxPriceOfOrder(10000L).minPriceOfOrder(1000L).build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/setLimitsBySumOfOrder/{tariffId}", 1L)
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isAccepted());
+    }
+
+    @Test
+    @SneakyThrows
+    void setAmountOfSum() {
+        EditAmountOfBagDto dto = ModelUtils.getAmountOfSum();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/setLimitsByAmountOfBags/{tariffId}", 1L)
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isAccepted());
+    }
+
+    @Test
+    @SneakyThrows
+    void deactivateTariffTest() {
+        mockMvc.perform(put(ubsLink + "/deactivateTariff/{tariffId}", 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isAccepted());
     }
 }

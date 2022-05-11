@@ -1,6 +1,5 @@
 package greencity.dto;
 
-
 import lombok.*;
 
 import java.util.List;
@@ -17,7 +16,4 @@ public class AllActiveLocationsDto {
     private String nameUk;
     private String nameEn;
     private List<LocationsDtos> locations;
-
-
-
 }

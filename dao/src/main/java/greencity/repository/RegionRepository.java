@@ -11,13 +11,16 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     /**
      * Method for get info about region.
      *
-     * @param name - name of searching region
-     * @return {@link Region}
+     * @param nameEn - name of searching region in English
+     * @param nameUk - name of searching region in Ukrainian
+     * @return Optional of {@link Region} if one of the params matches
      * @author Vadym Makitra
+     * @author Yurii Fedorko
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM regions r "
-            + "WHERE r.name_en = :name "
-            + "OR r.name_uk = :name")
-    Optional<Region> findRegionByName(@Param("name") String name);
+            + "WHERE r.name_en = :nameEn "
+            + "OR r.name_uk = :nameUk")
+    Optional<Region> findRegionByName(@Param("nameEn") String nameEn,
+        @Param("nameUk") String nameUk);
 }

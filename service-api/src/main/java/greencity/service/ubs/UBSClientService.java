@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 public interface UBSClientService {
     /**
@@ -303,15 +304,6 @@ public interface UBSClientService {
     LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws Exception;
 
     /**
-     * Method for getting info about courier,location,and courier limits.
-     *
-     * @param courierId - id of current courier;
-     * @return {@link GetCourierLocationDto}
-     * @author Vadym Makitra
-     */
-    List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId);
-
-    /**
      * Method validates received payment client response.
      *
      * @param dto {@link PaymentResponseDto} - response order data.
@@ -327,5 +319,22 @@ public interface UBSClientService {
      */
     UserPointDto getUserPoint(String uuid);
 
-    List<AllActiveLocationsDto> getAllActiveLocations();
+    /**
+     * Method for getting info about all active locations or if user has made an
+     * order before to get info about tariff.
+     *
+     * @param uuid      - user's uuid
+     * @param changeLoc - optional param. If it's present provide info about
+     *                  locations
+     * @return {@link OrderCourierPopUpDto}
+     */
+    OrderCourierPopUpDto getInfoForCourierOrdering(String uuid, Optional<String> changeLoc);
+
+    /**
+     * Method for getting info about tariff.
+     *
+     * @param locationId - id of location
+     * @return {@link OrderCourierPopUpDto}
+     */
+    OrderCourierPopUpDto getTariffInfoForLocation(Long locationId);
 }

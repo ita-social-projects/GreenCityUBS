@@ -16,7 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employees"})
+@EqualsAndHashCode(exclude = {"employees", "tariffsInfo"})
 @Table(name = "receiving_stations")
 public class ReceivingStation {
     @Id
@@ -26,7 +26,7 @@ public class ReceivingStation {
     @Column(length = 50, nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "receivingStationList")
+    @ManyToMany(mappedBy = "receivingStationList", cascade = CascadeType.ALL)
     private Set<TariffsInfo> tariffsInfo;
 
     @ManyToMany(mappedBy = "receivingStation")

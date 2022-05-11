@@ -7,15 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocationToRegionDtoMapper extends AbstractConverter<Location, RegionDto> {
-
     @Override
     public RegionDto convert(Location sourse) {
-
         return RegionDto.builder()
-                .regionId(sourse.getRegion().getId())
-                .nameUk(sourse.getRegion().getUkrName())
-                .nameEn(sourse.getRegion().getEnName())
-                .build();
+            .regionId(sourse.getRegion().getId())
+            .nameUk(sourse.getRegion().getUkrName())
+            .nameEn(sourse.getRegion().getEnName())
+            .build();
     }
-
 }

@@ -1,12 +1,12 @@
 package greencity.mapping;
 
 import greencity.dto.CourierInfoDto;
-import greencity.entity.order.CourierLocation;
+import greencity.entity.order.TariffsInfo;
 import org.modelmapper.AbstractConverter;
 
-public class CourierInfoDtoMapper extends AbstractConverter<CourierLocation, CourierInfoDto> {
+public class CourierInfoDtoMapper extends AbstractConverter<TariffsInfo, CourierInfoDto> {
     @Override
-    protected CourierInfoDto convert(CourierLocation courierLocation) {
+    protected CourierInfoDto convert(TariffsInfo courierLocation) {
         return CourierInfoDto.builder()
             .courierLimit(courierLocation.getCourierLimit())
             .maxAmountOfBigBags(courierLocation.getMaxAmountOfBigBags())

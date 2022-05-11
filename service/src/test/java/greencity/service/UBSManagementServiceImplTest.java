@@ -1775,7 +1775,6 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-
         ubsManagementService.getOrderStatusData(1L, "ua");
 
         verify(orderRepository).getOrderDetails(1L);

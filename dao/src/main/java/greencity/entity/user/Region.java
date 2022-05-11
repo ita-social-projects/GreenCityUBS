@@ -27,9 +27,4 @@ public class Region {
 
     @Column(name = "name_en")
     private String enName;
-/*-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "region")
-    private List<RegionTranslation> regionTranslations;
- */
-
 }

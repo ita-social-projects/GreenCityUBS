@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public enum LocationStatus {
-    ACTIVE("Активно"), DEACTIVATED("Неактивно");
+    ACTIVE("Активно"), DEACTIVATED("Неактивно"), NEW("Новостворено");
 
     private String status;
 }

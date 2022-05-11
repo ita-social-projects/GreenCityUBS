@@ -4,6 +4,12 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="2022-03-30-ch-drop-table-location_translations-Fedorko" author="Yurii Fedorko">
 
+        <dropColumn tableName="orders"
+                    columnName="courier_locations_id"/>
+
+        <dropColumn tableName="receiving_stations"
+                    columnName="tariffs_info_id"/>
+
         <dropTable cascadeConstraints="true"
                    catalogName="greencityubs"
                    schemaName="public"
@@ -18,9 +24,7 @@
                    catalogName="greencityubs"
                    schemaName="public"
                    tableName="courier_locations"/>
-        
-        <dropColumn tableName="orders"
-                    columnName="courier_locations_id"/>
+
 
     </changeSet>
     

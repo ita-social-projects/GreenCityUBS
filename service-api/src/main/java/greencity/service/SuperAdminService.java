@@ -141,7 +141,7 @@ public interface SuperAdminService {
      *
      * @return {@link GetCourierTranslationsDto}
      */
-    List<GetCourierLocationDto> getAllCouriersAndLocations();
+    // List<GetCourierLocationDto> getAllCouriersAndLocations();
 
     /**
      * Method for set courier limit by sum of order.
@@ -151,7 +151,7 @@ public interface SuperAdminService {
      *
      * @author Vadym Makitra
      */
-    void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
+    // void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
 
     /**
      * Method for set courier limit by amount of bag.
@@ -160,7 +160,7 @@ public interface SuperAdminService {
      * @param dto {@link EditAmountOfBagDto}
      * @author Vadym Makitra
      */
-    void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
+    // void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
 
     /**
      * Method for edit limit description.
@@ -196,7 +196,7 @@ public interface SuperAdminService {
      * @param dto {@link EditTariffInfoDto}
      * @return {@link EditTariffInfoDto}
      */
-    EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
+    // EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
 
     /**
      * Method for delete courier.
@@ -211,7 +211,7 @@ public interface SuperAdminService {
      * @param dto {@link NewLocationForCourierDto}
      * @author Vadym Makitra
      */
-    void addLocationToCourier(NewLocationForCourierDto dto);
+    // void addLocationToCourier(NewLocationForCourierDto dto);
 
     /**
      * Method for getting all info about tariffs.
@@ -249,4 +249,36 @@ public interface SuperAdminService {
      * @param id {@link Long} receiving station's id
      */
     void deleteReceivingStation(Long id);
+
+    /**
+     * Method creates new TariffsInfo.
+     *
+     * @param addNewTariffDto {@link AddNewTariffDto}
+     */
+    void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
+
+    /**
+     * Method for edit info about tariff.
+     *
+     * @param tariffId - id of tariff
+     * @param dto      {@link EditAmountOfBagDto}
+     */
+    void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto);
+
+    /**
+     * Method for edit info about tariff.
+     *
+     * @param tariffId - id of tariff
+     * @param dto      {@link EditPriceOfOrder}
+     */
+    void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto);
+
+    /**
+     * Method for deactivation or deleting Tariff depends on orders were made by
+     * this tariff.
+     *
+     * @param tariffId - id of tariff
+     * @return status of the tariff
+     */
+    String deactivateTariffCard(Long tariffId);
 }

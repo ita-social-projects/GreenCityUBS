@@ -2,7 +2,9 @@ package greencity.dto;
 
 import lombok.*;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -11,9 +13,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class EditPriceOfOrder {
     @NotNull
+    @Min(0)
     private Long minPriceOfOrder;
     @NotNull
+    @Min(0)
     private Long maxPriceOfOrder;
-    @NotNull
     private Long locationId;
 }

@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.user.Location;
-import greencity.entity.user.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,21 +26,36 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * FROM locations as l "
-            + "WHERE l.name_en = :locationName "
-            + "OR l.name_uk = :locationNameUk")
+            + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
+            + "OR l.name_uk = :locationNameUk)")
     Optional<Location> findLocationByName(@Param("locationNameUk") String locationNameUk,
-                                          @Param("locationNameEn") String locationNameEn);
+        @Param("locationNameEn") String locationNameEn,
+        @Param("regionId") Long regionId);
 
     /**
-     * Method for get info about region.
+     * Method for get all active locations.
      *
-     * @return {@link Location}
+     * @return list of {@link Location}
      * @author Yurii Fedorko
      */
     @Query(nativeQuery = true,
-        value = "select * from locations as l " +
-                "join regions as r " +
-                "on l.region_id = r.id " +
-                "where l.location_status = 'ACTIVE'")
+        value = "select * from locations as l "
+            + "join regions as r "
+            + "on l.region_id = r.id "
+            + "where l.location_status = 'ACTIVE'")
     List<Location> findAllActive();
+
+    /**
+     * Method for getting list of locations from one region.
+     *
+     * @param locIds   - list of location ID's
+     * @param regionId - id of region
+     * @return list of {@link Location}
+     * @author Yurii Fedorko
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * from locations "
+            + "WHERE region_id = :regionId "
+            + "AND id IN :locIds")
+    List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 }
