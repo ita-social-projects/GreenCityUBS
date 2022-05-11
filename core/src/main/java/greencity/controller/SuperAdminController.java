@@ -502,9 +502,9 @@ class SuperAdminController {
      * @return {@link GetTariffsInfoDto}
      * @author Yurii Fedorko
      */
-    @ApiOperation(value = "Add new tariff.")
+    @ApiOperation(value = "Add new tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 201, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
@@ -522,6 +522,13 @@ class SuperAdminController {
      *
      * @author Yurii Fedorko
      */
+    @ApiOperation(value = "Edit tariffLimits by  sum of Bags")
+    @ApiResponses(value = {
+            @ApiResponse(code = 202, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
     @PatchMapping("/setLimitsByAmountOfBags/{tariffId}")
     public ResponseEntity<HttpStatus> setLimitsByAmountOfBags(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditAmountOfBagDto dto) {
@@ -534,6 +541,13 @@ class SuperAdminController {
      *
      * @author Yurii Fedorko
      */
+    @ApiOperation(value = "Edit tariff limits by sum of order")
+    @ApiResponses(value = {
+            @ApiResponse(code = 202, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
     @PatchMapping("/setLimitsBySumOfOrder/{tariffId}")
     public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditPriceOfOrder dto) {
@@ -546,6 +560,13 @@ class SuperAdminController {
      *
      * @author Yurii Fedorko
      */
+    @ApiOperation(value = "Deactivate tariff")
+    @ApiResponses(value = {
+            @ApiResponse(code = 202, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
     @PutMapping("/deactivateTariff/{tariffId}")
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
