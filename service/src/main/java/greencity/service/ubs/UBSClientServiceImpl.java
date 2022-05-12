@@ -1554,6 +1554,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderCourierPopUpDto.setTariffsForLocationDto(
                 modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrder(lastOrder.get().getId()),
                     TariffsForLocationDto.class));
+        } else {
+            orderCourierPopUpDto.setOrderIsPresent(false);
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocations());
         }
         return orderCourierPopUpDto;
     }
