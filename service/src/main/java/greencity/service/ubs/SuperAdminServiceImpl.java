@@ -251,10 +251,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .locationStatus(LocationStatus.ACTIVE)
             .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
             .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
-                .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
             .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
-                .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
             .region(region)
             .build();
@@ -263,10 +263,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
         Optional<Location> location = locationRepository.findLocationByName(
             dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
-                .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
             dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst()
-                .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
             regionId);
 
@@ -279,11 +279,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {
         String enName = dto.getRegionTranslationDtos().stream()
             .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("en")).findAny()
-            .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
         String ukName = dto.getRegionTranslationDtos().stream()
             .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("ua")).findAny()
-            .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
         Region region = regionRepository.findRegionByName(enName, ukName).orElse(null);
@@ -446,10 +446,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         String enName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("en")).findAny()
-            .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
         String uaName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("ua")).findAny()
-            .orElseThrow(() -> new LanguageNotFoundException("Invalid language code"))
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
         return Region.builder()
@@ -531,19 +531,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private TariffsInfo tryToFindTariffById(Long tariffId) {
         return tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new TariffNotFoundException("Tariff with id " + tariffId + " does not exist!"));
+            .orElseThrow(() -> new TariffNotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
     }
 
     @Override
     public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
-        regionRepository.findById(addNewTariffDto.getRegionId())
-            .orElseThrow(() -> new RegionNotFoundException(
-                "Region with id " + addNewTariffDto.getRegionId() + " does not exist!"));
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courierRepository.findById(addNewTariffDto.getCourierId())
                 .orElseThrow(() -> new CourierNotFoundException(
-                    "Courier with id + " + addNewTariffDto.getCourierId() + " does not exist!")))
+                    ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + addNewTariffDto.getCourierId())))
             .locations(findLocationsForTariff(addNewTariffDto.getLocationIdList(), addNewTariffDto.getRegionId()))
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)

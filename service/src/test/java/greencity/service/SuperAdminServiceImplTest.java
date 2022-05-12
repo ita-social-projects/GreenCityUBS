@@ -634,7 +634,6 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(ModelUtils.getLocationList());
-        when(regionRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getRegion()));
         when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
@@ -643,17 +642,9 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void addNewTariffThrowsException() {
-        when(regionRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(RegionNotFoundException.class,
-            () -> superAdminService.addNewTariff(ModelUtils.getAddNewTariffDto(), "35467585763t4sfgchjfuyetf"));
-    }
-
-    @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
-        when(regionRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getRegion()));
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(Collections.emptyList());
         assertThrows(EntityNotFoundException.class,
@@ -663,7 +654,6 @@ class SuperAdminServiceImplTest {
     @Test
     void addNewTariffThrowsException3() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
-        when(regionRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getRegion()));
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(CourierNotFoundException.class,
             () -> superAdminService.addNewTariff(ModelUtils.getAddNewTariffDto(), "35467585763t4sfgchjfuyetf"));

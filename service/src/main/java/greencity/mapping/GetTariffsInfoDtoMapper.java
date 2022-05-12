@@ -34,7 +34,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .build())
                 .collect(Collectors.toList()))
             .createdAt(source.getCreatedAt())
-            // .creator(source.getCreator().getRecipientEmail())
+            .creator(source.getCreator().getRecipientEmail())
             .tariffStatus(source.getLocationStatus().toString())
             .locationInfoDtos(source.getLocations().stream()
                 .map(location -> LocationsDtos.builder()
@@ -48,7 +48,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .id(receivingStation.getId())
                     .createDate(receivingStation.getCreateDate())
                     .name(receivingStation.getName())
-                    // .createdBy(receivingStation.getCreatedBy().getRecipientEmail())
+                    .createdBy(receivingStation.getCreatedBy().getRecipientEmail())
                     .build())
                 .collect(Collectors.toList()))
             .build();
