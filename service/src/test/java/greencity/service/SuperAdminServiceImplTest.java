@@ -675,9 +675,10 @@ class SuperAdminServiceImplTest {
 
     @Test
     void editTariffTestThrows() {
+        var dto = ModelUtils.getEditPriceOfOrder();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(TariffNotFoundException.class,
-            () -> superAdminService.setTariffLimitBySumOfOrder(1L, ModelUtils.getEditPriceOfOrder()));
+            () -> superAdminService.setTariffLimitBySumOfOrder(1L, dto));
     }
 
     @Test
