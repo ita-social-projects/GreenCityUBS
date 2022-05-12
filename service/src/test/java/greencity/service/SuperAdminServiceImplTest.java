@@ -648,7 +648,7 @@ class SuperAdminServiceImplTest {
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(Collections.emptyList());
         assertThrows(EntityNotFoundException.class,
-            () -> superAdminService.addNewTariff(ModelUtils.getAddNewTariffDto(), "35467585763t4sfgchjfuyetf"));
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -656,7 +656,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(CourierNotFoundException.class,
-            () -> superAdminService.addNewTariff(ModelUtils.getAddNewTariffDto(), "35467585763t4sfgchjfuyetf"));
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test

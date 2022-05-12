@@ -1010,7 +1010,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         TariffsInfo tariffsInfo =
             tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
                 .orElseThrow(() -> new TariffNotFoundException(
-                    "Tariff for location with id " + dto.getLocationId() + " does not exist"));
+                    ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
@@ -1564,7 +1564,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
             .orElseThrow(
-                () -> new TariffNotFoundException("Tariff for location with id " + locationId + " does not exist"));
+                () -> new TariffNotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
     }
 
     @Override

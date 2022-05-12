@@ -90,6 +90,7 @@ public final class ErrorMessage {
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXITS = "User with this email does not exits: ";
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
+    public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
 
     /**
      * Constructor.
