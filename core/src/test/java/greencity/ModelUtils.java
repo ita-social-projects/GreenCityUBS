@@ -595,16 +595,13 @@ public class ModelUtils {
             .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
             .build();
         return GetTariffsInfoDto.builder()
-            // .locationInfoDto(locationInfoDto)
             .cardId(1L)
-            // .receivingStationDto(getReceivingStationDto())
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")
-            // .locationStatus("ACTIVE")
             .build();
     }
 

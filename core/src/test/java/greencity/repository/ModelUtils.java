@@ -45,7 +45,6 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .user(User.builder().id(1L).build())
             .ubsUser(UBSuser.builder().id(1L).build())
-            // .courierLocations(CourierLocation.builder().id(1L).build())
             .orderDate(LocalDateTime.now())
             .build());
         return orderList;
