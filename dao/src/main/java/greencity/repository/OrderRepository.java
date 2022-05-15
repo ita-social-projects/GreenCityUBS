@@ -255,7 +255,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(nativeQuery = true,
         value = "SELECT * FROM orders o "
             + "INNER JOIN users u ON o.users_id = u.id "
-            + "WHERE u.uuid = : user_uuid "
+            + "WHERE u.uuid = :user_uuid "
             + "ORDER BY o.order_date DESC "
             + "LIMIT 1")
     Optional<Order> getLastOrderOfUserByUUIDIfExists(@Param(value = "user_uuid") String usersUuid);

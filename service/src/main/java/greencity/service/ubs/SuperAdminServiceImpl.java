@@ -578,6 +578,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             return "Deleted";
         } else {
             tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
+            tariffsInfoRepository.save(tariffsInfo);
             return "Deactivated";
         }
     }

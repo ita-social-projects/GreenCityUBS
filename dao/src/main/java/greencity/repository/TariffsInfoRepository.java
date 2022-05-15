@@ -34,6 +34,6 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long> 
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM tariffs_info t JOIN orders o ON t.id = o.tariffs_info_id "
-            + "where o.id = : order_id")
+            + "where o.id = :order_id")
     TariffsInfo findTariffsInfoByOrder(@Param("order_id") Long orderId);
 }
