@@ -655,7 +655,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+//        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(any(),
                 eq(OrderAddressDtoRequest.class)))
