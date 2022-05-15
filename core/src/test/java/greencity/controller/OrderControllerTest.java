@@ -9,6 +9,7 @@ import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.client.UserRemoteClient;
+import greencity.dto.*;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +22,6 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import greencity.dto.OrderAddressDtoRequest;
-import greencity.dto.OrderCancellationReasonDto;
-import greencity.dto.OrderResponseDto;
-import greencity.dto.PaymentResponseDto;
-import greencity.dto.PaymentResponseDtoLiqPay;
-import greencity.dto.UbsCustomersDto;
-import greencity.dto.UbsCustomersDtoUpdate;
-import greencity.dto.UserInfoDto;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -143,17 +135,34 @@ class OrderControllerTest {
     void saveAddressForOrder() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
+        CreateAddressRequestDto dto = ModelUtils.getCreateAddressRequestDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String createAddressRequestDto = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/save-order-address")
+            .content(createAddressRequestDto)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+
+        verify(ubsClientService).saveCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void updateAddressForOrder() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+
         OrderAddressDtoRequest dto = ModelUtils.getOrderAddressDtoRequest();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post(ubsLink + "/save-order-address")
-            .content(orderAddressDtoRequest)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+        mockMvc.perform(put(ubsLink + "/update-order-address")
+                .content(orderAddressDtoRequest)
+                .principal(principal)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        verify(ubsClientService).saveCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).updateCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
     }
 
     @Test

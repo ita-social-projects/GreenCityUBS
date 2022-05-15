@@ -1,9 +1,16 @@
 package greencity.service;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.GeocodingApiRequest;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressType;
+import com.google.maps.model.GeocodingResult;
 import com.liqpay.LiqPay;
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
+import greencity.config.GoogleApiConfiguration;
 import greencity.constant.ErrorMessage;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
@@ -21,13 +28,19 @@ import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import org.bouncycastle.math.raw.Mod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.commons.util.ModuleUtils;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +48,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -48,6 +62,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({GeocodingApi.class, GeocodingApiRequest.class})
 class UBSClientServiceImplTest {
     @Mock
     private BagTranslationRepository bagTranslationRepository;
@@ -101,6 +117,9 @@ class UBSClientServiceImplTest {
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
     @Mock
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    @Mock
+    private GoogleApiService googleApiService;
+
 
     @Test
     @Transactional
@@ -567,80 +586,142 @@ class UBSClientServiceImplTest {
         return Arrays.asList(addressDto1, addressDto2);
     }
 
-    /*
-     * @Test void testSaveCurrentAddressForOrder() { String uuid =
-     * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
-     * List<Address> addresses = getTestAddresses(user);
-     * when(userRepository.findByUuid(uuid)).thenReturn(user);
-     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-     * when(modelMapper.map(any(),
-     * eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST)
-     * ;
-     * 
-     * addresses.get(0).setActual(false);
-     * when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
-     * 
-     * OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
-     * dtoRequest.setId(42L);
-     * when(addressRepository.findById(dtoRequest.getId())).thenReturn(Optional.of(
-     * addresses.get(0))); when(modelMapper.map(dtoRequest,
-     * Address.class)).thenReturn(new Address());
-     * 
-     * addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER); //
-     * AddressStatus.DELETED
-     * 
-     * ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
-     * 
-     * verify(addressRepository, times(1)).save(addresses.get(0)); }
-     * 
+    @Test
+    void testSaveCurrentAddressForOrder() {
+        User user = ModelUtils.getUserForCreate();
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+
+        addresses.get(0).setActual(false);
+
+        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
+
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        when(modelMapper.map(dtoRequest,
+                Address.class)).thenReturn(new Address());
+
+        addresses.get(0).setAddressStatus(AddressStatus.NEW);
+
+        ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
+
+        verify(addressRepository, times(1)).save(addresses.get(0));
+    }
+
+    @Test
+    void testSaveCurrentAddressForOrderAlreadyExistException() {
+        User user = ModelUtils.getUserForCreate();
+
+        List<Address> addresses = user.getAddresses();
+
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address"))
+                .thenReturn(ModelUtils.getGeocodingResult());
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(dtoRequest);
+
+        addresses.get(0).setActual(false);
+
+        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
+
+        addresses.get(0).setAddressStatus(AddressStatus.NEW);
+
+        assertThrows(AddressAlreadyExistException.class, () ->
+                ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+    }
+
+    @Test
+    void testUpdateCurrentAddressForOrder() {
+        User user = ModelUtils.getUserForCreate();
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+        dtoRequest.setId(1L);
+        dtoRequest.setSearchAddress(null);
+        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
+        updateAddressRequestDto.setId(1L);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+
+        addresses.get(0).setActual(false);
+        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.get(0).setUser(user);
+
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        when(modelMapper.map(dtoRequest,
+                Address.class)).thenReturn(addresses.get(0));
+
+        ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+
+        verify(addressRepository, times(1)).save(addresses.get(0));
+    }
+
+     /*
      * @Test void testSaveCurrentAddressForOrderThrows() { String uuid =
      * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
      * List<Address> addresses = getTestAddresses(user);
-     * 
+     *
      * OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
      * dtoRequest.setId(42L);
-     * 
+     *
      * when(userRepository.findByUuid(uuid)).thenReturn(user);
      * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
      * when(modelMapper.map(any(),
      * eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
-     * 
-     * assertThrows(AddressAlreadyExistException.class, () ->
-     * ubsService.saveCurrentAddressForOrder(dtoRequest, uuid)); }
-     * 
+     *
+     *
+     *
      * @Test void saveCurrentAddressForOrderWithDeletedAddress() { User user =
      * getTestUser(); List<Address> addresses = getTestAddresses(user);
      * OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder() .id(1L)
      * .addressComment("comment") .build(); Address deletedAddress =
      * Address.builder() .id(1L) .user(user) .addressStatus(AddressStatus.DELETED)
      * .build();
-     * 
+     *
      * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
      * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
      * when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
      * when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new
      * OrderAddressDtoRequest()); when(modelMapper.map(dtoRequest,
      * Address.class)).thenReturn(new Address());
-     * 
+     *
      * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-     * 
+     *
      * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
-     * 
+     *
      * @Test void saveCurrentAddressForOrderWithAnotherUser() { User user =
      * getTestUser(); User anotherUser = getUser().setId(2L); List<Address>
      * addresses = getTestAddresses(anotherUser); OrderAddressDtoRequest dtoRequest
      * = OrderAddressDtoRequest.builder() .id(13L) .addressComment("comment")
      * .build();
-     * 
+     *
      * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
      * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
      * when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)
      * )); when(modelMapper.map(any(),
      * eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
      * when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
-     * 
+     *
      * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-     * 
+     *
      * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
      */
 

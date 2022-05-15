@@ -1,6 +1,7 @@
 package greencity;
 
 import com.google.common.collect.Lists;
+import com.google.maps.model.*;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.entity.coords.Coordinates;
@@ -99,6 +100,7 @@ public class ModelUtils {
     public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
         getRequestToChangeOrdersDataDTO();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
+    public static final List<Locale> LOCALES = List.of(new Locale("uk"), new Locale("en"));
 
     public static CourierUpdateDto getUpdateCourierDto() {
         return CourierUpdateDto.builder()
@@ -3365,5 +3367,133 @@ public class ModelUtils {
             "    \"checkout_url\":\"https://pay.fondy.eu/checkout?token=afcb21aef707b1fea2565b66bac7dc41d7833390\"\n" +
             "  }\n" +
             "}";
+    }
+
+    public static List<GeocodingResult> getGeocodingResult() {
+        List<GeocodingResult> geocodingResults = new ArrayList<>();
+
+        GeocodingResult geocodingResult1 = new GeocodingResult();
+
+        Geometry geometry = new Geometry();
+        geometry.location = new LatLng(50.5555555d, 50.5555555d);
+
+        AddressComponent locality = new AddressComponent();
+        locality.longName = "fake street";
+        locality.types = new AddressComponentType[] { AddressComponentType.LOCALITY };
+
+        AddressComponent streetNumber = new AddressComponent();
+        streetNumber.longName = "13";
+        streetNumber.types = new AddressComponentType[] { AddressComponentType.STREET_NUMBER };
+
+        AddressComponent region = new AddressComponent();
+        region.longName = "fake region";
+        region.types = new AddressComponentType[] { AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1 };
+
+        AddressComponent sublocality = new AddressComponent();
+        sublocality.longName = "fake district";
+        sublocality.types = new AddressComponentType[] { AddressComponentType.SUBLOCALITY };
+
+        AddressComponent route = new AddressComponent();
+        route.longName = "fake street name";
+        route.types = new AddressComponentType[] { AddressComponentType.ROUTE };
+
+        geocodingResult1.addressComponents = new AddressComponent[] {
+                locality,
+                streetNumber,
+                region,
+                sublocality,
+                route
+        };
+
+        geocodingResult1.formattedAddress = "fake address";
+        geocodingResult1.geometry = geometry;
+
+        GeocodingResult geocodingResult2 = new GeocodingResult();
+
+        AddressComponent locality2 = new AddressComponent();
+        locality2.longName = "fake street";
+        locality2.types = new AddressComponentType[] { AddressComponentType.LOCALITY };
+
+        AddressComponent streetNumber2 = new AddressComponent();
+        streetNumber2.longName = "13";
+        streetNumber2.types = new AddressComponentType[] { AddressComponentType.STREET_NUMBER };
+
+        AddressComponent region2 = new AddressComponent();
+        region2.longName = "fake region";
+        region2.types = new AddressComponentType[] { AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1 };
+
+        AddressComponent sublocality2 = new AddressComponent();
+        sublocality2.longName = "fake district";
+        sublocality2.types = new AddressComponentType[] { AddressComponentType.SUBLOCALITY };
+
+        AddressComponent route2 = new AddressComponent();
+        route2.longName = "fake street name";
+        route2.types = new AddressComponentType[] { AddressComponentType.ROUTE };
+
+        geocodingResult2.addressComponents = new AddressComponent[] {
+                locality2,
+                streetNumber2,
+                region2,
+                sublocality2,
+                route2
+        };
+
+        geocodingResult2.formattedAddress = "fake address 2";
+        geocodingResult2.geometry = geometry;
+
+        geocodingResults.add(geocodingResult1);
+        geocodingResults.add(geocodingResult2);
+
+        return geocodingResults;
+    }
+
+    public static CreateAddressRequestDto getAddressRequestDto(){
+        return CreateAddressRequestDto.builder()
+                .addressComment("fdsfs")
+                .searchAddress("fake address")
+                .district("fdsfds")
+                .districtEn("dsadsad")
+                .region("regdsad")
+                .regionEn("regdsaden")
+                .houseNumber("1")
+                .houseCorpus("2")
+                .entranceNumber("3")
+                .build();
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressDtoRequest(){
+        return OrderAddressDtoRequest.builder()
+                .id(0L)
+                .region("fake region")
+                .city("fake street")
+                .district("fake district")
+                .entranceNumber("1")
+                .houseNumber("13")
+                .houseCorpus("1")
+                .street("fake street name")
+                .streetEn("fake street name")
+                .coordinates(new Coordinates(50.5555555d,50.5555555d))
+                .cityEn("fake street")
+                .districtEn("fake district")
+                .regionEn("fake region")
+                .build();
+    }
+
+    public static User getUserForCreate() {
+        return User.builder()
+                .id(1L)
+                .addresses(List.of(Address.builder().id(7L).city("fake street").cityEn("fake street")
+                        .district("fake district").districtEn("fake district").region("fake region").regionEn("fake region")
+                        .street("fake street name").streetEn("fake street name").houseNumber("13")
+                        .coordinates(new Coordinates(50.5555555, 50.5555555)).build()))
+                .recipientEmail("someUser@gmail.com")
+                .recipientPhone("962473289")
+                .recipientSurname("Ivanov")
+                .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+                .recipientName("Taras")
+                .uuid("uuid")
+                .ubsUsers(getUbsUsers())
+                .currentPoints(100)
+                .build();
     }
 }

@@ -12,6 +12,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.client.FondyClient;
+import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
@@ -81,6 +82,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GeoApiContext context;
+    private final GoogleApiService googleApiService;
+
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -336,7 +339,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
 
-        OrderAddressDtoRequest dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
+        OrderAddressDtoRequest dtoRequest =
+            getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
         addressRequestDtoForNullCheck.setId(0L);
@@ -373,7 +377,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         OrderAddressDtoRequest dtoRequest;
         if (addressRequestDto.getSearchAddress() != null) {
-            dtoRequest = geoCodeSearchingRequest(addressRequestDto.getSearchAddress());
+            dtoRequest = getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
             checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDto);
         } else {
             dtoRequest = addressRequestDto;
@@ -411,27 +415,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
             .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
-            .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
-            .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
+                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
         if (exist) {
             throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);
         }
-    }
-
-    private OrderAddressDtoRequest geoCodeSearchingRequest(String searchRequest) {
-        List<GeocodingResult> geocodingResults = new ArrayList<>();
-
-        locales.forEach(locale -> {
-            try {
-                GeocodingResult[] results = GeocodingApi.newRequest(context)
-                    .address(searchRequest).language(locale.getLanguage()).await();
-                Collections.addAll(geocodingResults, results);
-            } catch (IOException | InterruptedException | ApiException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
-        return getLocationDto(geocodingResults);
     }
 
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {

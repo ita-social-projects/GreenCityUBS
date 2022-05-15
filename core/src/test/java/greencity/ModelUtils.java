@@ -71,6 +71,20 @@ public class ModelUtils {
             .build();
     }
 
+    public static CreateAddressRequestDto getCreateAddressRequestDto() {
+        return CreateAddressRequestDto.builder()
+                .addressComment("Test comment")
+                .entranceNumber("7a")
+                .houseCorpus("2")
+                .houseNumber("7")
+                .searchAddress("Gorodotska, 7, Lviv")
+                .districtEn("Zaliznuchnuy")
+                .district("Залізничний")
+                .regionEn("Lvivskiy")
+                .region("Львівський")
+                .build();
+    }
+
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
