@@ -2,16 +2,14 @@ package greencity.ubstelegrambot;
 
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
-import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.service.NotificationServiceImpl;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,7 +82,7 @@ class TelegramServiceTest {
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());
 
-        assertThrows(MessageWasNotSend.class, () -> telegramService.sendNotification(notification));
+        assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification));
     }
 
     @Test
