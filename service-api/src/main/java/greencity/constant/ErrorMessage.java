@@ -21,7 +21,7 @@ public final class ErrorMessage {
         "The user already has connected to Telegram bot.";
     public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
         "The user already has connected to Viber bot.";
-    public static final String THE_MESSAGE_WAS_NOT_SEND = "The message was not send.";
+    public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
@@ -88,6 +88,9 @@ public final class ErrorMessage {
         "Cannot access another user's order cancellation reason";
     public static final String CANNOT_FIND_LANGUAGE_OF_TRANSLATION = "Cannot find language of translation";
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST = "User with this email does not exist: ";
+    public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
+    public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
+    public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
 
     /**
      * Constructor.

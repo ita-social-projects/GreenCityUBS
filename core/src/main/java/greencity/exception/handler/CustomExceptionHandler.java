@@ -745,4 +745,19 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
+
+    /**
+     * Exception handler for {@link RemoteServerUnavailableException}.
+     *
+     * @param ex      {@link RemoteServerUnavailableException} exception to handle.
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(RemoteServerUnavailableException.class)
+    public final ResponseEntity<Object> handleRemoteServerException(RemoteServerUnavailableException ex,
+        WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
 }

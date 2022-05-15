@@ -11,7 +11,7 @@ import greencity.dto.viber.enums.MessageType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
-import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.MessageWasNotSent;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnexistingUuidExeption;
 import greencity.exceptions.ViberBotAlreadyConnected;
@@ -177,7 +177,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
             log.error(ErrorMessage.INTERRUPTED_EXCEPTION);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
+            throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
         }
     }
 
