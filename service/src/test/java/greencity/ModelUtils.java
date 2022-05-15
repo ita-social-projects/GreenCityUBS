@@ -3465,6 +3465,7 @@ public class ModelUtils {
         return OrderAddressDtoRequest.builder()
                 .id(0L)
                 .region("fake region")
+                .searchAddress("fake address")
                 .city("fake street")
                 .district("fake district")
                 .entranceNumber("1")

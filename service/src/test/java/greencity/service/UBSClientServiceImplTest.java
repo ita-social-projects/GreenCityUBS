@@ -62,8 +62,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GeocodingApi.class, GeocodingApiRequest.class})
 class UBSClientServiceImplTest {
     @Mock
     private BagTranslationRepository bagTranslationRepository;
@@ -649,25 +647,25 @@ class UBSClientServiceImplTest {
         String uuid = user.getUuid();
         OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
         dtoRequest.setId(1L);
-        dtoRequest.setSearchAddress(null);
+        dtoRequest.setSearchAddress("fake address");
         OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-//        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
-        when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
-                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-
         addresses.get(0).setActual(false);
         addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
         addresses.get(0).setUser(user);
 
-        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(dtoRequest,
                 Address.class)).thenReturn(addresses.get(0));
+
+
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
 
         ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 

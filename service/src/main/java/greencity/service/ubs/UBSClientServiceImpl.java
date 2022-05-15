@@ -1,5 +1,10 @@
 package greencity.service.ubs;
 
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
+import greencity.client.FondyClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.*;
@@ -11,10 +16,8 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
-import greencity.client.FondyClient;
 import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
-import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -32,8 +35,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -42,17 +43,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
-import com.google.maps.GeoApiContext;
-import com.google.maps.GeocodingApi;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.AddressComponentType;
-import com.google.maps.model.GeocodingResult;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
