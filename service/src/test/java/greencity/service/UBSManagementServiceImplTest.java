@@ -1890,7 +1890,5 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusesTranslationTest() {
-
-    }
+    void getOrderStatusesTranslationTest() {}
 }
