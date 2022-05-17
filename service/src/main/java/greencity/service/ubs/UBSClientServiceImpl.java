@@ -44,8 +44,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
@@ -111,7 +111,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
         "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
     private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
-    private static  final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
+    private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     @Override
     @Transactional
@@ -391,62 +391,46 @@ public class UBSClientServiceImpl implements UBSClientService {
         return getLocationDto(geocodingResults);
     }
 
+    private void initializeUkrainianMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
+        Map<AddressComponentType, Consumer<String>> ukrainianResult = ImmutableMap.of(
+            AddressComponentType.LOCALITY, dtoRequest::setCity,
+            AddressComponentType.ROUTE, dtoRequest::setStreet,
+            AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
+            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrict,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
+
+        ukrainianResult
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
+                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> {
+                        value.accept(addressComponent.longName);
+                    });
+            }));
+    }
+
+    private void initializeEnglishMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
+        Map<AddressComponentType, Consumer<String>> englishResult = ImmutableMap.of(
+            AddressComponentType.LOCALITY, dtoRequest::setCityEn,
+            AddressComponentType.ROUTE, dtoRequest::setStreetEn,
+            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
+
+        englishResult
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
+                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> {
+                        value.accept(addressComponent.longName);
+                    });
+            }));
+    }
+
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
         OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        GeocodingResult ukrLang = geocodingResults.get(0);
-        GeocodingResult engLang = geocodingResults.get(1);
+        initializeEnglishMap(orderAddressDtoRequest, geocodingResults.get(0));
+        initializeUkrainianMap(orderAddressDtoRequest, geocodingResults.get(1));
 
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setCity(addressComponent.longName));
-        });
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setCityEn(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
-                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
-        });
-
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
-                .forEach(type -> orderAddressDtoRequest.setStreetEn(addressComponent.longName));
-        });
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
-                .forEach(type -> orderAddressDtoRequest.setStreet(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
-                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setDistrict(addressComponent.longName));
-        });
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setDistrictEn(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types)
-                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
-                .forEach(type -> orderAddressDtoRequest.setRegion(addressComponent.longName));
-        });
-
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types)
-                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
-                .forEach(type -> orderAddressDtoRequest.setRegionEn(addressComponent.longName));
-        });
-
-        double latitude = ukrLang.geometry.location.lat;
-        double longitude = ukrLang.geometry.location.lng;
+        double latitude = geocodingResults.get(0).geometry.location.lat;
+        double longitude = geocodingResults.get(0).geometry.location.lng;
         orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
         return orderAddressDtoRequest;

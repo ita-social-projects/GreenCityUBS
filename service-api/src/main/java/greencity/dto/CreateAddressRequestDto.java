@@ -18,7 +18,8 @@ import lombok.ToString;
 @ToString
 @Builder
 public class CreateAddressRequestDto {
-    private final static String VALIDATION_MESSAGE= "use only English,or Ukrainian latter";
+    // CHECKSTYLE:OFF
+    private final static String VALIDATION_MESSAGE = "use only English,or Ukrainian latter";
     private final static String NOT_EMPTY_MESSAGE = "name must not be empty";
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ,0-9']*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_MESSAGE)
