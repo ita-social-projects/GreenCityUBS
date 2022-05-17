@@ -1888,4 +1888,9 @@ class UBSManagementServiceImplTest {
             ubsManagementService.addBonusesToUser(dto, 20L);
         });
     }
+
+    @Test
+    void getOrderStatusesTranslationTest() {
+
+    }
 }
