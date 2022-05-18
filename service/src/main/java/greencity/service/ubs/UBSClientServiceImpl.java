@@ -1,7 +1,10 @@
 package greencity.service.ubs;
 
+import greencity.client.FondyClient;
+import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -11,7 +14,6 @@ import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.location.GetCourierLocationDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
@@ -19,14 +21,13 @@ import greencity.dto.payment.*;
 import greencity.dto.user.*;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.*;
 import greencity.repository.*;
-import greencity.client.FondyClient;
 import greencity.service.UAPhoneNumberUtil;
-import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -69,7 +70,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
     private final BagTranslationRepository bagTranslationRepository;
-    private final LocationTranslationRepository locationTranslationRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -83,12 +83,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrdersForUserRepository ordersForUserRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-    private final OrderUtils orderUtils;
+    private final LocationRepository locationRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
     private final LanguageRepository languageRepository;
-    private final CourierLocationRepository courierLocationRepository;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
@@ -211,7 +211,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             certificate.getExpirationDate(), certificate.getCode());
     }
 
-    private void checkSumIfCourierLimitBySumOfOrder(CourierLocation courierLocation, Integer sumWithoutDiscount) {
+    private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo courierLocation, Integer sumWithoutDiscount) {
         if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
             && sumWithoutDiscount < courierLocation.getMinPriceOfOrder()) {
             throw new SumOfOrderException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMinPriceOfOrder());
@@ -231,18 +231,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
+        TariffsInfo tariffsInfo =
+            tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
+                .orElseThrow(() -> new TariffNotFoundException("Tariff for courier with id " + 1L
+                    + " and location with id " + dto.getLocationId() + " does not exist"));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            courierLocation);
-        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
+            tariffsInfo);
+        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourierLocations(courierLocation);
+        order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -781,7 +783,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return false;
     }
 
-    private void checkAmountOfBagsIfCourierLimitByAmountOfBag(CourierLocation courierLocation, Integer countOfBigBag) {
+    private void checkAmountOfBagsIfCourierLimitByAmountOfBag(TariffsInfo courierLocation, Integer countOfBigBag) {
         if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
             && courierLocation.getMinAmountOfBigBags() > countOfBigBag) {
             throw new NotEnoughBagsException(
@@ -806,7 +808,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formBagsToBeSavedAndCalculateOrderSum(
-        Map<Integer, Integer> map, List<BagDto> bags, CourierLocation courierLocation) {
+        Map<Integer, Integer> map, List<BagDto> bags, TariffsInfo courierLocation) {
         int sumToPay = 0;
         int bigBagCounter = 0;
 
@@ -1005,18 +1007,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
         User currentUser = userRepository.findByUuid(uuid);
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, dto.getLocationId());
+        TariffsInfo tariffsInfo =
+            tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
+                .orElseThrow(() -> new TariffNotFoundException(
+                    ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + dto.getLocationId()));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
-            courierLocation);
-        checkSumIfCourierLimitBySumOfOrder(courierLocation, sumToPayWithoutDiscount);
+            tariffsInfo);
+        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, sumToPayWithoutDiscount);
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
         Order order = modelMapper.map(dto, Order.class);
-        order.setCourierLocations(courierLocation);
+        order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
@@ -1407,18 +1411,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public List<GetCourierLocationDto> getCourierLocationByCourierIdAndLanguageCode(Long courierId) {
-        List<CourierLocation> courierLocations =
-            courierLocationRepository.findCourierLocationsByCourierIdAndLanguageCode(courierId, LANG_CODE);
-        if (courierLocations.isEmpty()) {
-            throw new CourierNotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
-        }
-        return courierLocations.stream()
-            .map(courierLocation -> modelMapper.map(courierLocation, GetCourierLocationDto.class))
-            .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void validatePaymentClient(PaymentResponseDto dto) {
         Payment orderPayment = mapPaymentClient(dto);
@@ -1526,5 +1518,61 @@ public class UBSClientServiceImpl implements UBSClientService {
                 VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
         }
         return linkTemplate;
+    }
+
+    private List<AllActiveLocationsDto> getAllActiveLocations() {
+        List<Location> locations = locationRepository.findAllActive();
+        Map<RegionDto, List<LocationsDtos>> map = locations.stream()
+            .collect(Collectors.toMap(x -> modelMapper.map(x, RegionDto.class),
+                x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
+                (x, y) -> {
+                    x.addAll(y);
+                    return new ArrayList<>(x);
+                }));
+
+        return map.entrySet().stream()
+            .map(x -> AllActiveLocationsDto.builder()
+                .regionId(x.getKey().getRegionId())
+                .nameEn(x.getKey().getNameEn())
+                .nameUk(x.getKey().getNameUk())
+                .locations(x.getValue())
+                .build())
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderCourierPopUpDto getInfoForCourierOrdering(String uuid, Optional<String> changeLoc) {
+        OrderCourierPopUpDto orderCourierPopUpDto = new OrderCourierPopUpDto();
+        if (changeLoc.isPresent()) {
+            orderCourierPopUpDto.setOrderIsPresent(false);
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocations());
+            return orderCourierPopUpDto;
+        }
+        Optional<Order> lastOrder = orderRepository.getLastOrderOfUserByUUIDIfExists(uuid);
+        if (lastOrder.isPresent()) {
+            orderCourierPopUpDto.setOrderIsPresent(true);
+            orderCourierPopUpDto.setTariffsForLocationDto(
+                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrder(lastOrder.get().getId()),
+                    TariffsForLocationDto.class));
+        } else {
+            orderCourierPopUpDto.setOrderIsPresent(false);
+            orderCourierPopUpDto.setAllActiveLocationsDtos(getAllActiveLocations());
+        }
+        return orderCourierPopUpDto;
+    }
+
+    private TariffsInfo findTariffsInfoByCourierAndLocationId(Long courierId, Long locationId) {
+        return tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
+            .orElseThrow(
+                () -> new TariffNotFoundException(TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
+    }
+
+    @Override
+    public OrderCourierPopUpDto getTariffInfoForLocation(Long locationId) {
+        return OrderCourierPopUpDto.builder()
+            .orderIsPresent(true)
+            .tariffsForLocationDto(modelMapper.map(
+                findTariffsInfoByCourierAndLocationId(1L, locationId), TariffsForLocationDto.class))
+            .build();
     }
 }

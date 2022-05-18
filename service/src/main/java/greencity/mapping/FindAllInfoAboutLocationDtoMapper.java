@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region, LocationInfoDto> {
+    private static final String UALangCode = "ua";
+    private static final String ENLangCode = "en";
+
     @Override
     protected LocationInfoDto convert(Region source) {
         List<LocationsDto> locationsDtoList = source.getLocations().stream()
@@ -21,21 +24,17 @@ public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region,
                 .longitude(location.getCoordinates().getLongitude())
                 .latitude(location.getCoordinates().getLatitude())
                 .locationStatus(location.getLocationStatus().toString())
-                .locationTranslationDtoList(location.getLocationTranslations().stream()
-                    .map(locationTranslation -> LocationTranslationDto.builder()
-                        .languageCode(locationTranslation.getLanguage().getCode())
-                        .locationName(locationTranslation.getLocationName())
-                        .build())
-                    .collect(Collectors.toList()))
+                .locationTranslationDtoList(List.of(
+                    LocationTranslationDto.builder().locationName(location.getNameUk()).languageCode(UALangCode)
+                        .build(),
+                    LocationTranslationDto.builder().locationName(location.getNameEn()).languageCode(ENLangCode)
+                        .build()))
                 .build())
             .collect(Collectors.toList());
 
-        List<RegionTranslationDto> regionTranslationDtoList = source.getRegionTranslations().stream()
-            .map(regionTranslation -> RegionTranslationDto.builder()
-                .regionName(regionTranslation.getName())
-                .languageCode(regionTranslation.getLanguage().getCode())
-                .build())
-            .collect(Collectors.toList());
+        List<RegionTranslationDto> regionTranslationDtoList = List.of(
+            RegionTranslationDto.builder().regionName(source.getUkrName()).languageCode(UALangCode).build(),
+            RegionTranslationDto.builder().regionName(source.getEnName()).languageCode(ENLangCode).build());
 
         return LocationInfoDto.builder()
             .regionId(source.getId())

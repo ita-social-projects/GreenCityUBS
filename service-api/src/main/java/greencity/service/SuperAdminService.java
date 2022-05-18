@@ -1,8 +1,8 @@
 package greencity.service;
 
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
-import greencity.dto.location.GetCourierLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
@@ -10,7 +10,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffInfoDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -150,32 +149,6 @@ public interface SuperAdminService {
     List<CourierDto> getAllCouriers();
 
     /**
-     * Method for getting all info about courier's locations.
-     *
-     * @return {@link GetCourierTranslationsDto}
-     */
-    List<GetCourierLocationDto> getAllCouriersAndLocations();
-
-    /**
-     * Method for set courier limit by sum of order.
-     *
-     * @param id  - id of courier
-     * @param dto {@link EditPriceOfOrder}
-     *
-     * @author Vadym Makitra
-     */
-    void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto);
-
-    /**
-     * Method for set courier limit by amount of bag.
-     *
-     * @param id  - id of courier.
-     * @param dto {@link EditAmountOfBagDto}
-     * @author Vadym Makitra
-     */
-    void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto);
-
-    /**
      * Method for edit limit description.
      *
      * @param courierId        - id of courier
@@ -204,27 +177,11 @@ public interface SuperAdminService {
     GetTariffServiceDto excludeBag(Integer id);
 
     /**
-     * Method for edit info about tariff.
-     *
-     * @param dto {@link EditTariffInfoDto}
-     * @return {@link EditTariffInfoDto}
-     */
-    EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto);
-
-    /**
      * Method for delete courier.
      *
      * @param id - courier Id.
      */
     void deleteCourier(Long id);
-
-    /**
-     * Method for add new location to courier.
-     *
-     * @param dto {@link NewLocationForCourierDto}
-     * @author Vadym Makitra
-     */
-    void addLocationToCourier(NewLocationForCourierDto dto);
 
     /**
      * Method for getting all info about tariffs.
@@ -262,4 +219,36 @@ public interface SuperAdminService {
      * @param id {@link Long} receiving station's id
      */
     void deleteReceivingStation(Long id);
+
+    /**
+     * Method creates new TariffsInfo.
+     *
+     * @param addNewTariffDto {@link AddNewTariffDto}
+     */
+    void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
+
+    /**
+     * Method for edit info about tariff.
+     *
+     * @param tariffId - id of tariff
+     * @param dto      {@link EditAmountOfBagDto}
+     */
+    void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto);
+
+    /**
+     * Method for edit info about tariff.
+     *
+     * @param tariffId - id of tariff
+     * @param dto      {@link EditPriceOfOrder}
+     */
+    void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto);
+
+    /**
+     * Method for deactivation or deleting Tariff depends on orders were made by
+     * this tariff.
+     *
+     * @param tariffId - id of tariff
+     * @return status of the tariff
+     */
+    String deactivateTariffCard(Long tariffId);
 }

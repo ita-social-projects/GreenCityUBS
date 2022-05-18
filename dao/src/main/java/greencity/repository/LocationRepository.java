@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,7 +26,37 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * FROM locations as l "
-            + "join location_translations lt on l.id = lt.location_id "
-            + "where lt.location_name = :locationName")
-    Optional<Location> findLocationByName(@Param("locationName") String locationName);
+            + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
+            + "OR l.name_uk = :locationNameUk)")
+    Optional<Location> findLocationByName(@Param("locationNameUk") String locationNameUk,
+        @Param("locationNameEn") String locationNameEn,
+        @Param("regionId") Long regionId);
+
+    /**
+     * Method for get all active locations.
+     *
+     * @return list of {@link Location}
+     * @author Yurii Fedorko
+     */
+    @Query(nativeQuery = true,
+        value = "select * from locations as l "
+            + "inner join tariffs_info_locations_mapping as m on l.id = m.location_id "
+            + "join regions as r "
+            + "on l.region_id = r.id "
+            + "where l.location_status = 'ACTIVE'")
+    List<Location> findAllActive();
+
+    /**
+     * Method for getting list of locations from one region.
+     *
+     * @param locIds   - list of location ID's
+     * @param regionId - id of region
+     * @return list of {@link Location}
+     * @author Yurii Fedorko
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * from locations "
+            + "WHERE region_id = :regionId "
+            + "AND id IN :locIds")
+    List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 }

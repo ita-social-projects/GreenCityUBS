@@ -12,6 +12,7 @@ import greencity.client.UserRemoteClient;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -328,8 +329,18 @@ class OrderControllerTest {
     }
 
     @Test
-    void getCourierLocations() throws Exception {
-        mockMvc.perform(get(ubsLink + "/courier/{courierId}", 1))
+    @SneakyThrows
+    void getInfoAboutTariffTest() {
+        mockMvc.perform(get(ubsLink + "/tariffinfo-for-location/{locationId}", 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAllActiveLocations() {
+        mockMvc.perform(get(ubsLink + "/allLocations")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
