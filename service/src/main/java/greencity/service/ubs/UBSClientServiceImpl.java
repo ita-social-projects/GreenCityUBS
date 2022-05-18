@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
@@ -18,6 +19,7 @@ import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
+import greencity.client.UserRemoteClient;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -35,6 +37,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -43,9 +47,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
@@ -398,6 +410,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         address.setUser(addressUser);
+        address.setActual(true);
         address.setAddressStatus(addressStatus);
         address.setActual(addressActual);
         addressRepo.save(address);
@@ -416,62 +429,46 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    private void initializeUkrainianMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
+        Map<AddressComponentType, Consumer<String>> ukrainianResult = ImmutableMap.of(
+            AddressComponentType.LOCALITY, dtoRequest::setCity,
+            AddressComponentType.ROUTE, dtoRequest::setStreet,
+            AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
+            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrict,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
+
+        ukrainianResult
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
+                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> {
+                        value.accept(addressComponent.longName);
+                    });
+            }));
+    }
+
+    private void initializeEnglishMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
+        Map<AddressComponentType, Consumer<String>> englishResult = ImmutableMap.of(
+            AddressComponentType.LOCALITY, dtoRequest::setCityEn,
+            AddressComponentType.ROUTE, dtoRequest::setStreetEn,
+            AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
+
+        englishResult
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
+                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> {
+                        value.accept(addressComponent.longName);
+                    });
+            }));
+    }
+
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
         OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        GeocodingResult ukrLang = geocodingResults.get(0);
-        GeocodingResult engLang = geocodingResults.get(1);
+        initializeEnglishMap(orderAddressDtoRequest, geocodingResults.get(0));
+        initializeUkrainianMap(orderAddressDtoRequest, geocodingResults.get(1));
 
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setCity(addressComponent.longName));
-        });
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.LOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setCityEn(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
-                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
-        });
-
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
-                .forEach(type -> orderAddressDtoRequest.setStreetEn(addressComponent.longName));
-        });
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.ROUTE))
-                .forEach(type -> orderAddressDtoRequest.setStreet(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.STREET_NUMBER))
-                .forEach(type -> orderAddressDtoRequest.setHouseNumber(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setDistrict(addressComponent.longName));
-        });
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types).filter(type -> type.equals(AddressComponentType.SUBLOCALITY))
-                .forEach(type -> orderAddressDtoRequest.setDistrictEn(addressComponent.longName));
-        });
-
-        Arrays.stream(ukrLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types)
-                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
-                .forEach(type -> orderAddressDtoRequest.setRegion(addressComponent.longName));
-        });
-
-        Arrays.stream(engLang.addressComponents).forEach(addressComponent -> {
-            Arrays.stream(addressComponent.types)
-                .filter(type -> type.equals(AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1))
-                .forEach(type -> orderAddressDtoRequest.setRegionEn(addressComponent.longName));
-        });
-
-        double latitude = ukrLang.geometry.location.lat;
-        double longitude = ukrLang.geometry.location.lng;
+        double latitude = geocodingResults.get(0).geometry.location.lat;
+        double longitude = geocodingResults.get(0).geometry.location.lng;
         orderAddressDtoRequest.setCoordinates(new Coordinates(latitude, longitude));
 
         return orderAddressDtoRequest;

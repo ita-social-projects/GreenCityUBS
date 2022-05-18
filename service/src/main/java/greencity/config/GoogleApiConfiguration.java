@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.maps.GeoApiContext;
 
+// CHECKSTYLE:OFF
 @Configuration
 public class GoogleApiConfiguration {
     @Value("${greencity.authorization.googleApiKey}")
