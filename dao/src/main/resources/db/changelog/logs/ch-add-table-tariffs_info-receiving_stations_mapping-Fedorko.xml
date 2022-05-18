@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="ch-add-table-receiving_stations-to-tariffs_info-mapping-Fedorko" author="Fedorko Yurii">
+
+        <createTable tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id" type="BIGINT" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiving_station_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column> 
+        </createTable>
+
+        <addPrimaryKey tableName="tariffs_info_receiving_stations_mapping"
+                       columnNames="tariffs_info_id,receiving_station_id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_receiving_stations_tariffs_info_id"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="fk_tariffs_info_receiving_stations_id"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
