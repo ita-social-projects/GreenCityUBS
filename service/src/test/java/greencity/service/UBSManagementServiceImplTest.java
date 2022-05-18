@@ -22,6 +22,7 @@ import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
@@ -55,9 +56,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
@@ -1890,5 +1891,56 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusesTranslationTest() {}
+    void getOrderStatusesTranslationTest() {
+        OrderStatusesTranslationDto orderStatusesTranslationDto = mock(OrderStatusesTranslationDto.class);
+        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+
+        List<OrderStatusTranslation> list = mock(List.class);
+        List<OrderStatusesTranslationDto> listDto = mock(List.class);
+
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationsId(anyLong()))
+                .thenReturn(list);
+        List<OrderStatusTranslation> testlist= orderStatusTranslationRepository.getOrderStatusTranslationsId(getOrderStatusTranslation().getStatusId());
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationsId(getOrderStatusTranslation().getStatusId());
+        assertEquals(testlist, list);
+
+        assertEquals(OrderStatus.getConvertedEnumFromLongToEnum(1l), "FORMED");
+
+        orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
+        orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
+        orderStatusesTranslationDto.setAbleActualChange(anyBoolean());
+        orderStatusesTranslationDto.setKey(orderStatusTranslation.getNameEng());
+
+        when(listDto.add(orderStatusesTranslationDto)).thenReturn(true);
+        boolean added = listDto.add(orderStatusesTranslationDto);
+        verify(listDto).add(orderStatusesTranslationDto);
+        assertEquals(added, true);
+
+
+    }
+
+    @Test
+    void setValueForOrderStatusIsCancelledOrDoneAsTrueTest() {
+
+        OrderStatusesTranslationDto orderStatusesTranslationDto = mock(OrderStatusesTranslationDto.class);
+        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+
+        lenient().doAnswer((i) -> {
+            Object arg0 = i.getArgument(0);
+            assertEquals(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
+                    || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId(), arg0);
+
+            return null;
+        }).when(orderStatusesTranslationDto).setAbleActualChange(true);
+
+        OrderStatusTranslation test = getOrderStatusTranslation();
+        assertEquals(OrderStatus.CANCELED.getNumValue() == test.getStatusId()
+                || OrderStatus.DONE.getNumValue() == test.getStatusId(), false);
+
+        test.setStatusId(8l);
+        assertTrue(OrderStatus.CANCELED.getNumValue() == test.getStatusId()
+                || OrderStatus.DONE.getNumValue() == test.getStatusId());
+
+    }
 }
