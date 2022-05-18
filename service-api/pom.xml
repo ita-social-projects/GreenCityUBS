@@ -164,7 +164,6 @@
             <artifactId>feign-hystrix</artifactId>
             <version>${feign-core.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>
