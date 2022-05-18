@@ -40,6 +40,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      */
     @Query(nativeQuery = true,
         value = "select * from locations as l "
+            + "inner join tariffs_info_locations_mapping as m on l.id = m.location_id "
             + "join regions as r "
             + "on l.region_id = r.id "
             + "where l.location_status = 'ACTIVE'")
