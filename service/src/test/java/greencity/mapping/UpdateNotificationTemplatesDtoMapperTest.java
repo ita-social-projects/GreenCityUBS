@@ -1,13 +1,13 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.entity.notifications.NotificationTemplate;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.Assertions;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateNotificationTemplatesDtoMapperTest {

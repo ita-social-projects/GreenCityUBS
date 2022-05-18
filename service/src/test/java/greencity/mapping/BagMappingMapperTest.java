@@ -1,18 +1,18 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.BagMappingDto;
+import greencity.dto.bag.BagMappingDto;
 import greencity.entity.order.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class BagMappingMapperTest {

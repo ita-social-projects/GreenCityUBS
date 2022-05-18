@@ -2,12 +2,12 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.AddressDto;
-import greencity.dto.UserProfileDto;
-import greencity.client.UserRemoteClient;
+import greencity.dto.address.AddressDto;
+import greencity.dto.user.UserProfileDto;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,8 @@ import java.util.List;
 
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)

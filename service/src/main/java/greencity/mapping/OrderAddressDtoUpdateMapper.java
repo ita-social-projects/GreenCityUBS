@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.entity.user.ubs.Address;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

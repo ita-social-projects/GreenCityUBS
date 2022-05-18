@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.PositionDto;
+import greencity.dto.position.PositionDto;
 import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

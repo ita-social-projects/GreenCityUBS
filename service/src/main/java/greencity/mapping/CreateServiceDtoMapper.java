@@ -1,7 +1,7 @@
 package greencity.mapping;
 
-import greencity.dto.CreateServiceDto;
-import greencity.dto.ServiceTranslationDto;
+import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.ServiceTranslationDto;
 import greencity.entity.order.Service;
 import greencity.entity.order.ServiceTranslation;
 import org.modelmapper.AbstractConverter;

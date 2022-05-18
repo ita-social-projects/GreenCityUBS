@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.CertificateDto;
+import greencity.dto.certificate.CertificateDto;
 import greencity.entity.order.Certificate;
 import org.modelmapper.AbstractConverter;
 

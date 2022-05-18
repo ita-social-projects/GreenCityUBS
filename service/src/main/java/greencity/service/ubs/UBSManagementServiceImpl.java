@@ -1,10 +1,26 @@
 package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
-import greencity.dto.*;
+import greencity.dto.address.AddressExportDetailsDto;
+import greencity.dto.bag.*;
+import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.courier.CourierInfoDto;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.order.*;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.*;
+import greencity.dto.position.PositionDto;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.AddingPointsToUserDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
@@ -16,19 +32,22 @@ import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
-import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -820,6 +839,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 eventService.save(OrderHistory.ORDER_ADJUSTMENT,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.save(OrderHistory.ORDER_CONFIRMED,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
@@ -827,7 +847,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED && order.getPointsToUse() != 0) {
+                notificationService.notifyBonusesFromCanceledOrder(order);
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
                 eventService.save(OrderHistory.ORDER_CANCELLED + "  " + dto.getCancellationComment(),

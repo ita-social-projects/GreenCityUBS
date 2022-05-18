@@ -1,12 +1,15 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.position.AddingPositionDto;
+import greencity.dto.position.PositionDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.client.UserRemoteClient;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

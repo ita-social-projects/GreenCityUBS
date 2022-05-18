@@ -1,6 +1,6 @@
 package greencity.filters;
 
-import lombok.*;
+import lombok.Data;
 import org.springframework.data.domain.Sort;
 
 @Data

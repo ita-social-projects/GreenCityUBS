@@ -12,4 +12,5 @@ import org.springframework.context.annotation.Configuration;
 public class AuthorizationPropConfig {
     private String tokenKey;
     private String googleApiKey;
+    private String serviceEmail;
 }

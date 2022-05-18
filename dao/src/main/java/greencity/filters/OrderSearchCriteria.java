@@ -2,7 +2,7 @@ package greencity.filters;
 
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class OrderSearchCriteria {

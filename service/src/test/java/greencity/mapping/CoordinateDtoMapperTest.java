@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.CoordinatesDto;
+import greencity.dto.location.CoordinatesDto;
 import greencity.entity.coords.Coordinates;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

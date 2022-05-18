@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.OrderClientDto;
+import greencity.dto.order.OrderClientDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;

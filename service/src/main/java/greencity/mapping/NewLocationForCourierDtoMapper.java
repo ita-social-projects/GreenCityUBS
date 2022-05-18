@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.NewLocationForCourierDto;
+import greencity.dto.courier.NewLocationForCourierDto;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.order.CourierLocation;
 import org.modelmapper.AbstractConverter;

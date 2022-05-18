@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.UserProfileDto;
+import greencity.dto.user.UserProfileDto;
 import greencity.entity.user.User;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

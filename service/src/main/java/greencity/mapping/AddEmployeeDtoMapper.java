@@ -1,6 +1,6 @@
 package greencity.mapping;
 
-import greencity.dto.AddEmployeeDto;
+import greencity.dto.employee.AddEmployeeDto;
 import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;

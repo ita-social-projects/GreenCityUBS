@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.constant.ErrorMessage;
-import greencity.dto.CourierTranslationDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.CourierTranslation;
 import greencity.exceptions.LanguageNotFoundException;
 import org.modelmapper.AbstractConverter;

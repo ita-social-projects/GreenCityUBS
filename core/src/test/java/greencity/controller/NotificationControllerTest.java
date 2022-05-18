@@ -1,13 +1,10 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
-import greencity.constant.AppConstant;
-import greencity.dto.NotificationDto;
-import greencity.dto.UpdateNotificationTemplatesDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.NotificationTemplatesService;
 import org.junit.jupiter.api.BeforeEach;

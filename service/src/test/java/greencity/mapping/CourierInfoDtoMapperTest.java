@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.CourierInfoDto;
+import greencity.dto.courier.CourierInfoDto;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.order.CourierLocation;
 import org.junit.jupiter.api.Assertions;

@@ -1,7 +1,8 @@
 package greencity.service.ubs;
 
 import greencity.constant.OrderHistory;
-import greencity.dto.*;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.violation.*;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
@@ -96,7 +97,7 @@ public class ViolationServiceImpl implements ViolationService {
             userRepository.save(user);
             eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
-            notificationService.notifyAddViolation(order);
+            notificationService.notifyAddViolation(order.getId());
         } else {
             throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
         }

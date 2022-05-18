@@ -1,6 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.UserWithOrdersDto;
+import greencity.dto.order.UserWithOrdersDto;
 import greencity.entity.enums.SortingOrder;
 import org.springframework.data.domain.Pageable;
 

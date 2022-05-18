@@ -1,7 +1,7 @@
 package greencity.mapping;
 
 import greencity.ModelUtils;
-import greencity.dto.LocationInfoDto;
+import greencity.dto.location.LocationInfoDto;
 import greencity.entity.user.Region;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

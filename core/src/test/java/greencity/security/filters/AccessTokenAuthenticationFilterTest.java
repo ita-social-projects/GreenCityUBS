@@ -1,8 +1,8 @@
 package greencity.security.filters;
 
-import greencity.dto.UserVO;
-import greencity.security.JwtTool;
 import greencity.client.UserRemoteClient;
+import greencity.dto.user.UserVO;
+import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

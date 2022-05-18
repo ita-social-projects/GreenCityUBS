@@ -1,10 +1,12 @@
 package greencity.controller;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.*;
-import greencity.client.UserRemoteClient;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,14 +19,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +66,7 @@ class AdminUbsControllerTest {
 
     @Test
     void saveNewValueFromOrdersTableTest() throws Exception {
-        RequestToChangeOrdersDataDTO dto = ModelUtils.getRequestToChangeOrdersDataDTO();
+        RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         ChangeOrderResponseDTO changeOrderResponseDTO = ModelUtils.getChangeOrderResponseDTO();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
@@ -97,7 +102,7 @@ class AdminUbsControllerTest {
 
     @Test
     void blockOrdersTest() throws Exception {
-        List<BlockedOrderDTO> dto = new ArrayList<>();
+        List<BlockedOrderDto> dto = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 

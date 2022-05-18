@@ -1,6 +1,14 @@
 package greencity.service.ubs;
 
-import greencity.dto.*;
+import greencity.client.UserRemoteClient;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.TitleDto;
+import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.table.ColumnDTO;
+import greencity.dto.table.TableParamsDto;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
@@ -15,7 +23,6 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
-import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -55,7 +62,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String TIME_OF_EXPORT = "timeOfExport";
 
     @Override
-    public TableParamsDTO getParametersForOrdersTable(String uuid) {
+    public TableParamsDto getParametersForOrdersTable(String uuid) {
         String ordersInfo = "ORDERS_INFO";
         String customersInfo = "CUSTOMERS_INFO";
         String exportAddress = "EXPORT_ADDRESS";
@@ -83,6 +90,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 4, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("paymentDate", "Дата оплати", "Payment date"), "paymentDate", 20,
                 false, true, true, 5, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
+            new ColumnDTO(new TitleDto("commentsForOrder", "Коментар адміністратора", "Admin comment"),
+                "commentsForOrder",
+                20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), ordersInfo),
             new ColumnDTO(new TitleDto("clientName", "Ім'я замовника", "Client name"), "clientName", 20,
                 false, true, false, 6, EditType.READ_ONLY, new ArrayList<>(), customersInfo),
             new ColumnDTO(new TitleDto("clientPhone", "Телефон замовника", "Phone number"), "clientPhoneNumber",
@@ -153,18 +163,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 true, 31, EditType.SELECT, driverList(), responsible),
             new ColumnDTO(new TitleDto(NAVIGATOR, "Штурман", "Responsible navigator"), NAVIGATOR, 20, false,
                 true, true, 32, EditType.SELECT, navigatorList(), responsible),
-            new ColumnDTO(new TitleDto("commentsForOrder", "Коментарі до замовлення", "Comments for order"),
-                "commentsForOrder",
-                20, false, true, false, 33, EditType.READ_ONLY, new ArrayList<>(), orderDetails),
             new ColumnDTO(new TitleDto("blockedBy", "Ким заблоковано", "Blocked by"), "blockedBy",
                 20, false, true, false, 34, EditType.READ_ONLY, blockingStatusListForDevelopStage(),
                 orderDetails))));
-        return new TableParamsDTO(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
+        return new TableParamsDto(orderPage, orderSearchCriteria, columnDTOS, columnBelongingListForDevelopStage());
     }
 
     @Override
     public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
-        RequestToChangeOrdersDataDTO requestToChangeOrdersDataDTO) {
+        RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
@@ -458,12 +465,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public synchronized List<BlockedOrderDTO> requestToBlockOrder(String userUuid, List<Long> orders) {
+    public synchronized List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders) {
         String email = userRemoteClient.findByUuid(userUuid)
             .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
-        List<BlockedOrderDTO> blockedOrderDTOS = new ArrayList<>();
+        List<BlockedOrderDto> blockedOrderDTOS = new ArrayList<>();
         if (orders.isEmpty()) {
             orderRepository.setBlockedEmployeeForAllOrders(employee.getId());
         }
@@ -471,7 +478,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
             if (order.isBlocked() && !order.getBlockedByEmployee().equals(employee)) {
-                blockedOrderDTOS.add(BlockedOrderDTO
+                blockedOrderDTOS.add(BlockedOrderDto
                     .builder().orderId(orderId).userName(String.format("%s %s",
                         order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
                     .build());

@@ -1,12 +1,16 @@
 package greencity.client;
 
-import greencity.dto.UbsCustomersDto;
-import greencity.dto.UserVO;
-import greencity.dto.UserViolationMailDto;
-import greencity.entity.user.User;
 import greencity.client.config.UserRemoteClientInterceptor;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.user.UserVO;
+import greencity.entity.user.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
@@ -50,18 +54,27 @@ public interface UserRemoteClient {
     Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
 
     /**
-     * Send request to greenCityUser to send a violation email.
-     *
-     * @param message {@link UserViolationMailDto} violation details.
-     */
-    @PostMapping("/email/sendUserViolation")
-    void sendViolationOnMail(UserViolationMailDto message);
-
-    /**
      * Changes userStatus to "DEACTIVATED" by UUID.
      *
      * @param uuid {@link User}'s UUID.
      */
     @PutMapping("/user/markUserAsDeactivated")
     void markUserDeactivated(@RequestParam(UUID) String uuid);
+
+    /**
+     * Gets current user's password status.
+     *
+     * @return {@link PasswordStatusDto}.
+     */
+    @GetMapping("/ownSecurity/password-status")
+    PasswordStatusDto getPasswordStatus();
+
+    /**
+     * Sends an email notification for user.
+     *
+     * @param notification {@link NotificationDto} - notification details.
+     * @param email        {@link String} user's email.
+     */
+    @PostMapping("/email/notification")
+    void sendEmailNotification(NotificationDto notification, @RequestParam(EMAIL) String email);
 }

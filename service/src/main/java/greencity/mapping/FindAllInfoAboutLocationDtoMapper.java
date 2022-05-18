@@ -1,9 +1,9 @@
 package greencity.mapping;
 
-import greencity.dto.LocationInfoDto;
-import greencity.dto.LocationTranslationDto;
-import greencity.dto.LocationsDto;
-import greencity.dto.RegionTranslationDto;
+import greencity.dto.location.LocationInfoDto;
+import greencity.dto.location.LocationTranslationDto;
+import greencity.dto.location.LocationsDto;
+import greencity.dto.location.RegionTranslationDto;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;

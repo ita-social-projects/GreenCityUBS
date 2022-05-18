@@ -1,8 +1,8 @@
 package greencity.security.filters;
 
-import greencity.dto.UserVO;
-import greencity.security.JwtTool;
 import greencity.client.UserRemoteClient;
+import greencity.dto.user.UserVO;
+import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

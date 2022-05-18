@@ -3,7 +3,32 @@ package greencity;
 import com.google.common.collect.Lists;
 import com.google.maps.model.*;
 import greencity.constant.AppConstant;
-import greencity.dto.*;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.address.AddressDto;
+import greencity.dto.address.AddressInfoDto;
+import greencity.dto.bag.*;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.certificate.CertificateDtoForAdding;
+import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.courier.*;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.*;
+import greencity.dto.location.*;
+import greencity.dto.notification.*;
+import greencity.dto.order.*;
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.*;
+import greencity.dto.position.PositionDto;
+import greencity.dto.service.*;
+import greencity.dto.table.UbsTableCreationDto;
+import greencity.dto.tariff.*;
+import greencity.dto.user.*;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.UserViolationMailDto;
+import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.language.Language;
@@ -56,11 +81,14 @@ public class ModelUtils {
     public static final Order TEST_ORDER_2 = createTestOrder2();
     public static final Order TEST_ORDER_3 = createTestOrder3();
     public static final Order TEST_ORDER_4 = createTestOrder4();
+    public static final Order TEST_ORDER_5 = createTestOrder5();
     public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET = createNotificationParameterSet();
+    public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET2 = createNotificationParameterSet2();
     public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
     public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
     public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
+    public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
@@ -97,7 +125,7 @@ public class ModelUtils {
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
-    public static final RequestToChangeOrdersDataDTO REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
+    public static final RequestToChangeOrdersDataDto REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
         getRequestToChangeOrdersDataDTO();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Locale> LOCALES = List.of(new Locale("uk"), new Locale("en"));
@@ -1837,6 +1865,12 @@ public class ModelUtils {
             .build();
     }
 
+    private static Order createTestOrder5() {
+        return Order.builder().id(45L).user(User.builder().id(42L).build())
+            .orderDate(LocalDateTime.now()).pointsToUse(200)
+            .build();
+    }
+
     private static UserNotification createUserNotification3() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
@@ -1854,6 +1888,14 @@ public class ModelUtils {
         return userNotification;
     }
 
+    private static UserNotification createUserNotification5() {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.BONUSES_FROM_CANCELLED_ORDER);
+        userNotification.setUser(TEST_ORDER_5.getUser());
+        userNotification.setOrder(TEST_ORDER_5);
+        return userNotification;
+    }
+
     private static Set<NotificationParameter> createNotificationParameterSet() {
         Set<NotificationParameter> parameters = new HashSet<>();
 
@@ -1863,6 +1905,15 @@ public class ModelUtils {
             .value(String.valueOf(0)).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(String.valueOf(0)).build());
+
+        return parameters;
+    }
+
+    private static Set<NotificationParameter> createNotificationParameterSet2() {
+        Set<NotificationParameter> parameters = new HashSet<>();
+
+        parameters.add(NotificationParameter.builder().key("returnedPayment")
+            .value(String.valueOf(200L)).build());
 
         return parameters;
     }
@@ -3156,8 +3207,8 @@ public class ModelUtils {
             .build();
     }
 
-    public static RequestToChangeOrdersDataDTO getRequestToChangeOrdersDataDTO() {
-        return RequestToChangeOrdersDataDTO.builder()
+    public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
+        return RequestToChangeOrdersDataDto.builder()
             .columnName("orderStatus")
             .orderId(List.of(1l))
             .newValue("1")
