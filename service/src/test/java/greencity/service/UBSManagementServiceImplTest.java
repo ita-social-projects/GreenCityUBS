@@ -1943,44 +1943,4 @@ class UBSManagementServiceImplTest {
             ubsManagementService.addBonusesToUser(dto, 20L);
         });
     }
-
-    @Test
-    void getOrderStatusesTranslationTest() {
-        Order order = getOrder();
-
-        OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
-        //orderStatusesTranslationDto.setAbleActualChange(true);
-        OrderStatusTranslation orderStatusTranslation6= OrderStatusTranslation.builder()
-                .id(6L)
-                .name("Виконано")
-                .nameEng("DONE")
-                .statusId(6l)
-                .build();
-        OrderStatusTranslation orderStatusTranslation1= OrderStatusTranslation.builder()
-                .id(1L)
-                .name("Виконано")
-                .statusId(1l)
-                .build();
-
-        OrderStatusTranslation orderStatusTranslation2= OrderStatusTranslation.builder()
-                .id(1L)
-                .nameEng("DONE")
-                .statusId(1l)
-                .build();
-        List<OrderStatusTranslation> list = new ArrayList<>();
-        List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
-        list.add(orderStatusTranslation1);
-        list.add(orderStatusTranslation2);
-//        list.add(orderStatusTranslation6);
-//        when(orderStatusTranslationRepository.getOrderStatusTranslationsId(1L)) .thenReturn(list);
-//
-//          List<OrderStatusTranslation> testlist= orderStatusTranslationRepository.getOrderStatusTranslationsId(1l);
-//          verify(orderStatusTranslationRepository).getOrderStatusTranslationsId(1l);
-//          assertEquals(testlist, list);
-
-        when(orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue())).thenReturn(list);
-      //  when(orderStatusTranslation6.getStatusId()).thenReturn(orderStatusesTranslationDto.getAbleActualChange());
-    }
-
-
 }
