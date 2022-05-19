@@ -2062,6 +2062,31 @@ public class ModelUtils {
             .build();
     }
 
+    public static CourierTranslation getCourierTranslation() {
+        return CourierTranslation.builder()
+            .id(1L)
+            .name("Test")
+            .language(getLanguage())
+            .courier(getCourier())
+            .build();
+    }
+
+    public static GetCourierTranslationsDto getCourierTranslationsDto() {
+        return GetCourierTranslationsDto.builder()
+            .id(1L)
+            .languageCode("ua")
+            .name("Test")
+            .build();
+    }
+
+    public static CourierDto getCourierDto() {
+        return CourierDto.builder()
+            .courierId(1L)
+            .courierStatus("ACTIVE")
+            .courierTranslationDtos(getCourierTranslationDtoList())
+            .build();
+    }
+
     public static List<BagTranslation> getBagTransaltion() {
         return List.of(BagTranslation.builder()
             .description("Test")
