@@ -244,4 +244,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         + "join users u on o.users_id = u.id "
         + "where o.id = :orderId", nativeQuery = true)
     Optional<Order> getUserByOrderId(@Param(value = "orderId") Long orderId);
+
+    /**
+     * Method for getting last order of user by user's uuid if such order exists.
+     *
+     * @param usersUuid - user's uuid
+     * @return Optional of {@link Order}
+     * @author Yurii Fedorko
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM orders o "
+            + "INNER JOIN users u ON o.users_id = u.id "
+            + "WHERE u.uuid = :user_uuid "
+            + "ORDER BY o.order_date DESC "
+            + "LIMIT 1")
+    Optional<Order> getLastOrderOfUserByUUIDIfExists(@Param(value = "user_uuid") String usersUuid);
 }

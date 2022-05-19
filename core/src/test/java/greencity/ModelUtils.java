@@ -1,7 +1,7 @@
 package greencity;
 
 import greencity.configuration.RedirectionConfigProp;
-import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.EditAmountOfBagDto;
@@ -98,20 +98,6 @@ public class ModelUtils {
             .addressId(1L)
             .locationId(1L)
             .build();
-    }
-
-    public static CreateAddressRequestDto getCreateAddressRequestDto() {
-        return CreateAddressRequestDto.builder()
-                .addressComment("Test comment")
-                .entranceNumber("7a")
-                .houseCorpus("2")
-                .houseNumber("7")
-                .searchAddress("Gorodotska, 7, Lviv")
-                .districtEn("Zaliznuchnuy")
-                .district("Залізничний")
-                .regionEn("Lvivskiy")
-                .region("Львівський")
-                .build();
     }
 
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
@@ -609,16 +595,13 @@ public class ModelUtils {
             .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
             .build();
         return GetTariffsInfoDto.builder()
-            .locationInfoDto(locationInfoDto)
             .cardId(1L)
-            .receivingStationDto(getReceivingStationDto())
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")
-            .locationStatus("ACTIVE")
             .build();
     }
 
@@ -627,6 +610,15 @@ public class ModelUtils {
             .body("You have unpaid order")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
             .languageId(1)
+            .build();
+    }
+
+    public static AddNewTariffDto getAddNewTariffDto() {
+        return AddNewTariffDto.builder()
+            .regionId(1L)
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(List.of(1L))
             .build();
     }
 

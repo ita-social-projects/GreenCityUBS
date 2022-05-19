@@ -125,5 +125,12 @@
     <include file="db/changelog/logs/ch-drop-column-language_id-order_status_translation-Hural.xml"/>
     <include file="db/changelog/logs/ch-update-order_status_translation-Hural.xml"/>
     <include file="db/changelog/logs/ch-insert-into-notification-templates-Hlynskyi.xml"/>
+    <include file="db/changelog/logs/2022-03-30-ch-add-columns-nameEn-and-nameUk-to-regions-Fedorko.xml"/>
+    <include file="db/changelog/logs/2022-03-30-ch-add-columns-nameEn-and-nameUk-to-locations-Fedorko.xml"/>
+    <include file="db/changelog/logs/2022-03-30-ch-add-columns-to-tarifs_info-Fedorko.xml"/>
+    <include file="db/changelog/logs/2022-03-30-ch-drop-table-locationTranslations-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-tariffs_info-locations_mapping-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-tariffs_info-receiving_stations_mapping-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-regions-Fedorko.xml"/>
 </databaseChangeLog>
 
