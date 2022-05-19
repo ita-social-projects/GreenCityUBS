@@ -1,4 +1,4 @@
-package greencity.exceptions;
+package greencity.exceptions.bots;
 
 /**
  * Exception show that the message was not send to user.

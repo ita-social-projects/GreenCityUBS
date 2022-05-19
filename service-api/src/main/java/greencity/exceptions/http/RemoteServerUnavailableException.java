@@ -1,4 +1,4 @@
-package greencity.exceptions;
+package greencity.exceptions.http;
 
 /**
  * Exception thrown when remote server did not respond.

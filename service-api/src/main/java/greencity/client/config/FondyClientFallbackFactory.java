@@ -3,7 +3,7 @@ package greencity.client.config;
 import feign.hystrix.FallbackFactory;
 import greencity.client.FondyClient;
 import greencity.constant.ErrorMessage;
-import greencity.exceptions.RemoteServerUnavailableException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.springframework.stereotype.Component;
 
 @Component

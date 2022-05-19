@@ -7,8 +7,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.RemoteServerUnavailableException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

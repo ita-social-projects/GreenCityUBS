@@ -2,7 +2,7 @@ package greencity.client.config;
 
 import greencity.client.FondyClient;
 import greencity.dto.payment.PaymentRequestDto;
-import greencity.exceptions.RemoteServerUnavailableException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

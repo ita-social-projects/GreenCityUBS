@@ -2,7 +2,7 @@ package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
 import greencity.dto.notification.NotificationDto;
-import greencity.exceptions.RemoteServerUnavailableException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
