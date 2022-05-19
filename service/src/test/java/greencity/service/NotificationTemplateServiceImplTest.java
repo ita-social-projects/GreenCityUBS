@@ -14,7 +14,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.exceptions.NotificationNotFoundException;
+import greencity.exceptions.notification.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
