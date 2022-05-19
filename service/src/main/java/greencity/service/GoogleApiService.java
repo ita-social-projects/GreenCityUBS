@@ -4,6 +4,8 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
+
+import greencity.exceptions.api.GoogleApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +36,7 @@ public class GoogleApiService {
                     .address(searchRequest).language(locale.getLanguage()).await();
                 Collections.addAll(geocodingResults, results);
             } catch (IOException | InterruptedException | ApiException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new GoogleApiException(e.getMessage());
             }
         });
         return geocodingResults;

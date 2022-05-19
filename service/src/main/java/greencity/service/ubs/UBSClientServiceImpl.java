@@ -1,17 +1,56 @@
 package greencity.service.ubs;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.maps.GeoApiContext;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
+import javax.annotation.Nullable;
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
+
+import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
-import greencity.client.FondyClient;
-import greencity.client.UserRemoteClient;
+
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.dto.AllActiveLocationsDto;
 import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.*;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
@@ -22,13 +61,53 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.LiqPayOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderStatusPageDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.*;
-import greencity.dto.user.*;
+import greencity.dto.payment.FondyPaymentResponse;
+import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentRequestDtoLiqPay;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.payment.StatusRequestDtoLiqPay;
+import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.PointsForUbsUserDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.*;
-import greencity.entity.order.*;
+import greencity.entity.enums.AddressStatus;
+import greencity.entity.enums.BotType;
+import greencity.entity.enums.CertificateStatus;
+import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.OrderPaymentStatus;
+import greencity.entity.enums.OrderStatus;
+import greencity.entity.enums.PaymentStatus;
+import greencity.entity.enums.PaymentType;
+import greencity.entity.order.Bag;
+import greencity.entity.order.BagTranslation;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -36,7 +115,11 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.address.AddressAlreadyExistException;
 import greencity.exceptions.address.NotFoundOrderAddressException;
 import greencity.exceptions.bag.NotEnoughBagsException;
-import greencity.exceptions.certificate.*;
+import greencity.exceptions.certificate.CertificateExpiredException;
+import greencity.exceptions.certificate.CertificateIsNotActivated;
+import greencity.exceptions.certificate.CertificateIsUsedException;
+import greencity.exceptions.certificate.CertificateNotFoundException;
+import greencity.exceptions.certificate.TooManyCertificatesEntered;
 import greencity.exceptions.courier.TariffNotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.NotFoundException;
@@ -51,43 +134,56 @@ import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.exceptions.payment.PaymentValidationException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LanguageRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
-import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-
-import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
+
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TO_MUCH_BIG_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -424,17 +520,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         Address address = addressRepo.findById(dtoRequest.getId())
             .orElseThrow(() -> new NotFoundOrderAddressException(
                 ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dtoRequest.getId()));
-        if (address != null && AddressStatus.DELETED.equals(address.getAddressStatus())) {
+        if (AddressStatus.DELETED.equals(address.getAddressStatus())) {
             address = null;
         }
 
-        final AddressStatus addressStatus = address.getAddressStatus();
-        final User addressUser = address.getUser();
-        final Boolean addressActual = address.getActual();
+        final AddressStatus addressStatus = address != null ? address.getAddressStatus() : null;
+        final User addressUser = address != null ? address.getUser() : null;
+        final Boolean addressActual = address != null ? address.getActual() : null;
 
         address = modelMapper.map(dtoRequest, Address.class);
 
-        if (!addressUser.equals(currentUser)) {
+        if (!currentUser.equals(addressUser)) {
             address.setId(null);
         }
 
@@ -459,7 +555,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void initializeUkrainianMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
-        Map<AddressComponentType, Consumer<String>> ukrainianResult = ImmutableMap.of(
+        Map<AddressComponentType, Consumer<String>> ukrainianResult = Map.of(
             AddressComponentType.LOCALITY, dtoRequest::setCity,
             AddressComponentType.ROUTE, dtoRequest::setStreet,
             AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
@@ -467,28 +563,24 @@ public class UBSClientServiceImpl implements UBSClientService {
             AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
 
         ukrainianResult
-            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
-                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
-                    .forEach(componentType -> {
-                        value.accept(addressComponent.longName);
-                    });
-            }));
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents)
+                .forEach(addressComponent -> Arrays.stream(addressComponent.types)
+                    .filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> value.accept(addressComponent.longName))));
     }
 
     private void initializeEnglishMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
-        Map<AddressComponentType, Consumer<String>> englishResult = ImmutableMap.of(
+        Map<AddressComponentType, Consumer<String>> englishResult = Map.of(
             AddressComponentType.LOCALITY, dtoRequest::setCityEn,
             AddressComponentType.ROUTE, dtoRequest::setStreetEn,
             AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
             AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
 
         englishResult
-            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents).forEach(addressComponent -> {
-                Arrays.stream(addressComponent.types).filter(componentType -> componentType.equals(key))
-                    .forEach(componentType -> {
-                        value.accept(addressComponent.longName);
-                    });
-            }));
+            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents)
+                .forEach(addressComponent -> Arrays.stream(addressComponent.types)
+                    .filter(componentType -> componentType.equals(key))
+                    .forEach(componentType -> value.accept(addressComponent.longName))));
     }
 
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GoogleApiConfiguration {
     @Value("${greencity.authorization.googleApiKey}")
-    private String GOOGLE_API_KEY;
+    private String googleApiKey;
 
     /**
      * Method create ApiContext.
@@ -18,6 +18,6 @@ public class GoogleApiConfiguration {
      */
     @Bean
     GeoApiContext context() {
-        return new GeoApiContext.Builder().apiKey(GOOGLE_API_KEY).build();
+        return new GeoApiContext.Builder().apiKey(googleApiKey).build();
     }
 }
