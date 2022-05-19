@@ -88,6 +88,9 @@ public final class ErrorMessage {
         "Cannot access another user's order cancellation reason";
     public static final String CANNOT_FIND_LANGUAGE_OF_TRANSLATION = "Cannot find language of translation";
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST = "User with this email does not exist: ";
+    public static final String LANGUAGE_ERROR = "Invalid language code";
+    public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
+    public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
