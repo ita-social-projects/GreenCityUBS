@@ -443,7 +443,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page) {
-        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("order_date").descending());
+        PageRequest pageRequest =
+            PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("order_date").descending());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
         List<Order> orders = orderPages.getContent();
 
