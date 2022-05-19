@@ -266,6 +266,34 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setLimitDescription() {
+        Courier courier = ModelUtils.getCourier();
+        CourierTranslation courierTranslation = CourierTranslation.builder()
+                .id(1L)
+                .name("Test")
+                .language(getLanguage())
+                .courier(courier)
+                .build();
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+
+        lenient().when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        lenient().when(courierTranslationRepository.findCourierTranslationByCourier(courierLocation.getCourier())).thenReturn(courierTranslation);
+        lenient().when(courierTranslationRepository.save(courierTranslation)).thenReturn(courierTranslation);
+
+        GetCourierTranslationsDto courierTranslationsDto = GetCourierTranslationsDto.builder()
+                .id(1L)
+                .languageCode("ua")
+                .name("Test")
+                .build();
+
+        assertEquals(courierTranslationsDto, superAdminService.setLimitDescription(1L, "1"));
+
+        verify(courierRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourier(courierLocation.getCourier());
+        verify(courierTranslationRepository).save(courierTranslation);
+    }
+
+    @Test
     void createCourier() {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);
