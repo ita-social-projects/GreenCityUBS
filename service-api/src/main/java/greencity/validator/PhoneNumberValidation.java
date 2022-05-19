@@ -5,7 +5,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ErrorMessage;
-import greencity.exceptions.PhoneNumberParseException;
+import greencity.exceptions.number.PhoneNumberParseException;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

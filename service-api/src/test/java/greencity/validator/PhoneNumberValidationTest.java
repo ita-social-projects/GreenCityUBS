@@ -1,7 +1,7 @@
 package greencity.validator;
 
 import greencity.constant.ErrorMessage;
-import greencity.exceptions.PhoneNumberParseException;
+import greencity.exceptions.number.PhoneNumberParseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
