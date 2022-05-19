@@ -1,15 +1,8 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
-import greencity.configuration.SecurityConfig;
-import greencity.converters.UserArgumentResolver;
-import greencity.dto.notification.NotificationTemplateDto;
-import greencity.exception.handler.CustomExceptionHandler;
-import greencity.client.UserRemoteClient;
-import greencity.exceptions.NotFoundException;
-import greencity.service.notification.NotificationTemplateService;
+import java.security.Principal;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +20,21 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.security.Principal;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static greencity.ModelUtils.getUuid;
+import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.configuration.SecurityConfig;
+import greencity.converters.UserArgumentResolver;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.exception.handler.CustomExceptionHandler;
+import greencity.exceptions.http.NotFoundException;
+import greencity.service.notification.NotificationTemplateService;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static greencity.ModelUtils.getUuid;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)

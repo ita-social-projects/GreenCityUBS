@@ -614,12 +614,13 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dtoRequest,
             Address.class)).thenReturn(new Address());
         when(modelMapper.map(addresses.get(0),
-                AddressDto.class))
+            AddressDto.class))
                 .thenReturn(ModelUtils.addressDto());
 
         addresses.get(0).setAddressStatus(AddressStatus.NEW);
 
-        OrderWithAddressesResponseDto actualWithSearchAddress = ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actualWithSearchAddress =
+            ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
 
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
         verify(addressRepository, times(1)).save(addresses.get(0));
@@ -678,7 +679,8 @@ class UBSClientServiceImplTest {
             AddressDto.class))
                 .thenReturn(ModelUtils.addressDto());
 
-        OrderWithAddressesResponseDto actualWithSearchAddress = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actualWithSearchAddress =
+            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
         Assertions.assertNull(dtoRequest.getSearchAddress());
@@ -740,57 +742,6 @@ class UBSClientServiceImplTest {
         assertThrows(NotFoundOrderAddressException.class,
             () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
-
-    /*
-     * @Test void testSaveCurrentAddressForOrderThrows() { String uuid =
-     * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
-     * List<Address> addresses = getTestAddresses(user);
-     *
-     * OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
-     * dtoRequest.setId(42L);
-     *
-     * when(userRepository.findByUuid(uuid)).thenReturn(user);
-     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-     * when(modelMapper.map(any(),
-     * eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
-     *
-     *
-     *
-     * @Test void saveCurrentAddressForOrderWithDeletedAddress() { User user =
-     * getTestUser(); List<Address> addresses = getTestAddresses(user);
-     * OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder() .id(1L)
-     * .addressComment("comment") .build(); Address deletedAddress =
-     * Address.builder() .id(1L) .user(user) .addressStatus(AddressStatus.DELETED)
-     * .build();
-     *
-     * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-     * when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
-     * when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new
-     * OrderAddressDtoRequest()); when(modelMapper.map(dtoRequest,
-     * Address.class)).thenReturn(new Address());
-     *
-     * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-     *
-     * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
-     *
-     * @Test void saveCurrentAddressForOrderWithAnotherUser() { User user =
-     * getTestUser(); User anotherUser = getUser().setId(2L); List<Address>
-     * addresses = getTestAddresses(anotherUser); OrderAddressDtoRequest dtoRequest
-     * = OrderAddressDtoRequest.builder() .id(13L) .addressComment("comment")
-     * .build();
-     *
-     * when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-     * when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-     * when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)
-     * )); when(modelMapper.map(any(),
-     * eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
-     * when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
-     *
-     * ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
-     *
-     * verify(addressRepository, times(addresses.size() + 1)).save(any()); }
-     */
 
     @Test
     void testDeleteCurrentAddressForOrder() {

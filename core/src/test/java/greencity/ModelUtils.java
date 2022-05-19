@@ -631,15 +631,15 @@ public class ModelUtils {
 
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
-                .addressComment("fdsfs")
-                .searchAddress("fake address")
-                .district("fdsfds")
-                .districtEn("dsadsad")
-                .region("regdsad")
-                .regionEn("regdsaden")
-                .houseNumber("1")
-                .houseCorpus("2")
-                .entranceNumber("3")
-                .build();
+            .addressComment("fdsfs")
+            .searchAddress("fake address")
+            .district("fdsfds")
+            .districtEn("dsadsad")
+            .region("regdsad")
+            .regionEn("regdsaden")
+            .houseNumber("1")
+            .houseCorpus("2")
+            .entranceNumber("3")
+            .build();
     }
 }
