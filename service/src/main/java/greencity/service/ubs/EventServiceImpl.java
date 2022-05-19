@@ -3,7 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.OrderHistory;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
-import greencity.exceptions.PositionNotFoundException;
+import greencity.exceptions.position.PositionNotFoundException;
 import greencity.repository.EventRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -8,7 +8,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
-import greencity.exceptions.MessageWasNotSend;
+import greencity.exceptions.bots.MessageWasNotSend;
 import greencity.repository.NotificationTemplateRepository;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;

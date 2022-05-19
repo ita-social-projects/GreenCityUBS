@@ -7,6 +7,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
+import greencity.client.UserRemoteClient;
 import greencity.exceptions.NotFoundException;
 import greencity.service.notification.NotificationTemplateService;
 import org.junit.jupiter.api.BeforeEach;

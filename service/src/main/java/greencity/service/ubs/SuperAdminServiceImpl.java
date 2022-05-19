@@ -25,7 +25,6 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
-import greencity.exceptions.*;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
 import greencity.repository.*;
