@@ -9,7 +9,7 @@ public class RemoteServerUnavailableException extends RuntimeException {
      *
      * @param message {@link String} - exception message.
      */
-    public RemoteServerUnavailableException(String message) {
-        super(message);
+    public RemoteServerUnavailableException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -11,7 +11,7 @@ public class FondyClientFallbackFactory implements FallbackFactory<FondyClient> 
     @Override
     public FondyClient create(Throwable throwable) {
         return dto -> {
-            throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE);
+            throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE, throwable);
         };
     }
 }

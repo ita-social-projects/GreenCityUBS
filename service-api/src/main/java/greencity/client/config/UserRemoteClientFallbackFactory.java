@@ -22,27 +22,29 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
         return new UserRemoteClient() {
             @Override
             public String findUuidByEmail(String email) {
-                throw new NotFoundException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email);
+                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_USER_DATA, throwable);
             }
 
             @Override
             public Optional<UserVO> findNotDeactivatedByEmail(String email) {
+                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + email, throwable);
                 return Optional.empty();
             }
 
             @Override
             public Optional<UbsCustomersDto> findByUuid(String uuid) {
+                log.error(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, throwable);
                 return Optional.empty();
             }
 
             @Override
             public void markUserDeactivated(String uuid) {
-                throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED);
+                throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED, throwable);
             }
 
             @Override
             public PasswordStatusDto getPasswordStatus() {
-                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_PASSWORD_STATUS);
+                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_PASSWORD_STATUS, throwable);
             }
 
             @Override
