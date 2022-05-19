@@ -43,7 +43,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.*;
@@ -1807,6 +1809,58 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderStatusDataWithNOTEmptyListIF() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        Language language = getLanguage();
+        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = mock(OrderPaymentStatusTranslation.class);
+        List<OrderStatusTranslation> list = new ArrayList<>();
+        list.add(getOrderStatusTranslation());
+
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(getBag2list());
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
+                .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+                orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(1L))
+                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+
+        when( orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue()))
+                .thenReturn(list);
+
+        when(
+                orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslations(language.getId()))
+                .thenReturn(List.of(orderPaymentStatusTranslation));
+
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L);
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndTranslationValue(
+                1L);
+        verify(receivingStationRepository).findAll();
+
+    }
+
+
+    @Test
     void deleteManualPaymentTest() {
         Payment payment = ModelUtils.getManualPayment();
         User user = ModelUtils.getTestUser();
@@ -1892,55 +1946,41 @@ class UBSManagementServiceImplTest {
 
     @Test
     void getOrderStatusesTranslationTest() {
-        OrderStatusesTranslationDto orderStatusesTranslationDto = mock(OrderStatusesTranslationDto.class);
-        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+        Order order = getOrder();
 
-        List<OrderStatusTranslation> list = mock(List.class);
-        List<OrderStatusesTranslationDto> listDto = mock(List.class);
+        OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
+        //orderStatusesTranslationDto.setAbleActualChange(true);
+        OrderStatusTranslation orderStatusTranslation6= OrderStatusTranslation.builder()
+                .id(6L)
+                .name("Виконано")
+                .nameEng("DONE")
+                .statusId(6l)
+                .build();
+        OrderStatusTranslation orderStatusTranslation1= OrderStatusTranslation.builder()
+                .id(1L)
+                .name("Виконано")
+                .statusId(1l)
+                .build();
 
+        OrderStatusTranslation orderStatusTranslation2= OrderStatusTranslation.builder()
+                .id(1L)
+                .nameEng("DONE")
+                .statusId(1l)
+                .build();
+        List<OrderStatusTranslation> list = new ArrayList<>();
+        List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
+        list.add(orderStatusTranslation1);
+        list.add(orderStatusTranslation2);
+//        list.add(orderStatusTranslation6);
+//        when(orderStatusTranslationRepository.getOrderStatusTranslationsId(1L)) .thenReturn(list);
+//
+//          List<OrderStatusTranslation> testlist= orderStatusTranslationRepository.getOrderStatusTranslationsId(1l);
+//          verify(orderStatusTranslationRepository).getOrderStatusTranslationsId(1l);
+//          assertEquals(testlist, list);
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationsId(anyLong()))
-                .thenReturn(list);
-        List<OrderStatusTranslation> testlist= orderStatusTranslationRepository.getOrderStatusTranslationsId(getOrderStatusTranslation().getStatusId());
-        verify(orderStatusTranslationRepository).getOrderStatusTranslationsId(getOrderStatusTranslation().getStatusId());
-        assertEquals(testlist, list);
-
-        assertEquals(OrderStatus.getConvertedEnumFromLongToEnum(1l), "FORMED");
-
-        orderStatusesTranslationDto.setUa(orderStatusTranslation.getName());
-        orderStatusesTranslationDto.setEng(orderStatusTranslation.getNameEng());
-        orderStatusesTranslationDto.setAbleActualChange(anyBoolean());
-        orderStatusesTranslationDto.setKey(orderStatusTranslation.getNameEng());
-
-        when(listDto.add(orderStatusesTranslationDto)).thenReturn(true);
-        boolean added = listDto.add(orderStatusesTranslationDto);
-        verify(listDto).add(orderStatusesTranslationDto);
-        assertEquals(added, true);
-
-
+        when(orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue())).thenReturn(list);
+      //  when(orderStatusTranslation6.getStatusId()).thenReturn(orderStatusesTranslationDto.getAbleActualChange());
     }
 
-    @Test
-    void setValueForOrderStatusIsCancelledOrDoneAsTrueTest() {
 
-        OrderStatusesTranslationDto orderStatusesTranslationDto = mock(OrderStatusesTranslationDto.class);
-        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
-
-        lenient().doAnswer((i) -> {
-            Object arg0 = i.getArgument(0);
-            assertEquals(OrderStatus.CANCELED.getNumValue() == orderStatusTranslation.getStatusId()
-                    || OrderStatus.DONE.getNumValue() == orderStatusTranslation.getStatusId(), arg0);
-
-            return null;
-        }).when(orderStatusesTranslationDto).setAbleActualChange(true);
-
-        OrderStatusTranslation test = getOrderStatusTranslation();
-        assertEquals(OrderStatus.CANCELED.getNumValue() == test.getStatusId()
-                || OrderStatus.DONE.getNumValue() == test.getStatusId(), false);
-
-        test.setStatusId(8l);
-        assertTrue(OrderStatus.CANCELED.getNumValue() == test.getStatusId()
-                || OrderStatus.DONE.getNumValue() == test.getStatusId());
-
-    }
 }
