@@ -23,18 +23,18 @@ public class ViberClientFallbackFactory implements FallbackFactory<ViberClient> 
         return new ViberClient() {
             @Override
             public ResponseEntity<String> getAccountInfo() {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(JSON_COULD_NOT_RETRIEVE_DATA);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(JSON_COULD_NOT_RETRIEVE_DATA);
             }
 
             @Override
             public ResponseEntity<String> updateWebHook(WebhookDto dto) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(JSON_COULD_NOT_SET_WEBHOOK);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(JSON_COULD_NOT_SET_WEBHOOK);
             }
 
             @Override
             public ResponseEntity<String> sendMessage(SendMessageToUserDto message) {
                 log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(JSON_COULD_NOT_SEND_MESSAGE);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(JSON_COULD_NOT_SEND_MESSAGE);
             }
         };
     }

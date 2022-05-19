@@ -769,10 +769,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} with http status and exception message.
      */
     @ExceptionHandler(RemoteServerUnavailableException.class)
-    public final ResponseEntity<Object> handleRemoteServerException(RemoteServerUnavailableException ex,
-        WebRequest request) {
+    public final ResponseEntity<Object> handleRemoteServerUnavailableException(
+        RemoteServerUnavailableException ex, WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
     }
 }
