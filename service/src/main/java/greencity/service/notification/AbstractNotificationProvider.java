@@ -6,7 +6,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
-import greencity.exceptions.UserNotFoundException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.NotificationServiceImpl;
 import lombok.RequiredArgsConstructor;
