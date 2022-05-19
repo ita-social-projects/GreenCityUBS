@@ -111,6 +111,52 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setLimitDescription() {
+        Courier courier = ModelUtils.getCourier();
+        CourierTranslation courierTranslation = CourierTranslation.builder()
+            .id(1L)
+            .name("Test")
+            .language(getLanguage())
+            .courier(courier)
+            .build();
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(courierTranslationRepository.findCourierTranslationByCourier(getCourier()))
+            .thenReturn(courierTranslation);
+        when(courierTranslationRepository.save(courierTranslation)).thenReturn(courierTranslation);
+
+        GetCourierTranslationsDto courierTranslationsDto = GetCourierTranslationsDto.builder()
+            .id(1L)
+            .languageCode("ua")
+            .name("Test")
+            .build();
+
+        assertEquals(courierTranslationsDto, superAdminService.setLimitDescription(1L, "1"));
+
+        verify(courierRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourier(getCourier());
+        verify(courierTranslationRepository).save(courierTranslation);
+    }
+
+    @Test
+    void getAllCouriersTest() {
+        CourierDto courierDto = CourierDto.builder()
+            .courierId(1L)
+            .courierStatus("ACTIVE")
+            .courierTranslationDtos(getCourierTranslationDtoList())
+            .build();
+
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier()));
+        when(modelMapper.map(getCourier(), CourierDto.class))
+            .thenReturn(courierDto);
+
+        assertEquals(getCourierDtoList(), superAdminService.getAllCouriers());
+
+        verify(courierRepository).findAll();
+        verify(modelMapper).map(getCourier(), CourierDto.class);
+    }
+
+    @Test
     void deleteTariffServiceThrowException() {
         assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
