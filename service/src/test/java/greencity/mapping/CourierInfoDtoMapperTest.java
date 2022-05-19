@@ -3,7 +3,7 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.courier.CourierInfoDto;
 import greencity.entity.enums.CourierLimit;
-import greencity.entity.order.CourierLocation;
+import greencity.entity.order.TariffsInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ class CourierInfoDtoMapperTest {
     @Test
     void convert() {
 
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        TariffsInfo courierLocation = ModelUtils.getTariffsInfo();
 
         CourierInfoDto expected = CourierInfoDto.builder()
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)

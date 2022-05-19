@@ -2,8 +2,6 @@ package greencity.entity.language;
 
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.ServiceTranslation;
-import greencity.entity.user.LocationTranslation;
-import greencity.entity.user.RegionTranslation;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,11 +29,5 @@ public class Language {
     private List<ServiceTranslation> serviceTranslations;
 
     @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    private List<LocationTranslation> locationTranslations;
-
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
     private List<CourierTranslation> courierTranslations;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "language")
-    private List<RegionTranslation> regionTranslations;
 }

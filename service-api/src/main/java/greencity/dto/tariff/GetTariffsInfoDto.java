@@ -1,8 +1,9 @@
 package greencity.dto.tariff;
 
+import greencity.dto.LocationsDtos;
+import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.location.LocationInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -23,10 +24,16 @@ import java.util.List;
 @Builder
 public class GetTariffsInfoDto {
     private Long cardId;
-    private LocationInfoDto locationInfoDto;
-    private ReceivingStationDto receivingStationDto;
+    private RegionDto regionDto;
+    private List<LocationsDtos> locationInfoDtos;
+    private List<ReceivingStationDto> receivingStationDtos;
     private List<CourierTranslationDto> courierTranslationDtos;
-    private String locationStatus;
+    private String tariffStatus;
     private String creator;
     private LocalDate createdAt;
+    private String courierLimit;
+    private Long minAmountOfBags;
+    private Long maxAmountOfBags;
+    private Long minPriceOfOrder;
+    private Long maxPriceOfOrder;
 }

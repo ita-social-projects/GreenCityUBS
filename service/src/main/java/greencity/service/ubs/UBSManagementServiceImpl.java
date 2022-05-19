@@ -327,8 +327,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
-        Integer fullPrice =
-            serviceRepository.findFullPriceByCourierId(order.getCourierLocations().getCourier().getId());
+        Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
         Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -360,7 +359,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(order.getComment())
             .courierPricePerPackage(fullPrice)
-            .courierInfo(modelMapper.map(order.getCourierLocations(), CourierInfoDto.class))
+            .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
     }
 
@@ -836,7 +835,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 eventService.save(OrderHistory.ORDER_ADJUSTMENT,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
-                notificationService.notifyCourierItineraryFormed(order);
                 eventService.save(OrderHistory.ORDER_CONFIRMED,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
             } else if (order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {

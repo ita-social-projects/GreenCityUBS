@@ -2,6 +2,7 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.GetCourierLocationDto;
@@ -20,14 +21,12 @@ import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.*;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,10 +34,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import javax.persistence.EntityNotFoundException;
+import java.util.*;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,13 +68,7 @@ class SuperAdminServiceImplTest {
     @Mock
     private CourierTranslationRepository courierTranslationRepository;
     @Mock
-    private LocationTranslationRepository locationTranslationRepository;
-    @Mock
-    private CourierLocationRepository courierLocationRepository;
-    @Mock
     private RegionRepository regionRepository;
-    @Mock
-    private RegionTranslationRepository regionTranslationRepository;
     @Mock
     private ReceivingStationRepository receivingStationRepository;
     @Mock
@@ -316,7 +307,6 @@ class SuperAdminServiceImplTest {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
 
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
@@ -372,13 +362,11 @@ class SuperAdminServiceImplTest {
         Language language = ModelUtils.getLanguage();
         Region region = ModelUtils.getRegion();
 
-        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
-        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.of(region));
+        when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.of(region));
 
         superAdminService.addLocation(locationCreateDtoList);
 
-        verify(languageRepository).findLanguageByLanguageCode("ua");
-        verify(regionRepository).findRegionByName("Київська область");
+        verify(regionRepository).findRegionByName("Kyiv region", "Київська область");
     }
 
     @Test
@@ -387,25 +375,12 @@ class SuperAdminServiceImplTest {
         Language language = ModelUtils.getLanguage();
         Region region = ModelUtils.getRegion();
         Location location = ModelUtils.getLocationForCreateRegion();
-        List<LocationTranslation> locationTranslations = List.of(ModelUtils.getLocationTranslation());
-
-        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
-        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.of(language));
-        when(regionRepository.findRegionByName("Київська область")).thenReturn(Optional.empty());
-        when(regionTranslationRepository.saveAll(region.getRegionTranslations()))
-            .thenReturn(ModelUtils.getRegionTranslationsList());
-        when(locationRepository.save(location)).thenReturn(location);
-        when(locationTranslationRepository.saveAll(location.getLocationTranslations()))
-            .thenReturn(locationTranslations);
-
+        when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.empty());
+        when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
         superAdminService.addLocation(locationCreateDtoList);
-
-        verify(locationRepository).findLocationByName("Київ");
-        verify(languageRepository, times(2)).findLanguageByLanguageCode("ua");
-        verify(regionRepository).findRegionByName("Київська область");
-        verify(regionTranslationRepository).saveAll(region.getRegionTranslations());
+        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
+        verify(regionRepository).findRegionByName("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
-        verify(locationTranslationRepository).saveAll(location.getLocationTranslations());
     }
 
     @Test
@@ -423,7 +398,6 @@ class SuperAdminServiceImplTest {
     void deactivateLocation() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
-        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
 
@@ -444,28 +418,6 @@ class SuperAdminServiceImplTest {
 
         verify(bagRepository).findById(1);
         verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
-    }
-
-    @Test
-    void editInfoInTariff() {
-        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
-        Bag bag = ModelUtils.bagDto();
-        CourierTranslation courierTranslation = CourierTranslation.builder().id(1L).build();
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(
-            editTariffInfoDto.getCourierId(), editTariffInfoDto.getLocationId()))
-                .thenReturn(ModelUtils.getCourierLocations());
-        when(
-            courierTranslationRepository.findCourierTranslationByCourier(courierLocation.getCourier()))
-                .thenReturn(courierTranslation);
-        Assertions.assertEquals(editTariffInfoDto, superAdminService.editInfoInTariff(editTariffInfoDto));
-
-        verify(bagRepository).findById(1);
-        verify(courierTranslationRepository).findCourierTranslationByCourier(courierLocation.getCourier());
-        verify(courierLocationRepository).findCourierLocationsLimitsByCourierIdAndLocationId(
-            editTariffInfoDto.getCourierId(), editTariffInfoDto.getLocationId());
     }
 
     @Test
@@ -511,26 +463,15 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void addLocationExceptionTest() {
-        List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
-
-        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.empty());
-        when(languageRepository.findLanguageByLanguageCode("ua")).thenReturn(Optional.empty());
-
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
-
-        verify(languageRepository).findLanguageByLanguageCode("ua");
-    }
-
-    @Test
     void addLocationThrowLocationAlreadyCreatedExceptionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Location location = ModelUtils.getLocation();
-
-        when(locationRepository.findLocationByName("Київ")).thenReturn(Optional.of(location));
+        when(regionRepository.findRegionByName("Kyiv region", "Київська область"))
+            .thenReturn(Optional.of(ModelUtils.getRegion()));
+        when(locationRepository.findLocationByName("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
         assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
-        verify(locationRepository).findLocationByName("Київ");
+        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
     }
 
     @Test
@@ -542,7 +483,6 @@ class SuperAdminServiceImplTest {
     void deactivateLocationException2Test() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.DEACTIVATED);
-        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
 
@@ -558,10 +498,7 @@ class SuperAdminServiceImplTest {
     void activateLocationException2Test() {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
-        LocationTranslation locationTranslation = ModelUtils.getLocationTranslation();
-
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-
         assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.activateLocation(1L));
     }
 
@@ -599,13 +536,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void editInfoInTariffExceptionTest() {
-        EditTariffInfoDto editTariffInfoDto = ModelUtils.editTariffInfoDto();
-
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.editInfoInTariff(editTariffInfoDto));
-    }
-
-    @Test
     void deleteCourierTest() {
         Courier courier = ModelUtils.getCourier();
         ;
@@ -628,64 +558,6 @@ class SuperAdminServiceImplTest {
         assertThrows(CourierNotFoundException.class, () -> superAdminService.deleteCourier(1L));
 
         verify(courierRepository).findById(1L);
-    }
-
-    @Test
-    void addLocationToCourierTest() {
-        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        Courier courier = ModelUtils.getCourier();
-        Location location = ModelUtils.getLocation();
-        courierLocation.setCourier(courier);
-        courierLocation.setLocation(location);
-
-        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        when(courierLocationRepository.save(courierLocation)).thenReturn(courierLocation);
-
-        superAdminService.addLocationToCourier(dto);
-
-        verify(modelMapper).map(dto, CourierLocation.class);
-        verify(courierRepository).findById(1L);
-        verify(locationRepository).findById(1L);
-        verify(courierLocationRepository).save(courierLocation);
-    }
-
-    @Test
-    void addLocationToCourierThrowCourierNotFoundExceptionTest() {
-        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        Courier courier = ModelUtils.getCourier();
-        courierLocation.setCourier(courier);
-
-        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
-        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
-
-        verify(modelMapper).map(dto, CourierLocation.class);
-        verify(courierRepository).findById(1L);
-    }
-
-    @Test
-    void addLocationToCourierThrowLocationNotFoundExceptionTest() {
-        NewLocationForCourierDto dto = ModelUtils.newLocationForCourierDto();
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        Courier courier = ModelUtils.getCourier();
-        Location location = ModelUtils.getLocation();
-        courierLocation.setCourier(courier);
-        courierLocation.setLocation(location);
-
-        when(modelMapper.map(dto, CourierLocation.class)).thenReturn(courierLocation);
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.addLocationToCourier(dto));
-
-        verify(modelMapper).map(dto, CourierLocation.class);
-        verify(courierRepository).findById(1L);
-        verify(locationRepository).findById(1L);
     }
 
     @Test
@@ -816,7 +688,6 @@ class SuperAdminServiceImplTest {
         Courier courierToSave = Courier.builder()
             .id(courier.getId())
             .courierStatus(courier.getCourierStatus())
-            .courierLocations(courier.getCourierLocations())
             .courierTranslationList(listToSave)
             .build();
         CourierDto courierDto = CourierDto.builder()
@@ -841,4 +712,70 @@ class SuperAdminServiceImplTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    void editNewTariffSuccess() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
+            .thenReturn(ModelUtils.getLocationList());
+        when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
+        when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
+        superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
+    }
+
+    @Test
+    void addNewTariffThrowsException2() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
+            .thenReturn(Collections.emptyList());
+        assertThrows(EntityNotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void addNewTariffThrowsException3() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(CourierNotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void editTariffTest() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        superAdminService.setTariffLimitByAmountOfBags(1L, ModelUtils.getAmountOfBagDto());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitBySumOfOrderTest() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        superAdminService.setTariffLimitBySumOfOrder(1L, ModelUtils.getEditPriceOfOrder());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void editTariffTestThrows() {
+        var dto = ModelUtils.getEditPriceOfOrder();
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(TariffNotFoundException.class,
+            () -> superAdminService.setTariffLimitBySumOfOrder(1L, dto));
+    }
+
+    @Test
+    void deleteTariff() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        superAdminService.deactivateTariffCard(1L);
+        verify(tariffsInfoRepository).delete(tariffsInfo);
+    }
+
+    @Test
+    void deleteTariff2() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        assertEquals("Deactivated", superAdminService.deactivateTariffCard(1L));
+    }
 }

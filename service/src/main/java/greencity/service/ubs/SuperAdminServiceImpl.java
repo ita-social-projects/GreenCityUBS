@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.*;
@@ -9,7 +10,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffInfoDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -19,17 +19,9 @@ import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Courier;
-import greencity.entity.order.CourierLocation;
-import greencity.entity.order.CourierTranslation;
-import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
+import greencity.entity.order.*;
 import greencity.entity.user.Location;
-import greencity.entity.user.LocationTranslation;
 import greencity.entity.user.Region;
-import greencity.entity.user.RegionTranslation;
 import greencity.entity.user.User;
 import greencity.exceptions.*;
 import greencity.entity.user.employee.ReceivingStation;
@@ -38,8 +30,12 @@ import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -52,12 +48,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
     private final LanguageRepository languageRepository;
-    private final LocationTranslationRepository locationTranslationRepository;
     private final CourierRepository courierRepository;
     private final CourierTranslationRepository courierTranslationRepository;
-    private final CourierLocationRepository courierLocationRepository;
     private final RegionRepository regionRepository;
-    private final RegionTranslationRepository regionTranslationRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
@@ -246,59 +239,58 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void addLocation(List<LocationCreateDto> dtoList) {
         dtoList.forEach(locationCreateDto -> {
-            checkIfLocationAlreadyCreated(locationCreateDto.getAddLocationDtoList());
-
-            Location location = createNewLocation(locationCreateDto);
-            location.getLocationTranslations()
-                .forEach(locationTranslation -> locationTranslation.setLocation(location));
-
+            Region region = checkIfRegionAlreadyCreated(locationCreateDto);
+            Location location = createNewLocation(locationCreateDto, region);
+            checkIfLocationAlreadyCreated(locationCreateDto.getAddLocationDtoList(), region.getId());
             locationRepository.save(location);
-            locationTranslationRepository.saveAll(location.getLocationTranslations());
         });
     }
 
-    private Location createNewLocation(LocationCreateDto dto) {
+    private Location createNewLocation(LocationCreateDto dto, Region region) {
         return Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
             .coordinates(Coordinates.builder().latitude(dto.getLatitude()).longitude(dto.getLongitude()).build())
-            .locationTranslations(dto.getAddLocationDtoList()
-                .stream()
-                .map(this::addTranslationToLocation)
-                .collect(Collectors.toList()))
-            .region(checkIfRegionAlreadyCreated(dto))
+            .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+                .getLocationName())
+            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+                .getLocationName())
+            .region(region)
             .build();
     }
 
-    private LocationTranslation addTranslationToLocation(AddLocationTranslationDto locationTranslationDto) {
-        return LocationTranslation.builder()
-            .locationName(locationTranslationDto.getLocationName())
-            .language(getLanguageByCode(locationTranslationDto.getLanguageCode()))
-            .build();
-    }
+    private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
+        Optional<Location> location = locationRepository.findLocationByName(
+            dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+                .getLocationName(),
+            dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst()
+                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+                .getLocationName(),
+            regionId);
 
-    private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto) {
-        dto.forEach(locationTranslationDto -> {
-            Location location =
-                locationRepository.findLocationByName(locationTranslationDto.getLocationName()).orElse(null);
-            if (location != null) {
-                throw new LocationAlreadyCreatedException("The location with name: "
-                    + locationTranslationDto.getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
-            }
-        });
+        if (location.isPresent()) {
+            throw new LocationAlreadyCreatedException("The location with name: "
+                + dto.get(0).getLocationName() + ErrorMessage.LOCATION_ALREADY_EXIST);
+        }
     }
 
     private Region checkIfRegionAlreadyCreated(LocationCreateDto dto) {
-        Region region = new Region();
+        String enName = dto.getRegionTranslationDtos().stream()
+            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("en")).findAny()
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+            .getRegionName();
+        String ukName = dto.getRegionTranslationDtos().stream()
+            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("ua")).findAny()
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+            .getRegionName();
 
-        for (RegionTranslationDto regionTranslationDto : dto.getRegionTranslationDtos()) {
-            region = regionRepository.findRegionByName(regionTranslationDto.getRegionName()).orElse(null);
-        }
+        Region region = regionRepository.findRegionByName(enName, ukName).orElse(null);
 
         if (null == region) {
             region = createRegionWithTranslation(dto);
-
-            regionRepository.save(region);
-            regionTranslationRepository.saveAll(region.getRegionTranslations());
+            region = regionRepository.save(region);
         }
         return region;
     }
@@ -353,7 +345,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void checkIfCourierAlreadyExists(List<Courier> couriers, CreateCourierDto createCourierDto) {
-        couriers.stream()
+        couriers
             .forEach(courier -> courier.getCourierTranslationList().stream().forEach(courierTranslation -> {
                 if (courierTranslation.getName().equals(createCourierDto.getNameEn())
                     || courierTranslation.getName().equals(createCourierDto.getNameUa())) {
@@ -397,34 +389,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetCourierLocationDto> getAllCouriersAndLocations() {
-        return courierLocationRepository.findAllInfoAboutCourier()
-            .stream()
-            .map(courierLocation -> modelMapper.map(courierLocation, GetCourierLocationDto.class))
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public void setCourierLimitBySumOfOrder(Long id, EditPriceOfOrder dto) {
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(id, dto.getLocationId());
-        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        courierLocation.setMinPriceOfOrder(dto.getMinPriceOfOrder());
-        courierLocation.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
-        courierLocationRepository.save(courierLocation);
-    }
-
-    @Override
-    public void setCourierLimitByAmountOfBag(Long id, EditAmountOfBagDto dto) {
-        CourierLocation courierLocation =
-            courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(id, dto.getLocationId());
-        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
-        courierLocation.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
-        courierLocation.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
-        courierLocationRepository.save(courierLocation);
-    }
-
-    @Override
     public GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription) {
         Courier courier = courierRepository.findById(courierId).orElseThrow(
             () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
@@ -461,26 +425,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public EditTariffInfoDto editInfoInTariff(EditTariffInfoDto dto) {
-        Bag bag = bagRepository.findById(dto.getBagId()).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.BAG_NOT_FOUND));
-        bag.setMinAmountOfBags(dto.getMinimalAmountOfBagStatus());
-        CourierLocation courierLocation = courierLocationRepository
-            .findCourierLocationsLimitsByCourierIdAndLocationId(dto.getCourierId(), dto.getLocationId());
-        final CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourier(courierLocation.getCourier());
-        courierLocation.setCourierLimit(dto.getCourierLimitsBy());
-        courierLocation.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBag());
-        courierLocation.setMinAmountOfBigBags(dto.getMinAmountOfBigBag());
-        courierLocation.setMinPriceOfOrder(dto.getMinAmountOfOrder());
-        courierLocation.setMaxPriceOfOrder(dto.getMaxAmountOfOrder());
-        bagRepository.save(bag);
-        courierTranslationRepository.save(courierTranslation);
-        courierLocationRepository.save(courierLocation);
-        return dto;
-    }
-
-    @Override
     public void deleteCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
             () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
@@ -493,14 +437,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void addLocationToCourier(NewLocationForCourierDto dto) {
-        CourierLocation courierLocation = modelMapper.map(dto, CourierLocation.class);
-        courierLocation.setCourier(tryToFindCourierById(dto.getCourierId()));
-        courierLocation.setLocation(tryToFindLocationById(dto.getLocationId()));
-        courierLocationRepository.save(courierLocation);
-    }
-
-    @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo() {
         return tariffsInfoRepository.findAll()
             .stream()
@@ -509,30 +445,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
-        Region region = createNewRegion(dto);
-        region.getRegionTranslations().forEach(regionTranslation -> regionTranslation.setRegion(region));
-        return region;
-    }
+        String enName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("en")).findAny()
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+            .getRegionName();
+        String uaName = dto.getRegionTranslationDtos().stream().filter(x -> x.getLanguageCode().equals("ua")).findAny()
+            .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_ERROR))
+            .getRegionName();
 
-    private Region createNewRegion(LocationCreateDto dto) {
-        return Region.builder().regionTranslations(
-            dto.getRegionTranslationDtos().stream()
-                .map(regionTranslationDto -> RegionTranslation.builder()
-                    .language(getLanguageByCode(regionTranslationDto.getLanguageCode()))
-                    .name(regionTranslationDto.getRegionName())
-                    .build())
-                .collect(Collectors.toList()))
+        return Region.builder()
+            .enName(enName)
+            .ukrName(uaName)
             .build();
-    }
-
-    private Language getLanguageByCode(String languageCode) {
-        return languageRepository.findLanguageByLanguageCode(languageCode).orElseThrow(
-            () -> new LanguageNotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + languageCode));
-    }
-
-    private Courier tryToFindCourierById(Long id) {
-        return courierRepository.findById(id).orElseThrow(
-            () -> new CourierNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
     }
 
     private Location tryToFindLocationById(Long id) {
@@ -585,6 +508,78 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             receivingStationRepository.delete(station);
         } else {
             throw new EmployeeIllegalOperationException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
+        }
+    }
+
+    private Set<Location> findLocationsForTariff(List<Long> locationId, Long regionId) {
+        Set<Location> locationSet = new HashSet<>(locationRepository
+            .findAllByIdAndRegionId(locationId.stream().distinct().collect(Collectors.toList()), regionId));
+        if (locationSet.isEmpty()) {
+            throw new EntityNotFoundException("List of locations can not be empty");
+        }
+        return locationSet;
+    }
+
+    private Set<ReceivingStation> findReceivingStationsForTariff(List<Long> receivingStationIdList) {
+        Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
+            .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
+        if (receivingStations.isEmpty()) {
+            throw new EntityNotFoundException("List of receiving stations can not be empty");
+        }
+        return receivingStations;
+    }
+
+    private TariffsInfo tryToFindTariffById(Long tariffId) {
+        return tariffsInfoRepository.findById(tariffId)
+            .orElseThrow(() -> new TariffNotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
+    }
+
+    @Override
+    public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
+        TariffsInfo tariffsInfo = TariffsInfo.builder()
+            .createdAt(LocalDate.now())
+            .courier(courierRepository.findById(addNewTariffDto.getCourierId())
+                .orElseThrow(() -> new CourierNotFoundException(
+                    ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + addNewTariffDto.getCourierId())))
+            .locations(findLocationsForTariff(addNewTariffDto.getLocationIdList(), addNewTariffDto.getRegionId()))
+            .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
+            .locationStatus(LocationStatus.NEW)
+            .creator(userRepository.findByUuid(userUUID))
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .build();
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
+    public void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        tariffsInfo.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
+        tariffsInfo.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
+        tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+        tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
+    public void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        tariffsInfo.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
+        tariffsInfo.setMinPriceOfOrder(dto.getMinPriceOfOrder());
+        tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
+    public String deactivateTariffCard(Long tariffId) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        if (tariffsInfo.getOrders().isEmpty()) {
+            tariffsInfoRepository.delete(tariffsInfo);
+            return "Deleted";
+        } else {
+            tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
+            tariffsInfoRepository.save(tariffsInfo);
+            return "Deactivated";
         }
     }
 }
