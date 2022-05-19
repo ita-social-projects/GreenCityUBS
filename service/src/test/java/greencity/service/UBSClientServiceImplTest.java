@@ -601,11 +601,15 @@ class UBSClientServiceImplTest {
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
         when(modelMapper.map(dtoRequest,
             Address.class)).thenReturn(new Address());
+        when(modelMapper.map(addresses.get(0),
+                AddressDto.class))
+                .thenReturn(ModelUtils.addressDto());
 
         addresses.get(0).setAddressStatus(AddressStatus.NEW);
 
-        ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actualWithSearchAddress = ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
 
+        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
         verify(addressRepository, times(1)).save(addresses.get(0));
     }
 
@@ -662,11 +666,11 @@ class UBSClientServiceImplTest {
             AddressDto.class))
                 .thenReturn(ModelUtils.addressDto());
 
-        OrderWithAddressesResponseDto actual = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actualWithSearchAddress = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
         Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
         Assertions.assertNull(dtoRequest.getSearchAddress());
-        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actual);
+        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
         verify(googleApiService).getResultFromGeoCode("fake address");
 
         updateAddressRequestDto.setSearchAddress(null);
