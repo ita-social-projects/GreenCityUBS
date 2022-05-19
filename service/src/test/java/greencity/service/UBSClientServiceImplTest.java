@@ -1098,7 +1098,6 @@ class UBSClientServiceImplTest {
         assertNotNull(result);
     }
 
-
     @Test
     void saveFullOrderToDBForIfTrue() throws IllegalAccessException {
         User user = ModelUtils.getUserWithLastLocation();
@@ -1122,10 +1121,9 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
-
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
-                .thenReturn(ModelUtils.getCourierLocations());
+            .thenReturn(ModelUtils.getCourierLocations());
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -1135,7 +1133,6 @@ class UBSClientServiceImplTest {
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         assertNotNull(result);
     }
-
 
     @Test
     void testSaveToDBfromIForIFThrowsException() throws InvocationTargetException, IllegalAccessException {
@@ -1200,15 +1197,13 @@ class UBSClientServiceImplTest {
         courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         courierLocation.setMinPriceOfOrder(20000L);
 
-
         Bag bag = new Bag();
         bag.setCapacity(120);
         bag.setFullPrice(400);
 
-
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
-                .thenReturn(courierLocation);
+            .thenReturn(courierLocation);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(SumOfOrderException.class, () -> {
@@ -1218,7 +1213,7 @@ class UBSClientServiceImplTest {
         courierLocation.setMaxPriceOfOrder(500L);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
-                .thenReturn(courierLocation);
+            .thenReturn(courierLocation);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(SumOfOrderException.class, () -> {
@@ -1238,15 +1233,13 @@ class UBSClientServiceImplTest {
         courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         courierLocation.setMaxPriceOfOrder(500L);
 
-
         Bag bag = new Bag();
         bag.setCapacity(120);
         bag.setFullPrice(400);
 
-
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
-                .thenReturn(courierLocation);
+            .thenReturn(courierLocation);
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(SumOfOrderException.class, () -> {
@@ -1254,8 +1247,6 @@ class UBSClientServiceImplTest {
         });
 
     }
-
-
 
     @Test
     void saveFullOrderToDBFromLiqPayForIF() {

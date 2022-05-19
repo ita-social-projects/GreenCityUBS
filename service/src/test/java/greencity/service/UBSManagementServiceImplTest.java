@@ -1818,7 +1818,6 @@ class UBSManagementServiceImplTest {
         List<OrderStatusTranslation> list = new ArrayList<>();
         list.add(getOrderStatusTranslation());
 
-
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
         when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
@@ -1828,16 +1827,16 @@ class UBSManagementServiceImplTest {
         when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
         when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
-                .thenReturn(Optional.ofNullable(getStatusTranslation()));
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(
-                orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(1L))
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
 
-        when( orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue()))
-                .thenReturn(list);
+        when(orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue()))
+            .thenReturn(list);
 
         when(
-                orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslations(language.getId()))
+            orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslations(language.getId()))
                 .thenReturn(List.of(orderPaymentStatusTranslation));
 
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
@@ -1854,11 +1853,10 @@ class UBSManagementServiceImplTest {
         verify(bagTranslationRepository).findNameByBagId(1);
         verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6);
         verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndTranslationValue(
-                1L);
+            1L);
         verify(receivingStationRepository).findAll();
 
     }
-
 
     @Test
     void deleteManualPaymentTest() {
