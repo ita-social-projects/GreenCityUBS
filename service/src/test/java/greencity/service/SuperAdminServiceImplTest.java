@@ -294,6 +294,24 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void getAllCouriersTest() {
+        CourierDto courierDto = CourierDto.builder()
+                .courierId(1L)
+                .courierStatus("ACTIVE")
+                .courierTranslationDtos(getCourierTranslationDtoList())
+                .build();
+
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier()));
+        when(modelMapper.map(getCourier(), CourierDto.class))
+                .thenReturn(courierDto);
+
+        assertEquals(getCourierDtoList(), superAdminService.getAllCouriers());
+
+        verify(courierRepository).findAll();
+        verify(modelMapper).map(getCourier(), CourierDto.class);
+    }
+
+    @Test
     void createCourier() {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);
