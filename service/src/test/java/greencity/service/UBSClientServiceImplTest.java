@@ -115,7 +115,6 @@ class UBSClientServiceImplTest {
     @Mock
     private GoogleApiService googleApiService;
 
-
     @Test
     @Transactional
     void testValidatePayment() {
@@ -592,7 +591,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
+            eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
 
         addresses.get(0).setActual(false);
@@ -601,7 +600,7 @@ class UBSClientServiceImplTest {
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
         when(modelMapper.map(dtoRequest,
-                Address.class)).thenReturn(new Address());
+            Address.class)).thenReturn(new Address());
 
         addresses.get(0).setAddressStatus(AddressStatus.NEW);
 
@@ -620,9 +619,9 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode("fake address"))
-                .thenReturn(ModelUtils.getGeocodingResult());
+            .thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
+            eq(OrderAddressDtoRequest.class)))
                 .thenReturn(dtoRequest);
 
         addresses.get(0).setActual(false);
@@ -631,8 +630,8 @@ class UBSClientServiceImplTest {
 
         addresses.get(0).setAddressStatus(AddressStatus.NEW);
 
-        assertThrows(AddressAlreadyExistException.class, () ->
-                ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+        assertThrows(AddressAlreadyExistException.class,
+            () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
     }
 
     @Test
@@ -652,16 +651,15 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
+            eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
         when(modelMapper.map(dtoRequest,
-                Address.class)).thenReturn(addresses.get(0));
-
+            Address.class)).thenReturn(addresses.get(0));
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
         when(modelMapper.map(addresses.get(0),
-                AddressDto.class))
+            AddressDto.class))
                 .thenReturn(ModelUtils.addressDto());
 
         OrderWithAddressesResponseDto actual = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -672,7 +670,8 @@ class UBSClientServiceImplTest {
         verify(googleApiService).getResultFromGeoCode("fake address");
 
         updateAddressRequestDto.setSearchAddress(null);
-        OrderWithAddressesResponseDto actualWithoutSearchAddress = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actualWithoutSearchAddress =
+            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
         verify(addressRepository, times(2)).save(addresses.get(0));
     }
@@ -694,11 +693,11 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
+            eq(OrderAddressDtoRequest.class)))
                 .thenReturn(dtoRequest);
 
-        assertThrows(AddressAlreadyExistException.class, () ->
-                ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+        assertThrows(AddressAlreadyExistException.class,
+            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
 
     @Test
@@ -718,16 +717,15 @@ class UBSClientServiceImplTest {
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
         when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
         when(modelMapper.map(any(),
-                eq(OrderAddressDtoRequest.class)))
+            eq(OrderAddressDtoRequest.class)))
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(addressRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-
-        assertThrows(NotFoundOrderAddressException.class, () ->
-                ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+        assertThrows(NotFoundOrderAddressException.class,
+            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
 
-     /*
+    /*
      * @Test void testSaveCurrentAddressForOrderThrows() { String uuid =
      * "35467585763t4sfgchjfuyetf"; User user = new User(); user.setId(13L);
      * List<Address> addresses = getTestAddresses(user);

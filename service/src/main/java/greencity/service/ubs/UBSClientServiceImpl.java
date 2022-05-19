@@ -433,8 +433,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
             .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
-                .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
-                .anyMatch(addressDto -> addressDto.equals(dtoRequest));
+            .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
+            .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
         if (exist) {
             throw new AddressAlreadyExistException(ADDRESS_ALREADY_EXISTS);

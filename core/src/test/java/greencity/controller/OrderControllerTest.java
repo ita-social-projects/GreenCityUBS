@@ -136,7 +136,7 @@ class OrderControllerTest {
     void saveAddressForOrder() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
 
-        CreateAddressRequestDto dto = ModelUtils.getCreateAddressRequestDto();
+        CreateAddressRequestDto dto = ModelUtils.getAddressRequestDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String createAddressRequestDto = objectMapper.writeValueAsString(dto);
@@ -159,9 +159,9 @@ class OrderControllerTest {
         String orderAddressDtoRequest = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(ubsLink + "/update-order-address")
-                .content(orderAddressDtoRequest)
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+            .content(orderAddressDtoRequest)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
         verify(ubsClientService).updateCurrentAddressForOrder(anyObject(), eq("35467585763t4sfgchjfuyetf"));
     }
