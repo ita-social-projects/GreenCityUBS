@@ -587,7 +587,7 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUserForCreate();
         List<Address> addresses = user.getAddresses();
         String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
@@ -614,11 +614,9 @@ class UBSClientServiceImplTest {
     @Test
     void testSaveCurrentAddressForOrderAlreadyExistException() {
         User user = ModelUtils.getUserForCreate();
-
         List<Address> addresses = user.getAddresses();
-
         String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
@@ -643,9 +641,8 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUserForCreate();
         List<Address> addresses = user.getAddresses();
         String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressDtoRequest();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
         dtoRequest.setId(1L);
-        dtoRequest.setSearchAddress("fake address");
         OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
         updateAddressRequestDto.setId(1L);
         addresses.get(0).setActual(false);
@@ -664,10 +661,71 @@ class UBSClientServiceImplTest {
 
 
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        when(modelMapper.map(addresses.get(0),
+                AddressDto.class))
+                .thenReturn(ModelUtils.addressDto());
 
-        ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        OrderWithAddressesResponseDto actual = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
 
-        verify(addressRepository, times(1)).save(addresses.get(0));
+        Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
+        Assertions.assertNull(dtoRequest.getSearchAddress());
+        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actual);
+        verify(googleApiService).getResultFromGeoCode("fake address");
+
+        updateAddressRequestDto.setSearchAddress(null);
+        OrderWithAddressesResponseDto actualWithoutSearchAddress = ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
+        verify(addressRepository, times(2)).save(addresses.get(0));
+    }
+
+    @Test
+    void testUpdateCurrentAddressForOrderAlreadyExistException() {
+        User user = ModelUtils.getUserForCreate();
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        dtoRequest.setId(1L);
+        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
+        updateAddressRequestDto.setId(1L);
+        addresses.get(0).setActual(false);
+        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.get(0).setUser(user);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(dtoRequest);
+
+        assertThrows(AddressAlreadyExistException.class, () ->
+                ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+    }
+
+    @Test
+    void testUpdateCurrentAddressForOrderNotFoundOrderAddressException() {
+        User user = ModelUtils.getUserForCreate();
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        dtoRequest.setId(1L);
+        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
+        updateAddressRequestDto.setId(1L);
+        addresses.get(0).setActual(false);
+        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
+        addresses.get(0).setUser(user);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+        when(modelMapper.map(any(),
+                eq(OrderAddressDtoRequest.class)))
+                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+
+        assertThrows(NotFoundOrderAddressException.class, () ->
+                ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
 
      /*

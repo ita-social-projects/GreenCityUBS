@@ -3531,6 +3531,24 @@ public class ModelUtils {
                 .build();
     }
 
+    public static OrderAddressDtoRequest getTestOrderAddressLocationDto(){
+        return OrderAddressDtoRequest.builder()
+                .id(0L)
+                .region("fake region")
+                .city("fake street")
+                .district("fake district")
+                .entranceNumber("1")
+                .houseNumber("13")
+                .houseCorpus("1")
+                .street("fake street name")
+                .streetEn("fake street name")
+                .coordinates(new Coordinates(50.5555555d,50.5555555d))
+                .cityEn("fake street")
+                .districtEn("fake district")
+                .regionEn("fake region")
+                .build();
+    }
+
     public static User getUserForCreate() {
         return User.builder()
                 .id(1L)
@@ -3547,5 +3565,22 @@ public class ModelUtils {
                 .ubsUsers(getUbsUsers())
                 .currentPoints(100)
                 .build();
+    }
+
+    public static OrderWithAddressesResponseDto getAddressDtoResponse() {
+        return OrderWithAddressesResponseDto.builder()
+                .addressList(List.of(
+                        AddressDto.builder()
+                        .id(1L)
+                        .city("Lviv")
+                        .district("Zaliznuchnuy")
+                        .entranceNumber("7a")
+                        .houseCorpus("2")
+                        .houseNumber("7")
+                        .street("Gorodotska")
+                        .coordinates(new Coordinates(2.3, 5.6))
+                        .actual(false)
+                        .build()
+                )).build();
     }
 }
