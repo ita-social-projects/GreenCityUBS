@@ -42,10 +42,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -1340,7 +1337,7 @@ class UBSClientServiceImplTest {
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
