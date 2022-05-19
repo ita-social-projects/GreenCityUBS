@@ -1098,6 +1098,45 @@ class UBSClientServiceImplTest {
         assertNotNull(result);
     }
 
+
+    @Test
+    void saveFullOrderToDBForIfTrue() throws IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.setPointsToUse(6000);
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+                .thenReturn(ModelUtils.getCourierLocations());
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        assertNotNull(result);
+    }
+
+
     @Test
     void testSaveToDBfromIForIFThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
@@ -1148,6 +1187,75 @@ class UBSClientServiceImplTest {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
     }
+
+    @Test
+    void testSaveToDBfromThrowsException() throws InvocationTargetException, IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        courierLocation.setMinPriceOfOrder(20000L);
+
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+                .thenReturn(courierLocation);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        Assertions.assertThrows(SumOfOrderException.class, () -> {
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        });
+
+        courierLocation.setMaxPriceOfOrder(500L);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+                .thenReturn(courierLocation);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        Assertions.assertThrows(SumOfOrderException.class, () -> {
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        });
+    }
+
+    @Test
+    void testSaveToDBfromThrowsException2() throws InvocationTargetException, IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+
+        CourierLocation courierLocation = ModelUtils.getCourierLocations();
+        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+        courierLocation.setMaxPriceOfOrder(500L);
+
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
+                .thenReturn(courierLocation);
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        Assertions.assertThrows(SumOfOrderException.class, () -> {
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        });
+
+    }
+
+
 
     @Test
     void saveFullOrderToDBFromLiqPayForIF() {
