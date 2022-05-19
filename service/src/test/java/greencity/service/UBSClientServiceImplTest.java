@@ -27,7 +27,19 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.*;
+import greencity.exceptions.address.AddressAlreadyExistException;
+import greencity.exceptions.address.NotFoundOrderAddressException;
+import greencity.exceptions.bag.NotEnoughBagsException;
+import greencity.exceptions.certificate.CertificateNotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.http.NotFoundException;
+import greencity.exceptions.order.BadOrderStatusRequestException;
+import greencity.exceptions.order.EventsNotFoundException;
+import greencity.exceptions.order.OrderNotFoundException;
+import greencity.exceptions.payment.PaymentNotFoundException;
+import greencity.exceptions.payment.PaymentValidationException;
+import greencity.exceptions.user.UBSuserNotFoundException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.LiqPayService;
@@ -42,10 +54,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -1340,7 +1349,7 @@ class UBSClientServiceImplTest {
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))

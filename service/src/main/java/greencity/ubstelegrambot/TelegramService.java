@@ -5,7 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
-import greencity.exceptions.MessageWasNotSent;
+import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
 import lombok.extern.slf4j.Slf4j;

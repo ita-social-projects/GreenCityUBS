@@ -25,7 +25,24 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.*;
+import greencity.exceptions.address.AddressAlreadyExistException;
+import greencity.exceptions.address.NotFoundOrderAddressException;
+import greencity.exceptions.bag.NotEnoughBagsException;
+import greencity.exceptions.certificate.*;
+import greencity.exceptions.courier.TariffNotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.http.NotFoundException;
+import greencity.exceptions.location.IncorrectValueException;
+import greencity.exceptions.order.BadOrderStatusRequestException;
+import greencity.exceptions.order.EventsNotFoundException;
+import greencity.exceptions.order.OrderNotFoundException;
+import greencity.exceptions.order.SumOfOrderException;
+import greencity.exceptions.payment.BagNotFoundException;
+import greencity.exceptions.payment.LiqPayPaymentException;
+import greencity.exceptions.payment.PaymentNotFoundException;
+import greencity.exceptions.payment.PaymentValidationException;
+import greencity.exceptions.user.UBSuserNotFoundException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -40,6 +57,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -442,7 +460,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page) {
-        PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
+        PageRequest pageRequest =
+            PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("order_date").descending());
         Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
         List<Order> orders = orderPages.getContent();
 

@@ -3,7 +3,7 @@ package greencity.mapping;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.CourierTranslation;
-import greencity.exceptions.LanguageNotFoundException;
+import greencity.exceptions.language.LanguageNotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 

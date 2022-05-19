@@ -1,6 +1,35 @@
 package greencity.exception.handler;
 
-import greencity.exceptions.*;
+import greencity.exceptions.address.AddressAlreadyExistException;
+import greencity.exceptions.address.NotFoundOrderAddressException;
+import greencity.exceptions.admin.ServiceNotFoundException;
+import greencity.exceptions.admin.UpdateAdminPageInfoException;
+import greencity.exceptions.bag.BagWithThisStatusAlreadySetException;
+import greencity.exceptions.bag.NotEnoughBagsException;
+import greencity.exceptions.certificate.CertificateExpiredException;
+import greencity.exceptions.certificate.CertificateIsUsedException;
+import greencity.exceptions.certificate.CertificateNotFoundException;
+import greencity.exceptions.certificate.TooManyCertificatesEntered;
+import greencity.exceptions.courier.CourierLocationException;
+import greencity.exceptions.courier.CourierNotFoundException;
+import greencity.exceptions.courier.TariffNotFoundException;
+import greencity.exceptions.employee.*;
+import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.http.NotFoundException;
+import greencity.exceptions.image.ImageUrlParseException;
+import greencity.exceptions.language.LanguageNotFoundException;
+import greencity.exceptions.location.*;
+import greencity.exceptions.notification.NotificationNotFoundException;
+import greencity.exceptions.number.IncorrectEcoNumberFormatException;
+import greencity.exceptions.number.PhoneNumberParseException;
+import greencity.exceptions.order.*;
+import greencity.exceptions.payment.BagNotFoundException;
+import greencity.exceptions.payment.LiqPayPaymentException;
+import greencity.exceptions.payment.PaymentNotFoundException;
+import greencity.exceptions.payment.PaymentValidationException;
+import greencity.exceptions.position.PositionNotFoundException;
+import greencity.exceptions.position.PositionValidationException;
+import greencity.exceptions.user.UnexistingUuidExeption;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -101,8 +130,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception
-     * {@link greencity.exceptions.CertificateExpiredException}.
+     * Method interceptor exception {@link CertificateExpiredException}.
      *
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
@@ -116,8 +144,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Method interceptor exception
-     * {@link greencity.exceptions.CertificateIsUsedException}.
+     * Method interceptor exception {@link CertificateIsUsedException}.
      *
      * @return ResponseEntity which contain http status and body with message of
      *         exception.

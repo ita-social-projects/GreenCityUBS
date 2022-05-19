@@ -13,6 +13,8 @@ import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import greencity.exceptions.MessageWasNotSent;
 import greencity.exceptions.UserNotFoundException;
+import greencity.exceptions.bots.MessageWasNotSent;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
