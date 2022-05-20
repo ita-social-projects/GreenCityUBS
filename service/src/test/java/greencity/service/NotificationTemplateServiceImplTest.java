@@ -97,13 +97,15 @@ class NotificationTemplateServiceImplTest {
 
         @Test
         void testNotifyUnpaidOrders() {
-            User user = User.builder().id(42L).build();
-            List<Order> orders = List.of(Order.builder().id(42L).user(user)
-                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                .orderDate(LocalDateTime.now(fixedClock).minusMonths(1).plusDays(1)).build(),
-                Order.builder().id(50L).user(user)
-                    .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusDays(9)).build());
+            List<Order> orders = List.of(Order.builder().id(1L).user(getUser()).orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                            .orderDate(LocalDateTime.now(fixedClock).minusDays(3))
+                            .build(),
+                    Order.builder().id(2L).user(getUser())
+                            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                            .orderDate(LocalDateTime.now(fixedClock).minusMonths(1)).build(),
+                    Order.builder().id(3L).user(getUser())
+                            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                            .orderDate(LocalDateTime.now(fixedClock).minusDays(10)).build());
 
             when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID))
                 .thenReturn(orders);
@@ -112,23 +114,27 @@ class NotificationTemplateServiceImplTest {
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
                     orders.get(0).getId().toString());
 
-            UserNotification secondOrderLastNotification = new UserNotification();
-            secondOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-            secondOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusDays(8));
+            doReturn(Optional.empty()).when(userNotificationRepository)
+                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                            orders.get(1).getId().toString());
 
-            doReturn(Optional.of(secondOrderLastNotification)).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(1).getId().toString());
+            UserNotification thirdOrderLastNotification = new UserNotification();
+            thirdOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+            thirdOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(1));
+
+            doReturn(Optional.of(thirdOrderLastNotification)).when(userNotificationRepository)
+                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                            orders.get(2).getId().toString());
 
             UserNotification created = new UserNotification();
             created.setNotificationType(NotificationType.UNPAID_ORDER);
             created.setNotificationTime(LocalDateTime.now(fixedClock));
-            created.setUser(orders.get(0).getUser());
-            created.setId(42L);
+            created.setUser(getUser());
+            created.setId(1L);
 
             when(userNotificationRepository.save(any())).thenReturn(created);
 
-            NotificationParameter createdNotificationParameter = NotificationParameter.builder().id(42L)
+            NotificationParameter createdNotificationParameter = NotificationParameter.builder().id(1L)
                 .userNotification(created).key("orderNumber")
                 .value(orders.get(0).getId().toString()).build();
 
@@ -138,8 +144,8 @@ class NotificationTemplateServiceImplTest {
 
             notificationService.notifyUnpaidOrders();
 
-            verify(notificationParameterRepository, times(2)).save(any());
-            verify(userNotificationRepository, times(2)).save(any());
+            verify(notificationParameterRepository, times(3)).save(any());
+            verify(userNotificationRepository, times(3)).save(any());
         }
 
         @Test
