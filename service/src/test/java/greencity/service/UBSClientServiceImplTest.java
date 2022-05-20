@@ -1121,6 +1121,12 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -1196,19 +1202,35 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveToDBfromIFThrowsException() throws InvocationTargetException, IllegalAccessException {
+        Service service = new Service();
+        Courier courier = new Courier();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Bag bags = new Bag();
+        LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(9000);
+        user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
+        dto.getBags().get(0).setAmount(35);
+
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
 
         CourierLocation courierLocation = ModelUtils.getCourierLocations();
         courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         courierLocation.setMinPriceOfOrder(20000L);
-
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
@@ -1227,33 +1249,39 @@ class UBSClientServiceImplTest {
         Assertions.assertThrows(SumOfOrderException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
-
-        courierLocation.setMaxPriceOfOrder(500L);
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
-            .thenReturn(courierLocation);
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-
-        Assertions.assertThrows(SumOfOrderException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
-        });
     }
 
     @Test
     void testSaveToDBfromIFThrowsException2() throws InvocationTargetException, IllegalAccessException {
+        Service service = new Service();
+        Courier courier = new Courier();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Bag bags = new Bag();
+        LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(9000);
+        user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
+        dto.getBags().get(0).setAmount(35);
+
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(100);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
 
         CourierLocation courierLocation = ModelUtils.getCourierLocations();
         courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         courierLocation.setMaxPriceOfOrder(500L);
-
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
