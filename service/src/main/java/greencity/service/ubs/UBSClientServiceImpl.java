@@ -155,6 +155,29 @@ import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Nullable;
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
@@ -683,10 +706,10 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
 
     @Override
-    public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page) {
-        PageRequest pageRequest =
-            PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("order_date").descending());
-        Page<Order> orderPages = ordersForUserRepository.findAllOrdersByUserUuid(pageRequest, uuid);
+    public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
+        Page<Order> orderPages = nonNull(statuses)
+            ? ordersForUserRepository.findAllOrdersByUserUuidAndOrderStatus(page, uuid, statuses)
+            : ordersForUserRepository.findAllOrdersByUserUuid(page, uuid);
         List<Order> orders = orderPages.getContent();
 
         List<OrdersDataForUserDto> dtos = new ArrayList<>();

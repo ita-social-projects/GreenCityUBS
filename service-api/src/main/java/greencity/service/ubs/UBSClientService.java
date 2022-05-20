@@ -12,6 +12,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
+import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -143,7 +144,7 @@ public interface UBSClientService {
      * @param uuid current {@link User}'s uuid;
      * @author Oleksandr Khomiakov
      */
-    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page);
+    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
 
     /**
      * Method returns list all bonuses of user.
