@@ -585,8 +585,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
         OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        initializeEnglishMap(orderAddressDtoRequest, geocodingResults.get(0));
-        initializeUkrainianMap(orderAddressDtoRequest, geocodingResults.get(1));
+        initializeEnglishMap(orderAddressDtoRequest, geocodingResults.get(1));
+        initializeUkrainianMap(orderAddressDtoRequest, geocodingResults.get(0));
 
         double latitude = geocodingResults.get(0).geometry.location.lat;
         double longitude = geocodingResults.get(0).geometry.location.lng;
