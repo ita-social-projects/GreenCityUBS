@@ -1121,6 +1121,15 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
             .thenReturn(ModelUtils.getCourierLocations());
@@ -1186,7 +1195,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBfromThrowsException() throws InvocationTargetException, IllegalAccessException {
+    void testSaveToDBfromIFThrowsException() throws InvocationTargetException, IllegalAccessException {
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(9000);
 
@@ -1200,6 +1209,15 @@ class UBSClientServiceImplTest {
         Bag bag = new Bag();
         bag.setCapacity(120);
         bag.setFullPrice(400);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
@@ -1222,7 +1240,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBfromThrowsException2() throws InvocationTargetException, IllegalAccessException {
+    void testSaveToDBfromIFThrowsException2() throws InvocationTargetException, IllegalAccessException {
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(9000);
 
@@ -1236,6 +1254,15 @@ class UBSClientServiceImplTest {
         Bag bag = new Bag();
         bag.setCapacity(120);
         bag.setFullPrice(400);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(courierLocationRepository.findCourierLocationsLimitsByCourierIdAndLocationId(1L, null))
