@@ -36,6 +36,7 @@ import greencity.exceptions.http.NotFoundException;
 import greencity.exceptions.order.BadOrderStatusRequestException;
 import greencity.exceptions.order.EventsNotFoundException;
 import greencity.exceptions.order.OrderNotFoundException;
+import greencity.exceptions.order.SumOfOrderException;
 import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.exceptions.payment.PaymentValidationException;
 import greencity.exceptions.user.UBSuserNotFoundException;
@@ -1109,6 +1110,57 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void saveFullOrderToDBForIfTrue() throws IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.setPointsToUse(6000);
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        assertNotNull(result);
+    }
+
+    @Test
     void testSaveToDBfromIForIFThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
         Courier courier = new Courier();
@@ -1155,6 +1207,109 @@ class UBSClientServiceImplTest {
         Assertions.assertThrows(NotEnoughBagsException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
+    }
+
+
+    @Test
+    void testSaveToDBfromIFThrowsException() throws InvocationTargetException, IllegalAccessException {
+        Service service = new Service();
+        Courier courier = new Courier();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Bag bags = new Bag();
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(
+                        ModelUtils.getTariffInfoWithLimitOfBags()
+                                .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+                                .setMaxPriceOfOrder(500L)));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        Assertions.assertThrows(SumOfOrderException.class, () -> {
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        });
+    }
+
+    @Test
+    void testSaveToDBfromIFThrowsException2() throws InvocationTargetException, IllegalAccessException {
+        Service service = new Service();
+        Courier courier = new Courier();
+        LocationStatus locationStatus = LocationStatus.ACTIVE;
+        Bag bags = new Bag();
+
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(9000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(
+                        ModelUtils.getTariffInfoWithLimitOfBags()
+                                .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+                                .setMinPriceOfOrder(50000L)));
+
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        Assertions.assertThrows(SumOfOrderException.class, () -> {
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        });
+
     }
 
     @Test
