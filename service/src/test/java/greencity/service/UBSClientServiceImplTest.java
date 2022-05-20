@@ -1208,10 +1208,10 @@ class UBSClientServiceImplTest {
         Bag bags = new Bag();
         LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(900);
+        user.setCurrentPoints(9000);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
 
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
@@ -1219,7 +1219,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = new Bag();
-        bag.setCapacity(100);
+        bag.setCapacity(120);
         bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
@@ -1228,9 +1228,10 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        courierLocation.setMinPriceOfOrder(20000L);
+        CourierLocation courierLocation = ModelUtils.getCourierLocations()
+            .setMinPriceOfOrder(500L)
+            .setMaxPriceOfOrder(500L)
+            .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
@@ -1259,10 +1260,10 @@ class UBSClientServiceImplTest {
         Bag bags = new Bag();
         LocationTranslation locationTranslation = new LocationTranslation();
         User user = ModelUtils.getUserWithLastLocation();
-        user.setCurrentPoints(900);
+        user.setCurrentPoints(9000);
 
         OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(35);
+        dto.getBags().get(0).setAmount(15);
 
         Order order = getOrder();
         user.setOrders(new ArrayList<>());
@@ -1270,7 +1271,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
 
         Bag bag = new Bag();
-        bag.setCapacity(100);
+        bag.setCapacity(120);
         bag.setFullPrice(400);
 
         UBSuser ubSuser = getUBSuser();
@@ -1279,9 +1280,10 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
-        CourierLocation courierLocation = ModelUtils.getCourierLocations();
-        courierLocation.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        courierLocation.setMaxPriceOfOrder(500L);
+        CourierLocation courierLocation = ModelUtils.getCourierLocations()
+            .setMinPriceOfOrder(20000L)
+            .setMaxPriceOfOrder(20000L)
+            .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
