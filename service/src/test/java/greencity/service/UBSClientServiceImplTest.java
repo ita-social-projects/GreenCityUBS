@@ -1149,7 +1149,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -1209,7 +1209,6 @@ class UBSClientServiceImplTest {
         });
     }
 
-
     @Test
     void testSaveToDBfromIFThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
@@ -1248,10 +1247,10 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(
-                        ModelUtils.getTariffInfoWithLimitOfBags()
-                                .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                                .setMaxPriceOfOrder(500L)));
+            .thenReturn(Optional.of(
+                ModelUtils.getTariffInfoWithLimitOfBags()
+                    .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+                    .setMaxPriceOfOrder(500L)));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(SumOfOrderException.class, () -> {
@@ -1287,7 +1286,6 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
-
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -1299,10 +1297,10 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(
-                        ModelUtils.getTariffInfoWithLimitOfBags()
-                                .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                                .setMinPriceOfOrder(50000L)));
+            .thenReturn(Optional.of(
+                ModelUtils.getTariffInfoWithLimitOfBags()
+                    .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+                    .setMinPriceOfOrder(50000L)));
 
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
