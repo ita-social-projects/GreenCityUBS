@@ -1,5 +1,6 @@
 package greencity.client;
 
+import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.notification.NotificationDto;
@@ -18,7 +19,8 @@ import java.util.Optional;
  */
 @FeignClient(name = "user-remote-client",
     url = "${greencity.redirect.user-server-address}",
-    configuration = UserRemoteClientInterceptor.class)
+    configuration = UserRemoteClientInterceptor.class,
+    fallbackFactory = UserRemoteClientFallbackFactory.class)
 public interface UserRemoteClient {
     String EMAIL = "email";
     String UUID = "uuid";

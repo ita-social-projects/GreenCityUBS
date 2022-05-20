@@ -16,6 +16,7 @@ import greencity.exceptions.courier.TariffNotFoundException;
 import greencity.exceptions.employee.*;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.NotFoundException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.image.ImageUrlParseException;
 import greencity.exceptions.language.LanguageNotFoundException;
 import greencity.exceptions.location.*;
@@ -786,5 +787,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
+    }
+
+    /**
+     * Exception handler for {@link RemoteServerUnavailableException}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(RemoteServerUnavailableException.class)
+    public final ResponseEntity<Object> handleRemoteServerUnavailableException(WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
     }
 }

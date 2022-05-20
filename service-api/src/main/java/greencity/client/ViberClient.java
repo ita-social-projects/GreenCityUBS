@@ -1,5 +1,6 @@
 package greencity.client;
 
+import greencity.client.config.ViberClientFallbackFactory;
 import greencity.client.config.ViberClientInterceptor;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.dto.WebhookDto;
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
  */
 @FeignClient(name = "viber-client",
     url = "${greencity.external.viber-api-url}",
-    configuration = ViberClientInterceptor.class)
+    configuration = ViberClientInterceptor.class,
+    fallbackFactory = ViberClientFallbackFactory.class)
 public interface ViberClient {
     /**
      * Returns account info.

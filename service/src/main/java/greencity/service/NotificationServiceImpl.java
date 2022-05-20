@@ -1,6 +1,5 @@
 package greencity.service;
 
-import greencity.client.UserRemoteClient;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
@@ -60,7 +59,6 @@ public class NotificationServiceImpl implements NotificationService {
     private Clock clock;
     private List<? extends AbstractNotificationProvider> notificationProviders;
     private final NotificationTemplateRepository templateRepository;
-    private final UserRemoteClient userRemoteClient;
 
     @Autowired
     @Qualifier("singleThreadedExecutor")
@@ -143,7 +141,7 @@ public class NotificationServiceImpl implements NotificationService {
             .build());
         parameters.add(NotificationParameter.builder().key("phoneNumber")
             .value("+380638175035, +380931038987").build());
-        fillAdnSendNotification(parameters, order, NotificationType.COURIER_ITINERARY_FORMED);
+        fillAndSendNotification(parameters, order, NotificationType.COURIER_ITINERARY_FORMED);
     }
 
     /**
@@ -169,7 +167,7 @@ public class NotificationServiceImpl implements NotificationService {
             .value(String.format("%.2f", (double) amountToPay)).build());
         parameters.add(NotificationParameter.builder().key("orderNumber")
             .value(order.getId().toString()).build());
-        fillAdnSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
+        fillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
     }
 
     /**
@@ -208,7 +206,7 @@ public class NotificationServiceImpl implements NotificationService {
             .value(exportedBags.toString()).build());
         parameters.add(NotificationParameter.builder().key("paidPackageNumber")
             .value(paidBags.toString()).build());
-        fillAdnSendNotification(parameters, order, NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
+        fillAndSendNotification(parameters, order, NotificationType.ACCRUED_BONUSES_TO_ACCOUNT);
     }
 
     /**
@@ -221,7 +219,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder().key("returnedPayment")
             .value(String.valueOf(order.getPointsToUse())).build());
 
-        fillAdnSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
+        fillAndSendNotification(parameters, order, NotificationType.BONUSES_FROM_CANCELLED_ORDER);
     }
 
     /**
@@ -235,7 +233,7 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.add(NotificationParameter.builder()
             .key("violationDescription")
             .value(violation.getDescription()).build());
-        fillAdnSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
+        fillAndSendNotification(parameters, violation.getOrder(), NotificationType.VIOLATION_THE_RULES);
     }
 
     /**
@@ -362,7 +360,7 @@ public class NotificationServiceImpl implements NotificationService {
             .body(resultBody).build();
     }
 
-    private void fillAdnSendNotification(Set<NotificationParameter> parameters, Order order,
+    private void fillAndSendNotification(Set<NotificationParameter> parameters, Order order,
         NotificationType notificationType) {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(notificationType);
