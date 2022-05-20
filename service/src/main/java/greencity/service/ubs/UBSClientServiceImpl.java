@@ -474,7 +474,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
             modelMapper.map(addressRequestDto, OrderAddressDtoRequest.class);
         addressRequestDtoForNullCheck.setId(0L);
-        checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDtoForNullCheck);
+        checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
 
         if (addresses != null) {
             checkIfAddressExist(addresses, dtoRequest);
@@ -508,7 +508,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         OrderAddressDtoRequest dtoRequest;
         if (addressRequestDto.getSearchAddress() != null) {
             dtoRequest = getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
-            checkNullFieldsOnGoogleResponce(dtoRequest, addressRequestDto);
+            checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDto);
         } else {
             dtoRequest = addressRequestDto;
         }
@@ -554,29 +554,28 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void initializeUkrainianMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
-        Map<AddressComponentType, Consumer<String>> ukrainianResult = Map.of(
+    private Map<AddressComponentType, Consumer<String>> initializeUkrainianGeoCodingResult(
+        OrderAddressDtoRequest dtoRequest) {
+        return Map.of(
             AddressComponentType.LOCALITY, dtoRequest::setCity,
             AddressComponentType.ROUTE, dtoRequest::setStreet,
             AddressComponentType.STREET_NUMBER, dtoRequest::setHouseNumber,
             AddressComponentType.SUBLOCALITY, dtoRequest::setDistrict,
             AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegion);
-
-        ukrainianResult
-            .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents)
-                .forEach(addressComponent -> Arrays.stream(addressComponent.types)
-                    .filter(componentType -> componentType.equals(key))
-                    .forEach(componentType -> value.accept(addressComponent.longName))));
     }
 
-    private void initializeEnglishMap(OrderAddressDtoRequest dtoRequest, GeocodingResult geocodingResult) {
-        Map<AddressComponentType, Consumer<String>> englishResult = Map.of(
+    private Map<AddressComponentType, Consumer<String>> initializeEnglishGeoCodingResult(
+        OrderAddressDtoRequest dtoRequest) {
+        return Map.of(
             AddressComponentType.LOCALITY, dtoRequest::setCityEn,
             AddressComponentType.ROUTE, dtoRequest::setStreetEn,
             AddressComponentType.SUBLOCALITY, dtoRequest::setDistrictEn,
             AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1, dtoRequest::setRegionEn);
+    }
 
-        englishResult
+    private void initializeGeoCodingResults(Map<AddressComponentType, Consumer<String>> initializedMap,
+        GeocodingResult geocodingResult) {
+        initializedMap
             .forEach((key, value) -> Arrays.stream(geocodingResult.addressComponents)
                 .forEach(addressComponent -> Arrays.stream(addressComponent.types)
                     .filter(componentType -> componentType.equals(key))
@@ -585,8 +584,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private OrderAddressDtoRequest getLocationDto(List<GeocodingResult> geocodingResults) {
         OrderAddressDtoRequest orderAddressDtoRequest = new OrderAddressDtoRequest();
-        initializeEnglishMap(orderAddressDtoRequest, geocodingResults.get(1));
-        initializeUkrainianMap(orderAddressDtoRequest, geocodingResults.get(0));
+        initializeGeoCodingResults(initializeUkrainianGeoCodingResult(orderAddressDtoRequest), geocodingResults.get(0));
+        initializeGeoCodingResults(initializeEnglishGeoCodingResult(orderAddressDtoRequest), geocodingResults.get(1));
 
         double latitude = geocodingResults.get(0).geometry.location.lat;
         double longitude = geocodingResults.get(0).geometry.location.lng;
@@ -595,7 +594,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return orderAddressDtoRequest;
     }
 
-    private void checkNullFieldsOnGoogleResponce(OrderAddressDtoRequest dtoRequest,
+    private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
         OrderAddressDtoRequest addressRequestDto) {
         if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
             dtoRequest.setRegion(addressRequestDto.getRegion());
