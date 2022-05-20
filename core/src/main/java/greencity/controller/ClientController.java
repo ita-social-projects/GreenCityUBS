@@ -9,6 +9,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserVO;
+import greencity.entity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -71,8 +72,9 @@ public class ClientController {
     @GetMapping("/user-orders")
     @ApiPageable
     public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
-        @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page));
+        @ApiIgnore @CurrentUserUuid String uuid, @ApiIgnore Pageable page,
+        @RequestParam(value = "status", required = false) List<OrderStatus> statuses) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page, statuses));
     }
 
     /**
