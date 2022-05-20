@@ -1817,7 +1817,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusDataWithNOTEmptyListIF() {
+    void getOrderStatusesTranslationTest() {
         Order order = getOrderForGetOrderStatusData2Test();
         BagInfoDto bagInfoDto = getBagInfoDto();
         Language language = getLanguage();
