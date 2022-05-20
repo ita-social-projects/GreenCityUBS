@@ -1,5 +1,6 @@
 package greencity.client;
 
+import greencity.client.config.FondyClientFallbackFactory;
 import greencity.dto.payment.PaymentRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author Andrii Yezenitskyi
  */
 @FeignClient(name = "fondy-client",
-    url = "${greencity.external.fondy-api-url}")
+    url = "${greencity.external.fondy-api-url}",
+    fallbackFactory = FondyClientFallbackFactory.class)
 public interface FondyClient {
     /**
      * Returns response from Fondy checkout. <br>

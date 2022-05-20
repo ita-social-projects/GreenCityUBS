@@ -11,7 +11,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
-import greencity.exceptions.bots.MessageWasNotSend;
+import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
@@ -150,7 +150,7 @@ class ViberServiceImplTest {
                     .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
-        assertThrows(MessageWasNotSend.class, () -> viberService.sendNotification(notification));
+        assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification));
     }
 
     @Test
