@@ -5,7 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
-import greencity.exceptions.bots.MessageWasNotSend;
+import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.AbstractNotificationProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ public class TelegramService extends AbstractNotificationProvider {
             log.error(ErrorMessage.INTERRUPTED_EXCEPTION);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
+            throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
         }
     }
 

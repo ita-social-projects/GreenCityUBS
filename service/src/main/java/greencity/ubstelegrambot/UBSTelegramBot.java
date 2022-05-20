@@ -3,7 +3,7 @@ package greencity.ubstelegrambot;
 import greencity.constant.ErrorMessage;
 import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
-import greencity.exceptions.bots.MessageWasNotSend;
+import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.exceptions.bots.TelegramBotAlreadyConnected;
 import greencity.repository.TelegramBotRepository;
 import greencity.repository.UserRepository;
@@ -53,7 +53,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
             try {
                 execute(sendMessage);
             } catch (Exception e) {
-                throw new MessageWasNotSend(ErrorMessage.THE_MESSAGE_WAS_NOT_SEND);
+                throw new MessageWasNotSent(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT);
             }
         } else {
             throw new TelegramBotAlreadyConnected(ErrorMessage.THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT);

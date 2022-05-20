@@ -5,11 +5,11 @@ package greencity.exceptions.bots;
  *
  * @author Pikhotskyi Vladyslav
  */
-public class MessageWasNotSend extends RuntimeException {
+public class MessageWasNotSent extends RuntimeException {
     /**
      * Constructor.
      */
-    public MessageWasNotSend(String message) {
+    public MessageWasNotSent(String message) {
         super(message);
     }
 }
