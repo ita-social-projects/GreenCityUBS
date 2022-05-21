@@ -2,7 +2,6 @@ package greencity;
 
 import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.EditAmountOfBagDto;
@@ -627,19 +626,5 @@ public class ModelUtils {
         return new RedirectionConfigProp()
             .setGreenCityClient("123")
             .setUserServerAddress("123");
-    }
-
-    public static CreateAddressRequestDto getAddressRequestDto() {
-        return CreateAddressRequestDto.builder()
-            .addressComment("fdsfs")
-            .searchAddress("fake address")
-            .district("fdsfds")
-            .districtEn("dsadsad")
-            .region("regdsad")
-            .regionEn("regdsaden")
-            .houseNumber("1")
-            .houseCorpus("2")
-            .entranceNumber("3")
-            .build();
     }
 }

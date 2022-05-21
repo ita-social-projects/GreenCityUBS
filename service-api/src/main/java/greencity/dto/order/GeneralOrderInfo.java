@@ -3,9 +3,8 @@ package greencity.dto.order;
 import greencity.entity.enums.OrderPaymentStatus;
 import greencity.entity.enums.OrderStatus;
 import lombok.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter

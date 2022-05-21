@@ -2,12 +2,12 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderBagDto;
 import greencity.dto.order.OrderClientDto;
 import greencity.dto.order.OrderFondyClientDto;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
