@@ -2,10 +2,10 @@ package greencity.mapping;
 
 import greencity.ModelUtils;
 import greencity.dto.bag.BagInfoDto;
-import greencity.entity.order.Bag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import greencity.entity.order.Bag;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

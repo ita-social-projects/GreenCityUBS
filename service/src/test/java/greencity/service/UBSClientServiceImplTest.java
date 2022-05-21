@@ -1,40 +1,10 @@
 package greencity.service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.liqpay.LiqPay;
-
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.RegionDto;
@@ -44,28 +14,12 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
-import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.AddressStatus;
 import greencity.entity.enums.CertificateStatus;
@@ -101,60 +55,34 @@ import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.exceptions.payment.PaymentValidationException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.LiqPayService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
-import static greencity.ModelUtils.getBagOrderDto;
-import static greencity.ModelUtils.getBagTranslation;
-import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderFondyClientDto;
-import static greencity.ModelUtils.getOrderPaymentDetailDto;
-import static greencity.ModelUtils.getOrderResponseDto;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getSuccessfulFondyResponse;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUserWithLastLocation;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -210,8 +138,6 @@ class UBSClientServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private LocationRepository locationRepository;
-    @Mock
-    private GoogleApiService googleApiService;
 
     @Test
     @Transactional
@@ -680,153 +606,91 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveCurrentAddressForOrder() {
-        User user = ModelUtils.getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+        List<Address> addresses = getTestAddresses(user);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
-        when(modelMapper.map(any(),
-            eq(OrderAddressDtoRequest.class)))
-                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
 
         addresses.get(0).setActual(false);
-
-        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-
         when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
-        when(modelMapper.map(dtoRequest,
-            Address.class)).thenReturn(new Address());
-        when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(ModelUtils.addressDto());
 
-        addresses.get(0).setAddressStatus(AddressStatus.NEW);
+        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+        dtoRequest.setId(42L);
+        when(addressRepository.findById(dtoRequest.getId())).thenReturn(Optional.of(addresses.get(0)));
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
 
-        OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid);
+        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER); // AddressStatus.DELETED
 
-        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
+        ubsService.saveCurrentAddressForOrder(dtoRequest, uuid);
+
         verify(addressRepository, times(1)).save(addresses.get(0));
     }
 
     @Test
-    void testSaveCurrentAddressForOrderAlreadyExistException() {
-        User user = ModelUtils.getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+    void testSaveCurrentAddressForOrderThrows() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+        User user = new User();
+        user.setId(13L);
+        List<Address> addresses = getTestAddresses(user);
 
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        OrderAddressDtoRequest dtoRequest = new OrderAddressDtoRequest();
+        dtoRequest.setId(42L);
+
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address"))
-            .thenReturn(ModelUtils.getGeocodingResult());
-        when(modelMapper.map(any(),
-            eq(OrderAddressDtoRequest.class)))
-                .thenReturn(dtoRequest);
-
-        addresses.get(0).setActual(false);
-
-        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-
-        addresses.get(0).setAddressStatus(AddressStatus.NEW);
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(dtoRequest);
 
         assertThrows(AddressAlreadyExistException.class,
-            () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+            () -> ubsService.saveCurrentAddressForOrder(dtoRequest, uuid));
     }
 
     @Test
-    void testUpdateCurrentAddressForOrder() {
-        User user = ModelUtils.getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
-        dtoRequest.setId(1L);
-        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
-        updateAddressRequestDto.setId(1L);
-        addresses.get(0).setActual(false);
-        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
-        addresses.get(0).setUser(user);
+    void saveCurrentAddressForOrderWithDeletedAddress() {
+        User user = getTestUser();
+        List<Address> addresses = getTestAddresses(user);
+        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
+            .id(1L)
+            .addressComment("comment")
+            .build();
+        Address deletedAddress = Address.builder()
+            .id(1L)
+            .user(user)
+            .addressStatus(AddressStatus.DELETED)
+            .build();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
-        when(modelMapper.map(any(),
-            eq(OrderAddressDtoRequest.class)))
-                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
-        when(modelMapper.map(dtoRequest,
-            Address.class)).thenReturn(addresses.get(0));
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(deletedAddress));
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
 
-        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
-        when(modelMapper.map(addresses.get(0),
-            AddressDto.class))
-                .thenReturn(ModelUtils.addressDto());
+        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
 
-        OrderWithAddressesResponseDto actualWithSearchAddress =
-            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
-
-        Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
-        Assertions.assertNull(dtoRequest.getSearchAddress());
-        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
-        verify(googleApiService).getResultFromGeoCode("fake address");
-
-        updateAddressRequestDto.setSearchAddress(null);
-        OrderWithAddressesResponseDto actualWithoutSearchAddress =
-            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
-        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
-        verify(addressRepository, times(2)).save(addresses.get(0));
+        verify(addressRepository, times(addresses.size() + 1)).save(any());
     }
 
     @Test
-    void testUpdateCurrentAddressForOrderAlreadyExistException() {
-        User user = ModelUtils.getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
-        dtoRequest.setId(1L);
-        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
-        updateAddressRequestDto.setId(1L);
-        addresses.get(0).setActual(false);
-        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
-        addresses.get(0).setUser(user);
+    void saveCurrentAddressForOrderWithAnotherUser() {
+        User user = getTestUser();
+        User anotherUser = getUser().setId(2L);
+        List<Address> addresses = getTestAddresses(anotherUser);
+        OrderAddressDtoRequest dtoRequest = OrderAddressDtoRequest.builder()
+            .id(13L)
+            .addressComment("comment")
+            .build();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
-        when(modelMapper.map(any(),
-            eq(OrderAddressDtoRequest.class)))
-                .thenReturn(dtoRequest);
+        when(addressRepository.findById(13L)).thenReturn(Optional.of(addresses.get(0)));
+        when(modelMapper.map(any(), eq(OrderAddressDtoRequest.class))).thenReturn(new OrderAddressDtoRequest());
+        when(modelMapper.map(dtoRequest, Address.class)).thenReturn(new Address());
 
-        assertThrows(AddressAlreadyExistException.class,
-            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
-    }
+        ubsService.saveCurrentAddressForOrder(dtoRequest, user.getUuid());
 
-    @Test
-    void testUpdateCurrentAddressForOrderNotFoundOrderAddressException() {
-        User user = ModelUtils.getUserForCreate();
-        List<Address> addresses = user.getAddresses();
-        String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
-        dtoRequest.setId(1L);
-        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
-        updateAddressRequestDto.setId(1L);
-        addresses.get(0).setActual(false);
-        addresses.get(0).setAddressStatus(AddressStatus.IN_ORDER);
-        addresses.get(0).setUser(user);
-
-        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
-        when(modelMapper.map(any(),
-            eq(OrderAddressDtoRequest.class)))
-                .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
-        when(addressRepository.findById(user.getId())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundOrderAddressException.class,
-            () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
+        verify(addressRepository, times(addresses.size() + 1)).save(any());
     }
 
     @Test

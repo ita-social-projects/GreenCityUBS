@@ -1,7 +1,7 @@
 package greencity.controller;
 
-import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
+import greencity.client.UserRemoteClient;
 import greencity.service.ubs.ViberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

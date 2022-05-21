@@ -7,7 +7,6 @@ import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.UserInfoDto;
 import lombok.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

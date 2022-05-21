@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
@@ -90,24 +89,13 @@ public interface UBSClientService {
     /**
      * Method that save address for current user.
      *
-     * @param requestDto {@link CreateAddressRequestDto} information about address;
+     * @param dtoRequest {@link OrderAddressDtoRequest} information about address;
      * @param uuid       current {@link User}'s uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
      *         save address;
      * @author Veremchuk Zakhar
      */
-    OrderWithAddressesResponseDto saveCurrentAddressForOrder(CreateAddressRequestDto requestDto, String uuid);
-
-    /**
-     * Method that update address for current user.
-     *
-     * @param requestDto {@link OrderAddressDtoRequest} information about address;
-     * @param uuid       current {@link User}'s uuid;
-     * @return {@link OrderAddressDtoRequest} contains all information needed for
-     *         update address;
-     * @author Oleg Postolovskyi
-     */
-    OrderWithAddressesResponseDto updateCurrentAddressForOrder(OrderAddressDtoRequest requestDto, String uuid);
+    OrderWithAddressesResponseDto saveCurrentAddressForOrder(OrderAddressDtoRequest dtoRequest, String uuid);
 
     /**
      * Method that delete user address.
