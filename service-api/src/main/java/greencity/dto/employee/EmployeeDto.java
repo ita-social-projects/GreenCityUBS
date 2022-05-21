@@ -1,8 +1,8 @@
 package greencity.dto.employee;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.dto.position.PositionDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.position.PositionDto;
 import lombok.*;
 
 import javax.validation.constraints.*;
