@@ -1816,6 +1816,56 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void getOrderStatusesTranslationTest() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        Language language = getLanguage();
+        OrderStatusTranslation orderStatusTranslation = mock(OrderStatusTranslation.class);
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = mock(OrderPaymentStatusTranslation.class);
+        List<OrderStatusTranslation> list = new ArrayList<>();
+        list.add(getOrderStatusTranslation());
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.ofNullable(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
+        when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrderForGetOrderStatusData2Test()));
+        when(bagRepository.findAll()).thenReturn(getBag2list());
+        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(bagTranslationRepository.findNameByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(bagTranslationRepository.findNameEngByBagId(1)).thenReturn(new StringBuilder("name"));
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
+            .thenReturn(Optional.ofNullable(getStatusTranslation()));
+        when(
+            orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(1L))
+                .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue()))
+            .thenReturn(list);
+
+        when(
+            orderPaymentStatusTranslationRepository.getOrderStatusPaymentTranslations(language.getId()))
+                .thenReturn(List.of(orderPaymentStatusTranslation));
+
+        when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
+        when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
+
+        ubsManagementService.getOrderStatusData(1L);
+
+        verify(orderRepository).getOrderDetails(1L);
+        verify(bagRepository).findBagByOrderId(1L);
+        verify(certificateRepository).findCertificate(1L);
+        verify(orderRepository, times(5)).findById(1L);
+        verify(bagRepository).findAll();
+        verify(modelMapper).map(getBaglist().get(0), BagInfoDto.class);
+        verify(bagTranslationRepository).findNameByBagId(1);
+        verify(orderStatusTranslationRepository).getOrderStatusTranslationById(6);
+        verify(orderPaymentStatusTranslationRepository).findByOrderPaymentStatusIdAndTranslationValue(
+            1L);
+        verify(receivingStationRepository).findAll();
+
+    }
+
+    @Test
     void deleteManualPaymentTest() {
         Payment payment = ModelUtils.getManualPayment();
         User user = ModelUtils.getTestUser();
