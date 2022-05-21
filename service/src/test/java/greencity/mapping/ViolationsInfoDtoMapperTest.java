@@ -1,7 +1,6 @@
 package greencity.mapping;
 
 import greencity.dto.violation.ViolationsInfoDto;
-
 import greencity.entity.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

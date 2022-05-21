@@ -11,5 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "greencity.authorization", ignoreUnknownFields = false)
 public class AuthorizationPropConfig {
     private String tokenKey;
+    private String googleApiKey;
     private String serviceEmail;
 }

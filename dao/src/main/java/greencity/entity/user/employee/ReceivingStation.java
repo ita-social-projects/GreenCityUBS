@@ -1,8 +1,8 @@
 package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
-import greencity.entity.user.User;
 import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.User;
 import lombok.*;
 
 import javax.persistence.*;

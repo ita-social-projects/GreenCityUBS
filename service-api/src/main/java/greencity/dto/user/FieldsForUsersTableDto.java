@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
+import greencity.dto.pageble.PageableDto;
 import lombok.*;
 
 import java.util.List;
