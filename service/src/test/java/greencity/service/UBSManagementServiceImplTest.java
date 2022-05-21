@@ -12,6 +12,7 @@ import greencity.dto.bag.BagTransDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.OverpaymentInfoRequestDto;
