@@ -13,7 +13,7 @@ public class PaymentResponseDto {
     // CHECKSTYLE:OFF
     @Length(max = 1024)
     private String order_id;
-    private Integer merchant_id; // NOSONAR
+    private Integer merchant_id;
     private Integer amount;
     @Length(max = 3)
     private String currency;
@@ -52,7 +52,7 @@ public class PaymentResponseDto {
     private Integer eci;
     private Integer fee;
     @Length(max = 50)
-    private String payment_system; // NOSONAR
+    private String payment_system;
     @Length(max = 254)
     private String sender_email;
     private Integer payment_id;
