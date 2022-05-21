@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-@Builder
 public class OrderWithAddressesResponseDto {
     private List<AddressDto> addressList;
 }
