@@ -1,7 +1,10 @@
 package greencity.dto.viber.dto;
 
 import greencity.dto.viber.enums.MessageType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 @Getter
 @AllArgsConstructor

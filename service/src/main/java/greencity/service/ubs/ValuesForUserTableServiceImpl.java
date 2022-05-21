@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
