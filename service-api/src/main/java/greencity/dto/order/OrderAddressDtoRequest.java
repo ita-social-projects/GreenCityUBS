@@ -12,7 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = "id")
+@EqualsAndHashCode(exclude = {"id", "actual"})
 @ToString
 @Builder
 public class OrderAddressDtoRequest {
@@ -44,6 +44,8 @@ public class OrderAddressDtoRequest {
     private String street;
 
     private String addressComment;
+
+    private String searchAddress;
 
     private Coordinates coordinates;
 
