@@ -1,6 +1,8 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
@@ -57,6 +59,12 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     EventService eventService;
 
+    @Mock
+    private SuperAdminService superAdminService;
+
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
 
@@ -83,6 +91,63 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+    }
+
+    @Test
+    void getParametersForOrdersTest() {
+
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+
+        List<ReceivingStationDto> receivingStations = new ArrayList<>();
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation2));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8))
+                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
+
+
+        when(superAdminService.getAllReceivingStations())
+                .thenReturn(receivingStations);
+        when(employeeRepository.getAllEmployeeByPositionId(2L))
+                .thenReturn(employeeList);
+        when(employeeRepository.getAllEmployeeByPositionId(3L))
+                .thenReturn(employeeList);
+        when(employeeRepository.getAllEmployeeByPositionId(5L))
+                .thenReturn(employeeList);
+        when(employeeRepository.getAllEmployeeByPositionId(4L))
+                .thenReturn(employeeList);
+        assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
     @ParameterizedTest
@@ -359,4 +424,31 @@ class OrdersAdminsPageServiceImplTest {
         verify(employeeOrderPositionRepository, atLeast(1)).findAllByOrderId(1L);
         verify(eventService, atLeast(1)).changesWithResponsibleEmployee(1L, Boolean.FALSE);
     }
+
+    @Test
+    void requestToBlockOrderTest() {
+        User user = ModelUtils.getUser().setUuid("uuid");
+        List<Long> orders = new ArrayList<>();
+        orders.add(1l);
+
+        when(userRemoteClient.findByUuid(user.getUuid())).thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(orderRepository.findById(1l)).thenReturn(Optional.of(ModelUtils.getOrder()));
+
+        assertNotNull(ordersAdminsPageService.requestToBlockOrder(user.getUuid(), orders));
+    }
+
+    @Test
+    void unblockOrderTest() {
+        User user = ModelUtils.getUser().setUuid("uuid");
+        List<Long> orders = new ArrayList<>();
+        orders.add(1l);
+
+        when(userRemoteClient.findByUuid(user.getUuid())).thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
+        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(orderRepository.findById(1l)).thenReturn(Optional.of(ModelUtils.getOrder()));
+
+        assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));
+    }
+
 }
