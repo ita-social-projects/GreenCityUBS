@@ -311,7 +311,6 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.DELETED);
 
-
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -323,7 +322,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -361,7 +360,6 @@ class UBSClientServiceImplTest {
         address.setUser(user1);
         address.setAddressStatus(AddressStatus.NEW);
 
-
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -373,7 +371,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -403,7 +401,6 @@ class UBSClientServiceImplTest {
         bag.setCapacity(120);
         bag.setFullPrice(400);
 
-
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -415,9 +412,8 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-
 
         Assertions.assertThrows(IncorrectValueException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
@@ -459,9 +455,9 @@ class UBSClientServiceImplTest {
     @Test
     void checkCertificateUSED() {
         when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
-                .code("certificate")
-                .certificateStatus(CertificateStatus.USED)
-                .build()));
+            .code("certificate")
+            .certificateStatus(CertificateStatus.USED)
+            .build()));
 
         assertEquals("USED", ubsService.checkCertificate("certificate").getCertificateStatus());
     }
@@ -1299,7 +1295,6 @@ class UBSClientServiceImplTest {
         address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
-
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         Field merchantId = null;
         for (Field f : fields) {
@@ -1640,10 +1635,10 @@ class UBSClientServiceImplTest {
         order.getPayment().add(getPayment());
 
         StatusRequestDtoLiqPay dto = StatusRequestDtoLiqPay.builder()
-                .orderId("1_1")
-                .action("status")
-                .version(3)
-                .build();
+            .orderId("1_1")
+            .action("status")
+            .version(3)
+            .build();
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
         response.put("version", dto.getVersion().toString());
