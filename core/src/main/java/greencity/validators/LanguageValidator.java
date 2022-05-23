@@ -2,6 +2,7 @@ package greencity.validators;
 
 import greencity.annotations.ValidLanguage;
 import greencity.service.language.LanguageService;
+import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,9 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 public class LanguageValidator implements ConstraintValidator<ValidLanguage, Locale> {
     private List<String> codes;
-    Logger logger = LoggerFactory.getLogger(LanguageValidator.class);
 
     @Autowired
     private LanguageService languageService;
@@ -25,7 +26,7 @@ public class LanguageValidator implements ConstraintValidator<ValidLanguage, Loc
             codes = languageService.findAllLanguageCodes();
         } catch (Exception e) {
             codes = List.of("en", "ua");
-            logger.warn("Occurred error during processing request: {}", e.getMessage());
+            log.warn("Occurred error during processing request: {}", e.getMessage());
         }
     }
 
