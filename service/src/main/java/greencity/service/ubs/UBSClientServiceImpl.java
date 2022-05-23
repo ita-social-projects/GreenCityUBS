@@ -713,9 +713,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .reduce(0, Integer::sum));
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> {
-                return modelMapper.map(certificate, CertificateDto.class);
-            })
+            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
             .collect(Collectors.toList());
 
         Double amountBeforePayment =
