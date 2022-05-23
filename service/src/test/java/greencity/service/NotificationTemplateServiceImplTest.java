@@ -262,7 +262,7 @@ class NotificationTemplateServiceImplTest {
             UserNotification notification = new UserNotification();
             notification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
             notification.setUser(user);
-            notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
+            notification.setNotificationTime(LocalDateTime.now(fixedClock).minusMonths(2));
 
             when(userRepository
                 .getAllInactiveUsers(LocalDate.now(fixedClock).minusYears(1), LocalDate.now(fixedClock).minusMonths(2)))
