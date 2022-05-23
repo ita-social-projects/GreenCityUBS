@@ -491,13 +491,14 @@ class SuperAdminServiceImplTest {
 
     @Test
     void CreateReceivingStation() {
+        String test = TEST_USER.getUuid();
         AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
             .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
 
-        superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid());
+        superAdminService.createReceivingStation(stationDto, test);
 
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
         verify(receivingStationRepository, times(1)).save(any());
@@ -505,7 +506,7 @@ class SuperAdminServiceImplTest {
             .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
 
         Exception thrown = assertThrows(ReceivingStationValidationException.class,
-            () -> superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid()));
+            () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
     }
