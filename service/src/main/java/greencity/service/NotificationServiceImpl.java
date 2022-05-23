@@ -74,10 +74,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
                     order.getId().toString());
             if ((lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime()
-                    .isBefore(LocalDateTime.now(clock).minusDays(7).plusSeconds(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1).minusSeconds(1))
-                && order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3).plusSeconds(1))) {
+                || (lastNotification.get().getNotificationTime()
+                    .isBefore(LocalDateTime.now(clock).minusDays(7))
+                    || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
+                && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
+                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
+                && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
+                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)))) {
                 UserNotification userNotification = new UserNotification();
                 if (lastNotification.isPresent()) {
                     UserNotification oldNotification = lastNotification.get();
