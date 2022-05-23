@@ -380,13 +380,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {
-        if(dto.getTotalExported() !=  0) {
+        if (dto.getTotalExported() != 0) {
             return dto.getTotalExported();
         }
-        if(dto.getTotalConfirmed() != 0) {
-            return  dto.getTotalConfirmed();
+        if (dto.getTotalConfirmed() != 0) {
+            return dto.getTotalConfirmed();
         }
-        return  dto.getSumAmount();
+        return dto.getSumAmount();
 
     }
 
