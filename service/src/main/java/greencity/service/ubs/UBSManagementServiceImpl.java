@@ -361,7 +361,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
-            .orderFullPrice(prices.getSumAmount())
+            .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
@@ -377,6 +377,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierPricePerPackage(fullPrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
+    }
+
+    private Double setTotalPrice(CounterOrderDetailsDto dto) {
+        if(dto.getTotalExported() !=  0) {
+            return dto.getTotalExported();
+        }
+        if(dto.getTotalConfirmed() != 0) {
+            return  dto.getTotalConfirmed();
+        }
+        return  dto.getSumAmount();
+
     }
 
     /**
@@ -568,6 +579,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
+    private void calculateSum() {
+
+    }
+
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
         Long orderId, User currentUser) {
         Order order = orderRepository.findById(orderId).orElseThrow(
@@ -673,6 +688,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumAmount;
         double totalSumConfirmed;
         double totalSumExported;
+        if(!order.getAmountOfBagsOrdered().entrySet().isEmpty()) {
+
+        }
 
         if (!bag.isEmpty()) {
             for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
