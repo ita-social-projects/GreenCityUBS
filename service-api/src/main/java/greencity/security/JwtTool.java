@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Class that provides methods for working with JWT.
@@ -64,7 +61,7 @@ public class JwtTool {
      */
     public String createAccessToken(String email, int ttl) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("authorities", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+        claims.put("role", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
@@ -75,5 +72,31 @@ public class JwtTool {
             .setExpiration(calendar.getTime())
             .signWith(SignatureAlgorithm.HS256, accessTokenKey)
             .compact();
+    }
+
+    public List<String> getAuthoritiesFromToken(String accessToken){
+        List<String> authorities = (List<String>) Jwts.parser()
+                .setSigningKey(getAccessTokenKey())
+                .parseClaimsJws(accessToken)
+                .getBody()
+                .get("employee_authorities");
+        return authorities;
+    }
+
+    public String getNameFromToken(String accessToken){
+        return  (String) Jwts.parser()
+                .setSigningKey(getAccessTokenKey())
+                .parseClaimsJws(accessToken)
+                .getBody()
+                .get("sub");
+    }
+
+    public String getRoleFromToken(String accessToken){
+        List<String> role = (List<String>) Jwts.parser()
+                .setSigningKey(getAccessTokenKey())
+                .parseClaimsJws(accessToken)
+                .getBody()
+                .get("role");
+        return role.get(0);
     }
 }
