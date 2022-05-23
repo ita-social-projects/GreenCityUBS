@@ -579,10 +579,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void calculateSum() {
-
-    }
-
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
         Long orderId, User currentUser) {
         Order order = orderRepository.findById(orderId).orElseThrow(
@@ -688,9 +684,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumAmount;
         double totalSumConfirmed;
         double totalSumExported;
-        if(!order.getAmountOfBagsOrdered().entrySet().isEmpty()) {
-
-        }
 
         if (!bag.isEmpty()) {
             for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
