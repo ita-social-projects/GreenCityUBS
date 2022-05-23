@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.dto.location.CoordinatesDto;
 import greencity.dto.order.GroupedOrderDto;
 import greencity.dto.order.OrderDto;
 import greencity.entity.coords.Coordinates;
@@ -187,6 +188,8 @@ class CoordinateServiceImplTest {
 
     @Test
     void getClusteredCoordsAlongWithSpecifiedThrowExceptionTest() {
+        Set<CoordinatesDto> test = ModelUtils.getCoordinatesDtoSet();
+
         Coordinates coord = ModelUtils.getCoordinates();
         Set<Coordinates> result = new HashSet<>();
         result.add(coord);
@@ -207,7 +210,7 @@ class CoordinateServiceImplTest {
 
         Assertions.assertThrows(IncorrectValueException.class, () -> {
             coordinateService.getClusteredCoordsAlongWithSpecified(
-                ModelUtils.getCoordinatesDtoSet(), 3000, 15).get(0);
+                test, 3000, 15).get(0);
         });
 
     }

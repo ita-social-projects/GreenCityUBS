@@ -1033,6 +1033,16 @@ public class ModelUtils {
             .build();
     }
 
+    public static PersonalDataDto getPersonalDataDto2() {
+        return PersonalDataDto.builder()
+            .id(1l)
+            .firstName("Dima")
+            .lastName("Petrov")
+            .phoneNumber("0666051373")
+            .email("mail@mail.ua")
+            .build();
+    }
+
     public static User getUserPersonalData() {
         return User.builder()
             .id(1L)
@@ -2062,6 +2072,31 @@ public class ModelUtils {
             .language(Language.builder().id(1L).code("ua").build())
             .name("name")
             .courier(getCourier(courierLimit))
+            .build();
+    }
+
+    public static CourierTranslation getCourierTranslation() {
+        return CourierTranslation.builder()
+            .id(1L)
+            .name("Test")
+            .language(getLanguage())
+            .courier(getCourier())
+            .build();
+    }
+
+    public static GetCourierTranslationsDto getCourierTranslationsDto() {
+        return GetCourierTranslationsDto.builder()
+            .id(1L)
+            .languageCode("ua")
+            .name("Test")
+            .build();
+    }
+
+    public static CourierDto getCourierDto() {
+        return CourierDto.builder()
+            .courierId(1L)
+            .courierStatus("ACTIVE")
+            .courierTranslationDtos(getCourierTranslationDtoList())
             .build();
     }
 

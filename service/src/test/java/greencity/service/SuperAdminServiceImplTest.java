@@ -114,6 +114,32 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setLimitDescription() {
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
+        when(courierTranslationRepository.findCourierTranslationByCourier(getCourier()))
+            .thenReturn(getCourierTranslation());
+        when(courierTranslationRepository.save(getCourierTranslation())).thenReturn(getCourierTranslation());
+
+        assertEquals(getCourierTranslationsDto(), superAdminService.setLimitDescription(1L, "1"));
+
+        verify(courierRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourier(getCourier());
+        verify(courierTranslationRepository).save(getCourierTranslation());
+    }
+
+    @Test
+    void getAllCouriersTest() {
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier()));
+        when(modelMapper.map(getCourier(), CourierDto.class))
+            .thenReturn(getCourierDto());
+
+        assertEquals(getCourierDtoList(), superAdminService.getAllCouriers());
+
+        verify(courierRepository).findAll();
+        verify(modelMapper).map(getCourier(), CourierDto.class);
+    }
+
+    @Test
     void deleteTariffServiceThrowException() {
         assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
@@ -491,13 +517,14 @@ class SuperAdminServiceImplTest {
 
     @Test
     void CreateReceivingStation() {
+        String test = TEST_USER.getUuid();
         AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false, true);
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
             .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
 
-        superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid());
+        superAdminService.createReceivingStation(stationDto, test);
 
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
         verify(receivingStationRepository, times(1)).save(any());
@@ -505,7 +532,7 @@ class SuperAdminServiceImplTest {
             .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
 
         Exception thrown = assertThrows(ReceivingStationValidationException.class,
-            () -> superAdminService.createReceivingStation(stationDto, TEST_USER.getUuid()));
+            () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
     }
