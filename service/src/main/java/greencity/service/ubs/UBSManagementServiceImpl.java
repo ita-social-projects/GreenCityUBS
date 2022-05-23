@@ -361,7 +361,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
-            .orderFullPrice(setTotalPrice(prices))
+            .orderFullPrice(prices.getSumAmount())
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
@@ -377,16 +377,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierPricePerPackage(fullPrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
-    }
-
-    private Double setTotalPrice(CounterOrderDetailsDto dto) {
-        if (dto.getTotalExported() != 0) {
-            return dto.getTotalExported();
-        }
-        if (dto.getTotalConfirmed() != 0) {
-            return dto.getTotalConfirmed();
-        }
-        return dto.getSumAmount();
     }
 
     /**
