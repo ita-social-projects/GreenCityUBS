@@ -387,7 +387,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             return dto.getTotalConfirmed();
         }
         return dto.getSumAmount();
-
     }
 
     /**
