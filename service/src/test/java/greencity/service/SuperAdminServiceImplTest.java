@@ -114,6 +114,32 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setLimitDescription() {
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
+        when(courierTranslationRepository.findCourierTranslationByCourier(getCourier()))
+            .thenReturn(getCourierTranslation());
+        when(courierTranslationRepository.save(getCourierTranslation())).thenReturn(getCourierTranslation());
+
+        assertEquals(getCourierTranslationsDto(), superAdminService.setLimitDescription(1L, "1"));
+
+        verify(courierRepository).findById(1L);
+        verify(courierTranslationRepository).findCourierTranslationByCourier(getCourier());
+        verify(courierTranslationRepository).save(getCourierTranslation());
+    }
+
+    @Test
+    void getAllCouriersTest() {
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier()));
+        when(modelMapper.map(getCourier(), CourierDto.class))
+            .thenReturn(getCourierDto());
+
+        assertEquals(getCourierDtoList(), superAdminService.getAllCouriers());
+
+        verify(courierRepository).findAll();
+        verify(modelMapper).map(getCourier(), CourierDto.class);
+    }
+
+    @Test
     void deleteTariffServiceThrowException() {
         assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
