@@ -255,7 +255,8 @@ public class NotificationServiceImpl implements NotificationService {
                     .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                         NotificationType.LETS_STAY_CONNECTED);
             if (lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusMonths(2))
+                || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusMonths(2))) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
