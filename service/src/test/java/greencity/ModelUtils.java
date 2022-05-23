@@ -1035,12 +1035,12 @@ public class ModelUtils {
 
     public static PersonalDataDto getPersonalDataDto2() {
         return PersonalDataDto.builder()
-                .id(1l)
-                .firstName("Dima")
-                .lastName("Petrov")
-                .phoneNumber("0666051373")
-                .email("mail@mail.ua")
-                .build();
+            .id(1l)
+            .firstName("Dima")
+            .lastName("Petrov")
+            .phoneNumber("0666051373")
+            .email("mail@mail.ua")
+            .build();
     }
 
     public static User getUserPersonalData() {

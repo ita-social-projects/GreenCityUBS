@@ -104,49 +104,48 @@ class OrdersAdminsPageServiceImplTest {
         employeeList.add(ModelUtils.getEmployee());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation2));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(4))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(5))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(7))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7l)));
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7l)));
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8))
-                .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
-
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
 
         when(superAdminService.getAllReceivingStations())
-                .thenReturn(receivingStations);
+            .thenReturn(receivingStations);
         when(employeeRepository.getAllEmployeeByPositionId(2L))
-                .thenReturn(employeeList);
+            .thenReturn(employeeList);
         when(employeeRepository.getAllEmployeeByPositionId(3L))
-                .thenReturn(employeeList);
+            .thenReturn(employeeList);
         when(employeeRepository.getAllEmployeeByPositionId(5L))
-                .thenReturn(employeeList);
+            .thenReturn(employeeList);
         when(employeeRepository.getAllEmployeeByPositionId(4L))
-                .thenReturn(employeeList);
+            .thenReturn(employeeList);
         assertNotNull(ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
 
@@ -431,7 +430,8 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> orders = new ArrayList<>();
         orders.add(1l);
 
-        when(userRemoteClient.findByUuid(user.getUuid())).thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
+        when(userRemoteClient.findByUuid(user.getUuid()))
+            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1l)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
@@ -444,7 +444,8 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> orders = new ArrayList<>();
         orders.add(1l);
 
-        when(userRemoteClient.findByUuid(user.getUuid())).thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
+        when(userRemoteClient.findByUuid(user.getUuid()))
+            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1l)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
