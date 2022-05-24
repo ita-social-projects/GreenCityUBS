@@ -316,7 +316,15 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setRead(true);
         }
 
-        return createNotificationDto(notification, language, SITE, templateRepository);
+        NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository);
+
+        if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
+            Violation violation = violationRepository.findByOrderId(notification.getOrder().getId())
+                .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
+            notificationDto.setImages(violation.getImages());
+        }
+
+        return notificationDto;
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language) {
