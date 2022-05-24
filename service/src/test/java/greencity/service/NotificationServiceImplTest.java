@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.ModelUtils;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
@@ -386,7 +387,7 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationViolation() {
-        UserNotification notification = TEST_USER_NOTIFICATION_3;
+        UserNotification notification = createUserNotification3();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
@@ -398,12 +399,12 @@ class NotificationServiceImplTest {
 
         NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
 
-        assertEquals(TEST_NOTIFICATION_DTO.setImages(Collections.emptyList()), actual);
+        assertEquals(createViolationNotificationDto(), actual);
     }
 
     @Test
     void getNotificationViolationNotFoundException() {
-        UserNotification notification = TEST_USER_NOTIFICATION_3;
+        UserNotification notification = createUserNotification3();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(

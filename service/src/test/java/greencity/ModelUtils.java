@@ -57,7 +57,7 @@ import java.util.*;
 
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 
 public class ModelUtils {
 
@@ -1859,7 +1859,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static UserNotification createUserNotification3() {
+    public static UserNotification createUserNotification3() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(TEST_ORDER_4.getUser());
@@ -1946,6 +1946,14 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
+            .build();
+    }
+
+    public static NotificationDto createViolationNotificationDto() {
+        return NotificationDto.builder()
+            .title("Test")
+            .body("Test")
+            .images(emptyList())
             .build();
     }
 
