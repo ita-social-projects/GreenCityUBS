@@ -492,7 +492,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
 
         assertThrows(PaymentNotFoundException.class,
-            () -> ubsManagementService.returnOverpayment(order.getId(), dto, "abc"));
+            () -> ubsManagementService.returnOverpayment(1l, dto, "abc"));
 
     }
 
