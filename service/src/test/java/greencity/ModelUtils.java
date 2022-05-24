@@ -87,7 +87,7 @@ public class ModelUtils {
     public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET2 = createNotificationParameterSet2();
     public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
     public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
-    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
+    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotificationForViolation();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
@@ -1859,7 +1859,7 @@ public class ModelUtils {
             .build();
     }
 
-    public static UserNotification createUserNotification3() {
+    public static UserNotification createUserNotificationForViolation() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(TEST_ORDER_4.getUser());
