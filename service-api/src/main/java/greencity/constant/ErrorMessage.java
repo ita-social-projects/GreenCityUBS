@@ -96,6 +96,8 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
     public static final String COULD_NOT_RETRIEVE_USER_DATA = "Could not retrieve user data";
 
+    public static final String COMMENT_ERROR = "Invalid comment= ";
+
     /**
      * Constructor.
      */
