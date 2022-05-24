@@ -182,7 +182,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
             collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, currentUser);
-        } else {
+        }
+        if (order.getOrderStatus() == OrderStatus.CANCELED
+            && !overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)
+            && !overpaymentInfoRequestDto.getComment().equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
             throw new PaymentNotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
         }
         order.getPayment().add(payment);
