@@ -1488,12 +1488,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void transferUserPointsToOrder(Order order, int amountToTransfer) {
+    private void transferUserPointsToOrder(Order order, int amountToTransfer) {
         if (amountToTransfer <= 0) {
             return;
         }
