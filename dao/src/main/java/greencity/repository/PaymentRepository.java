@@ -44,4 +44,14 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
     @Query(value = "select distinct amount from payment"
         + " where order_id = :orderId", nativeQuery = true)
     Long findAmountByOrderId(@Param(value = "orderId") Long orderId);
+
+    /**
+     * Method return total paid sum made by order.
+     *
+     * @param orderId - id of order
+     * @return {@link Long} total paid sum for this order
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT sum(amount) FROM payment WHERE order_id = :orderId")
+    Long selectSumPaid(@Param(value = "orderId") Long orderId);
 }

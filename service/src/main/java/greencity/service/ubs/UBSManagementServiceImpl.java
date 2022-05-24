@@ -380,14 +380,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {
-        if(dto.getTotalExported() !=  0) {
-            return dto.getTotalExported();
+        if (dto.getSumExported() != 0) {
+            return dto.getSumExported();
         }
-        if(dto.getTotalConfirmed() != 0) {
-            return  dto.getTotalConfirmed();
+        if (dto.getSumConfirmed() != 0 && dto.getSumExported() == 0) {
+            return dto.getSumConfirmed();
         }
-        return  dto.getSumAmount();
-
+        return dto.getSumAmount();
     }
 
     /**
@@ -549,6 +548,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
+        final Long wasPaid = paymentRepository.selectSumPaid(orderId);
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
@@ -577,10 +577,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         entry.getKey().longValue());
             }
         }
-    }
-
-    private void calculateSum() {
-
+        var price = getPriceDetails(orderId);
+        Long needToPay = setTotalPrice(price).longValue() - wasPaid;
+        if (needToPay == 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+        }
+        if (needToPay != 0 && wasPaid != 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
+        }
+        if (wasPaid == 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
+        }
     }
 
     private void collectEventsAboutSetOrderDetails(Map<Integer, Integer> confirmed, Map<Integer, Integer> exported,
@@ -688,10 +695,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumAmount;
         double totalSumConfirmed;
         double totalSumExported;
-        if(!order.getAmountOfBagsOrdered().entrySet().isEmpty()) {
-
-        }
-
         if (!bag.isEmpty()) {
             for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
                 sumAmount += entry.getValue() * bag
