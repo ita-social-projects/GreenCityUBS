@@ -13,6 +13,7 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
 import greencity.entity.enums.OrderStatus;
+import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -20,6 +21,7 @@ import greencity.exceptions.payment.LiqPayPaymentException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -362,4 +364,12 @@ public interface UBSClientService {
      * @return {@link OrderCourierPopUpDto}
      */
     OrderCourierPopUpDto getTariffInfoForLocation(Long locationId);
+
+    /**
+     * Transfers User's points to his Order.
+     *
+     * @param order            {@link Order} order to transfer points to.
+     * @param amountToTransfer amount of points to transfer.
+     */
+    void transferUserPointsToOrder(Order order, int amountToTransfer);
 }

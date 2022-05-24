@@ -1167,8 +1167,12 @@ class UBSClientServiceImplTest {
         value.put(1, 22);
         order.setAmountOfBagsOrdered(value);
         order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000L);
+        order.setCertificates(Set.of(getCertificate()));
         User user = ModelUtils.getUser();
         user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
 
         Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();

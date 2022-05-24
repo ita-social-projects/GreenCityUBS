@@ -2856,7 +2856,7 @@ public class ModelUtils {
             .response_code(2)
             .response_description("ddd")
             .order_time("s")
-            .settlement_date("s")
+            .settlement_date("21.12.2014")
             .fee(null)
             .payment_system("s")
             .sender_email("s")
