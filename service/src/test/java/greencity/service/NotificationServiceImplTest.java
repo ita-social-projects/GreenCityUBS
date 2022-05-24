@@ -14,6 +14,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.exceptions.http.NotFoundException;
 import greencity.exceptions.notification.NotificationNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.ViberService;
@@ -42,7 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NotificationTemplateServiceImplTest {
+class NotificationServiceImplTest {
     private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
 
     @Mock
@@ -381,5 +382,38 @@ class NotificationTemplateServiceImplTest {
 
         assertThrows(NotificationNotFoundException.class,
             () -> notificationService.getNotification("testtest", 1L, "ua"));
+    }
+
+    @Test
+    void getNotificationViolation() {
+        UserNotification notification = createUserNotificationForViolation();
+        notification.getUser().setUuid("abc");
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES,
+            "ua",
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+            .thenReturn(Optional.of(getViolation()));
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
+
+        assertEquals(createViolationNotificationDto(), actual);
+    }
+
+    @Test
+    void getNotificationViolationNotFoundException() {
+        UserNotification notification = createUserNotificationForViolation();
+        notification.getUser().setUuid("abc");
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES,
+            "ua",
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderId(notification.getOrder().getId()))
+            .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> notificationService.getNotification("abc", 1L, "ua"));
     }
 }
