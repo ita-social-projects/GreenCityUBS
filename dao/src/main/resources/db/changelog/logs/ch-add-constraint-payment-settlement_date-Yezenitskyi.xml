@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="Yezenitskyi-3" author="Andrii Yezenitskyi">
+        <sql>
+            ALTER TABLE payment
+                DROP CONSTRAINT IF EXISTS settlement_date_is_right_format_or_null;
+
+            ALTER TABLE payment
+                ADD CONSTRAINT settlement_date_is_right_format_or_null
+                    CHECK (settlement_date ~ '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'
+                           OR settlement_date IS NULL);
+        </sql>
+    </changeSet>
+</databaseChangeLog>
