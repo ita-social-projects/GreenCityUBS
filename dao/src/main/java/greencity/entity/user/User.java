@@ -48,6 +48,9 @@ public class User {
     @Column(name = "recipient_email")
     private String recipientEmail;
 
+    @Column(name = "alternate_email")
+    private String alternateEmail;
+
     @Column(name = "recipient_phone")
     private String recipientPhone;
 

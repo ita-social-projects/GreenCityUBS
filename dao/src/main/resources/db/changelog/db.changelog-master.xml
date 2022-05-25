@@ -133,5 +133,6 @@
     <include file="db/changelog/logs/ch-add-table-tariffs_info-receiving_stations_mapping-Fedorko.xml"/>
     <include file="db/changelog/logs/ch-insert-into-regions-Fedorko.xml"/>
     <include file="db/changelog/logs/ch-add-constraint-payment-settlement_date-Yezenitskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-column-alternate_email-to-ubs_user-to-users-Hlazova.xml"/>
 </databaseChangeLog>
 
