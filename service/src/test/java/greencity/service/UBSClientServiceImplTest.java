@@ -595,6 +595,7 @@ class UBSClientServiceImplTest {
             UserProfileUpdateDto.builder().addressDto(addressDto)
                 .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
                 .recipientPhone(user.getRecipientPhone())
+                .alternateEmail("test@email.com")
                 .build();
 
         when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));

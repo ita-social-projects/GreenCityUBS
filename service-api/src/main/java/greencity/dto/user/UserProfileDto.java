@@ -28,6 +28,9 @@ public class UserProfileDto {
     @Email
     private String recipientEmail;
     @NotBlank
+    @Email
+    private String alternateEmail;
+    @NotBlank
     @ValidPhoneNumber
     private String recipientPhone;
     private List<AddressDto> addressDto;
