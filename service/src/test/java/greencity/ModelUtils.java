@@ -3101,6 +3101,10 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.FORMED)
             .counterOrderPaymentId(1L)
+            .pointsToUse(100)
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
             .build();
     }
 
