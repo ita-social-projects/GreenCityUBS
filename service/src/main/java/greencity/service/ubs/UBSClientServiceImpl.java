@@ -316,6 +316,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
+        if (currentUser.getAlternateEmail() != null
+            && !currentUser.getAlternateEmail().equals("")) {
+            dto.setEmail(currentUser.getAlternateEmail());
+        }
         return dto;
     }
 
