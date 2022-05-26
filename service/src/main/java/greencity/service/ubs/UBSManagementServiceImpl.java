@@ -548,7 +548,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
-        final Long wasPaid = paymentRepository.selectSumPaid(orderId);
+        final long wasPaid = paymentRepository.selectSumPaid(orderId) == null ? 0L : paymentRepository.selectSumPaid(orderId);
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
@@ -1270,7 +1270,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
             .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(payment -> payment / 100).reduce(Long::sum)
             .orElse(0L);
-        double totalAmount = dto.getTotalSumAmount();
+        double totalAmount = setTotalPrice(dto);
 
         if (paymentsForCurrentOrder > 0 && totalAmount > paymentsForCurrentOrder) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
