@@ -366,7 +366,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
-            .orderFullPrice(prices.getSumAmount())
+            .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
@@ -382,6 +382,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .courierPricePerPackage(fullPrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
+    }
+
+    private Double setTotalPrice(CounterOrderDetailsDto dto) {
+        if (dto.getSumExported() != 0) {
+            return dto.getSumExported();
+        }
+        if (dto.getSumConfirmed() != 0 && dto.getSumExported() == 0) {
+            return dto.getSumConfirmed();
+        }
+        return dto.getSumAmount();
     }
 
     /**
@@ -543,6 +553,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid) {
+        final long wasPaid =
+            paymentRepository.selectSumPaid(orderId) == null ? 0L : paymentRepository.selectSumPaid(orderId);
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
@@ -570,6 +582,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     .updateConfirm(entry.getValue(), orderId,
                         entry.getKey().longValue());
             }
+        }
+        var price = getPriceDetails(orderId);
+        Long needToPay = setTotalPrice(price).longValue() - wasPaid;
+        if (needToPay == 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+        }
+        if (needToPay != 0 && wasPaid != 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
+        }
+        if (wasPaid == 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
         }
     }
 
@@ -678,7 +701,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         double totalSumAmount;
         double totalSumConfirmed;
         double totalSumExported;
-
         if (!bag.isEmpty()) {
             for (Map.Entry<Integer, Integer> entry : order.getAmountOfBagsOrdered().entrySet()) {
                 sumAmount += entry.getValue() * bag
@@ -1254,7 +1276,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
             .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(payment -> payment / 100).reduce(Long::sum)
             .orElse(0L);
-        double totalAmount = dto.getTotalSumAmount();
+        double totalAmount = setTotalPrice(dto);
 
         if (paymentsForCurrentOrder > 0 && totalAmount > paymentsForCurrentOrder) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
