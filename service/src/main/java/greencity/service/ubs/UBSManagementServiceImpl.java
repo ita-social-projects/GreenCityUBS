@@ -375,7 +375,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .amountOfBagsConfirmed(order.getConfirmedQuantity())
             .numbersFromShop(order.getAdditionalOrders())
             .certificates(prices.getCertificate())
-            .paymentTableInfoDto(getPaymentInfo(orderId, prices.getSumAmount().longValue()))
+            .paymentTableInfoDto(getPaymentInfo(orderId, setTotalPrice(prices).longValue()))
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId))
             .comment(order.getComment())
