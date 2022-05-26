@@ -585,11 +585,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         var price = getPriceDetails(orderId);
         Long needToPay = setTotalPrice(price).longValue() - wasPaid;
-        if (needToPay == 0) {
+        if (needToPay <= 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+            return;
         }
-        if (needToPay != 0 && wasPaid != 0) {
+        if (needToPay > 0 && wasPaid != 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
+            return;
         }
         if (wasPaid == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
