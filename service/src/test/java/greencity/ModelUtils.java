@@ -225,7 +225,6 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
-            .alternateEmail("test@mail.com")
             .senderEmail("test@email.ua")
             .senderPhoneNumber("+380974563223")
             .senderLastName("TestLast")
