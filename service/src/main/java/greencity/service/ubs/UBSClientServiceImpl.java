@@ -316,6 +316,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
         PersonalDataDto dto = modelMapper.map(currentUser, PersonalDataDto.class);
         dto.setUbsUserId(ubsUser.get(0).getId());
+        if (currentUser.getAlternateEmail() != null &&
+            currentUser.getAlternateEmail() != "") {
+            dto.setEmail(currentUser.getAlternateEmail());
+        }
         return dto;
     }
 
@@ -377,8 +381,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 

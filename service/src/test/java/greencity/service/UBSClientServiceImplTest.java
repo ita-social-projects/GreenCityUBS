@@ -274,6 +274,7 @@ class UBSClientServiceImplTest {
     void testSaveToDB() throws InvocationTargetException, IllegalAccessException {
 
         User user = ModelUtils.getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
 
         OrderResponseDto dto = getOrderResponseDto();
@@ -380,13 +381,11 @@ class UBSClientServiceImplTest {
         String uuid = "35467585763t4sfgchjfuyetf";
         PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
 
-        User user = User.builder()
-            .uuid(uuid)
-            .recipientName("oleh")
-            .recipientSurname("ivanov")
-            .id(1L).recipientEmail("mail@mail.ua")
-            .recipientPhone("067894522")
-            .build();
+        User user = ModelUtils.getTestUser()
+            .setUuid(uuid)
+            .setRecipientEmail("mail@mail.ua")
+            .setRecipientPhone("067894522")
+            .setAlternateEmail("my@email.com");
         List<UBSuser> ubsUser = new ArrayList<>();
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
