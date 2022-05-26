@@ -54,4 +54,7 @@ public class UBSuser {
 
     @Column(nullable = false, length = 50)
     private String email;
+
+    @Column(name = "alternate_email", length = 50)
+    private String alternateEmail;
 }

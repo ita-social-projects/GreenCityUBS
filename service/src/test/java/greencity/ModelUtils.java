@@ -57,7 +57,7 @@ import java.util.*;
 
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 
 public class ModelUtils {
 
@@ -87,7 +87,7 @@ public class ModelUtils {
     public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET2 = createNotificationParameterSet2();
     public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
     public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
-    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
+    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotificationForViolation();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
@@ -1859,7 +1859,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static UserNotification createUserNotification3() {
+    public static UserNotification createUserNotificationForViolation() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(TEST_ORDER_4.getUser());
@@ -1946,6 +1946,14 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
+            .build();
+    }
+
+    public static NotificationDto createViolationNotificationDto() {
+        return NotificationDto.builder()
+            .title("Test")
+            .body("Test")
+            .images(emptyList())
             .build();
     }
 
@@ -2848,7 +2856,7 @@ public class ModelUtils {
             .response_code(2)
             .response_description("ddd")
             .order_time("s")
-            .settlement_date("s")
+            .settlement_date("21.12.2014")
             .fee(null)
             .payment_system("s")
             .sender_email("s")

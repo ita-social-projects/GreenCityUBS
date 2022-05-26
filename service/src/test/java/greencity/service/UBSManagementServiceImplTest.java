@@ -1,6 +1,7 @@
 package greencity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
@@ -19,9 +20,8 @@ import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.SortingOrder;
+import greencity.entity.coords.Coordinates;
+import greencity.entity.enums.*;
 import greencity.entity.language.Language;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
@@ -30,6 +30,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.address.NotFoundOrderAddressException;
 import greencity.exceptions.admin.UpdateAdminPageInfoException;
 import greencity.exceptions.employee.EmployeeAlreadyAssignedForOrder;
@@ -476,6 +477,22 @@ class UBSManagementServiceImplTest {
             order.getPayment().get(order.getPayment().size() - 1).getComment());
         assertEquals(dto.getOverpayment(), order.getPayment().get(order.getPayment().size() - 1).getAmount());
         assertEquals(dto.getBonuses() + dto.getOverpayment(), user.getCurrentPoints().longValue());
+    }
+
+    @Test
+    void returnOverpaymentAsBonusesForInvalidComment() {
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().get(0);
+        order.setOrderStatus(OrderStatus.CANCELED);
+        OverpaymentInfoRequestDto dto = ModelUtils.getOverpaymentInfoRequestDto();
+        dto.setComment("extra task");
+        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+        when(orderRepository.findById(order.getId())).thenReturn(
+            Optional.ofNullable(order));
+        when(userRepository.findUserByOrderId(order.getId())).thenReturn(Optional.ofNullable(user));
+        assertThrows(PaymentNotFoundException.class,
+            () -> ubsManagementService.returnOverpayment(1l, dto, "abc"));
+
     }
 
     @Test

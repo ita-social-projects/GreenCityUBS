@@ -1,8 +1,7 @@
 package greencity.client;
 
-import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
-import greencity.dto.user.PasswordStatusDto;
+import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;

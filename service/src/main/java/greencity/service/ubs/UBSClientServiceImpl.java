@@ -7,17 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -272,13 +262,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
+            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
             .fee(Long.valueOf(dto.getFee()))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())
             .paymentId(String.valueOf(dto.getPayment_id()))
             .paymentStatus(PaymentStatus.UNPAID)
             .build();
+    }
+
+    private String parseFondySettlementDate(String settlementDate) {
+        return settlementDate.isEmpty()
+            ? LocalDate.now().toString()
+            : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
     }
 
     /**
@@ -364,6 +360,11 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .orElseThrow(() -> new TariffNotFoundException("Tariff for courier with id " + 1L
                     + " and location with id " + dto.getLocationId() + " does not exist"));
         Map<Integer, Integer> amountOfBagsOrderedMap = new HashMap<>();
+
+        if (!dto.isShouldBePaid()) {
+            dto.setCertificates(Collections.emptySet());
+            dto.setPointsToUse(0);
+        }
 
         int sumToPayWithoutDiscount = formBagsToBeSavedAndCalculateOrderSum(amountOfBagsOrderedMap, dto.getBags(),
             tariffsInfo);
@@ -789,6 +790,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Long countPaidAmount(List<Payment> payments) {
         return payments.stream()
+            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
             .map(Payment::getAmount)
             .map(amount -> amount / 100)
             .reduce(0L, Long::sum);
@@ -1126,7 +1128,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileUpdateDto);
-
+        user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         List<Address> addressList =
             userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
                 .collect(Collectors.toList());
@@ -1474,8 +1476,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
 
-        currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
-        userRepository.save(currentUser);
+        transferUserPointsToOrder(order, dto.getPointsToUse());
 
         paymentVerification(sumToPay, order);
 
@@ -1485,6 +1486,41 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private void transferUserPointsToOrder(Order order, int amountToTransfer) {
+        if (amountToTransfer <= 0) {
+            return;
+        }
+
+        User user = order.getUser();
+        checkIfUserHaveEnoughPoints(user.getCurrentPoints(), amountToTransfer);
+
+        int maxPointsToTransfer = countAmountToPayForOrder(order);
+        if (amountToTransfer > maxPointsToTransfer) {
+            throw new IncorrectValueException(ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
+        }
+
+        order.setPointsToUse(order.getPointsToUse() + amountToTransfer);
+        user.setCurrentPoints(user.getCurrentPoints() - amountToTransfer);
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(-amountToTransfer)
+                .date(LocalDateTime.now())
+                .order(order)
+                .build());
+
+        orderRepository.save(order);
+    }
+
+    private int countAmountToPayForOrder(Order order) {
+        int certificatesAmount = nonNull(order.getCertificates())
+            ? order.getCertificates().stream()
+                .map(Certificate::getPoints)
+                .reduce(0, Integer::sum)
+            : 0;
+        return order.getSumTotalAmountWithoutDiscounts().intValue() - order.getPointsToUse() - certificatesAmount;
     }
 
     private void paymentVerification(Integer sumToPay, Order order) {
@@ -1683,7 +1719,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .responseCode(dto.getResponse_code())
             .responseDescription(dto.getResponse_description())
             .orderTime(dto.getOrder_time())
-            .settlementDate(dto.getSettlement_date().isEmpty() ? LocalDate.now().toString() : dto.getSettlement_date())
+            .settlementDate(parseFondySettlementDate(dto.getSettlement_date()))
             .fee(Optional.ofNullable(dto.getFee()).map(Long::valueOf).orElse(0L))
             .paymentSystem(dto.getPayment_system())
             .senderEmail(dto.getSender_email())

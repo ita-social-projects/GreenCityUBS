@@ -595,6 +595,7 @@ class UBSClientServiceImplTest {
             UserProfileUpdateDto.builder().addressDto(addressDto)
                 .recipientName(user.getRecipientName()).recipientSurname(user.getRecipientSurname())
                 .recipientPhone(user.getRecipientPhone())
+                .alternateEmail("test@email.com")
                 .build();
 
         when(modelMapper.map(addressDto.get(0), Address.class)).thenReturn(address.get(0));
@@ -1167,8 +1168,12 @@ class UBSClientServiceImplTest {
         value.put(1, 22);
         order.setAmountOfBagsOrdered(value);
         order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000L);
+        order.setCertificates(Set.of(getCertificate()));
         User user = ModelUtils.getUser();
         user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
 
         Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
