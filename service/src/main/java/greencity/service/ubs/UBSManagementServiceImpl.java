@@ -593,6 +593,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         var price = getPriceDetails(orderId);
         Long needToPay = setTotalPrice(price).longValue() - (wasPaid / 100);
+      
         if (needToPay <= 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             return;
