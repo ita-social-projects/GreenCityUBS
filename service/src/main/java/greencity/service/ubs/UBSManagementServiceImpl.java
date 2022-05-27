@@ -385,13 +385,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Double setTotalPrice(CounterOrderDetailsDto dto) {
-        if (dto.getSumExported() != 0) {
+        if (isContainsExportedBags(dto)) {
             return dto.getSumExported();
         }
-        if (dto.getSumConfirmed() != 0 && dto.getSumExported() == 0) {
+        if (isContainsConfirmedBags(dto)) {
             return dto.getSumConfirmed();
         }
         return dto.getSumAmount();
+    }
+
+    private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
+        return dto.getSumConfirmed() != 0 && dto.getSumExported() == 0;
+    }
+
+    private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
+        return dto.getSumExported() != 0;
     }
 
     /**
@@ -584,7 +592,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         var price = getPriceDetails(orderId);
-        Long needToPay = setTotalPrice(price).longValue() - wasPaid;
+        Long needToPay = setTotalPrice(price).longValue() - (wasPaid / 100);
+
         if (needToPay <= 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
             return;
@@ -1278,11 +1287,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
             .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(payment -> payment / 100).reduce(Long::sum)
             .orElse(0L);
+        long totalPaidAmount = (long) (paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus());
         double totalAmount = setTotalPrice(dto);
 
-        if (paymentsForCurrentOrder > 0 && totalAmount > paymentsForCurrentOrder) {
+        if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-        } else if (paymentsForCurrentOrder > 0 && totalAmount >= paymentsForCurrentOrder) {
+        } else if (paymentsForCurrentOrder > 0 && totalAmount <= totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
