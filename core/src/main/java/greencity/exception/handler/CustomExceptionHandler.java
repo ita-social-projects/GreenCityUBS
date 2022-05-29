@@ -118,7 +118,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({SumOfOrderException.class, CourierLocationException.class,
         LocationAlreadyCreatedException.class})
-    public final ResponseEntity<Object> handleSumOfOrderException(SumOfOrderException ex,
+    public final ResponseEntity<Object> handleSumOfOrderException(RuntimeException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponce);
