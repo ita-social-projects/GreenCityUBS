@@ -138,7 +138,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({EmployeeValidationException.class, PositionValidationException.class,
         ReceivingStationValidationException.class, EmployeeIllegalOperationException.class})
-    public final ResponseEntity<Object> handleUnprocessable_EntityException(RuntimeException ex,
+    public final ResponseEntity<Object> handleUnprocessableEntityException(RuntimeException ex,
         WebRequest webRequest) {
         ExceptionResponce exceptionResponce = new ExceptionResponce(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
