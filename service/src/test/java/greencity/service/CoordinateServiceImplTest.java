@@ -6,8 +6,8 @@ import greencity.dto.order.GroupedOrderDto;
 import greencity.dto.order.OrderDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
-import greencity.exceptions.order.ActiveOrdersNotFoundException;
-import greencity.exceptions.location.IncorrectValueException;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.CoordinateServiceImpl;
@@ -79,7 +79,7 @@ class CoordinateServiceImplTest {
 
         when(orderRepository.undeliveredAddresses()).thenReturn(undeliveredOrders);
 
-        assertThrows(ActiveOrdersNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> coordinateService.getAllUndeliveredOrdersWithLiters());
     }
 
@@ -119,14 +119,14 @@ class CoordinateServiceImplTest {
 
     @Test
     void getClusterCoordsThrowExceptionToDistanceTest() {
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             coordinateService.getClusteredCoords(-1, 20);
         });
     }
 
     @Test
     void getClusterCoordsThrowExceptionToLitresTest() {
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             coordinateService.getClusteredCoords(2, -1);
         });
     }
@@ -174,14 +174,14 @@ class CoordinateServiceImplTest {
 
     @Test
     void getClusteredCoordsAlongWithSpecifiedThrowExceptionToDistanceTest() {
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             coordinateService.getClusteredCoords(-1, 20);
         });
     }
 
     @Test
     void getClusteredCoordsAlongWithSpecifiedThrowExceptionToLitresTest() {
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             coordinateService.getClusteredCoords(2, -1);
         });
     }
@@ -208,7 +208,7 @@ class CoordinateServiceImplTest {
             }
         });
 
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             coordinateService.getClusteredCoordsAlongWithSpecified(
                 test, 3000, 15).get(0);
         });

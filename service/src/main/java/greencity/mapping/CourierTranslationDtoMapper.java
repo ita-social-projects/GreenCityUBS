@@ -3,7 +3,7 @@ package greencity.mapping;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.CourierTranslation;
-import greencity.exceptions.language.LanguageNotFoundException;
+import greencity.exceptions.NotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ public class CourierTranslationDtoMapper extends AbstractConverter<CourierTransl
         return CourierTranslationDto.builder()
             .languageCode(Optional.ofNullable(source.getLanguage())
                 .map(language -> language.getCode())
-                .orElseThrow(() -> new LanguageNotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)))
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)))
             .name(source.getName())
             .build();
     }

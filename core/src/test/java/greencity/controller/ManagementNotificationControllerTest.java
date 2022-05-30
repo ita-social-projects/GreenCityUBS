@@ -28,7 +28,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.exceptions.http.NotFoundException;
 import greencity.service.notification.NotificationTemplateService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;

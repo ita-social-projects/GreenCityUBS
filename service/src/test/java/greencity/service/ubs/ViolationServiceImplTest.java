@@ -8,8 +8,7 @@ import greencity.entity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.exceptions.order.OrderViolationException;
-import greencity.exceptions.order.UnexistingOrderException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UserRepository;
@@ -77,7 +76,7 @@ class ViolationServiceImplTest {
         User user = ModelUtils.getTestUser();
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(violationRepository.findByOrderId(1l)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UnexistingOrderException.class, () -> violationService.deleteViolation(1L, "abc"));
+        Assertions.assertThrows(NotFoundException.class, () -> violationService.deleteViolation(1L, "abc"));
         verify(violationRepository, times(1)).findByOrderId(1L);
     }
 
@@ -120,7 +119,7 @@ class ViolationServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
 
-        assertThrows(OrderViolationException.class,
+        assertThrows(NotFoundException.class,
             () -> violationService.addUserViolation(add, new MultipartFile[2], "abc"));
     }
 

@@ -15,7 +15,7 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.exceptions.location.LocationAlreadyCreatedException;
+import greencity.exceptions.BadRequestException;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -178,7 +178,7 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(dto);
 
-        Mockito.doThrow(LocationAlreadyCreatedException.class).when(superAdminService).addLocation(dto);
+        Mockito.doThrow(BadRequestException.class).when(superAdminService).addLocation(dto);
 
         mockMvc.perform(post(ubsLink + "/addLocations").principal(principal)
             .content(requestJson)

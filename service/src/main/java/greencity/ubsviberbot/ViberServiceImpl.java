@@ -11,9 +11,8 @@ import greencity.dto.viber.enums.MessageType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.MessageWasNotSent;
-import greencity.exceptions.http.NotFoundException;
-import greencity.exceptions.user.UnexistingUuidExeption;
 import greencity.exceptions.bots.ViberBotAlreadyConnected;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
@@ -122,7 +121,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
     @Override
     public void sendWelcomeMessageAndPreRegisterViberBotForUser(String receiverId, String uuid) {
         User user = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UnexistingUuidExeption(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         if (user.getViberBot() == null) {
             viberBotRepository.save(ViberBot.builder()
                 .chatId(receiverId)
