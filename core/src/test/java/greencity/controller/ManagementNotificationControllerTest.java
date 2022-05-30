@@ -3,6 +3,7 @@ package greencity.controller;
 import java.security.Principal;
 import java.util.List;
 
+import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
