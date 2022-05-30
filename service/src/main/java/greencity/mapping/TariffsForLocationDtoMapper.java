@@ -14,26 +14,29 @@ import java.util.stream.Collectors;
 @Component
 public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, TariffsForLocationDto> {
     @Override
-    public TariffsForLocationDto convert(TariffsInfo sourse) {
-        Region region = sourse.getLocations().iterator().next().getRegion();
-        RegionDto regionDto =
-            RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName()).nameUk(region.getUkrName()).build();
+    public TariffsForLocationDto convert(TariffsInfo source) {
+        Region region = source.getTariffLocations() != null ?
+                source.getTariffLocations().iterator().next().getLocation().getRegion() : null;
+        RegionDto regionDto = null;
+        if (region != null) {
+            regionDto = RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName()).nameUk(region.getUkrName()).build();
+        }
         return TariffsForLocationDto.builder()
             .regionDto(regionDto)
-            .locationsDtosList(sourse.getLocations().stream()
+            .locationsDtosList(source.getTariffLocations().stream()
                 .map(location -> LocationsDtos.builder()
                     .locationId(location.getId())
-                    .nameEn(location.getNameEn())
-                    .nameUk(location.getNameUk())
+                    .nameEn(location.getLocation().getNameEn())
+                    .nameUk(location.getLocation().getNameUk())
                     .build())
                 .collect(Collectors.toList()))
-            .tariffInfoId(sourse.getId())
-            .courierLimit(sourse.getCourierLimit().toString())
-            .maxPriceOfOrder(sourse.getMaxPriceOfOrder())
-            .minPriceOfOrder(sourse.getMinPriceOfOrder())
-            .maxAmountOfBigBags(sourse.getMaxAmountOfBigBags())
-            .minAmountOfBigBags(sourse.getMinAmountOfBigBags())
-            .courierTranslationDtos(sourse.getCourier().getCourierTranslationList().stream()
+            .tariffInfoId(source.getId())
+            .courierLimit(source.getCourierLimit().toString())
+            .maxPriceOfOrder(source.getMaxPriceOfOrder())
+            .minPriceOfOrder(source.getMinPriceOfOrder())
+            .maxAmountOfBigBags(source.getMaxAmountOfBigBags())
+            .minAmountOfBigBags(source.getMinAmountOfBigBags())
+            .courierTranslationDtos(source.getCourier().getCourierTranslationList().stream()
                 .map(x -> CourierTranslationDto.builder()
                     .languageCode(x.getLanguage().getCode())
                     .name(x.getName())

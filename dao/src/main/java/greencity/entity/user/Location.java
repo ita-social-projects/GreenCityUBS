@@ -3,11 +3,13 @@ package greencity.entity.user;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @EqualsAndHashCode(exclude = {"bags", "tariffsInfoList"})
@@ -42,6 +44,10 @@ public class Location {
     @ManyToOne
     private Region region;
 
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
+    private Set<TariffLocation> tariffLocations;
+    /*-
     @ManyToMany(mappedBy = "locations", cascade = CascadeType.ALL)
     private List<TariffsInfo> tariffsInfoList;
+     */
 }
