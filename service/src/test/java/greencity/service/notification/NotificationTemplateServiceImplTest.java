@@ -6,6 +6,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.schedule.NotificationSchedule;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
 import org.junit.jupiter.api.Test;
