@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.entity.order.Courier;
 import greencity.entity.order.CourierTranslation;
+import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
