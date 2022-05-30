@@ -411,7 +411,7 @@ class SuperAdminServiceImplTest {
         when(regionRepository.findRegionByName("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(ModelUtils.getRegion()));
         when(locationRepository.findLocationByName("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
-        assertThrows(BadRequestException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+        assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
         verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
     }
