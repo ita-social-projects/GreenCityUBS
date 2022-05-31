@@ -10,6 +10,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -251,4 +252,8 @@ public interface SuperAdminService {
      * @return status of the tariff
      */
     String deactivateTariffCard(Long tariffId);
+
+    void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto);
+
+    void activateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto);
 }

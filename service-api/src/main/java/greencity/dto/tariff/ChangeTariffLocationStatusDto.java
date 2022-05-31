@@ -14,8 +14,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeactivateTariffsLocationsDto {
+public class ChangeTariffLocationStatusDto {
     @NotNull
     @NotEmpty
-    private List<@Min(1)Long> locationIds;
+    private List<@Min(1) Long> locationIds;
 }

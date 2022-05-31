@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, TariffsForLocationDto> {
     @Override
     public TariffsForLocationDto convert(TariffsInfo source) {
-        Region region = source.getTariffLocations() != null ?
-                source.getTariffLocations().iterator().next().getLocation().getRegion() : null;
+        Region region = source.getTariffLocations() != null
+            ? source.getTariffLocations().iterator().next().getLocation().getRegion()
+            : null;
         RegionDto regionDto = null;
         if (region != null) {
-            regionDto = RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName()).nameUk(region.getUkrName()).build();
+            regionDto = RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
+                .nameUk(region.getUkrName()).build();
         }
         return TariffsForLocationDto.builder()
             .regionDto(regionDto)

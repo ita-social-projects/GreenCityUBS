@@ -12,6 +12,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -570,4 +571,19 @@ class SuperAdminController {
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
     }
+
+    @PutMapping("tariffs/{id}/locations/deactivate")
+    public ResponseEntity deactivateLocationsInTariff(@PathVariable Long id,
+        @Valid @RequestBody ChangeTariffLocationStatusDto dto) {
+        superAdminService.deactivateTariffLocations(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("tariffs/{id}/locations/activate")
+    public ResponseEntity activateLocationsInTariff(@PathVariable Long id,
+        @Valid @RequestBody ChangeTariffLocationStatusDto dto) {
+        superAdminService.activateTariffLocations(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
 }
