@@ -5,8 +5,8 @@ import greencity.dto.order.GroupedOrderDto;
 import greencity.dto.order.OrderDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
-import greencity.exceptions.order.ActiveOrdersNotFoundException;
-import greencity.exceptions.location.IncorrectValueException;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.OrderRepository;
 import lombok.NonNull;
@@ -59,7 +59,7 @@ public class CoordinateServiceImpl implements CoordinateService {
     private List<Order> getAllUndeliveredOrders() {
         List<Order> allCoords = orderRepository.undeliveredAddresses();
         if (allCoords.isEmpty()) {
-            throw new ActiveOrdersNotFoundException(UNDELIVERED_ORDERS_NOT_FOUND);
+            throw new NotFoundException(UNDELIVERED_ORDERS_NOT_FOUND);
         }
         return allCoords;
     }
@@ -88,10 +88,10 @@ public class CoordinateServiceImpl implements CoordinateService {
      */
     private void checkIfSpecifiedLitresAndDistancesAreValid(double distance, int litres) {
         if (distance < 0 || distance > 20) {
-            throw new IncorrectValueException(INAVALID_DISTANCE_AMOUNT);
+            throw new BadRequestException(INAVALID_DISTANCE_AMOUNT);
         }
         if (litres < 0 || litres > 10000) {
-            throw new IncorrectValueException(INAVALID_LITRES_AMOUNT);
+            throw new BadRequestException(INAVALID_LITRES_AMOUNT);
         }
     }
 
@@ -265,7 +265,7 @@ public class CoordinateServiceImpl implements CoordinateService {
             .map(c -> modelMapper.map(c, Coordinates.class)).collect(Collectors.toSet());
         for (Coordinates temp : result) {
             if (!allCoords.contains(temp)) {
-                throw new IncorrectValueException(NO_SUCH_COORDINATES + temp.getLatitude()
+                throw new BadRequestException(NO_SUCH_COORDINATES + temp.getLatitude()
                     + ", " + temp.getLongitude());
             }
         }

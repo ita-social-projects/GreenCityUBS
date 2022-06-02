@@ -3,7 +3,7 @@ package greencity.service.ubs;
 import greencity.constant.OrderHistory;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
-import greencity.exceptions.position.PositionNotFoundException;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.EventRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
 
         public static EmployeePositionChanges fromEmployeePosition(Long position) {
             return Optional.ofNullable(ALL_VAlUES.get(position))
-                .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID + position));
+                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID + position));
         }
     }
 }

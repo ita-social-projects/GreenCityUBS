@@ -1,10 +1,10 @@
-package greencity.exceptions.user;
+package greencity.exceptions;
 
-public class UnexistingUuidExeption extends RuntimeException {
+public class BadRequestException extends RuntimeException {
     /**
      * Default constructor.
      */
-    public UnexistingUuidExeption() {
+    public BadRequestException() {
     }
 
     /**
@@ -12,7 +12,7 @@ public class UnexistingUuidExeption extends RuntimeException {
      *
      * @param message message, that explains cause of the exception.
      */
-    public UnexistingUuidExeption(String message) {
+    public BadRequestException(String message) {
         super(message);
     }
 }

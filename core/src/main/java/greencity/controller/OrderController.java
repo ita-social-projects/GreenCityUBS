@@ -19,7 +19,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import greencity.exceptions.payment.LiqPayPaymentException;
+import greencity.exceptions.BadRequestException;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
@@ -421,7 +421,7 @@ public class OrderController {
     @GetMapping(value = "/getLiqPayStatus/{orderId}")
     public ResponseEntity<Map<String, Object>> getLiqPayStatusPayment(
         @Valid @PathVariable Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) throws LiqPayPaymentException {
+        @ApiIgnore @CurrentUserUuid String uuid) throws BadRequestException {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getLiqPayStatus(orderId, uuid));
     }

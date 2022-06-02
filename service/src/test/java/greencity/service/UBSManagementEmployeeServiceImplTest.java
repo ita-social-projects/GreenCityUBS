@@ -10,12 +10,8 @@ import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.enums.SortingOrder;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.exceptions.employee.EmployeeIllegalOperationException;
-import greencity.exceptions.employee.EmployeeNotFoundException;
-import greencity.exceptions.employee.EmployeeValidationException;
-import greencity.exceptions.location.ReceivingStationNotFoundException;
-import greencity.exceptions.position.PositionNotFoundException;
-import greencity.exceptions.position.PositionValidationException;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.EmployeeCriteriaRepository;
@@ -95,18 +91,18 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
 
-        Exception thrown = assertThrows(EmployeeValidationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(employeeDto, null));
         assertEquals(thrown.getMessage(),
             ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + employeeDto.getPhoneNumber());
-        Exception thrown1 = assertThrows(EmployeeValidationException.class,
+        Exception thrown1 = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.save(employeeDto, null));
         assertEquals(thrown1.getMessage(),
             ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + employeeDto.getEmail());
-        Exception thrown3 = assertThrows(PositionNotFoundException.class,
+        Exception thrown3 = assertThrows(NotFoundException.class,
             () -> employeeService.save(employeeDto, null));
         assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
-        Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
+        Exception thrown4 = assertThrows(NotFoundException.class,
             () -> employeeService.save(employeeDto, null));
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
     }
@@ -153,24 +149,24 @@ class UBSManagementEmployeeServiceImplTest {
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
 
         EmployeeDto employeeDto1 = getEmployeeDto();
-        Exception thrown2 = assertThrows(EmployeeNotFoundException.class,
+        Exception thrown2 = assertThrows(NotFoundException.class,
             () -> employeeService.update(employeeDto1, null));
         assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId(), thrown2.getMessage());
         EmployeeDto employeeDto2 = getEmployeeDto();
-        Exception thrown = assertThrows(EmployeeValidationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.update(employeeDto2, null));
         assertEquals(ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + getEmployeeDto().getPhoneNumber(),
             thrown.getMessage());
         EmployeeDto employeeDto3 = getEmployeeDto();
-        Exception thrown1 = assertThrows(EmployeeValidationException.class,
+        Exception thrown1 = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.update(employeeDto3, null));
         assertEquals(ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + getEmployeeDto().getEmail(), thrown1.getMessage());
         EmployeeDto employeeDto4 = getEmployeeDto();
-        Exception thrown3 = assertThrows(PositionNotFoundException.class,
+        Exception thrown3 = assertThrows(NotFoundException.class,
             () -> employeeService.update(employeeDto4, null));
         assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
         EmployeeDto employeeDto5 = getEmployeeDto();
-        Exception thrown4 = assertThrows(ReceivingStationNotFoundException.class,
+        Exception thrown4 = assertThrows(NotFoundException.class,
             () -> employeeService.update(employeeDto5, null));
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
     }
@@ -185,7 +181,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository).findById(1L);
         System.out.println(employee.getEmployeeStatus());
         assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
-        Exception thrown = assertThrows(EmployeeNotFoundException.class,
+        Exception thrown = assertThrows(NotFoundException.class,
             () -> employeeService.deleteEmployee(2L));
         assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
     }
@@ -203,7 +199,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(positionRepository, times(1)).save(any());
         verify(modelMapper, times(1)).map(any(Position.class), eq(PositionDto.class));
 
-        Exception thrown = assertThrows(PositionValidationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.create(addingPositionDto));
         assertEquals(thrown.getMessage(), ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS
             + addingPositionDto.getName());
@@ -222,9 +218,9 @@ class UBSManagementEmployeeServiceImplTest {
         verify(positionRepository, times(1)).existsPositionByName(dto.getName());
         verify(modelMapper, times(2)).map(any(), any());
 
-        Exception thrown = assertThrows(PositionValidationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.update(dto));
-        Exception thrown1 = assertThrows(PositionNotFoundException.class,
+        Exception thrown1 = assertThrows(NotFoundException.class,
             () -> employeeService.update(dto));
 
         assertEquals(thrown1.getMessage(), ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
@@ -255,12 +251,12 @@ class UBSManagementEmployeeServiceImplTest {
         verify(positionRepository, times(1)).delete(position);
 
         position.setEmployees(Set.of(getEmployee()));
-        Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.deletePosition(1L));
 
         when(positionRepository.findById(2L)).thenReturn(Optional.empty());
 
-        Exception thrown1 = assertThrows(PositionNotFoundException.class,
+        Exception thrown1 = assertThrows(NotFoundException.class,
             () -> employeeService.deletePosition(2L));
 
         assertEquals(ErrorMessage.POSITION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
@@ -286,13 +282,13 @@ class UBSManagementEmployeeServiceImplTest {
         employee.setImagePath(AppConstant.DEFAULT_IMAGE);
         when(repository.findById(2L)).thenReturn(Optional.empty());
 
-        Exception thrown1 = assertThrows(EmployeeNotFoundException.class,
+        Exception thrown1 = assertThrows(NotFoundException.class,
             () -> employeeService.deleteEmployeeImage(2L));
         assertEquals(thrown1.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
 
-        Exception thrown2 = assertThrows(EmployeeIllegalOperationException.class,
+        Exception thrown2 = assertThrows(UnprocessableEntityException.class,
             () -> employeeService.deleteEmployeeImage(1L));
         assertEquals(ErrorMessage.CANNOT_DELETE_DEFAULT_IMAGE, thrown2.getMessage());
     }
