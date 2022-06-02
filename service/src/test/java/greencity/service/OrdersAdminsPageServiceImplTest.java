@@ -11,8 +11,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
-import greencity.exceptions.employee.EmployeeNotFoundException;
-import greencity.exceptions.position.PositionNotFoundException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
@@ -310,7 +309,7 @@ class OrdersAdminsPageServiceImplTest {
         Optional<User> user = Optional.of(ModelUtils.getUser());
         when(userRepository.findUserByUuid(uuid)).thenReturn(user);
 
-        assertThrows(EmployeeNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
     }
 
@@ -324,7 +323,7 @@ class OrdersAdminsPageServiceImplTest {
         when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
 
-        assertThrows(PositionNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
     }
 

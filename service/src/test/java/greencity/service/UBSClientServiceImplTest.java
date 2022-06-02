@@ -15,7 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import greencity.dto.payment.StatusRequestDtoLiqPay;
-import greencity.exceptions.location.IncorrectValueException;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,18 +90,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.address.AddressAlreadyExistException;
-import greencity.exceptions.address.NotFoundOrderAddressException;
-import greencity.exceptions.bag.NotEnoughBagsException;
-import greencity.exceptions.certificate.CertificateNotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.exceptions.http.NotFoundException;
-import greencity.exceptions.order.BadOrderStatusRequestException;
-import greencity.exceptions.order.EventsNotFoundException;
-import greencity.exceptions.order.OrderNotFoundException;
-import greencity.exceptions.order.SumOfOrderException;
-import greencity.exceptions.payment.PaymentNotFoundException;
-import greencity.exceptions.payment.PaymentValidationException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.AddressRepository;
@@ -251,7 +241,7 @@ class UBSClientServiceImplTest {
         dto.setSettlement_date("");
         dto.setFee(0);
         lenient().when(encryptionUtil.checkIfResponseSignatureIsValid(dto, null)).thenReturn(false);
-        assertThrows(PaymentValidationException.class, () -> ubsService.validatePayment(dto));
+        assertThrows(BadRequestException.class, () -> ubsService.validatePayment(dto));
     }
 
     @Test
@@ -371,7 +361,7 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        Assertions.assertThrows(NotEnoughBagsException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -417,7 +407,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificateWithNoAvailable() {
-        Assertions.assertThrows(CertificateNotFoundException.class, () -> {
+        Assertions.assertThrows(NotFoundException.class, () -> {
             ubsService.checkCertificate("randomstring");
         });
     }
@@ -460,7 +450,7 @@ class UBSClientServiceImplTest {
     @Test
     void makeOrderAgainShouldThrowOrderNotFoundException() {
         Locale locale = new Locale("en");
-        Exception thrown = assertThrows(OrderNotFoundException.class,
+        Exception thrown = assertThrows(NotFoundException.class,
             () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
@@ -471,7 +461,7 @@ class UBSClientServiceImplTest {
         order.setOrderStatus(OrderStatus.CANCELED);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         Locale locale = new Locale("en");
-        Exception thrown = assertThrows(BadOrderStatusRequestException.class,
+        Exception thrown = assertThrows(BadRequestException.class,
             () -> ubsService.makeOrderAgain(locale, 1L));
         assertEquals(thrown.getMessage(), ErrorMessage.BAD_ORDER_STATUS_REQUEST
             + order.getOrderStatus());
@@ -529,7 +519,7 @@ class UBSClientServiceImplTest {
     @Test
     void getUserAndUserUbsAndViolationsInfoByOrderIdOrderNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "abc"));
     }
 
@@ -742,7 +732,7 @@ class UBSClientServiceImplTest {
 
         addresses.get(0).setAddressStatus(AddressStatus.NEW);
 
-        assertThrows(AddressAlreadyExistException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
     }
 
@@ -809,7 +799,7 @@ class UBSClientServiceImplTest {
             eq(OrderAddressDtoRequest.class)))
                 .thenReturn(dtoRequest);
 
-        assertThrows(AddressAlreadyExistException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
 
@@ -834,7 +824,7 @@ class UBSClientServiceImplTest {
                 .thenReturn(TEST_ORDER_ADDRESS_DTO_REQUEST);
         when(addressRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundOrderAddressException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid));
     }
 
@@ -862,7 +852,7 @@ class UBSClientServiceImplTest {
     @Test
     void testDeleteUnexistingAddress() {
         when(addressRepository.findById(42L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundOrderAddressException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
 
@@ -871,7 +861,7 @@ class UBSClientServiceImplTest {
         Address address = getTestAddresses(getTestUser()).get(0);
         address.setAddressStatus(AddressStatus.DELETED);
         when(addressRepository.findById(42L)).thenReturn(Optional.of(address));
-        assertThrows(NotFoundOrderAddressException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.deleteCurrentAddressForOrder(42L, "35467585763t4sfgchjfuyetf"));
     }
 
@@ -902,7 +892,7 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderPaymentDetailShouldThrowOrderNotFoundException() {
         when(orderRepository.findById(any())).thenReturn(Optional.empty());
-        Exception thrown = assertThrows(OrderNotFoundException.class,
+        Exception thrown = assertThrows(NotFoundException.class,
             () -> ubsService.getOrderPaymentDetail(null));
         assertEquals(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST, thrown.getMessage());
     }
@@ -923,7 +913,7 @@ class UBSClientServiceImplTest {
     @Test
     void getOrderCancellationReasonOrderNotFoundException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.getOrderCancellationReason(1L, "abc"));
     }
 
@@ -954,7 +944,7 @@ class UBSClientServiceImplTest {
     @Test
     void updateOrderCancellationReasonOrderNotFoundException() {
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.updateOrderCancellationReason(1L, null, "abc"));
     }
 
@@ -980,7 +970,7 @@ class UBSClientServiceImplTest {
     @Test
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
@@ -988,7 +978,7 @@ class UBSClientServiceImplTest {
     void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
-        assertThrows(EventsNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
@@ -1088,7 +1078,7 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        assertThrows(NotEnoughBagsException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -1128,7 +1118,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundOrderAddressException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -1149,7 +1139,7 @@ class UBSClientServiceImplTest {
 
         when(encryptionUtil.formingResponseSignatureLiqPay(dto.getData(), null)).thenReturn("fdf");
 
-        assertThrows(PaymentValidationException.class, () -> ubsService.validateLiqPayPayment(dto));
+        assertThrows(BadRequestException.class, () -> ubsService.validateLiqPayPayment(dto));
     }
 
     @Test
@@ -1365,7 +1355,7 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        Assertions.assertThrows(NotEnoughBagsException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -1416,7 +1406,7 @@ class UBSClientServiceImplTest {
 
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
-        Assertions.assertThrows(SumOfOrderException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
 
@@ -1466,7 +1456,7 @@ class UBSClientServiceImplTest {
                     .setMaxPriceOfOrder(500L)));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
-        Assertions.assertThrows(SumOfOrderException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
     }
@@ -1555,7 +1545,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersDto()));
 
-        assertThrows(PaymentValidationException.class, () -> ubsService.validatePaymentClient(dto));
+        assertThrows(BadRequestException.class, () -> ubsService.validatePaymentClient(dto));
     }
 
     @Test
@@ -1603,7 +1593,7 @@ class UBSClientServiceImplTest {
     @Test
     void getPaymentResponseFromFondyOrderNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(OrderNotFoundException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             ubsService.getPaymentResponseFromFondy(1L, "abc");
         });
     }
@@ -1616,7 +1606,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid(uuid)).thenReturn(order.getUser());
 
-        assertThrows(PaymentNotFoundException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             ubsService.getPaymentResponseFromFondy(1L, uuid);
         });
     }
@@ -1772,7 +1762,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
-        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
+        Assertions.assertThrows(NotFoundException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
 
@@ -1821,7 +1811,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
-        Assertions.assertThrows(NotFoundOrderAddressException.class, () -> {
+        Assertions.assertThrows(NotFoundException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
 
@@ -1858,7 +1848,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
-        Assertions.assertThrows(IncorrectValueException.class, () -> {
+        Assertions.assertThrows(BadRequestException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
         });
 

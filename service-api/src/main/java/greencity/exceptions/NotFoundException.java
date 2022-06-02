@@ -1,10 +1,10 @@
-package greencity.exceptions.payment;
+package greencity.exceptions;
 
-public class PaymentNotFoundException extends RuntimeException {
+public class NotFoundException extends RuntimeException {
     /**
      * Default constructor.
      */
-    public PaymentNotFoundException() {
+    public NotFoundException() {
     }
 
     /**
@@ -12,7 +12,7 @@ public class PaymentNotFoundException extends RuntimeException {
      *
      * @param message message, that explains cause of the exception.
      */
-    public PaymentNotFoundException(String message) {
+    public NotFoundException(String message) {
         super(message);
     }
 }

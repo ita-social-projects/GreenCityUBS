@@ -16,7 +16,7 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.exceptions.payment.LiqPayPaymentException;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
@@ -302,7 +302,7 @@ public interface UBSClientService {
      * @return {@link Map}
      * @author Vadym Makitra
      */
-    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws LiqPayPaymentException;
+    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws BadRequestException;
 
     /**
      * Method for delete user order.
