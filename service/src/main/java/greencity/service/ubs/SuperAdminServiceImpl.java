@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.entity.order.*;
+import greencity.exceptions.http.BadRequestException;
 import greencity.repository.*;
 import org.modelmapper.ModelMapper;
 
@@ -563,9 +564,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
-        // method for checking if tariff exist
         verifyIfTariffExists(addNewTariffDto.getLocationIdList(), addNewTariffDto.getCourierId());
-        //
         TariffsInfo tariffsInfo = createTariff(addNewTariffDto, userUUID, courier);
         var tariffLocationSet =
             findLocationsForTariff(addNewTariffDto.getLocationIdList(), addNewTariffDto.getRegionId())
@@ -637,14 +636,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto) {
-        tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.DEACTIVATED.name());
-    }
+    public void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
+        if("activate".equals(param)) {
+            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
+        } else if("deactivate".equals(param)) {
+            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.DEACTIVATED.name());
+        } else {
+            throw new BadRequestException("Unknown param");
+        }
 
-    @Override
-    @Transactional
-    public void activateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto) {
-        tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
     }
-
 }

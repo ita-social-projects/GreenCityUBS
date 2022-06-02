@@ -572,17 +572,10 @@ class SuperAdminController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
     }
 
-    @PutMapping("tariffs/{id}/locations/deactivate")
+    @PutMapping("tariffs/{id}/locations/change-status")
     public ResponseEntity deactivateLocationsInTariff(@PathVariable Long id,
-        @Valid @RequestBody ChangeTariffLocationStatusDto dto) {
-        superAdminService.deactivateTariffLocations(id, dto);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("tariffs/{id}/locations/activate")
-    public ResponseEntity activateLocationsInTariff(@PathVariable Long id,
-        @Valid @RequestBody ChangeTariffLocationStatusDto dto) {
-        superAdminService.activateTariffLocations(id, dto);
+        @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
+        superAdminService.deactivateTariffLocations(id, dto, status);
         return ResponseEntity.ok().build();
     }
 

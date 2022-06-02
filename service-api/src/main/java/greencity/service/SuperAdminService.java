@@ -253,7 +253,5 @@ public interface SuperAdminService {
      */
     String deactivateTariffCard(Long tariffId);
 
-    void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto);
-
-    void activateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto);
+    void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }
