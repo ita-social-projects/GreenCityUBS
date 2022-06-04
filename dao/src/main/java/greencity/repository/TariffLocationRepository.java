@@ -17,4 +17,11 @@ public interface TariffLocationRepository extends JpaRepository<TariffLocation, 
         "WHERE tariffs_info_id = :tariffId AND location_id IN :locationIds ")
     void changeStatusAll(@Param("tariffId") Long tariffId, @Param("locationIds") List<Long> locationIds,
         @Param("status") String status);
+
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM tariffs_locations as l JOIN tariffs_info as t " +
+            "ON l.tariffs_info_id = t.id " +
+            "WHERE l.location_id IN :locationIds AND t.courier_id = :courierId")
+    List<TariffLocation> findAllByCourierIdAndLocationIds(@Param("courierId") Long courierId,
+        @Param("locationIds") List<Long> locationIds);
 }

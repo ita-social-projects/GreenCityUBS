@@ -10,10 +10,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 
@@ -226,7 +223,7 @@ public interface SuperAdminService {
      *
      * @param addNewTariffDto {@link AddNewTariffDto}
      */
-    void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
+    AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
 
     /**
      * Method for edit info about tariff.
@@ -253,5 +250,5 @@ public interface SuperAdminService {
      */
     String deactivateTariffCard(Long tariffId);
 
-    void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
+    void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }

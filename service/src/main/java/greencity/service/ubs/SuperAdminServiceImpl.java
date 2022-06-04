@@ -1,15 +1,12 @@
 package greencity.service.ubs;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
-import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.*;
 import greencity.entity.order.*;
 import greencity.exceptions.http.BadRequestException;
 import greencity.repository.*;
@@ -33,9 +30,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
@@ -562,20 +556,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
+    public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
-        verifyIfTariffExists(addNewTariffDto.getLocationIdList(), addNewTariffDto.getCourierId());
+        List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
+        var tariffForLocationAndCourierAlreadyExistIdList =
+            verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
         TariffsInfo tariffsInfo = createTariff(addNewTariffDto, userUUID, courier);
         var tariffLocationSet =
-            findLocationsForTariff(addNewTariffDto.getLocationIdList(), addNewTariffDto.getRegionId())
+            findLocationsForTariff(idListToCheck, addNewTariffDto.getRegionId())
                 .stream().map(location -> TariffLocation.builder()
                     .tariffsInfo(tariffsInfo)
                     .location(location)
                     .locationStatus(LocationStatus.ACTIVE)
                     .build())
                 .collect(Collectors.toSet());
+        List<Long> existingLocationsIds =
+            tariffLocationSet.stream().map(tariffLocation -> tariffLocation.getLocation().getId())
+                .collect(Collectors.toList());
+        idListToCheck.removeAll(existingLocationsIds);
         tariffsInfo.setTariffLocations(tariffLocationSet);
         tariffsLocationRepository.saveAll(tariffLocationSet);
+        tariffsInfoRepository.save(tariffsInfo);
+        return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
     }
 
     private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String userUUID, Courier courier) {
@@ -590,10 +592,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return tariffsInfoRepository.save(tariffsInfo);
     }
 
-    private void verifyIfTariffExists(List<Long> locationIds, Long courierId) {
-        var tariffList = tariffsInfoRepository.findAllByCourierAndAndTariffLocations(courierId, locationIds);
-        locationIds.removeAll(tariffList.stream().flatMap(tariffsInfo -> tariffsInfo.getTariffLocations().stream()
-            .map(tariffLocation -> tariffLocation.getLocation().getId())).collect(Collectors.toList()));
+    private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
+        var tariffLocationListList = tariffsLocationRepository.findAllByCourierIdAndLocationIds(courierId, locationIds);
+        List<Long> alreadyExistsTariff = tariffLocationListList.stream()
+            .map(tariffLocation -> tariffLocation.getLocation().getId())
+            .collect(Collectors.toList());
+        locationIds.removeAll(alreadyExistsTariff);
+        return alreadyExistsTariff;
     }
 
     private Courier tryToFindCourier(Long courierId) {
@@ -636,11 +641,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public void deactivateTariffLocations(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
-        if("activate".equals(param)) {
+    public void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
+        if ("activate".equals(param.toLowerCase())) {
             tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
-        } else if("deactivate".equals(param)) {
-            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.DEACTIVATED.name());
+        } else if ("deactivate".equals(param.toLowerCase())) {
+            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(),
+                LocationStatus.DEACTIVATED.name());
         } else {
             throw new BadRequestException("Unknown param");
         }

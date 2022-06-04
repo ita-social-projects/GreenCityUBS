@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "tariffs_locations")
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = {"id", "locationStatus"})
 @Setter
 @Getter
 @AllArgsConstructor
@@ -28,4 +28,6 @@ public class TariffLocation {
     @Column
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
+
+
 }

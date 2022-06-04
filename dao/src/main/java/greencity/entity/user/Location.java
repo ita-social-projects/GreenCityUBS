@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@EqualsAndHashCode(exclude = {"bags", "tariffsInfoList"})
-@ToString(exclude = {"bags", "tariffsInfoList"})
+@EqualsAndHashCode(exclude = {"bags", "tariffLocations"})
+@ToString(exclude = {"bags", "tariffLocations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

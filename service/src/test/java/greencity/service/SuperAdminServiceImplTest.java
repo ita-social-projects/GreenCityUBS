@@ -76,6 +76,8 @@ class SuperAdminServiceImplTest {
     private ReceivingStationRepository receivingStationRepository;
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
+    @Mock
+    private TariffLocationRepository tariffsLocationRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -667,16 +669,17 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
-        verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsInfoRepository, times(2)).save(any());
     }
 
     @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
-        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
-            .thenReturn(Collections.emptyList());
         assertThrows(EntityNotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
