@@ -28,6 +28,4 @@ public class TariffLocation {
     @Column
     @Enumerated(EnumType.STRING)
     private LocationStatus locationStatus;
-
-
 }

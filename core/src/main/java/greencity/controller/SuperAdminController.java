@@ -569,16 +569,17 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for activation or deactivation Locations in Tariff depends on @RequestParam.
+     * Controller for activation or deactivation Locations in Tariff depends
+     * on @RequestParam.
      *
      * @author Yurii Fedorko
      */
     @ApiOperation(value = "Change Tariff Location status")
     @ApiResponses(value = {
-            @ApiResponse(code = 202, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PutMapping("tariffs/{id}/locations/change-status")
     public ResponseEntity changeLocationsInTariffStatus(@PathVariable Long id,
