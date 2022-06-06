@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.location.EditLocationDto;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -291,7 +292,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
-        Optional<Location> location = locationRepository.findLocationByName(
+        Optional<Location> location = locationRepository.findLocationByNameAndRegionId(
             dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
@@ -611,5 +612,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             tariffsInfoRepository.save(tariffsInfo);
             return "Deactivated";
         }
+    }
+
+    @Override
+    public void editLocations(List<EditLocationDto> editLocationDtoList) {
+        editLocationDtoList.forEach(editLocationDto -> {
+            Optional<Location> location = locationRepository.findById(editLocationDto.getLocationId());
+            Optional<Location> locationWithName =
+                locationRepository.findLocationByName(editLocationDto.getNameUa(), editLocationDto.getNameEn());
+            if (location.isPresent() && locationWithName.isEmpty()) {
+                Location current = location.get();
+                current.setNameUk(editLocationDto.getNameUa());
+                current.setNameEn(editLocationDto.getNameEn());
+                locationRepository.save(current);
+            }
+        });
     }
 }

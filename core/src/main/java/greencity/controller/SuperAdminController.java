@@ -5,6 +5,7 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
@@ -569,5 +570,23 @@ class SuperAdminController {
     @PutMapping("/deactivateTariff/{tariffId}")
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
+    }
+
+    /**
+     * Controller for editing Locations.
+     *
+     * @author Yurii Fedorko
+     */
+    @ApiOperation(value = "Edit Locations")
+    @ApiResponses(value = {
+        @ApiResponse(code = 202, message = HttpStatuses.ACCEPTED),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PostMapping("/locations/edit")
+    public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
+        superAdminService.editLocations(editLocationDtoList);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

@@ -4,6 +4,7 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.courier.*;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
@@ -23,7 +24,6 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.location.*;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -320,7 +320,7 @@ class SuperAdminServiceImplTest {
         when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.empty());
         when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
         superAdminService.addLocation(locationCreateDtoList);
-        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
+        verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
         verify(regionRepository).findRegionByName("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
     }
@@ -410,10 +410,10 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         when(regionRepository.findRegionByName("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(ModelUtils.getRegion()));
-        when(locationRepository.findLocationByName("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
+        when(locationRepository.findLocationByNameAndRegionId("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
         assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
-        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
+        verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
     }
 
     @Test
@@ -720,5 +720,17 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         assertEquals("Deactivated", superAdminService.deactivateTariffCard(1L));
+    }
+
+    @Test
+    void editLocation() {
+        Location location = ModelUtils.getLocation();
+        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
+        EditLocationDto dto = new EditLocationDto(1L, "Lviv", "Львів");
+        superAdminService.editLocations(List.of(dto));
+        verify(locationRepository).save(location);
+        verify(locationRepository).findById(anyLong());
+        verify(locationRepository).findLocationByName("Львів", "Lviv");
+        assertEquals(location.getNameEn(), dto.getNameEn());
     }
 }
