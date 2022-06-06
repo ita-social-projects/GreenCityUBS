@@ -16,7 +16,7 @@ public class EditLocationDto {
     @NotNull
     @Min(1)
     private Long locationId;
-    @Pattern(regexp = "^([A-Z]{1}[a-zA-Z]{2,}[\\-| ]{1}[A-Z]{1}[a-zA-Z]{1,})|([A-Z]{1}[a-z]{1,})",
+    @Pattern(regexp = "^([A-Z]{1}[a-z]{2,}([\\-| ]{1}[A-Z]{1}[a-zA-Z]{1,})?)",
         message = "use only English letters")
     @NotEmpty(message = "en name must not be empty")
     private String nameEn;
