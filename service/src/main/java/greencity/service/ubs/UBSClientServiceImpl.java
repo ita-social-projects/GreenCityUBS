@@ -818,19 +818,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
         return UserInfoDto.builder()
-            .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
-            .customerPhoneNumber(order.getUser().getRecipientPhone())
-            .customerEmail(order.getUser().getRecipientEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientId(order.getUbsUser().getId())
-            .recipientName(order.getUbsUser().getSenderFirstName())
-            .recipientSurName(order.getUbsUser().getSenderLastName())
-            .recipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber())
-            .recipientEmail(order.getUbsUser().getSenderEmail())
-            .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
-            .build();
+                .customerName(order.getUser().getRecipientName())
+                .customerSurName(order.getUser().getRecipientSurname())
+                .customerPhoneNumber(order.getUser().getRecipientPhone())
+                .customerEmail(order.getUser().getRecipientEmail())
+                .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+                .recipientId(order.getUbsUser().getId())
+                .recipientName(order.getUbsUser().getFirstName())
+                .recipientSurName(order.getUbsUser().getLastName())
+                .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
+                .recipientEmail(order.getUbsUser().getEmail())
+                .userViolationForCurrentOrder(
+                        userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+                .build();
     }
 
     /**
