@@ -606,5 +606,4 @@ class SuperAdminController {
         superAdminService.changeTariffLocationsStatus(id, dto, status);
         return ResponseEntity.ok().build();
     }
-
 }

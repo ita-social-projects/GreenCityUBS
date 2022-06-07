@@ -562,7 +562,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
         List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
-        var tariffForLocationAndCourierAlreadyExistIdList =
+        final var tariffForLocationAndCourierAlreadyExistIdList =
             verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
         TariffsInfo tariffsInfo = createTariff(addNewTariffDto, userUUID, courier);
         var tariffLocationSet =
@@ -669,6 +669,5 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         } else {
             throw new BadRequestException("Unresolvable param");
         }
-
     }
 }

@@ -260,11 +260,12 @@ public interface SuperAdminService {
     void editLocations(List<EditLocationDto> editLocationDtoList);
 
     /**
-     * Method for changing status of {@link greencity.entity.order.TariffLocation}
+     * Method for changing status of {@link greencity.entity.order.TariffLocation}.
      *
      * @param tariffId - id of tariff where location statuses want to be changed
-     * @param dto - contains List of Location id's to update status
-     * @param param - should be "activate" or "deactivate" or throws BadRequestException
+     * @param dto      - contains List of Location id's to update status
+     * @param param    - should be "activate" or "deactivate" or throws
+     *                 BadRequestException
      */
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }

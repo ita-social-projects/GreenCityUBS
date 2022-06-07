@@ -19,7 +19,7 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
             ? source.getTariffLocations().iterator().next().getLocation().getRegion()
             : null;
         RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
-                .nameUk(region.getUkrName()).build() : null;
+            .nameUk(region.getUkrName()).build() : null;
         return TariffsForLocationDto.builder()
             .regionDto(regionDto)
             .locationsDtosList(source.getTariffLocations().stream()
