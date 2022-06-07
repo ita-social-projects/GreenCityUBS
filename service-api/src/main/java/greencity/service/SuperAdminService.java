@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
@@ -249,6 +250,14 @@ public interface SuperAdminService {
      * @return status of the tariff
      */
     String deactivateTariffCard(Long tariffId);
+
+    /**
+     * Method for editing Locations.
+     *
+     * @param editLocationDtoList - dto contains id of location wanted to be edited
+     *                            and changed naming
+     */
+    void editLocations(List<EditLocationDto> editLocationDtoList);
 
     /**
      * Method for changing status of {@link greencity.entity.order.TariffLocation}

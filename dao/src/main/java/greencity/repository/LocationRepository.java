@@ -28,7 +28,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         value = "select * FROM locations as l "
             + "WHERE l.region_id = :regionId AND (l.name_en = :locationNameEn "
             + "OR l.name_uk = :locationNameUk)")
-    Optional<Location> findLocationByName(@Param("locationNameUk") String locationNameUk,
+    Optional<Location> findLocationByNameAndRegionId(@Param("locationNameUk") String locationNameUk,
         @Param("locationNameEn") String locationNameEn,
         @Param("regionId") Long regionId);
 
@@ -62,4 +62,18 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             + "WHERE region_id = :regionId "
             + "AND id IN :locIds")
     List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
+
+    /**
+     * Method for finding location by its translations.
+     *
+     * @param locationNameUk - Ukrainian translation
+     * @param locationNameEn - English translation
+     * @return Optional of {@link Location}
+     */
+    @Query(nativeQuery = true,
+        value = "select * FROM locations as l "
+            + "WHERE l.name_en = :locationNameEn "
+            + "AND l.name_uk = :locationNameUk")
+    Optional<Location> findLocationByName(@Param("locationNameUk") String locationNameUk,
+        @Param("locationNameEn") String locationNameEn);
 }

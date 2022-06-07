@@ -4,6 +4,7 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.courier.*;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
@@ -20,14 +21,9 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.admin.ServiceNotFoundException;
-import greencity.exceptions.bag.BagWithThisStatusAlreadySetException;
-import greencity.exceptions.courier.CourierNotFoundException;
-import greencity.exceptions.courier.TariffNotFoundException;
-import greencity.exceptions.employee.EmployeeIllegalOperationException;
-import greencity.exceptions.language.LanguageNotFoundException;
-import greencity.exceptions.location.*;
-import greencity.exceptions.payment.BagNotFoundException;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.UnprocessableEntityException;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -143,13 +139,13 @@ class SuperAdminServiceImplTest {
 
     @Test
     void deleteTariffServiceThrowException() {
-        assertThrows(BagNotFoundException.class, () -> superAdminService.deleteTariffService(1));
+        assertThrows(NotFoundException.class, () -> superAdminService.deleteTariffService(1));
     }
 
     @Test
     void editTariffService_Throw_Exception() {
         EditTariffServiceDto dto = new EditTariffServiceDto();
-        assertThrows(BagNotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
+        assertThrows(NotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
     }
 
     @Test
@@ -326,7 +322,7 @@ class SuperAdminServiceImplTest {
         when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.empty());
         when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
         superAdminService.addLocation(locationCreateDtoList);
-        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
+        verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
         verify(regionRepository).findRegionByName("Kyiv region", "Київська область");
         verify(locationRepository).save(location);
     }
@@ -371,7 +367,7 @@ class SuperAdminServiceImplTest {
     @Test
     void addTariffServiceExceptionTest() {
         AddServiceDto dto = ModelUtils.addServiceDto();
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
+        assertThrows(NotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
     }
 
     @Test
@@ -383,18 +379,18 @@ class SuperAdminServiceImplTest {
         lenient().when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
+        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
     }
 
     @Test
     void deleteServiceExceptionTest() {
-        assertThrows(ServiceNotFoundException.class, () -> superAdminService.deleteService(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.deleteService(1L));
     }
 
     @Test
     void editServiceExceptionTest() {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
-        assertThrows(ServiceNotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+        assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
 
     }
 
@@ -407,7 +403,7 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.findServiceById(service.getId())).thenReturn(Optional.of(service));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
-        assertThrows(LanguageNotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+        assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
     }
 
     @Test
@@ -416,15 +412,15 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocation();
         when(regionRepository.findRegionByName("Kyiv region", "Київська область"))
             .thenReturn(Optional.of(ModelUtils.getRegion()));
-        when(locationRepository.findLocationByName("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
-        assertThrows(LocationAlreadyCreatedException.class, () -> superAdminService.addLocation(locationCreateDtoList));
+        when(locationRepository.findLocationByNameAndRegionId("Київ", "Kyiv", 1L)).thenReturn(Optional.of(location));
+        assertThrows(NotFoundException.class, () -> superAdminService.addLocation(locationCreateDtoList));
 
-        verify(locationRepository).findLocationByName("Київ", "Kyiv", 1L);
+        verify(locationRepository).findLocationByNameAndRegionId("Київ", "Kyiv", 1L);
     }
 
     @Test
     void deactivateLocationExceptionTest() {
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.deactivateLocation(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocation(1L));
     }
 
     @Test
@@ -434,12 +430,12 @@ class SuperAdminServiceImplTest {
 
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
 
-        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.deactivateLocation(1L));
+        assertThrows(BadRequestException.class, () -> superAdminService.deactivateLocation(1L));
     }
 
     @Test
     void activateLocationExceptionTest() {
-        assertThrows(LocationNotFoundException.class, () -> superAdminService.activateLocation(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.activateLocation(1L));
     }
 
     @Test
@@ -447,17 +443,17 @@ class SuperAdminServiceImplTest {
         Location location = ModelUtils.getLocationDto();
         location.setLocationStatus(LocationStatus.ACTIVE);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
-        assertThrows(LocationStatusAlreadyExistException.class, () -> superAdminService.activateLocation(1L));
+        assertThrows(BadRequestException.class, () -> superAdminService.activateLocation(1L));
     }
 
     @Test
     void setLimitDescriptionExceptiomTest() {
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1"));
+        assertThrows(NotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1"));
     }
 
     @Test
     void excludeBagExceptionTest() {
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.excludeBag(1));
+        assertThrows(NotFoundException.class, () -> superAdminService.excludeBag(1));
     }
 
     @Test
@@ -466,12 +462,12 @@ class SuperAdminServiceImplTest {
 
         when(bagRepository.findById(1)).thenReturn(bag);
 
-        assertThrows(BagWithThisStatusAlreadySetException.class, () -> superAdminService.excludeBag(1));
+        assertThrows(BadRequestException.class, () -> superAdminService.excludeBag(1));
     }
 
     @Test
     void includeBagExceptionTest() {
-        assertThrows(BagNotFoundException.class, () -> superAdminService.includeBag(1));
+        assertThrows(NotFoundException.class, () -> superAdminService.includeBag(1));
     }
 
     @Test
@@ -480,7 +476,7 @@ class SuperAdminServiceImplTest {
 
         when(bagRepository.findById(1)).thenReturn(bag);
 
-        assertThrows(BagWithThisStatusAlreadySetException.class, () -> superAdminService.includeBag(1));
+        assertThrows(BadRequestException.class, () -> superAdminService.includeBag(1));
     }
 
     @Test
@@ -503,7 +499,7 @@ class SuperAdminServiceImplTest {
     void deleteCourierThrowCourierNotFoundException() {
         when(courierRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(CourierNotFoundException.class, () -> superAdminService.deleteCourier(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.deleteCourier(1L));
 
         verify(courierRepository).findById(1L);
     }
@@ -533,7 +529,7 @@ class SuperAdminServiceImplTest {
         verify(modelMapper, times(1))
             .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
 
-        Exception thrown = assertThrows(ReceivingStationValidationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
@@ -577,12 +573,12 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository, times(1)).delete(station);
 
         station.setEmployees(Set.of(getEmployee()));
-        Exception thrown = assertThrows(EmployeeIllegalOperationException.class,
+        Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> superAdminService.deleteReceivingStation(1L));
 
         when(receivingStationRepository.findById(2L)).thenReturn(Optional.empty());
 
-        Exception thrown1 = assertThrows(ReceivingStationNotFoundException.class,
+        Exception thrown1 = assertThrows(NotFoundException.class,
             () -> superAdminService.deleteReceivingStation(2L));
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
@@ -688,7 +684,7 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsException3() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(CourierNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
@@ -710,7 +706,7 @@ class SuperAdminServiceImplTest {
     void editTariffTestThrows() {
         var dto = ModelUtils.getEditPriceOfOrder();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(TariffNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.setTariffLimitBySumOfOrder(1L, dto));
     }
 
@@ -727,5 +723,17 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         assertEquals("Deactivated", superAdminService.deactivateTariffCard(1L));
+    }
+
+    @Test
+    void editLocation() {
+        Location location = ModelUtils.getLocation();
+        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
+        EditLocationDto dto = new EditLocationDto(1L, "Lviv", "Львів");
+        superAdminService.editLocations(List.of(dto));
+        verify(locationRepository).save(location);
+        verify(locationRepository).findById(anyLong());
+        verify(locationRepository).findLocationByName("Львів", "Lviv");
+        assertEquals(location.getNameEn(), dto.getNameEn());
     }
 }
