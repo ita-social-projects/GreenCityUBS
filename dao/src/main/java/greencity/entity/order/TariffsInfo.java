@@ -4,6 +4,7 @@ import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
 
@@ -75,4 +76,7 @@ public class TariffsInfo {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;
+
+    @ManyToMany(mappedBy = "tariffInfos", cascade = CascadeType.ALL)
+    private Set<Employee> employees;
 }

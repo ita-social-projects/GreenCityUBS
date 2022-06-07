@@ -59,8 +59,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             .get("role");
         return new UsernamePasswordAuthenticationToken(
             email,
-               role.contains("ROLE_UBS_EMPLOYEE")
-                        ? jwtTool.getAuthoritiesFromToken(authentication.getName()): Collections.emptyList(),
+            role.contains("ROLE_UBS_EMPLOYEE")
+                ? jwtTool.getAuthoritiesFromToken(authentication.getName())
+                : Collections.emptyList(),
             role.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
     }
 
