@@ -163,7 +163,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.HEAD,
                 UBS_LINK + "/userProfile/**")
             .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE");
-
     }
 
     /**
