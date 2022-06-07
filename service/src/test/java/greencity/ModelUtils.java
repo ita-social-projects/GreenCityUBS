@@ -967,6 +967,10 @@ public class ModelUtils {
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
                 .email("anatolii.andr@gmail.com")
+                .senderFirstName("Anatolii")
+                .senderLastName("Petyrov")
+                .senderPhoneNumber("095123456")
+                .senderEmail("anatolii.andr@gmail.com")
                 .build())
             .build();
     }
