@@ -967,6 +967,10 @@ public class ModelUtils {
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
                 .email("anatolii.andr@gmail.com")
+                .senderFirstName("Anatolii")
+                .senderLastName("Petyrov")
+                .senderPhoneNumber("095123456")
+                .senderEmail("anatolii.andr@gmail.com")
                 .build())
             .build();
     }
@@ -3101,6 +3105,10 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.FORMED)
             .counterOrderPaymentId(1L)
+            .pointsToUse(100)
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
             .build();
     }
 

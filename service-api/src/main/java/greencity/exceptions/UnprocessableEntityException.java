@@ -1,10 +1,10 @@
-package greencity.exceptions.order;
+package greencity.exceptions;
 
-public class UnexistingOrderException extends RuntimeException {
+public class UnprocessableEntityException extends RuntimeException {
     /**
      * Default constructor.
      */
-    public UnexistingOrderException() {
+    public UnprocessableEntityException() {
     }
 
     /**
@@ -12,7 +12,7 @@ public class UnexistingOrderException extends RuntimeException {
      *
      * @param message message, that explains cause of the exception.
      */
-    public UnexistingOrderException(String message) {
+    public UnprocessableEntityException(String message) {
         super(message);
     }
 }

@@ -18,10 +18,8 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.employee.EmployeeNotFoundException;
-import greencity.exceptions.order.BadOrderStatusRequestException;
-import greencity.exceptions.order.OrderNotFoundException;
-import greencity.exceptions.position.PositionNotFoundException;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
@@ -324,7 +322,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(value));
                     removePickUpDetailsAndResponsibleEmployees(existedOrder);
                 } else {
-                    throw new BadOrderStatusRequestException(
+                    throw new BadRequestException(
                         "Such desired status isn't applicable with current status!");
                 }
                 existedOrder.setBlocked(false);
@@ -428,15 +426,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
-            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_DOESNT_EXIST));
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
-            .orElseThrow(() -> new PositionNotFoundException(POSITION_NOT_FOUND_BY_ID));
+            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID));
         List<Long> unresolvedGoals = new ArrayList<>();
 
         for (Long orderId : ordersId) {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new OrderNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                 Boolean existedBefore =
                     employeeOrderPositionRepository.existsByOrderAndPosition(existedOrder, existedPosition);
                 final String historyChanges;

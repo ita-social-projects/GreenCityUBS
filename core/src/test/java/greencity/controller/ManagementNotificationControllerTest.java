@@ -3,6 +3,7 @@ package greencity.controller;
 import java.security.Principal;
 import java.util.List;
 
+import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.exceptions.http.NotFoundException;
 import greencity.service.notification.NotificationTemplateService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
