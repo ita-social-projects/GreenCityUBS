@@ -74,29 +74,16 @@ public class JwtTool {
             .compact();
     }
 
-    public List<String> getAuthoritiesFromToken(String accessToken){
+    /**
+     * Method for getting employee authorities from access token.
+     *
+     */
+    public List<String> getAuthoritiesFromToken(String accessToken) {
         List<String> authorities = (List<String>) Jwts.parser()
-                .setSigningKey(getAccessTokenKey())
-                .parseClaimsJws(accessToken)
-                .getBody()
-                .get("employee_authorities");
+            .setSigningKey(getAccessTokenKey())
+            .parseClaimsJws(accessToken)
+            .getBody()
+            .get("employee_authorities");
         return authorities;
-    }
-
-    public String getNameFromToken(String accessToken){
-        return  (String) Jwts.parser()
-                .setSigningKey(getAccessTokenKey())
-                .parseClaimsJws(accessToken)
-                .getBody()
-                .get("sub");
-    }
-
-    public String getRoleFromToken(String accessToken){
-        List<String> role = (List<String>) Jwts.parser()
-                .setSigningKey(getAccessTokenKey())
-                .parseClaimsJws(accessToken)
-                .getBody()
-                .get("role");
-        return role.get(0);
     }
 }
