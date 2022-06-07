@@ -8,9 +8,7 @@ import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.exceptions.http.NotFoundException;
-import greencity.exceptions.order.OrderViolationException;
-import greencity.exceptions.order.UnexistingOrderException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UserRepository;
@@ -80,7 +78,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     @Override
     public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
-        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new UnexistingOrderException(
+        Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new NotFoundException(
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
@@ -99,7 +97,7 @@ public class ViolationServiceImpl implements ViolationService {
                 + "  " + currentUser.getRecipientSurname(), order);
             notificationService.notifyAddViolation(order.getId());
         } else {
-            throw new OrderViolationException(ORDER_ALREADY_HAS_VIOLATION);
+            throw new NotFoundException(ORDER_ALREADY_HAS_VIOLATION);
         }
     }
 
@@ -162,7 +160,7 @@ public class ViolationServiceImpl implements ViolationService {
             eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
         } else {
-            throw new UnexistingOrderException(VIOLATION_DOES_NOT_EXIST);
+            throw new NotFoundException(VIOLATION_DOES_NOT_EXIST);
         }
     }
 
@@ -171,7 +169,7 @@ public class ViolationServiceImpl implements ViolationService {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Violation violation = violationRepository.findByOrderId(add.getOrderID())
-            .orElseThrow(() -> new UnexistingOrderException(ORDER_HAS_NOT_VIOLATION));
+            .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
         eventService.save(OrderHistory.CHANGES_VIOLATION,

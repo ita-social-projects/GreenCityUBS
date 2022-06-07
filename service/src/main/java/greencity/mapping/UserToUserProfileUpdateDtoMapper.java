@@ -23,6 +23,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .recipientName(user.getRecipientName())
             .recipientSurname(user.getRecipientSurname())
             .recipientPhone(user.getRecipientPhone())
+            .alternateEmail(user.getAlternateEmail())
             .addressDto(addressDtoList)
             .build();
     }

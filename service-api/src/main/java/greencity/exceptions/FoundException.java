@@ -1,10 +1,10 @@
-package greencity.exceptions.location;
+package greencity.exceptions;
 
-public class LocationNotFoundException extends RuntimeException {
+public class FoundException extends RuntimeException {
     /**
      * Default constructor.
      */
-    public LocationNotFoundException() {
+    public FoundException() {
     }
 
     /**
@@ -12,7 +12,7 @@ public class LocationNotFoundException extends RuntimeException {
      *
      * @param message message, that explains cause of the exception.
      */
-    public LocationNotFoundException(String message) {
+    public FoundException(String message) {
         super(message);
     }
 }

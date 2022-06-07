@@ -10,6 +10,7 @@ import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.enums.OrderStatus;
+import greencity.exceptions.payment.PaymentLinkException;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -114,7 +115,7 @@ public class ClientController {
     @PostMapping("/processOrderFondy")
     public ResponseEntity<FondyOrderResponse> processOrderFondy(
         @Valid @RequestBody OrderFondyClientDto dto,
-        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        @ApiIgnore @CurrentUserUuid String userUuid) throws PaymentLinkException {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processOrderFondyClient(dto, userUuid));
     }
 
@@ -135,7 +136,7 @@ public class ClientController {
     @PostMapping("/processOrderLiqpay")
     public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(
         @Valid @RequestBody OrderFondyClientDto dto,
-        @ApiIgnore @CurrentUserUuid String userUuid) throws Exception {
+        @ApiIgnore @CurrentUserUuid String userUuid) throws PaymentLinkException {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.proccessOrderLiqpayClient(dto, userUuid));
     }
 

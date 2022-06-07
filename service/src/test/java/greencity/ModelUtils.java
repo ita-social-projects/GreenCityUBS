@@ -57,7 +57,7 @@ import java.util.*;
 
 import static greencity.entity.enums.NotificationReceiverType.SITE;
 import static greencity.entity.enums.ViolationLevel.MAJOR;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 
 public class ModelUtils {
 
@@ -87,7 +87,7 @@ public class ModelUtils {
     public static final Set<NotificationParameter> TEST_NOTIFICATION_PARAMETER_SET2 = createNotificationParameterSet2();
     public static final UserNotification TEST_USER_NOTIFICATION = createUserNotification();
     public static final UserNotification TEST_USER_NOTIFICATION_2 = createUserNotification2();
-    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotification3();
+    public static final UserNotification TEST_USER_NOTIFICATION_3 = createUserNotificationForViolation();
     public static final UserNotification TEST_USER_NOTIFICATION_4 = createUserNotification4();
     public static final UserNotification TEST_USER_NOTIFICATION_5 = createUserNotification5();
     public static final NotificationParameter TEST_NOTIFICATION_PARAMETER = createNotificationParameter();
@@ -229,6 +229,32 @@ public class ModelUtils {
             .senderPhoneNumber("+380974563223")
             .senderLastName("TestLast")
             .senderFirstName("TestFirst")
+            .address(Address.builder()
+                .id(1L)
+                .user(null)
+                .houseNumber("1a")
+                .actual(true)
+                .entranceNumber("str")
+                .district("3a")
+                .houseCorpus("2a")
+                .city("Kiev")
+                .street("Gorodotska")
+                .coordinates(Coordinates.builder()
+                    .longitude(2.2)
+                    .latitude(3.2)
+                    .build())
+                .addressComment(null).build())
+            .orders(List.of(Order.builder().id(1L).build()))
+            .build();
+    }
+
+    public static UBSuser getUBSuserWithoutSender() {
+        return UBSuser.builder()
+            .firstName("oleh")
+            .lastName("ivanov")
+            .email("mail@mail.ua")
+            .id(1L)
+            .phoneNumber("067894522")
             .address(Address.builder()
                 .id(1L)
                 .user(null)
@@ -967,6 +993,30 @@ public class ModelUtils {
                 .lastName("Petyrov")
                 .phoneNumber("095123456")
                 .email("anatolii.andr@gmail.com")
+                .senderFirstName("Anatolii")
+                .senderLastName("Petyrov")
+                .senderPhoneNumber("095123456")
+                .senderEmail("anatolii.andr@gmail.com")
+                .build())
+            .build();
+    }
+
+    public static Order getOrderDetailsWithoutSender() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Alan")
+                .recipientSurname("Maym")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(4).build())
+            .ubsUser(UBSuser.builder()
+                .id(1L)
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
                 .build())
             .build();
     }
@@ -1030,6 +1080,16 @@ public class ModelUtils {
             .lastName("B")
             .phoneNumber("09443332")
             .email("dsd@gmail.com")
+            .build();
+    }
+
+    public static PersonalDataDto getPersonalDataDto2() {
+        return PersonalDataDto.builder()
+            .id(1l)
+            .firstName("Dima")
+            .lastName("Petrov")
+            .phoneNumber("0666051373")
+            .email("mail@mail.ua")
             .build();
     }
 
@@ -1294,6 +1354,10 @@ public class ModelUtils {
                 .firstName("oleh")
                 .lastName("ivanov")
                 .email("mail@mail.ua")
+                .senderEmail("test@email.ua")
+                .senderPhoneNumber("+380974563223")
+                .senderLastName("TestLast")
+                .senderFirstName("TestFirst")
                 .id(1L)
                 .phoneNumber("067894522")
                 .address(Address.builder()
@@ -1849,7 +1913,7 @@ public class ModelUtils {
             .build();
     }
 
-    private static UserNotification createUserNotification3() {
+    public static UserNotification createUserNotificationForViolation() {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.VIOLATION_THE_RULES);
         userNotification.setUser(TEST_ORDER_4.getUser());
@@ -1936,6 +2000,14 @@ public class ModelUtils {
         return NotificationDto.builder()
             .title("Test")
             .body("Test")
+            .build();
+    }
+
+    public static NotificationDto createViolationNotificationDto() {
+        return NotificationDto.builder()
+            .title("Test")
+            .body("Test")
+            .images(emptyList())
             .build();
     }
 
@@ -2062,6 +2134,31 @@ public class ModelUtils {
             .language(Language.builder().id(1L).code("ua").build())
             .name("name")
             .courier(getCourier(courierLimit))
+            .build();
+    }
+
+    public static CourierTranslation getCourierTranslation() {
+        return CourierTranslation.builder()
+            .id(1L)
+            .name("Test")
+            .language(getLanguage())
+            .courier(getCourier())
+            .build();
+    }
+
+    public static GetCourierTranslationsDto getCourierTranslationsDto() {
+        return GetCourierTranslationsDto.builder()
+            .id(1L)
+            .languageCode("ua")
+            .name("Test")
+            .build();
+    }
+
+    public static CourierDto getCourierDto() {
+        return CourierDto.builder()
+            .courierId(1L)
+            .courierStatus("ACTIVE")
+            .courierTranslationDtos(getCourierTranslationDtoList())
             .build();
     }
 
@@ -2813,7 +2910,7 @@ public class ModelUtils {
             .response_code(2)
             .response_description("ddd")
             .order_time("s")
-            .settlement_date("s")
+            .settlement_date("21.12.2014")
             .fee(null)
             .payment_system("s")
             .sender_email("s")
@@ -3058,6 +3155,10 @@ public class ModelUtils {
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.FORMED)
             .counterOrderPaymentId(1L)
+            .pointsToUse(100)
+            .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
             .build();
     }
 

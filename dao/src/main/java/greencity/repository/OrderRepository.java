@@ -259,4 +259,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             + "ORDER BY o.order_date DESC "
             + "LIMIT 1")
     Optional<Order> getLastOrderOfUserByUUIDIfExists(@Param(value = "user_uuid") String usersUuid);
+
+    /**
+     * Method sets order status by order's id.
+     *
+     * @param orderId     - order's ID
+     * @param orderStatus - order status to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET order_payment_status = :orderStatus WHERE id = :orderId")
+    void updateOrderPaymentStatus(@Param(value = "orderId") Long orderId, @Param("orderStatus") String orderStatus);
 }

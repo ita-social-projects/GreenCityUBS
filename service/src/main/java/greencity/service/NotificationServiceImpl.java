@@ -16,8 +16,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.exceptions.http.NotFoundException;
-import greencity.exceptions.notification.NotificationNotFoundException;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.NotificationService;
@@ -74,8 +73,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
                     order.getId().toString());
             if ((lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
+                || (lastNotification.get().getNotificationTime()
+                    .isBefore(LocalDateTime.now(clock).minusDays(7))
+                    || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
+                && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
+                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
+                && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
+                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)))) {
                 UserNotification userNotification = new UserNotification();
                 if (lastNotification.isPresent()) {
                     UserNotification oldNotification = lastNotification.get();
@@ -250,7 +254,8 @@ public class NotificationServiceImpl implements NotificationService {
                     .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
                         NotificationType.LETS_STAY_CONNECTED);
             if (lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1))) {
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusMonths(2))
+                || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusMonths(2))) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
                 userNotification.setUser(user);
@@ -300,17 +305,25 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationDto getNotification(String uuid, Long id, String language) {
         UserNotification notification = userNotificationRepository.findById(id)
-            .orElseThrow(() -> new NotificationNotFoundException(NOTIFICATION_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
         if (!notification.getUser().getUuid().equals(uuid)) {
-            throw new NotificationNotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+            throw new NotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
 
         if (!notification.isRead()) {
             notification.setRead(true);
         }
 
-        return createNotificationDto(notification, language, SITE, templateRepository);
+        NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository);
+
+        if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
+            Violation violation = violationRepository.findByOrderId(notification.getOrder().getId())
+                .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
+            notificationDto.setImages(violation.getImages());
+        }
+
+        return notificationDto;
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language) {

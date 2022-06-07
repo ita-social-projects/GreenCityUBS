@@ -16,6 +16,8 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -300,7 +302,7 @@ public interface UBSClientService {
      * @return {@link Map}
      * @author Vadym Makitra
      */
-    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws Exception;
+    Map<String, Object> getLiqPayStatus(Long orderId, String uuid) throws BadRequestException;
 
     /**
      * Method for delete user order.
@@ -316,7 +318,7 @@ public interface UBSClientService {
      * @param dto - current OrderFondyClientDto dto.
      * @author Max Boiarchuk
      */
-    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws Exception;
+    FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
 
     /**
      * Method return link with liqpay payment .
@@ -324,7 +326,7 @@ public interface UBSClientService {
      * @param dto - current OrderLiqpayClientDto dto.
      * @author Max Boiarchuk
      */
-    LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws Exception;
+    LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) throws PaymentLinkException;
 
     /**
      * Method validates received payment client response.

@@ -13,6 +13,7 @@ public class UserToUserProfileDtoMapper extends AbstractConverter<User, UserProf
             .recipientName(user.getRecipientName())
             .recipientSurname(user.getRecipientSurname())
             .recipientEmail(user.getRecipientEmail())
+            .alternateEmail(user.getAlternateEmail())
             .recipientPhone(user.getRecipientPhone())
             .build();
     }

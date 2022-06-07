@@ -5,8 +5,8 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import greencity.constant.ErrorMessage;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileNotSavedException;
-import greencity.exceptions.image.ImageUrlParseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
@@ -57,7 +57,7 @@ public class AzureCloudStorageService implements FileService {
         try {
             fileName = Paths.get(new URI(url).getPath()).getFileName().toString();
         } catch (URISyntaxException e) {
-            throw new ImageUrlParseException(ErrorMessage.PARSING_URL_FAILED + url);
+            throw new BadRequestException(ErrorMessage.PARSING_URL_FAILED + url);
         }
         BlobClient client = containerClient().getBlobClient(fileName);
         if (client.exists() != null && client.exists()) {
