@@ -34,6 +34,7 @@ import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
+import greencity.service.KafkaMessagingService;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -81,6 +82,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
     private final FileService fileService;
+    private final KafkaMessagingService kafkaMessagingService;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -895,6 +897,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             } else if (order.getOrderStatus() == OrderStatus.DONE) {
                 eventService.save(OrderHistory.ORDER_DONE,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
+                kafkaMessagingService.sendOrderDoneEvent(order);
             } else if (order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
                 eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF,
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);

@@ -149,6 +149,8 @@ class UBSManagementServiceImplTest {
 
     @Mock
     OrdersAdminsPageService ordersAdminsPageService;
+    @Mock
+    private KafkaMessagingService kafkaMessagingService;
 
     @Test
     void getAllCertificates() {
