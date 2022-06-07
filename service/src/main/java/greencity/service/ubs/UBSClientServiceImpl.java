@@ -737,12 +737,22 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
         UBSuser sender = order.getUbsUser();
-        return SenderInfoDto.builder()
-            .senderName(sender.getSenderFirstName())
-            .senderSurname(sender.getSenderLastName())
-            .senderEmail(sender.getSenderEmail())
-            .senderPhone(sender.getSenderPhoneNumber())
-            .build();
+        if (sender.getSenderFirstName().isEmpty() && sender.getSenderLastName().isEmpty()
+                && sender.getSenderPhoneNumber().isEmpty()) {
+            return SenderInfoDto.builder()
+                    .senderName(sender.getFirstName())
+                    .senderSurname(sender.getLastName())
+                    .senderEmail(sender.getEmail())
+                    .senderPhone(sender.getPhoneNumber())
+                    .build();
+        } else {
+            return SenderInfoDto.builder()
+                    .senderName(sender.getSenderFirstName())
+                    .senderSurname(sender.getSenderLastName())
+                    .senderEmail(sender.getSenderEmail())
+                    .senderPhone(sender.getSenderPhoneNumber())
+                    .build();
+        }
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
@@ -817,20 +827,28 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!order.getUser().equals(user)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
-        return UserInfoDto.builder()
-            .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
-            .customerPhoneNumber(order.getUser().getRecipientPhone())
-            .customerEmail(order.getUser().getRecipientEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientId(order.getUbsUser().getId())
-            .recipientName(order.getUbsUser().getFirstName())
-            .recipientSurName(order.getUbsUser().getLastName())
-            .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
-            .recipientEmail(order.getUbsUser().getEmail())
-            .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
-            .build();
+        UserInfoDto userInfoDto = UserInfoDto.builder()
+                .customerName(order.getUser().getRecipientName())
+                .customerSurName(order.getUser().getRecipientSurname())
+                .customerPhoneNumber(order.getUser().getRecipientPhone())
+                .customerEmail(order.getUser().getRecipientEmail())
+                .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
+                .recipientId(order.getUbsUser().getId())
+                .userViolationForCurrentOrder(
+                        userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+                .build();
+        if (order.getUbsUser().getSenderFirstName().isEmpty() && order.getUbsUser().getSenderLastName().isEmpty()
+                && order.getUbsUser().getSenderPhoneNumber().isEmpty()) {
+            return userInfoDto.setRecipientName(order.getUbsUser().getFirstName())
+                    .setRecipientSurName(order.getUbsUser().getLastName())
+                    .setRecipientEmail(order.getUbsUser().getEmail())
+                    .setRecipientPhoneNumber(order.getUbsUser().getPhoneNumber());
+        } else {
+            return userInfoDto.setRecipientName(order.getUbsUser().getSenderFirstName())
+                    .setRecipientSurName(order.getUbsUser().getSenderLastName())
+                    .setRecipientEmail(order.getUbsUser().getSenderEmail())
+                    .setRecipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber());
+        }
     }
 
     /**
