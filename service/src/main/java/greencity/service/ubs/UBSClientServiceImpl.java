@@ -738,10 +738,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
         UBSuser sender = order.getUbsUser();
         return SenderInfoDto.builder()
-            .senderName(sender.getFirstName())
-            .senderSurname(sender.getLastName())
-            .senderEmail(sender.getEmail())
-            .senderPhone(sender.getPhoneNumber())
+            .senderName(sender.getSenderFirstName())
+            .senderSurname(sender.getSenderLastName())
+            .senderEmail(sender.getSenderEmail())
+            .senderPhone(sender.getSenderPhoneNumber())
             .build();
     }
 
@@ -824,10 +824,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             .customerEmail(order.getUser().getRecipientEmail())
             .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
             .recipientId(order.getUbsUser().getId())
-            .recipientName(order.getUbsUser().getSenderFirstName())
-            .recipientSurName(order.getUbsUser().getSenderLastName())
-            .recipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber())
-            .recipientEmail(order.getUbsUser().getSenderEmail())
+            .recipientName(order.getUbsUser().getFirstName())
+            .recipientSurName(order.getUbsUser().getLastName())
+            .recipientPhoneNumber(order.getUbsUser().getPhoneNumber())
+            .recipientEmail(order.getUbsUser().getEmail())
             .userViolationForCurrentOrder(
                 userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
             .build();

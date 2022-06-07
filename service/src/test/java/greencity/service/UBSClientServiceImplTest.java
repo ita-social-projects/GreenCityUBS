@@ -500,16 +500,14 @@ class UBSClientServiceImplTest {
 
     @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
-        Order order = ModelUtils.getOrderDetails();
-        order.getUser().setUuid("test");
         UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
         expectedResult.setRecipientId(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid("test")).thenReturn(order.getUser());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetails().getUser());
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "test");
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
 
         verify(orderRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).countTotalUsersViolations(1L);
