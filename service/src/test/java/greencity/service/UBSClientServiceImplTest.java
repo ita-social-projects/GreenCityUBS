@@ -500,16 +500,32 @@ class UBSClientServiceImplTest {
 
     @Test
     void getsUserAndUserUbsAndViolationsInfoByOrderId() {
-        Order order = ModelUtils.getOrderDetails();
-        order.getUser().setUuid("test");
         UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
         expectedResult.setRecipientId(1L);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid("test")).thenReturn(order.getUser());
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrderDetails()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getOrderDetails().getUser());
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
         when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
             .thenReturn(expectedResult.getUserViolationForCurrentOrder());
-        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, "test");
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
+
+        verify(orderRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).countTotalUsersViolations(1L);
+        verify(userRepository, times(1)).checkIfUserHasViolationForCurrentOrder(1L, 1L);
+
+        assertEquals(expectedResult, actual);
+    }
+
+    @Test
+    void getsUserAndUserUbsAndViolationsInfoByOrderIdWithoutSender() {
+        UserInfoDto expectedResult = ModelUtils.getUserInfoDto();
+        expectedResult.setRecipientId(1L);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrderDetailsWithoutSender()));
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getOrderDetailsWithoutSender().getUser());
+        when(userRepository.countTotalUsersViolations(1L)).thenReturn(expectedResult.getTotalUserViolations());
+        when(userRepository.checkIfUserHasViolationForCurrentOrder(1L, 1L))
+            .thenReturn(expectedResult.getUserViolationForCurrentOrder());
+        UserInfoDto actual = ubsService.getUserAndUserUbsAndViolationsInfoByOrderId(1L, anyString());
 
         verify(orderRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).countTotalUsersViolations(1L);
@@ -1685,6 +1701,35 @@ class UBSClientServiceImplTest {
                 (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
 
+    }
+
+    @Test
+    void senderInfoDtoBuilderTest() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        UBSuser ubsuser = ModelUtils.getUBSuserWithoutSender();
+        Order order = ModelUtils.getOrderTest().setUbsUser(ubsuser);
+        User user = ModelUtils.getTestUser();
+        List<Order> orderList = new ArrayList<>();
+        order.setAmountOfBagsOrdered(Map.of(1, 10));
+        order.setUser(user);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
+        Page<Order> page = new PageImpl<>(orderList, pageable, 1);
+
+        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+            .thenReturn(page);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue()))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
+            (long) order.getOrderPaymentStatus().getStatusValue()))
+                .thenReturn(orderPaymentStatusTranslation);
+
+        PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
+        assertEquals(dto.getTotalElements(), orderList.size());
+        assertEquals(dto.getPage().get(0).getId(), order.getId());
     }
 
     @Test
