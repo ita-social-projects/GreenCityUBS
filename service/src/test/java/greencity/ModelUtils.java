@@ -248,6 +248,32 @@ public class ModelUtils {
             .build();
     }
 
+    public static UBSuser getUBSuserWithoutSender() {
+        return UBSuser.builder()
+            .firstName("oleh")
+            .lastName("ivanov")
+            .email("mail@mail.ua")
+            .id(1L)
+            .phoneNumber("067894522")
+            .address(Address.builder()
+                .id(1L)
+                .user(null)
+                .houseNumber("1a")
+                .actual(true)
+                .entranceNumber("str")
+                .district("3a")
+                .houseCorpus("2a")
+                .city("Kiev")
+                .street("Gorodotska")
+                .coordinates(Coordinates.builder()
+                    .longitude(2.2)
+                    .latitude(3.2)
+                    .build())
+                .addressComment(null).build())
+            .orders(List.of(Order.builder().id(1L).build()))
+            .build();
+    }
+
     public static User getTestUser() {
         return User.builder()
             .id(1L)
@@ -971,6 +997,26 @@ public class ModelUtils {
                 .senderLastName("Petyrov")
                 .senderPhoneNumber("095123456")
                 .senderEmail("anatolii.andr@gmail.com")
+                .build())
+            .build();
+    }
+
+    public static Order getOrderDetailsWithoutSender() {
+        return Order.builder()
+            .id(1L)
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Alan")
+                .recipientSurname("Maym")
+                .recipientPhone("091546745")
+                .recipientEmail("wayn@email.com")
+                .violations(4).build())
+            .ubsUser(UBSuser.builder()
+                .id(1L)
+                .firstName("Anatolii")
+                .lastName("Petyrov")
+                .phoneNumber("095123456")
+                .email("anatolii.andr@gmail.com")
                 .build())
             .build();
     }
