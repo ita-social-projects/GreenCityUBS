@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -16,6 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * @author Andrii Yezenitskyi
  */
 @RequiredArgsConstructor
+@Component
 public class UserRemoteClientInterceptor implements RequestInterceptor {
     private final JwtTool jwtTool;
     @Value("${greencity.authorization.service-email}")

@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
+import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
@@ -43,6 +44,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -133,8 +136,10 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+
     @GetMapping("/all-undelivered")
-    public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords() {
+    @PreAuthorize("@preAuthorizer.authoriseEmployee('Update user profile', authentication)")
+    public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
 
