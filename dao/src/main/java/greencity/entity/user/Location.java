@@ -46,8 +46,4 @@ public class Location {
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
     private Set<TariffLocation> tariffLocations;
-    /*-
-    @ManyToMany(mappedBy = "locations", cascade = CascadeType.ALL)
-    private List<TariffsInfo> tariffsInfoList;
-     */
 }

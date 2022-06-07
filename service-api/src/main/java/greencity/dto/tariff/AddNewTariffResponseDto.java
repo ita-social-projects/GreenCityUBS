@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddNewTariffResponseDto {
-
     private List<Long> tariffForLocationAndCourierAlreadyExistIdList;
     private List<Long> nonExistingLocationIdList;
 }

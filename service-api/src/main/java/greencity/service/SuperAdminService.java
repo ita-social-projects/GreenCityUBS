@@ -251,10 +251,11 @@ public interface SuperAdminService {
     String deactivateTariffCard(Long tariffId);
 
     /**
+     * Method for changing status of {@link greencity.entity.order.TariffLocation}
      *
-     * @param tariffId id of tariff where location statuses want to be changed
-     * @param dto
-     * @param param
+     * @param tariffId - id of tariff where location statuses want to be changed
+     * @param dto - contains List of Location id's to update status
+     * @param param - should be "activate" or "deactivate" or throws BadRequestException
      */
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }

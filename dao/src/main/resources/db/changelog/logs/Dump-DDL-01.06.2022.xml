@@ -131,6 +131,7 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="courier_translations_pk"/>
             </column>
+            <column name="name" type="varchar"/>
             <column name="courier_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
@@ -449,6 +450,8 @@
                 <constraints nullable="false"/>
             </column>
             <column name="tariffs_info_id" type="bigint"/>
+            <column name="edited_at" type="date"/>
+            <column name="edited_by" type="varchar"/>
         </createTable>
         
         <createTable tableName="service_translations">
@@ -521,7 +524,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="user_id" type="bigint">
-                <constraints nullable="false" deleteCascade="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
         
@@ -591,7 +594,7 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="viber_bot_pk"/>
             </column>
-            <column name="chat_id" type="varchar(256">
+            <column name="chat_id" type="varchar(256)">
                 <constraints nullable="false"/>
             </column>
             <column name="user_id" type="bigint">
@@ -682,13 +685,243 @@
                                  referencedTableName="languages"
                                  referencedColumnNames="id"/>
 
-        <addForeignKeyConstraint baseTableName="employee_position" baseColumnNames="" constraintName="" referencedTableName=""
-                                 referencedColumnNames=""/>
+        <addForeignKeyConstraint baseTableName="employee_position"
+                                 baseColumnNames="employee_id"
+                                 constraintName="employee_position_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
 
+        <addForeignKeyConstraint baseTableName="employee_position"
+                                 baseColumnNames="position_id"
+                                 constraintName="employee_position_to_positions_fk"
+                                 referencedTableName="positions"
+                                 referencedColumnNames="id"/>
 
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="employee_id"
+                                 constraintName="employee_receiving_station_mapping_to_employee_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
 
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="employee_receiving_station_mapping_to_receiving_stations_fk"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
 
+        <addForeignKeyConstraint baseTableName="events"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_events_order_id"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
         
+        <addForeignKeyConstraint baseTableName="locations"
+                                 baseColumnNames="region_id"
+                                 constraintName="fk_location_to_region_id"
+                                 referencedTableName="regions"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="notification_parameters"
+                                 baseColumnNames="notification_id"
+                                 constraintName="notification_parameters_to_user_notifications_fk"
+                                 referencedTableName="user_notifications"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="notification_templates"
+                                 baseColumnNames="language_id"
+                                 constraintName="notification_templates_to_languages_fk"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_additional"
+                                 baseColumnNames="orders_id"
+                                 constraintName="order_additional_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_bag_mapping"
+                                 baseColumnNames="order_id"
+                                 constraintName="order_bag_mapping_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_employee"
+                                 baseColumnNames="employee_id"
+                                 constraintName="order_employee_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="order_employee"
+                                 baseColumnNames="order_id"
+                                 constraintName="order_employee_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="ubs_user_id"
+                                 constraintName="orders_to_ubs_user_fk"
+                                 referencedTableName="ubs_user"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="users_id"
+                                 constraintName="orders_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="employee_id"
+                                 constraintName="orders_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="orders_to_ubs_receiving_stations_fk"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="orders_to_ubs_tariffs_info_fk"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="payment"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_payment_to_orders"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="receiving_stations"
+                                 baseColumnNames="created_by_id"
+                                 constraintName="receiving_stations_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service"
+                                 baseColumnNames="courier_id"
+                                 constraintName="service_to_courier_fk"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="service_to_tariffs_info_fk"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service_translations"
+                                 baseColumnNames="service_id"
+                                 constraintName="service_translations_service_fk"
+                                 referencedTableName="service"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service_translations"
+                                 baseColumnNames="language_id"
+                                 constraintName="service_translations_to_languages_fk"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="creator_id"
+                                 constraintName="tariffs_info_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="courier_id"
+                                 constraintName="tariffs_info_to_courier_fk"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_receiving_stations_tariffs_info_id"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="fk_tariffs_info_receiving_stations_id"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_locations"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_tariffs_locations_to_tariffs_info_id"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_locations"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_tariffs_locations_to_locations_id"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="telegram_bot"
+                                 baseColumnNames="user_id"
+                                 constraintName="telegram_bot_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="ubs_user"
+                                 baseColumnNames="users_id"
+                                 constraintName="ubs_user_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ubs_user"
+                                 baseColumnNames="address_id"
+                                 constraintName="ubs_user_to_address_fk"
+                                 referencedTableName="address"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_notifications"
+                                 baseColumnNames="users_id"
+                                 constraintName="user_notifications_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_notifications"
+                                 baseColumnNames="order_id"
+                                 constraintName="user_notifications_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="users"
+                                 baseColumnNames="last_order_location"
+                                 constraintName="users_to_locations_fk"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="viber_bot"
+                                 baseColumnNames="user_id"
+                                 constraintName="viber_bot_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="violation_images"
+                                 baseColumnNames="violation_id"
+                                 constraintName="fk_violation_image_mapping"
+                                 referencedTableName="violations_description_mapping"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="violations_description_mapping"
+                                 baseColumnNames="order_id"
+                                 constraintName="violations_description_mapping_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
+
+        <addForeignKeyConstraint baseTableName="violations_description_mapping"
+                                 baseColumnNames="added_by_user_id"
+                                 constraintName="violations_description_mapping_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
     <changeSet id="triggers_and_functions" author="Maksym Kuzbyt">

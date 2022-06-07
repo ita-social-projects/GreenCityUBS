@@ -69,13 +69,7 @@ public class TariffsInfo {
 
     @OneToMany(mappedBy = "tariffsInfo", cascade = CascadeType.ALL)
     private Set<TariffLocation> tariffLocations;
-    /*-
-    @ManyToMany
-    @JoinTable(name = "tariffs_info_locations_mapping",
-        joinColumns = @JoinColumn(name = "tariffs_info_id"),
-        inverseJoinColumns = @JoinColumn(name = "location_id"))
-    private Set<Location> locations;
-     */
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;
 }

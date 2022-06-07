@@ -3435,7 +3435,6 @@ public class ModelUtils {
             .courier(ModelUtils.getCourier())
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .tariffLocations(Set.of(TariffLocation.builder()
-                // .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
                 .location(Location.builder().id(1L)
                     .region(ModelUtils.getRegion())
                     .nameUk("Київ")
