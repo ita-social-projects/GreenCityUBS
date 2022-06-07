@@ -76,7 +76,4 @@ public class TariffsInfo {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;
-
-    @ManyToMany(mappedBy = "tariffInfos", cascade = CascadeType.ALL)
-    private Set<Employee> employees;
 }
