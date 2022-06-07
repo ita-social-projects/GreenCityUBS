@@ -250,5 +250,11 @@ public interface SuperAdminService {
      */
     String deactivateTariffCard(Long tariffId);
 
+    /**
+     *
+     * @param tariffId id of tariff where location statuses want to be changed
+     * @param dto
+     * @param param
+     */
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }

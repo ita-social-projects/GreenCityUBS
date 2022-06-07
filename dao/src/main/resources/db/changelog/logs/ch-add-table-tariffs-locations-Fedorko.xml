@@ -41,4 +41,12 @@
                                  referencedTableName="locations"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="ch-insert-table-tariffs_locations-Fedorko" author="Fedorko Yurii">
+        <insert tableName="tariffs_locations">
+            <column name="tariffs_info_id">1</column>
+            <column name="location_id">1</column>
+            <column name="location_status">ACTIVE</column>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

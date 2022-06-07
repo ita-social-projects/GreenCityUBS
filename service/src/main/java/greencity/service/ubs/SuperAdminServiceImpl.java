@@ -642,13 +642,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     @Transactional
     public void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
+        tryToFindTariffById(tariffId);
         if ("activate".equals(param.toLowerCase())) {
             tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
         } else if ("deactivate".equals(param.toLowerCase())) {
             tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(),
                 LocationStatus.DEACTIVATED.name());
         } else {
-            throw new BadRequestException("Unknown param");
+            throw new BadRequestException("Unresolvable param");
         }
 
     }
