@@ -47,10 +47,9 @@ class JwtAuthenticationProviderTest {
 
     @Test
     void authenticateWithValidAccessToken() {
-        final String accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxcXFAZW1h"
-            + "aWwuY29tIiwicm9sZSI6WyJST0xFX0FETUlOIl0sImlhdCI6MTY1NDYyOT"
-            + "QxNSwiZXhwIjoxNjU0NjM2NjE1fQ.kmrocXfHNsyASmZ24zEUmFn1N2Oct"
-            + "2pmBWWZO0xmAt0";
+        final String accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxcXFAZW1haWwu"
+            + "Y29tIiwicm9sZSI6WyJST0xFX0FETUlOIl0sImlhdCI6MTY1NDYzNjc2OSwiZXh"
+            + "wIjo2MTY1NDYzNjcwOX0.Ug-epWHV0a9f7BFPa1geKhqWysWkOdoG5wd4h2Hzpi4";
         when(jwtTool.getAccessTokenKey()).thenReturn("123123123");
         Authentication authentication = new UsernamePasswordAuthenticationToken(
             accessToken,
