@@ -1,0 +1,1133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="initial_DDL_Create" author="Yurii Fedorko">
+        <createTable tableName="address">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="address_pk"/>
+            </column>
+
+            <column name="city" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_en" type="varchar"/>
+
+            <column name="address_comment" type="varchar(200)"/>
+
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+
+            <column name="district" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="district_en" type="varchar(30)"/>
+
+            <column name="entrance_number" type="varchar(5)"/>
+            <column name="house_corpus" type="varchar(5)"/>
+            <column name="house_number" type="varchar(5)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="street" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street_en" type="varchar(50)"/>
+
+            <column name="actual" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="bigint"/>
+
+            <column name="status" type="varchar(15)" defaultValue="NEW">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="region" type="varchar"/>
+            <column name="region_en" type="varchar"/>
+        </createTable>
+        
+        <createTable tableName="bag">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="bag_pk"/>
+            </column>
+
+            <column name="capacity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commission" type="INT"/>
+            <column name="full_price" type="INT"/>
+            <column name="created_at" type="date"/>
+            <column name="created_by" type="varchar"/>
+            <column name="edited_at" type="date"/>
+            <column name="edited_by" type="varchar"/>
+            <column name="location_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_amount_of_bags" type="varchar" defaultValue="INCLUDE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tariffs_info_id" type="bigint"/>
+        </createTable>
+        
+        <createTable tableName="bag_translations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="bag_translations_pk"/>
+            </column>
+            <column name="name" type="varchar(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_eng" type="varchar(60)"/>
+            <column name="bag_id" type="integer"/>
+            <column name="description" type="varchar"/>
+        </createTable>
+        
+        <createTable tableName="certificate">
+            <column name="code" type="varchar(9)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="certificate_pk"/>
+            </column>
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="points" type="integer"/>
+            <column name="order_id" type="bigint"/>
+            <column name="creation_date" type="date"/>
+            <column name="date_of_use" type="date"/>
+        </createTable>
+        
+        <createTable tableName="change_of_points">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="change_of_points_pk"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="integer"/>
+            <column name="date" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="bigint"/>
+        </createTable>
+        
+        <createTable tableName="courier">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="courier_pk"/>
+            </column>
+            <column name="courier_status" type="varchar" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_date" type="date"/>
+            <column name="created_by_id" type="bigint"/>
+        </createTable>
+
+        <createTable tableName="courier_translations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="courier_translations_pk"/>
+            </column>
+            <column name="name" type="varchar"/>
+            <column name="courier_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="limit_description" type="varchar"/>
+        </createTable>
+        <addUniqueConstraint tableName="courier_translations" columnNames="courier_id, language_id" constraintName="UK_courier_id_and_languages_id"/>
+
+        <createTable tableName="custom_table_view">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="custom_table_view_pk"/>
+            </column>
+            <column name="uuid" type="varchar"/>
+            <column name="titles" type="varchar(551)"/>
+        </createTable>
+        
+        <createTable tableName="employee_order_position">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="employee_order_position_pk"/>
+            </column>
+
+            <column name="order_id" type="bigint"/>
+            <column name="employee_id" type="bigint"/>
+            <column name="position_id" type="bigint"/>
+        </createTable>
+
+        <createTable tableName="employee_position">
+            <column name="employee_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="position_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="employee_position" columnNames="position_id, employee_id"/>
+
+        <createTable tableName="employee_receiving_station_mapping">
+            <column name="employee_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiving_station_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="employee_receiving_station_mapping" columnNames="employee_id, receiving_station_id"/>
+
+        <createTable tableName="employees">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="employees_pk"/>
+            </column>
+            <column name="first_name" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(30)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="varchar(170)">
+                <constraints unique="true"/>
+            </column>
+            <column name="image_path" type="varchar"/>
+            <column name="status" type="varchar(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="events">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" primaryKeyName="events_pk"/>
+            </column>
+            <column name="event_date" type="timestamp"/>
+            <column name="event_name" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="languages">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="languages_pk"/>
+            </column>
+            <column name="code" type="varchar(35)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="locations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="locations_pk"/>
+            </column>
+            <column name="location_status" type="varchar" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_id" type="bigint" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="double"/>
+            <column name="longitude" type="double"/>
+            <column name="name_uk" type="varchar"/>
+            <column name="name_en" type="varchar"/>
+        </createTable>
+        
+        <createTable tableName="notification_parameters">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="notification_parameters_pk"/>
+            </column>
+            <column name="notification_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="notification_schedule">
+            <column name="notification_type" type="varchar">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_schedule_pk"/>
+            </column>
+            <column name="cron" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="notification_templates">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="notification_templates_pk"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body" type="varchar(1500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_receiver_type" type="varchar(50)"/>
+        </createTable>
+        
+        <createTable tableName="order_additional">
+            <column name="orders_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_order" type="varchar(15)"/>
+        </createTable>
+        
+        <createTable tableName="order_bag_mapping">
+            <column name="order_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bag_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="integer"/>
+            <column name="confirmed_quantity" type="integer"/>
+            <column name="exported_quantity" type="integer"/>
+        </createTable>
+        <addPrimaryKey tableName="order_bag_mapping" columnNames="order_id, bag_id"/>
+
+        <createTable tableName="order_employee">
+            <column name="employee_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="order_employee" columnNames="employee_id, order_id"/>
+        
+        <createTable tableName="order_payment_status_translations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="order_payment_status_translations_pk"/>
+            </column>
+            <column name="order_payment_status_id" type="bigint"/>
+            <column name="translation_value" type="varchar(30)"/>
+            <column name="translation_value_eng" type="varchar(60)"/>
+        </createTable>
+        
+        <createTable tableName="order_status_translations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="order_status_translations_pk"/>
+            </column>
+            <column name="status_id" type="bigint"/>
+            <column name="name" type="varchar(60)"/>
+            <column name="name_eng" type="varchar(60)"/>
+        </createTable>
+        
+        <createTable tableName="orders">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="orders_pk"/>
+            </column>
+            <column name="comment" type="varchar"/>
+            <column name="deliver_from" type="datetime(6)"/>
+            <column name="deliver_to" type="datetime(6)"/>
+            <column name="note" type="varchar"/>
+            <column name="order_date" type="datetime(6)"/>
+            <column name="order_status" type="varchar(18)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="points_to_use" type="integer" defaultValue="0"/>
+            <column name="receiving_station" type="varchar(50)"/>
+            <column name="ubs_user_id" type="bigint"/>
+            <column name="users_id" type="bigint"/>
+            <column name="order_payment_status" type="varchar(40)"/>
+            <column name="cancellation_reason" type="varchar(40)"/>
+            <column name="cancellation_comment" type="varchar(170)"/>
+            <column name="reason_not_taking_bag_description" type="varchar(512)"/>
+            <column name="image_reason_not_taking_bags" type="varchar(2048)"/>
+            <column name="date_of_export" type="date"/>
+            <column name="employee_id" type="bigint"/>
+            <column name="blocked" type="boolean"/>
+            <column name="admin_comment" type="varchar"/>
+            <column name="counter_order_payment_id" type="bigint" defaultValue="0"/>
+            <column name="sum_total_amount_without_discounts" type="bigint"/>
+            <column name="receiving_station_id" type="bigint"/>
+            <column name="tariffs_info_id" type="bigint"/>
+        </createTable>
+
+        <createTable tableName="payment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="payment_pk"/>
+            </column>
+            <column name="amount" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="response_status" type="varchar(50)"/>
+            <column name="sender_cell_phone" type="varchar(16)"/>
+            <column name="sender_account" type="varchar(50)"/>
+            <column name="masked_card" type="varchar(19)"/>
+            <column name="card_type" type="varchar(50)"/>
+            <column name="response_code" type="integer"/>
+            <column name="response_description" type="varchar(1024)"/>
+            <column name="order_time" type="varchar(19)"/>
+            <column name="settlement_date" type="varchar(10)">
+                <constraints checkConstraint="CHECK (settlement_date ~ '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'
+                OR settlement_date IS NULL)"/>
+            </column>
+            <column name="fee" type="bigint"/>
+            <column name="payment_system" type="varchar(50)"/>
+            <column name="sender_email" type="varchar"/>
+            <column name="payment_id" type="varchar(100)"/>
+            <column name="order_id" type="bigint"/>
+            <column name="comment" type="varchar"/>
+            <column name="payment_status" type="varchar(20)" defaultValue="UNPAID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receipt_link" type="varchar"/>
+            <column name="image_path" type="varchar"/>
+            <column name="payment_type" type="varchar"/>
+        </createTable>
+        
+        <createTable tableName="positions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="positions_pk"/>
+            </column>
+            <column name="name" type="varchar(30)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="receiving_stations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="receiving_stations_pk"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true"/>
+            </column>
+            <column name="create_date" type="date"/>
+            <column name="created_by_id" type="bigint"/>
+        </createTable>
+        
+        <createTable tableName="regions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="regions_pk"/>
+            </column>
+            <column name="name_uk" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_en" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="service">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="service_pk"/>
+            </column>
+            <column name="capacity" type="integer"/>
+            <column name="base_price" type="integer"/>
+            <column name="commission" type="integer"/>
+            <column name="full_price" type="integer"/>
+            <column name="created_at" type="date"/>
+            <column name="created_by" type="varchar"/>
+            <column name="courier_id" type="bigint" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tariffs_info_id" type="bigint"/>
+            <column name="edited_at" type="date"/>
+            <column name="edited_by" type="varchar"/>
+        </createTable>
+        
+        <createTable tableName="service_translations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="service_translations_pk"/>
+            </column>
+            <column name="name" type="varchar(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="service_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="service_translations" columnNames="service_id, language_id"/>
+        
+        <createTable tableName="tariffs_info">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="tariffs_info_pk"/>
+            </column>
+            <column name="location_status" type="varchar" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator_id" type="bigint"/>
+            <column name="created_at" type="date"/>
+            <column name="min_amount_of_big_bags" type="bigint"/>
+            <column name="max_amount_of_big_bags" type="bigint"/>
+            <column name="min_price_of_order" type="bigint"/>
+            <column name="max_price_of_order" type="bigint"/>
+            <column name="courier_limits" type="varchar" defaultValue="LIMIT_BY_AMOUNT_OF_BAG">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id" type="BIGINT" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiving_station_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="tariffs_info_receiving_stations_mapping" columnNames="tariffs_info_id,receiving_station_id"/>
+
+        <createTable tableName="tariffs_locations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="tariffs_locations_pk"/>
+            </column>
+            <column name="tariffs_info_id" type="bigint"/>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location_status" type="VARCHAR" defaultValue="ACTIVE"/>
+        </createTable>
+        <addUniqueConstraint tableName="tariffs_locations" columnNames="tariffs_info_id, location_id"/>
+
+        <createTable tableName="telegram_bot">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="telegram_bot_pk"/>
+            </column>
+            <column name="chat_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="ubs_user">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="ubs_user_pk"/>
+            </column>
+            <column name="email" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="users_id" type="bigint"/>
+            <column name="address_id" type="bigint"/>
+            <column name="sender_first_name" type="varchar(30)"/>
+            <column name="sender_last_name" type="varchar(30)"/>
+            <column name="sender_email" type="varchar(50)"/>
+            <column name="sender_phone_number" type="varchar(15)"/>
+            <column name="alternate_email" type="varchar(50)"/>
+        </createTable>
+
+        <createTable tableName="user_notifications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="user_notifications_pk"/>
+            </column>
+            <column name="users_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_time" type="TIMESTAMP(6)" defaultValue="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="bigint"/>
+            <column name="read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="users_pk"/>
+            </column>
+            <column name="current_points" type="integer" defaultValue="0"/>
+            <column name="uuid" type="varchar(60)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="violations" type="integer" defaultValue="0"/>
+            <column name="recipient_name" type="varchar(170)"/>
+            <column name="recipient_email" type="varchar(170)"/>
+            <column name="recipient_phone" type="varchar(30)"/>
+            <column name="recipient_surname" type="varchar(170)"/>
+            <column name="last_order_location" type="bigint"/>
+            <column name="date_of_registration" type="date"/>
+            <column name="alternate_email" type="varchar(170)"/>
+        </createTable>
+
+        <createTable tableName="viber_bot">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="viber_bot_pk"/>
+            </column>
+            <column name="chat_id" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" deleteCascade="true" unique="true"/>
+            </column>
+            <column name="notify" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="violation_images">
+            <column name="violation_id" type="bigint"/>
+            <column name="image" type="varchar"/>
+        </createTable>
+
+        <createTable tableName="violations_description_mapping">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="violations_description_mapping_pk"/>
+            </column>
+            <column name="violation_level" type="varchar(15)"/>
+            <column name="violation_date" type="datetime(6)"/>
+            <column name="description" type="varchar"/>
+            <column name="order_id" type="bigint"/>
+            <column name="added_by_user_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="relations_management" author="Yurii Fedorko">
+        <addForeignKeyConstraint baseTableName="address"
+                                 baseColumnNames="user_id"
+                                 constraintName="address_to_user_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="bag"
+                                 baseColumnNames="location_id"
+                                 constraintName="bag_to_locations_fk"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="bag"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="bag_to_tariffs_info_fk"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="bag_translations"
+                                 baseColumnNames="bag_id"
+                                 constraintName="bag_translations_to_bag_fk"
+                                 referencedTableName="bag"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="certificate"
+                                 baseColumnNames="order_id"
+                                 constraintName="certificate_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="change_of_points"
+                                 baseColumnNames="user_id"
+                                 constraintName="change_of_points_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="change_of_points"
+                                 baseColumnNames="order_id"
+                                 constraintName="change_of_points_to_orders_fk"
+                                 onUpdate="RESTRICT"
+                                 onDelete="RESTRICT"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="courier"
+                                 baseColumnNames="created_by_id"
+                                 constraintName="courier_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="courier_translations"
+                                 baseColumnNames="courier_id"
+                                 constraintName="courier_translations_to_courier_fk"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="courier_translations"
+                                 baseColumnNames="language_id"
+                                 constraintName="courier_translations_to_language_fk"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="employee_position"
+                                 baseColumnNames="employee_id"
+                                 constraintName="employee_position_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="employee_position"
+                                 baseColumnNames="position_id"
+                                 constraintName="employee_position_to_positions_fk"
+                                 referencedTableName="positions"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="employee_id"
+                                 constraintName="employee_receiving_station_mapping_to_employee_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="employee_receiving_station_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="employee_receiving_station_mapping_to_receiving_stations_fk"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="events"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_events_order_id"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="locations"
+                                 baseColumnNames="region_id"
+                                 constraintName="fk_location_to_region_id"
+                                 referencedTableName="regions"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="notification_parameters"
+                                 baseColumnNames="notification_id"
+                                 constraintName="notification_parameters_to_user_notifications_fk"
+                                 referencedTableName="user_notifications"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="notification_templates"
+                                 baseColumnNames="language_id"
+                                 constraintName="notification_templates_to_languages_fk"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_additional"
+                                 baseColumnNames="orders_id"
+                                 constraintName="order_additional_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_bag_mapping"
+                                 baseColumnNames="order_id"
+                                 constraintName="order_bag_mapping_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="order_employee"
+                                 baseColumnNames="employee_id"
+                                 constraintName="order_employee_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="order_employee"
+                                 baseColumnNames="order_id"
+                                 constraintName="order_employee_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="ubs_user_id"
+                                 constraintName="orders_to_ubs_user_fk"
+                                 referencedTableName="ubs_user"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="users_id"
+                                 constraintName="orders_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="employee_id"
+                                 constraintName="orders_to_employees_fk"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="orders_to_ubs_receiving_stations_fk"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="orders"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="orders_to_ubs_tariffs_info_fk"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="payment"
+                                 baseColumnNames="order_id"
+                                 constraintName="fk_payment_to_orders"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="receiving_stations"
+                                 baseColumnNames="created_by_id"
+                                 constraintName="receiving_stations_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service"
+                                 baseColumnNames="courier_id"
+                                 constraintName="service_to_courier_fk"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="service_to_tariffs_info_fk"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service_translations"
+                                 baseColumnNames="service_id"
+                                 constraintName="service_translations_service_fk"
+                                 referencedTableName="service"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="service_translations"
+                                 baseColumnNames="language_id"
+                                 constraintName="service_translations_to_languages_fk"
+                                 referencedTableName="languages"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="creator_id"
+                                 constraintName="tariffs_info_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="courier_id"
+                                 constraintName="tariffs_info_to_courier_fk"
+                                 referencedTableName="courier"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_receiving_stations_tariffs_info_id"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info_receiving_stations_mapping"
+                                 baseColumnNames="receiving_station_id"
+                                 constraintName="fk_tariffs_info_receiving_stations_id"
+                                 referencedTableName="receiving_stations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_locations"
+                                 baseColumnNames="tariffs_info_id"
+                                 constraintName="fk_tariffs_locations_to_tariffs_info_id"
+                                 referencedTableName="tariffs_info"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_locations"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_tariffs_locations_to_locations_id"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="telegram_bot"
+                                 baseColumnNames="user_id"
+                                 constraintName="telegram_bot_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="ubs_user"
+                                 baseColumnNames="users_id"
+                                 constraintName="ubs_user_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ubs_user"
+                                 baseColumnNames="address_id"
+                                 constraintName="ubs_user_to_address_fk"
+                                 referencedTableName="address"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_notifications"
+                                 baseColumnNames="users_id"
+                                 constraintName="user_notifications_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_notifications"
+                                 baseColumnNames="order_id"
+                                 constraintName="user_notifications_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="users"
+                                 baseColumnNames="last_order_location"
+                                 constraintName="users_to_locations_fk"
+                                 referencedTableName="locations"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="viber_bot"
+                                 baseColumnNames="user_id"
+                                 constraintName="viber_bot_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="violation_images"
+                                 baseColumnNames="violation_id"
+                                 constraintName="fk_violation_image_mapping"
+                                 referencedTableName="violations_description_mapping"
+                                 referencedColumnNames="id"/>
+        
+        <addForeignKeyConstraint baseTableName="violations_description_mapping"
+                                 baseColumnNames="order_id"
+                                 constraintName="violations_description_mapping_to_orders_fk"
+                                 referencedTableName="orders"
+                                 referencedColumnNames="id"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
+
+        <addForeignKeyConstraint baseTableName="violations_description_mapping"
+                                 baseColumnNames="added_by_user_id"
+                                 constraintName="violations_description_mapping_to_users_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="triggers_and_functions" author="Maksym Kuzbyt">
+        <sql endDelimiter="/">
+
+            DROP TRIGGER IF EXISTS insert_update_order_bag_mapping on order_bag_mapping ;
+            DROP  FUNCTION IF EXISTS calculate_sum_total_amount_without_discounts_for_order_bag_map();
+            DROP TRIGGER IF EXISTS insert_update_bag on bag;
+            DROP  FUNCTION IF EXISTS calculate_sum_total_amount_without_discounts_for_bag();
+
+            CREATE OR REPLACE FUNCTION  total_amount_without_discounts_OBM_amount() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT' )  AND (old.amount is not null or new.amount is not null ) )THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.amount*b.full_price)
+                                                      FROM order_bag_mapping obm
+                                                               INNER JOIN bag b on obm.bag_id = b.id
+                                                      WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END
+            $orders$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION  sum_total_amount_without_discounts_OBM_confirmed_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.confirmed_quantity is not null or new.confirmed_quantity is not null ) ) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.confirmed_quantity*b.full_price)
+                                                      FROM order_bag_mapping obm
+                                                               INNER JOIN bag b on obm.bag_id = b.id
+                                                      WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END
+            $orders$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION  sum_total_amount_without_discounts_OBM_exported_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+            IF((TG_OP = 'UPDATE' OR TG_OP = 'INSERT') AND (old.exported_quantity is not null or new.exported_quantity is not null )) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (SELECT sum (obm.exported_quantity*b.full_price)
+                                                      FROM order_bag_mapping obm
+                                                               INNER JOIN bag b on obm.bag_id = b.id
+                                                      WHERE order_id = o.id)
+            WHERE o.id = old.order_id OR o.id = new.order_id;
+            RETURN NEW;
+            END IF;
+            END
+            $orders$ LANGUAGE plpgsql;
+
+
+
+
+
+            CREATE TRIGGER insert_update_order_bag_mapping_amount
+                AFTER UPDATE OF amount on  order_bag_mapping
+                FOR EACH ROW EXECUTE PROCEDURE total_amount_without_discounts_OBM_amount();
+
+            CREATE TRIGGER insert_update_order_bag_mapping_confirmed_quantity
+                AFTER UPDATE OF confirmed_quantity on  order_bag_mapping
+                FOR EACH ROW EXECUTE PROCEDURE sum_total_amount_without_discounts_OBM_confirmed_quantity();
+
+            CREATE TRIGGER insert_update_order_bag_mapping_exported_quantity
+                AFTER UPDATE OF exported_quantity on  order_bag_mapping
+                FOR EACH ROW EXECUTE PROCEDURE sum_total_amount_without_discounts_OBM_exported_quantity();
+            /
+        </sql>
+    </changeSet>
+    
+    <changeSet id="views" author="Maksym Kuzbyt">
+        <createView
+                viewName="big_order_table"
+                replaceIfExists="true">
+
+            with group_capacity  as
+                     (SELECT this.order_id,
+                             case  when
+                                       ((select sum(obm.confirmed_quantity) from order_bag_mapping obm
+                                         where obm.order_id = this.order_id) is NULL
+                                           and (select sum(obm.exported_quantity) from order_bag_mapping obm
+                                                where obm.order_id = this.order_id) is NULL)
+                                       then concat(bag.capacity,'л - ',sum(amount),'шт')
+                                   when ((select sum(obm.exported_quantity) from order_bag_mapping obm
+                                          where obm.order_id = this.order_id) is NULL
+                                       and (select sum(obm.confirmed_quantity) from order_bag_mapping obm
+                                            where obm.order_id = this.order_id) is not NULL)
+                                       then  concat(bag.capacity,'л - ',sum(confirmed_quantity),'шт')
+                                   when ((select sum(obm.exported_quantity) from order_bag_mapping obm
+                                          where obm.order_id = this.order_id) is not NULL)
+                                       then concat(bag.capacity,'л - ',sum(exported_quantity),'шт')
+                                 end
+                                 as amount_cap
+                      from order_bag_mapping this
+                               left join bag on this.bag_id = bag.id
+                      group by  bag.capacity , this.order_id )
+
+
+            SELECT
+                o.id as id,
+                o.order_status as order_status ,
+                o.order_payment_status as order_payment_status,
+                cast(o.order_date as date) as order_date,
+                cast ((select  max(cast(p.settlement_date as date)) from payment p where p.order_id = o.id and o.order_payment_status='PAID') as date )  as payment_date,
+                concat_ws(' ',uu.first_name,uu.last_name) as client_name,
+                uu.phone_number as client_phone_number,
+                uu.email as client_email,
+                concat_ws(' ',uu.sender_first_name,uu.sender_last_name ) as sender_name,
+                uu.sender_phone_number as sender_phone,
+                uu.sender_email as sender_email,
+                u.violations as violations_amount,
+                a.region as region,
+                a.city as settlement,
+                a.district as district,
+                concat_ws(', ',concat(a.street , ' ' , a.house_number),
+                          case when (a.house_corpus) is not null and a.house_corpus != '' then concat('корп.',a.house_corpus) else 'корп.- ' end ,
+                          case when (a.entrance_number) is not null and a.entrance_number != '' then concat('п.', a.entrance_number) else 'п.- ' end)
+                    as address,
+                a.address_comment as comment_to_address_for_client,
+                (select string_agg(amount_cap,'; ')from group_capacity
+                 where order_id = o.id) as bag_amount,
+                o.sum_total_amount_without_discounts as total_order_sum,
+                (select string_agg(c.code,', ') from  certificate c where c.order_id=o.id) as order_certificate_code,
+
+                cast((case when (select sum(c.points) from  certificate c where c.order_id=o.id) is Null
+                               then 0 ELSE (select sum(c.points)from  certificate c where c.order_id=o.id) end)
+                    +
+                     (case when (o.points_to_use) is Null then 0 ELSE (o.points_to_use) end ) as bigint ) as general_discount,
+
+                cast( (case when (o.sum_total_amount_without_discounts) is Null then 0 ELSE (o.sum_total_amount_without_discounts) end )
+                    -
+                      (((case when (select sum(p.amount) from payment p where p.order_id=o.id) is Null then 0 ELSE (select sum(p.amount) from payment p
+                                                                                                                    where p.order_id=o.id) end ) / 100)
+                          +
+                       (case when (select sum(c.points) from certificate c where c.order_id=o.id) is Null then 0 ELSE (select sum(c.points) from certificate c
+                                                                                                                       where c.order_id=o.id) end )
+                          +
+                       (case when (o.points_to_use) is Null then 0 ELSE (o.points_to_use) end )) as bigint ) as amount_due,
+
+
+                o.comment as comment_for_order_by_client,
+                cast((case when (select sum(p.amount) from payment p where p.order_id=o.id) is Null then 0
+                           ELSE ((select sum(p.amount) from payment p where p.order_id=o.id)) end ) / 100 as bigint) as total_payment,
+                cast(o.deliver_from as date) as date_of_export,
+                concat_ws('-', cast(o.deliver_from as time), cast (o.deliver_to as time)) as time_of_export,
+                concat_ws('; ',oa.additional_order) as id_order_from_shop,
+                r.name as receiving_station,
+                r.id as receiving_station_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=3 )  as responsible_logic_man,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=3 )  as responsible_logic_man_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=5 )   as responsible_driver,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=5 )  as responsible_driver_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller_id,
+
+                (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
+                                                                          left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator,
+                (select e.id from employee_order_position eop
+                                      left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator_id,
+
+                o.note as comments_for_order,
+                o.blocked as is_blocked,
+                concat_ws(', ',e.first_name,e.last_name) as blocked_by
+
+            from orders o
+
+                     left join employees e on o.employee_id = e.id
+                     left join receiving_stations r on o.receiving_station_id = r.id
+                     left join ubs_user uu on o.ubs_user_id = uu.id
+                     left join address a on uu.address_id = a.id
+                     left join users u on o.users_id = u.id
+
+                     left join order_additional oa on o.id = oa.orders_id;
+        </createView>
+    </changeSet>
+
+
+<!--checkConstraint payment settlement_date-->
+<!--    <changeSet id="SQLconstraints" author="Andrii Yezenitskyi">-->
+<!--        <sql>-->
+<!--            ALTER TABLE payment-->
+<!--            DROP CONSTRAINT IF EXISTS settlement_date_is_right_format_or_null;-->
+
+<!--            ALTER TABLE payment-->
+<!--                ADD CONSTRAINT settlement_date_is_right_format_or_null-->
+<!--                    CHECK (settlement_date ~ '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'-->
+<!--                OR settlement_date IS NULL);-->
+<!--        </sql>-->
+<!--    </changeSet>-->
+
+    <changeSet id="indexes" author="Yurii Fedorko">
+        <createIndex tableName="employees" indexName="index_employee_email">
+            <column name="email"/>
+        </createIndex>
+        <modifySql>
+            <append value=" where email is not null"/>
+        </modifySql>
+    </changeSet>
+</databaseChangeLog>

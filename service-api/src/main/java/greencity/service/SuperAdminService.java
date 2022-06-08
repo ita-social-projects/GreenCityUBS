@@ -11,9 +11,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
 
@@ -226,7 +224,7 @@ public interface SuperAdminService {
      *
      * @param addNewTariffDto {@link AddNewTariffDto}
      */
-    void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
+    AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
 
     /**
      * Method for edit info about tariff.
@@ -260,4 +258,14 @@ public interface SuperAdminService {
      *                            and changed naming
      */
     void editLocations(List<EditLocationDto> editLocationDtoList);
+
+    /**
+     * Method for changing status of {@link greencity.entity.order.TariffLocation}.
+     *
+     * @param tariffId - id of tariff where location statuses want to be changed
+     * @param dto      - contains List of Location id's to update status
+     * @param param    - should be "activate" or "deactivate" or throws
+     *                 BadRequestException
+     */
+    void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
 }

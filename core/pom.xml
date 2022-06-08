@@ -171,11 +171,13 @@
         </dependency>
 
         <!-- feign -->
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-openfeign-core</artifactId>
-            <version>${spring-cloud-openfeign.version}</version>
+            <artifactId>spring-cloud-starter-hystrix</artifactId>
+            <version>1.4.7.RELEASE</version>
         </dependency>
+
     </dependencies>
 
     <build>
