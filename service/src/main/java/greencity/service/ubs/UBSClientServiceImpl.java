@@ -19,6 +19,8 @@ import javax.transaction.Transactional;
 
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+
+import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -772,16 +774,29 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
+        Map<Integer, Integer> amountOfBags = new HashMap<>();
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && MapUtils.isEmpty(order.getConfirmedQuantity())
+            && MapUtils.isEmpty(order.getExportedQuantity())) {
+            amountOfBags = order.getAmountOfBagsOrdered();
+        }
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
+            && MapUtils.isEmpty(order.getExportedQuantity())) {
+            amountOfBags = order.getConfirmedQuantity();
+        }
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
+            && !MapUtils.isEmpty(order.getExportedQuantity())) {
+            amountOfBags = order.getExportedQuantity();
+        }
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
-        Map<Integer, Integer> amountOfBags = order.getAmountOfBagsOrdered();
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
+        Map<Integer, Integer> finalAmountOfBags = amountOfBags;
         bags.forEach(bag -> {
             BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
             BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag(bag);
             bagDto.setService(bagTranslation.getName());
             bagDto.setServiceEng(bagTranslation.getNameEng());
-            bagDto.setCount(amountOfBags.get(bag.getId()));
-            bagDto.setTotalPrice(amountOfBags.get(bag.getId()) * bag.getFullPrice());
+            bagDto.setCount(finalAmountOfBags.get(bag.getId()));
+            bagDto.setTotalPrice(finalAmountOfBags.get(bag.getId()) * bag.getFullPrice());
             bagForUserDtos.add(bagDto);
         });
         return bagForUserDtos;
