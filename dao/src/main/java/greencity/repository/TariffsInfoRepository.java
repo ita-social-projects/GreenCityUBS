@@ -21,7 +21,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long> 
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM tariffs_info as t "
-            + "INNER JOIN tariffs_info_locations_mapping as m "
+            + "INNER JOIN tariffs_locations as m "
             + "on t.id = m.tariffs_info_id "
             + "WHERE t.courier_id = :courierId AND m.location_id = :locationId")
     Optional<TariffsInfo> findTariffsInfoLimitsByCourierIdAndLocationId(@Param("courierId") Long courierId,
