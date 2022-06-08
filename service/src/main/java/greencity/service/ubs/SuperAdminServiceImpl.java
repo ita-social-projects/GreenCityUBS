@@ -1,10 +1,7 @@
 package greencity.service.ubs;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
@@ -13,6 +10,9 @@ import greencity.dto.location.EditLocationDto;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.dto.tariff.*;
+import greencity.entity.order.*;
+import greencity.repository.*;
 import org.modelmapper.ModelMapper;
 
 import greencity.constant.ErrorMessage;
@@ -33,22 +33,12 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
-import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -68,6 +58,7 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -85,6 +76,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ReceivingStationRepository receivingStationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
+    private final TariffLocationRepository tariffsLocationRepository;
 
     @Override
     public AddServiceDto addTariffService(AddServiceDto dto, String uuid) {
@@ -566,19 +558,55 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
+    @Transactional
+    public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
+        Courier courier = tryToFindCourier(addNewTariffDto.getCourierId());
+        List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
+        final var tariffForLocationAndCourierAlreadyExistIdList =
+            verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
+        TariffsInfo tariffsInfo = createTariff(addNewTariffDto, userUUID, courier);
+        var tariffLocationSet =
+            findLocationsForTariff(idListToCheck, addNewTariffDto.getRegionId())
+                .stream().map(location -> TariffLocation.builder()
+                    .tariffsInfo(tariffsInfo)
+                    .location(location)
+                    .locationStatus(LocationStatus.ACTIVE)
+                    .build())
+                .collect(Collectors.toSet());
+        List<Long> existingLocationsIds =
+            tariffLocationSet.stream().map(tariffLocation -> tariffLocation.getLocation().getId())
+                .collect(Collectors.toList());
+        idListToCheck.removeAll(existingLocationsIds);
+        tariffsInfo.setTariffLocations(tariffLocationSet);
+        tariffsLocationRepository.saveAll(tariffLocationSet);
+        tariffsInfoRepository.save(tariffsInfo);
+        return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
+    }
+
+    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String userUUID, Courier courier) {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
-            .courier(courierRepository.findById(addNewTariffDto.getCourierId())
-                .orElseThrow(() -> new NotFoundException(
-                    ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + addNewTariffDto.getCourierId())))
-            .locations(findLocationsForTariff(addNewTariffDto.getLocationIdList(), addNewTariffDto.getRegionId()))
+            .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
             .creator(userRepository.findByUuid(userUUID))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
-        tariffsInfoRepository.save(tariffsInfo);
+        return tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
+        var tariffLocationListList = tariffsLocationRepository.findAllByCourierIdAndLocationIds(courierId, locationIds);
+        List<Long> alreadyExistsTariff = tariffLocationListList.stream()
+            .map(tariffLocation -> tariffLocation.getLocation().getId())
+            .collect(Collectors.toList());
+        locationIds.removeAll(alreadyExistsTariff);
+        return alreadyExistsTariff;
+    }
+
+    private Courier tryToFindCourier(Long courierId) {
+        return courierRepository.findById(courierId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
     }
 
     @Override
@@ -627,5 +655,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 locationRepository.save(current);
             }
         });
+    }
+
+    @Override
+    @Transactional
+    public void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
+        tryToFindTariffById(tariffId);
+        if ("activate".equals(param.toLowerCase())) {
+            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
+        } else if ("deactivate".equals(param.toLowerCase())) {
+            tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(),
+                LocationStatus.DEACTIVATED.name());
+        } else {
+            throw new BadRequestException("Unresolvable param");
+        }
     }
 }

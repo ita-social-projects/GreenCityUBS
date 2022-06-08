@@ -13,9 +13,7 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
@@ -499,7 +497,7 @@ class SuperAdminController {
     /**
      * Controller for add new tariff info.
      *
-     * @return {@link GetTariffsInfoDto}
+     * @return {@link AddNewTariffResponseDto}
      * @author Yurii Fedorko
      */
     @ApiOperation(value = "Add new tariff")
@@ -510,10 +508,9 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping("/add-new-tariff")
-    public ResponseEntity<HttpStatus> addNewTariff(@RequestBody @Valid AddNewTariffDto addNewTariffDto,
+    public ResponseEntity<AddNewTariffResponseDto> addNewTariff(@RequestBody @Valid AddNewTariffDto addNewTariffDto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        superAdminService.addNewTariff(addNewTariffDto, uuid);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addNewTariff(addNewTariffDto, uuid));
     }
 
     /**
@@ -588,5 +585,25 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
         superAdminService.editLocations(editLocationDtoList);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
+     * Controller for activation or deactivation Locations in Tariff depends
+     * on @RequestParam.
+     *
+     * @author Yurii Fedorko
+     */
+    @ApiOperation(value = "Change Tariff Location status")
+    @ApiResponses(value = {
+        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PutMapping("tariffs/{id}/locations/change-status")
+    public ResponseEntity changeLocationsInTariffStatus(@PathVariable Long id,
+        @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
+        superAdminService.changeTariffLocationsStatus(id, dto, status);
+        return ResponseEntity.ok().build();
     }
 }
