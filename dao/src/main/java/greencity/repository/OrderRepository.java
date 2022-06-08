@@ -272,6 +272,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         value = "UPDATE orders SET order_payment_status = :orderStatus WHERE id = :orderId")
     void updateOrderPaymentStatus(@Param(value = "orderId") Long orderId, @Param("orderStatus") String orderStatus);
 
+    /**
+     * Return sum of discounts by order id.
+     */
     @Query(nativeQuery = true,
         value = "select sum(COALESCE(c.points,0) + orders.points_to_use) from orders "
             + "left join certificate c on orders.id = c.order_id "

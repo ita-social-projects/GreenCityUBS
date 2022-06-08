@@ -774,18 +774,20 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
-        List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         Map<Integer, Integer> amountOfBags = new HashMap<>();
-        if (!MapUtils.isEmpty(order.getConfirmedQuantity()) && MapUtils.isEmpty(order.getConfirmedQuantity()) && MapUtils.isEmpty(order.getExportedQuantity())) {
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && MapUtils.isEmpty(order.getConfirmedQuantity())
+            && MapUtils.isEmpty(order.getExportedQuantity())) {
             amountOfBags = order.getAmountOfBagsOrdered();
         }
-        if (!MapUtils.isEmpty(order.getConfirmedQuantity()) && !MapUtils.isEmpty(order.getConfirmedQuantity()) && MapUtils.isEmpty(order.getExportedQuantity())) {
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
+            && MapUtils.isEmpty(order.getExportedQuantity())) {
             amountOfBags = order.getConfirmedQuantity();
         }
-        if (!MapUtils.isEmpty(order.getConfirmedQuantity()) && !MapUtils.isEmpty(order.getConfirmedQuantity()) && !MapUtils.isEmpty(order.getExportedQuantity())) {
+        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
+            && !MapUtils.isEmpty(order.getExportedQuantity())) {
             amountOfBags = order.getExportedQuantity();
         }
-
+        List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
         List<BagForUserDto> bagForUserDtos = new ArrayList<>();
         Map<Integer, Integer> finalAmountOfBags = amountOfBags;
         bags.forEach(bag -> {
