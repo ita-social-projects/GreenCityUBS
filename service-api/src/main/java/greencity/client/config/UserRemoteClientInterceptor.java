@@ -42,9 +42,6 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
             ? servletRequestAttributes.getRequest().getHeader(AUTHORIZATION_HEADER)
             : createAccessTokenForService();
 
-        log.warn("RequestContextHolder: {}", RequestContextHolder.getRequestAttributes().toString());
-        log.warn("Header: {}", servletRequestAttributes.getRequest().getHeader(AUTHORIZATION_HEADER));
-
         template.header(AUTHORIZATION_HEADER, accessToken);
     }
 
