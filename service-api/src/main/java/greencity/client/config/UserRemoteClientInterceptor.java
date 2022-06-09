@@ -5,6 +5,8 @@ import feign.RequestTemplate;
 import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -18,6 +20,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class UserRemoteClientInterceptor implements RequestInterceptor {
     private final JwtTool jwtTool;
     @Value("${greencity.authorization.service-email}")
@@ -38,6 +41,9 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
         String accessToken = servletRequestAttributes != null
             ? servletRequestAttributes.getRequest().getHeader(AUTHORIZATION_HEADER)
             : createAccessTokenForService();
+
+        log.warn("RequestContextHolder: {}", RequestContextHolder.getRequestAttributes().toString());
+        log.warn("Header: {}", servletRequestAttributes.getRequest().getHeader(AUTHORIZATION_HEADER));
 
         template.header(AUTHORIZATION_HEADER, accessToken);
     }

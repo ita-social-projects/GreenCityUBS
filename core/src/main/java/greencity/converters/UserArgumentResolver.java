@@ -3,6 +3,8 @@ package greencity.converters;
 import greencity.annotations.CurrentUserUuid;
 import greencity.client.UserRemoteClient;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
@@ -16,6 +18,7 @@ import java.security.Principal;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     @Lazy
     @Autowired
@@ -38,6 +41,8 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Principal principal = webRequest.getUserPrincipal();
+        log.warn("Principal: {}", webRequest.getUserPrincipal().toString());
+        log.warn("NativeWebRequest: {}", webRequest);
         return principal != null ? userRemoteClient.findUuidByEmail(principal.getName()) : null;
     }
 }
