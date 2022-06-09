@@ -193,7 +193,8 @@ class OrderControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate)))
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
@@ -298,18 +299,21 @@ class OrderControllerTest {
 
     @Test
     void deleteOrderAddressTest() throws Exception {
-        mockMvc.perform(delete("/ubs" + "/order-addresses" + "/{id}", 1L))
+        mockMvc.perform(delete("/ubs" + "/order-addresses" + "/{id}", 1L)
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
     @Test
     void getLiqPayStatusPayment() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)).andExpect(status().isOk());
+        mockMvc.perform(get(ubsLink + "/getLiqPayStatus/{orderId}", 1)
+            .principal(principal)).andExpect(status().isOk());
     }
 
     @Test
     void getFondyStatusPayment2() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1))
+        mockMvc.perform(get(ubsLink + "/getFondyStatus/{orderId}", 1)
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
