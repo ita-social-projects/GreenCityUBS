@@ -2,9 +2,6 @@ package greencity.dto.address;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.validation.constraints.Size;
-
 @Getter
 @Builder
 @AllArgsConstructor

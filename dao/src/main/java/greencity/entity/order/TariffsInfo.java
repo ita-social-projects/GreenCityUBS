@@ -2,9 +2,7 @@ package greencity.entity.order;
 
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.LocationStatus;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
-import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
 
