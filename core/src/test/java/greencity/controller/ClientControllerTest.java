@@ -159,6 +159,7 @@ class ClientControllerTest {
 
         this.mockMvc.perform(post(ubsLink + "/processOrderLiqpay")
             .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
             .content(dtoJson))
             .andExpect(status().isOk());
     }
