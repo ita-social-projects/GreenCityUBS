@@ -770,6 +770,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             .addressRegionEng(address.getRegionEn())
             .addressStreet(address.getStreet())
             .addressStreetEng(address.getStreetEn())
+            .houseCorpus(address.getHouseCorpus())
+            .houseNumber(address.getHouseNumber())
+            .entranceNumber(address.getEntranceNumber())
             .build();
     }
 
@@ -1152,7 +1155,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
         setUserData(user, userProfileUpdateDto);
-        user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         List<Address> addressList =
             userProfileUpdateDto.getAddressDto().stream().map(a -> modelMapper.map(a, Address.class))
                 .collect(Collectors.toList());
@@ -1190,6 +1192,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private User setUserData(User user, UserProfileUpdateDto userProfileUpdateDto) {
         user.setRecipientName(userProfileUpdateDto.getRecipientName());
         user.setRecipientSurname(userProfileUpdateDto.getRecipientSurname());
+        user.setAlternateEmail(userProfileUpdateDto.getAlternateEmail());
         user.setRecipientPhone(
             UAPhoneNumberUtil.getE164PhoneNumberFormat(userProfileUpdateDto.getRecipientPhone()));
         return user;

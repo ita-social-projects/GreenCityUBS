@@ -17,4 +17,7 @@ public class AddressInfoDto {
     private String addressDistinct;
     private String addressDistinctEng;
     private String addressComment;
+    private String houseNumber;
+    private String houseCorpus;
+    private String entranceNumber;
 }
