@@ -770,6 +770,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             .addressRegionEng(address.getRegionEn())
             .addressStreet(address.getStreet())
             .addressStreetEng(address.getStreetEn())
+            .houseCorpus(address.getHouseCorpus())
+            .houseNumber(address.getHouseNumber())
+            .entranceNumber(address.getEntranceNumber())
             .build();
     }
 

@@ -2,6 +2,9 @@ package greencity.dto.address;
 
 import lombok.*;
 
+import javax.persistence.Column;
+import javax.validation.constraints.Size;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -17,4 +20,7 @@ public class AddressInfoDto {
     private String addressDistinct;
     private String addressDistinctEng;
     private String addressComment;
+    private String houseNumber;
+    private String houseCorpus;
+    private String entranceNumber;
 }
