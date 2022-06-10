@@ -2,6 +2,7 @@ package greencity.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import greencity.dto.certificate.CertificateDto;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -387,20 +389,39 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificate() {
-        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
+        Certificate certificate = Certificate.builder()
             .code("certificate")
             .certificateStatus(CertificateStatus.ACTIVE)
-            .build()));
+            .build();
+        CertificateDto certificateDto = CertificateDto.builder()
+            .points(300)
+            .dateOfUse(LocalDate.now())
+            .expirationDate(LocalDate.now())
+            .code("200")
+            .certificateStatus("ACTIVE")
+            .build();
+        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(certificate));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
 
         assertEquals("ACTIVE", ubsService.checkCertificate("certificate").getCertificateStatus());
     }
 
     @Test
     void checkCertificateUSED() {
-        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
+        CertificateDto certificateDto = CertificateDto.builder()
+            .points(300)
+            .dateOfUse(LocalDate.now())
+            .expirationDate(LocalDate.now())
+            .code("200")
+            .certificateStatus("USED")
+            .build();
+        Certificate certificate = Certificate.builder()
             .code("certificate")
             .certificateStatus(CertificateStatus.USED)
-            .build()));
+            .build();
+
+        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(certificate));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
 
         assertEquals("USED", ubsService.checkCertificate("certificate").getCertificateStatus());
     }

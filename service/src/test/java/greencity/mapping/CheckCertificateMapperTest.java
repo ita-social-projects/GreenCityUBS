@@ -10,18 +10,19 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CertificateDtoMapperTest {
+class CheckCertificateMapperTest {
     @InjectMocks
-    CertificateDtoMapper certificateDtoMapper;
+    CheckCertificateMapper checkCertificateMapper;
 
     @Test
     void convert() {
         Certificate certificate = ModelUtils.getCertificate();
-        CertificateDto certificateDto = certificateDtoMapper.convert(certificate);
+        CertificateDto certificateDto = checkCertificateMapper.convert(certificate);
 
         Assertions.assertEquals(certificate.getCode(), certificateDto.getCode());
         Assertions.assertEquals(certificate.getPoints(), certificateDto.getPoints());
-        Assertions.assertEquals(certificate.getCreationDate(), certificateDto.getCreationDate());
+        Assertions.assertEquals(certificate.getDateOfUse(), certificateDto.getDateOfUse());
+        Assertions.assertEquals(certificate.getExpirationDate(), certificateDto.getExpirationDate());
         Assertions.assertEquals(certificate.getCertificateStatus().name(), certificateDto.getCertificateStatus());
     }
 }
