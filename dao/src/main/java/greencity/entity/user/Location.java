@@ -4,7 +4,6 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.TariffLocation;
-import greencity.entity.order.TariffsInfo;
 import lombok.*;
 
 import javax.persistence.*;

@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
