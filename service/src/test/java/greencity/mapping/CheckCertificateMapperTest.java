@@ -21,6 +21,7 @@ class CheckCertificateMapperTest {
 
         Assertions.assertEquals(certificate.getCode(), certificateDto.getCode());
         Assertions.assertEquals(certificate.getPoints(), certificateDto.getPoints());
+        Assertions.assertEquals(certificate.getCreationDate(), certificateDto.getCreationDate());
         Assertions.assertEquals(certificate.getDateOfUse(), certificateDto.getDateOfUse());
         Assertions.assertEquals(certificate.getExpirationDate(), certificateDto.getExpirationDate());
         Assertions.assertEquals(certificate.getCertificateStatus().name(), certificateDto.getCertificateStatus());

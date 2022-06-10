@@ -9,6 +9,7 @@ public class CheckCertificateMapper extends AbstractConverter<Certificate, Certi
     protected CertificateDto convert(Certificate certificate) {
         return CertificateDto.builder()
             .certificateStatus(certificate.getCertificateStatus().name())
+            .creationDate(certificate.getCreationDate())
             .expirationDate(certificate.getExpirationDate())
             .dateOfUse(certificate.getDateOfUse())
             .points(certificate.getPoints())
