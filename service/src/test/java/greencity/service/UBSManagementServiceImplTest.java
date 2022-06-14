@@ -33,6 +33,7 @@ import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
+import greencity.service.kafka.UserActionMessagingService;
 import greencity.service.ubs.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -150,7 +151,7 @@ class UBSManagementServiceImplTest {
     @Mock
     OrdersAdminsPageService ordersAdminsPageService;
     @Mock
-    private KafkaMessagingService kafkaMessagingService;
+    private UserActionMessagingService userActionMessagingService;
 
     @Test
     void getAllCertificates() {

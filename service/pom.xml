@@ -156,6 +156,12 @@
             <version>${spring-kafka.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${spring-kafka.version}</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
