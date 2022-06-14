@@ -3,15 +3,16 @@ package greencity.entity.user;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.order.Bag;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.TariffLocation;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-@EqualsAndHashCode(exclude = {"bags", "tariffsInfoList"})
-@ToString(exclude = {"bags", "tariffsInfoList"})
+@EqualsAndHashCode(exclude = {"bags", "tariffLocations"})
+@ToString(exclude = {"bags", "tariffLocations"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -42,6 +43,6 @@ public class Location {
     @ManyToOne
     private Region region;
 
-    @ManyToMany(mappedBy = "locations", cascade = CascadeType.ALL)
-    private List<TariffsInfo> tariffsInfoList;
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
+    private Set<TariffLocation> tariffLocations;
 }

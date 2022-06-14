@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,15 +52,17 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             .getBody()
             .getSubject();
         @SuppressWarnings({"unchecked, rawtype"})
-        List<String> authorities = (List<String>) Jwts.parser()
+        List<String> role = (List<String>) Jwts.parser()
             .setSigningKey(jwtTool.getAccessTokenKey())
             .parseClaimsJws(authentication.getName())
             .getBody()
-            .get("authorities");
+            .get("role");
         return new UsernamePasswordAuthenticationToken(
             email,
-            "",
-            authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+            role.contains("ROLE_UBS_EMPLOYEE")
+                ? jwtTool.getAuthoritiesFromToken(authentication.getName())
+                : Collections.emptyList(),
+            role.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
     }
 
     /**

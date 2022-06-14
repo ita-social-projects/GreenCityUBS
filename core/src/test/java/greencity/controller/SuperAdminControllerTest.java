@@ -111,7 +111,8 @@ class SuperAdminControllerTest {
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
             .content(ServiceResponseDtoJSON)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
@@ -122,7 +123,8 @@ class SuperAdminControllerTest {
         String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .content(ServiceResponseDtoJSON)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
@@ -300,7 +302,8 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(post(ubsLink + "/add-new-tariff")
             .content(objectMapper.writeValueAsString(dto))
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
             .andExpect(status().isCreated());
     }
 

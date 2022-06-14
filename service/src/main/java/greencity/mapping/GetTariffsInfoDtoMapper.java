@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetTariffsInfoDto> {
     @Override
     protected GetTariffsInfoDto convert(TariffsInfo source) {
-        Region region = source.getLocations().iterator().next().getRegion();
-        RegionDto regionDto =
-            RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName()).nameUk(region.getUkrName()).build();
+        Region region = source.getTariffLocations() != null
+            ? source.getTariffLocations().iterator().next().getLocation().getRegion()
+            : null;
+        RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
+            .nameUk(region.getUkrName()).build() : null;
         return GetTariffsInfoDto.builder()
             .cardId(source.getId())
             .courierLimit(source.getCourierLimit().toString())
@@ -34,13 +36,13 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .build())
                 .collect(Collectors.toList()))
             .createdAt(source.getCreatedAt())
-            .creator(source.getCreator().getRecipientEmail())
+            .creator(source.getCreator() != null ? source.getCreator().getRecipientEmail() : "unknown")
             .tariffStatus(source.getLocationStatus().toString())
-            .locationInfoDtos(source.getLocations().stream()
+            .locationInfoDtos(source.getTariffLocations().stream()
                 .map(location -> LocationsDtos.builder()
                     .locationId(location.getId())
-                    .nameEn(location.getNameEn())
-                    .nameUk(location.getNameUk())
+                    .nameEn(location.getLocation().getNameEn())
+                    .nameUk(location.getLocation().getNameUk())
                     .build())
                 .collect(Collectors.toList()))
             .receivingStationDtos(source.getReceivingStationList().stream()

@@ -2,7 +2,6 @@ package greencity.entity.order;
 
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.LocationStatus;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
@@ -19,8 +18,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"services", "bags", "receivingStationList", "locations", "orders"})
-@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "locations", "orders"})
+@ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders"})
+@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,11 +66,8 @@ public class TariffsInfo {
     @ManyToOne
     private Courier courier;
 
-    @ManyToMany
-    @JoinTable(name = "tariffs_info_locations_mapping",
-        joinColumns = @JoinColumn(name = "tariffs_info_id"),
-        inverseJoinColumns = @JoinColumn(name = "location_id"))
-    private Set<Location> locations;
+    @OneToMany(mappedBy = "tariffsInfo", cascade = CascadeType.ALL)
+    private Set<TariffLocation> tariffLocations;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;

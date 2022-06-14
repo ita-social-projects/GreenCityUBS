@@ -1,17 +1,14 @@
 package greencity.client;
 
-import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
+import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 

@@ -171,11 +171,13 @@
         </dependency>
 
         <!-- feign -->
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-openfeign-core</artifactId>
-            <version>${spring-cloud-openfeign.version}</version>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+            <version>2.1.0.RELEASE</version>
         </dependency>
+
     </dependencies>
 
     <build>
