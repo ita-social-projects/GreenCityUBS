@@ -161,4 +161,3 @@ stages:
                 releaseName: 'ubs'
                 overrideValues: 'image=skyere/greencityubs:$(Build.BuildId)'
                 arguments: '--debug'
-das
