@@ -15,6 +15,13 @@ public interface CertificateService {
     void addCertificate(CertificateDtoForAdding add);
 
     /**
+     * Method delete a certificates.
+     *
+     * @author Hlazova Nataliia
+     */
+    void deleteCertificate(String code);
+
+    /**
      * Method returns all certificates with filtering and sorting data.
      *
      * @return List of {@link greencity.entity.order.Certificate} lists.
