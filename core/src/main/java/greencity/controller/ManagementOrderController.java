@@ -24,6 +24,7 @@ import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.order.Certificate;
 import greencity.entity.parameters.CustomTableView;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
@@ -102,7 +103,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller getting all certificates with sorting possibility.
+     * Controller add certificate.
      *
      * @return httpStatus.
      * @author Nazar Struk
@@ -120,6 +121,29 @@ public class ManagementOrderController {
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         certificateService.addCertificate(certificateDtoForAdding);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    /**
+     * Controller delete certificate.
+     *
+     * @param code {@link String}.
+     * @return {@link HttpStatus} - http status.
+     * @author Hlazova Nataliia
+     */
+
+    @ApiOperation("Delete Certificate")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/deleteCertificate/{code}")
+    public ResponseEntity<HttpStatus> deleteCertificate(
+        @Valid @PathVariable String code) {
+        certificateService.deleteCertificate(code);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
