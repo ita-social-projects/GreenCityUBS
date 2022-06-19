@@ -202,10 +202,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.authorization.googleApiKey}")
-    private String googleApiKey;
+    @Value("${greencity.redirect.result-url-liq-pay}")
+    private String resultUrlLiqpay;
+    @Value("${greencity.redirect.result-url-fondy-personal-cabinet}")
+    private String resultUrlForPersonalCabinetOfUser;
+    @Value("${greencity.redirect.result-url-fondy}")
+    private String resultUrlFondy;
     private static final Integer BAG_CAPACITY = 120;
-    public static final String LANG_CODE = "ua";
     private final EventService eventService;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
@@ -213,11 +216,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
-    private static final String RESULT_URL_LIQPAY = "https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment";
-    private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
-        "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
-    private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
-    private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     @Override
     @Transactional
@@ -953,7 +951,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl(RESULT_URL_FONDY)
+            .responseUrl(resultUrlFondy)
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -1363,7 +1361,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl(RESULT_URL_LIQPAY)
+            .resultUrl(resultUrlLiqpay)
             .build();
     }
 
@@ -1609,7 +1607,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl(RESULT_URL_FOR_PERSONAL_CABINET_OF_USER)
+            .responseUrl(resultUrlForPersonalCabinetOfUser)
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1708,7 +1706,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl(RESULT_URL_LIQPAY)
+            .resultUrl(resultUrlLiqpay)
             .build();
     }
 
