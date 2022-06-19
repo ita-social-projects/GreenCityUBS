@@ -225,6 +225,12 @@ spec:
             secretKeyRef:
               name: appsecret
               key: LIQPAY-REDIRECT
+
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: GOOGLE-API-KEY
         ports:
         - containerPort: 8060
           name: tomcat
