@@ -208,11 +208,23 @@ spec:
               name: appsecret
               key: VIBER-BOT-TOKEN
 
-        # - name: WEBSITE_ENABLE_SYNC_UPDATE_SITE
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: appsecret
-        #       key: API-KEY
+        - name: FONDY_REDIRECT
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: FONDY-REDIRECT
+
+        - name: FONDY_PERSONAL_CABINET
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: FONDY-PERSONAL-CABINET
+
+        - name: LIQPAY_REDIRECT
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: LIQPAY-REDIRECT
         ports:
         - containerPort: 8060
           name: tomcat
