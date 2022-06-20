@@ -63,8 +63,8 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      *
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
+     * @param dto     {@link OrderResponseDto} user entered data;
+     * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
@@ -272,8 +272,8 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      * 
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
+     * @param dto     {@link OrderResponseDto} user entered data;
+     * @param uuid    current {@link User}'s uuid;
      * @param orderId {@link Long} order id;
      * @return {@link LiqPayOrderResponse} order id and liqpay payment button.
      * @author Vadym Makitra

@@ -387,18 +387,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private Order isExistOrder(OrderResponseDto dto, Long orderId ) {
+    private Order isExistOrder(OrderResponseDto dto, Long orderId) {
         if (orderId != null && !orderId.equals(null)) {
-            Order order =  orderRepository.findById(orderId)
-                    .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-           order.setPointsToUse(dto.getPointsToUse())
-                   .setAdditionalOrders(dto.getAdditionalOrders())
-                   .setComment(dto.getOrderComment());
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            order.setPointsToUse(dto.getPointsToUse())
+                .setAdditionalOrders(dto.getAdditionalOrders())
+                .setComment(dto.getOrderComment());
             return order;
         } else {
             return modelMapper.map(dto, Order.class);
         }
     }
+
     private FondyOrderResponse getPaymentRequestDto(Order order, String link) {
         return FondyOrderResponse.builder()
             .orderId(order.getId())
@@ -962,9 +963,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId).orElseThrow(null);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
-//            .orderId(orderId + "_"
-//                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
-                .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
+            .orderId(OrderUtils.generateOrderIdForPayment(orderId, order))
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
