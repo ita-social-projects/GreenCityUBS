@@ -53,6 +53,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .createdBy(receivingStation.getCreatedBy().getRecipientEmail())
                     .build())
                 .collect(Collectors.toList()))
+            .courierId(source.getCourier().getId())
             .build();
     }
 }

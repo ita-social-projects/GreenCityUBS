@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import greencity.dto.order.*;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.entity.enums.*;
+import greencity.entity.order.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -61,16 +62,6 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Courier;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.Service;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -100,6 +91,8 @@ import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+
+import javax.persistence.EntityNotFoundException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -1995,5 +1988,22 @@ class UBSClientServiceImplTest {
 
         ubsService.getLiqPayStatus(1L, "abc");
 
+    }
+
+    @Test
+    void getTariffForOrderTest() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
+            .thenReturn(ModelUtils.getTariffsForLocationDto());
+        var dto = ubsService.getTariffForOrder(1L);
+        verify(tariffsInfoRepository, times(1)).findByOrderId(anyLong());
+        verify(modelMapper).map(tariffsInfo, TariffsForLocationDto.class);
+    }
+
+    @Test
+    void getTariffForOrderFailTest() {
+        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
+        Assertions.assertThrows(EntityNotFoundException.class, () -> ubsService.getTariffForOrder(1L));
     }
 }

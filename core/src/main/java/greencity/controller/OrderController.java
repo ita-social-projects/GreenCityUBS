@@ -7,6 +7,7 @@ import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -532,5 +533,23 @@ public class OrderController {
     @GetMapping("/tariffinfo-for-location/{locationId}")
     public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(@Valid @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffInfoForLocation(locationId));
+    }
+
+    /**
+     * Controller for getting info about tariff by order's id.
+     *
+     * @param id - order ID
+     * @return {@link TariffsForLocationDto}
+     */
+    @ApiOperation(value = "Get tariff for order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/orders/{id}/tariff")
+    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
     }
 }
