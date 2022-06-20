@@ -912,7 +912,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testSetOrderDetailHALF_PAID() {
+    void testSetOrderDetailIfHalfPaid() {
         User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
             .id(42L).build();
         Order order = ModelUtils.getOrdersStatusAdjustmentDto();
