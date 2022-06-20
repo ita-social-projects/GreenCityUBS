@@ -7,6 +7,7 @@ metadata:
     cert-manager.io/issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "false"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
 spec:
   tls:
   - hosts:
