@@ -386,7 +386,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Order isExistOrder(OrderResponseDto dto, Long orderId) {
-        if (orderId != null && !orderId.equals(null)) {
+        if (orderId != null) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
             order.setPointsToUse(dto.getPointsToUse())
