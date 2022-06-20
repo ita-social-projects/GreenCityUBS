@@ -925,7 +925,8 @@ class UBSManagementServiceImplTest {
         ubsManagementService.setOrderDetail(order.getId(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
-
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
     }
 
     @Test
