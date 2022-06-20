@@ -300,6 +300,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
+                            .id(1l)
                 .paymentId("1")
                 .amount(20000L)
                 .currency("UAH")

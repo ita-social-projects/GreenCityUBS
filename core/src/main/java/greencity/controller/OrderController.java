@@ -137,11 +137,17 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/processOrder")
+    @PostMapping(value = {"/processOrder", "/processOrder/{id}" })
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
+        @Valid @RequestBody OrderResponseDto dto,
+        @Valid @PathVariable("id") Optional<Long> id) {
+        if (id.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
+        }
+//        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
     }
 
     /**
