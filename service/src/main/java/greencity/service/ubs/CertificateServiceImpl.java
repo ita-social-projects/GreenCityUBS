@@ -39,8 +39,8 @@ public class CertificateServiceImpl implements CertificateService {
     public void deleteCertificate(String code) {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
-        if (certificate.getCertificateStatus().equals(CertificateStatus.EXPIRED)
-            || certificate.getCertificateStatus().equals(CertificateStatus.USED)) {
+        if (CertificateStatus.EXPIRED.equals(certificate.getCertificateStatus())
+            || CertificateStatus.USED.equals(certificate.getCertificateStatus())) {
             throw new BadRequestException(ErrorMessage.CERTIFICATE_STATUS);
         }
         certificateRepository.delete(certificate);
