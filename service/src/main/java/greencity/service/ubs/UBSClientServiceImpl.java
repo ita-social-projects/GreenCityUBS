@@ -1507,8 +1507,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
 
-
-
         paymentVerification(sumToPay, order);
 
         if (sumToPay == 0) {
@@ -1521,10 +1519,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private Integer calculatePaidAmount(List<Payment> payments, Integer sumToPay) {
         Long paid = payments.stream()
-                .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
-                .map(Payment::getAmount)
-                .map(amount -> amount/100)
-                .reduce(0L, Long::sum);
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .map(amount -> amount / 100)
+            .reduce(0L, Long::sum);
 
         return sumToPay - paid.intValue();
     }
