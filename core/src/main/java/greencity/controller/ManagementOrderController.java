@@ -24,7 +24,6 @@ import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.Certificate;
 import greencity.entity.parameters.CustomTableView;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
