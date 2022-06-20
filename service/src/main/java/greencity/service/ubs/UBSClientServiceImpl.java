@@ -1875,4 +1875,14 @@ public class UBSClientServiceImpl implements UBSClientService {
                 findTariffsInfoByCourierAndLocationId(1L, locationId), TariffsForLocationDto.class))
             .build();
     }
+
+    @Override
+    public TariffsForLocationDto getTariffForOrder(Long id) {
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrderId(id);
+        if (tariffsInfo.isPresent()) {
+            return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
+        } else {
+            throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -362,4 +363,12 @@ public interface UBSClientService {
      * @return {@link OrderCourierPopUpDto}
      */
     OrderCourierPopUpDto getTariffInfoForLocation(Long locationId);
+
+    /**
+     * Method for getting info about tariff by order's id.
+     *
+     * @param id - id of order
+     * @return {@link TariffsForLocationDto}
+     */
+    TariffsForLocationDto getTariffForOrder(Long id);
 }
