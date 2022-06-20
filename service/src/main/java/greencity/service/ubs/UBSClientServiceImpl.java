@@ -1499,7 +1499,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Set<Certificate> orderCertificates = new HashSet<>();
+        List<Payment> payments = order.getPayment();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+        sumToPay = calculatePaidAmount(payments, sumToPay);
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
 
@@ -1511,6 +1513,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private Integer calculatePaidAmount(List<Payment> payments, Integer sumToPay) {
+        Long paid = payments.stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .map(amount -> amount / 100)
+            .reduce(0L, Long::sum);
+
+        return sumToPay - paid.intValue();
     }
 
     private void transferUserPointsToOrder(Order order, int amountToTransfer) {
@@ -1874,5 +1886,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             .tariffsForLocationDto(modelMapper.map(
                 findTariffsInfoByCourierAndLocationId(1L, locationId), TariffsForLocationDto.class))
             .build();
+    }
+
+    @Override
+    public TariffsForLocationDto getTariffForOrder(Long id) {
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrderId(id);
+        if (tariffsInfo.isPresent()) {
+            return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
+        } else {
+            throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
+        }
     }
 }
