@@ -6,6 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OptionForColumnDTO;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.*;
@@ -3695,5 +3696,9 @@ public class ModelUtils {
                     .actual(false)
                     .build()))
             .build();
+    }
+
+    public static TariffsForLocationDto getTariffsForLocationDto() {
+        return TariffsForLocationDto.builder().build();
     }
 }
