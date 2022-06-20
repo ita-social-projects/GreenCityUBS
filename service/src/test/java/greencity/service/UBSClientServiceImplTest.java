@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import greencity.dto.order.*;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.entity.enums.*;
