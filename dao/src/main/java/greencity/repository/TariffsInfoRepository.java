@@ -53,4 +53,14 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long> 
             + "WHERE courier_id = :courierId AND m.location_id IN :locationIds")
     List<TariffsInfo> findAllByCourierAndAndTariffLocations(@Param("courierId") Long courierId,
         @Param("locationIds") List<Long> locationIds);
+
+    /**
+     * Method for getting TariffInfo by order's id.
+     *
+     * @param orderId - id of order
+     * @return - Optional of {@link TariffsInfo} if order with such id exists in DB
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM tariffs_info t INNER JOIN orders o ON t.id = o.tariffs_info_id WHERE o.id = :orderId")
+    Optional<TariffsInfo> findByOrderId(@Param("orderId") Long orderId);
 }

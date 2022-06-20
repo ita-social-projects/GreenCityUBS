@@ -351,6 +351,15 @@ class OrderControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    @SneakyThrows
+    void getTariffForOrder() {
+        mockMvc.perform(get(ubsLink + "/orders/1/tariff")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = getRedirectionConfig();
 
