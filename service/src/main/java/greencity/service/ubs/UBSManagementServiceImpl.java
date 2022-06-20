@@ -559,6 +559,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         final User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         collectEventsAboutSetOrderDetails(confirmed, exported, orderId, currentUser);
+        final Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
@@ -594,6 +596,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (needToPay > 0 && wasPaid + discount != 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.HALF_PAID.name());
+            notificationService.notifyHalfPaidPackage(order);
             return;
         }
         if (wasPaid + discount == 0) {
