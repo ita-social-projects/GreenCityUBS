@@ -48,15 +48,15 @@ stages:
         KeyVaultName: '$(azKeyVault)'
         SecretsFilter: 'ftpHost, ftpUser, ftpPass'
         
-    - task: FtpUpload@2
-      displayName: Upload json to app service via FTP
-      inputs:
-        credentialsOption: 'inputs'
-        serverUrl: '$(ftpHost)'
-        username: '$(ftpUser)'
-        password: '$(ftpPass)'
-        filePatterns: '$(jsonFile)'
-        remoteDirectory: '$(jsonLocation)'
+#     - task: FtpUpload@2
+#       displayName: Upload json to app service via FTP
+#       inputs:
+#         credentialsOption: 'inputs'
+#         serverUrl: '$(ftpHost)'
+#         username: '$(ftpUser)'
+#         password: '$(ftpPass)'
+#         filePatterns: '$(jsonFile)'
+#         remoteDirectory: '$(jsonLocation)'
 
 #     - task: AzureAppServiceSettings@1
 #       displayName: Set GOOGLE_APPLICATION_CREDENTIALS config in Azure Portal
