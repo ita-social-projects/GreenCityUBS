@@ -14,7 +14,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import greencity.dto.order.*;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
+import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -48,17 +50,6 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
@@ -71,12 +62,6 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -304,9 +289,63 @@ class UBSClientServiceImplTest {
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
 
+    }
+
+    @Test
+    void testSaveToDBExistOrder() throws InvocationTargetException, IllegalAccessException {
+
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<Payment>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        Field merchantId = null;
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
+        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1l);
+        assertNotNull(result);
     }
 
     @Test
@@ -355,7 +394,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1044,7 +1083,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
+        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
@@ -1090,7 +1129,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1130,7 +1169,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1271,7 +1310,7 @@ class UBSClientServiceImplTest {
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
     }
 
@@ -1318,7 +1357,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
     }
 
@@ -1367,7 +1406,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1418,7 +1457,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1468,7 +1507,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1523,7 +1562,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
+        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
@@ -1803,7 +1842,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1852,7 +1891,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1889,7 +1928,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
