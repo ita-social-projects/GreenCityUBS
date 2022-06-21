@@ -1,12 +1,16 @@
 package greencity.service;
 
 import greencity.dto.certificate.CertificateDtoForAdding;
+import greencity.entity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.repository.CertificateCriteriaRepo;
 import greencity.repository.CertificateRepository;
 import greencity.service.ubs.CertificateServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -46,6 +51,34 @@ class CertificateServiceImplTest {
         when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
         certificateService.addCertificate(certificateDtoForAdding);
         verify(certificateRepository, times(1)).save(certificate);
+    }
+
+    @Test
+    void deleteCertificateTest() {
+        Certificate certificate = new Certificate();
+        certificate.setCode("1111-1234")
+            .setCertificateStatus(CertificateStatus.ACTIVE);
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
+        certificateService.deleteCertificate("1111-1234");
+        verify(certificateRepository, times(1)).delete(certificate);
+    }
+
+    @Test
+    void deleteCertificateNotFound() {
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            certificateService.deleteCertificate("1111-1234");
+        });
+    }
+
+    @Test
+    void deleteCertificateBadRequest() {
+        Certificate certificate = new Certificate();
+        certificate.setCode("1111-1234")
+            .setCertificateStatus(CertificateStatus.EXPIRED);
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            certificateService.deleteCertificate("1111-1234");
+        });
     }
 
     @Test
