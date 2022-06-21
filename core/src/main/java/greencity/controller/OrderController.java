@@ -136,7 +136,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
@@ -382,7 +381,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping(value = {"/processLiqPayOrder", "/processLiqPayOrder/{id}"})
