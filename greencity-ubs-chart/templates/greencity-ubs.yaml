@@ -40,6 +40,18 @@ spec:
               name: appsecret
               key: API-SECRET
 
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: APPLICATIONINSIGHTS-CONNECTION-STRING
+
+        - name: AZURE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: AZURE-CONNECTION-STRING
+
         - name: AZURE_CONTAINER_NAME
           valueFrom:
             secretKeyRef:
@@ -208,11 +220,29 @@ spec:
               name: appsecret
               key: VIBER-BOT-TOKEN
 
-        # - name: WEBSITE_ENABLE_SYNC_UPDATE_SITE
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: appsecret
-        #       key: API-KEY
+        - name: FONDY_REDIRECT
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: FONDY-REDIRECT
+
+        - name: FONDY_PERSONAL_CABINET
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: FONDY-PERSONAL-CABINET
+
+        - name: LIQPAY_REDIRECT
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: LIQPAY-REDIRECT
+
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: appsecret
+              key: GOOGLE-API-KEY
         ports:
         - containerPort: 8060
           name: tomcat
