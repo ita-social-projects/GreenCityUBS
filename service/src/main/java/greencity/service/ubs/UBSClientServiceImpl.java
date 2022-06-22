@@ -1466,7 +1466,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         payment.setPaymentSystem("LiqPay");
         payment.setCardType((String) map.get("sender_card_type"));
         payment.setResponseDescription((String) map.get("err_description"));
-        payment.setPaymentId((String) map.get("payment_id"));
+        payment.setPaymentId(String.valueOf(map.get("payment_id")));
         payment.setComment((String) map.get("description"));
         payment.setPaymentType(PaymentType.AUTO);
         payment.setSenderCellPhone((String) map.get("sender_phone"));
@@ -1490,7 +1490,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String convertMillisecondToLocalDate(long millis) {
         LocalDate date =
             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return dateFormatter.format(date);
     }
 
