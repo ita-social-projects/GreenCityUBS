@@ -295,60 +295,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBExistOrder() throws InvocationTargetException, IllegalAccessException {
-
-        User user = ModelUtils.getUserWithLastLocation();
-        user.setAlternateEmail("test@mail.com");
-        user.setCurrentPoints(900);
-
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.getBags().get(0).setAmount(15);
-        Order order = getOrder();
-        user.setOrders(new ArrayList<>());
-        user.getOrders().add(order);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        Bag bag = new Bag();
-        bag.setCapacity(120);
-        bag.setFullPrice(400);
-
-        UBSuser ubSuser = getUBSuser();
-
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
-
-        Order order1 = getOrder();
-        order1.setPayment(new ArrayList<Payment>());
-        Payment payment1 = getPayment();
-        payment1.setId(1L);
-        order1.getPayment().add(payment1);
-
-        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
-        Field merchantId = null;
-        for (Field f : fields) {
-            if (f.getName().equals("merchantId")) {
-                f.setAccessible(true);
-                f.set(ubsService, "1");
-            }
-        }
-
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
-        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
-        when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
-        when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1l);
-        assertNotNull(result);
-    }
-
-    @Test
     void testSaveToDBThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
         Courier courier = new Courier();
