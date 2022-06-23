@@ -5,10 +5,6 @@
 
     <changeSet id="Hlazova-3" author="Hlazova Nataliia">
         <update tableName="order_status_translations">
-            <column name="name" value="Узгоджено"/>
-            <where>id=2</where>
-        </update>
-        <update tableName="order_status_translations">
             <column name="name" value="Підтверджено"/>
             <where>id=4</where>
         </update>
