@@ -572,7 +572,7 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository, times(1)).findById(1L);
         verify(receivingStationRepository, times(1)).delete(station);
 
-        station.setEmployees(Set.of(getEmployee()));
+//        station.setEmployees(Set.of(getEmployee()));
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> superAdminService.deleteReceivingStation(1L));
 

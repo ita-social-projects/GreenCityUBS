@@ -92,7 +92,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CERTIFICATES', authentication)")
     @GetMapping("/getAllCertificates")
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
         CertificatePage certificatePage,
@@ -115,6 +115,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @ResponseStatus(value = HttpStatus.CREATED)
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_CERTIFICATE', authentication)")
     @PostMapping("/addCertificate")
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
@@ -159,7 +160,6 @@ public class ManagementOrderController {
     })
 
     @GetMapping("/all-undelivered")
-    @PreAuthorize("@preAuthorizer.authoriseEmployee('Update user profile', authentication)")
     public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
@@ -282,6 +282,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/bigOrderTable")
     public ResponseEntity<Page<BigOrderTableDTO>> getOrders(OrderPage page,
         OrderSearchCriteria criteria,
@@ -304,6 +305,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @PutMapping("/changeOrdersTableView")
     public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
         String titles) {
@@ -324,6 +326,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/getOrdersViewParameters")
     public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)

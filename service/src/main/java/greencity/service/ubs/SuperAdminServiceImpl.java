@@ -527,11 +527,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         ReceivingStation station = receivingStationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(
                 ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + id));
-        if (station.getEmployees() == null || station.getEmployees().isEmpty()) {
-            receivingStationRepository.delete(station);
-        } else {
-            throw new UnprocessableEntityException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
-        }
+        receivingStationRepository.delete(station);
     }
 
     private Set<Location> findLocationsForTariff(List<Long> locationId, Long regionId) {
@@ -587,7 +583,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courier)
-            .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
+//            .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
             .creator(userRepository.findByUuid(userUUID))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
