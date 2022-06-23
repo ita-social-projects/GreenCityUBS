@@ -115,7 +115,26 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"), eq(null));
+        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+
+    }
+
+    @Test
+    void processOrderId() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processOrder/{id}", 1L)
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).saveFullOrderToDB(anyObject(), eq("35467585763t4sfgchjfuyetf"), any());
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
 
     }
@@ -254,7 +273,26 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"));
+        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"), eq(null));
+        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+
+    }
+
+    @Test
+    void processLiqPayOrderId() throws Exception {
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderResponceDtoJSON = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/processLiqPayOrder/{id}", 1L)
+            .content(orderResponceDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).saveFullOrderToDBFromLiqPay(anyObject(), eq("35467585763t4sfgchjfuyetf"), any());
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
 
     }
@@ -346,6 +384,15 @@ class OrderControllerTest {
     @SneakyThrows
     void getAllActiveLocations() {
         mockMvc.perform(get(ubsLink + "/allLocations")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @SneakyThrows
+    void getTariffForOrder() {
+        mockMvc.perform(get(ubsLink + "/orders/1/tariff")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());

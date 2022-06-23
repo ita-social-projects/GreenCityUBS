@@ -14,7 +14,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import greencity.dto.order.*;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
+import greencity.entity.enums.*;
+import greencity.entity.order.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -47,17 +50,6 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.EventDto;
-import greencity.dto.order.FondyOrderResponse;
-import greencity.dto.order.MakeOrderAgainDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
@@ -70,22 +62,6 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Courier;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.Service;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -115,6 +91,8 @@ import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+
+import javax.persistence.EntityNotFoundException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -311,7 +289,7 @@ class UBSClientServiceImplTest {
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
 
     }
@@ -362,7 +340,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1051,7 +1029,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
+        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
@@ -1097,7 +1075,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1137,7 +1115,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1278,7 +1256,7 @@ class UBSClientServiceImplTest {
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
     }
 
@@ -1325,7 +1303,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
-        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
     }
 
@@ -1374,7 +1352,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1425,7 +1403,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1475,7 +1453,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
     }
 
@@ -1530,7 +1508,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
-        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf"));
+        assertNotNull(ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(bagRepository, times(2)).findById(3);
         verify(ubsUserRepository).findById(1L);
@@ -1810,7 +1788,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1859,7 +1837,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(any())).thenReturn(Optional.ofNullable(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1896,7 +1874,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf");
+            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         });
 
     }
@@ -1956,5 +1934,22 @@ class UBSClientServiceImplTest {
 
         ubsService.getLiqPayStatus(1L, "abc");
 
+    }
+
+    @Test
+    void getTariffForOrderTest() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
+            .thenReturn(ModelUtils.getTariffsForLocationDto());
+        var dto = ubsService.getTariffForOrder(1L);
+        verify(tariffsInfoRepository, times(1)).findByOrderId(anyLong());
+        verify(modelMapper).map(tariffsInfo, TariffsForLocationDto.class);
+    }
+
+    @Test
+    void getTariffForOrderFailTest() {
+        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
+        Assertions.assertThrows(EntityNotFoundException.class, () -> ubsService.getTariffForOrder(1L));
     }
 }
