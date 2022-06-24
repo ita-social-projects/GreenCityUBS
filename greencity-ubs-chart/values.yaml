@@ -1,1 +1,29 @@
-image: skyere/greencityubs:latest
+deployment:
+  replicas: 1
+  image: skyere/greencityubs:latest
+  requests:
+    cpu: 10m
+    memory: 250Mi
+  limits:
+    cpu: 2
+    memory: 1024Mi
+
+service:
+  type: ClusterIP
+
+# You need Nginx ingress controller and cert manager already installed
+# https://kubernetes.github.io/ingress-nginx/deploy/
+# https://cert-manager.io/docs/installation/helm/#3-install-customresourcedefinitions
+ingress:
+  enable_cors: true
+
+  # Example: "https://origin-site.com:4443, http://origin-site.com, https://example.org:1199"
+  # "https://*.origin-site.com:4443, http://*.origin-site.com"
+  # If not set will be used "*" instead. Example: cors_allow_origin: ""
+  cors_allow_origin: ""
+
+  # Only when cors_allow_origin is not "*"
+  cors_allow_credentials: "false"
+
+  hostname: greencity-ubs.testgreencity.ga
+  
