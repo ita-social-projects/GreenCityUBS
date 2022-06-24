@@ -64,12 +64,13 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      *
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
+     * @param dto     {@link OrderResponseDto} user entered data;
+     * @param uuid    current {@link User}'s uuid;
+     * @param orderId {@link Long} order id;
      * @return {@link PaymentRequestDto} which contains data to pay order out.
      * @author Oleh Bilonizhka
      */
-    FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid);
+    FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method get status of order from db by id.
@@ -272,12 +273,13 @@ public interface UBSClientService {
     /**
      * Methods saves all entered by user data to database.
      * 
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
+     * @param dto     {@link OrderResponseDto} user entered data;
+     * @param uuid    current {@link User}'s uuid;
+     * @param orderId {@link Long} order id;
      * @return {@link LiqPayOrderResponse} order id and liqpay payment button.
      * @author Vadym Makitra
      */
-    LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid);
+    LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method validates received payment response.

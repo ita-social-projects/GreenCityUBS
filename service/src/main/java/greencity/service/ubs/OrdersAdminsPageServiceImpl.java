@@ -143,7 +143,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     "Comment to the order from the client"),
                 "commentForOrderByClient", 20, false, true, false, 22, EditType.READ_ONLY, new ArrayList<>(),
                 orderDetails),
-            new ColumnDTO(new TitleDto("totalPayment", "Замовлення оплачено в розмірі", "Total payment"),
+            new ColumnDTO(new TitleDto("totalPayment", "Оплата", "Total payment"),
                 "totalPayment", 20, false, true,
                 false, 23,
                 EditType.READ_ONLY, new ArrayList<>(), orderDetails),
