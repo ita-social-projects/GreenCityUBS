@@ -373,9 +373,9 @@ public class NotificationServiceImpl implements NotificationService {
             .build();
     }
 
-    private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccauntInactivity) {
+    private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccountInactivity) {
         executor.execute(() -> notificationProviders
-            .forEach(provider -> provider.sendNotification(notification, monthsOfAccauntInactivity)));
+            .forEach(provider -> provider.sendNotification(notification, monthsOfAccountInactivity)));
     }
 
     /**
