@@ -3,6 +3,7 @@ package greencity.ubsviberbot;
 import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
@@ -112,7 +113,7 @@ class ViberServiceImplTest {
                     .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(sendMessageToUserDto)).thenReturn(null);
 
-        viberService.sendNotification(notification);
+        viberService.sendNotification(notification, 0L);
 
         verify(viberClient).sendMessage(any());
     }
@@ -128,7 +129,7 @@ class ViberServiceImplTest {
                 notification.getNotificationType(), userVO.getLanguageVO().getCode(), OTHER))
                     .thenReturn(Optional.of(template));
 
-        viberService.sendNotification(notification);
+        viberService.sendNotification(notification, 0L);
 
         verify(viberClient, never()).sendMessage(any());
     }
@@ -137,7 +138,7 @@ class ViberServiceImplTest {
     void sendNotificationUserNotFoundException() {
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
             .thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification));
+        assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification, 0L));
     }
 
     @Test
@@ -150,7 +151,7 @@ class ViberServiceImplTest {
                     .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
-        assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification));
+        assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, 0L));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
@@ -16,6 +17,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.AbstractNotificationProvider;
@@ -37,7 +39,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
@@ -96,7 +101,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationParameter.setUserNotification(created);
                 NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
                 created.setParameters(Collections.singleton(createdParameter));
-                sendNotificationsForBotsAndEmail(created);
+                sendNotificationsForBotsAndEmail(created, 0L);
             }
         }
     }
@@ -111,7 +116,7 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setUser(order.getUser());
         userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
-        sendNotificationsForBotsAndEmail(notification);
+        sendNotificationsForBotsAndEmail(notification, 0L);
     }
 
     @Override
@@ -245,24 +250,48 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyInactiveAccounts() {
-        List<User> users = userRepository
-            .getAllInactiveUsers(LocalDate.now(clock).minusYears(1), LocalDate.now(clock).minusMonths(2));
-        log.info("Found {} inactive users", users.size());
-        for (User user : users) {
-            Optional<UserNotification> lastNotification =
-                userNotificationRepository
-                    .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
-                        NotificationType.LETS_STAY_CONNECTED);
-            if (lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusMonths(2))
-                || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusMonths(2))) {
-                UserNotification userNotification = new UserNotification();
-                userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
-                userNotification.setUser(user);
-                userNotification.setNotificationTime(LocalDateTime.now(clock));
-                UserNotification notification = userNotificationRepository.save(userNotification);
-                sendNotificationsForBotsAndEmail(notification);
-            }
+        Long[] monthsList = {2L, 4L, 6L, 8L, 10L, 12L};
+        List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks = new ArrayList<>();
+        LocalDate dateOfLastNotification = LocalDate.now(clock).minusMonths(2L);
+        List<Long> userIdsByLastNotifications =
+            userNotificationRepository
+                .getUserIdByDateOfLastNotificationAndNotificationType(dateOfLastNotification,
+                    NotificationType.LETS_STAY_CONNECTED.toString());
+
+        Arrays.stream(monthsList).forEach(months -> {
+            LocalDate dateOfLastOrder = LocalDate.now(clock).minusMonths(months);
+            callableGetInactiveUsersTasks.add(() -> {
+                List<User> users = userRepository.getInactiveUsersByDateOfLastOrder(dateOfLastOrder);
+                List<User> filteredUsers = users.stream()
+                    .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
+                    .collect(Collectors.toList());
+                log.info("Found {} inactive users for {} months ", filteredUsers.size(), months.toString());
+                return InactiveAccountDto.builder().users(filteredUsers).months(months).build();
+            });
+        });
+
+        try {
+            List<Future<InactiveAccountDto>> futures = executor.invokeAll(callableGetInactiveUsersTasks);
+            futures.forEach(future -> {
+                try {
+                    List<User> users = future.get().getUsers();
+                    Long monthsOfAccountInactivity = future.get().getMonths();
+                    users.forEach(user -> {
+                        UserNotification userNotification = new UserNotification();
+                        userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
+                        userNotification.setUser(user);
+                        userNotification.setNotificationTime(LocalDateTime.now(clock));
+                        UserNotification notification = userNotificationRepository.save(userNotification);
+                        sendNotificationsForBotsAndEmail(notification, monthsOfAccountInactivity);
+                    });
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Unable to send notification to user {}", e.getMessage());
+                    Thread.currentThread().interrupt();
+                }
+            });
+        } catch (InterruptedException e) {
+            log.error("Unable to start thread {}", e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -315,7 +344,7 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setRead(true);
         }
 
-        NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository);
+        NotificationDto notificationDto = createNotificationDto(notification, language, SITE, templateRepository, 0L);
 
         if (NotificationType.VIOLATION_THE_RULES.equals(notification.getNotificationType())) {
             Violation violation = violationRepository.findByOrderId(notification.getOrder().getId())
@@ -344,8 +373,9 @@ public class NotificationServiceImpl implements NotificationService {
             .build();
     }
 
-    private void sendNotificationsForBotsAndEmail(UserNotification notification) {
-        executor.execute(() -> notificationProviders.forEach(provider -> provider.sendNotification(notification)));
+    private void sendNotificationsForBotsAndEmail(UserNotification notification, long monthsOfAccountInactivity) {
+        executor.execute(() -> notificationProviders
+            .forEach(provider -> provider.sendNotification(notification, monthsOfAccountInactivity)));
     }
 
     /**
@@ -353,7 +383,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     public static NotificationDto createNotificationDto(UserNotification notification, String language,
         NotificationReceiverType receiverType,
-        NotificationTemplateRepository templateRepository) {
+        NotificationTemplateRepository templateRepository, long monthsOfAccountInactivity) {
         NotificationTemplate template = templateRepository
             .findNotificationTemplateByNotificationTypeAndLanguageCodeAndNotificationReceiverType(
                 notification.getNotificationType(),
@@ -367,7 +397,7 @@ public class NotificationServiceImpl implements NotificationService {
             .collect(toMap(NotificationParameter::getKey, NotificationParameter::getValue));
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
-        String resultBody = sub.replace(templateBody);
+        String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
 
         return NotificationDto.builder().title(template.getTitle())
             .body(resultBody).build();
@@ -383,6 +413,6 @@ public class NotificationServiceImpl implements NotificationService {
         parameters.forEach(parameter -> parameter.setUserNotification(created));
         List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
         created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created);
+        sendNotificationsForBotsAndEmail(created, 0L);
     }
 }

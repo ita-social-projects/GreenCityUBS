@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -48,4 +50,15 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      * @author Ihor Volianskyi
      */
     long countUserNotificationByUserAndReadIsFalse(User user);
+
+    /**
+     * Method that returns list of user ids by {@link NotificationType} and
+     * {@link LocalDate}.
+     *
+     * @return {@link List} of {@link Long}.
+     */
+    @Query(nativeQuery = true, value = "SELECT distinct users_id FROM user_notifications "
+        + "WHERE CAST(notification_time AS DATE) > :dateOfLastNotification AND "
+        + "notification_type = :type")
+    List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
 }
