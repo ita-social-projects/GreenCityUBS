@@ -72,7 +72,7 @@ class OrdersAdminsPageServiceImplTest {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
     }
@@ -83,10 +83,10 @@ class OrdersAdminsPageServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
         assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
@@ -102,37 +102,37 @@ class OrdersAdminsPageServiceImplTest {
         List<Employee> employeeList = new ArrayList<>();
         employeeList.add(ModelUtils.getEmployee());
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7l)));
 
-        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8))
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
 
         when(superAdminService.getAllReceivingStations())

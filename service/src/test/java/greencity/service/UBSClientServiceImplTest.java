@@ -1652,15 +1652,15 @@ class UBSClientServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+        when(ordersForUserRepository.getAllByUserUuid(user.getUuid(), pageable))
             .thenReturn(page);
         when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(bagTranslationRepository.findBagTranslationByBag(bag)).thenReturn(translation);
         when(orderStatusTranslationRepository
-            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
-        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
+        when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
 
@@ -1673,11 +1673,11 @@ class UBSClientServiceImplTest {
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
         verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
-            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue());
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
-            .findByOrderPaymentStatusIdAndTranslationValue(
+            .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
-        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
+        verify(ordersForUserRepository).getAllByUserUuid(user.getUuid(), pageable);
 
     }
 
@@ -1696,12 +1696,12 @@ class UBSClientServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+        when(ordersForUserRepository.getAllByUserUuid(user.getUuid(), pageable))
             .thenReturn(page);
         when(orderStatusTranslationRepository
-            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
-        when(orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(
+        when(orderPaymentStatusTranslationRepository.getById(
             (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
 

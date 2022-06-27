@@ -18,23 +18,17 @@ public interface OrderStatusTranslationRepository extends JpaRepository<OrderSta
      * Method, that returns {@link OrderStatusTranslation} for chosen language and
      * order status.
      *
-     * @param statusId code of the orderStatus.
      * @return {@link OrderStatusTranslation}.
      * @author Oleksandr Khomiakov.
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM order_status_translations OST"
-            + " WHERE OST.status_id =:statusId")
-    Optional<OrderStatusTranslation> getOrderStatusTranslationById(int statusId);
+    Optional<OrderStatusTranslation> getOrderStatusTranslationById(Long id);
 
     /**
-     * This method which is list statuses found by languageId.
+     * This method which is list statuses.
      *
-     * @param statusId {@link Long}.
      * @return {@link List}.
      *
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderStatusTranslation AS ort")
-    List<OrderStatusTranslation> getOrderStatusTranslationsId(@Param("statusId") Long statusId);
+    List<OrderStatusTranslation> findAllBy();
 }

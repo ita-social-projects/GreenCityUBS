@@ -685,8 +685,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.findAllOrdersByUserUuidAndOrderStatus(page, uuid, statuses)
-            : ordersForUserRepository.findAllOrdersByUserUuid(page, uuid);
+            ? ordersForUserRepository.getAllByUserUuidAndOrderStatus(uuid, statuses, page)
+            : ordersForUserRepository.getAllByUserUuid(uuid, page);
         List<Order> orders = orderPages.getContent();
 
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
@@ -704,10 +704,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
             .orElse(orderStatusTranslationRepository.getOne(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-            .findByOrderPaymentStatusIdAndTranslationValue(
+            .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
 
         Double fullPrice = Double.valueOf(bagForUserDtos.stream()

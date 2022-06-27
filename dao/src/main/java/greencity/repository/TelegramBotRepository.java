@@ -12,6 +12,5 @@ public interface TelegramBotRepository extends CrudRepository<TelegramBot, Long>
      *
      * @return list of {@link TelegramBot}.
      */
-    @Query(value = "FROM TelegramBot t WHERE t.chatId = :chatId")
     TelegramBot findByChatId(Long chatId);
 }
