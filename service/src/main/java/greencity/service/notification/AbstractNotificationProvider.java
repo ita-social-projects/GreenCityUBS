@@ -42,8 +42,8 @@ public abstract class AbstractNotificationProvider {
      *
      * @param notification {@link UserNotification} - notification to send.
      */
-    public void sendNotification(UserNotification notification) {
-        NotificationDto notificationDto = createNotificationDto(notification);
+    public void sendNotification(UserNotification notification, long monthsOfAccountInactivity) {
+        NotificationDto notificationDto = createNotificationDto(notification, monthsOfAccountInactivity);
         if (isEnabled(notification.getUser())) {
             sendNotification(notification, notificationDto);
         }
@@ -63,11 +63,12 @@ public abstract class AbstractNotificationProvider {
      * @param notification {@link UserNotification} notification to create DTO from.
      * @return {@link NotificationDto} notification ready for sending.
      */
-    protected NotificationDto createNotificationDto(UserNotification notification) {
+    protected NotificationDto createNotificationDto(UserNotification notification, long monthsOfAccountInactivity) {
         UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail())
             .orElseThrow(() -> new UserNotFoundException(
                 ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + notification.getUser().getRecipientEmail()));
         return NotificationServiceImpl
-            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository);
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), OTHER, templateRepository,
+                monthsOfAccountInactivity);
     }
 }
