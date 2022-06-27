@@ -136,6 +136,6 @@
     <include file="db/changelog/logs/ch-add-column-alternate_email-to-ubs_user-to-users-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-add-table-tariffs-locations-Fedorko.xml"/>
     <include file="db/changelog/logs/ch-update-order_status_translation-Hlazova.xml"/>
-<!--    <include file="db/changelog/logs/Dump-DDL-01.06.2022.xml"/>-->
+    <include file="db/changelog/logs/ch-update-into-notification-templates-Postolovskyi.xml"/>
 </databaseChangeLog>
 
