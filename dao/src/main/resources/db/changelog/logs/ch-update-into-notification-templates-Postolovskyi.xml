@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Oleg-1" author="Postolovskyi">
+        <update tableName="notification_templates">
+            <column name="body">Привіт! Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» уже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме.</column>
+            <where>id=13</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="body">Привіт! Ми помітили, що ви не користувалися послугою «УБС Кур‘єр» уже %d місяці(в). Можливо, ви вирушили в тривалу подорож, а можливо, щось пішло не так зі збиранням пластиків. Поділіться, будь ласка, цим із нами, щоб ми зрозуміли, чи можемо допомогти і як саме.</column>
+            <where>id=27</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="body">Hi there! We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey, or maybe something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how.</column>
+            <where>id=14</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="body">Hi there! We noticed that you have not used the UBS Courier service for %d months. Maybe you went on a long journey, or maybe something went wrong with collecting plastics. Please share this with us so we can understand if we can help and how.</column>
+            <where>id=28</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
