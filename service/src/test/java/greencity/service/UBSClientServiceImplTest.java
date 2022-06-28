@@ -2,6 +2,7 @@ package greencity.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,12 +15,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import greencity.dto.certificate.CertificateDto;
 import greencity.dto.order.*;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
 import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+
+import org.bouncycastle.math.raw.Mod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -365,22 +369,33 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificate() {
-        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
-            .code("certificate")
-            .certificateStatus(CertificateStatus.ACTIVE)
-            .build()));
+        Certificate certificate = ModelUtils.getCertificate();
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(CertificateDto.builder()
+            .code("1111-1234")
+            .certificateStatus("ACTIVE")
+            .creationDate(LocalDate.now())
+            .dateOfUse(LocalDate.now().plusMonths(1))
+            .points(10)
+            .build());
 
-        assertEquals("ACTIVE", ubsService.checkCertificate("certificate").getCertificateStatus());
+        assertEquals("ACTIVE", ubsService.checkCertificate("1111-1234").getCertificateStatus());
     }
 
     @Test
     void checkCertificateUSED() {
-        when(certificateRepository.findById("certificate")).thenReturn(Optional.of(Certificate.builder()
-            .code("certificate")
-            .certificateStatus(CertificateStatus.USED)
-            .build()));
+        Certificate certificate = ModelUtils.getCertificate();
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(certificate));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(CertificateDto.builder()
+            .code("1111-1234")
+            .certificateStatus("USED")
+            .creationDate(LocalDate.now())
+            .dateOfUse(LocalDate.now().plusMonths(1))
+            .points(10)
+            .build());
 
-        assertEquals("USED", ubsService.checkCertificate("certificate").getCertificateStatus());
+        assertEquals("USED", ubsService.checkCertificate("1111-1234").getCertificateStatus());
     }
 
     @Test

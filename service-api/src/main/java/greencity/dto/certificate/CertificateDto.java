@@ -13,5 +13,7 @@ public class CertificateDto {
     private String certificateStatus;
     private Integer points;
     private LocalDate creationDate;
+    private LocalDate dateOfUse;
+    private LocalDate expirationDate;
     private String code;
 }

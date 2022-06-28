@@ -3411,7 +3411,8 @@ public class ModelUtils {
 
         CertificateDto certificateDto = CertificateDto.builder()
             .points(300)
-            .creationDate(LocalDate.now())
+            .dateOfUse(LocalDate.now())
+            .expirationDate(LocalDate.now())
             .code("200")
             .certificateStatus("ACTIVE")
             .build();
