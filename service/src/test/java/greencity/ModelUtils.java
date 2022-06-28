@@ -2379,6 +2379,23 @@ public class ModelUtils {
             .build());
     }
 
+    public static List<Bag> getBag3list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(2000)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(2100)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")

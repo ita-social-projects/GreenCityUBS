@@ -1969,9 +1969,12 @@ class UBSManagementServiceImplTest {
     @Test
     void addBonusesToUserTest() {
         User user = getTestUser();
-        Order order = getOrder2();
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
         ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
 
@@ -1983,10 +1986,37 @@ class UBSManagementServiceImplTest {
 
     @Test
     void addBonusesToUserWithoutUserTest() {
-        when(userRepository.findUserByOrderId(20L)).thenReturn(Optional.empty());
-        AddBonusesToUserDto dto = getAddBonusesToUserDto();
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.empty());
+
         assertThrows(UserNotFoundException.class, () -> {
-            ubsManagementService.addBonusesToUser(dto, 20L);
+            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
+        });
+    }
+
+    @Test
+    void addBonusesToUserWithoutOrderTest() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        AddBonusesToUserDto dto = getAddBonusesToUserDto();
+        assertThrows(NotFoundException.class, () -> {
+            ubsManagementService.addBonusesToUser(dto, 1L);
+        });
+    }
+
+    @Test
+    void addBonusesToUserWithNoOverpaymentTest() {
+        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBag3list());
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
+        assertThrows(BadRequestException.class, () -> {
+            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
         });
     }
 }
