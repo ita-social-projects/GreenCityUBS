@@ -315,12 +315,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
-        if (certificate.getCertificateStatus().toString().equals("USED")) {
-            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-                certificate.getDateOfUse(), certificate.getCode());
-        }
-        return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-            certificate.getExpirationDate(), certificate.getCode());
+        return modelMapper.map(certificate, CertificateDto.class);
     }
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo courierLocation, Integer sumWithoutDiscount) {
