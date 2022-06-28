@@ -1,5 +1,6 @@
 package greencity.service;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
@@ -16,6 +17,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
+import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
 import lombok.SneakyThrows;
@@ -23,15 +25,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;
@@ -83,6 +83,8 @@ class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     private Clock fixedClock;
+
+    ExecutorService mockExecutor = MoreExecutors.newDirectExecutorService();
 
     @Nested
     class ClockNotification {
@@ -257,6 +259,19 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyInactiveAccounts() {
+            AbstractNotificationProvider abstractNotificationProvider =
+                Mockito.mock(AbstractNotificationProvider.class);
+            NotificationServiceImpl notificationService1 = new NotificationServiceImpl(
+                userRepository,
+                userNotificationRepository,
+                bagRepository,
+                orderRepository,
+                violationRepository,
+                notificationParameterRepository,
+                clock,
+                List.of(abstractNotificationProvider),
+                templateRepository,
+                mockExecutor);
             User user = User.builder().id(42L).build();
             User user1 = User.builder().id(43L).build();
             UserNotification notification = new UserNotification();
@@ -264,20 +279,14 @@ class NotificationServiceImplTest {
             notification.setUser(user);
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusMonths(2));
 
-            when(userRepository
-                .getAllInactiveUsers(LocalDate.now(fixedClock).minusYears(1), LocalDate.now(fixedClock).minusMonths(2)))
-                    .thenReturn(List.of(user, user1));
-            when(userNotificationRepository
-                .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user,
-                    NotificationType.LETS_STAY_CONNECTED))
-                        .thenReturn(Optional.of(notification));
-            when(userNotificationRepository
-                .findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(user1,
-                    NotificationType.LETS_STAY_CONNECTED))
-                        .thenReturn(Optional.empty());
+            when(userNotificationRepository.getUserIdByDateOfLastNotificationAndNotificationType(
+                LocalDate.now(clock).minusMonths(2L), NotificationType.LETS_STAY_CONNECTED.toString()))
+                    .thenReturn(List.of(11L, 22L));
+            when(userRepository.getInactiveUsersByDateOfLastOrder(LocalDate.now(clock).minusMonths(2L)))
+                .thenReturn(List.of(user, user1));
             when(userNotificationRepository.save(any())).thenReturn(notification);
 
-            notificationService.notifyInactiveAccounts();
+            notificationService1.notifyInactiveAccounts();
 
             verify(userNotificationRepository, times(2)).save(any());
         }

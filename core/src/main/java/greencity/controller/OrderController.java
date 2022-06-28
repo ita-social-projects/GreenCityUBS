@@ -7,6 +7,7 @@ import greencity.constants.HttpStatuses;
 import greencity.constants.ValidationConstant;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -128,20 +129,27 @@ public class OrderController {
      *
      * @param userUuid {@link UserVO} id.
      * @param dto      {@link OrderResponseDto} order data.
+     * @param id       {@link Long} orderId.
      * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
      */
     @ApiOperation(value = "Process user order.")
     @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/processOrder")
+    @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid));
+        @Valid @RequestBody OrderResponseDto dto,
+        @Valid @PathVariable("id") Optional<Long> id) {
+        if (id.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
+        }
     }
 
     /**
@@ -366,20 +374,28 @@ public class OrderController {
      *
      * @param userUuid {@link UserVO} id.
      * @param dto      {@link OrderResponseDto} order data.
+     * @param id       {@link Long} orderId.
      * @return {@link LiqPayOrderResponse}.
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Process user order.")
     @ApiResponses(value = {
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/processLiqPayOrder")
+    @PostMapping(value = {"/processLiqPayOrder", "/processLiqPayOrder/{id}"})
     public ResponseEntity<LiqPayOrderResponse> processLiqPayOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid));
+        @Valid @RequestBody OrderResponseDto dto,
+        @Valid @PathVariable("id") Optional<Long> id) {
+        if (id.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, id.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, null));
+        }
     }
 
     /**
@@ -515,5 +531,23 @@ public class OrderController {
     @GetMapping("/tariffinfo-for-location/{locationId}")
     public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(@Valid @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffInfoForLocation(locationId));
+    }
+
+    /**
+     * Controller for getting info about tariff by order's id.
+     *
+     * @param id - order ID
+     * @return {@link TariffsForLocationDto}
+     */
+    @ApiOperation(value = "Get tariff for order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/orders/{id}/tariff")
+    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
     }
 }

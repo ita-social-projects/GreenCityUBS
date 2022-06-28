@@ -1,7 +1,9 @@
 package greencity.ubstelegrambot;
 
+import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
@@ -48,8 +50,8 @@ class TelegramServiceTest {
         .setId(42L)
         .setUser(user);
     private final NotificationTemplate template = new NotificationTemplate()
-        .setTitle("Title")
-        .setBody("Body");
+        .setTitle("Test")
+        .setBody("Test");
 
     @Test
     void testSendNotification() throws TelegramApiException {
@@ -65,8 +67,7 @@ class TelegramServiceTest {
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);
 
-        telegramService.sendNotification(notification);
-
+        telegramService.sendNotification(notification, 0L);
         verify(userRemoteClient).findNotDeactivatedByEmail(notification.getUser().getRecipientEmail());
         verify(ubsTelegramBot).execute(sendMessage);
     }
@@ -82,7 +83,7 @@ class TelegramServiceTest {
             .thenReturn(Optional.of(userVO));
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());
 
-        assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification));
+        assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification, 0L));
     }
 
     @Test

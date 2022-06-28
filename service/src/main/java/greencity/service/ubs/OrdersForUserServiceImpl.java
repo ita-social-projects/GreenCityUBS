@@ -57,7 +57,7 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
     private UserOrdersDto getAllOrders(Order order) {
         return UserOrdersDto.builder()
             .id(order.getId())
-            .amount(paymentRepository.findAmountByOrderId(order.getId()))
+            .amount(order.getSumTotalAmountWithoutDiscounts())
             .orderDate(order.getOrderDate())
             .orderStatus(order.getOrderStatus())
             .orderPaymentStatus(order.getOrderPaymentStatus())

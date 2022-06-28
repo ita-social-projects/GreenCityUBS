@@ -202,10 +202,13 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
-    @Value("${greencity.authorization.googleApiKey}")
-    private String googleApiKey;
+    @Value("${greencity.redirect.result-url-liq-pay}")
+    private String resultUrlLiqpay;
+    @Value("${greencity.redirect.result-url-fondy-personal-cabinet}")
+    private String resultUrlForPersonalCabinetOfUser;
+    @Value("${greencity.redirect.result-url-fondy}")
+    private String resultUrlFondy;
     private static final Integer BAG_CAPACITY = 120;
-    public static final String LANG_CODE = "ua";
     private final EventService eventService;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
@@ -213,11 +216,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
-    private static final String RESULT_URL_LIQPAY = "https://greencity-ubs.azurewebsites.net/ubs/receiveLiqPayPayment";
-    private static final String RESULT_URL_FOR_PERSONAL_CABINET_OF_USER =
-        "https://greencity-ubs.azurewebsites.net/ubs/receivePaymentClient";
-    private static final String RESULT_URL_FONDY = "https://greencity-ubs.azurewebsites.net/ubs/receivePayment";
-    private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));
 
     @Override
     @Transactional
@@ -338,7 +336,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid) {
+    public FondyOrderResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
         User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo =
             tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
@@ -357,7 +355,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
-        Order order = modelMapper.map(dto, Order.class);
+        Order order = isExistOrder(dto, orderId);
         order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
@@ -377,6 +375,19 @@ public class UBSClientServiceImpl implements UBSClientService {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
             String link = getLinkFromFondyCheckoutResponse(fondyClient.getCheckoutResponse(paymentRequestDto));
             return getPaymentRequestDto(order, link);
+        }
+    }
+
+    private Order isExistOrder(OrderResponseDto dto, Long orderId) {
+        if (orderId != null) {
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            order.setPointsToUse(dto.getPointsToUse())
+                .setAdditionalOrders(dto.getAdditionalOrders())
+                .setComment(dto.getOrderComment());
+            return order;
+        } else {
+            return modelMapper.map(dto, Order.class);
         }
     }
 
@@ -940,15 +951,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
-        Order testOrder = orderRepository.findById(orderId).orElseThrow(null);
+        Order order = orderRepository.findById(orderId).orElseThrow(null);
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId + "_"
-                + testOrder.getPayment().get(testOrder.getPayment().size() - 1).getId().toString())
+                + order.getPayment().get(order.getPayment().size() - 1).getId().toString())
             .orderDescription("ubs courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl(RESULT_URL_FONDY)
+            .responseUrl(resultUrlFondy)
             .build();
 
         paymentRequestDto.setSignature(encryptionUtil
@@ -1268,7 +1279,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     @Transactional
-    public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid) {
+    public LiqPayOrderResponse saveFullOrderToDBFromLiqPay(OrderResponseDto dto, String uuid, Long orderId) {
         User currentUser = userRepository.findByUuid(uuid);
         TariffsInfo tariffsInfo =
             tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(1L, dto.getLocationId())
@@ -1282,7 +1293,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         int sumToPay = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscount, dto.getPointsToUse());
 
-        Order order = modelMapper.map(dto, Order.class);
+        Order order = isExistOrder(dto, orderId);
         order.setTariffsInfo(tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
@@ -1358,7 +1369,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .get(order.getPayment().size() - 1).getId().toString())
             .language("en")
             .paytypes("card")
-            .resultUrl(RESULT_URL_LIQPAY)
+            .resultUrl(resultUrlLiqpay)
             .build();
     }
 
@@ -1450,7 +1461,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         payment.setPaymentSystem("LiqPay");
         payment.setCardType((String) map.get("sender_card_type"));
         payment.setResponseDescription((String) map.get("err_description"));
-        payment.setPaymentId((String) map.get("payment_id"));
+        payment.setPaymentId(String.valueOf(map.get("payment_id")));
         payment.setComment((String) map.get("description"));
         payment.setPaymentType(PaymentType.AUTO);
         payment.setSenderCellPhone((String) map.get("sender_phone"));
@@ -1474,7 +1485,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String convertMillisecondToLocalDate(long millis) {
         LocalDate date =
             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return dateFormatter.format(date);
     }
 
@@ -1496,7 +1507,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
 
         Set<Certificate> orderCertificates = new HashSet<>();
+        List<Payment> payments = order.getPayment();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+        sumToPay = calculatePaidAmount(payments, sumToPay);
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
 
@@ -1508,6 +1521,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
         }
+    }
+
+    private Integer calculatePaidAmount(List<Payment> payments, Integer sumToPay) {
+        Long paid = payments.stream()
+            .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
+            .map(Payment::getAmount)
+            .map(amount -> amount / 100)
+            .reduce(0L, Long::sum);
+
+        return sumToPay - paid.intValue();
     }
 
     private void transferUserPointsToOrder(Order order, int amountToTransfer) {
@@ -1604,7 +1627,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderDescription("courier")
             .currency("UAH")
             .amount(sumToPay * 100)
-            .responseUrl(RESULT_URL_FOR_PERSONAL_CABINET_OF_USER)
+            .responseUrl(resultUrlForPersonalCabinetOfUser)
             .build();
         paymentRequestDto.setSignature(encryptionUtil
             .formRequestSignature(paymentRequestDto, fondyPaymentKey, merchantId));
@@ -1703,7 +1726,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 orderId + "_" + order.getCounterOrderPaymentId().toString() + "_" + order.getPayment().get(0).getId())
             .language("en")
             .paytypes("card")
-            .resultUrl(RESULT_URL_LIQPAY)
+            .resultUrl(resultUrlLiqpay)
             .build();
     }
 
@@ -1871,5 +1894,15 @@ public class UBSClientServiceImpl implements UBSClientService {
             .tariffsForLocationDto(modelMapper.map(
                 findTariffsInfoByCourierAndLocationId(1L, locationId), TariffsForLocationDto.class))
             .build();
+    }
+
+    @Override
+    public TariffsForLocationDto getTariffForOrder(Long id) {
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrderId(id);
+        if (tariffsInfo.isPresent()) {
+            return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
+        } else {
+            throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
+        }
     }
 }

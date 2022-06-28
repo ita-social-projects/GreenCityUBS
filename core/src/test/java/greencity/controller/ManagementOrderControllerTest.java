@@ -138,6 +138,15 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void deleteCertificateTest() throws Exception {
+        doNothing().when(certificateService).deleteCertificate("1111-1234");
+
+        mockMvc.perform(delete(ubsLink + "/deleteCertificate" + "/" + "{code}", "1111-1234")
+            .principal(principal)).andExpect(status().isOk());
+        verify(certificateService, times(1)).deleteCertificate("1111-1234");
+    }
+
+    @Test
     void getAddressByOrder() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/read-address-order" + "/{id}", 1L))
             .andExpect(status().isOk());

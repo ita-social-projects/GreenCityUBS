@@ -36,4 +36,5 @@ public class GetTariffsInfoDto {
     private Long maxAmountOfBags;
     private Long minPriceOfOrder;
     private Long maxPriceOfOrder;
+    private Long courierId;
 }
