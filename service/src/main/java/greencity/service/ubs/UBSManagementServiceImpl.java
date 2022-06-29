@@ -560,18 +560,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
-        if (nonNull(exported)) {
-            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue()))) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
-                }
-                updateOrderRepository
-                    .updateExporter(entry.getValue(), orderId,
-                        entry.getKey().longValue());
-            }
-        }
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
@@ -584,6 +572,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         entry.getKey().longValue());
             }
         }
+
+        if (nonNull(exported)) {
+            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                }
+                updateOrderRepository
+                    .updateExporter(entry.getValue(), orderId,
+                        entry.getKey().longValue());
+            }
+        }
+
         long discount = orderRepository.findSumOfCertificatesByOrderId(orderId);
         var price = getPriceDetails(orderId);
         Long needToPay = setTotalPrice(price).longValue() - (wasPaid) - discount;
