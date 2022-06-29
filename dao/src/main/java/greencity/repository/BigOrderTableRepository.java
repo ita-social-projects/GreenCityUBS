@@ -74,7 +74,7 @@ public class BigOrderTableRepository {
         getPredicateByStringValue(predicates, sc, orderRoot);
         getPredicateByDateFilter(predicates, sc, orderRoot);
         getPredicateByLongValue(predicates, sc, orderRoot);
-        getPredicateByTariffsInfoIds();
+        getPredicateByTariffsInfoId(predicates,tariffsInfoIds,orderRoot);
 
         if (nonNull(sc.getSearch())) {
             predicates.add(criteriaPredicate.search(sc.getSearch(), orderRoot));
@@ -115,7 +115,7 @@ public class BigOrderTableRepository {
             .forEach(predicates::add);
     }
 
-    private void getPredicateByTariffsInfoIds(List<Predicate> predicates, List<Long> tariffsInfoIds,
+    private void getPredicateByTariffsInfoId(List<Predicate> predicates, List<Long> tariffsInfoIds,
                                           Root<BigOrderTableViews> orderRoot) {
 
     }
