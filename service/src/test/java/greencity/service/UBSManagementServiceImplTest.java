@@ -1968,9 +1968,8 @@ class UBSManagementServiceImplTest {
 
     @Test
     void addBonusesToUserTest() {
-        User user = getTestUser();
         Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
-        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(user));
+        User user = order.getUser();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
@@ -1978,24 +1977,9 @@ class UBSManagementServiceImplTest {
 
         ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
 
-        verify(userRepository).findUserByOrderId(1L);
         verify(orderRepository).findById(1L);
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
-    }
-
-    @Test
-    void addBonusesToUserWithoutUserTest() {
-        Order order = ModelUtils.getOrderForGetOrderStatusData2Test();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBaglist());
-        when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> {
-            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
-        });
     }
 
     @Test

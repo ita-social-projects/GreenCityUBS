@@ -1677,6 +1677,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
+    private void checkOverpayment(Long overpayment) {
+        if (overpayment == 0L) {
+            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
+        }
+    }
+
     @Override
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId) {
@@ -1684,11 +1690,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue());
-        if (overpayment == 0L) {
-            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
-        }
-        User currentUser = userRepository.findUserByOrderId(orderId)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        checkOverpayment(overpayment);
+        User currentUser = order.getUser();
 
         Long bonuses = overpayment * (-100);
         List<Payment> payments = order.getPayment();

@@ -3100,7 +3100,7 @@ public class ModelUtils {
                     .user(User.builder().id(1L).build())
                     .build())
                 .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
