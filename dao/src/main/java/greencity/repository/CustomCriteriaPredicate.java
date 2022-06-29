@@ -69,7 +69,7 @@ public class CustomCriteriaPredicate {
     Predicate filter(List<Long> ids, Root<?> root, String nameColumn) {
         List<Predicate> predicateList = new ArrayList<>();
         for (Long id : ids) {
-            predicateList.add(criteriaBuilder.equal(root.<Long>get(nameColumn),id));
+            predicateList.add(criteriaBuilder.equal(root.<Long>get(nameColumn), id));
         }
         return criteriaBuilder.or(predicateList.toArray(new Predicate[0]));
     }

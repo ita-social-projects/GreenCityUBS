@@ -45,7 +45,8 @@ public class BigOrderTableRepository {
      * @return Page
      * @author Kuzbyt Maksym
      */
-    public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria,  List<Long> tariffsInfoIds) {
+    public Page<BigOrderTableViews> findAll(OrderPage orderPage, OrderSearchCriteria searchCriteria,
+        List<Long> tariffsInfoIds) {
         var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
         var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
 
@@ -67,14 +68,15 @@ public class BigOrderTableRepository {
         return new PageImpl<>(resultList, pageable, ordersCount);
     }
 
-    private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot, List<Long> tariffsInfoIds) {
+    private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
+        List<Long> tariffsInfoIds) {
         var predicates = new ArrayList<Predicate>();
 
         getPredicateByEnumValue(predicates, sc, orderRoot);
         getPredicateByStringValue(predicates, sc, orderRoot);
         getPredicateByDateFilter(predicates, sc, orderRoot);
         getPredicateByLongValue(predicates, sc, orderRoot);
-        getPredicateByTariffsInfoId(predicates,tariffsInfoIds,orderRoot);
+        getPredicateByTariffsInfoId(predicates, tariffsInfoIds, orderRoot);
 
         if (nonNull(sc.getSearch())) {
             predicates.add(criteriaPredicate.search(sc.getSearch(), orderRoot));
@@ -116,8 +118,8 @@ public class BigOrderTableRepository {
     }
 
     private void getPredicateByTariffsInfoId(List<Predicate> predicates, List<Long> tariffsInfoIds,
-                                             Root<BigOrderTableViews> orderRoot) {
-        predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot,"tariffs_info_id"));
+        Root<BigOrderTableViews> orderRoot) {
+        predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffs_info_id"));
     }
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root) {

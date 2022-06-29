@@ -34,7 +34,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
         String email = userRepository.findByUuid(uuid).getRecipientEmail();
         Long employeeId = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria, tariffsInfoIds);
         var orderList = new ArrayList<BigOrderTableDTO>();

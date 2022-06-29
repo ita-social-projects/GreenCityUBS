@@ -958,7 +958,7 @@ public class ModelUtils {
                 .name("Водій")
                 .build()))
 //            .receivingStation(Set.of(ReceivingStation.builder()
-                .id(1L)
+            .id(1L)
 //                .name("Петрівка")
 //                .build()))
             .build();
