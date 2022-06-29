@@ -2379,6 +2379,23 @@ public class ModelUtils {
             .build());
     }
 
+    public static List<Bag> getBag3list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(2000)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(2100)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")
@@ -3083,7 +3100,7 @@ public class ModelUtils {
                     .user(User.builder().id(1L).build())
                     .build())
                 .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
