@@ -52,4 +52,5 @@ public class BigOrderTableViews {
     private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
+    private Long tariffs_info_id;
 }
