@@ -365,11 +365,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        }
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0 || !dto.isShouldBePaid()) {
+        if (sumToPay <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
@@ -925,29 +922,37 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
         User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
-        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
             (long) formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
+        setOrderPaymentStatus(order, sumToPay);
 
         Payment payment = Payment.builder()
-            .amount((long) (sumToPay * 100))
+            .amount(sumToPay * 100L)
             .orderStatus("created")
             .currency("UAH")
             .paymentStatus(PaymentStatus.UNPAID)
             .order(order).build();
-        if (order.getPayment() != null) {
-            order.getPayment().add(payment);
-        } else {
-            ArrayList<Payment> arrayOfPayments = new ArrayList<>();
-            arrayOfPayments.add(payment);
-            order.setPayment(arrayOfPayments);
+
+        if (order.getPayment() == null) {
+            order.setPayment(new ArrayList<>());
         }
+        order.getPayment().add(payment);
+
         orderRepository.save(order);
         return order;
+    }
+
+    private void setOrderPaymentStatus(Order order, int sumToPay) {
+        order.setOrderPaymentStatus(
+            sumToPay <= 0
+                ? OrderPaymentStatus.PAID
+                : order.getPointsToUse() > 0 || order.getCertificates().size() > 0
+                    ? OrderPaymentStatus.HALF_PAID
+                    : OrderPaymentStatus.UNPAID);
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
