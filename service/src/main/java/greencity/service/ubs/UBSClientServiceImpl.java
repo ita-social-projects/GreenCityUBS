@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -947,12 +948,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void setOrderPaymentStatus(Order order, int sumToPay) {
-        order.setOrderPaymentStatus(
-            sumToPay <= 0
-                ? OrderPaymentStatus.PAID
-                : order.getPointsToUse() > 0 || order.getCertificates().size() > 0
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        } else {
+            order
+                .setOrderPaymentStatus(order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
                     ? OrderPaymentStatus.HALF_PAID
                     : OrderPaymentStatus.UNPAID);
+        }
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
