@@ -15,11 +15,15 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class UserActionMessagingService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Value("${kafka.enable}")
+    private boolean enabled;
     @Value("${kafka.topic.user.actions}")
     private String topic;
 
     private void sendMessage(UserActionMessage message) {
-        kafkaTemplate.send(topic, message);
+        if (enabled) {
+            kafkaTemplate.send(topic, message);
+        }
     }
 
     /**
