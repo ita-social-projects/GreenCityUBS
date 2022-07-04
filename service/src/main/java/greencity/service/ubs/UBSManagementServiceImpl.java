@@ -1133,17 +1133,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
-        Long paymentSum = order.getPayment().stream()
-            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount)
-            .map(a -> a / 100)
-            .reduce(Long::sum)
-            .orElse(0L);
-        Long paymentsWithCertificatesAndPoints = paymentSum
-            + ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                + order.getPointsToUse());
-        return sumToPay - paymentsWithCertificatesAndPoints < 0 ? Math.abs(paymentsWithCertificatesAndPoints - sumToPay)
-            : 0L;
+        long paymentSum = order.getPayment().stream()
+            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        long certificateSum = order.getCertificates().stream()
+            .map(Certificate::getPoints)
+            .reduce(0, Integer::sum);
+
+        long overpayment = paymentSum + certificateSum + order.getPointsToUse() - sumToPay;
+
+        return OrderStatus.CANCELED.equals(order.getOrderStatus())
+            ? paymentSum
+            : Math.max(overpayment, 0L);
     }
 
     /**
@@ -1155,7 +1158,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculatePaidAmount(Order order) {
         return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, (a, b) -> a + b);
+            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, Long::sum);
     }
 
     /**
