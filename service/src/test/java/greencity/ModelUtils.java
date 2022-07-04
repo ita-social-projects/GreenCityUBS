@@ -2421,10 +2421,10 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(100L)
+            .paidAmount(200L)
             .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(PaymentInfoDto.builder().build()))
-            .overpayment(200L)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
+            .overpayment(800L)
             .build();
     }
 

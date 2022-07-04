@@ -1617,7 +1617,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
 
-        ubsManagementService.getPaymentInfo(order.getId(), 100L);
+        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
     }
 
     @Test
