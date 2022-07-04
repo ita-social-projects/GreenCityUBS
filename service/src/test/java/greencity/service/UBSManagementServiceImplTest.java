@@ -55,7 +55,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.ModelUtils.*;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -1619,7 +1618,6 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
 
         ubsManagementService.getPaymentInfo(order.getId(), 100L);
-        verify(notificationService, times(1)).notifyBonuses(any(), any());
     }
 
     @Test
@@ -1980,6 +1978,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).findById(1L);
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 859L);
     }
 
     @Test

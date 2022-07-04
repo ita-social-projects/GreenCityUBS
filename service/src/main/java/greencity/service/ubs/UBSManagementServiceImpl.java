@@ -123,9 +123,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
-        if ((order.getOrderStatus() == OrderStatus.DONE)) {
-            notificationService.notifyBonuses(order, overpayment);
-        }
         return paymentTableInfoDto;
     }
 
@@ -1695,10 +1692,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkOverpayment(overpayment);
         User currentUser = order.getUser();
 
-        Long bonuses = overpayment * (-100);
-        List<Payment> payments = order.getPayment();
-        Payment payment = Payment.builder()
-            .amount(bonuses)
+        order.getPayment().add(Payment.builder()
+            .amount(overpayment * (-100))
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1706,11 +1701,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .currency("UAH")
             .orderStatus(String.valueOf(OrderStatus.FORMED))
             .paymentStatus(PaymentStatus.PAID)
-            .build();
-        payments.add(payment);
-        order.setPayment(payments);
-        Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-        currentUser.setCurrentPoints(userBonuses);
+            .build());
+
+        transferPointsToUser(order, currentUser, overpayment.intValue());
+
         orderRepository.save(order);
         userRepository.save(currentUser);
 
@@ -1720,5 +1714,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .receiptLink(addBonusesToUserDto.getReceiptLink())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
+    }
+
+    private void transferPointsToUser(Order order, User user, int points) {
+        if (points <= 0) {
+            return;
+        }
+
+        user.setCurrentPoints(user.getCurrentPoints() + points);
+
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(points)
+                .date(LocalDateTime.now())
+                .order(order)
+                .build());
+
+        notificationService.notifyBonuses(order, (long) points);
     }
 }
