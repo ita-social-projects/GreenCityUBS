@@ -1617,8 +1617,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(modelMapper.map(any(), eq(PaymentInfoDto.class))).thenReturn(paymentInfo);
 
-        ubsManagementService.getPaymentInfo(order.getId(), 100L);
-        verify(notificationService, times(1)).notifyBonuses(any(), any());
+        assertEquals(ModelUtils.getPaymentTableInfoDto(), ubsManagementService.getPaymentInfo(order.getId(), 100L));
     }
 
     @Test
@@ -1979,6 +1978,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).findById(1L);
         verify(orderRepository).save(order);
         verify(userRepository).save(user);
+        verify(notificationService).notifyBonuses(order, 859L);
     }
 
     @Test
