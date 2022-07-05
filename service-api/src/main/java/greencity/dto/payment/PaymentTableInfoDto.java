@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
+@EqualsAndHashCode
 public class PaymentTableInfoDto {
     Long paidAmount;
     Long unPaidAmount;
