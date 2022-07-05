@@ -685,8 +685,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.getAllByUserUuidAndOrderStatus(uuid, statuses, page)
-            : ordersForUserRepository.getAllByUserUuid(uuid, page);
+            ? ordersForUserRepository.findAllOrdersByUserUuidAndOrderStatus(page, uuid, statuses)
+            : ordersForUserRepository.findAllOrdersByUserUuid(page, uuid);
         List<Order> orders = orderPages.getContent();
 
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
