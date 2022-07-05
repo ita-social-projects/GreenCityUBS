@@ -2560,6 +2560,7 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
+            .bagTranslations(List.of(getBagTranslation()))
             .build();
     }
 
