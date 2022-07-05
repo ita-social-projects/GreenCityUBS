@@ -37,6 +37,7 @@ import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.isNull;
@@ -1726,9 +1728,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         user.setCurrentPoints(user.getCurrentPoints() + points);
 
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
+        user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
         user.getChangeOfPointsList()
             .add(ChangeOfPoints.builder()
                 .user(user)

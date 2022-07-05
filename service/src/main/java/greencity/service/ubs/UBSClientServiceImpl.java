@@ -716,7 +716,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private BagForUserDto buildBagForUserDto(Bag bag, int count) {
         BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
-        BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag(bag);
+        BagTranslation bagTranslation = bag.getBagTranslations().get(0);
         bagDto.setService(bagTranslation.getName());
         bagDto.setServiceEng(bagTranslation.getNameEng());
         bagDto.setCount(count);
