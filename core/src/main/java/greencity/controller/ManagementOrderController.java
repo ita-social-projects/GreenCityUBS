@@ -587,9 +587,10 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-data-for-order/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-        @PathVariable(name = "id") Long orderId) {
+        @PathVariable(name = "id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderStatusData(orderId));
+            .body(ubsManagementService.getOrderStatusData(orderId, uuid));
     }
 
     /**
@@ -978,7 +979,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
         @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid); // tyt
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

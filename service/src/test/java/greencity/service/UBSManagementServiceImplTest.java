@@ -1275,7 +1275,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderStatusDataThrowsUnexistingOrderExceptionTest() {
         Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsManagementService.getOrderStatusData(100L);
+            ubsManagementService.getOrderStatusData(100L, null);
         });
     }
 
@@ -1431,7 +1431,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
 
-        ubsManagementService.getOrderStatusData(1L);
+        ubsManagementService.getOrderStatusData(1L, null);
 
         verify(orderRepository).getOrderDetails(1L);
         verify(bagRepository).findBagByOrderId(1L);
@@ -1467,7 +1467,7 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(getOrderForGetOrderStatusData2Test().getPayment().get(0), PaymentInfoDto.class))
             .thenReturn(ModelUtils.getInfoPayment());
 
-        ubsManagementService.getOrderStatusData(1L);
+        ubsManagementService.getOrderStatusData(1L, null);
 
         verify(orderRepository).getOrderDetails(1L);
         verify(bagRepository).findBagByOrderId(1L);
@@ -1504,7 +1504,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(ModelUtils.getReceivingList());
 
-        ubsManagementService.getOrderStatusData(1L);
+        ubsManagementService.getOrderStatusData(1L, null);
 
         verify(orderRepository).getOrderDetails(1L);
         verify(bagRepository).findBagByOrderId(1L);
@@ -1538,7 +1538,7 @@ class UBSManagementServiceImplTest {
             orderPaymentStatusTranslationRepository.findByOrderPaymentStatusIdAndTranslationValue(1L))
                 .thenReturn(OrderPaymentStatusTranslation.builder().translationValue("name").build());
         assertThrows(NotFoundException.class, () -> {
-            ubsManagementService.getOrderStatusData(1L);
+            ubsManagementService.getOrderStatusData(1L, null);
         });
 
     }
@@ -1841,7 +1841,7 @@ class UBSManagementServiceImplTest {
 
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
-        ubsManagementService.getOrderStatusData(1L);
+        ubsManagementService.getOrderStatusData(1L, null);
 
         verify(orderRepository).getOrderDetails(1L);
         verify(bagRepository).findBagByOrderId(1L);
@@ -1890,7 +1890,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(6L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findAll()).thenReturn(getReceivingList());
 
-        ubsManagementService.getOrderStatusData(1L);
+        ubsManagementService.getOrderStatusData(1L, null);
 
         verify(orderRepository).getOrderDetails(1L);
         verify(bagRepository).findBagByOrderId(1L);

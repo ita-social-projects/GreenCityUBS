@@ -51,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -159,6 +160,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByOrderId(orderId)
             .orElseThrow(
                 () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        checkAvailableOrderForEmployee(orderId, uuid);
         Payment payment = createPayment(order, overpaymentInfoRequestDto);
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
@@ -332,7 +334,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId) {
+    public OrderStatusPageDto getOrderStatusData(Long orderId, String uuid) {
+        checkAvailableOrderForEmployee(orderId, uuid);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
@@ -1231,7 +1234,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-
+        checkAvailableOrderForEmployee(order.getId(), uuid);
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
             paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, currentUser)));
         updateOrderPaymentStatusForManualPayment(order);
@@ -1548,6 +1551,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
+        checkAvailableOrderForEmployee(order.getId(), uuid);
         order.setAdminComment(adminCommentDto.getAdminComment());
         orderRepository.save(order);
         eventService.save(OrderHistory.ADD_ADMIN_COMMENT, user.getRecipientName()
@@ -1613,6 +1617,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String currentUser) {
+        checkAvailableOrderForEmployee(orderId, currentUser);
         try {
             if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
                 updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), currentUser);
@@ -1645,6 +1650,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    private void checkAvailableOrderForEmployee(Long orderId, String uuid) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(uuid).getRecipientEmail())
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        boolean status = false;
+        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
+        for (Long id : tariffsInfoIds) {
+            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+        }
+        if (!status) {
+            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + orderId);
         }
     }
 

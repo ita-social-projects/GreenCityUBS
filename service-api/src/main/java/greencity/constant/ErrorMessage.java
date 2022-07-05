@@ -99,6 +99,7 @@ public final class ErrorMessage {
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
+    public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
 
     /**
      * Constructor.

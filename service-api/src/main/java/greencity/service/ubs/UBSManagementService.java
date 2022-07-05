@@ -126,7 +126,7 @@ public interface UBSManagementService {
      * @return {@link OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
-    OrderStatusPageDto getOrderStatusData(Long orderId);
+    OrderStatusPageDto getOrderStatusData(Long orderId, String uuid);
 
     /**
      * Method that gets bags information.

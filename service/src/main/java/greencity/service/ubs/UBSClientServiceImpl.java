@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 
+import greencity.repository.*;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -108,21 +109,6 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
 import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -130,34 +116,9 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
 
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
-
-import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TO_MUCH_BIG_BAG_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -172,6 +133,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
+    private final EmployeeRepository employeeRepository;
     private final AddressRepository addressRepo;
     private final LiqPayService liqPayService;
     private final UserRemoteClient userRemoteClient;
@@ -1144,6 +1106,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public List<EventDto> getAllEventsForOrder(Long orderId, String uuid) {
+        checkAvailableOrderForEmployee(orderId, uuid);
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
@@ -1156,6 +1119,21 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
+    }
+
+    private void checkAvailableOrderForEmployee(Long orderId, String uuid) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(uuid).getRecipientEmail())
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        boolean status = false;
+        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
+        for (Long id : tariffsInfoIds) {
+            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+        }
+        if (!status) {
+            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + orderId);
+        }
     }
 
     /**
@@ -1387,8 +1365,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId) {
-        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId);
+    public OrderStatusPageDto getOrderInfoForSurcharge(Long orderId, String uuid) {
+        OrderStatusPageDto orderStatusPageDto = ubsManagementService.getOrderStatusData(orderId, uuid);
         Map<Integer, Integer> amountBagsOrder = orderStatusPageDto.getAmountOfBagsOrdered();
         Map<Integer, Integer> amountBagsOrderExported = orderStatusPageDto.getAmountOfBagsExported();
         amountBagsOrderExported.replaceAll((id, quantity) -> quantity = quantity - amountBagsOrder.get(id));

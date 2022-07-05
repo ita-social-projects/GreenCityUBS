@@ -300,7 +300,7 @@ public class OrderController {
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, uuid));
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, uuid)); // tyt
     }
 
     /**

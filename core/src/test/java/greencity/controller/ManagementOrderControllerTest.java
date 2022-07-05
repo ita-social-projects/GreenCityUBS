@@ -239,7 +239,7 @@ class ManagementOrderControllerTest {
     @Test
     void getDataForOrderStatusPageTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L));
-        verify(ubsManagementService).getOrderStatusData(1L);
+        verify(ubsManagementService).getOrderStatusData(1L, null);
     }
 
     @Test
