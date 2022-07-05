@@ -428,7 +428,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationById(orderStatus.getNumValue());
+            orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
         String currentOrderStatusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
         String currentOrderStatusTranslationEng =
@@ -439,13 +439,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
         Order currentOrder = order.orElseGet(Order::new);
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
-            .findByOrderPaymentStatusIdAndTranslationValue((long) orderStatusPayment.getStatusValue());
+            .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
             .id(order.isPresent() ? order.get().getId() : 0)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
-            .orderStatusesDtos(getOrderStatusesTranslation(currentOrder))
-            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(currentOrder))
+            .orderStatusesDtos(getOrderStatusesTranslation())
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
             .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
@@ -460,15 +460,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method which is get order translation statuses in two languages like:
      * ua and en.
      *
-     * @param order {@link Long}.
      * @return {@link List}.
      *
      * @author Yuriy Bahlay.
      */
-    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation(Order order) {
+    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation() {
         List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderStatusTranslation> orderStatusTranslations =
-            orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue());
+            orderStatusTranslationRepository.findAllBy();
         if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
@@ -505,15 +504,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * This is method which is get order payment statuses translation.
      *
-     * @param order {@link Order}.
      * @return {@link List}.
      *
      * @author Yuriy Bahlay.
      */
-    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation(Order order) {
+    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation() {
         List<OrderPaymentStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderPaymentStatusTranslation> orderStatusPaymentTranslations = orderPaymentStatusTranslationRepository
-            .getOrderStatusPaymentTranslations((long) order.getOrderPaymentStatus().getStatusValue());
+            .getAllBy();
         if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
