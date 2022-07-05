@@ -1652,7 +1652,7 @@ class UBSClientServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+        when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
         when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
@@ -1677,7 +1677,7 @@ class UBSClientServiceImplTest {
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
-        verify(ordersForUserRepository).findAllOrdersByUserUuid(pageable, user.getUuid());
+        verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
 
     }
 
@@ -1696,7 +1696,7 @@ class UBSClientServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
-        when(ordersForUserRepository.findAllOrdersByUserUuid(pageable, user.getUuid()))
+        when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))

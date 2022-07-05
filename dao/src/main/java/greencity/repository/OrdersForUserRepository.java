@@ -52,10 +52,7 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @param uuid     {@link User}'s uuid.
      * @return {@link Page} of {@link Order}.
      */
-    @Query("SELECT o FROM Order o "
-        + "WHERE o.user.uuid = :uuid "
-        + "ORDER BY o.orderDate DESC")
-    Page<Order> findAllOrdersByUserUuid(Pageable pageable, String uuid);
+    Page<Order> getAllByUserUuid(Pageable pageable, String uuid);
 
     /**
      * Returns a page with orders for the specified user and status matching one of
@@ -66,9 +63,5 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @param statuses list of {@link OrderStatus} to match.
      * @return {@link Page} of {@link Order}.
      */
-    @Query("SELECT o FROM Order o "
-        + "WHERE o.user.uuid = :uuid "
-        + "AND o.orderStatus IN :statuses "
-        + "ORDER BY o.orderDate DESC")
-    Page<Order> findAllOrdersByUserUuidAndOrderStatus(Pageable pageable, String uuid, List<OrderStatus> statuses);
+    Page<Order> getAllByUserUuidAndOrderStatusIn(Pageable pageable, String uuid, List<OrderStatus> statuses);
 }
