@@ -2379,6 +2379,23 @@ public class ModelUtils {
             .build());
     }
 
+    public static List<Bag> getBag3list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(2000)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(2100)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")
@@ -2404,10 +2421,10 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(100L)
+            .paidAmount(200L)
             .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(PaymentInfoDto.builder().build()))
-            .overpayment(200L)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
+            .overpayment(800L)
             .build();
     }
 
@@ -2543,6 +2560,7 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
+            .bagTranslations(List.of(getBagTranslation()))
             .build();
     }
 
@@ -3083,7 +3101,7 @@ public class ModelUtils {
                     .user(User.builder().id(1L).build())
                     .build())
                 .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .adminComment("Admin")

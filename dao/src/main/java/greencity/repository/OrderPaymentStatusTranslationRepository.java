@@ -2,8 +2,6 @@ package greencity.repository;
 
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -16,27 +14,19 @@ import java.util.List;
 public interface OrderPaymentStatusTranslationRepository
     extends JpaRepository<OrderPaymentStatusTranslation, Long> {
     /**
-     * This method which is list payment statuses found by paymentId.
+     * This method which is list payment statuses.
      *
-     * @param paymentId {@link Long}.
      * @return {@link List}.
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort")
-    List<OrderPaymentStatusTranslation> getOrderStatusPaymentTranslations(
-        @Param("paymentId") Long paymentId);
+    List<OrderPaymentStatusTranslation> getAllBy();
 
     /**
-     * This is method which is find order payment status by paymentId and
-     * languageId.
+     * This is method which is find order payment status.
      *
-     * @param paymentStatusId {@link Long}.
      * @return {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    @Query("SELECT ort FROM OrderPaymentStatusTranslation AS ort "
-        + "WHERE ort.orderPaymentStatusId = :paymentStatusId")
-    OrderPaymentStatusTranslation findByOrderPaymentStatusIdAndTranslationValue(
-        @Param("paymentStatusId") Long paymentStatusId);
+    OrderPaymentStatusTranslation getById(Long id);
 }
