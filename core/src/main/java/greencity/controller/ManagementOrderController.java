@@ -979,7 +979,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
         @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid); // tyt
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

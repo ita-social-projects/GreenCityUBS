@@ -160,7 +160,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         User user = userRepository.findUserByOrderId(orderId)
             .orElseThrow(
                 () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        checkAvailableOrderForEmployee(orderId, uuid);
+        checkAvailableOrderForEmployee(orderId, currentUser.getRecipientEmail());
         Payment payment = createPayment(order, overpaymentInfoRequestDto);
         if ((order.getOrderStatus() == OrderStatus.DONE)) {
             returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
@@ -335,7 +335,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public OrderStatusPageDto getOrderStatusData(Long orderId, String uuid) {
-        checkAvailableOrderForEmployee(orderId, uuid);
+        String email = userRepository.findByUuid(uuid).getRecipientEmail();
+        checkAvailableOrderForEmployee(orderId, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
@@ -1234,7 +1235,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        checkAvailableOrderForEmployee(order.getId(), uuid);
+        checkAvailableOrderForEmployee(order.getId(), currentUser.getRecipientEmail());
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
             paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, currentUser)));
         updateOrderPaymentStatusForManualPayment(order);
@@ -1482,6 +1483,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public void assignEmployeesWithThePositionsToTheOrder(AssignEmployeesForOrderDto dto, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        checkAvailableOrderForEmployee(dto.getOrderId(), currentUser.getRecipientEmail());
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         if (dto.getEmployeesList() != null) {
@@ -1496,6 +1498,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 Employee employeeForAssigning = employeeRepository.findById(assignForOrderEmployee.getEmployeeId())
                     .orElseThrow(() -> new NotFoundException(
                         EMPLOYEE_NOT_FOUND + assignForOrderEmployee.getEmployeeId()));
+                checkAvailableOrderForEmployee(order.getId(), employeeForAssigning.getEmail());
                 Long positionForEmployee =
                     employeeRepository.findPositionForEmployee(assignForOrderEmployee.getEmployeeId())
                         .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
@@ -1551,7 +1554,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
-        checkAvailableOrderForEmployee(order.getId(), uuid);
+        String email = userRepository.findByUuid(uuid).getRecipientEmail();
+        checkAvailableOrderForEmployee(order.getId(), email);
         order.setAdminComment(adminCommentDto.getAdminComment());
         orderRepository.save(order);
         eventService.save(OrderHistory.ADD_ADMIN_COMMENT, user.getRecipientName()
@@ -1617,7 +1621,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String currentUser) {
-        checkAvailableOrderForEmployee(orderId, currentUser);
+        String email = userRepository.findByUuid(currentUser).getRecipientEmail();
+        checkAvailableOrderForEmployee(orderId, email);
         try {
             if (nonNull(updateOrderPageDto.getGeneralOrderInfo())) {
                 updateOrderDetailStatus(orderId, updateOrderPageDto.getGeneralOrderInfo(), currentUser);
@@ -1653,10 +1658,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
-    private void checkAvailableOrderForEmployee(Long orderId, String uuid) {
+    private void checkAvailableOrderForEmployee(Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(uuid).getRecipientEmail())
+        Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);

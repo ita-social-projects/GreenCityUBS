@@ -1106,8 +1106,9 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public List<EventDto> getAllEventsForOrder(Long orderId, String uuid) {
-        checkAvailableOrderForEmployee(orderId, uuid);
+        String email = userRepository.findByUuid(uuid).getRecipientEmail();
         Optional<Order> order = orderRepository.findById(orderId);
+        checkAvailableOrderForEmployee(order.get(), email);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
@@ -1121,10 +1122,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private void checkAvailableOrderForEmployee(Long orderId, String uuid) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(uuid).getRecipientEmail())
+    private void checkAvailableOrderForEmployee(Order order, String email) {
+        Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
@@ -1132,7 +1131,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             status = id.equals(order.getTariffsInfo().getId()) ? true : status;
         }
         if (!status) {
-            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + orderId);
+            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
         }
     }
 
