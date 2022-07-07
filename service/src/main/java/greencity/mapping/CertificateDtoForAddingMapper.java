@@ -18,6 +18,7 @@ public class CertificateDtoForAddingMapper extends AbstractConverter<Certificate
             .creationDate(LocalDate.now())
             .expirationDate(LocalDate.now().plusMonths(source.getMonthCount()))
             .certificateStatus(CertificateStatus.ACTIVE)
+            .initialPointsValue(source.getInitialPointsValue())
             .build();
     }
 }

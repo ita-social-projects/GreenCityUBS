@@ -38,4 +38,7 @@ public class Certificate {
 
     @Column
     private LocalDate dateOfUse;
+
+    @Column(name = "initial_points_value")
+    private Integer initialPointsValue;
 }
