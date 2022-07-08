@@ -8,6 +8,9 @@ deployment:
     cpu: 2
     memory: 1024Mi
 
+externalSecret:
+  secretName: greencity-secret
+
 service:
   type: ClusterIP
 
