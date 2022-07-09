@@ -1130,7 +1130,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     /**
-     * Method that calculate's overpayment on user's order.
+     * Method that calculates overpayment on user's order.
      *
      * @param order    of {@link Order} order;
      * @param sumToPay of {@link Long} sum to pay;
@@ -1688,6 +1688,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         return emps;
+    }
+
+    public Boolean checkEmployeeForOrder(Long orderId, String uuid) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        String email = userRepository.findByUuid(uuid).getRecipientEmail();
+        Long employeeId = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        boolean status = false;
+        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
+        for (Long id : tariffsInfoIds) {
+            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+        }
+        return status;
     }
 
     @Override

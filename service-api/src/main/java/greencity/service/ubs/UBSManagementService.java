@@ -284,4 +284,14 @@ public interface UBSManagementService {
      * @author Pavlo Hural.
      */
     AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
+
+    /**
+     * Method returns employee's access status to order.
+     *
+     * @param orderId {@link Long}.
+     * @param uuid    {@link String}.
+     *
+     * @author Hlazova Nataliia.
+     */
+    Boolean checkEmployeeForOrder(Long orderId, String uuid);
 }

@@ -595,6 +595,26 @@ public class ManagementOrderController {
     }
 
     /**
+     * Controller to check current employee for order.
+     *
+     * @return {@link Boolean}.
+     * @author Hlazova Nataliia
+     */
+    @ApiOperation(value = "Controller to check current employee for order")
+    @ApiResponses({
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/check-employee-for-order/{id}")
+    public ResponseEntity<Boolean> checkEmployeeForOrderPage(
+        @PathVariable(name = "id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ubsManagementService.checkEmployeeForOrder(orderId, uuid));
+    }
+
+    /**
      * Controller for update export details.
      *
      * @return {@link ExportDetailsDto}.
@@ -801,7 +821,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for get employees depends from position.
+     * Controller for get employees depends on position.
      *
      * @return {EmployeePositionDtoRequest}.
      * @author Bohdan Fedorkiv
