@@ -212,7 +212,7 @@ public interface UBSManagementService {
      *
      * @author Bohdan Fedorkiv
      */
-    EmployeePositionDtoRequest getAllEmployeesByPosition(Long id);
+    EmployeePositionDtoRequest getAllEmployeesByPosition(Long id, String email);
 
     /**
      * Method that update EmployeePositionDtoResponse.

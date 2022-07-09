@@ -52,6 +52,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -814,13 +815,14 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-employee-by-position/{id}")
-    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long id) {
+    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long orderId,
+        @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllEmployeesByPosition(id));
+            .body(ubsManagementService.getAllEmployeesByPosition(orderId, uuid));
     }
 
     /**
-     * Controller for update depends from position.
+     * Controller for update depends on position.
      *
      * @return {EmployeePositionDtoResponse}.
      * @author Bohdan Fedorkiv
