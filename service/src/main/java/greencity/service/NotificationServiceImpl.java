@@ -17,7 +17,6 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.AbstractNotificationProvider;
@@ -202,6 +201,10 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void notifyBonuses(Order order, Long overpayment) {
+        if (overpayment <= 0) {
+            return;
+        }
+
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Integer paidBags = order.getConfirmedQuantity().values().stream()

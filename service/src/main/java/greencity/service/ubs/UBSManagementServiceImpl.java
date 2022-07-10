@@ -37,6 +37,7 @@ import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,9 +124,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
-        if ((order.getOrderStatus() == OrderStatus.DONE)) {
-            notificationService.notifyBonuses(order, overpayment);
-        }
         return paymentTableInfoDto;
     }
 
@@ -1134,17 +1132,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
-        Long paymentSum = order.getPayment().stream()
-            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount)
-            .map(a -> a / 100)
-            .reduce(Long::sum)
-            .orElse(0L);
-        Long paymentsWithCertificatesAndPoints = paymentSum
-            + ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                + order.getPointsToUse());
-        return sumToPay - paymentsWithCertificatesAndPoints < 0 ? Math.abs(paymentsWithCertificatesAndPoints - sumToPay)
-            : 0L;
+        long paymentSum = order.getPayment().stream()
+            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        long certificateSum = order.getCertificates().stream()
+            .map(Certificate::getPoints)
+            .reduce(0, Integer::sum);
+
+        long overpayment = paymentSum + certificateSum + order.getPointsToUse() - sumToPay;
+
+        return OrderStatus.CANCELED.equals(order.getOrderStatus())
+            ? paymentSum
+            : Math.max(overpayment, 0L);
     }
 
     /**
@@ -1156,7 +1157,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculatePaidAmount(Order order) {
         return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, (a, b) -> a + b);
+            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, Long::sum);
     }
 
     /**
@@ -1693,10 +1694,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         checkOverpayment(overpayment);
         User currentUser = order.getUser();
 
-        Long bonuses = overpayment * (-100);
-        List<Payment> payments = order.getPayment();
-        Payment payment = Payment.builder()
-            .amount(bonuses)
+        order.getPayment().add(Payment.builder()
+            .amount(overpayment * (-100))
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1704,11 +1703,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .currency("UAH")
             .orderStatus(String.valueOf(OrderStatus.FORMED))
             .paymentStatus(PaymentStatus.PAID)
-            .build();
-        payments.add(payment);
-        order.setPayment(payments);
-        Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-        currentUser.setCurrentPoints(userBonuses);
+            .build());
+
+        transferPointsToUser(order, currentUser, overpayment.intValue());
+
         orderRepository.save(order);
         userRepository.save(currentUser);
 
@@ -1718,5 +1716,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .receiptLink(addBonusesToUserDto.getReceiptLink())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
+    }
+
+    private void transferPointsToUser(Order order, User user, int points) {
+        if (points <= 0) {
+            return;
+        }
+
+        user.setCurrentPoints(user.getCurrentPoints() + points);
+
+        user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(points)
+                .date(LocalDateTime.now())
+                .order(order)
+                .build());
+
+        notificationService.notifyBonuses(order, (long) points);
     }
 }
