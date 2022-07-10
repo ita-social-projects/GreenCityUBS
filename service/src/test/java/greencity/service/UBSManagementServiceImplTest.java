@@ -630,7 +630,7 @@ class UBSManagementServiceImplTest {
         when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
         when(positionRepository.findAll()).thenReturn(positionList);
         when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
-        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId()));
+        assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId(),"abc" ));
     }
 
     @Test

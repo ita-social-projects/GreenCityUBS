@@ -243,6 +243,12 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void checkEmployeeForOrderPageTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/check-employee-for-order/{id}", 1L));
+        verify(ubsManagementService).checkEmployeeForOrder(1L, null);
+    }
+
+    @Test
     void updateOrderExportedDetail() throws Exception {
         ExportDetailsDto dto = ModelUtils.getOrderDetailExportDto();
         ObjectMapper objectMapper = new ObjectMapper();
