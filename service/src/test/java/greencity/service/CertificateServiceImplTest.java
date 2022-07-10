@@ -46,7 +46,7 @@ class CertificateServiceImplTest {
 
     @Test
     void addCertificateTest() {
-        CertificateDtoForAdding certificateDtoForAdding = new CertificateDtoForAdding("1111-1234", 5, 100);
+        CertificateDtoForAdding certificateDtoForAdding = new CertificateDtoForAdding("1111-1234", 5, 100, 100);
         Certificate certificate = new Certificate();
         when(modelMapper.map(certificateDtoForAdding, Certificate.class)).thenReturn(certificate);
         certificateService.addCertificate(certificateDtoForAdding);
