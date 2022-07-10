@@ -975,6 +975,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
+            certificate.setPoints(certificate.getPoints() + sumToPay);
             return true;
         }
         return false;
@@ -1431,8 +1432,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Set<Certificate> orderCertificates = new HashSet<>();
         List<Payment> payments = order.getPayment();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
         sumToPay = calculatePaidAmount(payments, sumToPay);
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
 
@@ -1573,6 +1574,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
                 if (dontSendLinkToFondyIfClient(sumToPay)) {
                     certificate.setCertificateStatus(CertificateStatus.USED);
+                    certificate.setPoints(certificate.getPoints() + sumToPay);
                     sumToPay = 0;
                 }
             }
