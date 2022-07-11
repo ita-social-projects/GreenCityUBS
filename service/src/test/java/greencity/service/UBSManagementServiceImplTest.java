@@ -428,7 +428,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void returnOverpaymentAsMoneyForStatusCancelled() { // tyt
+    void returnOverpaymentAsMoneyForStatusCancelled() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setOrderStatus(OrderStatus.CANCELED).setTariffsInfo(getTariffsInfo());
@@ -646,7 +646,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getAllEmployeesByPosition() { // tyt
+    void getAllEmployeesByPosition() {
         Order order = ModelUtils.getOrder();
         order.setTariffsInfo(getTariffsInfo());
         User user = ModelUtils.getTestUser();
@@ -1367,7 +1367,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void updateOrderAdminPageInfoTest() { // tyt
+    void updateOrderAdminPageInfoTest() {
         OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
         Order order = ModelUtils.getOrder();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
@@ -1956,7 +1956,7 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void getOrderStatusDataWithNotEmptyLists() { // tyt
+    void getOrderStatusDataWithNotEmptyLists() {
         Order order = getOrderForGetOrderStatusData2Test();
         BagInfoDto bagInfoDto = getBagInfoDto();
         Language language = getLanguage();
