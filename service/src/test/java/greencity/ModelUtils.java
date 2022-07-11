@@ -339,7 +339,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Саперно-Слобідська")
                 .build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
@@ -2456,6 +2455,7 @@ public class ModelUtils {
             .id(1L)
             .pointsToUse(1)
             .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(200L)
@@ -2464,6 +2464,15 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
+            .build();
+    }
+
+    public static Order getOrderCountWithPaymentStatusPaid() {
+        return Order.builder()
+            .id(1L)
+            .pointsToUse(1)
+            .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .build();
     }
 

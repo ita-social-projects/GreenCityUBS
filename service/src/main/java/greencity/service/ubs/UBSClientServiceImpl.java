@@ -292,6 +292,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderId != null) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            checkIsOrderPaid(order.getOrderPaymentStatus());
             order.setPointsToUse(dto.getPointsToUse())
                 .setAdditionalOrders(dto.getAdditionalOrders())
                 .setComment(dto.getOrderComment());
@@ -1423,6 +1424,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
         Order order = findByIdOrderForClient(dto);
+        checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
         checkForNullCounter(order);
@@ -1444,6 +1446,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
+        }
+    }
+
+    private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
+        if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
+            throw new BadRequestException(ORDER_ALREADY_PAID);
         }
     }
 
@@ -1605,6 +1613,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);
 
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
