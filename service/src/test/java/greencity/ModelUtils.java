@@ -339,7 +339,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Саперно-Слобідська")
                 .build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)

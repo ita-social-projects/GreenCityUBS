@@ -292,6 +292,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderId != null) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            checkIsOrderPaid(order.getOrderPaymentStatus());
             order.setPointsToUse(dto.getPointsToUse())
                 .setAdditionalOrders(dto.getAdditionalOrders())
                 .setComment(dto.getOrderComment());
