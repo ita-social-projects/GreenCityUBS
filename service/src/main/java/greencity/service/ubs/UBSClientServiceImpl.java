@@ -1450,7 +1450,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
-        if (orderPaymentStatus.equals(OrderPaymentStatus.PAID)) {
+        if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
             throw new BadRequestException(ORDER_ALREADY_PAID);
         }
     }
