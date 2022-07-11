@@ -1133,6 +1133,14 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void processOrderFondyClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
+    }
+
+    @Test
     void proccessOrderLiqpayClient() {
         Order order = ModelUtils.getOrderCount();
         HashMap<Integer, Integer> value = new HashMap<>();
@@ -1151,6 +1159,14 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(liqPayService).getCheckoutResponse(any());
+    }
+
+    @Test
+    void proccessOrderLiqpayClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.proccessOrderLiqpayClient(dto, "uuid"));
     }
 
     @Test
