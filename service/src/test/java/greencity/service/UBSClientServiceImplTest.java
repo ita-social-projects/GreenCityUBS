@@ -177,7 +177,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveToDB() throws InvocationTargetException, IllegalAccessException {
-
         User user = ModelUtils.getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
@@ -229,6 +228,28 @@ class UBSClientServiceImplTest {
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
 
+    }
+
+    @Test
+    void saveToDBFailPaidOrder() {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(1000);
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(5);
+        Order order = getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
     @Test
@@ -989,6 +1010,28 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void saveFullOrderFromLiqPayFailPaidOrder() {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(1000);
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(5);
+        Order order = getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", 1L));
+    }
+
+    @Test
     void testSaveFullOrderFromLiqPayThrowsException() throws InvocationTargetException, IllegalAccessException {
         Service service = new Service();
         Courier courier = new Courier();
@@ -1133,6 +1176,14 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void processOrderFondyClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
+    }
+
+    @Test
     void proccessOrderLiqpayClient() {
         Order order = ModelUtils.getOrderCount();
         HashMap<Integer, Integer> value = new HashMap<>();
@@ -1151,6 +1202,14 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(liqPayService).getCheckoutResponse(any());
+    }
+
+    @Test
+    void proccessOrderLiqpayClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.proccessOrderLiqpayClient(dto, "uuid"));
     }
 
     @Test
