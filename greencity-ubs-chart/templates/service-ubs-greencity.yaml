@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-greencity-service-ubs
+  name: {{ .Release.Name }}-greencity-ubs-service
 spec:
   type: {{ .Values.service.type }}
   ports:
