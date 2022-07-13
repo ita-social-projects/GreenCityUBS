@@ -30,6 +30,6 @@ spec:
         pathType: Prefix
         backend:
           service: 
-            name: {{ .Release.Name }}-greencity-service-ubs
+            name: {{ .Release.Name }}-greencity-ubs-service
             port: 
               number: 80
