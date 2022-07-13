@@ -445,15 +445,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
-        return tariffs
+        List<GetTariffsInfoDto> dtos = tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
-            .peek(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
-                .sorted(Comparator.comparing(LocationsDtos::getNameUk))
-                .collect(Collectors.toList())))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
             .sorted(Comparator.comparing(tariff -> tariff.getTariffStatus().getPriority()))
             .collect(Collectors.toList());
+        dtos.forEach(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
+            .sorted(Comparator.comparing(LocationsDtos::getNameUk))
+            .collect(Collectors.toList())));
+        return dtos;
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
