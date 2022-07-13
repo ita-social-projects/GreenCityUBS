@@ -15,6 +15,7 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
+import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -486,12 +487,13 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about tariffs.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/tariffs/all")
-    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
+    @GetMapping("/tariffs")
+    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo(filterCriteria));
     }
 
     /**
