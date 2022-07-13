@@ -11,7 +11,7 @@ on:
 
 env:
   repository: ubs
-  userRepoName: chat
+  userRepoName: core
   onbootJarName: app.jar
   dockerRepoName: skyere/greencityubs
 
