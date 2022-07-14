@@ -16,7 +16,7 @@ public enum PaymentStatus {
      * Method for getting a value of paymentStatus, which is used for translating
      * order status to different languages.
      *
-     * @return {@link int} orderStatus value.
+     * @return {@link int} paymentStatus value.
      */
     public int getNumValue() {
         return value;
