@@ -737,7 +737,7 @@ class SuperAdminServiceImplTest {
         superAdminService.editLocations(List.of(dto));
         verify(locationRepository).save(location);
         verify(locationRepository).findById(anyLong());
-        verify(locationRepository).findLocationByName("Львів", "Lviv");
+        verify(locationRepository).existsByNameUkAndNameEnAndRegion("Львів", "Lviv", location.getRegion());
         assertEquals(location.getNameEn(), dto.getNameEn());
     }
 }
