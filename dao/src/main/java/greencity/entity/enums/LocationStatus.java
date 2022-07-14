@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public enum LocationStatus {
-    ACTIVE("Активно"), DEACTIVATED("Неактивно"), NEW("Новостворено");
+    ACTIVE(1, "Активно"), NEW(2, "Новостворено"), DEACTIVATED(3, "Неактивно");
 
+    private int priority;
     private String status;
 }
