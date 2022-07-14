@@ -3,10 +3,7 @@ package greencity;
 import com.google.common.collect.Lists;
 import com.google.maps.model.*;
 import greencity.constant.AppConstant;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.*;
@@ -20,6 +17,7 @@ import greencity.dto.employee.*;
 import greencity.dto.location.*;
 import greencity.dto.notification.*;
 import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
@@ -3387,20 +3385,13 @@ public class ModelUtils {
     }
 
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
-        LocationsDto locationsDto = LocationsDto.builder()
-            .locationId(1L)
-            .locationTranslationDtoList(getLocationTranslationDto())
-            .locationStatus("ACTIVE")
-            .latitude(100.0)
-            .longitude(100.0)
-            .build();
-        LocationInfoDto locationInfoDto = LocationInfoDto.builder()
-            .locationsDto(List.of(locationsDto))
-            .regionId(1L)
-            .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
-            .build();
+        Location location = getLocation();
         return GetTariffsInfoDto.builder()
             .cardId(1L)
+            .locationInfoDtos(List.of(LocationsDtos.builder()
+                .locationId(location.getId())
+                .nameEn(location.getNameEn())
+                .nameUk(location.getNameUk()).build()))
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")

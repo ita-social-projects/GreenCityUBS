@@ -24,6 +24,8 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -506,11 +508,13 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getAllTariffsInfoTest() {
-        when(tariffsInfoRepository.findAll()).thenReturn(List.of(ModelUtils.getTariffsInfo()));
+        when(tariffsInfoRepository.findAll(any(TariffsInfoSpecification.class)))
+            .thenReturn(List.of(ModelUtils.getTariffsInfo()));
+        when(modelMapper.map(any(TariffsInfo.class), eq(GetTariffsInfoDto.class))).thenReturn(getAllTariffsInfoDto());
 
-        List<GetTariffsInfoDto> tariffsInfos = superAdminService.getAllTariffsInfo();
+        superAdminService.getAllTariffsInfo(TariffsInfoFilterCriteria.builder().build());
 
-        verify(tariffsInfoRepository).findAll();
+        verify(tariffsInfoRepository).findAll(any(TariffsInfoSpecification.class));
     }
 
     @Test

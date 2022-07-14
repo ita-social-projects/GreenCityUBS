@@ -20,7 +20,7 @@ class GetTariffsInfoDtoMapperTest {
         Assertions.assertEquals(tariffsInfo.getId(), dto.getCardId());
         Assertions.assertEquals(tariffsInfo.getCourierLimit().toString(), dto.getCourierLimit());
         Assertions.assertEquals(tariffsInfo.getCreatedAt(), dto.getCreatedAt());
-        Assertions.assertEquals(tariffsInfo.getLocationStatus().toString(), dto.getTariffStatus());
+        Assertions.assertEquals(tariffsInfo.getLocationStatus(), dto.getTariffStatus());
 
     }
 }
