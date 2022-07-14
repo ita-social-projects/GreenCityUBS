@@ -2,10 +2,7 @@ package greencity.dto.location;
 
 import lombok.*;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 
 @Getter
 @Setter
@@ -16,12 +13,12 @@ public class EditLocationDto {
     @NotNull
     @Min(1)
     private Long locationId;
-    @Pattern(regexp = "^([A-Z]{1}[a-z]{2,}([\\-| ]{1}[A-Z]{1}[a-zA-Z]{1,})?)",
+    @Pattern(regexp = "^([A-Z][a-z]*'?[a-z]+($|[ -](?=[A-Z])))+$",
         message = "use only English letters")
-    @NotEmpty(message = "en name must not be empty")
+    @Size(min = 3, max = 40, message = "a minimum of 3 to a maximum of 40 characters are allowed")
     private String nameEn;
-    @Pattern(regexp = "^([А-ЯЇІЄҐ]{1}[а-яіїєґ]{1,}[ -]?[А-ЯЇІЄҐ]{1}[а-яіїєґ]{1,})",
+    @Pattern(regexp = "^([А-ЯЇІЄҐ][а-яіїєґ]*'?[а-яіїєґ]+($|[ -](?=[А-ЯЇІЄҐ])))+$",
         message = "use only Ukrainian letters")
-    @NotEmpty(message = "ua name must not be empty")
+    @Size(min = 3, max = 40, message = "a minimum of 3 to a maximum of 40 characters are allowed")
     private String nameUa;
 }
