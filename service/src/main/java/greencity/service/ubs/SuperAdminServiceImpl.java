@@ -1,31 +1,12 @@
 package greencity.service.ubs;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityNotFoundException;
-
-import greencity.dto.location.EditLocationDto;
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.UnprocessableEntityException;
-import greencity.dto.tariff.*;
-import greencity.entity.order.*;
-import greencity.repository.*;
-import org.modelmapper.ModelMapper;
-
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.LocationsDtos;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.AddingReceivingStationDto;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.GetCourierTranslationsDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.courier.*;
 import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
@@ -33,32 +14,34 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
+import greencity.dto.tariff.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
+import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.CourierTranslationRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.ServiceTranslationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.filters.TariffsInfoSpecification;
+import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -460,11 +443,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetTariffsInfoDto> getAllTariffsInfo() {
-        return tariffsInfoRepository.findAll()
+    public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
+        List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
+        List<GetTariffsInfoDto> dtos = tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
+            .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
+            .sorted(Comparator.comparing(tariff -> tariff.getTariffStatus().getPriority()))
             .collect(Collectors.toList());
+        dtos.forEach(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
+            .sorted(Comparator.comparing(LocationsDtos::getNameUk))
+            .collect(Collectors.toList())));
+        return dtos;
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {

@@ -14,6 +14,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Service;
+import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
 
@@ -187,7 +188,7 @@ public interface SuperAdminService {
      *
      * @return {@link GetTariffsInfoDto}
      */
-    List<GetTariffsInfoDto> getAllTariffsInfo();
+    List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria);
 
     /**
      * Method creates new receiving station.

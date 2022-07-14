@@ -4,13 +4,8 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import greencity.entity.enums.LocationStatus;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +23,7 @@ public class GetTariffsInfoDto {
     private List<LocationsDtos> locationInfoDtos;
     private List<ReceivingStationDto> receivingStationDtos;
     private List<CourierTranslationDto> courierTranslationDtos;
-    private String tariffStatus;
+    private LocationStatus tariffStatus;
     private String creator;
     private LocalDate createdAt;
     private String courierLimit;
