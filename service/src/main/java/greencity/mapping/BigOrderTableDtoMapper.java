@@ -1,6 +1,7 @@
 package greencity.mapping;
 
 import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.SenderLocation;
 import greencity.entity.order.BigOrderTableViews;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,10 @@ public class BigOrderTableDtoMapper extends AbstractConverter<BigOrderTableViews
             .setSenderPhone(bigViews.getSenderPhone())
             .setSenderEmail(bigViews.getSenderEmail())
             .setViolationsAmount(bigViews.getViolationsAmount())
-            .setRegion(bigViews.getRegion())
-            .setSettlement(bigViews.getSettlement())
-            .setDistrict(bigViews.getDistrict())
-            .setAddress(bigViews.getAddress())
+            .setRegion(new SenderLocation().setUa(bigViews.getRegion()).setEn(bigViews.getRegionEn()))
+            .setSettlement(new SenderLocation().setUa(bigViews.getSettlement()).setEn(bigViews.getSettlementEn()))
+            .setDistrict(new SenderLocation().setUa(bigViews.getDistrict()).setEn(bigViews.getDistrictEn()))
+            .setAddress(new SenderLocation().setUa(bigViews.getAddress()).setEn(bigViews.getAddressEn()))
             .setCommentToAddressForClient(bigViews.getCommentToAddressForClient())
             .setCommentForOrderByClient(bigViews.getCommentForOrderByClient())
             .setCommentsForOrder(bigViews.getCommentsForOrder())
