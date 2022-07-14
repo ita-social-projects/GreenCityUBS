@@ -634,17 +634,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public void editLocations(List<EditLocationDto> editLocationDtoList) {
-        editLocationDtoList.forEach(editLocationDto -> {
-            Optional<Location> location = locationRepository.findById(editLocationDto.getLocationId());
-            Optional<Location> locationWithName =
-                locationRepository.findLocationByName(editLocationDto.getNameUa(), editLocationDto.getNameEn());
-            if (location.isPresent() && locationWithName.isEmpty()) {
-                Location current = location.get();
-                current.setNameUk(editLocationDto.getNameUa());
-                current.setNameEn(editLocationDto.getNameEn());
-                locationRepository.save(current);
-            }
-        });
+        editLocationDtoList.forEach(this::editLocation);
+    }
+
+    private void editLocation(EditLocationDto editLocationDto) {
+        Location location = tryToFindLocationById(editLocationDto.getLocationId());
+        if (!locationExists(editLocationDto.getNameUa(), editLocationDto.getNameEn(), location.getRegion())) {
+            location.setNameUk(editLocationDto.getNameUa());
+            location.setNameEn(editLocationDto.getNameEn());
+            locationRepository.save(location);
+        }
+    }
+
+    private boolean locationExists(String nameUk, String nameEn, Region region) {
+        return locationRepository.existsByNameUkAndNameEnAndRegion(nameUk, nameEn, region);
     }
 
     @Override
