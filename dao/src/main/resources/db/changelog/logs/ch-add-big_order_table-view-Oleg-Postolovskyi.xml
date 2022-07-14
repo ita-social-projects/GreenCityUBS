@@ -93,9 +93,9 @@
             left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=5 )  as responsible_driver_id,
 
             (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
-            left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=1 )   as responsible_caller,
+            left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller,
             (select e.id from employee_order_position eop
-            left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=1 )   as responsible_caller_id,
+            left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=2 )   as responsible_caller_id,
 
             (select concat_ws(', ',e.first_name,e.last_name) from employee_order_position eop
             left join employees e on eop.employee_id = e.id where order_id =o.id and eop.position_id=4 )   as responsible_navigator,
