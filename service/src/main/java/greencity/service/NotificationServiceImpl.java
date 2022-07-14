@@ -160,7 +160,8 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Long paidAmount = order.getPayment().stream()
-            .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+            .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
+                && !x.getPaymentStatus().equals(PaymentStatus.UNPAID))
             .map(Payment::getAmount).reduce(0L, Long::sum);
 
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
@@ -200,7 +201,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyBonuses(Order order, Long overpayment) {
+    public void notifyBonuses(Order order, Long overpayment) { // tyt
         if (overpayment <= 0) {
             return;
         }
@@ -225,7 +226,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyBonusesFromCanceledOrder(Order order) {
+    public void notifyBonusesFromCanceledOrder(Order order) { // tyt
         Set<NotificationParameter> parameters = new HashSet<>();
 
         parameters.add(NotificationParameter.builder().key("returnedPayment")
