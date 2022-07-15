@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name = "big_order_table")
+// CHECKSTYLE:OFF
 public class BigOrderTableViews {
     @Id
     private Long id;
@@ -52,4 +53,5 @@ public class BigOrderTableViews {
     private String commentsForOrder;
     private Boolean isBlocked;
     private String blockedBy;
+    private Long tariffs_info_id;
 }
