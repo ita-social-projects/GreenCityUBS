@@ -935,10 +935,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
             .build();
     }
 
@@ -954,10 +950,7 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .receivingStation(Set.of(ReceivingStation.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
+            .id(1L)
             .build();
     }
 
@@ -3507,10 +3500,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(Collections.emptyList())
-            .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
-                .build()))
+//            .receivingStationList(Set.of(ReceivingStation.builder()
+//                .name("receivingStation")
+//                .createdBy(ModelUtils.createUser())
+//                .build()))
             .build();
     }
 
@@ -3535,10 +3528,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(List.of(ModelUtils.getOrder()))
-            .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
-                .build()))
+//            .receivingStationList(Set.of(ReceivingStation.builder()
+//                .name("receivingStation")
+//                .createdBy(ModelUtils.createUser())
+//                .build()))
             .build();
     }
 

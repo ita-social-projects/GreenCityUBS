@@ -130,7 +130,8 @@ public class ModelUtils {
             .setResponsibleNavigator("Migno, Tekku")
             .setCommentsForOrder("criteria")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
 
     }
 
@@ -176,7 +177,8 @@ public class ModelUtils {
             .setResponsibleNavigator("Abu, Dabi")
             .setCommentsForOrder("criteria")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_84() {
@@ -210,7 +212,8 @@ public class ModelUtils {
             .setIdOrderFromShop("")
             .setCommentsForOrder("criteria")
             .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi");
+            .setBlockedBy("Abu, Dabi")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_85() {
@@ -243,7 +246,8 @@ public class ModelUtils {
             .setIdOrderFromShop("")
             .setCommentsForOrder("sorting")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_86() {
@@ -288,7 +292,8 @@ public class ModelUtils {
             .setResponsibleNavigator("Test, User")
             .setCommentsForOrder("filtering")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_87() {
@@ -334,7 +339,8 @@ public class ModelUtils {
             .setResponsibleNavigator("Test, User")
             .setCommentsForOrder("searching")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_88() {
@@ -380,7 +386,8 @@ public class ModelUtils {
             .setResponsibleNavigatorId(3L)
             .setResponsibleNavigator("Migno, Tekku")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_89() {
@@ -413,7 +420,8 @@ public class ModelUtils {
             .setTimeOfExport("22:27:25-22:27:29")
             .setIdOrderFromShop("")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_90() {
@@ -460,7 +468,8 @@ public class ModelUtils {
             .setResponsibleNavigatorId(10L)
             .setResponsibleNavigator("Abu, Dabi")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_91() {
@@ -494,7 +503,8 @@ public class ModelUtils {
             .setTimeOfExport("07:00:00-15:00:00")
             .setIdOrderFromShop("")
             .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi");
+            .setBlockedBy("Abu, Dabi")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_92() {
@@ -528,7 +538,8 @@ public class ModelUtils {
             .setTimeOfExport("22:27:59-22:28:11")
             .setIdOrderFromShop("")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static BigOrderTableViews getBOTViews_93() {
@@ -572,7 +583,8 @@ public class ModelUtils {
             .setResponsibleNavigatorId(10L)
             .setResponsibleNavigator("Abu, Dabi")
             .setIsBlocked(false)
-            .setBlockedBy("");
+            .setBlockedBy("")
+            .setTariffs_info_id(1L);
     }
 
     public static List<BigOrderTableViews> getListBOTViewsStandardPageASC() {

@@ -83,7 +83,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Employee checkIfEmailUnique(String email, Long id);
 
     /**
-     * Method return all employees depends from they positions.
+     * Method return all employees depends on they positions.
      *
      * @param positionId {@link Integer}
      * @return {@link List}of{@link Employee}
@@ -130,4 +130,18 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      */
     @Query(value = "SELECT * FROM EMPLOYEES WHERE EMPLOYEES.EMAIL = :email", nativeQuery = true)
     Optional<Employee> findByEmail(@Param(value = "email") String email);
+
+    /**
+     * Method find current tariffsInfo for Employee.
+     *
+     * @param employeeId {@link Long}.
+     * @return {@link Long}.
+     * @author Hlazova Nataliia.
+     */
+    @Query(
+        value = "SELECT TARIFF_INFOS_RECEIVING_EMPLOYEE_MAPPING.TARIFFS_INFO_ID "
+            + "FROM TARIFF_INFOS_RECEIVING_EMPLOYEE_MAPPING "
+            + "WHERE EMPLOYEE_ID = :employeeId",
+        nativeQuery = true)
+    List<Long> findTariffsInfoForEmployee(Long employeeId);
 }
