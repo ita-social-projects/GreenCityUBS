@@ -104,6 +104,13 @@
                 o.note as comments_for_order,
                 o.blocked as is_blocked,
                 concat_ws(', ',e.first_name,e.last_name) as blocked_by,
+                a.region_en as region_en,
+                a.city_en as settlement_en,
+                a.district_en as district_en,
+                concat_ws(', ',concat(a.street_en , ' ' , a.house_number),
+                          case when (a.house_corpus) is not null and a.house_corpus != '' then concat('b.',a.house_corpus) else 'b.- ' end ,
+                          case when (a.entrance_number) is not null and a.entrance_number != '' then concat('e.', a.entrance_number) else 'e.- ' end)
+                    as address_en,
                 o.tariffs_info_id as tariffs_info_id
 
             from orders o
