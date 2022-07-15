@@ -1,33 +1,20 @@
 package greencity.repository;
 
+import greencity.entity.enums.SortingOrder;
+import greencity.entity.user.User;
+import greencity.filters.CustomerPage;
+import greencity.filters.UserFilterCriteria;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
-
-import greencity.entity.enums.SortingOrder;
-import greencity.entity.user.User;
-import greencity.filters.CustomerPage;
-import greencity.filters.UserFilterCriteria;
 
 import static java.util.Objects.nonNull;
 
@@ -69,13 +56,11 @@ public class UserTableRepo {
         criteriaQuery.groupBy(userRoot.get("id"));
         setOrder(column, sortingOrder, criteriaQuery, userRoot);
         if (userFilterCriteria != null) {
-            Predicate predicateHaving = getPredicateForHaving(userFilterCriteria, userRoot);
-            criteriaQuery.having(predicateHaving);
-        }
-        if (userFilterCriteria != null && !CollectionUtils.isEmpty(usId)) {
             Predicate predicateWhere = getPredicateForWhereAnd(userFilterCriteria, userRoot);
             Predicate predicateWhere2 = getPredicateForWhereOr(userRoot, usId);
+            Predicate predicateHaving = getPredicateForHaving(userFilterCriteria, userRoot);
             criteriaQuery.where(predicateWhere, predicateWhere2);
+            criteriaQuery.having(predicateHaving);
         }
 
         TypedQuery<User> typedQuery = entityManager.createQuery(criteriaQuery);
