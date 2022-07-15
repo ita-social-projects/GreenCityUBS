@@ -24,7 +24,7 @@ public enum OrderStatus {
 
     /**
      * Method for getting a value of orderStatus, which is used for translating
-     * order status to different languages.
+     * order status wo different languages.
      * 
      * @return {@link int} orderStatus value.
      */

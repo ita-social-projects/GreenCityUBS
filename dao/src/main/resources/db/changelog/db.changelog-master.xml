@@ -138,6 +138,5 @@
     <include file="db/changelog/logs/ch-update-order_status_translation-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-update-into-notification-templates-Postolovskyi.xml"/>
     <include file="db/changelog/logs/ch-add-column-certificate-initial_points_value-Postolovskyi.xml"/>
-    <include file="db/changelog/logs/ch-add-big_order_table-view-Oleg-Postolovskyi.xml"/>
 </databaseChangeLog>
 

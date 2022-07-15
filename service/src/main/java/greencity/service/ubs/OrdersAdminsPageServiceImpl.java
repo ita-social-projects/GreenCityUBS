@@ -13,7 +13,6 @@ import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
@@ -51,7 +50,6 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
-    private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final EventService eventService;
@@ -227,9 +225,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         OrderStatus[] orderStatuses = OrderStatus.values();
         for (OrderStatus o : orderStatuses) {
             String ua = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getName();
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getName();
             String en = orderStatusTranslationRepository.getOrderStatusTranslationById((long) o.getNumValue())
-                .orElseThrow(() -> new EntityNotFoundException(ORDER_STATUS_NOT_FOUND)).getNameEng();
+                .orElseThrow(() -> new EntityNotFoundException("Order status have not found")).getNameEng();
             optionForColumnDTOS
                 .add(OptionForColumnDTO.builder().key(o.toString()).ua(ua).en(en).filtered(false).build());
         }
@@ -240,14 +238,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         PaymentStatus[] paymentStatuses = PaymentStatus.values();
         for (PaymentStatus p : paymentStatuses) {
-            OrderPaymentStatusTranslation orderPaymentStatusTranslation =
-                orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById((long) p.getNumValue())
-                    .orElseThrow(() -> new EntityNotFoundException(ORDER_PAYMENT_STATUS_NOT_FOUND));
-            optionForColumnDTOS.add(OptionForColumnDTO.builder()
-                .key(p.name())
-                .ua(orderPaymentStatusTranslation.getTranslationValue())
-                .en(orderPaymentStatusTranslation.getTranslationsValueEng())
-                .build());
+            optionForColumnDTOS.add(OptionForColumnDTO.builder().key(p.name()).ua(p.name()).en(p.name()).build());
         }
         return optionForColumnDTOS;
     }
