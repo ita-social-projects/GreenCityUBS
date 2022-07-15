@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -63,6 +64,14 @@ public class CustomCriteriaPredicate {
         Arrays.stream(id)
             .forEach(predicate::value);
         return predicate;
+    }
+
+    Predicate filter(List<Long> ids, Root<?> root, String nameColumn) {
+        List<Predicate> predicateList = new ArrayList<>();
+        for (Long id : ids) {
+            predicateList.add(criteriaBuilder.equal(root.<Long>get(nameColumn), id));
+        }
+        return criteriaBuilder.or(predicateList.toArray(new Predicate[0]));
     }
 
     Predicate search(String[] searchWords, Root<?> root) {

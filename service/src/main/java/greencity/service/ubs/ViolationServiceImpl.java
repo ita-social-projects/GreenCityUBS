@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.violation.*;
@@ -8,12 +9,10 @@ import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.OrderRepository;
-import greencity.repository.UserRepository;
-import greencity.repository.UserViolationsTableRepo;
-import greencity.repository.ViolationRepository;
+import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +35,7 @@ import static greencity.constant.ErrorMessage.*;
 public class ViolationServiceImpl implements ViolationService {
     private ViolationRepository violationRepository;
     private UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private UserViolationsTableRepo userViolationsTableRepo;
     private OrderRepository orderRepository;
 
@@ -82,6 +83,7 @@ public class ViolationServiceImpl implements ViolationService {
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        checkAvailableOrderForEmployee(order.getId(), currentUser.getRecipientEmail());
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
             Violation violation = violationBuilder(add, order, currentUser);
@@ -98,6 +100,21 @@ public class ViolationServiceImpl implements ViolationService {
             notificationService.notifyAddViolation(order.getId());
         } else {
             throw new NotFoundException(ORDER_ALREADY_HAS_VIOLATION);
+        }
+    }
+
+    private void checkAvailableOrderForEmployee(Long orderId, String email) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        Long employeeId = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+        boolean status = false;
+        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
+        for (Long id : tariffsInfoIds) {
+            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
+        }
+        if (!status) {
+            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + orderId);
         }
     }
 
