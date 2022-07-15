@@ -935,6 +935,10 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
             .build();
     }
 
@@ -950,7 +954,10 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .id(1L)
+            .receivingStation(Set.of(ReceivingStation.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
             .build();
     }
 
@@ -2430,7 +2437,8 @@ public class ModelUtils {
         return OrderPaymentStatusTranslation.builder()
             .id(1L)
             .orderPaymentStatusId(1L)
-            .translationValue("Abc")
+            .translationValue("Абв")
+            .translationsValueEng("Abc")
             .build();
     }
 
@@ -2953,9 +2961,13 @@ public class ModelUtils {
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
             .setRegion("Київська область")
+            .setRegionEn("Kyivs'ka oblast")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Шевченківський")
+            .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("Січових Стрільців, 37, 1, 1")
+            .setAddressEn("Sichovyh Stril'tsiv, 37, 1, 1")
             .setCommentToAddressForClient("coment")
             .setBagAmount("3")
             .setTotalOrderSum(500L)
@@ -3001,10 +3013,11 @@ public class ModelUtils {
             .setSenderPhone("996755544")
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
-            .setRegion("Київська область")
-            .setSettlement("Київ")
-            .setDistrict("Шевченківський")
-            .setAddress("Січових Стрільців, 37, 1, 1")
+            .setRegion(new SenderLocation().setUa("Київська область").setEn("Kyivs'ka oblast"))
+            .setSettlement(new SenderLocation().setUa("Київ").setEn("Kyiv"))
+            .setDistrict(new SenderLocation().setUa("Шевченківський").setEn("Shevchenkivs'kyi"))
+            .setAddress(
+                new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
             .setCommentToAddressForClient("coment")
             .setBagsAmount("3")
             .setTotalOrderSum(500L)
@@ -3035,7 +3048,11 @@ public class ModelUtils {
             .setResponsibleCaller("")
             .setResponsibleDriver("")
             .setResponsibleLogicMan("")
-            .setResponsibleNavigator("");
+            .setResponsibleNavigator("")
+            .setRegion(new SenderLocation().setEn(null).setUa(null))
+            .setSettlement(new SenderLocation().setEn(null).setUa(null))
+            .setDistrict(new SenderLocation().setEn(null).setUa(null))
+            .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
 
     public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
@@ -3490,10 +3507,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(Collections.emptyList())
-//            .receivingStationList(Set.of(ReceivingStation.builder()
-//                .name("receivingStation")
-//                .createdBy(ModelUtils.createUser())
-//                .build()))
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
             .build();
     }
 
@@ -3518,10 +3535,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(List.of(ModelUtils.getOrder()))
-//            .receivingStationList(Set.of(ReceivingStation.builder()
-//                .name("receivingStation")
-//                .createdBy(ModelUtils.createUser())
-//                .build()))
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
             .build();
     }
 

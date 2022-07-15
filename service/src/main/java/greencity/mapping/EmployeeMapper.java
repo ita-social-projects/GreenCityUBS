@@ -36,6 +36,12 @@ public class EmployeeMapper extends AbstractConverter<Employee, EmployeeDto> {
                     .name(p.getName())
                     .build())
                 .collect(Collectors.toList()))
+            .receivingStations(employee.getReceivingStation().stream()
+                .map(r -> ReceivingStationDto.builder()
+                    .id(r.getId())
+                    .name(r.getName())
+                    .build())
+                .collect(Collectors.toList()))
             .build();
     }
 }

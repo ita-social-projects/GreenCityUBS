@@ -30,6 +30,8 @@ public final class ErrorMessage {
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
     public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
+    public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
+    public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
@@ -104,7 +106,6 @@ public final class ErrorMessage {
     public static final String USE_ONLY_ENGLISH_LETTERS = "use only English letters";
     public static final String USE_ONLY_UKRAINIAN_LETTERS = "use only Ukrainian letters";
     public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
-    public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
 
     /**
      * Constructor.

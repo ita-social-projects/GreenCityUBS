@@ -517,7 +517,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         ReceivingStation station = receivingStationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(
                 ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + id));
-        receivingStationRepository.delete(station);
+        if (station.getEmployees() == null || station.getEmployees().isEmpty()) {
+            receivingStationRepository.delete(station);
+        } else {
+            throw new UnprocessableEntityException(ErrorMessage.EMPLOYEES_ASSIGNED_STATION);
+        }
     }
 
     private Set<Location> findLocationsForTariff(List<Long> locationId, Long regionId) {

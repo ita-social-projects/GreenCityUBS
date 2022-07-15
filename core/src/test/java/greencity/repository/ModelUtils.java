@@ -101,9 +101,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Дарницький")
+            .setDistrictEn("Darnyts'kyi")
             .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
+            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 1шт; 120л - 2шт")
             .setTotalOrderSum(600L)
@@ -126,8 +130,7 @@ public class ModelUtils {
             .setResponsibleNavigator("Migno, Tekku")
             .setCommentsForOrder("criteria")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
 
     }
 
@@ -144,9 +147,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Дарницький")
+            .setDistrictEn("Darnyts'kyi")
             .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
+            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 5шт; 120л - 3шт")
             .setTotalOrderSum(1050L)
@@ -169,8 +176,7 @@ public class ModelUtils {
             .setResponsibleNavigator("Abu, Dabi")
             .setCommentsForOrder("criteria")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_84() {
@@ -185,9 +191,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Печерський")
+            .setDistrictEn("Pechers'kyi")
             .setAddress("Khorolska Street 7, корп.8, п.- ")
+            .setAddressEn("Khorolska Street 7, b.8, e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("120л - 4шт")
             .setTotalOrderSum(1200L)
@@ -200,8 +210,7 @@ public class ModelUtils {
             .setIdOrderFromShop("")
             .setCommentsForOrder("criteria")
             .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("Abu, Dabi");
     }
 
     public static BigOrderTableViews getBOTViews_85() {
@@ -216,9 +225,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn(null)
             .setSettlement("Київ")
+            .setSettlementEn(null)
             .setDistrict("Дніпровський")
+            .setDistrictEn(null)
             .setAddress("Kharkivs'ke Highway 5, корп.4, п.- ")
+            .setAddressEn(" 5, b.4, e.- ")
             .setBagAmount("120л - 2шт")
             .setTotalOrderSum(600L)
             .setGeneralDiscount(0L)
@@ -230,8 +243,7 @@ public class ModelUtils {
             .setIdOrderFromShop("")
             .setCommentsForOrder("sorting")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_86() {
@@ -247,9 +259,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn(null)
             .setSettlement("Київ")
+            .setSettlementEn(null)
             .setDistrict("Дніпровський")
+            .setDistrictEn(null)
             .setAddress("Kharkivs'ke Highway 5, корп.4, п.- ")
+            .setAddressEn(" 5, b.4, e.- ")
             .setBagAmount("120л - 2шт")
             .setTotalOrderSum(600L)
             .setOrderCertificateCode("3003-1992")
@@ -272,8 +288,7 @@ public class ModelUtils {
             .setResponsibleNavigator("Test, User")
             .setCommentsForOrder("filtering")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_87() {
@@ -289,9 +304,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Дарницький")
+            .setDistrictEn("Darnyts'kyi")
             .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
+            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 5шт; 120л - 10шт")
             .setTotalOrderSum(3000L)
@@ -315,8 +334,7 @@ public class ModelUtils {
             .setResponsibleNavigator("Test, User")
             .setCommentsForOrder("searching")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_88() {
@@ -334,9 +352,13 @@ public class ModelUtils {
             .setSenderEmail("test@ukr.net")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Дарницький")
+            .setDistrictEn("Darnyts'kyi")
             .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
+            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 1шт; 120л - 2шт")
             .setTotalOrderSum(600L)
@@ -358,8 +380,7 @@ public class ModelUtils {
             .setResponsibleNavigatorId(3L)
             .setResponsibleNavigator("Migno, Tekku")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_89() {
@@ -374,9 +395,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Солом'янський")
+            .setDistrictEn("Solom'yans'kyi")
             .setAddress("Севастопольська площа 19, корп.- , п.- ")
+            .setAddressEn("Sevastopol's'ka Square 19, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 1шт; 120л - 3шт")
             .setTotalOrderSum(850L)
@@ -388,8 +413,7 @@ public class ModelUtils {
             .setTimeOfExport("22:27:25-22:27:29")
             .setIdOrderFromShop("")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_90() {
@@ -407,9 +431,13 @@ public class ModelUtils {
             .setSenderEmail("test@email.ua")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Солом'янський")
+            .setDistrictEn("Solom'yans'kyi")
             .setAddress("Вулиця Федора Ернста 10, корп.16, п.- ")
+            .setAddressEn("Fedora Ernsta Street 10, b.16, e.- ")
             .setCommentToAddressForClient("Ого, який коментар до адреси")
             .setBagAmount("20л - 6шт; 120л - 14шт")
             .setTotalOrderSum(4200L)
@@ -432,8 +460,7 @@ public class ModelUtils {
             .setResponsibleNavigatorId(10L)
             .setResponsibleNavigator("Abu, Dabi")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_91() {
@@ -449,9 +476,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Солом'янський")
+            .setDistrictEn("Solom'yans'kyi")
             .setAddress("Севастопольська площа 19, корп.- , п.- ")
+            .setAddressEn("Sevastopol's'ka Square 19, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 2шт; 120л - 2шт")
             .setTotalOrderSum(650L)
@@ -463,8 +494,7 @@ public class ModelUtils {
             .setTimeOfExport("07:00:00-15:00:00")
             .setIdOrderFromShop("")
             .setIsBlocked(true)
-            .setBlockedBy("Abu, Dabi")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("Abu, Dabi");
     }
 
     public static BigOrderTableViews getBOTViews_92() {
@@ -480,9 +510,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Дарницький")
+            .setDistrictEn("Darnyts'kyi")
             .setAddress("проспект Петра Григоренка 3, корп.- , п.- ")
+            .setAddressEn("Petra Hryhorenka Avenue 3, b.- , e.- ")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 2шт; 120л - 2шт")
             .setTotalOrderSum(650L)
@@ -494,8 +528,7 @@ public class ModelUtils {
             .setTimeOfExport("22:27:59-22:28:11")
             .setIdOrderFromShop("")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static BigOrderTableViews getBOTViews_93() {
@@ -511,9 +544,13 @@ public class ModelUtils {
             .setSenderName("")
             .setViolationsAmount(0)
             .setRegion("Київська область")
+            .setRegionEn("Kyiv region")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Шевченківський")
+            .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("улица Владимира Винниченко 10, корп.- , п.1")
+            .setAddressEn("Vladimir Vinnichenko Street 10, b.- , e.1")
             .setCommentToAddressForClient("")
             .setBagAmount("20л - 30шт; 120л - 70шт")
             .setTotalOrderSum(5000L)
@@ -535,8 +572,7 @@ public class ModelUtils {
             .setResponsibleNavigatorId(10L)
             .setResponsibleNavigator("Abu, Dabi")
             .setIsBlocked(false)
-            .setBlockedBy("")
-            .setTariffs_info_id(1L);
+            .setBlockedBy("");
     }
 
     public static List<BigOrderTableViews> getListBOTViewsStandardPageASC() {

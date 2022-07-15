@@ -108,24 +108,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> getAllInactiveUsers(LocalDate fromDate, LocalDate toDate);
 
     /**
-     * Method return all user's id depends on they tariffsInfo.
-     *
-     * @param tariffsInfoId {@link Integer}
-     * @return {@link List}of{@link User}
-     * @author Hlazova Natalia
-     */
-    @Query(
-        value = "SELECT USERS.ID FROM USERS "
-            + "JOIN ORDERS "
-            + "ON USERS.ID = ORDERS.USERS_ID "
-            + "JOIN TARIFFS_INFO "
-            + "ON TARIFFS_INFO.ID = ORDERS.TARIFFS_INFO_ID "
-            + "WHERE TARIFFS_INFO.ID = :tariffsInfoId "
-            + "GROUP BY USERS.ID ",
-        nativeQuery = true)
-    List<Long> getAllUsersByTariffsInfoId(Long tariffsInfoId);
-
-    /**
      * Return list of the inactive users depends of time limits.
      */
     @Query(nativeQuery = true,
