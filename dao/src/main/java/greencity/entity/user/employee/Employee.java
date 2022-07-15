@@ -2,7 +2,6 @@ package greencity.entity.user.employee;
 
 import greencity.entity.enums.EmployeeStatus;
 import greencity.entity.order.Order;
-import greencity.entity.order.TariffsInfo;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
@@ -58,10 +57,10 @@ public class Employee {
 
     @ManyToMany
     @JoinTable(
-        name = "tariff_infos_receiving_employee_mapping",
+        name = "employee_receiving_station_mapping",
         joinColumns = {@JoinColumn(name = "employee_id")},
-        inverseJoinColumns = {@JoinColumn(name = "tariffs_info_id")})
-    private Set<TariffsInfo> tariffInfos;
+        inverseJoinColumns = {@JoinColumn(name = "receiving_station_id")})
+    private Set<ReceivingStation> receivingStation;
 
     @OneToMany(mappedBy = "employee")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
