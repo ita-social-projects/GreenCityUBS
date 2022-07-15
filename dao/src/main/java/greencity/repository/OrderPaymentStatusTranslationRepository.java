@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
