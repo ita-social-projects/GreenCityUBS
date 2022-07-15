@@ -44,6 +44,7 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
+import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -534,9 +535,9 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
-    @GetMapping("/tariffs/all")
-    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
+    @GetMapping("/tariffs")
+    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo(filterCriteria));
     }
 
     /**

@@ -1690,6 +1690,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return emps;
     }
 
+    /**
+     * This method checks if Employee is assigned to the order.
+     * 
+     * @param orderId - ID of chosen order {@link Long}.
+     * @param uuid    - uuid of logged employee {@link String}.
+     *
+     * @return {@link Boolean}
+     */
     public Boolean checkEmployeeForOrder(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
