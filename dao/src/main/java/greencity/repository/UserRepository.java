@@ -124,4 +124,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
             + "GROUP BY USERS.ID ",
         nativeQuery = true)
     List<Long> getAllUsersByTariffsInfoId(Long tariffsInfoId);
+
+    /**
+     * Return list of the inactive users depends of time limits.
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM users "
+            + "INNER JOIN orders o "
+            + "ON users.id = o.users_id "
+            + "AND o.id = (SELECT o1.id FROM orders o1 "
+            + "WHERE o1.users_id = o.users_id "
+            + "ORDER BY o1.order_date DESC limit 1) "
+            + "WHERE CAST(o.order_date AS DATE) = :dateOfLastOrder")
+    List<User> getInactiveUsersByDateOfLastOrder(LocalDate dateOfLastOrder);
 }

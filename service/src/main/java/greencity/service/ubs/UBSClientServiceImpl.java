@@ -7,7 +7,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,10 +28,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.NotFoundException;
-
-import greencity.repository.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -105,10 +113,28 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LanguageRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.GoogleApiService;
 import greencity.service.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -116,9 +142,36 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import lombok.RequiredArgsConstructor;
 
-import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
+
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TO_MUCH_BIG_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 
 /**
  * Implementation of {@link UBSClientService}.
@@ -277,12 +330,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Certificate certificate = certificateRepository.findById(code)
             .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + code));
 
-        if (certificate.getCertificateStatus().toString().equals("USED")) {
-            return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-                certificate.getDateOfUse(), certificate.getCode());
-        }
-        return new CertificateDto(certificate.getCertificateStatus().toString(), certificate.getPoints(),
-            certificate.getExpirationDate(), certificate.getCode());
+        return modelMapper.map(certificate, CertificateDto.class);
     }
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo courierLocation, Integer sumWithoutDiscount) {
@@ -332,11 +380,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        }
         eventService.save(OrderHistory.ORDER_FORMED, OrderHistory.CLIENT, order);
-        if (sumToPay == 0 || !dto.isShouldBePaid()) {
+        if (sumToPay <= 0 || !dto.isShouldBePaid()) {
             return getPaymentRequestDto(order, null);
         } else {
             PaymentRequestDto paymentRequestDto = formPaymentRequest(order.getId(), sumToPay);
@@ -349,6 +394,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (orderId != null) {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            checkIsOrderPaid(order.getOrderPaymentStatus());
             order.setPointsToUse(dto.getPointsToUse())
                 .setAdditionalOrders(dto.getAdditionalOrders())
                 .setComment(dto.getOrderComment());
@@ -647,8 +693,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.findAllOrdersByUserUuidAndOrderStatus(page, uuid, statuses)
-            : ordersForUserRepository.findAllOrdersByUserUuid(page, uuid);
+            ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
+            : ordersForUserRepository.getAllByUserUuid(page, uuid);
         List<Order> orders = orderPages.getContent();
 
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
@@ -666,10 +712,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById(order.getOrderStatus().getNumValue())
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
             .orElse(orderStatusTranslationRepository.getOne(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-            .findByOrderPaymentStatusIdAndTranslationValue(
+            .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
 
         Double fullPrice = Double.valueOf(bagForUserDtos.stream()
@@ -750,32 +796,35 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
-        Map<Integer, Integer> amountOfBags = new HashMap<>();
-        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && MapUtils.isEmpty(order.getConfirmedQuantity())
-            && MapUtils.isEmpty(order.getExportedQuantity())) {
-            amountOfBags = order.getAmountOfBagsOrdered();
+        Map<Integer, Integer> actualBagAmounts = getActualBagAmountsForOrder(order);
+        List<Bag> bagsForOrder = bagRepository.findBagByOrderId(order.getId());
+        return bagsForOrder.stream()
+            .filter(bag -> actualBagAmounts.containsKey(bag.getId()))
+            .map(bag -> buildBagForUserDto(bag, actualBagAmounts.get(bag.getId())))
+            .collect(Collectors.toList());
+    }
+
+    private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
+        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
+            return order.getExportedQuantity();
         }
-        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
-            && MapUtils.isEmpty(order.getExportedQuantity())) {
-            amountOfBags = order.getConfirmedQuantity();
+        if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
+            return order.getConfirmedQuantity();
         }
-        if (!MapUtils.isEmpty(order.getAmountOfBagsOrdered()) && !MapUtils.isEmpty(order.getConfirmedQuantity())
-            && !MapUtils.isEmpty(order.getExportedQuantity())) {
-            amountOfBags = order.getExportedQuantity();
+        if (MapUtils.isNotEmpty(order.getAmountOfBagsOrdered())) {
+            return order.getAmountOfBagsOrdered();
         }
-        List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
-        List<BagForUserDto> bagForUserDtos = new ArrayList<>();
-        Map<Integer, Integer> finalAmountOfBags = amountOfBags;
-        bags.forEach(bag -> {
-            BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag(bag);
-            bagDto.setService(bagTranslation.getName());
-            bagDto.setServiceEng(bagTranslation.getNameEng());
-            bagDto.setCount(finalAmountOfBags.get(bag.getId()));
-            bagDto.setTotalPrice(finalAmountOfBags.get(bag.getId()) * bag.getFullPrice());
-            bagForUserDtos.add(bagDto);
-        });
-        return bagForUserDtos;
+        return new HashMap<>();
+    }
+
+    private BagForUserDto buildBagForUserDto(Bag bag, int count) {
+        BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
+        BagTranslation bagTranslation = bag.getBagTranslations().get(0);
+        bagDto.setService(bagTranslation.getName());
+        bagDto.setServiceEng(bagTranslation.getNameEng());
+        bagDto.setCount(count);
+        bagDto.setTotalPrice(count * bag.getFullPrice());
+        return bagDto;
     }
 
     private Long countPaidAmount(List<Payment> payments) {
@@ -892,29 +941,39 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> amountOfBagsOrderedMap, UBSuser userData,
         User currentUser, int sumToPay) {
         order.setOrderStatus(OrderStatus.FORMED);
-        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setCertificates(orderCertificates);
         order.setAmountOfBagsOrdered(amountOfBagsOrderedMap);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
             (long) formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap));
+        setOrderPaymentStatus(order, sumToPay);
 
         Payment payment = Payment.builder()
-            .amount((long) (sumToPay * 100))
+            .amount(sumToPay * 100L)
             .orderStatus("created")
             .currency("UAH")
             .paymentStatus(PaymentStatus.UNPAID)
             .order(order).build();
-        if (order.getPayment() != null) {
-            order.getPayment().add(payment);
-        } else {
-            ArrayList<Payment> arrayOfPayments = new ArrayList<>();
-            arrayOfPayments.add(payment);
-            order.setPayment(arrayOfPayments);
+
+        if (order.getPayment() == null) {
+            order.setPayment(new ArrayList<>());
         }
+        order.getPayment().add(payment);
+
         orderRepository.save(order);
         return order;
+    }
+
+    private void setOrderPaymentStatus(Order order, int sumToPay) {
+        if (sumToPay <= 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        } else {
+            order.setOrderPaymentStatus(
+                order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
+                    ? OrderPaymentStatus.HALF_PAID
+                    : OrderPaymentStatus.UNPAID);
+        }
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
@@ -1019,6 +1078,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private boolean dontSendLinkToFondyIf(int sumToPay, Certificate certificate) {
         if (sumToPay <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
+            certificate.setPoints(certificate.getPoints() + sumToPay);
             return true;
         }
         return false;
@@ -1481,6 +1541,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public FondyOrderResponse processOrderFondyClient(OrderFondyClientDto dto, String uuid) {
         Order order = findByIdOrderForClient(dto);
+        checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();
         checkForNullCounter(order);
@@ -1490,8 +1551,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Set<Certificate> orderCertificates = new HashSet<>();
         List<Payment> payments = order.getPayment();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
         sumToPay = calculatePaidAmount(payments, sumToPay);
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
 
         transferUserPointsToOrder(order, dto.getPointsToUse());
 
@@ -1502,6 +1563,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             String link = formedLink(order, sumToPay);
             return getPaymentRequestDto(order, link);
+        }
+    }
+
+    private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
+        if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
+            throw new BadRequestException(ORDER_ALREADY_PAID);
         }
     }
 
@@ -1632,6 +1699,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
                 if (dontSendLinkToFondyIfClient(sumToPay)) {
                     certificate.setCertificateStatus(CertificateStatus.USED);
+                    certificate.setPoints(certificate.getPoints() + sumToPay);
                     sumToPay = 0;
                 }
             }
@@ -1662,6 +1730,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public LiqPayOrderResponse proccessOrderLiqpayClient(OrderFondyClientDto dto, String uuid) {
         Order order = orderRepository.findById(dto.getOrderId()).orElseThrow();
+        checkIsOrderPaid(order.getOrderPaymentStatus());
         User currentUser = findByIdUserForClient(uuid);
 
         Map<Integer, Integer> amountOfBagsOrderedMap = order.getAmountOfBagsOrdered();

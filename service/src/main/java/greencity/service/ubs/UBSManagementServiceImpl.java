@@ -37,6 +37,7 @@ import greencity.repository.*;
 import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,9 +125,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .filter(payment -> payment.getPaymentStatus().equals(PaymentStatus.PAID))
             .map(x -> modelMapper.map(x, PaymentInfoDto.class)).collect(Collectors.toList());
         paymentTableInfoDto.setPaymentInfoDtos(getAmountInUAH(paymentInfoDtos));
-        if ((order.getOrderStatus() == OrderStatus.DONE)) {
-            notificationService.notifyBonuses(order, overpayment);
-        }
         return paymentTableInfoDto;
     }
 
@@ -432,7 +430,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private GeneralOrderInfo getInfoAboutStatusesAndDateFormed(Optional<Order> order) {
         OrderStatus orderStatus = order.isPresent() ? order.get().getOrderStatus() : OrderStatus.CANCELED;
         Optional<OrderStatusTranslation> orderStatusTranslation =
-            orderStatusTranslationRepository.getOrderStatusTranslationById(orderStatus.getNumValue());
+            orderStatusTranslationRepository.getOrderStatusTranslationById((long) orderStatus.getNumValue());
         String currentOrderStatusTranslation =
             orderStatusTranslation.isPresent() ? orderStatusTranslation.get().getName() : orderStatus.name();
         String currentOrderStatusTranslationEng =
@@ -443,13 +441,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.map(Order::getOrderPaymentStatus).orElse(OrderPaymentStatus.UNPAID);
         Order currentOrder = order.orElseGet(Order::new);
         OrderPaymentStatusTranslation currentOrderStatusPaymentTranslation = orderPaymentStatusTranslationRepository
-            .findByOrderPaymentStatusIdAndTranslationValue((long) orderStatusPayment.getStatusValue());
+            .getById((long) orderStatusPayment.getStatusValue());
 
         return GeneralOrderInfo.builder()
             .id(order.isPresent() ? order.get().getId() : 0)
             .dateFormed(order.map(Order::getOrderDate).orElse(null))
-            .orderStatusesDtos(getOrderStatusesTranslation(currentOrder))
-            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation(currentOrder))
+            .orderStatusesDtos(getOrderStatusesTranslation())
+            .orderPaymentStatusesDto(getOrderPaymentStatusesTranslation())
             .orderStatus(order.map(Order::getOrderStatus).orElse(null))
             .orderPaymentStatus(order.map(Order::getOrderPaymentStatus).orElse(null))
             .orderPaymentStatusName(currentOrderStatusPaymentTranslation.getTranslationValue())
@@ -464,15 +462,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method which is get order translation statuses in two languages like:
      * ua and en.
      *
-     * @param order {@link Long}.
      * @return {@link List}.
      *
      * @author Yuriy Bahlay.
      */
-    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation(Order order) {
+    private List<OrderStatusesTranslationDto> getOrderStatusesTranslation() {
         List<OrderStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderStatusTranslation> orderStatusTranslations =
-            orderStatusTranslationRepository.getOrderStatusTranslationsId((long) order.getOrderStatus().getNumValue());
+            orderStatusTranslationRepository.findAllBy();
         if (!orderStatusTranslations.isEmpty()) {
             for (OrderStatusTranslation orderStatusTranslation : orderStatusTranslations) {
                 OrderStatusesTranslationDto orderStatusesTranslationDto = new OrderStatusesTranslationDto();
@@ -509,15 +506,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     /**
      * This is method which is get order payment statuses translation.
      *
-     * @param order {@link Order}.
      * @return {@link List}.
      *
      * @author Yuriy Bahlay.
      */
-    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation(Order order) {
+    private List<OrderPaymentStatusesTranslationDto> getOrderPaymentStatusesTranslation() {
         List<OrderPaymentStatusesTranslationDto> orderStatusesTranslationDtos = new ArrayList<>();
         List<OrderPaymentStatusTranslation> orderStatusPaymentTranslations = orderPaymentStatusTranslationRepository
-            .getOrderStatusPaymentTranslations((long) order.getOrderPaymentStatus().getStatusValue());
+            .getAllBy();
         if (!orderStatusPaymentTranslations.isEmpty()) {
             for (OrderPaymentStatusTranslation orderStatusPaymentTranslation : orderStatusPaymentTranslations) {
                 OrderPaymentStatusesTranslationDto translationDto = new OrderPaymentStatusesTranslationDto();
@@ -564,18 +560,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         final Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
-        if (nonNull(exported)) {
-            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue()))) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
-                }
-                updateOrderRepository
-                    .updateExporter(entry.getValue(), orderId,
-                        entry.getKey().longValue());
-            }
-        }
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
@@ -588,6 +572,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         entry.getKey().longValue());
             }
         }
+
+        if (nonNull(exported)) {
+            for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
+                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
+                    entry.getKey().longValue()))) {
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                }
+                updateOrderRepository
+                    .updateExporter(entry.getValue(), orderId,
+                        entry.getKey().longValue());
+            }
+        }
+
         long discount = orderRepository.findSumOfCertificatesByOrderId(orderId);
         var price = getPriceDetails(orderId);
         Long needToPay = setTotalPrice(price).longValue() - (wasPaid) - discount;
@@ -1138,17 +1136,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     private Long calculateOverpayment(Order order, Long sumToPay) {
-        Long paymentSum = order.getPayment().stream()
-            .filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount)
-            .map(a -> a / 100)
-            .reduce(Long::sum)
-            .orElse(0L);
-        Long paymentsWithCertificatesAndPoints = paymentSum
-            + ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
-                + order.getPointsToUse());
-        return sumToPay - paymentsWithCertificatesAndPoints < 0 ? Math.abs(paymentsWithCertificatesAndPoints - sumToPay)
-            : 0L;
+        long paymentSum = order.getPayment().stream()
+            .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
+            .map(payment -> payment.getAmount() / 100)
+            .reduce(0L, Long::sum);
+
+        long certificateSum = order.getCertificates().stream()
+            .map(Certificate::getPoints)
+            .reduce(0, Integer::sum);
+
+        long overpayment = paymentSum + certificateSum + order.getPointsToUse() - sumToPay;
+
+        return OrderStatus.CANCELED.equals(order.getOrderStatus())
+            ? paymentSum
+            : Math.max(overpayment, 0L);
     }
 
     /**
@@ -1160,7 +1161,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     private Long calculatePaidAmount(Order order) {
         return order.getPayment().stream().filter(x -> x.getPaymentStatus().equals(PaymentStatus.PAID))
-            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, (a, b) -> a + b);
+            .map(Payment::getAmount).map(amount -> amount / 100).reduce(0L, Long::sum);
     }
 
     /**
@@ -1732,18 +1733,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
     }
 
+    private void checkOverpayment(Long overpayment) {
+        if (overpayment == 0L) {
+            throw new BadRequestException(USER_HAS_NO_OVERPAYMENT);
+        }
+    }
+
     @Override
     public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId) {
-        User currentUser = userRepository.findUserByOrderId(orderId)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+        CounterOrderDetailsDto prices = getPriceDetails(orderId);
+        Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue());
+        checkOverpayment(overpayment);
+        User currentUser = order.getUser();
 
-        Long bonuses = addBonusesToUserDto.getAmount() * (-100);
-        List<Payment> payments = order.getPayment();
-        Payment payment = Payment.builder()
-            .amount(bonuses)
+        order.getPayment().add(Payment.builder()
+            .amount(overpayment * (-100))
             .settlementDate(addBonusesToUserDto.getSettlementdate())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .receiptLink(addBonusesToUserDto.getReceiptLink())
@@ -1751,11 +1758,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .currency("UAH")
             .orderStatus(String.valueOf(OrderStatus.FORMED))
             .paymentStatus(PaymentStatus.PAID)
-            .build();
-        payments.add(payment);
-        order.setPayment(payments);
-        Integer userBonuses = currentUser.getCurrentPoints() + addBonusesToUserDto.getAmount().intValue();
-        currentUser.setCurrentPoints(userBonuses);
+            .build());
+
+        transferPointsToUser(order, currentUser, overpayment.intValue());
+
         orderRepository.save(order);
         userRepository.save(currentUser);
 
@@ -1765,5 +1771,24 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .receiptLink(addBonusesToUserDto.getReceiptLink())
             .paymentId(addBonusesToUserDto.getPaymentId())
             .build();
+    }
+
+    private void transferPointsToUser(Order order, User user, int points) {
+        if (points <= 0) {
+            return;
+        }
+
+        user.setCurrentPoints(user.getCurrentPoints() + points);
+
+        user.setChangeOfPointsList(ListUtils.defaultIfNull(user.getChangeOfPointsList(), new ArrayList<>()));
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(points)
+                .date(LocalDateTime.now())
+                .order(order)
+                .build());
+
+        notificationService.notifyBonuses(order, (long) points);
     }
 }

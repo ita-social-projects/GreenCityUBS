@@ -1,10 +1,35 @@
 package greencity.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.CreateCourierTranslationDto;
+import greencity.dto.courier.GetCourierTranslationsDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
@@ -13,21 +38,17 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @Validated
@@ -508,6 +529,7 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about tariffs.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })

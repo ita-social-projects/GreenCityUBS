@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static greencity.constants.ValidationConstant.SELECT_CORRECT_LANGUAGE;
+import static greencity.constant.ValidationConstant.SELECT_CORRECT_LANGUAGE;
 
 @Constraint(validatedBy = LanguageValidator.class)
 @Retention(RetentionPolicy.RUNTIME)

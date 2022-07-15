@@ -50,6 +50,7 @@ public final class ErrorMessage {
     public static final String LOCATION_DOESNT_FOUND = "Location does not found";
     public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
+    public static final String ORDER_ALREADY_PAID = "Current order is already paid";
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
     public static final String ORDER_HAS_NOT_VIOLATION = "Order has not violation";
     public static final String EVENTS_NOT_FOUND_EXCEPTION = "Events didn't find in order id: ";
@@ -83,6 +84,7 @@ public final class ErrorMessage {
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
+    public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
@@ -99,6 +101,9 @@ public final class ErrorMessage {
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
+    public static final String USE_ONLY_ENGLISH_LETTERS = "use only English letters";
+    public static final String USE_ONLY_UKRAINIAN_LETTERS = "use only Ukrainian letters";
+    public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
 
     /**

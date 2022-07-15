@@ -3,10 +3,7 @@ package greencity;
 import com.google.common.collect.Lists;
 import com.google.maps.model.*;
 import greencity.constant.AppConstant;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.*;
@@ -20,6 +17,7 @@ import greencity.dto.employee.*;
 import greencity.dto.location.*;
 import greencity.dto.notification.*;
 import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
@@ -339,7 +337,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Саперно-Слобідська")
                 .build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
@@ -2379,6 +2376,23 @@ public class ModelUtils {
             .build());
     }
 
+    public static List<Bag> getBag3list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(2000)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(2100)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")
@@ -2404,10 +2418,10 @@ public class ModelUtils {
 
     public static PaymentTableInfoDto getPaymentTableInfoDto() {
         return PaymentTableInfoDto.builder()
-            .paidAmount(100L)
+            .paidAmount(200L)
             .unPaidAmount(0L)
-            .paymentInfoDtos(List.of(PaymentInfoDto.builder().build()))
-            .overpayment(200L)
+            .paymentInfoDtos(List.of(getInfoPayment().setAmount(10L)))
+            .overpayment(800L)
             .build();
     }
 
@@ -2439,6 +2453,7 @@ public class ModelUtils {
             .id(1L)
             .pointsToUse(1)
             .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(200L)
@@ -2447,6 +2462,15 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
+            .build();
+    }
+
+    public static Order getOrderCountWithPaymentStatusPaid() {
+        return Order.builder()
+            .id(1L)
+            .pointsToUse(1)
+            .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .build();
     }
 
@@ -2543,6 +2567,7 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
+            .bagTranslations(List.of(getBagTranslation()))
             .build();
     }
 
@@ -3083,7 +3108,7 @@ public class ModelUtils {
                     .user(User.builder().id(1L).build())
                     .build())
                 .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
+            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
@@ -3360,20 +3385,13 @@ public class ModelUtils {
     }
 
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
-        LocationsDto locationsDto = LocationsDto.builder()
-            .locationId(1L)
-            .locationTranslationDtoList(getLocationTranslationDto())
-            .locationStatus("ACTIVE")
-            .latitude(100.0)
-            .longitude(100.0)
-            .build();
-        LocationInfoDto locationInfoDto = LocationInfoDto.builder()
-            .locationsDto(List.of(locationsDto))
-            .regionId(1L)
-            .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
-            .build();
+        Location location = getLocation();
         return GetTariffsInfoDto.builder()
             .cardId(1L)
+            .locationInfoDtos(List.of(LocationsDtos.builder()
+                .locationId(location.getId())
+                .nameEn(location.getNameEn())
+                .nameUk(location.getNameUk()).build()))
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
@@ -3411,7 +3429,8 @@ public class ModelUtils {
 
         CertificateDto certificateDto = CertificateDto.builder()
             .points(300)
-            .creationDate(LocalDate.now())
+            .dateOfUse(LocalDate.now())
+            .expirationDate(LocalDate.now())
             .code("200")
             .certificateStatus("ACTIVE")
             .build();
