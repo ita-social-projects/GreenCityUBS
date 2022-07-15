@@ -30,6 +30,8 @@ public final class ErrorMessage {
     public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
     public static final String BAD_ORDER_STATUS_REQUEST = "Incorrect order status: ";
+    public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
+    public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String CURRENT_PHONE_NUMBER_ALREADY_EXISTS = "Employee with this phone number already exists: ";
