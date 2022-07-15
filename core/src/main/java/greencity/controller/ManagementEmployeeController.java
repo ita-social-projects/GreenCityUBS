@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,7 +54,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeDto> saveEmployee(
@@ -78,7 +76,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @ApiPageable
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-employees")
     public ResponseEntity<Page<EmployeeDto>> getAllEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
@@ -99,7 +96,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @ApiPageable
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/getAll-active-employees")
     public ResponseEntity<Page<EmployeeDto>> getAllActiveEmployees(EmployeePage employeePage,
         EmployeeFilterCriteria employeeFilterCriteria) {
@@ -144,7 +140,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @DeleteMapping("/delete-employee/{id}")
     public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
@@ -165,7 +160,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping("/create-position")
     public ResponseEntity<PositionDto> createPosition(@Valid AddingPositionDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.create(dto));
@@ -186,7 +180,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEE', authentication)")
     @PutMapping("/update-position")
     public ResponseEntity<PositionDto> updatePosition(@RequestBody @Valid PositionDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(dto));
@@ -204,7 +197,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_EMPLOYEES_PAGE', authentication)")
     @GetMapping("/get-all-positions")
     public ResponseEntity<List<PositionDto>> getAllPositions() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getAllPositions());
@@ -222,7 +214,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @DeleteMapping("/delete-position/{id}")
     public ResponseEntity<HttpStatus> deletePosition(@PathVariable Long id) {
         employeeService.deletePosition(id);
@@ -243,7 +234,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEE', authentication)")
     @DeleteMapping("/delete-employee-image/{id}")
     public ResponseEntity<HttpStatus> deleteEmployeeImage(@PathVariable Long id) {
         employeeService.deleteEmployeeImage(id);

@@ -126,7 +126,7 @@ public interface UBSManagementService {
      * @return {@link OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
-    OrderStatusPageDto getOrderStatusData(Long orderId, String uuid);
+    OrderStatusPageDto getOrderStatusData(Long orderId);
 
     /**
      * Method that gets bags information.
@@ -212,7 +212,7 @@ public interface UBSManagementService {
      *
      * @author Bohdan Fedorkiv
      */
-    EmployeePositionDtoRequest getAllEmployeesByPosition(Long id, String email);
+    EmployeePositionDtoRequest getAllEmployeesByPosition(Long id);
 
     /**
      * Method that update EmployeePositionDtoResponse.
@@ -284,14 +284,4 @@ public interface UBSManagementService {
      * @author Pavlo Hural.
      */
     AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, Long orderId);
-
-    /**
-     * Method returns employee's access status to order.
-     *
-     * @param orderId {@link Long}.
-     * @param uuid    {@link String}.
-     *
-     * @author Hlazova Nataliia.
-     */
-    Boolean checkEmployeeForOrder(Long orderId, String uuid);
 }

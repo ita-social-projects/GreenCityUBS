@@ -49,17 +49,16 @@ public class UserTableRepo {
      */
 
     public Page<User> findAll(UserFilterCriteria userFilterCriteria, String column,
-        SortingOrder sortingOrder, CustomerPage page, List<Long> usId) {
+        SortingOrder sortingOrder, CustomerPage page) {
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> userRoot = criteriaQuery.from(User.class);
         userRoot.join(ORDERS, JoinType.INNER);
         criteriaQuery.groupBy(userRoot.get("id"));
         setOrder(column, sortingOrder, criteriaQuery, userRoot);
         if (userFilterCriteria != null) {
-            Predicate predicateWhere = getPredicateForWhereAnd(userFilterCriteria, userRoot);
-            Predicate predicateWhere2 = getPredicateForWhereOr(userRoot, usId);
+            Predicate predicateWhere = getPredicateForWhere(userFilterCriteria, userRoot);
             Predicate predicateHaving = getPredicateForHaving(userFilterCriteria, userRoot);
-            criteriaQuery.where(predicateWhere, predicateWhere2);
+            criteriaQuery.where(predicateWhere);
             criteriaQuery.having(predicateHaving);
         }
 
@@ -76,7 +75,7 @@ public class UserTableRepo {
         return new PageImpl<>(resultList, pageable, usersCount);
     }
 
-    private Predicate getPredicateForWhereAnd(UserFilterCriteria us, Root<User> userRoot) {
+    private Predicate getPredicateForWhere(UserFilterCriteria us, Root<User> userRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (nonNull(us.getUserRegistrationDate())) {
             predicateList.add(userRegistrationDateFiltering(us.getUserRegistrationDate(), userRoot));
@@ -88,12 +87,6 @@ public class UserTableRepo {
             predicateList.add(userBonusesFiltering(us.getNumberOfBonuses(), userRoot));
         }
         return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
-    }
-
-    private Predicate getPredicateForWhereOr(Root<User> userRoot, List<Long> usId) {
-        List<Predicate> predicateList = new ArrayList<>();
-        predicateList.addAll(userTariffsInfoFiltering(usId, userRoot));
-        return criteriaBuilder.or(predicateList.toArray(new Predicate[0]));
     }
 
     private void searchUsers(UserFilterCriteria us, Root<User> userRoot, List<Predicate> predicateList) {
@@ -184,14 +177,6 @@ public class UserTableRepo {
         } else {
             criteriaQuery.orderBy(criteriaBuilder.asc(sortBy));
         }
-    }
-
-    private List<Predicate> userTariffsInfoFiltering(List<Long> usId, Root<User> userRoot) {
-        List<Predicate> predicateList = new ArrayList<>();
-        for (Long id : usId) {
-            predicateList.add(criteriaBuilder.equal(userRoot.get("id"), id));
-        }
-        return predicateList;
     }
 
     private Predicate userRegistrationDateFiltering(String[] dates, Root<User> userRoot) {

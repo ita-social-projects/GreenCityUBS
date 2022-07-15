@@ -1,6 +1,7 @@
 package greencity.controller;
 
-import greencity.annotations.*;
+import greencity.annotations.ApiPageable;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
@@ -13,17 +14,17 @@ import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -62,14 +63,12 @@ public class AdminUbsController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
     @GetMapping("/usersAll")
     public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(CustomerPage page,
-        String columnName, Principal principal,
+        String columnName,
         @RequestParam SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria,
-                principal.getName()));
+            .body(valuesForUserTable.getAllFields(page, columnName, sortingOrder, userFilterCriteria));
     }
 
     /**
