@@ -1,29 +1,9 @@
 package greencity.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.EntityNotFoundException;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.courier.AddingReceivingStationDto;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.service.AddServiceDto;
@@ -36,13 +16,7 @@ import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
-import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -52,43 +26,23 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.CourierTranslationRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.ServiceTranslationRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.ubs.SuperAdminServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.*;
+
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.getAllTariffsInfoDto;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getCourierTranslation;
-import static greencity.ModelUtils.getCourierTranslationsDto;
-import static greencity.ModelUtils.getEnLanguage;
-import static greencity.ModelUtils.getLanguage;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getReceivingStationDto;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -613,7 +567,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    @Disabled
     void deleteReceivingStation() {
         ReceivingStation station = getReceivingStation();
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(station));
@@ -623,6 +576,7 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository, times(1)).findById(1L);
         verify(receivingStationRepository, times(1)).delete(station);
 
+        station.setEmployees(Set.of(getEmployee()));
         Exception thrown = assertThrows(UnprocessableEntityException.class,
             () -> superAdminService.deleteReceivingStation(1L));
 

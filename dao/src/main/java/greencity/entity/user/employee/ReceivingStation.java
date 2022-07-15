@@ -29,6 +29,9 @@ public class ReceivingStation {
     @ManyToMany(mappedBy = "receivingStationList", cascade = CascadeType.ALL)
     private Set<TariffsInfo> tariffsInfo;
 
+    @ManyToMany(mappedBy = "receivingStation")
+    private Set<Employee> employees;
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "receivingStation")
     private List<Order> orders;
 

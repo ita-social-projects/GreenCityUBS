@@ -52,7 +52,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -93,7 +92,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CERTIFICATES', authentication)")
+
     @GetMapping("/getAllCertificates")
     public ResponseEntity<PageableDto<CertificateDtoForSearching>> allCertificates(
         CertificatePage certificatePage,
@@ -116,7 +115,6 @@ public class ManagementOrderController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_CERTIFICATE', authentication)")
     @PostMapping("/addCertificate")
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
@@ -161,6 +159,7 @@ public class ManagementOrderController {
     })
 
     @GetMapping("/all-undelivered")
+    @PreAuthorize("@preAuthorizer.authoriseEmployee('Update user profile', authentication)")
     public ResponseEntity<List<GroupedOrderDto>> allUndeliveredCoords(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(coordinateService.getAllUndeliveredOrdersWithLiters());
     }
@@ -283,7 +282,6 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/bigOrderTable")
     public ResponseEntity<Page<BigOrderTableDTO>> getOrders(OrderPage page,
         OrderSearchCriteria criteria,
@@ -306,7 +304,6 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @PutMapping("/changeOrdersTableView")
     public ResponseEntity<CustomTableView> setCustomTable(@ApiIgnore @CurrentUserUuid String uuid,
         String titles) {
@@ -327,7 +324,6 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_BIG_ORDER_TABLE', authentication)")
     @GetMapping("/getOrdersViewParameters")
     public ResponseEntity<CustomTableViewDto> getCustomTableParameters(@ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -588,29 +584,9 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-data-for-order/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-        @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        @PathVariable(name = "id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderStatusData(orderId, uuid));
-    }
-
-    /**
-     * Controller to check current employee for order.
-     *
-     * @return {@link Boolean}.
-     * @author Hlazova Nataliia
-     */
-    @ApiOperation(value = "Controller to check current employee for order")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
-    @GetMapping("/check-employee-for-order/{id}")
-    public ResponseEntity<Boolean> checkEmployeeForOrderPage(
-        @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.checkEmployeeForOrder(orderId, uuid));
+            .body(ubsManagementService.getOrderStatusData(orderId));
     }
 
     /**
@@ -820,7 +796,7 @@ public class ManagementOrderController {
     }
 
     /**
-     * Controller for get employees depends on position.
+     * Controller for get employees depends from position.
      *
      * @return {EmployeePositionDtoRequest}.
      * @author Bohdan Fedorkiv
@@ -834,14 +810,13 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-employee-by-position/{id}")
-    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllEmployeesByPosition(orderId, uuid));
+            .body(ubsManagementService.getAllEmployeesByPosition(id));
     }
 
     /**
-     * Controller for update depends on position.
+     * Controller for update depends from position.
      *
      * @return {EmployeePositionDtoResponse}.
      * @author Bohdan Fedorkiv
