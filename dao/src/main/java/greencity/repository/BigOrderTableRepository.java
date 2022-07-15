@@ -1,25 +1,22 @@
 package greencity.repository;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
+import greencity.entity.order.BigOrderTableViews;
+import greencity.filters.OrderPage;
+import greencity.filters.OrderSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
-import greencity.entity.order.BigOrderTableViews;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Objects.nonNull;
 
@@ -122,9 +119,7 @@ public class BigOrderTableRepository {
 
     private void getPredicateByTariffsInfoId(List<Predicate> predicates, List<Long> tariffsInfoIds,
         Root<BigOrderTableViews> orderRoot) {
-        if (!CollectionUtils.isEmpty(tariffsInfoIds)) {
-            predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffs_info_id"));
-        }
+        predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffs_info_id"));
     }
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root) {
