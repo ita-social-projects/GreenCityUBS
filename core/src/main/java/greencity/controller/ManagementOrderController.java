@@ -665,7 +665,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/return-overpayment-as-bonuses-info") // tyt
+    @GetMapping("/return-overpayment-as-bonuses-info")
     public ResponseEntity<PaymentTableInfoDto> returnOverpaymentAsBonusesInfo(@RequestParam Long orderId,
         @RequestParam Long sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -711,7 +711,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PostMapping("/return-overpayment") // tyt
+    @PostMapping("/return-overpayment")
     public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
         @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
         @ApiIgnore @CurrentUserUuid String uuid) {
@@ -1017,7 +1017,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PostMapping(value = "/add-bonuses-user/{id}")
-    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId, // tyt
+    public ResponseEntity<AddBonusesToUserDto> addBonusesToUser(@PathVariable(name = "id") Long orderId,
         @RequestBody @Valid AddBonusesToUserDto addBonusesToUserDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.addBonusesToUser(addBonusesToUserDto, orderId));

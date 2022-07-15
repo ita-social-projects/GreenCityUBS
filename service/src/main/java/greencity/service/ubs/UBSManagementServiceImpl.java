@@ -110,7 +110,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Nazar Struk, Ostap Mykhailivskyi
      */
     @Override
-    public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) { // TYT
+    public PaymentTableInfoDto getPaymentInfo(long orderId, Long sumToPay) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long paidAmount = calculatePaidAmount(order);
@@ -149,7 +149,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public void returnOverpayment(Long orderId,
-        OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid) { // tyt
+        OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         Order order = orderRepository.findById(orderId)
@@ -188,7 +188,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @param currentUser   {@link User}.
      * @author Yuriy Bahlay.
      */
-    private void collectEventsAboutOverpayment(String commentStatus, Order order, User currentUser) { // tyt
+    private void collectEventsAboutOverpayment(String commentStatus, Order order, User currentUser) {
         if (commentStatus.equals(AppConstant.PAYMENT_REFUND)) {
             eventService.save(OrderHistory.RETURN_OVERPAYMENT_TO_CLIENT, currentUser.getRecipientName()
                 + "  " + currentUser.getRecipientSurname(), order);
@@ -209,10 +209,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Ostap Mykhailivskyi
      */
     @Override
-    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) { // tyt
+    public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
         Order order = orderRepository.getUserByOrderId(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-        Long overpayment = calculateOverpayment(order, sumToPay); // tyt
+        Long overpayment = calculateOverpayment(order, sumToPay);
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
         PaymentInfoDto payDto = PaymentInfoDto.builder().amount(overpayment)
             .settlementdate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).build();
@@ -330,7 +330,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    public OrderStatusPageDto getOrderStatusData(Long orderId) { // TYT
+    public OrderStatusPageDto getOrderStatusData(Long orderId) {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
@@ -355,7 +355,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .addressExportDetailsDto(addressDtoForAdminPage)
             .addressComment(address.getAddressComment()).bags(bagInfo)
             .orderFullPrice(setTotalPrice(prices))
-            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount()) // TYT
+            .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
             .orderExportedPrice(prices.getSumExported()).orderExportedDiscountedPrice(prices.getTotalSumExported())
             .amountOfBagsOrdered(order.getAmountOfBagsOrdered())
@@ -889,7 +889,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-            } else if (order.getOrderStatus() == OrderStatus.CANCELED && order.getPointsToUse() != 0) {
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED
+                && (order.getPointsToUse() != 0 || order.getCertificates().size() != 0)) {
                 notificationService.notifyBonusesFromCanceledOrder(order);
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
@@ -1131,7 +1132,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateOverpayment(Order order, Long sumToPay) { // tyt
+    private Long calculateOverpayment(Order order, Long sumToPay) {
         long paymentSum = order.getPayment().stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
             .map(payment -> payment.getAmount() / 100)
@@ -1169,7 +1170,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @return {@link Long }
      * @author Ostap Mykhailivskyi
      */
-    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) { // TYT
+    private Long calculateUnpaidAmount(Order order, Long sumToPay, Long paidAmount) {
         sumToPay =
             sumToPay - ((order.getCertificates().stream().map(Certificate::getPoints).reduce(Integer::sum).orElse(0))
                 + order.getPointsToUse());
@@ -1213,7 +1214,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         order.getPayment().forEach(p -> p.setPaymentStatus(PaymentStatus.PAYMENT_REFUNDED));
     }
 
-    private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order, // tyt
+    private void returnOverpaymentAsBonusesForStatusCancelled(User user, Order order,
         OverpaymentInfoRequestDto overpaymentInfoRequestDto) {
         user.setCurrentPoints((int) (user.getCurrentPoints() + overpaymentInfoRequestDto.getOverpayment()
             + overpaymentInfoRequestDto.getBonuses()));
@@ -1685,12 +1686,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto, // tyt
+    public AddBonusesToUserDto addBonusesToUser(AddBonusesToUserDto addBonusesToUserDto,
         Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue()); // tyt
+        Long overpayment = calculateOverpayment(order, setTotalPrice(prices).longValue());
         checkOverpayment(overpayment);
         User currentUser = order.getUser();
 
@@ -1705,7 +1706,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .paymentStatus(PaymentStatus.PAID)
             .build());
 
-        transferPointsToUser(order, currentUser, overpayment.intValue()); // tyt
+        transferPointsToUser(order, currentUser, overpayment.intValue());
 
         orderRepository.save(order);
         userRepository.save(currentUser);
@@ -1733,6 +1734,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .date(LocalDateTime.now())
                 .order(order)
                 .build());
-        notificationService.notifyBonuses(order, (long) points); // tyt
+        notificationService.notifyBonuses(order, (long) points);
     }
 }

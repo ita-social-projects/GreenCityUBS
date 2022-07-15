@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Hlazova-6" author="Hlazova Nataliia">
+        <update tableName="notification_templates">
+            <column name="title">Bonus points added</column>
+            <where>id=32</where>
+        </update>
+        <update tableName="notification_templates">
+            <column name="title">Bonus points added</column>
+            <where>id=30</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
