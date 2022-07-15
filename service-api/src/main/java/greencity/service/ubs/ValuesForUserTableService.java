@@ -15,5 +15,5 @@ public interface ValuesForUserTableService {
      * @author Stepan Tehlivets.
      */
     PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
-        SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria);
+        SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria, String email);
 }

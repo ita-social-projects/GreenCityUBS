@@ -6,6 +6,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -54,6 +55,8 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
     @Mock
+    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
+    @Mock
     private UserRepository userRepository;
     @Mock
     EventService eventService;
@@ -93,10 +96,10 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void getParametersForOrdersTest() {
+    void getParametersForOrdersExceptionTable3() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
-        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
 
         List<ReceivingStationDto> receivingStations = new ArrayList<>();
         List<Employee> employeeList = new ArrayList<>();
@@ -134,6 +137,56 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
+
+        assertThrows(EntityNotFoundException.class, () -> ordersAdminsPageService.getParametersForOrdersTable("1"));
+    }
+
+    @Test
+    void getParametersForOrdersTest() {
+
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation().setNameEng("en");
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+
+        List<ReceivingStationDto> receivingStations = new ArrayList<>();
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(ModelUtils.getEmployee());
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(2l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(2L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(2l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(3l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(3L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(3l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(4L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(4l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(5L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(5l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(6l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(7L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation2.setStatusId(7l)));
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
+
+        when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
+            .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
 
         when(superAdminService.getAllReceivingStations())
             .thenReturn(receivingStations);
