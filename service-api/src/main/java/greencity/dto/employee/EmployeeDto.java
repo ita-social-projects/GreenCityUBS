@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-@ToString
 public class EmployeeDto {
     @Min(1)
     private Long id;

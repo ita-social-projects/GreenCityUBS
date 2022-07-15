@@ -11,7 +11,7 @@ public class PreAuthorizer {
     /**
      * Method for authorising employee.
      */
-    public boolean hasAuthority(String authority, Authentication authentication) {
+    public boolean authoriseEmployee(String authority, Authentication authentication) {
         List<String> authorities = (List<String>) authentication.getCredentials();
         if (authorities.contains(authority)) {
             return true;

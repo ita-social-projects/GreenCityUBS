@@ -216,10 +216,9 @@ public class ClientController {
     })
     @GetMapping("/get-data-for-order-surcharge/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
-        @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        @PathVariable(name = "id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getOrderInfoForSurcharge(orderId, uuid));
+            .body(ubsClientService.getOrderInfoForSurcharge(orderId));
     }
 
     /**

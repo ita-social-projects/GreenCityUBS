@@ -3,7 +3,6 @@ package greencity.entity.order;
 import greencity.entity.enums.CourierLimit;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.user.User;
-import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import lombok.*;
 
@@ -37,9 +36,6 @@ public class TariffsInfo {
         joinColumns = @JoinColumn(name = "tariffs_info_id"),
         inverseJoinColumns = @JoinColumn(name = "receiving_station_id"))
     private Set<ReceivingStation> receivingStationList;
-
-    @ManyToMany(mappedBy = "tariffInfos")
-    private Set<Employee> employees;
 
     @Column
     @Enumerated(EnumType.STRING)
