@@ -29,6 +29,10 @@ public class BigOrderTableViews {
     private String settlement;
     private String district;
     private String address;
+    private String regionEn;
+    private String settlementEn;
+    private String districtEn;
+    private String addressEn;
     private String commentToAddressForClient;
     private String bagAmount;
     private Long totalOrderSum;
