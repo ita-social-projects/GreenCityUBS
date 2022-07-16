@@ -1,28 +1,94 @@
 package greencity.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityNotFoundException;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.liqpay.LiqPay;
+
 import greencity.ModelUtils;
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
-import greencity.dto.*;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.RegionDto;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.order.*;
+import greencity.dto.order.EventDto;
+import greencity.dto.order.FondyOrderResponse;
+import greencity.dto.order.MakeOrderAgainDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
+import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.*;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.*;
-import greencity.entity.order.*;
+import greencity.entity.enums.AddressStatus;
+import greencity.entity.enums.CertificateStatus;
+import greencity.entity.enums.CourierLimit;
+import greencity.entity.enums.LocationStatus;
+import greencity.entity.enums.OrderPaymentStatus;
+import greencity.entity.enums.OrderStatus;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.Courier;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.Service;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -32,36 +98,60 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LanguageRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.LiqPayService;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
+import static greencity.ModelUtils.getBagOrderDto;
+import static greencity.ModelUtils.getBagTranslation;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderClientDto;
+import static greencity.ModelUtils.getOrderDetails;
+import static greencity.ModelUtils.getOrderDoneByUser;
+import static greencity.ModelUtils.getOrderFondyClientDto;
+import static greencity.ModelUtils.getOrderPaymentDetailDto;
+import static greencity.ModelUtils.getOrderResponseDto;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getPayment;
+import static greencity.ModelUtils.getSuccessfulFondyResponse;
+import static greencity.ModelUtils.getTestUser;
+import static greencity.ModelUtils.getUBSuser;
+import static greencity.ModelUtils.getUserWithLastLocation;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -177,7 +267,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void testSaveToDB() throws InvocationTargetException, IllegalAccessException {
-
         User user = ModelUtils.getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
@@ -229,6 +318,28 @@ class UBSClientServiceImplTest {
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         assertNotNull(result);
 
+    }
+
+    @Test
+    void saveToDBFailPaidOrder() {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(1000);
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(5);
+        Order order = getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
     @Test
@@ -901,6 +1012,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    @Disabled
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = ModelUtils.getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
@@ -912,6 +1024,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    @Disabled
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
@@ -919,6 +1032,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    @Disabled
     void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
@@ -986,6 +1100,28 @@ class UBSClientServiceImplTest {
         verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
         verify(liqPayService).getCheckoutResponse(any());
+    }
+
+    @Test
+    void saveFullOrderFromLiqPayFailPaidOrder() {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(1000);
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(5);
+        Order order = getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
     @Test
@@ -1133,6 +1269,14 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void processOrderFondyClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.processOrderFondyClient(dto, "uuid"));
+    }
+
+    @Test
     void proccessOrderLiqpayClient() {
         Order order = ModelUtils.getOrderCount();
         HashMap<Integer, Integer> value = new HashMap<>();
@@ -1151,6 +1295,14 @@ class UBSClientServiceImplTest {
 
         verify(orderRepository, times(2)).findById(1L);
         verify(liqPayService).getCheckoutResponse(any());
+    }
+
+    @Test
+    void proccessOrderLiqpayClientFailPaidOrder() {
+        Order order = ModelUtils.getOrderCountWithPaymentStatusPaid();
+        OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
+        Assertions.assertThrows(BadRequestException.class, () -> ubsService.proccessOrderLiqpayClient(dto, "uuid"));
     }
 
     @Test

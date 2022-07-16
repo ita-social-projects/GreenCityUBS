@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.TariffsInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long> {
+public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>, JpaSpecificationExecutor<TariffsInfo> {
     /**
      * Method for getting TariffInfo.
      *

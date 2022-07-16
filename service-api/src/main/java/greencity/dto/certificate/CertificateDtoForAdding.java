@@ -25,4 +25,9 @@ public class CertificateDtoForAdding {
     @Min(0)
     @Max(1000)
     private int points;
+
+    @NotNull
+    @Min(0)
+    @Max(1000)
+    private int initialPointsValue;
 }

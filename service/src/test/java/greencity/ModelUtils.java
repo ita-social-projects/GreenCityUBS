@@ -3,10 +3,7 @@ package greencity;
 import com.google.common.collect.Lists;
 import com.google.maps.model.*;
 import greencity.constant.AppConstant;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.*;
@@ -20,6 +17,7 @@ import greencity.dto.employee.*;
 import greencity.dto.location.*;
 import greencity.dto.notification.*;
 import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
@@ -339,7 +337,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Саперно-Слобідська")
                 .build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .cancellationReason(CancellationReason.OUT_OF_CITY)
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
@@ -938,10 +935,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
             .build();
     }
 
@@ -957,10 +950,7 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .receivingStation(Set.of(ReceivingStation.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
+            .id(1L)
             .build();
     }
 
@@ -2440,7 +2430,8 @@ public class ModelUtils {
         return OrderPaymentStatusTranslation.builder()
             .id(1L)
             .orderPaymentStatusId(1L)
-            .translationValue("Abc")
+            .translationValue("Абв")
+            .translationsValueEng("Abc")
             .build();
     }
 
@@ -2456,6 +2447,7 @@ public class ModelUtils {
             .id(1L)
             .pointsToUse(1)
             .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
             .payment(Lists.newArrayList(Payment.builder()
                 .paymentId("1L")
                 .amount(200L)
@@ -2464,6 +2456,15 @@ public class ModelUtils {
                 .comment("avb")
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
+            .build();
+    }
+
+    public static Order getOrderCountWithPaymentStatusPaid() {
+        return Order.builder()
+            .id(1L)
+            .pointsToUse(1)
+            .counterOrderPaymentId(2L)
+            .orderPaymentStatus(OrderPaymentStatus.PAID)
             .build();
     }
 
@@ -2953,9 +2954,13 @@ public class ModelUtils {
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
             .setRegion("Київська область")
+            .setRegionEn("Kyivs'ka oblast")
             .setSettlement("Київ")
+            .setSettlementEn("Kyiv")
             .setDistrict("Шевченківський")
+            .setDistrictEn("Shevchenkivs'kyi")
             .setAddress("Січових Стрільців, 37, 1, 1")
+            .setAddressEn("Sichovyh Stril'tsiv, 37, 1, 1")
             .setCommentToAddressForClient("coment")
             .setBagAmount("3")
             .setTotalOrderSum(500L)
@@ -3001,10 +3006,11 @@ public class ModelUtils {
             .setSenderPhone("996755544")
             .setSenderEmail("motiy14146@ecofreon.com")
             .setViolationsAmount(1)
-            .setRegion("Київська область")
-            .setSettlement("Київ")
-            .setDistrict("Шевченківський")
-            .setAddress("Січових Стрільців, 37, 1, 1")
+            .setRegion(new SenderLocation().setUa("Київська область").setEn("Kyivs'ka oblast"))
+            .setSettlement(new SenderLocation().setUa("Київ").setEn("Kyiv"))
+            .setDistrict(new SenderLocation().setUa("Шевченківський").setEn("Shevchenkivs'kyi"))
+            .setAddress(
+                new SenderLocation().setUa("Січових Стрільців, 37, 1, 1").setEn("Sichovyh Stril'tsiv, 37, 1, 1"))
             .setCommentToAddressForClient("coment")
             .setBagsAmount("3")
             .setTotalOrderSum(500L)
@@ -3035,7 +3041,11 @@ public class ModelUtils {
             .setResponsibleCaller("")
             .setResponsibleDriver("")
             .setResponsibleLogicMan("")
-            .setResponsibleNavigator("");
+            .setResponsibleNavigator("")
+            .setRegion(new SenderLocation().setEn(null).setUa(null))
+            .setSettlement(new SenderLocation().setEn(null).setUa(null))
+            .setDistrict(new SenderLocation().setEn(null).setUa(null))
+            .setAddress(new SenderLocation().setEn(null).setUa(null));
     }
 
     public static BigOrderTableViews getBigOrderTableViewsByDateNullTest() {
@@ -3378,20 +3388,13 @@ public class ModelUtils {
     }
 
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
-        LocationsDto locationsDto = LocationsDto.builder()
-            .locationId(1L)
-            .locationTranslationDtoList(getLocationTranslationDto())
-            .locationStatus("ACTIVE")
-            .latitude(100.0)
-            .longitude(100.0)
-            .build();
-        LocationInfoDto locationInfoDto = LocationInfoDto.builder()
-            .locationsDto(List.of(locationsDto))
-            .regionId(1L)
-            .regionTranslationDtos(List.of(getSingleRegionTranslationDto()))
-            .build();
+        Location location = getLocation();
         return GetTariffsInfoDto.builder()
             .cardId(1L)
+            .locationInfoDtos(List.of(LocationsDtos.builder()
+                .locationId(location.getId())
+                .nameEn(location.getNameEn())
+                .nameUk(location.getNameUk()).build()))
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
                 .languageCode("ua")
@@ -3497,10 +3500,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(Collections.emptyList())
-            .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
-                .build()))
+//            .receivingStationList(Set.of(ReceivingStation.builder()
+//                .name("receivingStation")
+//                .createdBy(ModelUtils.createUser())
+//                .build()))
             .build();
     }
 
@@ -3525,10 +3528,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(List.of(ModelUtils.getOrder()))
-            .receivingStationList(Set.of(ReceivingStation.builder()
-                .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
-                .build()))
+//            .receivingStationList(Set.of(ReceivingStation.builder()
+//                .name("receivingStation")
+//                .createdBy(ModelUtils.createUser())
+//                .build()))
             .build();
     }
 

@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.user.Location;
+import greencity.entity.user.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -64,16 +65,12 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     List<Location> findAllByIdAndRegionId(@Param("locIds") List<Long> locIds, @Param("regionId") Long regionId);
 
     /**
-     * Method for finding location by its translations.
+     * Method for finding out if the location already exists in the specified
+     * region.
      *
-     * @param locationNameUk - Ukrainian translation
-     * @param locationNameEn - English translation
-     * @return Optional of {@link Location}
+     * @param nameUk Ukrainian translation.
+     * @param nameEn English translation.
+     * @return {@code true} if exists, {@code else} otherwise.
      */
-    @Query(nativeQuery = true,
-        value = "select * FROM locations as l "
-            + "WHERE l.name_en = :locationNameEn "
-            + "AND l.name_uk = :locationNameUk")
-    Optional<Location> findLocationByName(@Param("locationNameUk") String locationNameUk,
-        @Param("locationNameEn") String locationNameEn);
+    boolean existsByNameUkAndNameEnAndRegion(String nameUk, String nameEn, Region region);
 }

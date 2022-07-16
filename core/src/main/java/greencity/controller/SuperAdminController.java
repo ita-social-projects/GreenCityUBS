@@ -1,10 +1,35 @@
 package greencity.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.CreateCourierTranslationDto;
+import greencity.dto.courier.GetCourierTranslationsDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
@@ -13,20 +38,18 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
+import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @Validated
@@ -55,6 +78,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createTariffService")
     public ResponseEntity<AddServiceDto> createTariffService(
         @RequestBody AddServiceDto dto,
@@ -75,6 +99,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
     @GetMapping("/getTariffService")
     public ResponseEntity<List<GetTariffServiceDto>> createService() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService());
@@ -93,6 +118,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
@@ -113,6 +139,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
@@ -136,6 +163,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createService")
     public ResponseEntity<CreateServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
@@ -156,6 +184,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getService")
     public ResponseEntity<List<GetServiceDto>> getService() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService());
@@ -173,6 +202,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @DeleteMapping("/deleteService/{id}")
     public ResponseEntity<HttpStatus> deleteService(
         @Valid @PathVariable Long id) {
@@ -192,6 +222,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PutMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> editService(
         @Valid @PathVariable Long id,
@@ -212,6 +243,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getLocations")
     public ResponseEntity<List<LocationInfoDto>> getLocations() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllLocation());
@@ -231,6 +263,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_LOCATION', authentication)")
     @PostMapping("/addLocations")
     public ResponseEntity<HttpStatus> addLocation(
         @Valid @RequestBody List<LocationCreateDto> dto) {
@@ -251,6 +284,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
     @PatchMapping("/deactivateLocations/{id}")
     public ResponseEntity<HttpStatus> deactivateLocation(
         @PathVariable Long id) {
@@ -271,6 +305,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_LOCATION', authentication)")
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<HttpStatus> activeLocation(
         @PathVariable Long id) {
@@ -291,6 +326,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_COURIER', authentication)")
     @PostMapping("/createCourier")
     public ResponseEntity<CreateCourierDto> addService(
         @Valid @RequestBody CreateCourierDto dto,
@@ -312,6 +348,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
     @PutMapping("/update-courier")
     public ResponseEntity<CourierDto> updateCourier(@RequestBody @Valid CourierUpdateDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateCourier(dto));
@@ -329,6 +366,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getCouriers")
     public ResponseEntity<List<CourierDto>> getAllCouriers() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllCouriers());
@@ -346,6 +384,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
     @PatchMapping("/setLimitDescription/{courierId}")
     public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
         @PathVariable Long courierId, String limitDescription) {
@@ -400,6 +439,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
     @DeleteMapping("/courier/{id}")
     public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
         superAdminService.deleteCourier(id);
@@ -419,6 +459,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_RECEIVING_STATION', authentication)")
     @PostMapping("/create-receiving-station")
     public ResponseEntity<ReceivingStationDto> createReceivingStation(@Valid AddingReceivingStationDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
@@ -439,6 +480,7 @@ class SuperAdminController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_RECEIVING_STATION', authentication)")
     @PutMapping("/update-receiving-station")
     public ResponseEntity<ReceivingStationDto> updateReceivingStation(@RequestBody @Valid ReceivingStationDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.updateReceivingStation(dto));
@@ -455,6 +497,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/get-all-receiving-station")
     public ResponseEntity<List<ReceivingStationDto>> getAllReceivingStation() {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllReceivingStations());
@@ -471,6 +514,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_RECEIVING_STATION', authentication)")
     @DeleteMapping("/delete-receiving-station/{id}")
     public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
         superAdminService.deleteReceivingStation(id);
@@ -486,12 +530,14 @@ class SuperAdminController {
     @ApiOperation(value = "Get all info about tariffs.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/tariffs/all")
-    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo());
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
+    @GetMapping("/tariffs")
+    public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo(filterCriteria));
     }
 
     /**
@@ -507,6 +553,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/add-new-tariff")
     public ResponseEntity<AddNewTariffResponseDto> addNewTariff(@RequestBody @Valid AddNewTariffDto addNewTariffDto,
         @ApiIgnore @CurrentUserUuid String uuid) {
@@ -526,6 +573,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PatchMapping("/setLimitsByAmountOfBags/{tariffId}")
     public ResponseEntity<HttpStatus> setLimitsByAmountOfBags(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditAmountOfBagDto dto) {
@@ -545,6 +593,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PatchMapping("/setLimitsBySumOfOrder/{tariffId}")
     public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditPriceOfOrder dto) {
@@ -564,6 +613,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_PRICING_CARD', authentication)")
     @PutMapping("/deactivateTariff/{tariffId}")
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
@@ -581,6 +631,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
     @PostMapping("/locations/edit")
     public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
         superAdminService.editLocations(editLocationDtoList);
@@ -600,6 +651,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
     @PutMapping("tariffs/{id}/locations/change-status")
     public ResponseEntity changeLocationsInTariffStatus(@PathVariable Long id,
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
