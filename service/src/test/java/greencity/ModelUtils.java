@@ -1618,10 +1618,12 @@ public class ModelUtils {
             Payment.builder()
                 .id(1L)
                 .paymentStatus(PaymentStatus.PAID)
+                .amount(100L)
                 .build(),
             Payment.builder()
                 .id(2L)
                 .paymentStatus(PaymentStatus.PAID)
+                .amount(50L)
                 .build());
     }
 
@@ -3723,5 +3725,15 @@ public class ModelUtils {
 
     public static TariffsForLocationDto getTariffsForLocationDto() {
         return TariffsForLocationDto.builder().build();
+    }
+
+    public static CertificateDto createCertificateDto() {
+        return CertificateDto.builder()
+            .points(300)
+            .dateOfUse(LocalDate.now())
+            .expirationDate(LocalDate.now())
+            .code("200")
+            .certificateStatus("ACTIVE")
+            .build();
     }
 }
