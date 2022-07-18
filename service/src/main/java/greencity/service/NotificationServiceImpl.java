@@ -161,8 +161,8 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Long paidAmount = order.getPayment().stream()
-            .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
-                && !x.getPaymentStatus().equals(PaymentStatus.UNPAID))
+            .filter(payment -> !payment.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
+                && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
             .map(Payment::getAmount).reduce(0L, Long::sum);
 
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
