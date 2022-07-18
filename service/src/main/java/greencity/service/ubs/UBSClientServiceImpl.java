@@ -1575,9 +1575,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
-
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPay);
 
         return sumToPay;
     }
@@ -1690,7 +1688,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private int formCertificatesToBeSavedAndCalculateOrderSumClient(OrderFondyClientDto dto,
-        Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
         if (sumToPay != 0 && dto.getCertificates() != null) {
             Set<Certificate> certificates =
@@ -1700,7 +1697,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             }
             checkValidationCertificates(certificates, dto);
             for (Certificate temp : certificates) {
-                Certificate certificate = getCertificateForClient(orderCertificates, temp, order);
+                Certificate certificate = getCertificateForClient(temp, order);
                 sumToPay -= certificate.getPoints();
 
                 if (dontSendLinkToFondyIfClient(sumToPay)) {
@@ -1720,10 +1717,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private Certificate getCertificateForClient(Set<Certificate> orderCertificates, Certificate certificate,
+    private Certificate getCertificateForClient(Certificate certificate,
         Order order) {
         certificate.setOrder(order);
-        orderCertificates.add(certificate);
         certificate.setCertificateStatus(CertificateStatus.USED);
         certificate.setDateOfUse(LocalDate.now());
         return certificate;
@@ -1745,9 +1741,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Integer sumToPay = formBagsToBeSavedAndCalculateOrderSumClient(amountOfBagsOrderedMap);
         sumToPay = reduceOrderSumDueToUsedPoints(sumToPay, dto.getPointsToUse());
-
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, orderCertificates, order, sumToPay);
+        sumToPay = formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPay);
 
         currentUser.setCurrentPoints(currentUser.getCurrentPoints() - dto.getPointsToUse());
         userRepository.save(currentUser);
