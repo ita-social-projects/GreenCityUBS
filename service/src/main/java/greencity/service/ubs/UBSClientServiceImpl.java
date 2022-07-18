@@ -902,17 +902,14 @@ public class UBSClientServiceImpl implements UBSClientService {
      * @author Rusanovscaia Nadejda
      */
     @Override
-    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email) {
         Optional<UBSuser> optionalUbsUser = ubsUserRepository.findById(dtoUpdate.getRecipientId());
         if (optionalUbsUser.isEmpty()) {
             throw new UBSuserNotFoundException(RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST + dtoUpdate.getRecipientId());
         }
         UBSuser user = optionalUbsUser.get();
         ubsUserRepository.save(updateRecipientDataInOrder(user, dtoUpdate));
-        eventService.save(OrderHistory.CHANGED_SENDER, currentUser.getRecipientName()
-            + "  " + currentUser.getRecipientSurname(), optionalUbsUser.get().getOrders().get(0));
+        eventService.saveEvent(OrderHistory.CHANGED_SENDER, email, optionalUbsUser.get().getOrders().get(0));
         return UbsCustomersDto.builder()
             .name(user.getFirstName() + " " + user.getLastName())
             .email(user.getEmail())
@@ -1165,8 +1162,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public List<EventDto> getAllEventsForOrder(Long orderId, String uuid) {
-        String email = userRepository.findByUuid(uuid).getRecipientEmail();
+    public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
         Optional<Order> order = orderRepository.findById(orderId);
         checkAvailableOrderForEmployee(order.get(), email);
         if (order.isEmpty()) {

@@ -33,8 +33,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final UserRepository userRepository;
 
     @Override
-    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid) {
-        String email = userRepository.findByUuid(uuid).getRecipientEmail();
+    public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);

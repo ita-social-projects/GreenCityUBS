@@ -1,6 +1,11 @@
 package greencity.service.ubs;
 
 import greencity.entity.order.Order;
+import greencity.entity.user.employee.Employee;
+
+import javax.persistence.EntityNotFoundException;
+
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 
 public interface EventService {
     /**
@@ -21,4 +26,14 @@ public interface EventService {
      * @author Rostyslav Sikhovskiy.
      */
     String changesWithResponsibleEmployee(Long positionId, Boolean existedBefore);
+
+    /**
+     * Method save event with employee.
+     *
+     * @param name  {@link String};
+     * @param order {@link Order}
+     * @param email {@link String}.
+     * @author Hlazova Nataliia.
+     */
+    void saveEvent(String name, String email, Order order);
 }

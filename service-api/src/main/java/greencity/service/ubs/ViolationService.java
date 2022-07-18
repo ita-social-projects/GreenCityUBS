@@ -25,10 +25,10 @@ public interface ViolationService {
      *
      * @param add            {@link AddingViolationsToUserDto}
      * @param multipartFiles {@link MultipartFile}
-     * @param uuid           {@link String}.
+     * @param email          {@link String}.
      * @author Nazar Struk
      */
-    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid);
+    void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String email);
 
     /**
      * Method returns detailed information about user violation by order id.

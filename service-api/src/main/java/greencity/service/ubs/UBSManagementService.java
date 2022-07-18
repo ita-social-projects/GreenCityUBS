@@ -36,7 +36,7 @@ public interface UBSManagementService {
      *
      * @author Ostap Mykhailivskyi
      */
-    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String uuid);
+    void returnOverpayment(Long orderId, OverpaymentInfoRequestDto overpaymentInfoRequestDto, String email);
 
     /**
      * Method returns overpayment to user.
@@ -84,12 +84,12 @@ public interface UBSManagementService {
      * Method that update address.
      *
      * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id;
-     * @param uuid      {@link String}.
+     * @param email     {@link String}.
      * @return {@link OrderAddressDtoResponse} that contains address;
      * @author Mahdziak Orest
      */
     Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
-        String uuid);
+        String email);
 
     /**
      * Method for getting order detail by language and order id.
@@ -104,7 +104,7 @@ public interface UBSManagementService {
      * @author Mahdziak Orest
      */
     void setOrderDetail(Long orderId,
-        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String uuid);
+        Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email);
 
     /**
      * Method that count sum order.
@@ -126,7 +126,7 @@ public interface UBSManagementService {
      * @return {@link OrderStatusPageDto}.
      * @author Oleksandr Khomiakov
      */
-    OrderStatusPageDto getOrderStatusData(Long orderId, String uuid);
+    OrderStatusPageDto getOrderStatusData(Long orderId, String email);
 
     /**
      * Method that gets bags information.
@@ -147,7 +147,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String uuid);
+    OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String email);
 
     /**
      * Method that get export details by order id.
@@ -177,12 +177,12 @@ public interface UBSManagementService {
      * @param paymentRequestDto of {@link ManualPaymentRequestDto} manual payment
      *                          request dto;
      * @param image             {@link MultipartFile} image of receipt.
-     * @param uuid              {@link String}.
+     * @param email             {@link String}.
      * @return {@link ManualPaymentResponseDto }
      * @author Denys Kisliak
      */
     ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String uuid);
+        MultipartFile image, String email);
 
     /**
      * Method that deletes manual payment.
@@ -236,44 +236,44 @@ public interface UBSManagementService {
      * This is method which is save Admin comment.
      *
      * @param adminCommentDto {@link AdminCommentDto}.
-     * @param uuid            {@link String}.
+     * @param email           {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String uuid);
+    void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email);
 
     /**
      * This is method updates eco id from the shop for order.
      *
      * @param ecoNumberDto {@link EcoNumberDto}.
      * @param orderId      {@link Long}.
-     * @param uuid         {@link String}.
+     * @param email        {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String uuid);
+    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String email);
 
     /**
      * This is method which is updates admin page info for order.
      * 
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
      * @param orderId                 {@link Long}.
-     * @param currentUser             {@link String}.
+     * @param email                   {@link String}.
      *
      * @author Yuriy Bahlay.
      */
     void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String lang,
-        String currentUser);
+        String email);
 
     /**
      * This is method which is updates admin page info for all order.
      *
      * @param updateAllOrderPageDto {@link UpdateOrderPageAdminDto}.
-     * @param uuid                  {@link String} currentUser.
+     * @param email                 {@link String} currentUser.
      *
      * @author Max Boiarchuk.
      */
-    void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String uuid, String lang);
+    void updateAllOrderAdminPageInfo(UpdateAllOrderPageDto updateAllOrderPageDto, String email, String lang);
 
     /**
      * Method that add bonuses to user.
@@ -289,9 +289,9 @@ public interface UBSManagementService {
      * Method returns employee's access status to order.
      *
      * @param orderId {@link Long}.
-     * @param uuid    {@link String}.
+     * @param email   {@link String}.
      *
      * @author Hlazova Nataliia.
      */
-    Boolean checkEmployeeForOrder(Long orderId, String uuid);
+    Boolean checkEmployeeForOrder(Long orderId, String email);
 }

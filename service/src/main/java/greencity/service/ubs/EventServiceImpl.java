@@ -3,12 +3,15 @@ package greencity.service.ubs;
 import greencity.constant.OrderHistory;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.entity.user.employee.Employee;
 import greencity.exceptions.NotFoundException;
+import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +21,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
+    private final EmployeeRepository employeeRepository;
 
     /**
      * This is method which collect's information about order history lifecycle.
@@ -58,6 +63,22 @@ public class EventServiceImpl implements EventService {
     public String changesWithResponsibleEmployee(Long positionId, Boolean existedBefore) {
         EmployeePositionChanges employeePosition = EmployeePositionChanges.fromEmployeePosition(positionId);
         return existedBefore == Boolean.TRUE ? employeePosition.getUpdated() : employeePosition.getAssigned();
+    }
+
+    /**
+     * Method save event with employee.
+     *
+     * @param name  {@link String};
+     * @param order {@link Order}
+     * @param email {@link String}.
+     * @author Hlazova Nataliia.
+     */
+    @Override
+    public void saveEvent(String name, String email, Order order) {
+        Employee employee = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        save(name, employee.getFirstName()
+            + "  " + employee.getLastName(), order);
     }
 
     @RequiredArgsConstructor

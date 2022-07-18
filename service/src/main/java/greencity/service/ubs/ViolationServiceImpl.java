@@ -9,6 +9,7 @@ import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
+import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
@@ -78,15 +79,13 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String uuid) {
+    public void addUserViolation(AddingViolationsToUserDto add, MultipartFile[] multipartFiles, String email) {
         Order order = orderRepository.findById(add.getOrderID()).orElseThrow(() -> new NotFoundException(
             ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        checkAvailableOrderForEmployee(order.getId(), currentUser.getRecipientEmail());
+        checkAvailableOrderForEmployee(order.getId(), email);
         if (violationRepository.findByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
-            Violation violation = violationBuilder(add, order, currentUser);
+            Violation violation = violationBuilder(add, order, user);
             if (multipartFiles.length > 0) {
                 List<String> images = new LinkedList<>();
                 setImages(multipartFiles, images);
@@ -95,8 +94,7 @@ public class ViolationServiceImpl implements ViolationService {
             violationRepository.save(violation);
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.ADD_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), order);
+            eventService.saveEvent(OrderHistory.ADD_VIOLATION, email, order);
             notificationService.notifyAddViolation(order.getId());
         } else {
             throw new NotFoundException(ORDER_ALREADY_HAS_VIOLATION);
@@ -174,8 +172,8 @@ public class ViolationServiceImpl implements ViolationService {
             User user = violationOptional.get().getOrder().getUser();
             user.setViolations(userRepository.countTotalUsersViolations(user.getId()));
             userRepository.save(user);
-            eventService.save(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientName()
-                + "  " + currentUser.getRecipientSurname(), violationOptional.get().getOrder());
+            eventService.saveEvent(OrderHistory.DELETE_VIOLATION, currentUser.getRecipientEmail(),
+                violationOptional.get().getOrder());
         } else {
             throw new NotFoundException(VIOLATION_DOES_NOT_EXIST);
         }
@@ -189,8 +187,7 @@ public class ViolationServiceImpl implements ViolationService {
             .orElseThrow(() -> new NotFoundException(ORDER_HAS_NOT_VIOLATION));
         updateViolation(violation, add, multipartFiles);
         violationRepository.save(violation);
-        eventService.save(OrderHistory.CHANGES_VIOLATION,
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), violation.getOrder());
+        eventService.saveEvent(OrderHistory.CHANGES_VIOLATION, currentUser.getRecipientEmail(), violation.getOrder());
     }
 
     private void updateViolation(Violation violation, UpdateViolationToUserDto add, MultipartFile[] multipartFiles) {

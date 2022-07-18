@@ -15,7 +15,7 @@ public interface BigOrderTableServiceView {
      * @param searchCriteria used to formed filtering and searching
      * @return {@link BigOrderTableDTO}
      */
-    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String uuid);
+    Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email);
 
     /**
      * Method save or update view of Orders table.
