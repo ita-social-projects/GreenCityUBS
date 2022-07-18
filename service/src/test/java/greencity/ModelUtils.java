@@ -1956,6 +1956,7 @@ public class ModelUtils {
         return Order.builder().id(45L).user(User.builder().id(42L).build())
             .confirmedQuantity(new HashMap<>())
             .exportedQuantity(new HashMap<>())
+            .amountOfBagsOrdered(new HashMap<>())
             .orderStatus(OrderStatus.ADJUSTMENT)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .orderDate(LocalDateTime.now())
