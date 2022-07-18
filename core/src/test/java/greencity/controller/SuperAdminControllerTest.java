@@ -16,6 +16,7 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
+import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -287,9 +288,10 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String result = objectMapper.writeValueAsString(getTariffsInfoDto);
 
-        Mockito.when(superAdminService.getAllTariffsInfo()).thenReturn(List.of(ModelUtils.getAllTariffsInfoDto()));
+        Mockito.when(superAdminService.getAllTariffsInfo(TariffsInfoFilterCriteria.builder().build()))
+            .thenReturn(List.of(getTariffsInfoDto));
 
-        mockMvc.perform(get(ubsLink + "/tariffs/all")
+        mockMvc.perform(get(ubsLink + "/tariffs")
             .content(result)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());

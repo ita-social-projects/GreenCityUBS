@@ -117,7 +117,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
-              key: JAWSDB-URL-UBS
+              key: {{ if eq .Values.environment "prod" }}JAWSDB-URL-UBS{{ else }}JAWSDB-URL-UBS-TEST{{ end }}
 
         - name: JDBC_LOB
           valueFrom:
