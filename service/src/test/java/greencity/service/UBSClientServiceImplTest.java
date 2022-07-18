@@ -121,6 +121,7 @@ import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 
+import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -134,24 +135,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_REQUEST;
-import static greencity.ModelUtils.getBagOrderDto;
-import static greencity.ModelUtils.getBagTranslation;
-import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderClientDto;
-import static greencity.ModelUtils.getOrderDetails;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderFondyClientDto;
-import static greencity.ModelUtils.getOrderPaymentDetailDto;
-import static greencity.ModelUtils.getOrderResponseDto;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getSuccessfulFondyResponse;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUBSuser;
-import static greencity.ModelUtils.getUserWithLastLocation;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -1239,12 +1222,12 @@ class UBSClientServiceImplTest {
         order.setPointsToUse(100);
         order.setSumTotalAmountWithoutDiscounts(1000L);
         order.setCertificates(Set.of(getCertificate()));
+        order.setPayment(TEST_PAYMENT_LIST);
         User user = ModelUtils.getUser();
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
 
-        Bag bag = ModelUtils.bagDtoClient();
         OrderFondyClientDto dto = ModelUtils.getOrderFondyClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -1254,12 +1237,16 @@ class UBSClientServiceImplTest {
             }
         }
 
+        Certificate certificate = ModelUtils.getCertificate();
+        CertificateDto certificateDto = ModelUtils.createCertificateDto();
+
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.ofNullable(user));
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
+        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
 
         ubsService.processOrderFondyClient(dto, "uuid");
 
