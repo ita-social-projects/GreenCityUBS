@@ -141,5 +141,6 @@
     <include file="db/changelog/logs/ch-add-big_order_table-view-Oleg-Postolovskyi.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-add-table-tariff_infos_receiving_employee_mapping-Hlazova.xml"/>
+    <include file="db/changelog/logs/ch-update-into-notification-templates-Hlazova.xml"/>
 </databaseChangeLog>
 

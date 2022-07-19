@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
 import static greencity.entity.enums.NotificationReceiverType.SITE;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -160,7 +161,8 @@ public class NotificationServiceImpl implements NotificationService {
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Long paidAmount = order.getPayment().stream()
-            .filter(x -> !x.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED))
+            .filter(payment -> !payment.getPaymentStatus().equals(PaymentStatus.PAYMENT_REFUNDED)
+                && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
             .map(Payment::getAmount).reduce(0L, Long::sum);
 
         List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
@@ -207,7 +209,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Set<NotificationParameter> parameters = new HashSet<>();
 
-        Integer paidBags = order.getConfirmedQuantity().values().stream()
+        Integer paidBags = order.getAmountOfBagsOrdered().values().stream()
             .reduce(0, Integer::sum);
         Integer exportedBags = order.getExportedQuantity().values().stream()
             .reduce(0, Integer::sum);
@@ -227,7 +229,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyBonusesFromCanceledOrder(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
-
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
         parameters.add(NotificationParameter.builder().key("returnedPayment")
             .value(String.valueOf(order.getPointsToUse())).build());
 
