@@ -14,14 +14,8 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.user.User;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.EmployeeOrderPosition;
-import greencity.entity.user.employee.Position;
-import greencity.entity.user.employee.ReceivingStation;
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
+import greencity.entity.user.employee.*;
+import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
@@ -174,12 +168,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     @Override
-    public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
+    public ChangeOrderResponseDTO chooseOrdersDataSwitcher(String email,
         RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         String columnName = requestToChangeOrdersDataDTO.getColumnName();
         String value = requestToChangeOrdersDataDTO.getNewValue();
         List<Long> ordersId = requestToChangeOrdersDataDTO.getOrderId();
-        Long employeeId = employeeRepository.findByEmail(userRepository.findByUuid(userUuid).getRecipientEmail())
+        Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         switch (columnName) {
             case ORDER_STATUS:
@@ -192,7 +186,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
-                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, userUuid));
+                return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
         }
     }
 
@@ -431,9 +425,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position,
-        String uuid) {
-        final User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        String email) {
         Employee existedEmployee = employeeRepository.findById(Long.parseLong(employee))
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         Position existedPosition = positionRepository.findById(position)
@@ -466,8 +458,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
-                eventService.save(historyChanges,
-                    currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), existedOrder);
+                eventService.saveEvent(historyChanges, email, existedOrder);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }

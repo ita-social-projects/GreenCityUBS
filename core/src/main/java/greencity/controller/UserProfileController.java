@@ -39,14 +39,14 @@ public class UserProfileController {
      */
     @ApiOperation(value = "Update user profile")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = UserProfileDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserProfileDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PutMapping("/user/update")
     public ResponseEntity<UserProfileUpdateDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateProfileData(userUuid, userProfileUpdateDto));
     }
 

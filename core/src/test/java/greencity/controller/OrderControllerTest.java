@@ -248,15 +248,12 @@ class OrderControllerTest {
 
     @Test
     void testGetOrderHistoryByOrderId() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        when(ubsClientService.getAllEventsForOrder(1L, "35467585763t4sfgchjfuyetf"))
-            .thenReturn(ModelUtils.getListEventsDTOS());
         mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L)
             .principal(principal))
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
-            .getAllEventsForOrder(1L, "35467585763t4sfgchjfuyetf");
+            .getAllEventsForOrder(1L, "test@gmail.com");
     }
 
     @Test

@@ -90,8 +90,8 @@ public interface OrdersAdminsPageService {
      * @param employee of {@link String}
      * @param ordersId of {@link List}
      * @param position of {@link Long}
-     * @param uuid     of {@link String}
+     * @param email    of {@link String}
      * @author Liubomyr Pater
      */
-    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, String uuid);
+    List<Long> responsibleEmployee(List<Long> ordersId, String employee, Long position, String email);
 }

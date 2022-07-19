@@ -69,6 +69,8 @@ class ManagementOrderControllerTest {
     @Mock
     BigOrderTableServiceView bigOrderTableServiceView;
 
+    private final Principal principal = getUuid();
+
     public static final String contentForaddingcontroller = "{\n"
         + " \"code\": \"1111-2222\",\n" +
         " \"monthCount\": 8,\n" +
@@ -102,8 +104,6 @@ class ManagementOrderControllerTest {
         + "],\n"
         + "\"orderId\": 8\n"
         + "}";
-
-    private Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
@@ -156,6 +156,7 @@ class ManagementOrderControllerTest {
     void updateAddress() throws Exception {
         this.mockMvc.perform(put(ubsLink + "/update-address")
             .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal)
             .content(contentForUpdatingController))
             .andExpect(status().isCreated());
     }
@@ -238,14 +239,16 @@ class ManagementOrderControllerTest {
 
     @Test
     void getDataForOrderStatusPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L));
-        verify(ubsManagementService).getOrderStatusData(1L, null);
+        this.mockMvc.perform(get(ubsLink + "/get-data-for-order/{id}", 1L)
+            .principal(principal));
+        verify(ubsManagementService).getOrderStatusData(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
     void checkEmployeeForOrderPageTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/check-employee-for-order/{id}", 1L));
-        verify(ubsManagementService).checkEmployeeForOrder(1L, null);
+        this.mockMvc.perform(get(ubsLink + "/check-employee-for-order/{id}", 1L)
+            .principal(principal));
+        verify(ubsManagementService).checkEmployeeForOrder(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -312,7 +315,8 @@ class ManagementOrderControllerTest {
 
     @Test
     void getAllEmployeeByPositionTest() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/get-all-employee-by-position" + "/{id}", 1L))
+        this.mockMvc.perform(get(ubsLink + "/get-all-employee-by-position" + "/{id}", 1L)
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
@@ -353,6 +357,7 @@ class ManagementOrderControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post(ubsLink + "/save-admin-comment", 1L)
             .content(writeValueAsString)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
@@ -365,6 +370,7 @@ class ManagementOrderControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put(ubsLink + "/update-eco-store{id}", 1L)
             .content(writeValueAsString)
+            .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
     }
@@ -466,7 +472,8 @@ class ManagementOrderControllerTest {
 
     @Test
     void getOrders() throws Exception {
-        this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1"))
+        this.mockMvc.perform(get(ubsLink + "/bigOrderTable", "uuid1")
+            .principal(principal))
             .andExpect(status().isOk());
     }
 
