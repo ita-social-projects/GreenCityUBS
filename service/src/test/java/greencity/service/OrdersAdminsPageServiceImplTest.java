@@ -13,7 +13,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.OrdersAdminsPageServiceImpl;
@@ -290,13 +289,12 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void responsibleEmployeeWithExistedBeforeTest() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(positionRepository.findById(1l)).thenReturn(position);
         when(orderRepository.findById(1L)).thenReturn(order);
@@ -304,9 +302,8 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(Boolean.TRUE);
         when(eventService.changesWithResponsibleEmployee(1L, Boolean.TRUE)).thenReturn("Some changes");
 
-        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, uuid);
+        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, email);
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
         verify(employeeOrderPositionRepository).existsByOrderAndPosition(order.get(), position.get());
@@ -315,13 +312,12 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void responsibleEmployeeWithoutExistedBeforeTest() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(positionRepository.findById(1l)).thenReturn(position);
         when(orderRepository.findById(1L)).thenReturn(order);
@@ -336,9 +332,8 @@ class OrdersAdminsPageServiceImplTest {
                 .build())));
         when(eventService.changesWithResponsibleEmployee(1L, Boolean.FALSE)).thenReturn("Some changes");
 
-        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, uuid);
+        ordersAdminsPageService.responsibleEmployee(List.of(1l), "1", 1l, email);
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
         verify(employeeOrderPositionRepository).existsByOrderAndPosition(order.get(), position.get());
@@ -348,22 +343,20 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void responsibleEmployeeThrowsUserNotFoundException() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         List<Long> ordersId = List.of(1l);
 
-        assertThrows(UserNotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
+        assertThrows(NotFoundException.class,
+            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, email));
     }
 
     @Test
     void responsibleEmployeeThrowsEntityNotFoundException() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         List<Long> ordersId = List.of(1l);
-        Optional<User> user = Optional.of(ModelUtils.getUser());
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
 
         assertThrows(NotFoundException.class,
-            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid));
+            () -> ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, email));
     }
 
     @Test
@@ -373,7 +366,6 @@ class OrdersAdminsPageServiceImplTest {
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
 
         assertThrows(NotFoundException.class,
@@ -382,48 +374,44 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void responsibleEmployeeCatchException() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         List<Long> ordersId = List.of(1l);
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(positionRepository.findById(1l)).thenReturn(position);
 
-        ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, uuid);
+        ordersAdminsPageService.responsibleEmployee(ordersId, "1", 1L, email);
 
-        verify(userRepository).findUserByUuid(uuid);
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
     }
 
     @Test
     void chooseOrdersDataSwitcherTest() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<User> user = Optional.of(ModelUtils.getUser());
 
         when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
-        when(userRepository.findByUuid(uuid)).thenReturn(user.get());
-        when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
+        when(employeeRepository.findByEmail(email)).thenReturn(employee);
 
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
         dto.setNewValue("2022-12-12");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("timeOfExport");
         dto.setNewValue("00:00-00:30");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("receivingStation");
         dto.setNewValue("1");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
 
-        verify(userRepository, atLeast(1)).findByUuid(uuid);
         verify(receivingStationRepository, atLeast(1)).getOne(1L);
-        verify(employeeRepository, atLeast(1)).findByEmail(user.get().getRecipientEmail());
+        verify(employeeRepository, atLeast(1)).findByEmail(email);
     }
 
     @Test
@@ -439,14 +427,13 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
-        String uuid = "uuid";
+        String email = "test@gmail.com";
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
         Optional<User> user = Optional.of(ModelUtils.getUser());
         Optional<Position> position = Optional.of(ModelUtils.getPosition());
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
-        when(userRepository.findUserByUuid(uuid)).thenReturn(user);
         when(employeeRepository.findById(1L)).thenReturn(employee);
         when(orderRepository.findById(1L)).thenReturn(order);
         when(positionRepository.findById(1l)).thenReturn(position);
@@ -462,13 +449,12 @@ class OrdersAdminsPageServiceImplTest {
                 .build())));
         when(eventService.changesWithResponsibleEmployee(1L, Boolean.FALSE)).thenReturn("Some changes");
 
-        when(userRepository.findByUuid(uuid)).thenReturn(user.get());
-        when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
+        when(employeeRepository.findByEmail(email)).thenReturn(employee);
         dto.setColumnName("responsibleManager");
-        ordersAdminsPageService.chooseOrdersDataSwitcher(uuid, dto);
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
 
-        verify(userRepository, atLeast(1)).findByUuid(uuid);
-        verify(userRepository, atLeast(1)).findUserByUuid(uuid);
+//        verify(userRepository, atLeast(1)).findByUuid(uuid);
+//        verify(userRepository, atLeast(1)).findUserByUuid(uuid);
         verify(employeeRepository, atLeast(1)).findById(1L);
         verify(orderRepository, atLeast(1)).findById(1L);
         verify(employeeOrderPositionRepository, atLeast(1)).existsByOrderAndPosition(order.get(), position.get());

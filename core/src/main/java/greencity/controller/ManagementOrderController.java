@@ -262,8 +262,8 @@ public class ManagementOrderController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @RequestPart(required = false) @Nullable MultipartFile[] files,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        violationService.addUserViolation(add, files, uuid);
+        Principal principal) {
+        violationService.addUserViolation(add, files, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -284,9 +284,9 @@ public class ManagementOrderController {
     @GetMapping("/bigOrderTable")
     public ResponseEntity<Page<BigOrderTableDTO>> getOrders(OrderPage page,
         OrderSearchCriteria criteria,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bigOrderTableService.getOrders(page, criteria, uuid));
+            .body(bigOrderTableService.getOrders(page, criteria, principal.getName()));
     }
 
     /**
@@ -369,9 +369,9 @@ public class ManagementOrderController {
     @PutMapping("/update-address")
     public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
         @Valid @RequestBody OrderAddressExportDetailsDtoUpdate dto, Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateAddress(dto, orderId, uuid));
+            .body(ubsManagementService.updateAddress(dto, orderId, principal.getName()));
     }
 
     /**
@@ -523,9 +523,9 @@ public class ManagementOrderController {
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
         @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderDetailStatus(id, dto, uuid));
+            .body(ubsManagementService.updateOrderDetailStatus(id, dto, principal.getName()));
     }
 
     /**
@@ -586,9 +586,9 @@ public class ManagementOrderController {
     @GetMapping("/get-data-for-order/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
         @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderStatusData(orderId, uuid));
+            .body(ubsManagementService.getOrderStatusData(orderId, principal.getName()));
     }
 
     /**
@@ -605,9 +605,9 @@ public class ManagementOrderController {
     @GetMapping("/check-employee-for-order/{id}")
     public ResponseEntity<Boolean> checkEmployeeForOrderPage(
         @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.checkEmployeeForOrder(orderId, uuid));
+            .body(ubsManagementService.checkEmployeeForOrder(orderId, principal.getName()));
     }
 
     /**
@@ -627,9 +627,9 @@ public class ManagementOrderController {
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
         @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoUpdate dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.updateOrderExportDetails(id, dto, uuid));
+            .body(ubsManagementService.updateOrderExportDetails(id, dto, principal.getName()));
     }
 
     /**
@@ -738,8 +738,8 @@ public class ManagementOrderController {
     @PostMapping("/return-overpayment")
     public ResponseEntity<HttpStatus> returnOverpayment(@RequestParam Long orderId,
         @RequestBody OverpaymentInfoRequestDto overpaymentInfoRequestDto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, uuid);
+        Principal principal) {
+        ubsManagementService.returnOverpayment(orderId, overpaymentInfoRequestDto, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -764,9 +764,9 @@ public class ManagementOrderController {
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) MultipartFile image, @ApiIgnore @CurrentUserUuid String uuid) {
+        @RequestPart(required = false) MultipartFile image, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, uuid));
+            .body(ubsManagementService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
     }
 
     /**
@@ -832,9 +832,9 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-all-employee-by-position/{id}")
     public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
+        Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getAllEmployeesByPosition(orderId, uuid));
+            .body(ubsManagementService.getAllEmployeesByPosition(orderId, principal.getName()));
     }
 
     /**
@@ -931,7 +931,6 @@ public class ManagementOrderController {
      * Controller for saving Admin comment.
      *
      * @param adminCommentDto {@link AdminCommentDto}.
-     * @param uuid            {@link String}.
      * @author Bahlay Yuriy.
      */
     @ApiOperation(value = "Save admin comment")
@@ -946,8 +945,8 @@ public class ManagementOrderController {
     @PostMapping("/save-admin-comment")
     public ResponseEntity<HttpStatus> saveAdminCommentToOrder(
         @RequestBody @Valid AdminCommentDto adminCommentDto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.saveAdminCommentToOrder(adminCommentDto, uuid);
+        Principal principal) {
+        ubsManagementService.saveAdminCommentToOrder(adminCommentDto, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -955,7 +954,6 @@ public class ManagementOrderController {
      * Controller for updating Id From eco-store for order.
      * 
      * @param ecoNumberDto {@link EcoNumberDto}.
-     * @param uuid         {@link String}.
      * @author Bahlay Yuriy.
      */
     @ApiOperation(value = "update eco-store id for order")
@@ -970,8 +968,8 @@ public class ManagementOrderController {
     @PutMapping("/update-eco-store{id}")
     public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
         @RequestBody @Valid EcoNumberDto ecoNumberDto, @PathVariable(name = "id") Long orderId,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, uuid);
+        Principal principal) {
+        ubsManagementService.updateEcoNumberForOrder(ecoNumberDto, orderId, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -980,7 +978,6 @@ public class ManagementOrderController {
      *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
      * @param orderId            {@link Long}.
-     * @param uuid               {@link String}.
      *
      * @author Bahlay Yuriy.
      */
@@ -996,8 +993,8 @@ public class ManagementOrderController {
     @PatchMapping("/update-order-page-admin-info/{id}")
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
-        @RequestParam String lang, @ApiIgnore @CurrentUserUuid String uuid) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, uuid);
+        @RequestParam String lang, Principal principal) {
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -1005,7 +1002,6 @@ public class ManagementOrderController {
      * Controller for updating all order admin page info.
      *
      * @param updateAllOrderPageDto {@link UpdateAllOrderPageDto}.
-     * @param uuid                  {@link String} currentUser.
      * @param lang                  {@link String} language
      * @author Max Boiarchuk.
      */
@@ -1020,9 +1016,9 @@ public class ManagementOrderController {
     })
     @PutMapping("/all-order-page-admin-info")
     public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
-        @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, @ApiIgnore @CurrentUserUuid String uuid,
+        @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, Principal principal,
         @RequestParam String lang) {
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, uuid, lang);
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, principal.getName(), lang);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

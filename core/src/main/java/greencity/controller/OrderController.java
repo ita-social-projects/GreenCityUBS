@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -283,8 +284,7 @@ public class OrderController {
     /**
      * Controller gets info about events history from,order bu order id.
      *
-     * @param id   {@link Long}.
-     * @param uuid current {@link User}'s uuid.
+     * @param id {@link Long}.
      * @return {@link HttpStatus} - http status.
      * @author Yuriy Bahlay.
      */
@@ -299,8 +299,8 @@ public class OrderController {
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
         @Valid @PathVariable("orderId") Long id,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, uuid));
+        Principal principal) {
+        return ResponseEntity.ok().body(ubsClientService.getAllEventsForOrder(id, principal.getName()));
     }
 
     /**

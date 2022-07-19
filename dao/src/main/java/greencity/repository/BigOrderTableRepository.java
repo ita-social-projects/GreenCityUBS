@@ -119,7 +119,7 @@ public class BigOrderTableRepository {
 
     private void getPredicateByTariffsInfoId(List<Predicate> predicates, List<Long> tariffsInfoIds,
         Root<BigOrderTableViews> orderRoot) {
-        predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffs_info_id"));
+        predicates.add(criteriaPredicate.filter(tariffsInfoIds, orderRoot, "tariffsInfoId"));
     }
 
     private void sort(OrderPage orderPage, CriteriaQuery<BigOrderTableViews> cq, Root<BigOrderTableViews> root) {

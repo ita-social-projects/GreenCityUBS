@@ -176,7 +176,7 @@ public interface UBSClientService {
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
-    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String uuid);
+    UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String email);
 
     /**
      * Method that update user.
@@ -245,11 +245,11 @@ public interface UBSClientService {
      * Methods for finding all events for Order.
      *
      * @param orderId {@link Long} id.
-     * @param uuid    current {@link User}'s uuid;
+     * @param email   {@link String};
      * @return {@link List} that contains list of EventsDTOS.
      * @author Yuriy Bahlay.
      */
-    List<EventDto> getAllEventsForOrder(Long orderId, String uuid);
+    List<EventDto> getAllEventsForOrder(Long orderId, String email);
 
     /**
      * Methods for converting UserProfileDTO to PersonalDataDTO.
