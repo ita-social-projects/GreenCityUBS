@@ -954,6 +954,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orderStatus("created")
             .currency("UAH")
             .paymentStatus(PaymentStatus.UNPAID)
+            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .order(order).build();
 
         if (order.getPayment() == null) {

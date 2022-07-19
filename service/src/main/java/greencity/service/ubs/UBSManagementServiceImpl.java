@@ -893,7 +893,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     OrderHistory.ORDER_NOT_TAKEN_OUT + "  " + order.getComment() + "  "
                         + order.getImageReasonNotTakingBags(),
                     currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), order);
-            } else if (order.getOrderStatus() == OrderStatus.CANCELED && order.getPointsToUse() != 0) {
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED
+                && (order.getPointsToUse() != 0 || order.getCertificates().isEmpty())) {
                 notificationService.notifyBonusesFromCanceledOrder(order);
                 returnAllPointsFromOrder(order);
                 order.setCancellationComment(dto.getCancellationComment());
@@ -1337,7 +1338,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
         User currentUser) {
         Payment payment = Payment.builder()
-            .settlementDate(paymentRequestDto.getSettlementdate())
+            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
             .paymentStatus(PaymentStatus.PAID)
             .paymentId(paymentRequestDto.getPaymentId())
@@ -1796,7 +1797,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .date(LocalDateTime.now())
                 .order(order)
                 .build());
-
         notificationService.notifyBonuses(order, (long) points);
     }
 }
