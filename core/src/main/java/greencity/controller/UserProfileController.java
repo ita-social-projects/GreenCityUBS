@@ -46,7 +46,7 @@ public class UserProfileController {
     @PutMapping("/user/update")
     public ResponseEntity<UserProfileUpdateDto> updateUserData(@ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.updateProfileData(userUuid, userProfileUpdateDto));
     }
 
