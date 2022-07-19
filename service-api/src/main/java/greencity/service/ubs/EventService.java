@@ -1,11 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.entity.order.Order;
-import greencity.entity.user.employee.Employee;
-
-import javax.persistence.EntityNotFoundException;
-
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 
 public interface EventService {
     /**

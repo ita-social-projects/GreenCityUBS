@@ -9,7 +9,6 @@ import greencity.entity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
