@@ -164,32 +164,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/bigOrderTable",
                 UBS_MANAG_LINK + "/getOrdersViewParameters",
                 UBS_MANAG_LINK + "/usersAll",
-                ADMIN_EMPL_LINK + "/getAll-employees",
-                ADMIN_EMPL_LINK + "/getAll-active-employees",
-                ADMIN_EMPL_LINK + "/get-all-positions",
-                SUPERADMIN_LINK + "/getTariffService",
-                SUPERADMIN_LINK + "/getService",
-                SUPERADMIN_LINK + "/getLocations")
+                ADMIN_EMPL_LINK + "/**",
+                SUPERADMIN_LINK + "/**")
             .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 UBS_MANAG_LINK + "/addCertificate",
-                ADMIN_EMPL_LINK + "/save-employee",
-                ADMIN_EMPL_LINK + "/create-position",
-                SUPERADMIN_LINK + "/createTariffService",
-                SUPERADMIN_LINK + "/createService")
+                ADMIN_EMPL_LINK + "/**",
+                SUPERADMIN_LINK + "/**")
             .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
                 UBS_MANAG_LINK + "/changeOrdersTableView",
-                ADMIN_EMPL_LINK + "/update-position",
-                SUPERADMIN_LINK + "/editTariffService/{id}",
-                SUPERADMIN_LINK + "/editService/{id}")
+                ADMIN_EMPL_LINK + "/**",
+                SUPERADMIN_LINK + "/**")
             .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
-                ADMIN_EMPL_LINK + "/delete-employee/{id}",
-                ADMIN_EMPL_LINK + "/delete-position/{id}",
-                ADMIN_EMPL_LINK + "/delete-employee-image/{id}",
-                SUPERADMIN_LINK + "/deleteTariffService/{id}",
-                SUPERADMIN_LINK + "/deleteService/{id}")
+                ADMIN_EMPL_LINK + "/**",
+                SUPERADMIN_LINK + "/**")
             .hasAnyRole(UBS_EMPLOYEE);
     }
 
