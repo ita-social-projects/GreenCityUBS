@@ -42,7 +42,6 @@
             <groupId>com.greencity</groupId>
             <artifactId>service</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.greencity</groupId>
