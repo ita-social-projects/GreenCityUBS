@@ -343,4 +343,20 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isAccepted());
     }
+
+    @Test
+    void setLimitDescription() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{courierId}", 1L))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void includeBag() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/includeBag/{id}", 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void excludeBag() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)).andExpect(status().isOk());
+    }
 }
