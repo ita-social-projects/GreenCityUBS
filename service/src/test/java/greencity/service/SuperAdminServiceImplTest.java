@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.entity.order.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +38,6 @@ import greencity.entity.enums.CourierStatus;
 import greencity.entity.enums.LocationStatus;
 import greencity.entity.enums.MinAmountOfBag;
 import greencity.entity.language.Language;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
-import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -785,5 +780,50 @@ class SuperAdminServiceImplTest {
         verify(locationRepository).findById(anyLong());
         verify(locationRepository).existsByNameUkAndNameEnAndRegion("Львів", "Lviv", location.getRegion());
         assertEquals(location.getNameEn(), dto.getNameEn());
+    }
+
+    @Test
+    void changeTariffLocationsStatusParamActivate() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        TariffLocation tariffLocation = tariffsInfo.getTariffLocations().stream().findFirst().get();
+        Location location = tariffLocation.getLocation();
+
+        List<Long> locationsId = new ArrayList<>();
+        locationsId.add(location.getId());
+        ChangeTariffLocationStatusDto dto = new ChangeTariffLocationStatusDto().setLocationIds(locationsId);
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        superAdminService.changeTariffLocationsStatus(1L, dto, "activate");
+        verify(tariffsLocationRepository).changeStatusAll(1L, locationsId, LocationStatus.ACTIVE.name());
+    }
+
+    @Test
+    void changeTariffLocationsStatusParamDeactivate() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        TariffLocation tariffLocation = tariffsInfo.getTariffLocations().stream().findFirst().get();
+        Location location = tariffLocation.getLocation();
+
+        List<Long> locationsId = new ArrayList<>();
+        locationsId.add(location.getId());
+        ChangeTariffLocationStatusDto dto = new ChangeTariffLocationStatusDto().setLocationIds(locationsId);
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        superAdminService.changeTariffLocationsStatus(1L, dto, "deactivate");
+        verify(tariffsLocationRepository).changeStatusAll(1L, locationsId, LocationStatus.DEACTIVATED.name());
+    }
+
+    @Test
+    void changeTariffLocationsStatusParamUnresolvable() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        TariffLocation tariffLocation = tariffsInfo.getTariffLocations().stream().findFirst().get();
+        Location location = tariffLocation.getLocation();
+
+        List<Long> locationsId = new ArrayList<>();
+        locationsId.add(location.getId());
+        ChangeTariffLocationStatusDto dto = new ChangeTariffLocationStatusDto().setLocationIds(locationsId);
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
     }
 }
