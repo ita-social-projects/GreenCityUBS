@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -76,7 +77,7 @@ public class TokenServiceImplTest {
         ChangeTariffLocationStatusDto dto = new ChangeTariffLocationStatusDto().setLocationIds(locationsId);
 
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
-        assertThrows(BadRequestException.class, () ->
-                superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
     }
 }

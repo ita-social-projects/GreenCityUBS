@@ -347,7 +347,7 @@ class SuperAdminControllerTest {
     @Test
     void setLimitDescription() throws Exception {
         mockMvc.perform(patch(ubsLink + "/setLimitDescription/{courierId}", 1L))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 
     @Test
