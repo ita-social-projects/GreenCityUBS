@@ -82,23 +82,39 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/getOrdersViewParameters",
                 UBS_MANAG_LINK + "/tableParams",
                 UBS_MANAG_LINK + "/usersAll",
+                UBS_MANAG_LINK + "/get-data-for-order/{id}",
+                UBS_MANAG_LINK + "/violation-details/{id}",
+                UBS_MANAG_LINK + "/{id}/ordersAll",
+                UBS_LINK + "/order_history/{id}",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 UBS_MANAG_LINK + "/addCertificate",
+                UBS_MANAG_LINK + "/addViolationToUser",
+                UBS_MANAG_LINK + "/add-manual-payment/{id}",
+                UBS_MANAG_LINK + "/add-bonuses-user/{id}",
+                UBS_MANAG_LINK + "/return-overpayment",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
                 UBS_MANAG_LINK + "/changeOrdersTableView",
+                UBS_MANAG_LINK + "/updateViolationToUser",
+                UBS_MANAG_LINK + "/update-manual-payment/{id}",
+                UBS_MANAG_LINK + "/changingOrder",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ADMIN_EMPL_LINK + "/**",
+                UBS_MANAG_LINK + "/delete-violation-from-order/{id}",
+                UBS_MANAG_LINK + "/delete-manual-payment/{id}",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+            .antMatchers(HttpMethod.PATCH,
+                UBS_MANAG_LINK + "/update-order-page-admin-info/{id}")
+            .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
