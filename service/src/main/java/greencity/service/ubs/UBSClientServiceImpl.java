@@ -1052,7 +1052,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, int sumToPay) {
         if (sumToPay != 0 && dto.getCertificates() != null) {
             for (String temp : dto.getCertificates()) {
-                if (dto.getCertificates().size()>5) {
+                if (dto.getCertificates().size() > 5) {
                     throw new BadRequestException(TOO_MANY_CERTIFICATES);
                 }
                 Certificate certificate = certificateRepository.findById(temp).orElseThrow(
