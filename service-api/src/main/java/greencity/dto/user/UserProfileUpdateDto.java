@@ -4,6 +4,7 @@ import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.address.AddressDto;
 import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -23,9 +24,11 @@ public class UserProfileUpdateDto {
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z\\s-'.]{1,30}")
     private String recipientSurname;
     @Email
+    @Pattern(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")
     private String alternateEmail;
     @NotBlank
     @ValidPhoneNumber
     private String recipientPhone;
+    @Valid
     private List<AddressDto> addressDto;
 }

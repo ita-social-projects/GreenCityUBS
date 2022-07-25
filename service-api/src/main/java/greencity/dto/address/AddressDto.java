@@ -7,7 +7,9 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import static greencity.constant.ValidationConstant.*;
 
 @Getter
 @Setter
@@ -22,20 +24,27 @@ public class AddressDto implements Serializable {
     private Long id;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CITY_UK_REGEXP)
     private String city;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CH_UA + "{1,30}")
     private String district;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CH_UA + "{1,30}")
     private String region;
     @Length(max = 4)
+    @Pattern(regexp = CH_NUM + "{1,4}")
     private String entranceNumber;
     @Length(max = 5)
+    @Pattern(regexp = CH_NUM + "{1,5}")
     private String houseCorpus;
     @Length(max = 5)
+    @Pattern(regexp = CH_NUM + "{1,5}")
     private String houseNumber;
     @Length(max = 50)
+    @Pattern(regexp = CH_UA + "{1,50}")
     private String street;
 
     private String addressComment;
@@ -45,13 +54,17 @@ public class AddressDto implements Serializable {
     private Boolean actual;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CITY_EN_REGEXP)
     private String cityEn;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CH_EN + "{1,30}")
     private String regionEn;
     @Length(max = 50)
+    @Pattern(regexp = CH_EN + "{1,50}")
     private String streetEn;
     @NotBlank
     @Length(max = 30)
+    @Pattern(regexp = CH_EN + "{1,30}")
     private String districtEn;
 }

@@ -7,6 +7,9 @@ public class ValidationConstant {
     public static final String CITY_UK_REGEXP =
         "^([А-ЯЇІЄҐ][а-яіїєґ]{0,39}'?[а-яіїєґ]{1,39}($|[ -](?=[А-ЯЇІЄҐ]))){1,10}$";
     public static final String CITY_EN_REGEXP = "^([A-Z][a-z]{0,39}'?[a-z]{1,39}($|[ -](?=[A-Z]))){1,10}$";
+    public static final String CH_EN = "[A-Za-z\\s-'.]";
+    public static final String CH_UA = "[ЁёІіЇїҐґЄєА-Яа-я\\s-'.]";
+    public static final String CH_NUM = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9\\s-.]";
 
     /**
      * Constructor.
