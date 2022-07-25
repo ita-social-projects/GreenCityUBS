@@ -1051,9 +1051,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private int formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
         Order order, int sumToPay) {
         if (sumToPay != 0 && dto.getCertificates() != null) {
-            boolean tooManyCertificates = false;
             for (String temp : dto.getCertificates()) {
-                if (tooManyCertificates) {
+                if (dto.getCertificates().size()>5) {
                     throw new BadRequestException(TOO_MANY_CERTIFICATES);
                 }
                 Certificate certificate = certificateRepository.findById(temp).orElseThrow(
@@ -1066,7 +1065,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 certificate.setDateOfUse(LocalDate.now());
                 if (dontSendLinkToFondyIf(sumToPay, certificate)) {
                     sumToPay = 0;
-                    tooManyCertificates = true;
                 }
             }
         }
