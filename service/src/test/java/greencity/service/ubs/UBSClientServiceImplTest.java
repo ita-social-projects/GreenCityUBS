@@ -1971,6 +1971,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    @Disabled
     void getLiqPayStatusTest() {
         Order order = getOrder().setUser(getTestUser());
         order.getPayment().add(getPayment());
