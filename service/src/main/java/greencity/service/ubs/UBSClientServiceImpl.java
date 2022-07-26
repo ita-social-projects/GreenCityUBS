@@ -1176,19 +1176,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .collect(Collectors.toList());
     }
 
-    private void checkAvailableOrderForEmployee(Order order, String email) {
-        Long employeeId = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
-        boolean status = false;
-        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
-        for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
-        }
-        if (!status) {
-            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
-        }
-    }
-
     /**
      * {@inheritDoc}
      */

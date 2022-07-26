@@ -1006,7 +1006,7 @@ class UBSClientServiceImplTest {
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, anyString()));
+            () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
     @Test
@@ -1014,7 +1014,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
         when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, anyString()));
+            () -> ubsService.getAllEventsForOrder(1L, "abc"));
     }
 
     @Test
@@ -1971,13 +1971,12 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    @Ignore
     void getLiqPayStatusTest() {
         Order order = getOrder().setUser(getTestUser());
         order.getPayment().add(getPayment());
 
         StatusRequestDtoLiqPay dto = StatusRequestDtoLiqPay.builder()
-            .orderId("1_1")
+            .orderId("1L")
             .action("status")
             .version(3)
             .build();
@@ -1985,8 +1984,8 @@ class UBSClientServiceImplTest {
         response.put("status", "success");
         response.put("version", dto.getVersion().toString());
         response.put("order_id", dto.getOrderId());
-        response.put("create_date", 100l);
-        response.put("end_date", 200l);
+        response.put("create_date", 100L);
+        response.put("end_date", 200L);
         response.put("sender_commission", 20d);
         response.put("amount", 20d);
 
@@ -2001,12 +2000,12 @@ class UBSClientServiceImplTest {
         res.put("status", "failure");
         res.put("version", dto.getVersion().toString());
         res.put("order_id", dto.getOrderId());
-        res.put("create_date", 100l);
-        res.put("end_date", 200l);
+        res.put("create_date", 100L);
+        res.put("end_date", 200L);
         res.put("sender_commission", 20d);
         res.put("amount", 20d);
 
-        when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("abc")).thenReturn(getTestUser());
         when(liqPayService.getPaymentStatus(dto)).thenReturn(res);
         when(paymentRepository.findAllByOrder(order)).thenReturn(order.getPayment());
