@@ -26,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static greencity.constant.AppConstant.*;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
@@ -33,8 +34,6 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final String UBS_LINK = "/ubs";
-    private static final String ADMIN_LINK = "/admin";
     private final JwtTool jwtTool;
     private final UserRemoteClient userRemoteClient;
 
@@ -77,53 +76,94 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities."))
             .and()
             .authorizeRequests()
+            .antMatchers(HttpMethod.GET,
+                UBS_MANAG_LINK + "/getAllCertificates",
+                UBS_MANAG_LINK + "/bigOrderTable",
+                UBS_MANAG_LINK + "/getOrdersViewParameters",
+                UBS_MANAG_LINK + "/tableParams",
+                UBS_MANAG_LINK + "/usersAll",
+                UBS_MANAG_LINK + "/get-data-for-order/{id}",
+                UBS_MANAG_LINK + "/violation-details/{id}",
+                UBS_MANAG_LINK + "/{id}/ordersAll",
+                UBS_LINK + "/order_history/{id}",
+                ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**")
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/addCertificate",
+                UBS_MANAG_LINK + "/addViolationToUser",
+                UBS_MANAG_LINK + "/add-manual-payment/{id}",
+                UBS_MANAG_LINK + "/add-bonuses-user/{id}",
+                UBS_MANAG_LINK + "/return-overpayment",
+                ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**")
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+            .antMatchers(HttpMethod.PUT,
+                UBS_MANAG_LINK + "/changeOrdersTableView",
+                UBS_MANAG_LINK + "/updateViolationToUser",
+                UBS_MANAG_LINK + "/update-manual-payment/{id}",
+                UBS_MANAG_LINK + "/changingOrder",
+                ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**")
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+            .antMatchers(HttpMethod.DELETE,
+                ADMIN_EMPL_LINK + "/**",
+                UBS_MANAG_LINK + "/delete-violation-from-order/{id}",
+                UBS_MANAG_LINK + "/delete-manual-payment/{id}",
+                SUPER_ADMIN_LINK + "/**")
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+            .antMatchers(HttpMethod.PATCH,
+                UBS_MANAG_LINK + "/update-order-page-admin-info/{id}")
+            .hasAnyRole(UBS_EMPLOYEE)
+            .antMatchers(HttpMethod.POST,
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
                 ADMIN_LINK + "/**",
                 "/accountinfo")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.GET,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
                 ADMIN_LINK + "/**",
                 "/accountinfo",
                 "/removewebhook",
                 "/setwebhook")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.PATCH,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.DELETE,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.PUT,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/update-recipients-data",
-                ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE", "UBS_EMPLOYEE")
+                ADMIN_LINK + "/**",
+                "/notifications/updateTemplateForOTHER",
+                "/notifications/updateTemplateForSITE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.HEAD,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.OPTIONS,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.TRACE,
-                UBS_LINK + "/management/**",
-                UBS_LINK + "/superAdmin/**",
+                UBS_MANAG_LINK + "/**",
+                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.POST,
                 UBS_LINK + "/userProfile/**",
                 UBS_LINK + "/order/**",
@@ -131,38 +171,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/processLiqPayOrder",
                 UBS_LINK + "/client/**",
                 "/notifications/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
-            .antMatchers(HttpMethod.PUT,
-                "/notifications/updateTemplateForOTHER",
-                "/notifications/updateTemplateForSITE")
-            .hasAnyRole("ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.GET,
                 UBS_LINK + "/**",
                 UBS_LINK + "/client/**",
                 "/notifications/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PUT,
                 UBS_LINK + "/userProfile/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.PATCH,
                 UBS_LINK + "/userProfile/**",
                 UBS_LINK + "/client/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.DELETE,
                 UBS_LINK + "/userProfile/**",
-                UBS_LINK + "/order-addresses/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
-            .antMatchers(UBS_LINK + "/client/delete-order/{id}")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+                UBS_LINK + "/order-addresses/**",
+                UBS_LINK + "/client/delete-order/{id}")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.TRACE,
                 UBS_LINK + "/userProfile/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.OPTIONS,
                 UBS_LINK + "/userProfile/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE")
+            .hasAnyRole(USER, ADMIN)
             .antMatchers(HttpMethod.HEAD,
                 UBS_LINK + "/userProfile/**")
-            .hasAnyRole("USER", "ADMIN", "UBS_EMPLOYEE");
+            .hasAnyRole(USER, ADMIN);
     }
 
     /**
