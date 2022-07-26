@@ -208,10 +208,8 @@ class CoordinateServiceImplTest {
             }
         });
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            coordinateService.getClusteredCoordsAlongWithSpecified(
-                test, 3000, 15).get(0);
-        });
+        Assertions.assertThrows(BadRequestException.class, () ->
+                coordinateService.getClusteredCoordsAlongWithSpecified(test, 3000, 15));
 
     }
 }

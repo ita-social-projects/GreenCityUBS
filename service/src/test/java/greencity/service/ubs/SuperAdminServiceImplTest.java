@@ -608,7 +608,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    @Disabled
     void deleteReceivingStation() {
         ReceivingStation station = getReceivingStation();
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(station));
@@ -618,16 +617,12 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository, times(1)).findById(1L);
         verify(receivingStationRepository, times(1)).delete(station);
 
-        Exception thrown = assertThrows(UnprocessableEntityException.class,
-            () -> superAdminService.deleteReceivingStation(1L));
-
         when(receivingStationRepository.findById(2L)).thenReturn(Optional.empty());
 
         Exception thrown1 = assertThrows(NotFoundException.class,
             () -> superAdminService.deleteReceivingStation(2L));
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
-        assertEquals(ErrorMessage.EMPLOYEES_ASSIGNED_STATION, thrown.getMessage());
     }
 
     @Test

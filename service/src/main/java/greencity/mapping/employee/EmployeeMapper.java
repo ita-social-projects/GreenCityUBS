@@ -1,6 +1,5 @@
 package greencity.mapping.employee;
 
-import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.PositionDto;
 import greencity.entity.user.employee.Employee;

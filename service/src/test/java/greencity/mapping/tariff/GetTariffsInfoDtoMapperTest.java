@@ -1,5 +1,6 @@
 package greencity.mapping.tariff;
 
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.mapping.tariff.GetTariffsInfoDtoMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -17,14 +18,12 @@ class GetTariffsInfoDtoMapperTest {
     private GetTariffsInfoDtoMapper mapper;
 
     @Test
-    @Disabled
-    void convert() {
+    void convertTariffInfo() {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
-        var dto = mapper.convert(tariffsInfo);
+        GetTariffsInfoDto dto = mapper.convert(tariffsInfo);
         Assertions.assertEquals(tariffsInfo.getId(), dto.getCardId());
         Assertions.assertEquals(tariffsInfo.getCourierLimit().toString(), dto.getCourierLimit());
         Assertions.assertEquals(tariffsInfo.getCreatedAt(), dto.getCreatedAt());
         Assertions.assertEquals(tariffsInfo.getLocationStatus(), dto.getTariffStatus());
-
     }
 }

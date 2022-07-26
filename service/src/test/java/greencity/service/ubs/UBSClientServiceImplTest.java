@@ -19,6 +19,7 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.service.google.GoogleApiService;
 import greencity.service.PhoneNumberFormatterService;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -991,7 +992,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    @Disabled
     void testGelAllEventsFromOrderByOrderId() {
         List<Event> orderEvents = ModelUtils.getListOfEvents();
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
@@ -1003,20 +1003,18 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    @Disabled
     void testGelAllEventsFromOrderByOrderIdWithThrowingOrderNotFindException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, anyString()));
     }
 
     @Test
-    @Disabled
     void testGelAllEventsFromOrderByOrderIdWithThrowingEventsNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(ModelUtils.getOrderWithEvents());
-        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(List.of());
+        when(eventRepository.findAllEventsByOrderId(1L)).thenReturn(Collections.emptyList());
         assertThrows(NotFoundException.class,
-            () -> ubsService.getAllEventsForOrder(1L, "abc"));
+            () -> ubsService.getAllEventsForOrder(1L, anyString()));
     }
 
     @Test
@@ -1973,6 +1971,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    @Ignore
     void getLiqPayStatusTest() {
         Order order = getOrder().setUser(getTestUser());
         order.getPayment().add(getPayment());
@@ -2013,7 +2012,6 @@ class UBSClientServiceImplTest {
         when(paymentRepository.findAllByOrder(order)).thenReturn(order.getPayment());
 
         ubsService.getLiqPayStatus(1L, "abc");
-
     }
 
     @Test

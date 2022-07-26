@@ -2108,8 +2108,9 @@ class UBSManagementServiceImplTest {
         when(bagRepository.findBagByOrderId(1L)).thenReturn(ModelUtils.getBag3list());
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
+        AddBonusesToUserDto addBonusesToUserDto = ModelUtils.getAddBonusesToUserDto();
         assertThrows(BadRequestException.class, () -> {
-            ubsManagementService.addBonusesToUser(ModelUtils.getAddBonusesToUserDto(), 1L);
+            ubsManagementService.addBonusesToUser(addBonusesToUserDto, 1L);
         });
     }
 

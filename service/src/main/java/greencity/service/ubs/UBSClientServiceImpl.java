@@ -1163,7 +1163,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
         Optional<Order> order = orderRepository.findById(orderId);
-        checkAvailableOrderForEmployee(order.get(), email);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
