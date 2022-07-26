@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.googleApi;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
@@ -6,7 +6,7 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.GeocodingResult;
 
 import greencity.exceptions.api.GoogleApiException;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class GoogleApiService {
     private final GeoApiContext context;
     private static final List<Locale> locales = List.of(new Locale("uk"), new Locale("en"));

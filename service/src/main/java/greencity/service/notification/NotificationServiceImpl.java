@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.notification;
 
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -76,15 +76,8 @@ public class NotificationServiceImpl implements NotificationService {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    order.getId().toString());
-            if ((lastNotification.isEmpty()
-                || (lastNotification.get().getNotificationTime()
-                    .isBefore(LocalDateTime.now(clock).minusDays(7))
-                    || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
-                && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
-                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
-                && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
-                    || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)))) {
+                        order.getId().toString());
+            if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 if (lastNotification.isPresent()) {
                     UserNotification oldNotification = lastNotification.get();
@@ -92,18 +85,32 @@ public class NotificationServiceImpl implements NotificationService {
                 } else {
                     userNotification.setUser(order.getUser());
                 }
-                userNotification.setNotificationTime(LocalDateTime.now(clock));
-                userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-                userNotification.setOrder(order);
-                UserNotification created = userNotificationRepository.save(userNotification);
-                NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId()
-                    .toString());
-                notificationParameter.setUserNotification(created);
-                NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
-                created.setParameters(Collections.singleton(createdParameter));
-                sendNotificationsForBotsAndEmail(created, 0L);
+                UserNotification notification = initialiseNotificationForUnpaidOrder(order, userNotification);
+                sendNotificationsForBotsAndEmail(notification, 0L);
             }
         }
+    }
+
+    public boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
+        return (lastNotification.isEmpty()
+                || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
+                || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
+                && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
+                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
+                && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
+                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
+    }
+
+    public UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
+        userNotification.setNotificationTime(LocalDateTime.now(clock));
+        userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
+        userNotification.setOrder(order);
+        UserNotification notification = userNotificationRepository.save(userNotification);
+        NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId().toString());
+        notificationParameter.setUserNotification(notification);
+        NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
+        notification.setParameters(Collections.singleton(createdParameter));
+        return notification;
     }
 
     /**
@@ -124,9 +131,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (dto.getOrder_id() != null) {
             Long orderId = Long.valueOf(dto.getOrder_id().split("_")[0]);
             Optional<Order> orderOptional = orderRepository.findById(orderId);
-            if (orderOptional.isPresent()) {
-                notifyPaidOrder(orderOptional.get());
-            }
+            orderOptional.ifPresent(this::notifyPaidOrder);
         }
     }
 
@@ -190,12 +195,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .findLastNotificationByNotificationTypeAndOrderNumber(
                     NotificationType.UNPAID_PACKAGE.toString(),
                     order.getId().toString());
-            if ((lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))) {
+            if (checkIfHalfPaidPackageNeedsNotification(order, lastNotification)) {
                 notifyHalfPaidPackage(order);
             }
         }
+    }
+
+    public boolean checkIfHalfPaidPackageNeedsNotification(Order order, Optional<UserNotification> lastNotification) {
+        return (lastNotification.isEmpty()
+                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1));
     }
 
     /**
@@ -266,18 +275,26 @@ public class NotificationServiceImpl implements NotificationService {
                 .getUserIdByDateOfLastNotificationAndNotificationType(dateOfLastNotification,
                     NotificationType.LETS_STAY_CONNECTED.toString());
 
+        findInactiveUsers(monthsList, callableGetInactiveUsersTasks, userIdsByLastNotifications);
+        tryToSendNotificationForInactiveUser(callableGetInactiveUsersTasks);
+    }
+
+    public void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,
+                                  List<Long> userIdsByLastNotifications) {
         Arrays.stream(monthsList).forEach(months -> {
             LocalDate dateOfLastOrder = LocalDate.now(clock).minusMonths(months);
             callableGetInactiveUsersTasks.add(() -> {
                 List<User> users = userRepository.getInactiveUsersByDateOfLastOrder(dateOfLastOrder);
                 List<User> filteredUsers = users.stream()
-                    .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
-                    .collect(Collectors.toList());
-                log.info("Found {} inactive users for {} months ", filteredUsers.size(), months.toString());
+                        .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
+                        .collect(Collectors.toList());
+                log.info("Found {} inactive users for {} months ", filteredUsers.size(), months);
                 return InactiveAccountDto.builder().users(filteredUsers).months(months).build();
             });
         });
+    }
 
+    public void tryToSendNotificationForInactiveUser(List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks) {
         try {
             List<Future<InactiveAccountDto>> futures = executor.invokeAll(callableGetInactiveUsersTasks);
             futures.forEach(future -> {
@@ -285,11 +302,7 @@ public class NotificationServiceImpl implements NotificationService {
                     List<User> users = future.get().getUsers();
                     Long monthsOfAccountInactivity = future.get().getMonths();
                     users.forEach(user -> {
-                        UserNotification userNotification = new UserNotification();
-                        userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
-                        userNotification.setUser(user);
-                        userNotification.setNotificationTime(LocalDateTime.now(clock));
-                        UserNotification notification = userNotificationRepository.save(userNotification);
+                        UserNotification notification = initialiseNotificationForInactiveUser(user);
                         sendNotificationsForBotsAndEmail(notification, monthsOfAccountInactivity);
                     });
                 } catch (InterruptedException | ExecutionException e) {
@@ -301,6 +314,14 @@ public class NotificationServiceImpl implements NotificationService {
             log.error("Unable to start thread {}", e.getMessage());
             Thread.currentThread().interrupt();
         }
+    }
+
+    public UserNotification initialiseNotificationForInactiveUser(User user) {
+        UserNotification userNotification = new UserNotification();
+        userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
+        userNotification.setUser(user);
+        userNotification.setNotificationTime(LocalDateTime.now(clock));
+        return userNotificationRepository.save(userNotification);
     }
 
     /**

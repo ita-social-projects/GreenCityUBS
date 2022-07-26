@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
@@ -25,6 +25,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.exceptions.*;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.ubs.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

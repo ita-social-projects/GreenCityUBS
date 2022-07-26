@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
@@ -14,6 +14,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
+import greencity.service.SuperAdminService;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.OrdersAdminsPageServiceImpl;
 import greencity.service.ubs.UBSManagementEmployeeService;

@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.notification;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import greencity.dto.notification.NotificationDto;
@@ -17,7 +17,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
-import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
 import lombok.SneakyThrows;
@@ -31,7 +30,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;

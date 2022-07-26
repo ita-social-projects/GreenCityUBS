@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.dto.location.CoordinatesDto;

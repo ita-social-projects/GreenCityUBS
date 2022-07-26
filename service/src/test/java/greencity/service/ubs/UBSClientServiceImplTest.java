@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.service.googleApi.GoogleApiService;
+import greencity.service.PhoneNumberFormatterService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -114,10 +116,6 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.EventService;
-import greencity.service.ubs.LiqPayService;
-import greencity.service.ubs.UBSClientServiceImpl;
-import greencity.service.ubs.UBSManagementService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 

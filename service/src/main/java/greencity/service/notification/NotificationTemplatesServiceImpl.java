@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.notification;
 
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.ubs.NotificationTemplatesService;

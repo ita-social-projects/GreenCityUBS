@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.language;
 
 import greencity.repository.LanguageRepository;
 import greencity.service.language.LanguageServiceImpl;

@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import java.util.ArrayList;
 import java.util.Collections;

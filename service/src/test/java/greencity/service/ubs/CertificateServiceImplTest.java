@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.ubs;
 
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.entity.enums.CertificateStatus;
