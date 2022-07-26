@@ -18,8 +18,8 @@ import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.service.UAPhoneNumberUtil;
-import lombok.RequiredArgsConstructor;
+import greencity.service.phone.UAPhoneNumberUtil;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;

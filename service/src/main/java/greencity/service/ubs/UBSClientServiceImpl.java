@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
@@ -135,8 +136,8 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.GoogleApiService;
-import greencity.service.UAPhoneNumberUtil;
+import greencity.service.googleApi.GoogleApiService;
+import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -177,7 +178,7 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
  * Implementation of {@link UBSClientService}.
  */
 @Service
-@RequiredArgsConstructor
+@Data
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;

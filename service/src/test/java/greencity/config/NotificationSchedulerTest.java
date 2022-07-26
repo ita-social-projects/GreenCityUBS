@@ -1,6 +1,6 @@
 package greencity.config;
 
-import greencity.service.NotificationServiceImpl;
+import greencity.service.notification.NotificationServiceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
