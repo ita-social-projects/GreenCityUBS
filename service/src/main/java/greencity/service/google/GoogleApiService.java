@@ -36,6 +36,7 @@ public class GoogleApiService {
                     .address(searchRequest).language(locale.getLanguage()).await();
                 Collections.addAll(geocodingResults, results);
             } catch (IOException | InterruptedException | ApiException e) {
+                Thread.currentThread().interrupt();
                 throw new GoogleApiException(e.getMessage());
             }
         });
