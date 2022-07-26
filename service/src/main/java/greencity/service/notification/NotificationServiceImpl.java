@@ -19,7 +19,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
-import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,19 +78,14 @@ public class NotificationServiceImpl implements NotificationService {
                         order.getId().toString());
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
-                if (lastNotification.isPresent()) {
-                    UserNotification oldNotification = lastNotification.get();
-                    userNotification.setUser(oldNotification.getUser());
-                } else {
-                    userNotification.setUser(order.getUser());
-                }
+                userNotification.setUser(order.getUser());
                 UserNotification notification = initialiseNotificationForUnpaidOrder(order, userNotification);
                 sendNotificationsForBotsAndEmail(notification, 0L);
             }
         }
     }
 
-    public boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
+    private boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
         return (lastNotification.isEmpty()
                 || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
                 || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
@@ -101,7 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
-    public UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
+    private UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
         userNotification.setNotificationTime(LocalDateTime.now(clock));
         userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
         userNotification.setOrder(order);
@@ -201,7 +195,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    public boolean checkIfHalfPaidPackageNeedsNotification(Order order, Optional<UserNotification> lastNotification) {
+    private boolean checkIfHalfPaidPackageNeedsNotification(Order order, Optional<UserNotification> lastNotification) {
         return (lastNotification.isEmpty()
                 || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
                 && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1));
