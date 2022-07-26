@@ -34,6 +34,7 @@ import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -56,26 +57,13 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/ubs/management")
+@RequiredArgsConstructor
 public class ManagementOrderController {
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
     private final ViolationService violationService;
     private final BigOrderTableServiceView bigOrderTableService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public ManagementOrderController(UBSManagementService ubsManagementService, CertificateService certificateService,
-        ViolationService violationService, CoordinateService coordinateService,
-        BigOrderTableServiceView bigOrderTableService) {
-        this.ubsManagementService = ubsManagementService;
-        this.certificateService = certificateService;
-        this.violationService = violationService;
-        this.coordinateService = coordinateService;
-        this.bigOrderTableService = bigOrderTableService;
-    }
 
     /**
      * Controller getting all certificates with sorting possibility.
