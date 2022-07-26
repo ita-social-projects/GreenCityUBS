@@ -1,9 +1,8 @@
-package greencity.mapping.receivingStation;
+package greencity.mapping.station;
 
 import greencity.ModelUtils;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.mapping.receivingStation.ReceivingStationDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

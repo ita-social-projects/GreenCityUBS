@@ -1,4 +1,4 @@
-package greencity.service.googleApi;
+package greencity.service.google;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;

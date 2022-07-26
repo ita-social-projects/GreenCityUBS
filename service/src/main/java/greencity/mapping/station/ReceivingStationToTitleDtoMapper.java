@@ -1,4 +1,4 @@
-package greencity.mapping.receivingStation;
+package greencity.mapping.station;
 
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.courier.ReceivingStationDto;

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
-import greencity.service.googleApi.GoogleApiService;
+import greencity.service.google.GoogleApiService;
 import greencity.service.PhoneNumberFormatterService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;

@@ -1,4 +1,4 @@
-package greencity.mapping.receivingStation;
+package greencity.mapping.station;
 
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.entity.user.employee.ReceivingStation;

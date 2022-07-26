@@ -75,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
         for (Order order : orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)) {
             Optional<UserNotification> lastNotification = userNotificationRepository
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                        order.getId().toString());
+                    order.getId().toString());
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
                 userNotification.setUser(order.getUser());
@@ -87,11 +87,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
         return (lastNotification.isEmpty()
-                || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
+            || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
                 || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
-                && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
+            && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
-                && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
+            && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
                 || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
     }
 
@@ -100,7 +100,8 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
         userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
-        NotificationParameter notificationParameter = new NotificationParameter("orderNumber", order.getId().toString());
+        NotificationParameter notificationParameter =
+            new NotificationParameter("orderNumber", order.getId().toString());
         notificationParameter.setUserNotification(notification);
         NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
         notification.setParameters(Collections.singleton(createdParameter));
@@ -197,8 +198,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private boolean checkIfHalfPaidPackageNeedsNotification(Order order, Optional<UserNotification> lastNotification) {
         return (lastNotification.isEmpty()
-                || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-                && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1));
+            || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
+            && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1));
     }
 
     /**
@@ -273,22 +274,23 @@ public class NotificationServiceImpl implements NotificationService {
         tryToSendNotificationForInactiveUser(callableGetInactiveUsersTasks);
     }
 
-    public void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,
-                                  List<Long> userIdsByLastNotifications) {
+    private void findInactiveUsers(Long[] monthsList, List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks,
+        List<Long> userIdsByLastNotifications) {
         Arrays.stream(monthsList).forEach(months -> {
             LocalDate dateOfLastOrder = LocalDate.now(clock).minusMonths(months);
             callableGetInactiveUsersTasks.add(() -> {
                 List<User> users = userRepository.getInactiveUsersByDateOfLastOrder(dateOfLastOrder);
                 List<User> filteredUsers = users.stream()
-                        .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
-                        .collect(Collectors.toList());
+                    .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
+                    .collect(Collectors.toList());
                 log.info("Found {} inactive users for {} months ", filteredUsers.size(), months);
                 return InactiveAccountDto.builder().users(filteredUsers).months(months).build();
             });
         });
     }
 
-    public void tryToSendNotificationForInactiveUser(List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks) {
+    private void tryToSendNotificationForInactiveUser(
+        List<Callable<InactiveAccountDto>> callableGetInactiveUsersTasks) {
         try {
             List<Future<InactiveAccountDto>> futures = executor.invokeAll(callableGetInactiveUsersTasks);
             futures.forEach(future -> {
@@ -310,7 +312,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    public UserNotification initialiseNotificationForInactiveUser(User user) {
+    private UserNotification initialiseNotificationForInactiveUser(User user) {
         UserNotification userNotification = new UserNotification();
         userNotification.setNotificationType(NotificationType.LETS_STAY_CONNECTED);
         userNotification.setUser(user);

@@ -136,12 +136,11 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.googleApi.GoogleApiService;
+import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import lombok.RequiredArgsConstructor;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
