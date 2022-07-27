@@ -19,7 +19,6 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.service.google.GoogleApiService;
 import greencity.service.PhoneNumberFormatterService;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -1971,7 +1970,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("test isn't correct")
     void getLiqPayStatusTest() {
         Order order = getOrder().setUser(getTestUser());
         order.getPayment().add(getPayment());

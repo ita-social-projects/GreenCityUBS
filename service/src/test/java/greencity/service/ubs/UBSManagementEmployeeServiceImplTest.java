@@ -138,7 +138,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("test isn't correct")
     void updateEmployee() {
         when(modelMapper.map(any(), any())).thenReturn(getEmployee(), getEmployeeDto());
         when(repository.existsById(any())).thenReturn(true);
@@ -157,7 +157,7 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("test isn't correct")
     void updateEmployeeShouldThrowExceptions() {
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
