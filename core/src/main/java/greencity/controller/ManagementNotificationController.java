@@ -1,13 +1,10 @@
 package greencity.controller;
 
 import greencity.annotations.ApiPageable;
-import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,13 +26,6 @@ public class ManagementNotificationController {
      * @author Dima Sannytski.
      */
     @ApiOperation(value = "Get all notification templates")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping
     @ApiPageable
     public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@ApiIgnore Pageable pageable) {
@@ -49,15 +39,8 @@ public class ManagementNotificationController {
      * @author Dima Sannytski.
      */
     @ApiOperation("Update notification template")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PutMapping
-    public ResponseEntity<HttpStatuses> updateNotificationTemplate(
+    public ResponseEntity<HttpStatus> updateNotificationTemplate(
         @RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
         notificationTemplateService.update(notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -69,13 +52,6 @@ public class ManagementNotificationController {
      * @author Dima Sannytski.
      */
     @ApiOperation(value = "Get notification template by id")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping("/{id}")
     public ResponseEntity<NotificationTemplateDto> getNotificationTemplate(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)

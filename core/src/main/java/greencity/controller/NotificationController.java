@@ -4,7 +4,6 @@ import greencity.annotations.ApiLocale;
 import greencity.annotations.ApiPageableWithLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
-import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
@@ -12,8 +11,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.NotificationTemplatesService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -39,13 +36,6 @@ public class NotificationController {
      * @author Ihor Volianskyi
      */
     @ApiOperation("Return body of the notification and set status - is read")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PostMapping(value = "/{id}")
     @ApiLocale
     public ResponseEntity<NotificationDto> getNotification(@ApiIgnore @CurrentUserUuid String userUuid,
@@ -61,10 +51,6 @@ public class NotificationController {
      * @author Ihor Volianskyi
      */
     @ApiOperation(value = "Get page with notifications for current user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
     @GetMapping
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
@@ -81,13 +67,6 @@ public class NotificationController {
      * @author Igor Boykov
      */
     @ApiOperation(value = "get all unreaden notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping(value = "quantityUnreadenNotifications")
     public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid) {
@@ -102,13 +81,6 @@ public class NotificationController {
      */
 
     @ApiOperation(value = "Update body in notification template for SITE notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PutMapping(value = "/updateTemplateForSITE")
     public ResponseEntity<HttpStatus> updateNotificationTemplateForSITE(
         @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {
@@ -124,13 +96,6 @@ public class NotificationController {
      */
 
     @ApiOperation(value = "Update body in notification template for OTHER notifications")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PutMapping(value = "/updateTemplateForOTHER")
     public ResponseEntity<HttpStatus> updateNotificationTemplateForOTHER(
         @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {

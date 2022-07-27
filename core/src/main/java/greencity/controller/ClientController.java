@@ -3,7 +3,6 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidLanguage;
-import greencity.constants.HttpStatuses;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -13,8 +12,6 @@ import greencity.entity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -40,10 +37,6 @@ public class ClientController {
      * @author Danylko Mykola.
      */
     @ApiOperation(value = "Get all orders done by user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderClientDto[].class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
     @GetMapping("/getAll-users-orders")
     public ResponseEntity<List<OrderClientDto>> getAllOrdersDoneByUser(
         @ApiIgnore @CurrentUserUuid String userUuid) {
@@ -57,12 +50,6 @@ public class ClientController {
      * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for logged user")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
-    })
     @GetMapping("/user-orders")
     @ApiPageable
     public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
@@ -78,13 +65,6 @@ public class ClientController {
      * @author Max Boiarchuk
      */
     @ApiOperation(value = "delete user order")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @DeleteMapping("/delete-order/{id}")
     public ResponseEntity<HttpStatus> deleteOrder(@PathVariable Long id) {
         ubsClientService.deleteOrder(id);
@@ -98,13 +78,6 @@ public class ClientController {
      * @author Max Boiarchuk
      */
     @ApiOperation(value = "return the link for payment")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PostMapping("/processOrderFondy")
     public ResponseEntity<FondyOrderResponse> processOrderFondy(
         @Valid @RequestBody OrderFondyClientDto dto,
@@ -119,13 +92,6 @@ public class ClientController {
      * @author Max Boiarchuk
      */
     @ApiOperation(value = "return the link for liqpay payment")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PostMapping("/processOrderLiqpay")
     public ResponseEntity<LiqPayOrderResponse> processOrderLiqpay(
         @Valid @RequestBody OrderFondyClientDto dto,
@@ -142,13 +108,6 @@ public class ClientController {
      * @author Danylko Mykola
      */
     @ApiOperation(value = "Make order again if our status of Order is ON_THE_ROUTE, CONFIRMED, DONE")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @PostMapping("/{id}/make-order-again")
     public ResponseEntity<MakeOrderAgainDto> makeOrderAgain(@PathVariable(name = "id") Long orderId,
         @ApiIgnore @ValidLanguage Locale locale) {
@@ -163,11 +122,6 @@ public class ClientController {
      * @author Liubomyr Bratakh
      */
     @ApiOperation(value = "Get user's bonuses.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = AllPointsUserDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-    })
     @GetMapping("/users-pointsToUse")
     public ResponseEntity<AllPointsUserDto> getAllPointsForUser(
         @ApiIgnore @CurrentUserUuid String uuid) {
@@ -181,13 +135,6 @@ public class ClientController {
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Return order payment details")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderPaymentDetailDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
@@ -200,13 +147,6 @@ public class ClientController {
      * @author Igor Boykov
      */
     @ApiOperation(value = "Controller for getting order info data about surcharge")
-    @ApiResponses({
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto.class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping("/get-data-for-order-surcharge/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderSurcharge(
         @PathVariable(name = "id") Long orderId,
@@ -223,12 +163,6 @@ public class ClientController {
      * @author Max Boiarchuk
      */
     @ApiOperation(value = "Get current user points.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointDto.class),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
     @GetMapping("/user-bonuses")
     public ResponseEntity<UserPointDto> getUserBonuses(
         @ApiIgnore @CurrentUserUuid String userUuid) {
