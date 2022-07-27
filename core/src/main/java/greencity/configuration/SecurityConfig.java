@@ -87,6 +87,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/{id}/ordersAll",
                 UBS_LINK + "/order_history/{id}",
                 ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/get-all-receiving-station",
+                SUPER_ADMIN_LINK + "/getLocations",
+                SUPER_ADMIN_LINK + "/getCouriers",
+                SUPER_ADMIN_LINK + "/tariffs",
+                SUPER_ADMIN_LINK + "/getTariffService",
+                SUPER_ADMIN_LINK + "/getService",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
@@ -96,6 +102,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/add-bonuses-user/{id}",
                 UBS_MANAG_LINK + "/return-overpayment",
                 ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/add-new-tariff",
+                SUPER_ADMIN_LINK + "/addLocations",
+                SUPER_ADMIN_LINK + "/createCourier",
+                SUPER_ADMIN_LINK + "/createTariffService",
+                SUPER_ADMIN_LINK + "/createService",
+                SUPER_ADMIN_LINK + "/create-receiving-station",
+                SUPER_ADMIN_LINK + "/locations/edit",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
@@ -103,7 +116,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/updateViolationToUser",
                 UBS_MANAG_LINK + "/update-manual-payment/{id}",
                 UBS_MANAG_LINK + "/changingOrder",
+                UBS_MANAG_LINK + "/blockOrders",
+                UBS_MANAG_LINK + "/unblockOrders",
                 ADMIN_EMPL_LINK + "/**",
+                SUPER_ADMIN_LINK + "/update-courier",
+                SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
@@ -113,7 +130,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
-                UBS_MANAG_LINK + "/update-order-page-admin-info/{id}")
+                UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
+                SUPER_ADMIN_LINK + "/editInfoAboutTariff")
             .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 UBS_MANAG_LINK + "/**",
