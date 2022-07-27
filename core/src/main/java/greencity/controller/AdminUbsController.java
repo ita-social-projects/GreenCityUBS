@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
@@ -103,10 +104,11 @@ public class AdminUbsController {
     })
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
-        @ApiIgnore @CurrentUserUuid String userUuid,
+        @ApiIgnore HttpServletRequest request,
         @Valid @RequestBody RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         ChangeOrderResponseDTO changeOrderResponseDTO =
-            ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
+            ordersAdminsPageService.chooseOrdersDataSwitcher(request.getUserPrincipal().getName(),
+                requestToChangeOrdersDataDTO);
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
             .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
     }

@@ -71,7 +71,8 @@ class AdminUbsControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
-        when(ordersAdminsPageService.chooseOrdersDataSwitcher(null, dto)).thenReturn(changeOrderResponseDTO);
+        when(ordersAdminsPageService.chooseOrdersDataSwitcher("35467585763t4sfgchjfuyetf", dto))
+            .thenReturn(changeOrderResponseDTO);
 
         mockMvc.perform(put(management + "/changingOrder")
             .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +80,7 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).chooseOrdersDataSwitcher(null, dto);
+        verify(ordersAdminsPageService).chooseOrdersDataSwitcher("35467585763t4sfgchjfuyetf", dto);
     }
 
     @Test
