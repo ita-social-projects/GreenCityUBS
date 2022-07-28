@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,15 +55,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @Validated
 @RequestMapping("/ubs/superAdmin")
+@RequiredArgsConstructor
 class SuperAdminController {
     private final SuperAdminService superAdminService;
-
-    /**
-     * Constructor for initialize SuperAdminService.
-     */
-    public SuperAdminController(SuperAdminService superAdminService) {
-        this.superAdminService = superAdminService;
-    }
 
     /**
      * Controller for create new tariff.

@@ -8,6 +8,7 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,15 +20,9 @@ import javax.validation.Valid;
 @RestController
 @Validated
 @RequestMapping("/ubs/userProfile")
+@RequiredArgsConstructor
 public class UserProfileController {
     private final UBSClientService ubsClientService;
-
-    /**
-     * Constructor with parameters.
-     */
-    public UserProfileController(UBSClientService ubsClientService) {
-        this.ubsClientService = ubsClientService;
-    }
 
     /**
      * Controller returns user`s data or update {@link UserProfileDto} date.

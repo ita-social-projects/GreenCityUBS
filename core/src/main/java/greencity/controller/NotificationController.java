@@ -14,7 +14,7 @@ import greencity.service.ubs.NotificationTemplatesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,19 +28,10 @@ import java.util.Locale;
 @RestController
 @RequestMapping("/notifications")
 @Validated
+@RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationTemplatesService notificationTemplatesService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public NotificationController(NotificationService notificationService,
-        NotificationTemplatesService notificationTemplatesService) {
-        this.notificationService = notificationService;
-        this.notificationTemplatesService = notificationTemplatesService;
-    }
 
     /**
      * Controller return body of the notification and set status - is read.

@@ -26,7 +26,7 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,21 +45,11 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/ubs")
 @Validated
+@RequiredArgsConstructor
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final RedirectionConfigProp redirectionConfigProp;
     private final NotificationService notificationService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
-        NotificationService notificationService) {
-        this.ubsClientService = ubsClientService;
-        this.redirectionConfigProp = redirectionConfigProp;
-        this.notificationService = notificationService;
-    }
 
     /**
      * Controller returns all available bags and bonus points of current user.
