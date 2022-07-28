@@ -3,7 +3,7 @@ package greencity.service.ubs;
 import com.liqpay.LiqPay;
 import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.StatusRequestDtoLiqPay;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.util.Map;
  * Implementation of {@link LiqPayService}.
  */
 @Service
-@RequiredArgsConstructor
+@Data
 public class LiqPayServiceImpl implements LiqPayService {
     private final LiqPay liqPay;
 

@@ -9,8 +9,8 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.OrderRepository;
+import lombok.Data;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.*;
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class CoordinateServiceImpl implements CoordinateService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;

@@ -20,7 +20,7 @@ import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import java.util.*;
 import static greencity.constant.ErrorMessage.*;
 
 @Service
-@AllArgsConstructor
+@Data
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;

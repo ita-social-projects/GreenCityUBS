@@ -12,7 +12,7 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.repository.CertificateCriteriaRepo;
 import greencity.repository.CertificateRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.*;
 
 @org.springframework.stereotype.Service
-@RequiredArgsConstructor
+@Data
 public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepository certificateRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
