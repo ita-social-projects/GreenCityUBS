@@ -34,7 +34,7 @@ import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
-@RequiredArgsConstructor
+@Data
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository translationRepository;

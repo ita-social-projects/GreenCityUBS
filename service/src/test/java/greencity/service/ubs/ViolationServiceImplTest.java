@@ -31,7 +31,7 @@ import greencity.repository.OrderRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
-import greencity.service.NotificationServiceImpl;
+import greencity.service.notification.NotificationServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

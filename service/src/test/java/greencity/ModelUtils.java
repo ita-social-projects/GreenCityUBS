@@ -3503,10 +3503,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(Collections.emptyList())
-//            .receivingStationList(Set.of(ReceivingStation.builder()
-//                .name("receivingStation")
-//                .createdBy(ModelUtils.createUser())
-//                .build()))
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
             .build();
     }
 

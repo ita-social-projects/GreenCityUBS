@@ -7,7 +7,7 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileNotSavedException;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class AzureCloudStorageService implements FileService {
     private final String connectionString;
     private final String containerName;
