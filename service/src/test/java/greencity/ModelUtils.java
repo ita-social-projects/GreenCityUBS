@@ -935,6 +935,10 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
             .build();
     }
 
