@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.jupiter.api.Disabled;
+import greencity.ModelUtils;
+import greencity.entity.user.employee.ReceivingStation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,8 +35,6 @@ import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.service.ubs.FileService;
-import greencity.service.ubs.UBSManagementEmployeeServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -138,56 +136,72 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    @Disabled("test isn't correct")
-    void updateEmployee() {
-        when(modelMapper.map(any(), any())).thenReturn(getEmployee(), getEmployeeDto());
+    void updateEmployeeTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        ReceivingStation station = ModelUtils.getReceivingStation();
+        Position position = ModelUtils.getPosition();
+
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
-            .thenReturn(null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong()))
-            .thenReturn(null);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
-        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
-        employeeService.update(getEmployeeDto(), null);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
+            .thenReturn(true);
+
+        employeeService.update(dto, null);
+
         verify(repository, times(1)).save(any());
         verify(repository, times(1)).checkIfEmailUnique(anyString(), anyLong());
         verify(repository, times(1)).checkIfPhoneNumberUnique(anyString(), anyLong());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
-        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(station.getId(),
+            station.getName());
     }
 
     @Test
-    @Disabled("test isn't correct")
-    void updateEmployeeShouldThrowExceptions() {
+    void updateEmployeeNotFoundTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong()))
-            .thenReturn(getEmployee(), null, null, null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong()))
-            .thenReturn(getEmployee(), null, null);
-        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
-        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
+    }
 
-        EmployeeDto employeeDto1 = getEmployeeDto();
-        Exception thrown2 = assertThrows(NotFoundException.class,
-            () -> employeeService.update(employeeDto1, null));
-        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + getEmployeeDto().getId(), thrown2.getMessage());
-        EmployeeDto employeeDto2 = getEmployeeDto();
-        Exception thrown = assertThrows(UnprocessableEntityException.class,
-            () -> employeeService.update(employeeDto2, null));
-        assertEquals(ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + getEmployeeDto().getPhoneNumber(),
-            thrown.getMessage());
-        EmployeeDto employeeDto3 = getEmployeeDto();
-        Exception thrown1 = assertThrows(UnprocessableEntityException.class,
-            () -> employeeService.update(employeeDto3, null));
-        assertEquals(ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + getEmployeeDto().getEmail(), thrown1.getMessage());
-        EmployeeDto employeeDto4 = getEmployeeDto();
-        Exception thrown3 = assertThrows(NotFoundException.class,
-            () -> employeeService.update(employeeDto4, null));
-        assertEquals(ErrorMessage.POSITION_NOT_FOUND, thrown3.getMessage());
-        EmployeeDto employeeDto5 = getEmployeeDto();
-        Exception thrown4 = assertThrows(NotFoundException.class,
-            () -> employeeService.update(employeeDto5, null));
-        assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND, thrown4.getMessage());
+    @Test
+    void updateEmployeePhoneAlreadyExistsTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
+        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
+    }
+
+    @Test
+    void updateEmployeeEmailAlreadyExistsTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
+        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
+    }
+
+    @Test
+    void updateEmployeePositionNotFoundTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
+    }
+
+    @Test
+    void updateEmployeeStationNotFoundTest() {
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        Position position = ModelUtils.getPosition();
+        when(repository.existsById(any())).thenReturn(true);
+        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
