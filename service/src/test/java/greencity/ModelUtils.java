@@ -299,7 +299,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
-                .id(1l)
+                .id(1L)
                 .paymentId("1")
                 .amount(20000L)
                 .currency("UAH")

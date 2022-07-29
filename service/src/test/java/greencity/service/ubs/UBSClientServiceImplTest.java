@@ -20,7 +20,6 @@ import javax.persistence.EntityNotFoundException;
 import greencity.service.google.GoogleApiService;
 import greencity.service.PhoneNumberFormatterService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -126,13 +125,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
@@ -1700,15 +1693,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void getLiqPayStatusAccessDeniedException() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
-        when(userRepository.findByUuid(anyString())).thenReturn(getTestUser());
-        assertThrows(AccessDeniedException.class, () -> {
-            ubsService.getLiqPayStatus(1L, "abc");
-        });
-    }
-
-    @Test
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
@@ -1970,47 +1954,51 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    @Disabled("test isn't correct")
     void getLiqPayStatusTest() {
-        Order order = getOrder().setUser(getTestUser());
-        order.getPayment().add(getPayment());
+        Order order = ModelUtils.getOrder();
+        User user = order.getUser();
 
         StatusRequestDtoLiqPay dto = StatusRequestDtoLiqPay.builder()
-            .orderId("1L")
+            .orderId("1_1")
             .action("status")
             .version(3)
             .build();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("version", dto.getVersion().toString());
-        response.put("order_id", dto.getOrderId());
-        response.put("create_date", 100L);
-        response.put("end_date", 200L);
-        response.put("sender_commission", 20d);
-        response.put("amount", 20d);
 
-        when(orderRepository.findById(1l)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid("abc")).thenReturn(getTestUser());
+        Map<String, Object> response = generateLiqPayResponse(dto);
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(userRepository.findByUuid(anyString())).thenReturn(user);
         when(liqPayService.getPaymentStatus(dto)).thenReturn(response);
         when(paymentRepository.findAllByOrder(order)).thenReturn(order.getPayment());
 
-        ubsService.getLiqPayStatus(1L, "abc");
+        ubsService.getLiqPayStatus(1L, anyString());
+        verify(paymentRepository, times(1)).save(order.getPayment().get(0));
+        verify(orderRepository, times(1)).save(order);
+        assertEquals(response, ubsService.getLiqPayStatus(1L, "abc"));
+    }
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("status", "failure");
-        res.put("version", dto.getVersion().toString());
-        res.put("order_id", dto.getOrderId());
-        res.put("create_date", 100L);
-        res.put("end_date", 200L);
-        res.put("sender_commission", 20d);
-        res.put("amount", 20d);
+    private Map<String, Object> generateLiqPayResponse(StatusRequestDtoLiqPay dto) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("version", dto.getVersion());
+        response.put("order_id", dto.getOrderId());
+        response.put("create_date", System.currentTimeMillis());
+        response.put("end_date", System.currentTimeMillis());
+        response.put("sender_commission", 10d);
+        response.put("amount", 1d);
+        return response;
+    }
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(userRepository.findByUuid("abc")).thenReturn(getTestUser());
-        when(liqPayService.getPaymentStatus(dto)).thenReturn(res);
-        when(paymentRepository.findAllByOrder(order)).thenReturn(order.getPayment());
+    @Test
+    void getLiqPayStatusOrderDoesNotExistTest() {
+        assertThrows(NotFoundException.class, () -> ubsService.getLiqPayStatus(1L, anyString()));
+    }
 
-        ubsService.getLiqPayStatus(1L, "abc");
+    @Test
+    void getLiqPayStatusAccessDeniedTest() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(getOrder()));
+        when(userRepository.findByUuid(anyString())).thenReturn(getUser());
+        assertThrows(AccessDeniedException.class, () -> ubsService.getLiqPayStatus(1L, "abc"));
     }
 
     @Test
