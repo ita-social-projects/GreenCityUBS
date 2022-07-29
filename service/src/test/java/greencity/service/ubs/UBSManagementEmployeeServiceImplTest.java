@@ -148,7 +148,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
             .thenReturn(true);
 
-        employeeService.update(dto, any());
+        employeeService.update(dto, null);
 
         verify(repository, times(1)).save(any());
         verify(repository, times(1)).checkIfEmailUnique(anyString(), anyLong());
@@ -162,7 +162,7 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeeNotFoundTest() {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
-        assertThrows(NotFoundException.class, () -> employeeService.update(dto, any()));
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
@@ -170,7 +170,7 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
-        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, any()));
+        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
@@ -179,7 +179,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
-        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, any()));
+        assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
@@ -189,7 +189,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
-        assertThrows(NotFoundException.class, () -> employeeService.update(dto, any()));
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test
@@ -201,7 +201,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> employeeService.update(dto, any()));
+        assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
 
     @Test

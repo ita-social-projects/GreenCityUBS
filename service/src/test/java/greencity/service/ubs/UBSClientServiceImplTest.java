@@ -1991,7 +1991,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void getLiqPayStatusOrderDoesNotExistTest() {
-        assertThrows(NotFoundException.class, () -> ubsService.getLiqPayStatus(1L, anyString()));
+        assertThrows(NotFoundException.class, () -> ubsService.getLiqPayStatus(1L, null));
     }
 
     @Test
