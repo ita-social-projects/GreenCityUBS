@@ -137,38 +137,37 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
-        Employee employee = ModelUtils.getEmployee();
-        Position position = ModelUtils.getPosition();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         ReceivingStation station = ModelUtils.getReceivingStation();
+        Position position = ModelUtils.getPosition();
 
-        when(modelMapper.map(any(), any())).thenReturn(employee, dto);
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
-        when(stationRepository.existsReceivingStationByIdAndName(station.getId(), station.getName()))
+        when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
             .thenReturn(true);
 
-        employeeService.update(getEmployeeDto(), any());
+        employeeService.update(dto, any());
 
         verify(repository, times(1)).save(any());
         verify(repository, times(1)).checkIfEmailUnique(anyString(), anyLong());
         verify(repository, times(1)).checkIfPhoneNumberUnique(anyString(), anyLong());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
-        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(station.getId(), station.getName());
+        verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(station.getId(),
+            station.getName());
     }
 
     @Test
     void updateEmployeeNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(false, true, true, true, true);
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, any()));
     }
 
     @Test
     void updateEmployeePhoneAlreadyExistsTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
         assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, any()));
@@ -176,7 +175,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeEmailAlreadyExistsTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
@@ -185,7 +184,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeePositionNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
         when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
@@ -195,7 +194,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeStationNotFoundTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         Position position = ModelUtils.getPosition();
         when(repository.existsById(any())).thenReturn(true);
         when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
