@@ -2,8 +2,10 @@ package greencity.repository;
 
 import greencity.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -137,4 +139,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
             + "ORDER BY o1.order_date DESC limit 1) "
             + "WHERE CAST(o.order_date AS DATE) = :dateOfLastOrder")
     List<User> getInactiveUsersByDateOfLastOrder(LocalDate dateOfLastOrder);
+
+    /**
+     * Method sets user current points by user's id.
+     *
+     * @param userId     - user's ID
+     * @param returnPoints - user points to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+            value = "UPDATE users SET current_points = current_points + :returnPoints WHERE id = :userId")
+    void updateUserCurrentPoints(Long userId, int returnPoints);
 }

@@ -577,11 +577,21 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         long discount = orderRepository.findSumOfCertificatesByOrderId(orderId);
-        var price = getPriceDetails(orderId);
-        Long needToPay = setTotalPrice(price).longValue() - (wasPaid) - discount;
+        Long totalPrice = setTotalPrice(getPriceDetails(orderId)).longValue();
+        Long needToPay = totalPrice - wasPaid - discount;
 
-        if (needToPay <= 0) {
+        if (needToPay == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+            return;
+        }
+        if (totalPrice - wasPaid >= 0 && needToPay < 0) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+            recalculateCertificates( totalPrice - wasPaid, order);
+            return;
+        }
+        if (totalPrice < wasPaid) {
+            orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
+            recalculateCertificates( 0L, order);
             return;
         }
         if (needToPay > 0 && wasPaid + discount != 0) {
@@ -591,6 +601,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (wasPaid + discount == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
+        }
+    }
+
+    private void recalculateCertificates(long amount, Order order) {
+        Set<Certificate> certificates = order.getCertificates();
+        for (Certificate certificate : certificates) {
+            amount = amount - certificate.getPoints();
+            if (amount < 0) {
+                certificate.setPoints(certificate.getPoints() + (int) amount);
+                certificateRepository.save(certificate);
+                amount = 0L;
+            }
+        }
+        recalculatePoints(amount, order);
+    }
+
+    private void recalculatePoints(long amount, Order order) {
+        if (order.getPointsToUse() > amount) {
+            userRepository.updateUserCurrentPoints(order.getUser().getId(), order.getPointsToUse() - (int) amount);
+            order.setPointsToUse((int) amount);
+            orderRepository.updateOrderPointsToUse(order.getId(), (int) amount);
         }
     }
 
