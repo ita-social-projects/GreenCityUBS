@@ -143,12 +143,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Method sets user current points by user's id.
      *
-     * @param userId     - user's ID
+     * @param userId       - user's ID
      * @param returnPoints - user points to set
      */
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
-            value = "UPDATE users SET current_points = current_points + :returnPoints WHERE id = :userId")
+        value = "UPDATE users SET current_points = current_points + :returnPoints WHERE id = :userId")
     void updateUserCurrentPoints(Long userId, int returnPoints);
 }

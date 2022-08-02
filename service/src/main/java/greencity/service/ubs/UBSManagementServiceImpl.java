@@ -586,12 +586,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         if (totalPrice - wasPaid >= 0 && needToPay < 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
-            recalculateCertificates( totalPrice - wasPaid, order);
+            recalculateCertificates(totalPrice - wasPaid, order);
             return;
         }
         if (totalPrice < wasPaid) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
-            recalculateCertificates( 0L, order);
+            recalculateCertificates(0L, order);
             return;
         }
         if (needToPay > 0 && wasPaid + discount != 0) {

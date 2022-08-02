@@ -290,6 +290,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
-            value = "UPDATE orders SET points_to_use = :pointsToUse WHERE id = :orderId")
+        value = "UPDATE orders SET points_to_use = :pointsToUse WHERE id = :orderId")
     void updateOrderPointsToUse(Long orderId, int pointsToUse);
 }
