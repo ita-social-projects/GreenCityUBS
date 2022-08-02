@@ -40,6 +40,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -949,6 +950,47 @@ class UBSManagementServiceImplTest {
             UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailIfPaidAndPriceLessThanDiscount() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
+        when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto2()));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
+        ubsManagementService.setOrderDetail(order.getId(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
+
+        verify(certificateRepository).save(ModelUtils.getCertificate2().setPoints(20));
+        verify(userRepository).updateUserCurrentPoints(1L, 100);
+        verify(orderRepository).updateOrderPointsToUse(1L, 0);
+    }
+
+    @Test
+    void testSetOrderDetailIfPaidAndPriceLessThanPaidSum() {
+        User user = User.builder().uuid("abc").recipientName("Петро").recipientSurname("Петренко")
+            .id(42L).build();
+        Order order = ModelUtils.getOrdersStatusAdjustmentDto2();
+        when(paymentRepository.selectSumPaid(order.getId())).thenReturn(10000L);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+        when(certificateRepository.findCertificate(order.getId())).thenReturn(List.of(ModelUtils.getCertificate2()));
+        when(orderRepository.findSumOfCertificatesByOrderId(order.getId())).thenReturn(600L);
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto2()));
+        when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
+        ubsManagementService.setOrderDetail(order.getId(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "abc");
+
+        verify(certificateRepository).save(ModelUtils.getCertificate2().setPoints(0));
+        verify(userRepository).updateUserCurrentPoints(1L, 100);
+        verify(orderRepository).updateOrderPointsToUse(1L, 0);
     }
 
     @Test

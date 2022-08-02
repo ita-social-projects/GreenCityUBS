@@ -280,4 +280,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             + "left join certificate c on orders.id = c.order_id "
             + "where id= :orderId")
     Long findSumOfCertificatesByOrderId(Long orderId);
+
+    /**
+     * Method sets order points to use by order's id.
+     *
+     * @param orderId     - order's ID
+     * @param pointsToUse - order points to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET points_to_use = :pointsToUse WHERE id = :orderId")
+    void updateOrderPointsToUse(Long orderId, int pointsToUse);
 }

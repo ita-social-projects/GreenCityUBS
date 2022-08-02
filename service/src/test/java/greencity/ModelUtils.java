@@ -829,6 +829,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static Certificate getCertificate2() {
+        return Certificate.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(600)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .order(null)
+            .build();
+    }
+
     public static UserViolationMailDto getUserViolationMailDto() {
         return UserViolationMailDto.builder()
             .email("string@gmail.com")
@@ -3185,6 +3196,20 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrdersStatusAdjustmentDto2() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .counterOrderPaymentId(1L)
+            .certificates(Set.of(getCertificate2()))
+            .pointsToUse(100)
+            .build();
+    }
+
     public static Order getOrdersStatusConfirmedDto() {
         return Order.builder()
             .id(1L)
@@ -3208,6 +3233,22 @@ public class ModelUtils {
             .counterOrderPaymentId(1L)
             .pointsToUse(100)
             .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .build();
+    }
+
+    public static Order getOrdersStatusFormedDto2() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.FORMED)
+            .counterOrderPaymentId(1L)
+            .pointsToUse(100)
+            .confirmedQuantity(Map.of(1, 3))
             .exportedQuantity(Map.of(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .build();
