@@ -32,29 +32,29 @@ public class CourierDtoMapperTest {
     @Test
     public void convert() {
         CourierTranslation courierTranslation = CourierTranslation.builder()
-                .id(2L)
-                .name("Ukrainian")
-                .courier(new Courier())
-                .language(new Language())
-                .build();
+            .id(2L)
+            .name("Ukrainian")
+            .courier(new Courier())
+            .language(new Language())
+            .build();
 
         CourierTranslationDto courierTranslationDto = CourierTranslationDto.builder()
-                .name("Ukrainian")
-                .languageCode("null")
-                .build();
+            .name("Ukrainian")
+            .languageCode("null")
+            .build();
 
         User user = User.builder()
-                .recipientName("Ivan")
-                .recipientSurname("Boiko")
-                .build();
+            .recipientName("Ivan")
+            .recipientSurname("Boiko")
+            .build();
 
         Courier expected = Courier.builder()
-                .id(22L)
-                .courierStatus(ACTIVE)
-                .courierTranslationList(List.of(courierTranslation))
-                .createDate(LocalDate.of(2022, 8, 2))
-                .createdBy(user)
-                .build();
+            .id(22L)
+            .courierStatus(ACTIVE)
+            .courierTranslationList(List.of(courierTranslation))
+            .createDate(LocalDate.of(2022, 8, 2))
+            .createdBy(user)
+            .build();
 
         CourierDto actual = courierDtoMapper.convert(expected);
 

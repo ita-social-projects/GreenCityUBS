@@ -18,10 +18,10 @@ public class LocationToLocationsDtosMapperTest {
     @Test
     public void convert() {
         Location expected = Location.builder()
-                .id(42L)
-                .nameEn("Lviv")
-                .nameUk("Львів")
-                .build();
+            .id(42L)
+            .nameEn("Lviv")
+            .nameUk("Львів")
+            .build();
 
         LocationsDtos actual = locationToLocationsDtosMapper.convert(expected);
 
