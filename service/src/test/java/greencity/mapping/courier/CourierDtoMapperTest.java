@@ -2,7 +2,6 @@ package greencity.mapping.courier;
 
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierTranslationDto;
-import greencity.entity.language.Language;
 import greencity.entity.order.Courier;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.user.User;
@@ -15,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 
+import static greencity.ModelUtils.*;
 import static greencity.entity.enums.CourierStatus.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,22 +31,11 @@ public class CourierDtoMapperTest {
 
     @Test
     public void convert() {
-        CourierTranslation courierTranslation = CourierTranslation.builder()
-            .id(2L)
-            .name("Ukrainian")
-            .courier(new Courier())
-            .language(new Language())
-            .build();
+        CourierTranslation courierTranslation = getCourierTranslation();
 
-        CourierTranslationDto courierTranslationDto = CourierTranslationDto.builder()
-            .name("Ukrainian")
-            .languageCode("null")
-            .build();
+        CourierTranslationDto courierTranslationDto = getCourierTranslationDto();
 
-        User user = User.builder()
-            .recipientName("Ivan")
-            .recipientSurname("Boiko")
-            .build();
+        User user = getUser();
 
         Courier expected = Courier.builder()
             .id(22L)

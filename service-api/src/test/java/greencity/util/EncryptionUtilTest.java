@@ -1,6 +1,7 @@
 package greencity.util;
 
 import com.liqpay.LiqPayUtil;
+import greencity.ModelUtils;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
@@ -14,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.StandardCharsets;
 
+import static greencity.ModelUtils.getPaymentRequestDto;
+import static greencity.ModelUtils.getPaymentRequestDtoLiqPay;
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,41 +32,7 @@ public class EncryptionUtilTest {
 
     @Test
     public void checkIfResponseSignatureIsValid() {
-        PaymentResponseDto paymentResponseDto = PaymentResponseDto.builder()
-            .actual_amount(10)
-            .actual_currency("USD")
-            .amount(2)
-            .approval_code("123")
-            .card_bin(444455)
-            .card_type("VISA")
-            .currency("USD")
-            .eci(6)
-            .fee(10)
-            .masked_card("1")
-            .merchant_data("03/08/22")
-            .merchant_id(3)
-            .order_id("234")
-            .order_status("approved")
-            .order_time("13/08/22")
-            .payment_id(85233820)
-            .payment_system("card")
-            .product_id("324")
-            .rectoken("Y")
-            .rectoken_lifetime("256")
-            .response_code(200)
-            .response_description("")
-            .response_status("APPROVED")
-            .reversal_amount(2)
-            .rrn("IADG/0000000C00000000")
-            .sender_account("sender")
-            .sender_cell_phone("+4930901820")
-            .sender_email("sender@mail.com")
-            .settlement_currency("USD")
-            .settlement_date("03/08/22")
-            .tran_type("purchase")
-            .verification_status("ACTIVE")
-            .parent_order_id(1)
-            .build();
+        PaymentResponseDto paymentResponseDto = ModelUtils.getPaymentResponseDto();
 
         paymentResponseDto.setSignature(SIGNATURE);
 
@@ -74,15 +43,7 @@ public class EncryptionUtilTest {
 
     @Test
     public void formRequestSignature() {
-        PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
-            .orderId("1")
-            .merchantId(2)
-            .orderDescription("")
-            .currency("USD")
-            .amount(2)
-            .signature("")
-            .responseUrl("responseUrl")
-            .build();
+        PaymentRequestDto paymentRequestDto = getPaymentRequestDto();
 
         String stringBuilder = PASSWORD + "|" + paymentRequestDto.getAmount() +
             "|" + paymentRequestDto.getCurrency() +
@@ -97,18 +58,7 @@ public class EncryptionUtilTest {
 
     @Test
     public void formingRequestSignatureLiqPay() {
-        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = PaymentRequestDtoLiqPay.builder()
-            .publicKey("publicKey")
-            .version(3)
-            .action("pay")
-            .amount(2)
-            .currency("USD")
-            .description("description")
-            .orderId("233")
-            .language("eng")
-            .paytypes("card")
-            .resultUrl("resultUrl")
-            .build();
+        PaymentRequestDtoLiqPay paymentRequestDtoLiqPay = getPaymentRequestDtoLiqPay();
 
         JSONObject data = new JSONObject();
         data.put("public_key", paymentRequestDtoLiqPay.getPublicKey());
