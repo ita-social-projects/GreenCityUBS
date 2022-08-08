@@ -3796,4 +3796,11 @@ public class ModelUtils {
             .certificateStatus("ACTIVE")
             .build();
     }
+
+    public static CourierTranslationDto getCourierTranslationDto() {
+        return CourierTranslationDto.builder()
+            .name("Test")
+            .languageCode("null")
+            .build();
+    }
 }
