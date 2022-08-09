@@ -67,7 +67,7 @@ class UserProfileControllerTest {
             .content(responseJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test

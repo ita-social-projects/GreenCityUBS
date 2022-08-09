@@ -12,6 +12,7 @@ public final class HttpStatuses {
     public static final String SEE_OTHER = "See Other";
     public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     public static final String UNPROCESSABLE_ENTITY = "Unprocessable entity";
+    public static final String NO_CONTENT = "No content";
 
     HttpStatuses() {
     }
