@@ -117,7 +117,6 @@ public class ModelUtils {
             .setTotalPayment(600L)
             .setDateOfExport(LocalDate.parse("2022-02-04", DATE_TIME_FORMATTER))
             .setTimeOfExport("21:22:04-23:22:22")
-            .setIdOrderFromShop("")
             .setReceivingStationId(1L)
             .setReceivingStation("Саперно-Слобідська")
             .setResponsibleLogicManId(2L)
@@ -164,7 +163,6 @@ public class ModelUtils {
             .setTotalPayment(1050L)
             .setDateOfExport(LocalDate.parse("2022-02-03", DATE_TIME_FORMATTER))
             .setTimeOfExport("07:00:00-18:00:10")
-            .setIdOrderFromShop("")
             .setReceivingStationId(2L)
             .setReceivingStation("Грибовицька")
             .setResponsibleLogicManId(3L)
@@ -209,7 +207,6 @@ public class ModelUtils {
             .setTotalPayment(0L)
             .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
             .setTimeOfExport("10:00:00-18:00:10")
-            .setIdOrderFromShop("")
             .setCommentsForOrder("criteria")
             .setIsBlocked(true)
             .setBlockedBy("Abu, Dabi")
@@ -243,7 +240,6 @@ public class ModelUtils {
             .setTotalPayment(0L)
             .setDateOfExport(LocalDate.parse("2022-02-05", DATE_TIME_FORMATTER))
             .setTimeOfExport("10:00:00-18:00:10")
-            .setIdOrderFromShop("")
             .setCommentsForOrder("sorting")
             .setIsBlocked(false)
             .setBlockedBy("")
@@ -279,7 +275,6 @@ public class ModelUtils {
             .setTotalPayment(500L)
             .setDateOfExport(LocalDate.parse("2022-02-06", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:27:00-22:27:03")
-            .setIdOrderFromShop("")
             .setReceivingStationId(2L)
             .setReceivingStation("Грибовицька")
             .setResponsibleLogicManId(3L)
@@ -326,7 +321,6 @@ public class ModelUtils {
             .setTotalPayment(600L)
             .setDateOfExport(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:27:07-22:27:12")
-            .setIdOrderFromShop("")
             .setReceivingStationId(2L)
             .setReceivingStation("Грибовицька")
             .setResponsibleLogicManId(3L)
@@ -374,7 +368,6 @@ public class ModelUtils {
             .setTotalPayment(600L)
             .setDateOfExport(LocalDate.parse("2022-02-08", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:27:16-22:27:21")
-            .setIdOrderFromShop("")
             .setReceivingStationId(1L)
             .setReceivingStation("Саперно-Слобідська")
             .setResponsibleLogicManId(10L)
@@ -418,7 +411,6 @@ public class ModelUtils {
             .setTotalPayment(0L)
             .setDateOfExport(LocalDate.parse("2022-02-09", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:27:25-22:27:29")
-            .setIdOrderFromShop("")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -456,7 +448,6 @@ public class ModelUtils {
             .setTotalPayment(2150L)
             .setDateOfExport(LocalDate.parse("2022-02-10", DATE_TIME_FORMATTER))
             .setTimeOfExport("07:00:00-15:00:00")
-            .setIdOrderFromShop("")
             .setReceivingStationId(2L)
             .setReceivingStation("Грибовицька")
             .setResponsibleLogicManId(3L)
@@ -501,7 +492,6 @@ public class ModelUtils {
             .setTotalPayment(650L)
             .setDateOfExport(LocalDate.parse("2022-02-10", DATE_TIME_FORMATTER))
             .setTimeOfExport("07:00:00-15:00:00")
-            .setIdOrderFromShop("")
             .setIsBlocked(true)
             .setBlockedBy("Abu, Dabi")
             .setTariffsInfoId(1L);
@@ -536,7 +526,6 @@ public class ModelUtils {
             .setTotalPayment(650L)
             .setDateOfExport(LocalDate.parse("2022-02-18", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:27:59-22:28:11")
-            .setIdOrderFromShop("")
             .setIsBlocked(false)
             .setBlockedBy("")
             .setTariffsInfoId(1L);
@@ -571,7 +560,6 @@ public class ModelUtils {
             .setTotalPayment(12650L)
             .setDateOfExport(LocalDate.parse("2022-02-03", DATE_TIME_FORMATTER))
             .setTimeOfExport("22:28:18-22:28:24")
-            .setIdOrderFromShop("")
             .setReceivingStationId(2L)
             .setReceivingStation("Грибовицька")
             .setResponsibleLogicManId(3L)
@@ -763,15 +751,15 @@ public class ModelUtils {
     public static List<BigOrderTableViews> getListBOTViewsOSC_Sorting_By_Order_Payment_Status_DESC() {
         return Arrays.asList(
             getBOTViews_89(),
-            getBOTViews_84(),
             getBOTViews_85(),
+            getBOTViews_84(),
             getBOTViews_91(),
-            getBOTViews_90(),
-            getBOTViews_92(),
             getBOTViews_86(),
+            getBOTViews_93(),
             getBOTViews_87(),
-            getBOTViews_82(),
-            getBOTViews_88());
+            getBOTViews_88(),
+            getBOTViews_83(),
+            getBOTViews_92());
     }
 
     public static Page<BigOrderTableViews> getPageableAllBOTViews_ASC() {
