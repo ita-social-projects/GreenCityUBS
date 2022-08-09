@@ -1,10 +1,12 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.LocationCreateDto;
@@ -307,6 +309,17 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void checkIfTariffExistsTest() throws Exception {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(post(ubsLink + "/check-if-tariff-exists")
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
+            .andExpect(status().isOk());
     }
 
     @Test

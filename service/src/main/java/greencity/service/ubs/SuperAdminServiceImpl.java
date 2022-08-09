@@ -583,7 +583,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
         var tariffLocationListList = tariffsLocationRepository
-                .findAllByCourierIdAndLocationIds(courierId, locationIds);
+            .findAllByCourierIdAndLocationIds(courierId, locationIds);
         List<Long> alreadyExistsTariff = tariffLocationListList.stream()
             .map(tariffLocation -> tariffLocation.getLocation().getId())
             .collect(Collectors.toList());
@@ -599,7 +599,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public boolean checkIfTariffExists(AddNewTariffDto addNewTariffDto) {
         List<TariffLocation> tariffLocations = tariffsLocationRepository.findAllByCourierIdAndLocationIds(
-                addNewTariffDto.getCourierId(), addNewTariffDto.getLocationIdList());
+            addNewTariffDto.getCourierId(), addNewTariffDto.getLocationIdList());
 
         return (tariffLocations != null && !tariffLocations.isEmpty());
     }
