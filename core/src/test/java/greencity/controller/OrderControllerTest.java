@@ -126,32 +126,9 @@ class OrderControllerTest {
     }
 
     @Test
-    void processOrderId() throws Exception {
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getOrderDetailStatusDto();
-
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processOrder/{id}", 1L)
-            .content(orderResponseDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(ubsClientService).saveFullOrderToDB(any(), eq("35467585763t4sfgchjfuyetf"), any());
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-    }
-
-    @Test
     void processPaidOrderId() throws Exception {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getOrderDetailStatusDto();
-
-        System.out.println(orderDetailStatusDto.getPaymentStatus());
 
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
