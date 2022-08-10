@@ -34,7 +34,6 @@ public class UserProfileController {
      */
     @ApiOperation(value = "Update user profile")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserProfileDto.class),
         @ApiResponse(code = 204, message = HttpStatuses.NO_CONTENT),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
