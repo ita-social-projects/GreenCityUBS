@@ -228,6 +228,13 @@ public interface SuperAdminService {
     AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID);
 
     /**
+     * Method checks if passed TariffsInfo exists in database.
+     *
+     * @param addNewTariffDto {@link AddNewTariffDto}
+     */
+    boolean checkIfTariffExists(AddNewTariffDto addNewTariffDto);
+
+    /**
      * Method for edit info about tariff.
      *
      * @param tariffId - id of tariff
