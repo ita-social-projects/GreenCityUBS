@@ -9,7 +9,6 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.entity.order.*;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,7 +59,6 @@ import greencity.repository.ServiceTranslationRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.SuperAdminServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

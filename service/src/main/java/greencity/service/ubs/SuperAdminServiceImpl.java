@@ -35,6 +35,7 @@ import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -601,7 +602,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<TariffLocation> tariffLocations = tariffsLocationRepository.findAllByCourierIdAndLocationIds(
             addNewTariffDto.getCourierId(), addNewTariffDto.getLocationIdList());
 
-        return (tariffLocations != null && !tariffLocations.isEmpty());
+        return (!CollectionUtils.isEmpty(tariffLocations));
     }
 
     @Override
