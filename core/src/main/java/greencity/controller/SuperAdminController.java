@@ -556,6 +556,25 @@ class SuperAdminController {
     }
 
     /**
+     * Controller for checking if tariff info is already in the database.
+     *
+     * @author Inna Yashna
+     */
+    @ApiOperation(value = "Check if tariff exists")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
+    @PostMapping("/check-if-tariff-exists")
+    public ResponseEntity<Boolean> checkIfTariffExists(
+        @RequestBody @Valid AddNewTariffDto addNewTariffDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.checkIfTariffExists(addNewTariffDto));
+    }
+
+    /**
      * Controller for updating TariffsInfo and setting courierLimit by amount of
      * bags.
      *

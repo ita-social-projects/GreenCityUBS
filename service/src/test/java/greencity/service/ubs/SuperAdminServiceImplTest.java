@@ -9,7 +9,6 @@ import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.entity.order.*;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,10 +59,8 @@ import greencity.repository.ServiceTranslationRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.SuperAdminServiceImpl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -726,6 +723,15 @@ class SuperAdminServiceImplTest {
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void checkIfTariffExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
+            .thenReturn(Collections.emptyList());
+        boolean actual = superAdminService.checkIfTariffExists(dto);
+        assertFalse(actual);
     }
 
     @Test
