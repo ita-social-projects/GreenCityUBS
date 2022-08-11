@@ -103,6 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/return-overpayment",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/add-new-tariff",
+                SUPER_ADMIN_LINK + "/check-if-tariff-exists",
                 SUPER_ADMIN_LINK + "/addLocations",
                 SUPER_ADMIN_LINK + "/createCourier",
                 SUPER_ADMIN_LINK + "/createTariffService",
