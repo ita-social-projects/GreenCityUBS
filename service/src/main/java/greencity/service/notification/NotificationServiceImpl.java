@@ -18,6 +18,7 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
@@ -363,7 +364,7 @@ public class NotificationServiceImpl implements NotificationService {
             .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
         if (!notification.getUser().getUuid().equals(uuid)) {
-            throw new ForbiddenException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+            throw new AccessDeniedException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
 
         if (!notification.isRead()) {
