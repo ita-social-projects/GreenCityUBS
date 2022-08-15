@@ -32,6 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.ws.rs.ForbiddenException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -362,7 +363,7 @@ public class NotificationServiceImpl implements NotificationService {
             .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
         if (!notification.getUser().getUuid().equals(uuid)) {
-            throw new NotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+            throw new ForbiddenException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
 
         if (!notification.isRead()) {
