@@ -15,6 +15,7 @@ import greencity.entity.user.employee.Position;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
+import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.OrdersAdminsPageServiceImpl;
 import greencity.service.ubs.UBSManagementEmployeeService;
@@ -60,6 +61,8 @@ class OrdersAdminsPageServiceImplTest {
     private UserRepository userRepository;
     @Mock
     EventService eventService;
+    @Mock
+    NotificationServiceImpl notificationService;
 
     @Mock
     private SuperAdminService superAdminService;
@@ -256,12 +259,6 @@ class OrdersAdminsPageServiceImplTest {
 
         ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, 1L);
 
-        assertNull(order.getDateOfExport());
-        assertNull(order.getDeliverFrom());
-        assertNull(order.getDeliverTo());
-        assertNull(order.getReceivingStation());
-        assertNull(order.getEmployeeOrderPositions());
-
         verify(orderRepository).save(order);
     }
 
@@ -399,6 +396,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(receivingStationRepository.getOne(1L)).thenReturn(ModelUtils.getReceivingStation());
         when(employeeRepository.findByEmail(email)).thenReturn(employee);
+        when(employeeRepository.findById(1L)).thenReturn(employee);
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
@@ -409,6 +407,12 @@ class OrdersAdminsPageServiceImplTest {
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("receivingStation");
         dto.setNewValue("1");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        dto.setColumnName("cancellationReason");
+        dto.setNewValue("MOVING_OUT");
+        ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
+        dto.setColumnName("cancellationComment");
+        dto.setNewValue("Comment");
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
 
         verify(receivingStationRepository, atLeast(1)).getOne(1L);
