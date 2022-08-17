@@ -382,7 +382,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         }
         user.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(user);
-        if (order.getCertificates().size() > 0) {
+        if (!order.getCertificates().isEmpty()) {
             Set<Certificate> certificates = order.getCertificates();
             for (Certificate certificate : certificates) {
                 certificate.setPoints(0);
@@ -410,7 +410,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         if (EnumUtils.isValidEnum(CancellationReason.class, value)) {
             for (Long orderId : ordersId) {
                 try {
-                    orderRepository.findById(orderId)
+                    Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
                     orderRepository.updateCancelingReason(orderId, value);
                 } catch (Exception e) {
