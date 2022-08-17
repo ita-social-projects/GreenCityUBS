@@ -114,6 +114,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.PUT,
                 UBS_MANAG_LINK + "/changeOrdersTableView",
                 UBS_MANAG_LINK + "/updateViolationToUser",
+                UBS_MANAG_LINK + "/all-order-page-admin-info",
                 UBS_MANAG_LINK + "/update-manual-payment/{id}",
                 UBS_MANAG_LINK + "/changingOrder",
                 UBS_MANAG_LINK + "/blockOrders",
