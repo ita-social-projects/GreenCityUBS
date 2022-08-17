@@ -412,7 +412,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 try {
                     Order existedOrder = orderRepository.findById(orderId)
                         .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-                    orderRepository.updateCancelingReason(orderId, value);
+                    orderRepository.updateCancelingReason(existedOrder.getId(), value);
                 } catch (Exception e) {
                     unresolvedGoals.add(orderId);
                 }
