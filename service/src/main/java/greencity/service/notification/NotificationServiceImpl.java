@@ -18,6 +18,7 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.ws.rs.ForbiddenException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -362,7 +364,7 @@ public class NotificationServiceImpl implements NotificationService {
             .orElseThrow(() -> new NotFoundException(NOTIFICATION_DOES_NOT_EXIST));
 
         if (!notification.getUser().getUuid().equals(uuid)) {
-            throw new NotFoundException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
+            throw new AccessDeniedException(NOTIFICATION_DOES_NOT_BELONG_TO_USER);
         }
 
         if (!notification.isRead()) {
