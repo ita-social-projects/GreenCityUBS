@@ -38,6 +38,9 @@ public class EventServiceImpl implements EventService {
      * @author Yuriy Bahlay.
      */
     public void save(String eventName, String eventAuthor, Order order) {
+        if (eventName.isEmpty()) {
+            return;
+        }
         Event event = new Event();
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);

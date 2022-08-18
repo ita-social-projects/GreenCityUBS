@@ -40,6 +40,13 @@ class EventServiceImplTest {
     }
 
     @Test
+    void saveEmptyEventTest() {
+        Order order = ModelUtils.getOrder();
+        eventService.save("", "admin", order);
+        verify(eventRepository, times(0)).save(any());
+    }
+
+    @Test
     void changesWithResponsibleEmployeeTest() {
         String existedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.TRUE);
         String unExistedCallManager = eventService.changesWithResponsibleEmployee(2L, Boolean.FALSE);
