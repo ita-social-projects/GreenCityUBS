@@ -7,6 +7,7 @@ import greencity.dto.notification.SenderInfoDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;
-    private LocalDateTime datePaid;
+    private ZonedDateTime datePaid;
     private String orderStatus;
     private String orderStatusEng;
     private String paymentStatus;

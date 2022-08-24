@@ -51,6 +51,7 @@ import org.springframework.data.domain.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -3464,7 +3465,7 @@ public class ModelUtils {
         return OrdersDataForUserDto.builder()
             .id(1L)
             .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
-            .datePaid(LocalDateTime.now())
+            .datePaid(ZonedDateTime.now())
             .amountBeforePayment(500d)
             .bonuses(100d)
             .orderFullPrice(400d)
