@@ -889,12 +889,12 @@ public class ModelUtils {
             .userBonuses(100)
             .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
                 .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                        .atZone(ZoneId.of("Europe/Ukraine")))
+                    .atZone(ZoneId.of("Europe/Ukraine")))
                 .amount(50)
                 .numberOfOrder(36874L).build(),
                 PointsForUbsUserDto.builder()
                     .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                            .atZone(ZoneId.of("Europe/Ukraine")))
+                        .atZone(ZoneId.of("Europe/Ukraine")))
                     .amount(50)
                     .numberOfOrder(35478L).build()))
             .build();
@@ -904,7 +904,7 @@ public class ModelUtils {
     public static PointsForUbsUserDto pointsForUbsUserDto() {
         return PointsForUbsUserDto.builder()
             .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                    .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Ukraine")))
             .amount(700)
             .numberOfOrder(35478L).build();
     }
@@ -3472,7 +3472,7 @@ public class ModelUtils {
         return OrdersDataForUserDto.builder()
             .id(1L)
             .dateForm(LocalDateTime.of(22, 10, 12, 14, 55)
-                    .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Ukraine")))
             .datePaid(ZonedDateTime.now())
             .amountBeforePayment(500d)
             .bonuses(100d)
