@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Class that used by {@link ModelMapper} to map {@link OrderResponseDto} into
@@ -22,7 +23,7 @@ public class OrderMapper extends AbstractConverter<OrderResponseDto, Order> {
     @Override
     protected Order convert(OrderResponseDto dto) {
         return Order.builder()
-            .orderDate(LocalDateTime.now())
+            .orderDate(ZonedDateTime.now())
             .pointsToUse(dto.getPointsToUse())
             .comment(dto.getOrderComment())
             .additionalOrders(dto.getAdditionalOrders())

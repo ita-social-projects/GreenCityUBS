@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class OrdersDataForUserDto {
     private Long id;
-    private LocalDateTime dateForm;
+    private ZonedDateTime dateForm;
     private ZonedDateTime datePaid;
     private String orderStatus;
     private String orderStatusEng;

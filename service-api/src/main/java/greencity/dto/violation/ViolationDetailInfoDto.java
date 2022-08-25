@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -20,6 +21,6 @@ public class ViolationDetailInfoDto {
     private String description;
     @Nullable
     private List<String> images;
-    private LocalDateTime violationDate;
+    private ZonedDateTime violationDate;
     private String addedByUser;
 }

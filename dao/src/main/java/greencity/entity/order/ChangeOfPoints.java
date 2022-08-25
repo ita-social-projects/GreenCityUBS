@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class ChangeOfPoints {
     private Integer amount;
 
     @Column
-    private LocalDateTime date;
+    private ZonedDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

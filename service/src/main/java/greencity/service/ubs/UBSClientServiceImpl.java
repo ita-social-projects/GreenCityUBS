@@ -2,10 +2,7 @@ package greencity.service.ubs;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1600,7 +1597,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .add(ChangeOfPoints.builder()
                 .user(user)
                 .amount(-amountToTransfer)
-                .date(LocalDateTime.now())
+                .date(ZonedDateTime.now())
                 .order(order)
                 .build());
 

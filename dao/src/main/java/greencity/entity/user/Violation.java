@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -29,7 +30,7 @@ public class Violation {
     private String description;
 
     @Column(name = "violation_date")
-    private LocalDateTime violationDate;
+    private ZonedDateTime violationDate;
 
     @ElementCollection
     @CollectionTable(name = "violation_images",
