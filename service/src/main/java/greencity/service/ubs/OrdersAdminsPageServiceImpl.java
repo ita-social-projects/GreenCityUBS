@@ -24,8 +24,8 @@ import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
+import greencity.service.NotificationServiceImpl;
 import greencity.service.SuperAdminService;
-import greencity.service.notification.NotificationServiceImpl;
 import lombok.Data;
 import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
@@ -36,6 +36,7 @@ import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -373,7 +374,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
-            .date(LocalDateTime.now())
+            .date(ZonedDateTime.now())
             .user(user)
             .order(order)
             .build();

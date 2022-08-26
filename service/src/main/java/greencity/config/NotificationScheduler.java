@@ -1,6 +1,6 @@
 package greencity.config;
 
-import greencity.service.notification.NotificationServiceImpl;
+import greencity.service.NotificationServiceImpl;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

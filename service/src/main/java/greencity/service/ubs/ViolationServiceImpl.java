@@ -13,7 +13,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
-import greencity.service.notification.NotificationServiceImpl;
+import greencity.service.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
