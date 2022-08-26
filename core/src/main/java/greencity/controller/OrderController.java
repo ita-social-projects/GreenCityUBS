@@ -23,10 +23,11 @@ import greencity.entity.user.User;
 import greencity.exceptions.BadRequestException;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.UBSManagementService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,21 +46,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/ubs")
 @Validated
+@RequiredArgsConstructor
 public class OrderController {
     private final UBSClientService ubsClientService;
+    private final UBSManagementService ubsManagementService;
     private final RedirectionConfigProp redirectionConfigProp;
     private final NotificationService notificationService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public OrderController(UBSClientService ubsClientService, RedirectionConfigProp redirectionConfigProp,
-        NotificationService notificationService) {
-        this.ubsClientService = ubsClientService;
-        this.redirectionConfigProp = redirectionConfigProp;
-        this.notificationService = notificationService;
-    }
 
     /**
      * Controller returns all available bags and bonus points of current user.
@@ -119,7 +111,7 @@ public class OrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/personal-data")
-    public ResponseEntity<PersonalDataDto> getUBSusers(
+    public ResponseEntity<PersonalDataDto> getUBSUsers(
         @ApiIgnore @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getSecondPageData(userUuid));
@@ -146,6 +138,10 @@ public class OrderController {
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
+            OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
+            if (orderDetailStatusDto.getPaymentStatus().equals("PAID")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
             return ResponseEntity.status(HttpStatus.OK)
                 .body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
         } else {

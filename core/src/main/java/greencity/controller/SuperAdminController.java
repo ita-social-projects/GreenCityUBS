@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,15 +55,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @Validated
 @RequestMapping("/ubs/superAdmin")
+@RequiredArgsConstructor
 class SuperAdminController {
     private final SuperAdminService superAdminService;
-
-    /**
-     * Constructor for initialize SuperAdminService.
-     */
-    public SuperAdminController(SuperAdminService superAdminService) {
-        this.superAdminService = superAdminService;
-    }
 
     /**
      * Controller for create new tariff.
@@ -558,6 +553,25 @@ class SuperAdminController {
     public ResponseEntity<AddNewTariffResponseDto> addNewTariff(@RequestBody @Valid AddNewTariffDto addNewTariffDto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addNewTariff(addNewTariffDto, uuid));
+    }
+
+    /**
+     * Controller for checking if tariff info is already in the database.
+     *
+     * @author Inna Yashna
+     */
+    @ApiOperation(value = "Check if tariff exists")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
+    @PostMapping("/check-if-tariff-exists")
+    public ResponseEntity<Boolean> checkIfTariffExists(
+        @RequestBody @Valid AddNewTariffDto addNewTariffDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.checkIfTariffExists(addNewTariffDto));
     }
 
     /**

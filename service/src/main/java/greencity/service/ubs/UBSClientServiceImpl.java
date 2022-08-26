@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
@@ -132,12 +133,11 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.GoogleApiService;
-import greencity.service.UAPhoneNumberUtil;
+import greencity.service.google.GoogleApiService;
+import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import lombok.RequiredArgsConstructor;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
@@ -152,7 +152,6 @@ import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND;
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
@@ -174,7 +173,7 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
  * Implementation of {@link UBSClientService}.
  */
 @Service
-@RequiredArgsConstructor
+@Data
 public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
@@ -1160,7 +1159,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<EventDto> getAllEventsForOrder(Long orderId, String email) {
         Optional<Order> order = orderRepository.findById(orderId);
-        checkAvailableOrderForEmployee(order.get(), email);
         if (order.isEmpty()) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
@@ -1172,19 +1170,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .stream()
             .map(event -> modelMapper.map(event, EventDto.class))
             .collect(Collectors.toList());
-    }
-
-    private void checkAvailableOrderForEmployee(Order order, String email) {
-        Long employeeId = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
-        boolean status = false;
-        List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
-        for (Long id : tariffsInfoIds) {
-            status = id.equals(order.getTariffsInfo().getId()) ? true : status;
-        }
-        if (!status) {
-            throw new BadRequestException(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId());
-        }
     }
 
     /**

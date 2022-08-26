@@ -34,7 +34,8 @@ import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
-@RequiredArgsConstructor
+@Data
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository translationRepository;
@@ -582,7 +583,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
-        var tariffLocationListList = tariffsLocationRepository.findAllByCourierIdAndLocationIds(courierId, locationIds);
+        var tariffLocationListList = tariffsLocationRepository
+            .findAllByCourierIdAndLocationIds(courierId, locationIds);
         List<Long> alreadyExistsTariff = tariffLocationListList.stream()
             .map(tariffLocation -> tariffLocation.getLocation().getId())
             .collect(Collectors.toList());
@@ -593,6 +595,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Courier tryToFindCourier(Long courierId) {
         return courierRepository.findById(courierId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
+    }
+
+    @Override
+    public boolean checkIfTariffExists(AddNewTariffDto addNewTariffDto) {
+        List<TariffLocation> tariffLocations = tariffsLocationRepository.findAllByCourierIdAndLocationIds(
+            addNewTariffDto.getCourierId(), addNewTariffDto.getLocationIdList());
+
+        return (!CollectionUtils.isEmpty(tariffLocations));
     }
 
     @Override

@@ -7,8 +7,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -25,7 +24,7 @@ import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 
 @Service
-@RequiredArgsConstructor
+@Data
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
@@ -39,6 +38,9 @@ public class EventServiceImpl implements EventService {
      * @author Yuriy Bahlay.
      */
     public void save(String eventName, String eventAuthor, Order order) {
+        if (eventName.isEmpty()) {
+            return;
+        }
         Event event = new Event();
         event.setEventDate(LocalDateTime.now());
         event.setEventName(eventName);
@@ -81,8 +83,7 @@ public class EventServiceImpl implements EventService {
             + "  " + employee.getLastName(), order);
     }
 
-    @RequiredArgsConstructor
-    @Getter
+    @Data
     private static class EmployeePositionChanges {
         private final String updated;
         private final String assigned;

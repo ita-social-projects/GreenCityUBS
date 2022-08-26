@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.UserRemoteClient;
+import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
 import greencity.dto.courier.ReceivingStationDto;
@@ -9,18 +10,24 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.TableParamsDto;
+import greencity.entity.enums.CancellationReason;
 import greencity.entity.enums.EditType;
 import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentStatus;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.*;
 import greencity.exceptions.*;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import greencity.repository.*;
 import greencity.service.SuperAdminService;
-import lombok.AllArgsConstructor;
+import greencity.service.notification.NotificationServiceImpl;
+import lombok.Data;
+import org.apache.commons.lang3.EnumUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,12 +40,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static greencity.constant.ErrorMessage.*;
+import static java.util.Objects.isNull;
 
 @Service
-@AllArgsConstructor
+@Data
 public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
+    private final CertificateRepository certificateRepository;
     private final UBSManagementEmployeeService employeeService;
     private final ModelMapper modelMapper;
     private final ReceivingStationRepository receivingStationRepository;
@@ -49,6 +58,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
     private final EventService eventService;
+    private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
@@ -58,6 +68,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private static final String CALLER = "responsibleCaller";
     private static final String NAVIGATOR = "responsibleNavigator";
     private static final String TIME_OF_EXPORT = "timeOfExport";
+    private static final String CANCELLATION_REASON = "cancellationReason";
+    private static final String CANCELLATION_COMMENT = "cancellationComment";
 
     @Override
     public TableParamsDto getParametersForOrdersTable(String uuid) {
@@ -184,6 +196,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 return createReturnForSwitchChangeOrder(timeOfExportForDevelopStage(ordersId, value, employeeId));
             case RECEIVING:
                 return createReturnForSwitchChangeOrder(receivingStationForDevelopStage(ordersId, value, employeeId));
+            case CANCELLATION_REASON:
+                return createReturnForSwitchChangeOrder(cancellationReasonForDevelopStage(ordersId, value));
+            case CANCELLATION_COMMENT:
+                return createReturnForSwitchChangeOrder(
+                    cancellationCommentForDevelopStage(ordersId, value, employeeId));
             default:
                 Long position = ColumnNameToPosition.columnNameToEmployeePosition(columnName);
                 return createReturnForSwitchChangeOrder(responsibleEmployee(ordersId, value, position, email));
@@ -328,6 +345,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     throw new BadRequestException(
                         "Such desired status isn't applicable with current status!");
                 }
+                if (existedOrder.getOrderStatus() == OrderStatus.CANCELED
+                    && (existedOrder.getPointsToUse() != 0 || !existedOrder.getCertificates().isEmpty())) {
+                    notificationService.notifyBonusesFromCanceledOrder(existedOrder);
+                    returnAllPointsFromOrder(existedOrder);
+                }
                 existedOrder.setBlocked(false);
                 existedOrder.setBlockedByEmployee(null);
                 orderRepository.save(existedOrder);
@@ -336,6 +358,37 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             }
         }
         return unresolvedGoals;
+    }
+
+    private void returnAllPointsFromOrder(Order order) {
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        order.setPointsToUse(0);
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
+        if (!order.getCertificates().isEmpty()) {
+            Set<Certificate> certificates = order.getCertificates();
+            for (Certificate certificate : certificates) {
+                certificate.setPoints(0);
+                certificateRepository.save(certificate);
+            }
+        }
     }
 
     private void removePickUpDetailsAndResponsibleEmployees(Order order) {
@@ -350,6 +403,40 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             employeeOrderPositionRepository.deleteAll(order.getEmployeeOrderPositions());
             order.setEmployeeOrderPositions(null);
         }
+    }
+
+    private List<Long> cancellationReasonForDevelopStage(List<Long> ordersId, String value) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+        if (EnumUtils.isValidEnum(CancellationReason.class, value)) {
+            for (Long orderId : ordersId) {
+                try {
+                    Order existedOrder = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                    orderRepository.updateCancelingReason(existedOrder.getId(), value);
+                } catch (Exception e) {
+                    unresolvedGoals.add(orderId);
+                }
+            }
+        }
+        return unresolvedGoals;
+    }
+
+    private List<Long> cancellationCommentForDevelopStage(List<Long> ordersId, String value, Long employeeId) {
+        List<Long> unresolvedGoals = new ArrayList<>();
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+        for (Long orderId : ordersId) {
+            try {
+                Order existedOrder = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+                orderRepository.updateCancelingComment(orderId, value);
+                eventService.saveEvent(OrderHistory.ORDER_CANCELLED + "  " + value, employee.getEmail(),
+                    existedOrder);
+            } catch (Exception e) {
+                unresolvedGoals.add(orderId);
+            }
+        }
+        return unresolvedGoals;
     }
 
     @Override

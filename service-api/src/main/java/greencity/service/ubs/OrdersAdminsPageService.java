@@ -19,11 +19,11 @@ public interface OrdersAdminsPageService {
     /**
      * Method that return.
      *
-     * @param userUuid                     of {@link String}
+     * @param email                        of {@link String}
      * @param requestToChangeOrdersDataDTO of {@link RequestToChangeOrdersDataDto}
      * @author Liubomyr Pater
      */
-    ChangeOrderResponseDTO chooseOrdersDataSwitcher(String userUuid,
+    ChangeOrderResponseDTO chooseOrdersDataSwitcher(String email,
         RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO);
 
     /**

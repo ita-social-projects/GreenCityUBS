@@ -15,7 +15,7 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +28,9 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/ubs/client")
+@RequiredArgsConstructor
 public class ClientController {
     private final UBSClientService ubsClientService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public ClientController(UBSClientService ubsClientService) {
-        this.ubsClientService = ubsClientService;
-    }
 
     /**
      * Controller returns all user's orders.
@@ -106,7 +99,7 @@ public class ClientController {
      */
     @ApiOperation(value = "return the link for payment")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = MakeOrderAgainDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),

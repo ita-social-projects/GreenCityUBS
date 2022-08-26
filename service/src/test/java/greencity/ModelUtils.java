@@ -297,7 +297,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(Lists.newArrayList(Payment.builder()
-                .id(1l)
+                .id(1L)
                 .paymentId("1")
                 .amount(20000L)
                 .currency("UAH")
@@ -827,6 +827,17 @@ public class ModelUtils {
             .build();
     }
 
+    public static Certificate getCertificate2() {
+        return Certificate.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(600)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .order(null)
+            .build();
+    }
+
     public static UserViolationMailDto getUserViolationMailDto() {
         return UserViolationMailDto.builder()
             .email("string@gmail.com")
@@ -936,6 +947,24 @@ public class ModelUtils {
             .employeePositions(List.of(PositionDto.builder()
                 .id(1L)
                 .name("Водій")
+                .build()))
+            .build();
+    }
+
+    public static EmployeeDto getEmployeeDtoWithReceivingStations() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
                 .build()))
             .build();
     }
@@ -3175,6 +3204,20 @@ public class ModelUtils {
             .build();
     }
 
+    public static Order getOrdersStatusAdjustmentDto2() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.ADJUSTMENT)
+            .counterOrderPaymentId(1L)
+            .certificates(Set.of(getCertificate2()))
+            .pointsToUse(100)
+            .build();
+    }
+
     public static Order getOrdersStatusConfirmedDto() {
         return Order.builder()
             .id(1L)
@@ -3198,6 +3241,22 @@ public class ModelUtils {
             .counterOrderPaymentId(1L)
             .pointsToUse(100)
             .confirmedQuantity(Map.of(1, 1))
+            .exportedQuantity(Map.of(1, 1))
+            .amountOfBagsOrdered(Map.of(1, 1))
+            .build();
+    }
+
+    public static Order getOrdersStatusFormedDto2() {
+        return Order.builder()
+            .id(1L)
+            .payment(List.of(Payment.builder().id(1L).build()))
+            .user(User.builder().id(1L).build())
+            .imageReasonNotTakingBags(List.of("ss"))
+            .reasonNotTakingBagDescription("aa")
+            .orderStatus(OrderStatus.FORMED)
+            .counterOrderPaymentId(1L)
+            .pointsToUse(100)
+            .confirmedQuantity(Map.of(1, 3))
             .exportedQuantity(Map.of(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .build();
@@ -3512,10 +3571,10 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(Collections.emptyList())
-//            .receivingStationList(Set.of(ReceivingStation.builder()
-//                .name("receivingStation")
-//                .createdBy(ModelUtils.createUser())
-//                .build()))
+            .receivingStationList(Set.of(ReceivingStation.builder()
+                .name("receivingStation")
+                .createdBy(ModelUtils.createUser())
+                .build()))
             .build();
     }
 
@@ -3744,6 +3803,13 @@ public class ModelUtils {
             .expirationDate(LocalDate.now())
             .code("200")
             .certificateStatus("ACTIVE")
+            .build();
+    }
+
+    public static CourierTranslationDto getCourierTranslationDto() {
+        return CourierTranslationDto.builder()
+            .name("Test")
+            .languageCode("null")
             .build();
     }
 }

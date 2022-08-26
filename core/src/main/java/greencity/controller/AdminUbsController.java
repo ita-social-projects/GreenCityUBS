@@ -14,7 +14,7 @@ import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
 import io.swagger.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,31 +22,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/management")
+@RequiredArgsConstructor
 public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
     private final ViolationService violationService;
-
-    /**
-     * Constructor with parameters.
-     */
-    @Autowired
-    public AdminUbsController(OrdersAdminsPageService ordersAdminsPageService,
-        ValuesForUserTableService valuesForUserTable,
-        OrdersForUserService ordersForUserService,
-        ViolationService violationService) {
-        this.ordersAdminsPageService = ordersAdminsPageService;
-        this.valuesForUserTable = valuesForUserTable;
-        this.ordersForUserService = ordersForUserService;
-        this.violationService = violationService;
-    }
 
     /**
      * Controller for obtaining all users that made at least one order.
@@ -103,10 +91,11 @@ public class AdminUbsController {
     })
     @PutMapping("/changingOrder")
     public ResponseEntity<List<Long>> saveNewValueFromOrdersTable(
-        @ApiIgnore @CurrentUserUuid String userUuid,
+        @ApiIgnore HttpServletRequest request,
         @Valid @RequestBody RequestToChangeOrdersDataDto requestToChangeOrdersDataDTO) {
         ChangeOrderResponseDTO changeOrderResponseDTO =
-            ordersAdminsPageService.chooseOrdersDataSwitcher(userUuid, requestToChangeOrdersDataDTO);
+            ordersAdminsPageService.chooseOrdersDataSwitcher(request.getUserPrincipal().getName(),
+                requestToChangeOrdersDataDTO);
         return ResponseEntity.status(changeOrderResponseDTO.getHttpStatus())
             .body(changeOrderResponseDTO.getUnresolvedGoalsOrderId());
     }
