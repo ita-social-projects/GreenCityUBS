@@ -16,7 +16,6 @@ import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
 import greencity.service.ubs.ViberService;
 import greencity.ubstelegrambot.TelegramService;
@@ -387,7 +386,7 @@ class NotificationServiceImplTest {
     void testGetNotificationThrowsException() {
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(TEST_USER_NOTIFICATION_4));
 
-        assertThrows(AccessDeniedException.class,
+        assertThrows(NotFoundException.class,
             () -> notificationService.getNotification("testtest", 1L, "ua"));
     }
 
