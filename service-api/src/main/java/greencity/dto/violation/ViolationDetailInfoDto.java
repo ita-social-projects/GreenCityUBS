@@ -4,7 +4,6 @@ import greencity.entity.enums.ViolationLevel;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 

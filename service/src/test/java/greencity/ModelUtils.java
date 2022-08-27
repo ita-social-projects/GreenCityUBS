@@ -872,7 +872,7 @@ public class ModelUtils {
                 .amount(350L)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .build();
     }
@@ -889,12 +889,12 @@ public class ModelUtils {
             .userBonuses(100)
             .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
                 .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                    .atZone(ZoneId.of("Europe/Ukraine")))
+                        .atZone(ZoneId.of("Europe/Kyiv")))
                 .amount(50)
                 .numberOfOrder(36874L).build(),
                 PointsForUbsUserDto.builder()
                     .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                        .atZone(ZoneId.of("Europe/Ukraine")))
+                            .atZone(ZoneId.of("Europe/Kyiv")))
                     .amount(50)
                     .numberOfOrder(35478L).build()))
             .build();
@@ -904,7 +904,7 @@ public class ModelUtils {
     public static PointsForUbsUserDto pointsForUbsUserDto() {
         return PointsForUbsUserDto.builder()
             .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                    .atZone(ZoneId.of("Europe/Kyiv")))
             .amount(700)
             .numberOfOrder(35478L).build();
     }
@@ -1215,8 +1215,9 @@ public class ModelUtils {
 
     public static Violation getViolation() {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
-            2021, Month.MARCH,
-            16, 13, 00, 00).atZone(ZoneId.of("Europe/Ukraine"));
+                        2021, Month.MARCH,
+                        16, 13, 00, 00)
+                .atZone(ZoneId.of("Europe/Kyiv"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1232,7 +1233,8 @@ public class ModelUtils {
     public static Violation getViolation2() {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00).atZone(ZoneId.of("Europe/Ukraine"));
+            16, 13, 00, 00)
+                .atZone(ZoneId.of("Europe/Kyiv"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1246,8 +1248,9 @@ public class ModelUtils {
 
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
-            2021, Month.MARCH,
-            16, 13, 00, 00).atZone(ZoneId.of("Europe/Ukraine"));
+                        2021, Month.MARCH,
+                        16, 13, 00, 00)
+                .atZone(ZoneId.of("Europe/Kyiv"));
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
@@ -1418,7 +1421,7 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1441,7 +1444,7 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1464,7 +1467,7 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1487,7 +1490,7 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 1))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1510,7 +1513,7 @@ public class ModelUtils {
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 1))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1568,7 +1571,7 @@ public class ModelUtils {
             .ubsUser(createUbsUser())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
             .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .build();
     }
 
@@ -3472,7 +3475,7 @@ public class ModelUtils {
         return OrdersDataForUserDto.builder()
             .id(1L)
             .dateForm(LocalDateTime.of(22, 10, 12, 14, 55)
-                .atZone(ZoneId.of("Europe/Ukraine")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .datePaid(ZonedDateTime.now())
             .amountBeforePayment(500d)
             .bonuses(100d)
