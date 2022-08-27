@@ -1,4 +1,4 @@
-package greencity.service;
+package greencity.service.notification;
 
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
@@ -19,7 +19,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
-import greencity.service.notification.AbstractNotificationProvider;
 import greencity.service.ubs.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
