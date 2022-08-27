@@ -3749,4 +3749,41 @@ public class ModelUtils {
             .certificateStatus("ACTIVE")
             .build();
     }
+
+    public static EmployeeDto getEmployeeDtoWithReceivingStations() {
+        return EmployeeDto.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeePositions(List.of(PositionDto.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .build();
+    }
+
+    public static CourierTranslationDto getCourierTranslationDto() {
+        return CourierTranslationDto.builder()
+            .name("Test")
+            .languageCode("null")
+            .build();
+    }
+
+    public static Certificate getCertificate2() {
+        return Certificate.builder()
+            .code("1111-1234")
+            .certificateStatus(CertificateStatus.ACTIVE)
+            .points(600)
+            .expirationDate(LocalDate.now().plusMonths(1))
+            .creationDate(LocalDate.now())
+            .order(null)
+            .build();
+    }
+
 }

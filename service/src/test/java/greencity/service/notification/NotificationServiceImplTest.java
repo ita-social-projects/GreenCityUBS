@@ -100,14 +100,14 @@ class NotificationServiceImplTest {
         void testNotifyUnpaidOrders() {
             List<Order> orders = List.of(
                 Order.builder().id(1L).user(getUser()).orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusDays(3))
+                    .orderDate(ZonedDateTime.now(fixedClock).minusDays(3))
                     .build(),
                 Order.builder().id(2L).user(getUser())
                     .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusMonths(1)).build(),
+                    .orderDate(ZonedDateTime.now(fixedClock).minusMonths(1)).build(),
                 Order.builder().id(3L).user(getUser())
                     .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusDays(10)).build());
+                    .orderDate(ZonedDateTime.now(fixedClock).minusDays(10)).build());
 
             when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID))
                 .thenReturn(orders);
@@ -178,7 +178,7 @@ class NotificationServiceImplTest {
                 .deliverTo(LocalDateTime.now(fixedClock).minusHours(2))
                 .orderStatus(OrderStatus.ADJUSTMENT)
                 .orderPaymentStatus(OrderPaymentStatus.PAID)
-                .orderDate(LocalDateTime.now(fixedClock))
+                .orderDate(ZonedDateTime.now(fixedClock))
                 .build();
 
             UserNotification userNotification = new UserNotification();
@@ -294,12 +294,12 @@ class NotificationServiceImplTest {
         void testNotifyAllHalfPaidPackages() {
             User user = User.builder().id(42L).build();
             List<Order> orders = List.of(Order.builder().id(47L).user(user)
-                .orderDate(LocalDateTime.now(fixedClock))
+                .orderDate(ZonedDateTime.now(fixedClock))
                 .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
                 .payment(Collections.emptyList())
                 .build(),
                 Order.builder().id(51L).user(user)
-                    .orderDate(LocalDateTime.now(fixedClock))
+                    .orderDate(ZonedDateTime.now(fixedClock))
                     .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
                     .payment(List.of(
                         Payment.builder()

@@ -129,7 +129,7 @@ class UBSManagementEmployeeServiceImplTest {
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
             Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1l));
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
         employeeService.findAll(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
             .findAll(employeePage, employeeFilterCriteria);
