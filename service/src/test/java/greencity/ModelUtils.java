@@ -889,12 +889,12 @@ public class ModelUtils {
             .userBonuses(100)
             .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
                 .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                        .atZone(ZoneId.of("Europe/Kyiv")))
+                    .atZone(ZoneId.of("Europe/Kyiv")))
                 .amount(50)
                 .numberOfOrder(36874L).build(),
                 PointsForUbsUserDto.builder()
                     .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                            .atZone(ZoneId.of("Europe/Kyiv")))
+                        .atZone(ZoneId.of("Europe/Kyiv")))
                     .amount(50)
                     .numberOfOrder(35478L).build()))
             .build();
@@ -904,7 +904,7 @@ public class ModelUtils {
     public static PointsForUbsUserDto pointsForUbsUserDto() {
         return PointsForUbsUserDto.builder()
             .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
-                    .atZone(ZoneId.of("Europe/Kyiv")))
+                .atZone(ZoneId.of("Europe/Kyiv")))
             .amount(700)
             .numberOfOrder(35478L).build();
     }
@@ -1215,9 +1215,9 @@ public class ModelUtils {
 
     public static Violation getViolation() {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
-                        2021, Month.MARCH,
-                        16, 13, 00, 00)
-                .atZone(ZoneId.of("Europe/Kyiv"));
+            2021, Month.MARCH,
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kyiv"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1234,7 +1234,7 @@ public class ModelUtils {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
             16, 13, 00, 00)
-                .atZone(ZoneId.of("Europe/Kyiv"));
+            .atZone(ZoneId.of("Europe/Kyiv"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
@@ -1248,9 +1248,9 @@ public class ModelUtils {
 
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
         ZonedDateTime zonedDateTime = LocalDateTime.of(
-                        2021, Month.MARCH,
-                        16, 13, 00, 00)
-                .atZone(ZoneId.of("Europe/Kyiv"));
+            2021, Month.MARCH,
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kyiv"));
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
