@@ -123,6 +123,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_CERTIFICATE', authentication)")
     @DeleteMapping("/deleteCertificate/{code}")
     public ResponseEntity<HttpStatus> deleteCertificate(
         @Valid @PathVariable String code) {
@@ -353,6 +354,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-address")
     public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddressByOrderId(
         @Valid @RequestBody OrderAddressExportDetailsDtoUpdate dto, Long orderId,
@@ -507,6 +509,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
         @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
@@ -611,6 +614,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
         @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoUpdate dto,
@@ -977,6 +981,7 @@ public class ManagementOrderController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PatchMapping("/update-order-page-admin-info/{id}")
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
