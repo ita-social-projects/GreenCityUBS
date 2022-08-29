@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class UserOrdersDto {
     private Long id;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDateTime orderDate;
+    private ZonedDateTime orderDate;
     private OrderStatus orderStatus;
     private OrderPaymentStatus orderPaymentStatus;
     private Long amount;

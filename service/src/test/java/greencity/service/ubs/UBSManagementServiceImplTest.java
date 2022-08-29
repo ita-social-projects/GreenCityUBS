@@ -45,6 +45,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -522,8 +525,8 @@ class UBSManagementServiceImplTest {
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
         Order order = user.getOrders().get(0);
-        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)));
-
+        order.setOrderDate((LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+            .atZone(ZoneId.of("Europe/Kiev"))));
         List<Payment> payment = new ArrayList<>();
         payment.add(Payment.builder().build());
 
@@ -612,7 +615,7 @@ class UBSManagementServiceImplTest {
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
         Order order = user.getOrders().get(0);
-        order.setOrderDate((LocalDateTime.now()));
+        order.setOrderDate((ZonedDateTime.now()));
 
         List<Payment> payment = new ArrayList<>();
         payment.add(Payment.builder().build());
@@ -1381,7 +1384,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoTest() {
         OrderDetailStatusRequestDto orderDetailStatusRequestDto = ModelUtils.getTestOrderDetailStatusRequestDto();
         Order order = ModelUtils.getOrder();
-        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderDate(ZonedDateTime.now()).setTariffsInfo(getTariffsInfo());
         User user = ModelUtils.getTestUser();
         Employee employee = ModelUtils.getEmployee();
         List<Long> tariffsInfoIds = new ArrayList<>();
@@ -1418,7 +1421,7 @@ class UBSManagementServiceImplTest {
     void updateOrderAdminPageInfoTestThrowsException() {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         Order order = ModelUtils.getOrder();
-        order.setOrderDate(LocalDateTime.now()).setTariffsInfo(getTariffsInfo());
+        order.setOrderDate(ZonedDateTime.now()).setTariffsInfo(getTariffsInfo());
         User user = ModelUtils.getTestUser();
         Employee employee = ModelUtils.getEmployee();
         List<Long> tariffsInfoIds = new ArrayList<>();
@@ -1444,7 +1447,7 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForFormedOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getFormedOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
         doNothing().when(notificationService).notifyPaidOrder(order);
@@ -1458,7 +1461,7 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForCanceledPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getCanceledPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
         doNothing().when(notificationService).notifyPaidOrder(order);
@@ -1472,7 +1475,7 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getAdjustmentPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
         doNothing().when(notificationService).notifyPaidOrder(order);
@@ -1486,7 +1489,7 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForFormedHalfPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getFormedHalfPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
 
@@ -1501,7 +1504,7 @@ class UBSManagementServiceImplTest {
     void getOrderSumDetailsForCanceledHalfPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
         Order order = ModelUtils.getCanceledHalfPaidOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(bagRepository.findBagByOrderId(1L)).thenReturn(getBaglist());
 
@@ -1818,7 +1821,7 @@ class UBSManagementServiceImplTest {
     @Test
     void updateAllOrderAdminPageInfoStatusConfirmedTest() {
         Order order = ModelUtils.getOrder();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(getReceivingStation()));
@@ -1878,7 +1881,7 @@ class UBSManagementServiceImplTest {
     void updateAllOrderAdminPageInfoAdditionalOrdersEmptyTest() {
         Order order = ModelUtils.getOrder2();
         UpdateAllOrderPageDto updateAllOrderPageDto = ModelUtils.updateAllOrderPageDto(OrderStatus.CANCELED);
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now());
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(getReceivingStation()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));

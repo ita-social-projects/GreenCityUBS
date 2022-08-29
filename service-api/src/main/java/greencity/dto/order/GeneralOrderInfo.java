@@ -5,6 +5,7 @@ import greencity.entity.enums.OrderStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class GeneralOrderInfo {
     private Long id;
-    private LocalDateTime dateFormed;
+    private ZonedDateTime dateFormed;
     private List<OrderStatusesTranslationDto> orderStatusesDtos;
     private List<OrderPaymentStatusesTranslationDto> orderPaymentStatusesDto;
     private OrderStatus orderStatus;

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.PAID)
             .user(User.builder().id(1L).build())
             .ubsUser(UBSuser.builder().id(1L).build())
-            .orderDate(LocalDateTime.now())
+            .orderDate(ZonedDateTime.now())
             .build());
         return orderList;
     }

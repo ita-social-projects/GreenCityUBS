@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 public class UserViolationsDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDateTime violationDate;
+    private ZonedDateTime violationDate;
     private Long orderId;
     private ViolationLevel violationLevel;
 }

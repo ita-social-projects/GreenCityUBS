@@ -38,9 +38,7 @@ import greencity.entity.user.ubs.Address;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -288,16 +286,17 @@ public class ModelUtils {
     }
 
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
-        LocalDateTime localdatetime = LocalDateTime.of(
+        ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kiev"));
 
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
-            .violationDate(localdatetime)
+            .violationDate(zonedDateTime)
             .build();
     }
 

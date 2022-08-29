@@ -55,6 +55,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -271,7 +272,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         ourUser.setCurrentPoints(ourUser.getCurrentPoints() + addingPointsToUserDto.getAdditionalPoints());
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(addingPointsToUserDto.getAdditionalPoints())
-            .date(LocalDateTime.now())
+            .date(ZonedDateTime.now())
             .user(ourUser)
             .build();
         ourUser.getChangeOfPointsList().add(changeOfPoints);
@@ -998,7 +999,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
         ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
             .amount(pointsToReturn)
-            .date(LocalDateTime.now())
+            .date(ZonedDateTime.now())
             .user(user)
             .order(order)
             .build();
@@ -1189,7 +1190,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private ChangeOfPoints createChangeOfPoints(Order order, User user, Long amount) {
         return ChangeOfPoints.builder()
-            .date(LocalDateTime.now())
+            .date(ZonedDateTime.now())
             .user(user)
             .order(order)
             .amount(Math.toIntExact(amount))
@@ -1792,7 +1793,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .add(ChangeOfPoints.builder()
                 .user(user)
                 .amount(points)
-                .date(LocalDateTime.now())
+                .date(ZonedDateTime.now())
                 .order(order)
                 .build());
         notificationService.notifyBonuses(order, (long) points);

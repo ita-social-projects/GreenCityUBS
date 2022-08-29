@@ -37,6 +37,7 @@ import javax.ws.rs.ForbiddenException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -91,10 +92,10 @@ public class NotificationServiceImpl implements NotificationService {
         return (lastNotification.isEmpty()
             || (lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusDays(7))
                 || lastNotification.get().getNotificationTime().isEqual(LocalDateTime.now(clock).minusDays(7))))
-            && (order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1))
-                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusMonths(1)))
-            && (order.getOrderDate().isBefore(LocalDateTime.now(clock).minusDays(3))
-                || order.getOrderDate().isEqual(LocalDateTime.now(clock).minusDays(3)));
+            && (order.getOrderDate().isAfter(ZonedDateTime.now(clock).minusMonths(1))
+                || order.getOrderDate().isEqual(ZonedDateTime.now(clock).minusMonths(1)))
+            && (order.getOrderDate().isBefore(ZonedDateTime.now(clock).minusDays(3))
+                || order.getOrderDate().isEqual(ZonedDateTime.now(clock).minusDays(3)));
     }
 
     private UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
@@ -201,7 +202,7 @@ public class NotificationServiceImpl implements NotificationService {
     private boolean checkIfHalfPaidPackageNeedsNotification(Order order, Optional<UserNotification> lastNotification) {
         return (lastNotification.isEmpty()
             || lastNotification.get().getNotificationTime().isBefore(LocalDateTime.now(clock).minusWeeks(1)))
-            && order.getOrderDate().isAfter(LocalDateTime.now(clock).minusMonths(1));
+            && order.getOrderDate().isAfter(ZonedDateTime.now(clock).minusMonths(1));
     }
 
     /**

@@ -48,9 +48,7 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.util.Bot;
 import org.springframework.data.domain.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -291,7 +289,7 @@ public class ModelUtils {
             .id(1L)
             .amount(0)
             .order(getOrder())
-            .date(LocalDateTime.now())
+            .date(ZonedDateTime.now())
             .build();
     }
 
@@ -884,7 +882,8 @@ public class ModelUtils {
                 .id(1L)
                 .amount(350L)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .build();
     }
@@ -900,11 +899,13 @@ public class ModelUtils {
         return AllPointsUserDto.builder()
             .userBonuses(100)
             .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
-                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
+                    .atZone(ZoneId.of("Europe/Kiev")))
                 .amount(50)
                 .numberOfOrder(36874L).build(),
                 PointsForUbsUserDto.builder()
-                    .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+                    .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
+                        .atZone(ZoneId.of("Europe/Kiev")))
                     .amount(50)
                     .numberOfOrder(35478L).build()))
             .build();
@@ -913,7 +914,8 @@ public class ModelUtils {
 
     public static PointsForUbsUserDto pointsForUbsUserDto() {
         return PointsForUbsUserDto.builder()
-            .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
+            .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amount(700)
             .numberOfOrder(35478L).build();
     }
@@ -1241,47 +1243,50 @@ public class ModelUtils {
     }
 
     public static Violation getViolation() {
-        LocalDateTime localdatetime = LocalDateTime.of(
+        ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kiev"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
                 .id(1L).user(ModelUtils.getTestUser()).build())
             .violationLevel(MAJOR)
             .description("violation1")
-            .violationDate(localdatetime)
+            .violationDate(zonedDateTime)
             .images(new LinkedList<>())
             .addedByUser(getTestUser())
             .build();
     }
 
     public static Violation getViolation2() {
-        LocalDateTime localdatetime = LocalDateTime.of(
+        ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kiev"));
         return Violation.builder()
             .id(1L)
             .order(Order.builder()
                 .id(1L).user(ModelUtils.getTestUser()).build())
             .violationLevel(MAJOR)
             .description("violation1")
-            .violationDate(localdatetime)
+            .violationDate(zonedDateTime)
             .images(List.of("as", "s"))
             .build();
     }
 
     public static ViolationDetailInfoDto getViolationDetailInfoDto() {
-        LocalDateTime localdatetime = LocalDateTime.of(
+        ZonedDateTime zonedDateTime = LocalDateTime.of(
             2021, Month.MARCH,
-            16, 13, 00, 00);
+            16, 13, 00, 00)
+            .atZone(ZoneId.of("Europe/Kiev"));
         return ViolationDetailInfoDto.builder()
             .orderId(1L)
             .addedByUser("Alan Po")
             .violationLevel(MAJOR)
             .description("violation1")
             .images(new ArrayList<>())
-            .violationDate(localdatetime)
+            .violationDate(zonedDateTime)
             .build();
     }
 
@@ -1444,7 +1449,8 @@ public class ModelUtils {
                 .amount(350L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1466,7 +1472,8 @@ public class ModelUtils {
                 .amount(350L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1488,7 +1495,8 @@ public class ModelUtils {
                 .amount(300000L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1510,7 +1518,8 @@ public class ModelUtils {
                 .amount(100L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 1))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1532,7 +1541,8 @@ public class ModelUtils {
                 .amount(1000L)
                 .paymentStatus(PaymentStatus.PAID)
                 .build()))
-            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
+            .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .amountOfBagsOrdered(Collections.singletonMap(1, 1))
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
@@ -1589,7 +1599,8 @@ public class ModelUtils {
             .orderStatus(OrderStatus.FORMED)
             .ubsUser(createUbsUser())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
-            .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5))
+            .orderDate(LocalDateTime.of(2021, 8, 5, 21, 47, 5)
+                .atZone(ZoneId.of("Europe/Kiev")))
             .build();
     }
 
@@ -1926,13 +1937,13 @@ public class ModelUtils {
 
     private static Order createTestOrder4() {
         return Order.builder().id(46L).user(User.builder().id(42L).build())
-            .orderDate(LocalDateTime.now())
+            .orderDate(ZonedDateTime.now())
             .build();
     }
 
     private static Order createTestOrder5() {
         return Order.builder().id(45L).user(User.builder().id(42L).build())
-            .orderDate(LocalDateTime.now()).pointsToUse(200)
+            .orderDate(ZonedDateTime.now()).pointsToUse(200)
             .build();
     }
 
@@ -1990,7 +2001,7 @@ public class ModelUtils {
             .amountOfBagsOrdered(new HashMap<>())
             .orderStatus(OrderStatus.ADJUSTMENT)
             .orderPaymentStatus(OrderPaymentStatus.PAID)
-            .orderDate(LocalDateTime.now())
+            .orderDate(ZonedDateTime.now())
             .build();
     }
 
@@ -2005,7 +2016,7 @@ public class ModelUtils {
 
     private static Order createTestOrder2() {
         return Order.builder().id(43L).user(User.builder().id(42L).build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
+            .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(ZonedDateTime.now()).build();
     }
 
     private static UserNotification createUserNotification4() {
@@ -3522,8 +3533,9 @@ public class ModelUtils {
 
         return OrdersDataForUserDto.builder()
             .id(1L)
-            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55))
-            .datePaid(LocalDateTime.now())
+            .dateForm(LocalDateTime.of(22, 10, 12, 14, 55)
+                .atZone(ZoneId.of("Europe/Kiev")))
+            .datePaid(ZonedDateTime.now())
             .amountBeforePayment(500d)
             .bonuses(100d)
             .orderFullPrice(400d)

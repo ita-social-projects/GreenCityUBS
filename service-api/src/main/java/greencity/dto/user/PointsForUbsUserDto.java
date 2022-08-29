@@ -3,6 +3,7 @@ package greencity.dto.user;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 
 public class PointsForUbsUserDto {
-    private LocalDateTime dateOfEnrollment;
+    private ZonedDateTime dateOfEnrollment;
     private Long numberOfOrder;
     private Integer amount;
 }
