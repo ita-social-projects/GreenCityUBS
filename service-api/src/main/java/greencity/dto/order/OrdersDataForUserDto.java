@@ -6,7 +6,6 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;

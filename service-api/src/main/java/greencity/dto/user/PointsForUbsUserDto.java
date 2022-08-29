@@ -2,7 +2,6 @@ package greencity.dto.user;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Getter
