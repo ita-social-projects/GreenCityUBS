@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -278,7 +279,7 @@ public class OrderController {
     }
 
     /**
-     * Controller gets info about events history from,order bu order id.
+     * Controller gets info about events history from,order by order id.
      *
      * @param id {@link Long}.
      * @return {@link HttpStatus} - http status.
@@ -312,6 +313,7 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-recipients-data")
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
         @Valid @RequestBody UbsCustomersDtoUpdate dto, @ApiIgnore @CurrentUserUuid String uuid) {
@@ -385,13 +387,10 @@ public class OrderController {
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {
-        if (id.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, id.get()));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, null));
-        }
+        return id.map(uid -> ResponseEntity.status(HttpStatus.OK)
+            .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, uid)))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.saveFullOrderToDBFromLiqPay(dto, userUuid, null)));
     }
 
     /**
