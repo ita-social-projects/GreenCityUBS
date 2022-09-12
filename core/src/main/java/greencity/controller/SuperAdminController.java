@@ -113,7 +113,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
@@ -134,7 +134,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @RequestBody EditTariffServiceDto editTariff, @Valid @PathVariable Integer id,
@@ -267,7 +267,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deactivating location byb Id.
+     * Controller for deactivating location by Id.
      *
      * @param id - id of location
      * @return {@link LocationInfoDto}
@@ -279,7 +279,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
     @PatchMapping("/deactivateLocations/{id}")
     public ResponseEntity<HttpStatus> deactivateLocation(
         @PathVariable Long id) {
@@ -300,7 +300,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_LOCATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_LOCATION_CARD', authentication)")
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<HttpStatus> activeLocation(
         @PathVariable Long id) {
@@ -627,7 +627,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_PRICING_CARD', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/deactivateTariff/{tariffId}")
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
@@ -665,7 +665,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
     @PutMapping("tariffs/{id}/locations/change-status")
     public ResponseEntity changeLocationsInTariffStatus(@PathVariable Long id,
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {

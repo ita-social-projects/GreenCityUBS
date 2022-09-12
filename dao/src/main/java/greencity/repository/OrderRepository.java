@@ -292,4 +292,28 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(nativeQuery = true,
         value = "UPDATE orders SET points_to_use = :pointsToUse WHERE id = :orderId")
     void updateOrderPointsToUse(Long orderId, int pointsToUse);
+
+    /**
+     * Method sets order cancellation comment by order's id.
+     *
+     * @param orderId             - order's ID
+     * @param cancellationComment - order cancellation comment to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET cancellation_comment = :cancellationComment WHERE id = :orderId")
+    void updateCancelingComment(Long orderId, String cancellationComment);
+
+    /**
+     * Method sets order cancellation reason by order's id.
+     *
+     * @param orderId            - order's ID
+     * @param cancellationReason - order cancellation reason to set
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders SET cancellation_reason = :cancellationReason WHERE id = :orderId")
+    void updateCancelingReason(Long orderId, String cancellationReason);
 }
