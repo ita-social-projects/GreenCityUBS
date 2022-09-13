@@ -157,27 +157,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(
                 () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         checkAvailableOrderForEmployee(order, email);
-        if (!OrderStatus.DONE.equals(order.getOrderStatus()) && !OrderStatus.CANCELED.equals(order.getOrderStatus())) {
-            throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
-        }
         Payment payment = createPayment(order, overpaymentInfoRequestDto);
-        if (OrderStatus.DONE.equals(order.getOrderStatus())) {
-            returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
-        }
-        if (OrderStatus.CANCELED.equals(order.getOrderStatus())) {
-            if (overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
-                returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
-                collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-            }
-            if (overpaymentInfoRequestDto.getComment()
-                .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
-                returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
-                collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-            }
-            if (!AppConstant.PAYMENT_REFUND.equals(overpaymentInfoRequestDto.getComment())
-                && !AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT.equals(overpaymentInfoRequestDto.getComment())) {
-                throw new NotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
-            }
+        switch (order.getOrderStatus()) {
+            case DONE:
+                returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
+                break;
+            case CANCELED:
+                switch (overpaymentInfoRequestDto.getComment()) {
+                    case AppConstant.PAYMENT_REFUND:
+                        returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
+                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
+                        break;
+                    case AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT:
+                        returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
+                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
+                        break;
+                    default:
+                        throw new NotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
+                }
+                break;
+            default:
+                throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
         order.getPayment().add(payment);
         userRepository.save(user);
