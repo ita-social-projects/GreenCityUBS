@@ -1667,7 +1667,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
