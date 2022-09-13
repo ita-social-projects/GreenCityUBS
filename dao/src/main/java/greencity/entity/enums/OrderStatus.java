@@ -11,7 +11,8 @@ public enum OrderStatus {
     ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
     DONE(6, "DONE"),
     NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
-    CANCELED(8, OrderStatus.CANCELED_STR);
+    CANCELED(8, OrderStatus.CANCELED_STR),
+    PAID(9, "PAID");
 
     private static final String CANCELED_STR = "CANCELED";
     private int statusValue;

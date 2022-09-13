@@ -188,6 +188,9 @@ class OrdersAdminsPageServiceImplTest {
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(8L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(8l)));
 
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(9L))
+            .thenReturn(Optional.ofNullable(orderStatusTranslation.setStatusId(9l)));
+
         when(orderPaymentStatusTranslationRepository.getOrderPaymentStatusTranslationById(anyLong()))
             .thenReturn(Optional.ofNullable(orderPaymentStatusTranslation));
 
