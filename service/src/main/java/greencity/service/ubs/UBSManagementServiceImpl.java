@@ -158,23 +158,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         checkAvailableOrderForEmployee(order, email);
         Payment payment = createPayment(order, overpaymentInfoRequestDto);
-        if ((order.getOrderStatus() == OrderStatus.DONE)) {
-            returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
-        }
-        if (order.getOrderStatus() == OrderStatus.CANCELED
-            && overpaymentInfoRequestDto.getComment().equals(AppConstant.PAYMENT_REFUND)) {
-            returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
-            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-        }
-        if (order.getOrderStatus() == OrderStatus.CANCELED && overpaymentInfoRequestDto.getComment()
-            .equals(AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT)) {
-            returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
-            collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
-        }
-        if (OrderStatus.CANCELED.equals(order.getOrderStatus())
-            && !AppConstant.PAYMENT_REFUND.equals(overpaymentInfoRequestDto.getComment())
-            && !AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT.equals(overpaymentInfoRequestDto.getComment())) {
-            throw new NotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
+        switch (order.getOrderStatus()) {
+            case DONE:
+                returnOverpaymentForStatusDone(user, order, overpaymentInfoRequestDto, payment);
+                break;
+            case CANCELED:
+                switch (overpaymentInfoRequestDto.getComment()) {
+                    case AppConstant.PAYMENT_REFUND:
+                        returnOverpaymentAsMoneyForStatusCancelled(user, order, overpaymentInfoRequestDto);
+                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
+                        break;
+                    case AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT:
+                        returnOverpaymentAsBonusesForStatusCancelled(user, order, overpaymentInfoRequestDto);
+                        collectEventsAboutOverpayment(overpaymentInfoRequestDto.getComment(), order, email);
+                        break;
+                    default:
+                        throw new NotFoundException(COMMENT_ERROR + overpaymentInfoRequestDto.getComment());
+                }
+                break;
+            default:
+                throw new BadRequestException(BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
         }
         order.getPayment().add(payment);
         userRepository.save(user);
@@ -1664,7 +1667,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void checkAvailableOrderForEmployee(Order order, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         boolean status = false;
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         for (Long id : tariffsInfoIds) {
