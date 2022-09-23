@@ -275,6 +275,7 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.save(service)).thenReturn(service);
         when(serviceTranslationRepository.saveAll(service.getServiceTranslations()))
             .thenReturn(List.of(serviceTranslation));
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
         when(modelMapper.map(service, CreateServiceDto.class)).thenReturn(createServiceDto);
 
         assertEquals(createServiceDto, superAdminService.addService(createServiceDto, user.getUuid()));
