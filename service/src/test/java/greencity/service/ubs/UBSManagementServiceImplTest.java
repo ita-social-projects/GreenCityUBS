@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UBSManagementServiceImplTest { // tyt
+class UBSManagementServiceImplTest {
     @Mock(lenient = true)
     AddressRepository addressRepository;
 

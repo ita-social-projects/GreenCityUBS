@@ -47,7 +47,7 @@ import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.*;
 
 @ExtendWith(MockitoExtension.class)
-class SuperAdminServiceImplTest { // tyt
+class SuperAdminServiceImplTest {
     @InjectMocks
     private SuperAdminServiceImpl superAdminService;
     @Mock
@@ -549,26 +549,18 @@ class SuperAdminServiceImplTest { // tyt
         List<CourierTranslation> starterList = List.of(CourierTranslation.builder()
             .id(1L)
             .name("Тест")
+            .nameEng("Test")
             .courier(courier)
-            .build(),
-            CourierTranslation.builder()
-                .id(2L)
-                .name("Test")
-                .courier(courier)
-                .build());
+            .build());
 
         courier.setCourierTranslationList(starterList);
 
         List<CourierTranslation> listToSave = List.of(CourierTranslation.builder()
             .id(1L)
             .name("УБС")
+            .nameEng("UBS")
             .courier(courier)
-            .build(),
-            CourierTranslation.builder()
-                .id(2L)
-                .name("UBS")
-                .courier(courier)
-                .build());
+            .build());
 
         List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
             .name("УБС")

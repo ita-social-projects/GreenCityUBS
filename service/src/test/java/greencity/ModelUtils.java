@@ -22,12 +22,10 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.*;
-import greencity.dto.table.UbsTableCreationDto;
 import greencity.dto.tariff.*;
 import greencity.dto.user.*;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
-import greencity.dto.violation.UserViolationMailDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
@@ -803,7 +801,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .orderStatus(OrderStatus.CONFIRMED)
-            .payment(singletonList(new Payment().builder()
+            .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(350L)
                 .build()))
@@ -1638,10 +1636,6 @@ public class ModelUtils {
             .build());
     }
 
-    private static List<String> createAllLanguageCode() {
-        return List.of("ua", "en");
-    }
-
     private static EmployeePositionDtoResponse createEmployeePositionDtoResponse() {
         return EmployeePositionDtoResponse.builder()
             .orderId(1L)
@@ -2433,13 +2427,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AddLocationTranslationDto getAddLocationTranslationDto() {
-        return AddLocationTranslationDto.builder()
-            .locationName("Name1")
-            .languageCode("ua")
-            .build();
-    }
-
     public static ServiceTranslationDto getServiceTranslationDto() {
         return ServiceTranslationDto.builder()
             .description("Test")
@@ -3119,13 +3106,6 @@ public class ModelUtils {
             .receiptLink("test")
             .settlementdate("test")
             .amount(1000L)
-            .build();
-    }
-
-    public static RegionTranslationDto getSingleRegionTranslationDto() {
-        return RegionTranslationDto.builder()
-            .regionName("Lviv")
-            .languageCode("ua")
             .build();
     }
 
