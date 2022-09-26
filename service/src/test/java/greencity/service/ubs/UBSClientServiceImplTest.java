@@ -1207,7 +1207,7 @@ class UBSClientServiceImplTest {
             .thenReturn(null);
 
         assertThrows(NotFoundException.class, () -> {
-            ubsService.deleteOrder(order.getUser().getUuid(), 1L);
+            ubsService.deleteOrder("UUID", 1L);
         });
     }
 
@@ -1752,11 +1752,11 @@ class UBSClientServiceImplTest {
         Order order = ModelUtils.getOrderTest();
         User user = ModelUtils.getTestUser();
 
-        when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
+        when(ordersForUserRepository.getAllByUserUuidAndId("UUID", order.getId()))
             .thenReturn(null);
 
         assertThrows(NotFoundException.class, () -> {
-            ubsService.getOrderForUser(user.getUuid(), 1L);
+            ubsService.getOrderForUser("UUID", 1L);
         });
     }
 
