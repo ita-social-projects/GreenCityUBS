@@ -1201,6 +1201,17 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void deleteOrderFail() {
+        Order order = ModelUtils.getOrder();
+        when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
+            .thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> {
+            ubsService.deleteOrder(order.getUser().getUuid(), 1L);
+        });
+    }
+
+    @Test
     void processOrderFondyClient() throws Exception {
         Order order = ModelUtils.getOrderCount();
         HashMap<Integer, Integer> value = new HashMap<>();
@@ -1734,6 +1745,19 @@ class UBSClientServiceImplTest {
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
+    }
+
+    @Test
+    void getOrderForUserFail() {
+        Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+
+        when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
+            .thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> {
+            ubsService.getOrderForUser(user.getUuid(), 1L);
+        });
     }
 
     @Test
