@@ -53,7 +53,7 @@ public class Order {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
     private boolean blocked;
@@ -131,14 +131,14 @@ public class Order {
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order")
     private List<Payment> payment;
 
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.MERGE)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<Event> events;
 
     @Column(name = "reason_not_taking_bag_description")

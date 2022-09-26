@@ -29,7 +29,7 @@ public class ReceivingStation {
     @ManyToMany(mappedBy = "receivingStationList", cascade = CascadeType.ALL)
     private Set<TariffsInfo> tariffsInfo;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "receivingStation")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "receivingStation")
     private List<Order> orders;
 
     @ManyToOne

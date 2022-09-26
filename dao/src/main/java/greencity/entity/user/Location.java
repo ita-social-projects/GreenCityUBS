@@ -37,7 +37,7 @@ public class Location {
     @Embedded
     private Coordinates coordinates;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location")
     private List<Bag> bags;
 
     @ManyToOne

@@ -49,7 +49,7 @@ public class Service {
     @ManyToOne
     Courier courier;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     List<ServiceTranslation> serviceTranslations;
 
     @ManyToOne

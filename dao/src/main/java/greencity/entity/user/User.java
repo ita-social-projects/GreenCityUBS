@@ -27,13 +27,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<UBSuser> ubsUsers;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Order> orders;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Address> addresses;
 
     @Column(name = "current_points", columnDefinition = "int default 0")
@@ -54,7 +54,7 @@ public class User {
     @Column(name = "recipient_phone")
     private String recipientPhone;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<ChangeOfPoints> changeOfPointsList;
 
     @Column
@@ -72,6 +72,6 @@ public class User {
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator")
+    @OneToMany(mappedBy = "creator")
     private List<TariffsInfo> tariffsInfos;
 }

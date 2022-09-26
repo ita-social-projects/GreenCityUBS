@@ -26,10 +26,10 @@ public class TariffsInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Service> services;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Bag> bags;
 
     @ManyToMany
@@ -73,6 +73,6 @@ public class TariffsInfo {
     @OneToMany(mappedBy = "tariffsInfo", cascade = CascadeType.ALL)
     private Set<TariffLocation> tariffLocations;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;
 }
