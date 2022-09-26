@@ -359,10 +359,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
         List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
         for (CourierTranslation originalCourierTranslation : listToUpdate) {
-            originalCourierTranslation.setName(updatedList.stream()
-                .findFirst().get().getName());
-            originalCourierTranslation.setNameEng(updatedList.stream()
-                .findFirst().get().getNameEng());
+            originalCourierTranslation.setName(updatedList.get(0).getName());
+            originalCourierTranslation.setNameEng(updatedList.get(0).getNameEng());
         }
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());

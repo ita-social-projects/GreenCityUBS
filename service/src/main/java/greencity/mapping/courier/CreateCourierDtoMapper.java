@@ -13,10 +13,8 @@ public class CreateCourierDtoMapper extends AbstractConverter<Courier, CreateCou
     @Override
     protected CreateCourierDto convert(Courier source) {
         List<CourierTranslation> courierTranslations = source.getCourierTranslationList();
-
-        String en = courierTranslations.stream().findFirst().get().getNameEng();
-
-        String ua = courierTranslations.stream().findFirst().get().getName();
+        String en = courierTranslations.get(0).getNameEng();
+        String ua = courierTranslations.get(0).getName();
 
         return CreateCourierDto.builder()
             .nameEn(en)

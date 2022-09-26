@@ -23,10 +23,8 @@ class CreateCourierDtoMapperTest {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
 
         List<CourierTranslation> courierTranslations = courier.getCourierTranslationList();
-
-        String en = courierTranslations.stream().findFirst().get().getNameEng();
-
-        String ua = courierTranslations.stream().findFirst().get().getName();
+        String en = courierTranslations.get(0).getNameEng();
+        String ua = courierTranslations.get(0).getName();
 
         CreateCourierDto createCourierDto = mapper.convert(courier);
         Assertions.assertEquals(createCourierDto.getNameUa(), ua);
