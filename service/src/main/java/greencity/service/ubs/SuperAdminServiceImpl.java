@@ -158,12 +158,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createServiceWithTranslation(CreateServiceDto dto, User user) {
+        Long id = dto.getCourierId();
+        Courier courier = courierRepository.findById(id).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+
         Service service = Service.builder()
             .basePrice(dto.getPrice())
             .commission(dto.getCommission())
             .fullPrice(dto.getPrice() + dto.getCommission())
             .capacity(dto.getCapacity())
             .createdAt(LocalDate.now())
+            .courier(courier)
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
