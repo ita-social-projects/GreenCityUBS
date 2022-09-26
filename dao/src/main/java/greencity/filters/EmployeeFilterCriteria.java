@@ -2,13 +2,10 @@ package greencity.filters;
 
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class EmployeeFilterCriteria {
     private String[] employeePositions;
     private String[] receivingStations;

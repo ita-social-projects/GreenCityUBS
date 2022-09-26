@@ -2,13 +2,10 @@ package greencity.mapping.courier;
 
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.CourierTranslation;
-import greencity.mapping.courier.CourierTranslationDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static greencity.ModelUtils.getLanguage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,12 +18,12 @@ class CourierTranslationDtoMapperTest {
         CourierTranslation expected = CourierTranslation.builder()
             .id(1L)
             .courier(null)
-            .language(getLanguage())
+            .nameEng("Test")
             .name("Тест")
             .build();
         CourierTranslationDto actual = mapper.convert(expected);
 
         assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getLanguage().getCode(), actual.getLanguageCode());
+        assertEquals(expected.getNameEng(), actual.getNameEng());
     }
 }

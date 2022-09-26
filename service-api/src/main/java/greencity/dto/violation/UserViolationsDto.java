@@ -1,7 +1,7 @@
 package greencity.dto.violation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import greencity.entity.enums.ViolationLevel;
+import greencity.enums.ViolationLevel;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 

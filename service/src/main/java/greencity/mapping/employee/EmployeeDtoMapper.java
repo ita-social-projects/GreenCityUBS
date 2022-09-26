@@ -1,7 +1,7 @@
 package greencity.mapping.employee;
 
 import greencity.dto.employee.EmployeeDto;
-import greencity.entity.enums.EmployeeStatus;
+import greencity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;

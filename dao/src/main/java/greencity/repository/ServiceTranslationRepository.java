@@ -6,12 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ServiceTranslationRepository extends JpaRepository<ServiceTranslation, Long> {
     /**
-     * Method find service translation by service and language code.
+     * Method find service translation by service.
      * 
      * @param service - current service.
-     * @param code    - language code.
      * @return {@link ServiceTranslation}
      * @author Vadym Makitra
      */
-    ServiceTranslation findServiceTranslationsByServiceAndLanguageCode(Service service, String code);
+    ServiceTranslation findServiceTranslationsByService(Service service);
 }

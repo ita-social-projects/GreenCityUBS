@@ -1,6 +1,6 @@
 package greencity.dto.violation;
 
-import greencity.entity.enums.ViolationLevel;
+import greencity.enums.ViolationLevel;
 import lombok.*;
 import org.springframework.lang.Nullable;
 

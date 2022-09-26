@@ -2,12 +2,10 @@ package greencity.filters;
 
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@Builder
 public class CustomerPage {
     private int pageNumber = 0;
     private int pageSize = 10;

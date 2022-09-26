@@ -6,14 +6,11 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @Embeddable
-@ToString
-@EqualsAndHashCode
 public class Coordinates implements Serializable {
     @Column(nullable = true)
     private double latitude;

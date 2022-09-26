@@ -2,8 +2,7 @@ package greencity.mapping.certificate;
 
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.entity.enums.CertificateStatus;
-import greencity.mapping.certificate.CertificateDtoForAddingMapper;
+import greencity.enums.CertificateStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

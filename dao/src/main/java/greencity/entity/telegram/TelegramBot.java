@@ -6,13 +6,12 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "telegram_bot")
-@Getter
-@Setter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(exclude = {"user"})
+@Table(name = "telegram_bot")
 public class TelegramBot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

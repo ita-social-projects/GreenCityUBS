@@ -91,15 +91,8 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.enums.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.BotType;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
-import greencity.entity.enums.PaymentType;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Certificate;
@@ -120,22 +113,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -203,7 +181,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    private final LanguageRepository languageRepository;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")

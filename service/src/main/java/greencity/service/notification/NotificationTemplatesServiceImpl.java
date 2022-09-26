@@ -14,15 +14,15 @@ public class NotificationTemplatesServiceImpl implements NotificationTemplatesSe
      * {@inheritDoc}
      */
     @Override
-    public void updateNotificationTemplateForSITE(String body, String notificationType, long languageId) {
-        notificationTemplateRepository.updateNotificationTemplateForSITE(body, notificationType, languageId);
+    public void updateNotificationTemplateForSITE(String body, String notificationType, String languageCode) {
+        notificationTemplateRepository.updateNotificationTemplateForSITE(body, notificationType, languageCode);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateNotificationTemplateForOTHER(String body, String notificationType, long languageId) {
-        notificationTemplateRepository.updateNotificationTemplateForOTHER(body, notificationType, languageId);
+    public void updateNotificationTemplateForOTHER(String body, String notificationType, String languageCode) {
+        notificationTemplateRepository.updateNotificationTemplateForOTHER(body, notificationType, languageCode);
     }
 }

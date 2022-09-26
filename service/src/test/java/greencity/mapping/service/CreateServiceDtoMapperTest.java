@@ -23,8 +23,8 @@ class CreateServiceDtoMapperTest {
             mapper.convert(service).getServiceTranslationDtoList().get(0).getName());
         Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getDescription(),
             mapper.convert(service).getServiceTranslationDtoList().get(0).getDescription());
-        Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getLanguageId(),
-            mapper.convert(service).getServiceTranslationDtoList().get(0).getLanguageId());
+        Assertions.assertEquals(dto.getServiceTranslationDtoList().get(0).getNameEng(),
+            mapper.convert(service).getServiceTranslationDtoList().get(0).getNameEng());
         Assertions.assertEquals(dto.getCapacity(), mapper.convert(service).getCapacity());
         Assertions.assertEquals(dto.getCommission(), mapper.convert(service).getCommission());
         Assertions.assertEquals(dto.getPrice(), mapper.convert(service).getPrice());

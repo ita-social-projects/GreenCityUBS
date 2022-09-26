@@ -21,7 +21,7 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
             .courierTranslationDtos(
                 source.getCourierTranslationList().stream()
                     .map(courierTranslation -> CourierTranslationDto.builder()
-                        .languageCode(courierTranslation.getLanguage().getCode())
+                        .nameEng(courierTranslation.getNameEng())
                         .name(courierTranslation.getName())
                         .build())
                     .collect(Collectors.toList()))

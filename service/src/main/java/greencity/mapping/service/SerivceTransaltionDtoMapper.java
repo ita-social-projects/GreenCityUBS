@@ -12,7 +12,7 @@ public class SerivceTransaltionDtoMapper extends AbstractConverter<ServiceTransl
         return ServiceTranslationDto.builder()
             .name(source.getName())
             .description(source.getDescription())
-            .languageId(source.getLanguage().getId())
+            .nameEng(source.getNameEng())
             .build();
     }
 }

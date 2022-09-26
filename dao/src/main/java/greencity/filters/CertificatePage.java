@@ -3,12 +3,10 @@ package greencity.filters;
 import lombok.*;
 import org.springframework.data.domain.Sort;
 
-@Builder
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@Builder
 public class CertificatePage {
     private int pageNumber = 0;
     private int pageSize = 10;

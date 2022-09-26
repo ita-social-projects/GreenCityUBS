@@ -13,7 +13,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;

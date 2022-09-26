@@ -6,7 +6,7 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.violation.UserViolationsWithUserName;
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersAdminsPageService;

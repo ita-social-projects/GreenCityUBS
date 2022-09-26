@@ -2,9 +2,8 @@ package greencity.mapping.courier;
 
 import greencity.ModelUtils;
 import greencity.dto.courier.CourierInfoDto;
-import greencity.entity.enums.CourierLimit;
+import greencity.enums.CourierLimit;
 import greencity.entity.order.TariffsInfo;
-import greencity.mapping.courier.CourierInfoDtoMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

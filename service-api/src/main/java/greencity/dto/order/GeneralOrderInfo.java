@@ -1,7 +1,7 @@
 package greencity.dto.order;
 
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

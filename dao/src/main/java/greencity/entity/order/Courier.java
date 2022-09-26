@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.CourierStatus;
+import greencity.enums.CourierStatus;
 import greencity.entity.user.User;
 import lombok.*;
 
@@ -9,10 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @EqualsAndHashCode(
     exclude = {"courierTranslationList", "services", "tariffsInfoList"})
@@ -25,13 +24,13 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     private CourierStatus courierStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
     private List<CourierTranslation> courierTranslationList;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
     private List<TariffsInfo> tariffsInfoList;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "courier")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
     List<Service> services;
 
     @ManyToOne

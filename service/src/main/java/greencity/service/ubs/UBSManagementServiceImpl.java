@@ -21,7 +21,6 @@ import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -29,6 +28,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
@@ -580,8 +580,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
 
         long discount = orderRepository.findSumOfCertificatesByOrderId(orderId);
-        Long totalPrice = setTotalPrice(getPriceDetails(orderId)).longValue();
-        Long needToPay = totalPrice - wasPaid - discount;
+        long totalPrice = setTotalPrice(getPriceDetails(orderId)).longValue();
+        long needToPay = totalPrice - wasPaid - discount;
 
         if (needToPay == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.PAID.name());
@@ -944,7 +944,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .build();
     }
 
-    private OrderDetailDto setOrderDetailDto(OrderDetailDto dto, Order order) {
+    private void setOrderDetailDto(OrderDetailDto dto, Order order) {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
@@ -959,8 +959,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
-
-        return dto;
     }
 
     private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {

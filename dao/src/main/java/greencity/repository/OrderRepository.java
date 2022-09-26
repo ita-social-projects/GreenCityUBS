@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.OrderPaymentStatus;
+import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

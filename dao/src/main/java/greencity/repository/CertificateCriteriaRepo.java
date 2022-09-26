@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.CertificateStatus;
+import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;

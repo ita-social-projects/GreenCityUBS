@@ -20,7 +20,7 @@ import greencity.ModelUtils;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;

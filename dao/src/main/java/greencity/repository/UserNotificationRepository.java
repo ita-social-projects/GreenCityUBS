@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import org.springframework.data.domain.Page;
