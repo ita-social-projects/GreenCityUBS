@@ -1,14 +1,8 @@
 package greencity.entity.notifications;
 
-import greencity.entity.enums.NotificationReceiverType;
-import greencity.entity.enums.NotificationType;
-import greencity.entity.language.Language;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import greencity.entity.enums.*;
+import lombok.*;
 import lombok.experimental.Accessors;
-
 import javax.persistence.*;
 
 @Entity
@@ -33,9 +27,8 @@ public class NotificationTemplate {
     @Column(name = "body", length = 1500)
     private String body;
 
-    @ManyToOne
-    @JoinColumn(name = "language_id")
-    private Language language;
+    @Column(name = "language_code")
+    private String languageCode;
 
     @Column(nullable = false, name = "notification_receiver_type", length = 50)
     @Enumerated(EnumType.STRING)

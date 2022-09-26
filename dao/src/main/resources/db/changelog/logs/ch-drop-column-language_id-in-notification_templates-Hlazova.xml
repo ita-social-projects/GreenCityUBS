@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Hlazova-9" author="Hlazova Nataliia">
+
+        <dropTable  cascadeConstraints="true"
+                    catalogName="greencityubs"
+                    schemaName="public"
+                    tableName="languages"/>
+
+        <dropColumn tableName="notification_templates">
+            <column name="language_id"/>
+        </dropColumn>
+
+        <addColumn tableName="notification_templates">
+            <column name="language_code" type="VARCHAR(10)"/>
+        </addColumn>
+
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=3</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=5</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=7</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=9</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=11</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=13</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=15</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=17</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=19</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=21</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=23</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=25</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=27</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=29</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="ua"/>
+            <where>id=31</where>
+        </update>
+
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=2</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=4</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=6</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=8</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=10</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=12</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=14</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=16</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=18</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=20</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=22</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=24</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=26</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=28</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=30</where>
+        </update>
+        <update tableName="notification_templates" >
+            <column name="language_code" value="en"/>
+            <where>id=32</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

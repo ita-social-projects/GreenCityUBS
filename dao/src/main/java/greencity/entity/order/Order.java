@@ -27,10 +27,10 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+@EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
-@ToString(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+@ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {

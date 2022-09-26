@@ -6,14 +6,12 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @Table(name = "events")
 @EqualsAndHashCode(exclude = {"order"})
-
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -31,7 +31,6 @@ import greencity.dto.violation.UserViolationMailDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
-import greencity.entity.language.Language;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -77,7 +76,6 @@ public class ModelUtils {
     public static final List<OrderDetailInfoDto> TEST_ORDER_DETAILS_INFO_DTO_LIST =
         singletonList(createOrderDetailInfoDto());
     public static final OrderAddressDtoRequest TEST_ORDER_ADDRESS_DTO_REQUEST = createOrderDtoRequest();
-    public static final Order GET_ORDER_DETAILS = getOrderDetails();
     public static final Order TEST_ORDER_2 = createTestOrder2();
     public static final Order TEST_ORDER_3 = createTestOrder3();
     public static final Order TEST_ORDER_4 = createTestOrder4();
@@ -101,7 +99,6 @@ public class ModelUtils {
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
     public static final PageableDto<NotificationShortDto> TEST_DTO = createPageableDto();
-    public static final List<String> TEST_ALL_LANGUAGE_CODE = createAllLanguageCode();
     public static final Order TEST_ORDER_UPDATE_POSITION = createOrder2();
     public static final List<EmployeeOrderPosition> TEST_EMPLOYEE_ORDER_POSITION = createEmployeeOrderPositionList();
     public static final EmployeePositionDtoResponse TEST_EMPLOYEE_POSITION_DTO_RESPONSE =
@@ -125,10 +122,7 @@ public class ModelUtils {
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
-    public static final RequestToChangeOrdersDataDto REQUEST_TO_CHANGE_ORDERS_DATA_DTO =
-        getRequestToChangeOrdersDataDTO();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
-    public static final List<Locale> LOCALES = List.of(new Locale("uk"), new Locale("en"));
 
     public static CourierUpdateDto getUpdateCourierDto() {
         return CourierUpdateDto.builder()
@@ -195,7 +189,7 @@ public class ModelUtils {
 
     public static OrderResponseDto getOrderResponseDto() {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(Arrays.asList("232-534-634")))
+            .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .locationId(1L)
             .orderComment("comment")
@@ -341,68 +335,6 @@ public class ModelUtils {
             .imageReasonNotTakingBags(List.of("foto"))
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
-            .build();
-    }
-
-    public static Order getOrderForGetOrderStatusDataTest() {
-        return Order.builder()
-            .id(1L)
-            .payment(Lists.newArrayList(Payment.builder()
-                .paymentId("1L")
-                .amount(20000L)
-                .currency("UAH")
-                .settlementDate("20.02.1990")
-                .comment("avb")
-                .paymentStatus(PaymentStatus.PAID)
-                .build()))
-            .ubsUser(UBSuser.builder()
-                .firstName("oleh")
-                .lastName("ivanov")
-                .email("mail@mail.ua")
-                .id(1L)
-                .phoneNumber("067894522")
-                .address(Address.builder()
-                    .id(1L)
-                    .city("Lviv")
-                    .street("Levaya")
-                    .district("frankivskiy")
-                    .entranceNumber("5")
-                    .addressComment("near mall")
-                    .houseCorpus("1")
-                    .houseNumber("4")
-                    .coordinates(Coordinates.builder()
-                        .latitude(49.83)
-                        .longitude(23.88)
-                        .build())
-                    .user(User.builder().id(1L).build())
-                    .build())
-                .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
-            .certificates(Collections.emptySet())
-            .pointsToUse(700)
-            .adminComment("Admin")
-            .cancellationComment("cancelled")
-            .receivingStation(ReceivingStation.builder()
-                .id(1L)
-                .name("Саперно-Слобідська")
-                .build())
-            .orderPaymentStatus(OrderPaymentStatus.PAID)
-            .cancellationReason(CancellationReason.OUT_OF_CITY)
-            .imageReasonNotTakingBags(List.of("foto"))
-            .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-            .tariffsInfo(TariffsInfo.builder()
-                .courier(Courier.builder()
-                    .id(1L)
-                    .build())
-                .id(1L)
-                .tariffLocations(Set.of(TariffLocation.builder()
-                    .id(1L)
-                    .build()))
-                .maxAmountOfBigBags(2L)
-                .maxPriceOfOrder(500000L)
-                .minAmountOfBigBags(99L)
-                .minPriceOfOrder(500L)
-                .build())
             .build();
     }
 
@@ -840,15 +772,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static UserViolationMailDto getUserViolationMailDto() {
-        return UserViolationMailDto.builder()
-            .email("string@gmail.com")
-            .name("string")
-            .language("en")
-            .violationDescription("String Description")
-            .build();
-    }
-
     public static AddingViolationsToUserDto getAddingViolationsToUserDto() {
         return AddingViolationsToUserDto.builder()
             .orderID(1L)
@@ -858,7 +781,7 @@ public class ModelUtils {
     }
 
     public static UpdateViolationToUserDto getUpdateViolationToUserDto() {
-        List<String> listImages = new ArrayList();
+        List<String> listImages = new ArrayList<>();
         listImages.add("");
         return UpdateViolationToUserDto.builder()
             .orderID(1L)
@@ -887,35 +810,6 @@ public class ModelUtils {
             .orderDate(LocalDateTime.of(2021, 5, 15, 10, 20, 5))
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .build();
-    }
-
-    public static OrderBagDto getOrderBagDto() {
-        return OrderBagDto.builder()
-            .id(1)
-            .amount(3)
-            .build();
-    }
-
-    public static AllPointsUserDto allPointsUserDto() {
-        return AllPointsUserDto.builder()
-            .userBonuses(100)
-            .ubsUserBonuses(List.of(PointsForUbsUserDto.builder()
-                .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-                .amount(50)
-                .numberOfOrder(36874L).build(),
-                PointsForUbsUserDto.builder()
-                    .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-                    .amount(50)
-                    .numberOfOrder(35478L).build()))
-            .build();
-
-    }
-
-    public static PointsForUbsUserDto pointsForUbsUserDto() {
-        return PointsForUbsUserDto.builder()
-            .dateOfEnrollment(LocalDateTime.of(2017, 12, 25, 3, 0, 0, 0))
-            .amount(700)
-            .numberOfOrder(35478L).build();
     }
 
     public static AddEmployeeDto getAddEmployeeDto() {
@@ -1106,7 +1000,7 @@ public class ModelUtils {
 
     public static PersonalDataDto getPersonalDataDto2() {
         return PersonalDataDto.builder()
-            .id(1l)
+            .id(1L)
             .firstName("Dima")
             .lastName("Petrov")
             .phoneNumber("0666051373")
@@ -1236,10 +1130,6 @@ public class ModelUtils {
         return List.of(ReceivingStation.builder().id(1L).build());
     }
 
-    public static UbsTableCreationDto getUbsTableCreationDto() {
-        return UbsTableCreationDto.builder().uuid("87df9ad5-6393-441f-8423-8b2e770b01a8").build();
-    }
-
     public static Violation getViolation() {
         LocalDateTime localdatetime = LocalDateTime.of(
             2021, Month.MARCH,
@@ -1342,7 +1232,7 @@ public class ModelUtils {
     public static Payment getManualPayment() {
         return Payment.builder()
             .settlementDate("02-08-2021")
-            .amount(500l)
+            .amount(500L)
             .paymentStatus(PaymentStatus.PAID)
             .paymentId("1l")
             .receiptLink("somelink.com")
@@ -1355,7 +1245,7 @@ public class ModelUtils {
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .settlementdate("02-08-2021")
-            .amount(500l)
+            .amount(500L)
             .receiptLink("link")
             .paymentId("1")
             .imagePath("fdhgh")
@@ -1571,7 +1461,7 @@ public class ModelUtils {
         Map<PositionDto, List<EmployeeNameIdDto>> allPositionsEmployees = new HashMap<>();
         Map<PositionDto, String> currentPositionEmployees = new HashMap<>();
         String value = getEmployee().getFirstName() + " " + getEmployee().getLastName();
-        allPositionsEmployees.put(getPositionDto(), new ArrayList<>(Arrays.asList(EmployeeNameIdDto.builder()
+        allPositionsEmployees.put(getPositionDto(), new ArrayList<>(List.of(EmployeeNameIdDto.builder()
             .id(getPositionDto().getId())
             .name(value)
             .build())));
@@ -1737,16 +1627,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Location getLastLocation() {
-        return Location.builder()
-            .id(1l)
-            .nameUk("київ")
-            .nameEn("Kyiv")
-            .locationStatus(LocationStatus.ACTIVE)
-            .coordinates(Coordinates.builder().latitude(100.00).longitude(100.00).build())
-            .build();
-    }
-
     public static List<Location> getLocationList() {
         return List.of(Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
@@ -1756,20 +1636,6 @@ public class ModelUtils {
             .region(getRegion())
             .coordinates(getCoordinates())
             .build());
-    }
-
-    public static List<LocationResponseDto> getLocationResponseDtoList() {
-        return List.of(LocationResponseDto.builder()
-            .id(1L)
-            .name("Київ")
-            .languageCode("ua")
-            .build(),
-            LocationResponseDto.builder()
-                .id(2L)
-                .name("Name2")
-                .languageCode("ua")
-                .build());
-
     }
 
     private static List<String> createAllLanguageCode() {
@@ -1846,13 +1712,6 @@ public class ModelUtils {
             .build();
     }
 
-    private static UpdateOrderDetailDto createUpdateOrderDetailDto() {
-        return UpdateOrderDetailDto.builder()
-            .amountOfBagsConfirmed(Map.ofEntries(Map.entry(1, 1)))
-            .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
-            .build();
-    }
-
     public static Set<CoordinatesDto> getCoordinatesDtoSet() {
         Set<CoordinatesDto> set = new HashSet<>();
         set.add(CoordinatesDto.builder()
@@ -1894,7 +1753,7 @@ public class ModelUtils {
         notificationTemplate.setNotificationType(NotificationType.UNPAID_ORDER);
         notificationTemplate.setNotificationReceiverType(SITE);
         notificationTemplate.setBody("Test");
-        notificationTemplate.setLanguage(Language.builder().id(1L).code("ua").build());
+        // notificationTemplate.set;
 
         return notificationTemplate;
     }
@@ -2077,18 +1936,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static GetTariffServiceDto getTariffServiceDto() {
-        return GetTariffServiceDto.builder()
-            .fullPrice(300)
-            .nameEng("a")
-            .capacity(120)
-            .commission(50)
-            .description("description")
-            .name("name")
-            .price(250)
-            .build();
-    }
-
     public static Optional<Bag> getBag() {
         return Optional.of(Bag.builder()
             .id(1)
@@ -2138,12 +1985,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Courier getCourier(CourierLimit courierLimit) {
-        return Courier.builder()
-            .courierTranslationList(getCourierTranslations())
-            .build();
-    }
-
     public static Courier getCourier() {
         return Courier.builder()
             .id(1L)
@@ -2152,20 +1993,11 @@ public class ModelUtils {
             .build();
     }
 
-    public static CourierTranslation getCourierTranslation(CourierLimit courierLimit) {
-        return CourierTranslation.builder()
-            .id(1L)
-            .language(Language.builder().id(1L).code("ua").build())
-            .name("name")
-            .courier(getCourier(courierLimit))
-            .build();
-    }
-
     public static CourierTranslation getCourierTranslation() {
         return CourierTranslation.builder()
             .id(1L)
             .name("Test")
-            .language(getLanguage())
+            .nameEng("Test")
             .courier(getCourier())
             .build();
     }
@@ -2173,7 +2005,7 @@ public class ModelUtils {
     public static GetCourierTranslationsDto getCourierTranslationsDto() {
         return GetCourierTranslationsDto.builder()
             .id(1L)
-            .languageCode("ua")
+            .nameEng("Test")
             .name("Test")
             .build();
     }
@@ -2243,7 +2075,7 @@ public class ModelUtils {
             .price(100)
             .description("test")
             .name("test")
-            .languageCode("ua")
+            .nameEng("test")
             .build();
 
     }
@@ -2282,7 +2114,7 @@ public class ModelUtils {
         return ServiceTranslation.builder()
             .name("Test")
             .description("Test")
-            .language(getLanguage())
+            .nameEng("Test")
             .build();
     }
 
@@ -2293,42 +2125,10 @@ public class ModelUtils {
             .build();
     }
 
-    public static Language getLanguage() {
-        return Language.builder()
-            .id(1L)
-            .code("ua")
-            .build();
-    }
-
-    public static Language getEnLanguage() {
-        return Language.builder()
-            .id(2L)
-            .code("en")
-            .build();
-    }
-
-    public static List<CreateCourierTranslationDto> getCreateCourierTranslationDto() {
-        return List.of(CreateCourierTranslationDto.builder()
-            .languageId(1L)
-            .name("Test")
-            .build());
-    }
-
     public static List<CourierTranslation> getCourierTranslations() {
         return List.of(CourierTranslation.builder()
             .name("Test")
-            .language(ModelUtils.getLanguage())
-            .build(),
-            CourierTranslation.builder()
-                .name("Test")
-                .language(ModelUtils.getEnLanguage())
-                .build());
-    }
-
-    public static List<OrderInfoDto> getOrderInfoDto() {
-        return List.of(OrderInfoDto.builder()
-            .id(1L)
-            .orderPrice(24.039)
+            .nameEng("Test")
             .build());
     }
 
@@ -2353,7 +2153,7 @@ public class ModelUtils {
 
     public static Order getOrderUserFirst() {
         return Order.builder()
-            .id(1l)
+            .id(1L)
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
@@ -2364,7 +2164,7 @@ public class ModelUtils {
 
     public static Order getOrderUserSecond() {
         return Order.builder()
-            .id(2l)
+            .id(2L)
             .exportedQuantity(Collections.singletonMap(1, 1))
             .amountOfBagsOrdered(Map.of(1, 1))
             .confirmedQuantity(Map.of(1, 1))
@@ -2500,14 +2300,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static OrderLiqpayClienDto getOrderLiqpayClientDto() {
-        return OrderLiqpayClienDto
-            .builder()
-            .orderId(1l)
-            .sum(1)
-            .build();
-    }
-
     public static UpdateOrderPageAdminDto updateOrderPageAdminDto() {
         return UpdateOrderPageAdminDto.builder()
             .generalOrderInfo(OrderDetailStatusRequestDto
@@ -2559,8 +2351,8 @@ public class ModelUtils {
     public static List<ServiceTranslation> getServiceTranslationList() {
         return List.of(ServiceTranslation.builder()
             .description("Test")
-            .language(Language.builder().id(1L).code("ua").build())
             .name("Test")
+            .nameEng("Test")
             .id(1L)
             .service(Service.builder()
                 .id(1L)
@@ -2624,37 +2416,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static EditTariffInfoDto editTariffInfoDto() {
-        return EditTariffInfoDto.builder()
-            .bagId(1)
-            .courierId(1L)
-            .courierLimitsBy(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .limitDescription("dd")
-            .maxAmountOfBigBag(1L)
-            .minAmountOfBigBag(1L)
-            .maxAmountOfOrder(1L)
-            .minAmountOfOrder(1L)
-            .minimalAmountOfBagStatus(MinAmountOfBag.EXCLUDE)
-            .locationId(1L)
-            .build();
-    }
-
-    public static Courier getcourierDto() {
-        return Courier.builder()
-            .id(1L)
-            .courierTranslationList(List.of(CourierTranslation.builder()
-                .id(1L)
-                .name("mark")
-                .build()))
-            .courierStatus(CourierStatus.ACTIVE)
-            .build();
-    }
-
     public static GetServiceDto getServiceDto() {
         User user = getUser();
         return GetServiceDto.builder()
-            .id(1l)
+            .id(1L)
             .name("test")
+            .nameEng("test")
             .capacity(120)
             .price(100)
             .commission(50)
@@ -2662,14 +2429,7 @@ public class ModelUtils {
             .fullPrice(150)
             .editedAt(LocalDate.now())
             .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .languageCode("ua")
             .courierId(1L)
-            .build();
-    }
-
-    public static LocationCreateDto getLocationCreateDto() {
-        return LocationCreateDto.builder()
-            .addLocationDtoList(List.of(getAddLocationTranslationDto()))
             .build();
     }
 
@@ -2683,24 +2443,8 @@ public class ModelUtils {
     public static ServiceTranslationDto getServiceTranslationDto() {
         return ServiceTranslationDto.builder()
             .description("Test")
-            .languageId(1L)
+            .nameEng("Test")
             .name("Test")
-            .build();
-    }
-
-    public static GetCourierLocationDto getCourierLocationsDto() {
-        return GetCourierLocationDto.builder()
-            .minPriceOfOrder(500L)
-            .maxPriceOfOrder(20000L)
-            .courierLimit("LIMIT_BY_AMOUNT_OF_BAG")
-            .minAmountOfBigBags(2L)
-            .maxAmountOfBigBags(20L)
-            .courierDtos(getCourierDtoList())
-            .locationInfoDtos(List.of(LocationInfoDto.builder()
-                .locationsDto(getLocationsDto())
-                .regionTranslationDtos(getRegionTranslationsDto())
-                .regionId(1L)
-                .build()))
             .build();
     }
 
@@ -2720,27 +2464,11 @@ public class ModelUtils {
             .build();
     }
 
-    public static LimitsDto getCourierLimitsDto() {
-        return LimitsDto.builder()
-            .locationId(1L)
-            .maxAmountOfBigBags(20L)
-            .minAmountOfBigBags(2L)
-            .maxPriceOfOrder(20000L)
-            .minPriceOfOrder(500L)
-            .build();
-    }
-
-    public static CreateCourierDto createCourier() {
-        return CreateCourierDto.builder()
-            .nameEn("nameEn")
-            .nameUa("nameUa")
-            .build();
-    }
-
     public static GetServiceDto getAllInfoAboutService() {
         User user = getUser();
         return GetServiceDto.builder()
             .name("Test")
+            .nameEng("Test")
             .capacity(120)
             .price(100)
             .commission(50)
@@ -2749,7 +2477,6 @@ public class ModelUtils {
             .id(1L)
             .createdAt(LocalDate.now())
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .languageCode("ua")
             .courierId(1L)
             .build();
     }
@@ -2760,15 +2487,6 @@ public class ModelUtils {
             .statusId(1L)
             .id(1L)
             .name("ua")
-            .build();
-    }
-
-    public static OrderStatusTranslation getOrderStatusTranslation2() {
-        return OrderStatusTranslation
-            .builder()
-            .statusId(1L)
-            .id(1L)
-            .name("en")
             .build();
     }
 
@@ -2803,8 +2521,7 @@ public class ModelUtils {
             .setId(1L)
             .setBody("test")
             .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER)
-            .setLanguage(new Language().setId(1L));
+            .setNotificationType(NotificationType.UNPAID_ORDER);
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
@@ -2878,20 +2595,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static NewLocationForCourierDto newLocationForCourierDto() {
-        return NewLocationForCourierDto.builder()
-            .courierId(1L)
-            .locationId(1L)
-            .amountOfBigBag(RangeDto.builder()
-                .max(20L)
-                .min(2L).build())
-            .amountOfOrder(RangeDto.builder()
-                .max(20000L)
-                .min(500L)
-                .build())
-            .build();
-    }
-
     public static LocationInfoDto getInfoAboutLocationDto() {
         return LocationInfoDto.builder()
             .regionId(1L)
@@ -2930,11 +2633,7 @@ public class ModelUtils {
         return List.of(
             CourierTranslationDto.builder()
                 .name("Test")
-                .languageCode("ua").build(),
-            CourierTranslationDto.builder()
-                .name("Test")
-                .languageCode("en")
-                .build());
+                .nameEng("Test").build());
     }
 
     public static Location getLocationForCreateRegion() {
@@ -3014,16 +2713,6 @@ public class ModelUtils {
             .setBlockedBy("Blocked Test");
     }
 
-    public static List<BigOrderTableViews> getBigOrderTableViewsList() {
-        return Collections.singletonList(getBigOrderTableViews());
-    }
-
-    public static Page<BigOrderTableViews> getBigOrderedTableViewPage() {
-        var sort = Sort.by(Sort.Direction.DESC, "id");
-        var pageable = PageRequest.of(1, 1, sort);
-        return new PageImpl<>(getBigOrderTableViewsList(), pageable, 1L);
-    }
-
     public static BigOrderTableDTO getBigOrderTableDto() {
         return new BigOrderTableDTO()
             .setId(3333L)
@@ -3090,15 +2779,6 @@ public class ModelUtils {
             .setResponsibleDriver(null)
             .setResponsibleLogicMan(null)
             .setResponsibleNavigator(null);
-    }
-
-    public static List<BigOrderTableDTO> getBigOrderTableDTOList() {
-        return Collections.singletonList(getBigOrderTableDto());
-    }
-
-    public static Page<BigOrderTableDTO> getBigOrderTableDTOPage() {
-        var sort = Sort.by(Sort.Direction.DESC, "id");
-        return new PageImpl<>(getBigOrderTableDTOList(), PageRequest.of(1, 1, sort), 1L);
     }
 
     public static Order getOrderForGetOrderStatusData2Test() {
@@ -3176,9 +2856,9 @@ public class ModelUtils {
     public static Order getOrderForGetOrderStatusEmptyPriceDetails() {
         return Order.builder()
             .id(1L)
-            .amountOfBagsOrdered(new HashMap<Integer, Integer>())
-            .confirmedQuantity(new HashMap<Integer, Integer>())
-            .exportedQuantity(new HashMap<Integer, Integer>())
+            .amountOfBagsOrdered(new HashMap<>())
+            .confirmedQuantity(new HashMap<>())
+            .exportedQuantity(new HashMap<>())
             .pointsToUse(100)
             .orderStatus(OrderStatus.DONE)
             .build();
@@ -3350,7 +3030,7 @@ public class ModelUtils {
     public static RequestToChangeOrdersDataDto getRequestToChangeOrdersDataDTO() {
         return RequestToChangeOrdersDataDto.builder()
             .columnName("orderStatus")
-            .orderId(List.of(1l))
+            .orderId(List.of(1L))
             .newValue("1")
             .build();
     }
@@ -3366,7 +3046,7 @@ public class ModelUtils {
         return botList;
     }
 
-    public static UpdateAllOrderPageDto updateAllOrderPageDto(OrderStatus orderStatus) {
+    public static UpdateAllOrderPageDto updateAllOrderPageDto() {
         return UpdateAllOrderPageDto.builder()
             .orderId(List.of(1L))
             .exportDetailsDto(ExportDetailsDtoUpdate
@@ -3459,7 +3139,7 @@ public class ModelUtils {
                 .nameUk(location.getNameUk()).build()))
             .courierTranslationDtos(List.of(CourierTranslationDto.builder()
                 .name("UBS")
-                .languageCode("ua")
+                .nameEng("UBS")
                 .build()))
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Taras")
@@ -3479,12 +3159,10 @@ public class ModelUtils {
         return UpdateNotificationTemplatesDto.builder()
             .body("test")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
-            .languageId(1)
             .build();
     }
 
     public static OrdersDataForUserDto getOrderStatusDto() {
-
         SenderInfoDto senderInfoDto = SenderInfoDto.builder()
             .senderName("TestName")
             .senderSurname("TestSurName")
@@ -3590,10 +3268,6 @@ public class ModelUtils {
             .maxPriceOfOrder(50000L)
             .minPriceOfOrder(500L)
             .orders(List.of(ModelUtils.getOrder()))
-//            .receivingStationList(Set.of(ReceivingStation.builder()
-//                .name("receivingStation")
-//                .createdBy(ModelUtils.createUser())
-//                .build()))
             .build();
     }
 
@@ -3604,10 +3278,6 @@ public class ModelUtils {
             .receivingStationsIdList(List.of(1L))
             .regionId(1L)
             .build();
-    }
-
-    private static EditAmountOfBagDto getEditAmountOfBagDto() {
-        return EditAmountOfBagDto.builder().maxAmountOfBigBags(500L).minAmountOfBigBags(100L).build();
     }
 
     public static String getSuccessfulFondyResponse() {
@@ -3800,7 +3470,7 @@ public class ModelUtils {
     public static CourierTranslationDto getCourierTranslationDto() {
         return CourierTranslationDto.builder()
             .name("Test")
-            .languageCode("null")
+            .nameEng("Test")
             .build();
     }
 }

@@ -2,11 +2,9 @@ package greencity.entity.parameters;
 
 import lombok.*;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
 public class OptionForColumn {
     private long id;

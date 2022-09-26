@@ -2,12 +2,9 @@ package greencity.entity.language;
 
 import lombok.*;
 
-//@Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
 public class Title {
     private long id;

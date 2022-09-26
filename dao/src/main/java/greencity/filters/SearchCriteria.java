@@ -5,13 +5,10 @@ import greencity.entity.enums.OrderStatus;
 import greencity.entity.enums.PaymentSystem;
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SearchCriteria {
     private OrderStatus[] orderStatuses;
     private PaymentSystem[] paymentSystems;

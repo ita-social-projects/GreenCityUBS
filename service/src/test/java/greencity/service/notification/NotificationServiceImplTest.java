@@ -18,8 +18,6 @@ import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
-import greencity.service.ubs.ViberService;
-import greencity.ubstelegrambot.TelegramService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -64,12 +62,6 @@ class NotificationServiceImplTest {
 
     @Mock
     private NotificationTemplateRepository templateRepository;
-
-    @Mock
-    private TelegramService telegramService;
-
-    @Mock
-    private ViberService viberService;
 
     @Mock
     private Clock clock;

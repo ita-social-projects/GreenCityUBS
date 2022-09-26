@@ -51,11 +51,11 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     @Transactional
     @Modifying
     @Query(value = "update notification_templates set body = :body where notification_type = :notificationType "
-        + "and notification_receiver_type = 'SITE' and language_id = :languageId",
+        + "and notification_receiver_type = 'SITE' and language_code = :languageCode",
         nativeQuery = true)
     void updateNotificationTemplateForSITE(@Param("body") String body,
         @Param("notificationType") String notificationType,
-        @Param("languageId") long languageId);
+        @Param("languageCode") String languageCode);
 
     /**
      * Method that updates body in notification templates for receiving type OTHER.
@@ -65,9 +65,9 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     @Transactional
     @Modifying
     @Query(value = "update notification_templates set body = :body where notification_type = :notificationType "
-        + "and notification_receiver_type = 'OTHER' and language_id = :languageId",
+        + "and notification_receiver_type = 'OTHER' and language_code = :languageCode",
         nativeQuery = true)
     void updateNotificationTemplateForOTHER(@Param("body") String body,
         @Param("notificationType") String notificationType,
-        @Param("languageId") long languageId);
+        @Param("languageCode") String languageCode);
 }

@@ -7,10 +7,9 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @EqualsAndHashCode(exclude = {"order"})
 @Table(name = "certificate")

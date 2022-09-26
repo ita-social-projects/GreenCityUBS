@@ -21,5 +21,5 @@ public class EditServiceDto {
     @NotNull
     Long locationId;
     @NotNull
-    String languageCode;
+    String nameEng;
 }

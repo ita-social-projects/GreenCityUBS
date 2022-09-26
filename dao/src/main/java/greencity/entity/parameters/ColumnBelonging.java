@@ -5,12 +5,9 @@ import lombok.*;
 
 import java.util.List;
 
-//@Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
 public class ColumnBelonging {
     private long id;

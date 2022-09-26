@@ -114,9 +114,10 @@ public class NotificationController {
     })
     @PutMapping(value = "/updateTemplateForSITE")
     public ResponseEntity<HttpStatus> updateNotificationTemplateForSITE(
-        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {
+        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto,
+        @ApiIgnore @ValidLanguage Locale locale) {
         notificationTemplatesService.updateNotificationTemplateForSITE(updateNotificationTemplatesDto.getBody(),
-            updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
+            updateNotificationTemplatesDto.getNotificationType(), locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -136,9 +137,10 @@ public class NotificationController {
     })
     @PutMapping(value = "/updateTemplateForOTHER")
     public ResponseEntity<HttpStatus> updateNotificationTemplateForOTHER(
-        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto) {
+        @Valid @RequestBody UpdateNotificationTemplatesDto updateNotificationTemplatesDto,
+        @ApiIgnore @ValidLanguage Locale locale) {
         notificationTemplatesService.updateNotificationTemplateForOTHER(updateNotificationTemplatesDto.getBody(),
-            updateNotificationTemplatesDto.getNotificationType(), updateNotificationTemplatesDto.getLanguageId());
+            updateNotificationTemplatesDto.getNotificationType(), locale.getLanguage());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

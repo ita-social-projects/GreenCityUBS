@@ -7,10 +7,9 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @Table(name = "payment")
 @EqualsAndHashCode(exclude = {"order"})

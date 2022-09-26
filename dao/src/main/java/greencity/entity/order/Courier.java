@@ -9,10 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @EqualsAndHashCode(
     exclude = {"courierTranslationList", "services", "tariffsInfoList"})

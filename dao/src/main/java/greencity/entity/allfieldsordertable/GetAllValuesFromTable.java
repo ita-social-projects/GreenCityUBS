@@ -2,11 +2,10 @@ package greencity.entity.allfieldsordertable;
 
 import lombok.*;
 
-@Getter
-@Setter
-@Builder
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@Builder
 public class GetAllValuesFromTable {
     private Long orderId;
     private String orderStatus;
