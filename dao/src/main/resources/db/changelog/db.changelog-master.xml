@@ -144,5 +144,7 @@
     <include file="db/changelog/logs/ch-update-into-notification-templates-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Hlazova-2.xml"/>
     <include file="db/changelog/logs/ch-insert-into-order-status-translations-Yashna.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-language_id-in-courier_and_service_translations-Hlazova.xml"/>
+    <include file="db/changelog/logs/ch-drop-column-language_id-in-notification_templates-Hlazova.xml"/>
 </databaseChangeLog>
 

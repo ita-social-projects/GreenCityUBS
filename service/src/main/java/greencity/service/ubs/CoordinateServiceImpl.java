@@ -132,7 +132,6 @@ public class CoordinateServiceImpl implements CoordinateService {
                 allCoords.remove(grouped);
             }
 
-            // mapping coordinates to orderDto
             getUndeliveredOrdersByGroupedCoordinates(closeRelatives,
                 amountOfLitresInCluster, allClusters);
         });

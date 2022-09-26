@@ -1,6 +1,6 @@
 package greencity.dto.order;
 
-import greencity.entity.enums.CancellationReason;
+import greencity.enums.CancellationReason;
 import lombok.*;
 
 @Getter

@@ -16,11 +16,10 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.CourierStatus;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.MinAmountOfBag;
-import greencity.entity.language.Language;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -53,7 +52,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ServiceRepository serviceRepository;
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
-    private final LanguageRepository languageRepository;
     private final CourierRepository courierRepository;
     private final CourierTranslationRepository courierTranslationRepository;
     private final RegionRepository regionRepository;
@@ -173,10 +171,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
                     .description(serviceTranslationDto.getDescription())
-                    .language(languageRepository.findById(serviceTranslationDto.getLanguageId()).orElseThrow(
-                        () -> new NotFoundException(
-                            ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_ID + serviceTranslationDto.getLanguageId())))
                     .name(serviceTranslationDto.getName())
+                    .nameEng(serviceTranslationDto.getNameEng())
                     .build())
                 .collect(Collectors.toList()))
             .build();
@@ -199,6 +195,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .price(serviceTranslation.getService().getBasePrice())
             .capacity(serviceTranslation.getService().getCapacity())
             .name(serviceTranslation.getName())
+            .nameEng(serviceTranslation.getNameEng())
             .commission(serviceTranslation.getService().getCommission())
             .fullPrice(serviceTranslation.getService().getFullPrice())
             .id(serviceTranslation.getService().getId())
@@ -206,7 +203,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(serviceTranslation.getService().getCreatedBy())
             .editedAt(serviceTranslation.getService().getEditedAt())
             .editedBy(serviceTranslation.getService().getEditedBy())
-            .languageCode(serviceTranslation.getLanguage().getCode())
             .build();
     }
 
@@ -222,19 +218,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = serviceRepository.findServiceById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         User user = userRepository.findByUuid(uuid);
-        final Language language = languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.LANGUAGE_IS_NOT_FOUND_BY_CODE + dto.getLanguageCode()));
         service.setCapacity(dto.getCapacity());
         service.setCommission(dto.getCommission());
         service.setBasePrice(dto.getPrice());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
         ServiceTranslation serviceTranslation = serviceTranslationRepository
-            .findServiceTranslationsByServiceAndLanguageCode(service, dto.getLanguageCode());
+            .findServiceTranslationsByService(service);
         serviceTranslation.setService(service);
         serviceTranslation.setName(dto.getName());
+        serviceTranslation.setNameEng(dto.getNameEng());
         serviceTranslation.setDescription(dto.getDescription());
-        serviceTranslation.setLanguage(language);
         service.setFullPrice(dto.getPrice() + dto.getCommission());
         service.setBasePrice(dto.getPrice());
         serviceRepository.save(service);
@@ -347,10 +341,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Courier courier = Courier.builder()
             .courierTranslationList(
                 List.of(
-                    CourierTranslation.builder().name(dto.getNameUa())
-                        .language(languageRepository.findLanguageByCode("ua")).build(),
-                    CourierTranslation.builder().name(dto.getNameEn())
-                        .language(languageRepository.findLanguageByCode("en")).build()))
+                    CourierTranslation.builder().name(dto.getNameUa()).nameEng(dto.getNameEn()).build()))
             .build();
         courier.getCourierTranslationList().forEach(courierTranslation -> courierTranslation.setCourier(courier));
         return courier;
@@ -358,8 +349,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkIfCourierAlreadyExists(List<Courier> couriers, CreateCourierDto createCourierDto) {
         couriers
-            .forEach(courier -> courier.getCourierTranslationList().stream().forEach(courierTranslation -> {
-                if (courierTranslation.getName().equals(createCourierDto.getNameEn())
+            .forEach(courier -> courier.getCourierTranslationList().forEach(courierTranslation -> {
+                if (courierTranslation.getNameEng().equals(createCourierDto.getNameEn())
                     || courierTranslation.getName().equals(createCourierDto.getNameUa())) {
                     throw new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS);
                 }
@@ -373,13 +364,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
         List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
         for (CourierTranslation originalCourierTranslation : listToUpdate) {
-            originalCourierTranslation.setName(updatedList.stream()
-                .filter(translationDto -> translationDto.getLanguageCode()
-                    .equals(originalCourierTranslation.getLanguage()
-                        .getCode()))
-                .findFirst()
-                .map(CourierTranslationDto::getName)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.CANNOT_FIND_LANGUAGE_OF_TRANSLATION)));
+            originalCourierTranslation.setName(updatedList.get(0).getName());
+            originalCourierTranslation.setNameEng(updatedList.get(0).getNameEng());
         }
         courierRepository.save(courier);
         courierTranslationRepository.saveAll(courier.getCourierTranslationList());
@@ -395,8 +381,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private GetCourierTranslationsDto getAllCouriers(CourierTranslation courierTranslation) {
         return GetCourierTranslationsDto.builder()
             .id(courierTranslation.getCourier().getId())
-            .languageCode(courierTranslation.getLanguage().getCode())
             .name(courierTranslation.getName())
+            .nameEng(courierTranslation.getNameEng())
             .build();
     }
 
@@ -665,9 +651,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param) {
         tryToFindTariffById(tariffId);
-        if ("activate".equals(param.toLowerCase())) {
+        if ("activate".equalsIgnoreCase(param)) {
             tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(), LocationStatus.ACTIVE.name());
-        } else if ("deactivate".equals(param.toLowerCase())) {
+        } else if ("deactivate".equalsIgnoreCase(param)) {
             tariffsLocationRepository.changeStatusAll(tariffId, dto.getLocationIds(),
                 LocationStatus.DEACTIVATED.name());
         } else {

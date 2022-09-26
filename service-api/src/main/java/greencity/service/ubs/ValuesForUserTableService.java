@@ -3,7 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.FieldsForUsersTableDto;
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 

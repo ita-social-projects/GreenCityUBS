@@ -1,6 +1,5 @@
 package greencity.entity.order;
 
-import greencity.entity.language.Language;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,8 +7,8 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"service", "language"})
-@ToString(exclude = {"service", "language"})
+@EqualsAndHashCode(exclude = {"service"})
+@ToString(exclude = {"service"})
 @Getter
 @Setter
 @Builder
@@ -23,11 +22,11 @@ public class ServiceTranslation {
     private String name;
 
     @Column(nullable = false)
+    private String nameEng;
+
+    @Column(nullable = false)
     private String description;
 
     @ManyToOne
     Service service;
-
-    @ManyToOne
-    private Language language;
 }

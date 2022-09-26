@@ -1,9 +1,8 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.repository.*;
-import greencity.service.ubs.OrdersForUserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

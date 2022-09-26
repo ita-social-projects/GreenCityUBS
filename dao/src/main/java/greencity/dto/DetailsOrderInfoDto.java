@@ -2,10 +2,9 @@ package greencity.dto;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 public class DetailsOrderInfoDto {
     private String service;

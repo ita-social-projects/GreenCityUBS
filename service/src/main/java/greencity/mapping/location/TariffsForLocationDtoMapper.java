@@ -37,7 +37,7 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
             .minAmountOfBigBags(source.getMinAmountOfBigBags())
             .courierTranslationDtos(source.getCourier().getCourierTranslationList().stream()
                 .map(x -> CourierTranslationDto.builder()
-                    .languageCode(x.getLanguage().getCode())
+                    .nameEng(x.getNameEng())
                     .name(x.getName())
                     .build())
                 .collect(Collectors.toList()))

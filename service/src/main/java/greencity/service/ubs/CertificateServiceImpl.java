@@ -4,7 +4,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.pageble.PageableDto;
-import greencity.entity.enums.CertificateStatus;
+import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;

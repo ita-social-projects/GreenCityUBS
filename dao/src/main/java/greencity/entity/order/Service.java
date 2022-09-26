@@ -7,10 +7,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @EqualsAndHashCode(
     exclude = {"serviceTranslations", "courier", "tariffsInfo"})
@@ -50,7 +49,7 @@ public class Service {
     @ManyToOne
     Courier courier;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     List<ServiceTranslation> serviceTranslations;
 
     @ManyToOne

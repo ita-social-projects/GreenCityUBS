@@ -1,8 +1,8 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.CancellationReason;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -27,10 +27,10 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "orders")
-@EqualsAndHashCode(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+@EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
-@ToString(exclude = {"employeeOrderPositions", "courierLocations", "userNotifications", "ubsUser",
+@ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
     "changeOfPointsList", "blockedByEmployee", "certificates", "attachedEmployees", "payment", "employeeOrderPositions",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
@@ -53,7 +53,7 @@ public class Order {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<ChangeOfPoints> changeOfPointsList;
 
     private boolean blocked;
@@ -131,14 +131,14 @@ public class Order {
     private Set<String> additionalOrders;
 
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order")
     private List<Payment> payment;
 
     @OneToMany(mappedBy = "order")
     @Cascade(org.hibernate.annotations.CascadeType.MERGE)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<Event> events;
 
     @Column(name = "reason_not_taking_bag_description")

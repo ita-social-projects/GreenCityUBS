@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.entity.user.Violation;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;

@@ -2,7 +2,7 @@ package greencity.dto.table;
 
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
-import greencity.entity.enums.EditType;
+import greencity.enums.EditType;
 import lombok.*;
 
 import java.util.List;

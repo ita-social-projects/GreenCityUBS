@@ -6,18 +6,18 @@ public interface NotificationTemplatesService {
      *
      * @param body             - new body for template
      * @param notificationType - type of notifications
-     * @param languageId       - language id
+     * @param languageCode     - language code
      * @author Natalia Kozak
      */
-    void updateNotificationTemplateForSITE(String body, String notificationType, long languageId);
+    void updateNotificationTemplateForSITE(String body, String notificationType, String languageCode);
 
     /**
      * Method that updates body in notification templates for receiving type OTHER.
      *
      * @param body             - new body for template
      * @param notificationType - type of notifications
-     * @param languageId       - language id
+     * @param languageCode     - language code
      * @author Natalia Kozak
      */
-    void updateNotificationTemplateForOTHER(String body, String notificationType, long languageId);
+    void updateNotificationTemplateForOTHER(String body, String notificationType, String languageCode);
 }

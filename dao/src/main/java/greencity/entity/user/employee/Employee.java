@@ -1,6 +1,6 @@
 package greencity.entity.user.employee;
 
-import greencity.entity.enums.EmployeeStatus;
+import greencity.enums.EmployeeStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
 import lombok.*;
@@ -16,7 +16,7 @@ import java.util.Set;
 @Builder
 @Entity
 @EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders",
-    "employeeOrderPositions", "orders", "receivingStation"})
+    "employeeOrderPositions", "orders"})
 @Table(name = "employees")
 public class Employee {
     @Id

@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import org.springframework.data.domain.Page;

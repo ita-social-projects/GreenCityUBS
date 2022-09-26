@@ -1,17 +1,14 @@
 package greencity.filters;
 
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentSystem;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentSystem;
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SearchCriteria {
     private OrderStatus[] orderStatuses;
     private PaymentSystem[] paymentSystems;

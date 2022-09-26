@@ -1,15 +1,12 @@
 package greencity.filters;
 
-import greencity.entity.enums.CertificateStatus;
+import greencity.enums.CertificateStatus;
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CertificateFilterCriteria {
     private CertificateStatus[] certificateStatus;
     private String expirationDateFrom;

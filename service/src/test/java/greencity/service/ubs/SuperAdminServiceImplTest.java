@@ -1,9 +1,6 @@
 package greencity.service.ubs;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -19,12 +16,7 @@ import org.modelmapper.ModelMapper;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.courier.AddingReceivingStationDto;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.service.AddServiceDto;
@@ -33,10 +25,9 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.entity.enums.CourierStatus;
-import greencity.entity.enums.LocationStatus;
-import greencity.entity.enums.MinAmountOfBag;
-import greencity.entity.language.Language;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -46,41 +37,14 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CourierRepository;
-import greencity.repository.CourierTranslationRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RegionRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.ServiceTranslationRepository;
-import greencity.repository.TariffLocationRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.getAllTariffsInfoDto;
-import static greencity.ModelUtils.getCourier;
-import static greencity.ModelUtils.getCourierDto;
-import static greencity.ModelUtils.getCourierDtoList;
-import static greencity.ModelUtils.getCourierTranslation;
-import static greencity.ModelUtils.getCourierTranslationsDto;
-import static greencity.ModelUtils.getEnLanguage;
-import static greencity.ModelUtils.getLanguage;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getReceivingStationDto;
+import static greencity.ModelUtils.*;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -92,8 +56,6 @@ class SuperAdminServiceImplTest {
     private BagRepository bagRepository;
     @Mock
     private BagTranslationRepository bagTranslationRepository;
-    @Mock
-    private LanguageRepository languageRepository;
     @Mock
     private LocationRepository locationRepository;
     @Mock
@@ -135,7 +97,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getTariffServiceTest() {
-        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<BagTranslation>());
+        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<>());
 
         superAdminService.getTariffService();
 
@@ -239,15 +201,11 @@ class SuperAdminServiceImplTest {
         Service service = ModelUtils.getEditedService();
         User user = ModelUtils.getUser();
         EditServiceDto dto = ModelUtils.getEditServiceDto();
-        Language language = ModelUtils.getLanguage();
         ServiceTranslation serviceTranslation = ModelUtils.getServiceTranslation();
 
         when(serviceRepository.findServiceById(1L)).thenReturn(Optional.of(service));
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(languageRepository.findLanguageByLanguageCode(dto.getLanguageCode()))
-            .thenReturn(Optional.of(language));
-        when(serviceTranslationRepository.findServiceTranslationsByServiceAndLanguageCode(service,
-            dto.getLanguageCode())).thenReturn(serviceTranslation);
+        when(serviceTranslationRepository.findServiceTranslationsByService(service)).thenReturn(serviceTranslation);
         when(serviceRepository.save(service)).thenReturn(service);
         GetServiceDto getTariffServiceDto = ModelUtils.getServiceDto();
 
@@ -255,9 +213,7 @@ class SuperAdminServiceImplTest {
 
         verify(userRepository, times(1)).findByUuid(user.getUuid());
         verify(serviceRepository, times(1)).findServiceById(service.getId());
-        verify(languageRepository, times(1)).findLanguageByLanguageCode(dto.getLanguageCode());
-        verify(serviceTranslationRepository, times(1)).findServiceTranslationsByServiceAndLanguageCode(service,
-            dto.getLanguageCode());
+        verify(serviceTranslationRepository, times(1)).findServiceTranslationsByService(service);
         verify(serviceRepository, times(1)).save(service);
     }
 
@@ -265,13 +221,11 @@ class SuperAdminServiceImplTest {
     void addService() {
         User user = ModelUtils.getUser();
         Courier courier = ModelUtils.getCourier();
-        Language language = ModelUtils.getLanguage();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
         Service service = ModelUtils.getService();
         ServiceTranslation serviceTranslation = ModelUtils.getServiceTranslation();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
-        when(languageRepository.findById(language.getId())).thenReturn(Optional.of(language));
         when(serviceRepository.save(service)).thenReturn(service);
         when(serviceTranslationRepository.saveAll(service.getServiceTranslations()))
             .thenReturn(List.of(serviceTranslation));
@@ -281,7 +235,6 @@ class SuperAdminServiceImplTest {
         assertEquals(createServiceDto, superAdminService.addService(createServiceDto, user.getUuid()));
 
         verify(userRepository).findByUuid(user.getUuid());
-        verify(languageRepository).findById(language.getId());
         verify(serviceRepository).save(service);
         verify(serviceTranslationRepository).saveAll(service.getServiceTranslations());
         verify(modelMapper).map(service, CreateServiceDto.class);
@@ -295,8 +248,6 @@ class SuperAdminServiceImplTest {
 
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
-        when(languageRepository.findLanguageByCode("en")).thenReturn(ModelUtils.getEnLanguage());
-        when(languageRepository.findLanguageByCode("ua")).thenReturn(ModelUtils.getLanguage());
         when(courierRepository.save(any())).thenReturn(courier);
         when(courierTranslationRepository.saveAll(any()))
             .thenReturn(ModelUtils.getCourierTranslations());
@@ -305,8 +256,6 @@ class SuperAdminServiceImplTest {
         assertEquals(createCourierDto,
             superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
 
-        verify(languageRepository).findLanguageByCode("en");
-        verify(languageRepository).findLanguageByCode("ua");
         verify(courierRepository).save(any());
         verify(courierTranslationRepository).saveAll(any());
         verify(modelMapper).map(any(), eq(CreateCourierDto.class));
@@ -344,7 +293,6 @@ class SuperAdminServiceImplTest {
     @Test
     void addLocationTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
-        Language language = ModelUtils.getLanguage();
         Region region = ModelUtils.getRegion();
 
         when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.of(region));
@@ -357,8 +305,6 @@ class SuperAdminServiceImplTest {
     @Test
     void addLocationCreateNewRegionTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
-        Language language = ModelUtils.getLanguage();
-        Region region = ModelUtils.getRegion();
         Location location = ModelUtils.getLocationForCreateRegion();
         when(regionRepository.findRegionByName("Kyiv region", "Київська область")).thenReturn(Optional.empty());
         when(regionRepository.save(any())).thenReturn(ModelUtils.getRegion());
@@ -412,18 +358,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void createServiceWithTranslationThrowLanguageNotFoundException() {
-        CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
-        Courier courier = ModelUtils.getCourier();
-        User user = ModelUtils.getUser();
-
-        lenient().when(courierRepository.findById(createServiceDto.getCourierId())).thenReturn(Optional.of(courier));
-        when(userRepository.findByUuid("uuid")).thenReturn(user);
-
-        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, "uuid"));
-    }
-
-    @Test
     void deleteServiceExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteService(1L));
     }
@@ -433,18 +367,6 @@ class SuperAdminServiceImplTest {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
 
-    }
-
-    @Test
-    void editServiceExceptionThrowLanguageNotFoundExceptionTest() {
-        EditServiceDto dto = ModelUtils.getEditServiceDto();
-        Service service = Service.builder().id(1L).build();
-        User user = User.builder().build();
-
-        when(serviceRepository.findServiceById(service.getId())).thenReturn(Optional.of(service));
-        when(userRepository.findByUuid("uuid")).thenReturn(user);
-
-        assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
     }
 
     @Test
@@ -523,7 +445,6 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteCourierTest() {
         Courier courier = ModelUtils.getCourier();
-        ;
         courier.setCourierStatus(CourierStatus.DELETED);
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
@@ -627,42 +548,26 @@ class SuperAdminServiceImplTest {
     void updateCourierTest() {
         Courier courier = getCourier();
 
-        List starterList = List.of(CourierTranslation.builder()
+        List<CourierTranslation> starterList = List.of(CourierTranslation.builder()
             .id(1L)
-            .language(getLanguage())
             .name("Тест")
+            .nameEng("Test")
             .courier(courier)
-            .build(),
-            CourierTranslation.builder()
-                .id(2L)
-                .language(getEnLanguage())
-                .name("Test")
-                .courier(courier)
-                .build());
+            .build());
 
         courier.setCourierTranslationList(starterList);
 
-        List listToSave = List.of(CourierTranslation.builder()
+        List<CourierTranslation> listToSave = List.of(CourierTranslation.builder()
             .id(1L)
-            .language(getLanguage())
             .name("УБС")
+            .nameEng("UBS")
             .courier(courier)
-            .build(),
-            CourierTranslation.builder()
-                .id(2L)
-                .language(getEnLanguage())
-                .name("UBS")
-                .courier(courier)
-                .build());
+            .build());
 
-        List dtoList = List.of(CourierTranslationDto.builder()
+        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
             .name("УБС")
-            .languageCode("ua")
-            .build(),
-            CourierTranslationDto.builder()
-                .name("UBS")
-                .languageCode("en")
-                .build());
+            .nameEng("UBS")
+            .build());
         CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
             .courierTranslationDtos(dtoList)

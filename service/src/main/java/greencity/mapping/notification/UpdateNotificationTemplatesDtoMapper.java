@@ -13,7 +13,6 @@ public class UpdateNotificationTemplatesDtoMapper
         return UpdateNotificationTemplatesDto.builder()
             .body(notificationTemplate.getBody())
             .notificationType(notificationTemplate.getNotificationType().toString())
-            .languageId(notificationTemplate.getLanguage().getId())
             .build();
     }
 }

@@ -5,10 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
 @Table(name = "order_payment_status_translations")
 public class OrderPaymentStatusTranslation {

@@ -14,6 +14,4 @@ public class UpdateNotificationTemplatesDto {
     String body;
     @NotNull
     String notificationType;
-    @NotNull
-    long languageId;
 }

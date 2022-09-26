@@ -1,6 +1,6 @@
 package greencity.entity.user;
 
-import greencity.entity.enums.ViolationLevel;
+import greencity.enums.ViolationLevel;
 import greencity.entity.order.Order;
 import lombok.*;
 

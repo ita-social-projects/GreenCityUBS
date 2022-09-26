@@ -14,7 +14,7 @@ import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 

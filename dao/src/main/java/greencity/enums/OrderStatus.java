@@ -1,8 +1,7 @@
-package greencity.entity.enums;
+package greencity.enums;
 
 import java.util.Arrays;
 
-// if values changed, change in order_status_translations table is required
 public enum OrderStatus {
     FORMED(1, "ADJUSTMENT", OrderStatus.CANCELED_STR, "BROUGHT_IT_HIMSELF"),
     ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR, "CONFIRMED"),

@@ -1,7 +1,7 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
+import greencity.enums.AddressStatus;
 import greencity.entity.user.User;
 import lombok.*;
 

@@ -2,7 +2,7 @@ package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.NotificationTemplatesServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -24,21 +24,21 @@ class NotificationTemplatesServiceImplTest {
     void updateNotificationTemplateForSITE() {
         UpdateNotificationTemplatesDto updateNotificationTemplatesDto = ModelUtils.getUpdateNotificationTemplatesDto();
         notificationTemplatesService.updateNotificationTemplateForSITE("test", NotificationType.UNPAID_ORDER.toString(),
-            1);
+            "ua");
         verify(notificationTemplateRepository).updateNotificationTemplateForSITE(
             updateNotificationTemplatesDto.getBody(),
             updateNotificationTemplatesDto.getNotificationType(),
-            updateNotificationTemplatesDto.getLanguageId());
+            "ua");
     }
 
     @Test
     void updateNotificationTemplateForOTHER() {
         UpdateNotificationTemplatesDto updateNotificationTemplatesDto = ModelUtils.getUpdateNotificationTemplatesDto();
         notificationTemplatesService.updateNotificationTemplateForOTHER("test",
-            NotificationType.UNPAID_ORDER.toString(), 1);
+            NotificationType.UNPAID_ORDER.toString(), "ua");
         verify(notificationTemplateRepository).updateNotificationTemplateForOTHER(
             updateNotificationTemplatesDto.getBody(),
             updateNotificationTemplatesDto.getNotificationType(),
-            updateNotificationTemplatesDto.getLanguageId());
+            "ua");
     }
 }
