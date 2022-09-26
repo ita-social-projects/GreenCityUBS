@@ -1,6 +1,5 @@
 package greencity.entity.notifications;
 
-import greencity.entity.enums.*;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import lombok.*;
