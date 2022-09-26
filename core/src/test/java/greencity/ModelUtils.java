@@ -32,7 +32,6 @@ import greencity.dto.tariff.TariffTranslationDto;
 import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.*;
 import greencity.entity.user.ubs.Address;
 import greencity.enums.*;
 import org.springframework.http.HttpStatus;

@@ -16,7 +16,6 @@ import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.enums.*;
 import greencity.entity.order.*;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.*;
