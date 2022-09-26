@@ -1,7 +1,7 @@
 package greencity.entity.user;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import greencity.entity.order.Bag;
 import greencity.entity.order.TariffLocation;
 import lombok.*;

@@ -9,7 +9,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.payment.PaymentLinkException;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;

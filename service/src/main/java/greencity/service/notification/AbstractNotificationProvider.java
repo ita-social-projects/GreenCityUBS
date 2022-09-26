@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
 
-import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.enums.NotificationReceiverType.OTHER;
 
 @RequiredArgsConstructor
 public abstract class AbstractNotificationProvider {

@@ -1,9 +1,9 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.AddressStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;

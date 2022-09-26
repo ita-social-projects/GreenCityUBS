@@ -5,10 +5,10 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.entity.enums.NotificationReceiverType;
-import greencity.entity.enums.NotificationType;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.PaymentStatus;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static greencity.constant.ErrorMessage.*;
-import static greencity.entity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 

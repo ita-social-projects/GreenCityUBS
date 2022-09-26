@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.CourierStatus;
+import greencity.enums.CourierStatus;
 import greencity.entity.user.User;
 import lombok.*;
 

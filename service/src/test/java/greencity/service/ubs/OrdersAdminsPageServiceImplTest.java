@@ -4,7 +4,7 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;

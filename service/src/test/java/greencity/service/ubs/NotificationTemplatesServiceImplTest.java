@@ -2,7 +2,7 @@ package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.service.notification.NotificationTemplatesServiceImpl;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.CertificateStatus;
+import greencity.enums.CertificateStatus;
 import lombok.*;
 
 import javax.persistence.*;

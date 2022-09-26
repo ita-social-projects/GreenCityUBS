@@ -2,10 +2,9 @@ package greencity.mapping.order;
 
 import greencity.ModelUtils;
 import greencity.dto.order.OrderClientDto;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
-import greencity.mapping.order.OrderClientDtoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

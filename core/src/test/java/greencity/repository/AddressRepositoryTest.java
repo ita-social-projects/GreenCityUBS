@@ -3,7 +3,7 @@ package greencity.repository;
 import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.OrderPaymentStatus;
+import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.ubs.Address;
 import org.junit.jupiter.api.Assertions;

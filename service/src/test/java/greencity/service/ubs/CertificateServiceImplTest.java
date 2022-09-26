@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.certificate.CertificateDtoForAdding;
-import greencity.entity.enums.CertificateStatus;
+import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -9,7 +9,6 @@ import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.repository.CertificateCriteriaRepo;
 import greencity.repository.CertificateRepository;
-import greencity.service.ubs.CertificateServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

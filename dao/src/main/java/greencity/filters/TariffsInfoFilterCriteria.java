@@ -1,6 +1,6 @@
 package greencity.filters;
 
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import lombok.*;
 
 import java.io.Serializable;

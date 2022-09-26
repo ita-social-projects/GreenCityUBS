@@ -42,6 +42,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.*;
 import greencity.util.Bot;
 import org.springframework.data.domain.*;
 
@@ -51,8 +52,8 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static greencity.entity.enums.NotificationReceiverType.SITE;
-import static greencity.entity.enums.ViolationLevel.MAJOR;
+import static greencity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.*;
 
 public class ModelUtils {

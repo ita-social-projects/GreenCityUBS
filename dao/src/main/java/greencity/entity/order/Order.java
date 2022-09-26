@@ -1,8 +1,8 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.CancellationReason;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;

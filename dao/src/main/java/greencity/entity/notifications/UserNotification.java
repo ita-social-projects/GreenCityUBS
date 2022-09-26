@@ -1,6 +1,6 @@
 package greencity.entity.notifications;
 
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import lombok.Data;

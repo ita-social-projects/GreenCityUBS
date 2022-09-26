@@ -1,4 +1,4 @@
-package greencity.entity.enums;
+package greencity.enums;
 
 import java.util.Arrays;
 

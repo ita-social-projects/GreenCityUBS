@@ -1,7 +1,7 @@
 package greencity.dto.tariff;
 
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.MinAmountOfBag;
+import greencity.enums.CourierLimit;
+import greencity.enums.MinAmountOfBag;
 import lombok.*;
 
 @Getter

@@ -3,11 +3,10 @@ package greencity.ubsviberbot;
 import greencity.client.UserRemoteClient;
 import greencity.client.ViberClient;
 import greencity.dto.language.LanguageVO;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.viber.dto.SendMessageToUserDto;
 import greencity.dto.viber.enums.MessageType;
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -27,7 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
-import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.enums.NotificationReceiverType.OTHER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

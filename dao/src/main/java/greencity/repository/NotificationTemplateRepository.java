@@ -1,7 +1,7 @@
 package greencity.repository;
 
-import greencity.entity.enums.NotificationReceiverType;
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -34,6 +34,7 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.enums.*;
 import greencity.entity.user.ubs.Address;
+import greencity.enums.*;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
@@ -43,7 +44,7 @@ import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static greencity.entity.enums.ViolationLevel.MAJOR;
+import static greencity.enums.ViolationLevel.MAJOR;
 
 public class ModelUtils {
 

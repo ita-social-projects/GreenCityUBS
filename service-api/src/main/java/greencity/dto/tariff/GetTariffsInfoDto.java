@@ -4,7 +4,7 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import lombok.*;
 
 import java.time.LocalDate;

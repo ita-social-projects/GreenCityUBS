@@ -2,8 +2,8 @@ package greencity.repository;
 
 import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;

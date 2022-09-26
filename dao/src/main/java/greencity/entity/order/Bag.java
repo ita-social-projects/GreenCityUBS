@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.MinAmountOfBag;
+import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import lombok.*;
 
