@@ -64,4 +64,12 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @return {@link Page} of {@link Order}.
      */
     Page<Order> getAllByUserUuidAndOrderStatusIn(Pageable pageable, String uuid, List<OrderStatus> statuses);
+
+    /**
+     * Returns an order for the specified user.
+     *
+     * @param uuid {@link User}'s uuid.
+     * @return {@link Order}.
+     */
+    Order getAllByUserUuidAndId(String uuid, Long id);
 }

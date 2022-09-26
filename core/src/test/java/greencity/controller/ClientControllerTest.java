@@ -132,6 +132,14 @@ class ClientControllerTest {
     }
 
     @Test
+    void getDataForOrderTest() throws Exception {
+        this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void deleteOrderTest() throws Exception {
         this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
             .principal(principal)
