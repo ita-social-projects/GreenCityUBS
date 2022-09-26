@@ -220,6 +220,7 @@ class SuperAdminServiceImplTest {
     @Test
     void addService() {
         User user = ModelUtils.getUser();
+        Courier courier = ModelUtils.getCourier();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
         Service service = ModelUtils.getService();
         ServiceTranslation serviceTranslation = ModelUtils.getServiceTranslation();
