@@ -1526,9 +1526,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void deleteOrder(Long id) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    public void deleteOrder(String uuid, Long id) {
+        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
+        if (order == null) {
+            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
         orderRepository.delete(order);
     }
 

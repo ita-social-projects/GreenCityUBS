@@ -121,9 +121,7 @@ import greencity.util.EncryptionUtil;
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -1194,8 +1192,11 @@ class UBSClientServiceImplTest {
     @Test
     void deleteOrder() {
         Order order = ModelUtils.getOrder();
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
-        ubsService.deleteOrder(1L);
+        when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
+                .thenReturn(order);
+
+        ubsService.deleteOrder(order.getUser().getUuid(), 1L);
+
         verify(orderRepository).delete(order);
     }
 

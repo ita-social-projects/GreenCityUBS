@@ -323,7 +323,7 @@ public interface UBSClientService {
      * @param id - current order id.
      * @author Max Boyarchuk
      */
-    void deleteOrder(Long id);
+    void deleteOrder(String uuid, Long id);
 
     /**
      * Method return link with Fondy payment .
