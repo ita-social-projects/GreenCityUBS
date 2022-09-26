@@ -1193,7 +1193,7 @@ class UBSClientServiceImplTest {
     void deleteOrder() {
         Order order = ModelUtils.getOrder();
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
-                .thenReturn(order);
+            .thenReturn(order);
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
@@ -1715,14 +1715,14 @@ class UBSClientServiceImplTest {
         orderList.add(order);
 
         when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
-                .thenReturn(order);
+            .thenReturn(order);
         when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
-                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
-                (long) order.getOrderPaymentStatus().getStatusValue()))
+            (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
 
         ubsService.getOrderForUser(user.getUuid(), 1L);
@@ -1730,10 +1730,10 @@ class UBSClientServiceImplTest {
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
         verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
-                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
-                .getById(
-                        (long) order.getOrderPaymentStatus().getStatusValue());
+            .getById(
+                (long) order.getOrderPaymentStatus().getStatusValue());
     }
 
     @Test

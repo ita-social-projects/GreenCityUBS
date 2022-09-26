@@ -158,8 +158,6 @@ public interface UBSClientService {
      */
     OrdersDataForUserDto getOrderForUser(String uuid, Long id);
 
-
-
     /**
      * Method returns list all bonuses of user.
      *

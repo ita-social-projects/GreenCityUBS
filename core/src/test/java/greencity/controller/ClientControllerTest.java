@@ -134,9 +134,9 @@ class ClientControllerTest {
     @Test
     void getDataForOrderTest() throws Exception {
         this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test

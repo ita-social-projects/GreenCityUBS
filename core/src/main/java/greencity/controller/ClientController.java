@@ -79,13 +79,13 @@ public class ClientController {
      */
     @ApiOperation(value = "returns user order for logged user")
     @ApiResponses({
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/user-order/{id}")
     public ResponseEntity<OrdersDataForUserDto> getAllDataForOneOrder(
-            @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long id) {
+        @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderForUser(uuid, id));
     }
 
@@ -103,8 +103,8 @@ public class ClientController {
     })
     @DeleteMapping("/delete-order/{id}")
     public ResponseEntity<HttpStatus> deleteOrder(
-            @ApiIgnore @CurrentUserUuid String uuid,
-            @PathVariable Long id) {
+        @ApiIgnore @CurrentUserUuid String uuid,
+        @PathVariable Long id) {
         ubsClientService.deleteOrder(uuid, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
