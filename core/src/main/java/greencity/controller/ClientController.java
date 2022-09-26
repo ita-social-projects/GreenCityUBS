@@ -53,7 +53,7 @@ public class ClientController {
     /**
      * Controller for getting all user orders.
      *
-     * @return {@link List OrderStatusForUserDto}.
+     * @return {@link List OrdersDataForUserDto}.
      * @author Oleksandr Khomiakov
      */
     @ApiOperation(value = "returns all user orders for logged user")
@@ -72,6 +72,25 @@ public class ClientController {
     }
 
     /**
+     * Controller for getting user order.
+     *
+     * @return {@link OrdersDataForUserDto}.
+     * @author Oleg Postolovskyi
+     */
+    @ApiOperation(value = "returns user order for logged user")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/user-order/{id}")
+    public ResponseEntity<OrdersDataForUserDto> getAllDataForOneOrder(
+            @ApiIgnore @CurrentUserUuid String uuid, @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderForUser(uuid, id));
+    }
+
+    /**
      * Controller for delete user order.
      *
      * @return {@link HttpStatus http status}.
@@ -80,7 +99,6 @@ public class ClientController {
     @ApiOperation(value = "delete user order")
     @ApiResponses({
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = OrderStatusPageDto[].class),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)

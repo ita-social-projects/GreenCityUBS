@@ -707,6 +707,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPages.getTotalPages());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
+        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
+        if (order == null) {
+            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+
+        return getOrdersData(order);
+    }
+
     private OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);

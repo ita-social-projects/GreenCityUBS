@@ -151,6 +151,16 @@ public interface UBSClientService {
     PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
 
     /**
+     * Method that returns info about order for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleg Postolovskyi
+     */
+    OrdersDataForUserDto getOrderForUser(String uuid, Long id);
+
+
+
+    /**
      * Method returns list all bonuses of user.
      *
      * @param uuid of {@link User}'s uuid;
