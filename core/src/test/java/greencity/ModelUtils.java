@@ -533,7 +533,6 @@ public class ModelUtils {
         return UpdateNotificationTemplatesDto.builder()
             .body("You have unpaid order")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
-            .languageId(1)
             .build();
     }
 
