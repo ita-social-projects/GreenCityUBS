@@ -207,6 +207,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
 
     @Override
     @Transactional
@@ -452,6 +453,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+
+        if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
+            throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
+        }
 
         OrderAddressDtoRequest dtoRequest =
             getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));

@@ -737,6 +737,21 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testSaveCurrentAddressForMaximumNumbersOfOrdersAddressesException() {
+        User user = ModelUtils.getUserForCreate();
+        List<Address> addresses = getMaximumAmountOfAddresses();
+        String uuid = user.getUuid();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+
+        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
+
+        assertThrows(BadRequestException.class,
+            () -> ubsService.saveCurrentAddressForOrder(createAddressRequestDto, uuid));
+    }
+
+    @Test
     void testUpdateCurrentAddressForOrder() {
         User user = ModelUtils.getUserForCreate();
         List<Address> addresses = user.getAddresses();
