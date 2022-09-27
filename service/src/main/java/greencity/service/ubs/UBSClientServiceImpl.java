@@ -465,14 +465,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRequestDtoForNullCheck.setId(0L);
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
 
-        if (addresses != null) {
-            checkIfAddressExist(addresses, dtoRequest);
+        checkIfAddressExist(addresses, dtoRequest);
 
-            addresses.forEach(addressItem -> {
-                addressItem.setActual(false);
-                addressRepo.save(addressItem);
-            });
-        }
+        addresses.forEach(addressItem -> {
+            addressItem.setActual(false);
+            addressRepo.save(addressItem);
+        });
 
         Address address = modelMapper.map(dtoRequest, Address.class);
 
