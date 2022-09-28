@@ -258,10 +258,10 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Get information about all employee's authorities")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @GetMapping("/get-all-authorities")
@@ -279,15 +279,15 @@ public class ManagementEmployeeController {
      */
     @ApiOperation(value = "Edit an employee`s authorities")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = HttpStatuses.OK, response = UserEmployeeAuthorityDto.class),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 201, message = HttpStatuses.OK, response = UserEmployeeAuthorityDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @PutMapping("/edit-authorities")
     public ResponseEntity<Object> editAuthorities(@Valid @RequestBody UserEmployeeAuthorityDto dto,
-                                                  @ApiIgnore Principal principal) {
+        @ApiIgnore Principal principal) {
         ubsClientService.updateEmployeesAuthorities(dto, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).build();
     }

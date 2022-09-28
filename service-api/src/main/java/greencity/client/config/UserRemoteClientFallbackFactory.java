@@ -56,7 +56,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public Set<String> getAllAuthorities(String email) {
                 throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY,
-                        throwable);
+                    throwable);
             }
 
             @Override

@@ -3803,4 +3803,17 @@ public class ModelUtils {
             .languageCode("null")
             .build();
     }
+
+    public static List<String> getAllAuthorities() {
+        List<String> authorities = new ArrayList<>();
+        authorities.add("SEE_CLIENTS_PAGE");
+        return authorities;
+    }
+
+    public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
+        return UserEmployeeAuthorityDto.builder()
+            .employeeId(1L)
+            .authorities(getAllAuthorities())
+            .build();
+    }
 }

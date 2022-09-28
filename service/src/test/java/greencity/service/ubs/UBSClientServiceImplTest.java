@@ -3,20 +3,12 @@ package greencity.service.ubs;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.service.google.GoogleApiService;
 import greencity.service.PhoneNumberFormatterService;
 import org.junit.jupiter.api.Assertions;
@@ -2016,5 +2008,21 @@ class UBSClientServiceImplTest {
     void getTariffForOrderFailTest() {
         when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
         Assertions.assertThrows(EntityNotFoundException.class, () -> ubsService.getTariffForOrder(1L));
+    }
+
+    @Test
+    void getAllAuthorities() {
+        Set<String> authorities = new HashSet<>();
+        when(userRemoteClient.getAllAuthorities(anyString())).thenReturn(authorities);
+        userRemoteClient.getAllAuthorities("test@mail.com");
+        verify(userRemoteClient, times(1)).getAllAuthorities("test@mail.com");
+    }
+
+    @Test
+    void updateEmployeesAuthorities() {
+        UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
+        userRemoteClient.updateEmployeesAuthorities(dto, "test@mail.com");
+        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
+            dto, "test@mail.com");
     }
 }
