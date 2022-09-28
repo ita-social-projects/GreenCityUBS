@@ -21,7 +21,6 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 

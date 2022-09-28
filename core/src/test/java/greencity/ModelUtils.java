@@ -11,6 +11,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.*;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationScheduleDto;
@@ -650,6 +651,15 @@ public class ModelUtils {
             .houseNumber("1")
             .houseCorpus("2")
             .entranceNumber("3")
+            .build();
+    }
+
+    public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
+        List<String> authorities = new ArrayList<>();
+        authorities.add("SEE_CLIENTS_PAGE");
+        return UserEmployeeAuthorityDto.builder()
+            .authorities(authorities)
+            .employeeId(1L)
             .build();
     }
 }
