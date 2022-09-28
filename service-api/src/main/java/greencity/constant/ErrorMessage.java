@@ -100,6 +100,8 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
     public static final String COULD_NOT_RETRIEVE_USER_DATA = "Could not retrieve user data";
+    public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
+    public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";

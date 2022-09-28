@@ -3,6 +3,7 @@ package greencity.client;
 import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
@@ -11,6 +12,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Client for getting info about {@link User} from GreenCityUser server.
@@ -76,4 +78,21 @@ public interface UserRemoteClient {
      */
     @PostMapping("/email/notification")
     void sendEmailNotification(NotificationDto notification, @RequestParam(EMAIL) String email);
+
+    /**
+     * Get information about all employee's authorities.
+     *
+     * @param email {@link String} user's email.
+     * @return Set of {@link String} employee's authorities.
+     */
+    @GetMapping("/user/get-all-authorities")
+    Set<String> getAllAuthorities(@RequestParam(EMAIL) String email);
+
+    /**
+     * Edit an employee's authorities.
+     *
+     * @param dto {@link UserEmployeeAuthorityDto}
+     */
+    @PutMapping("user/edit-authorities")
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto,  @RequestParam(EMAIL) String email);
 }

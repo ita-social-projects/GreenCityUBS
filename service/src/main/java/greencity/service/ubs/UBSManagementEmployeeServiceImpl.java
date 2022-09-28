@@ -20,7 +20,10 @@ import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -84,9 +87,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         EmployeeFilterCriteria employeeFilterCriteria) {
         Page<Employee> employees =
             employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
-        List<EmployeeDto> employeeDtos = employees.stream()
+        List<EmployeeDto> employeesDto = employees.stream()
             .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
-        return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
+        return new PageImpl<>(employeesDto, employees.getPageable(), employees.getTotalElements());
     }
 
     /**

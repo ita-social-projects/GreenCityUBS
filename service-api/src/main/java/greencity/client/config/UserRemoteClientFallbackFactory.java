@@ -4,6 +4,7 @@ import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -49,6 +51,17 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public void sendEmailNotification(NotificationDto notification, String email) {
                 log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
+            public Set<String> getAllAuthorities(String email) {
+                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY,
+                        throwable);
+            }
+
+            @Override
+            public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+                log.error(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
             }
         };
     }

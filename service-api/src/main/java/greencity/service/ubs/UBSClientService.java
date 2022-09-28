@@ -6,6 +6,7 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
@@ -20,11 +21,9 @@ import greencity.entity.user.ubs.UBSuser;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public interface UBSClientService {
     /**
@@ -373,4 +372,19 @@ public interface UBSClientService {
      * @return {@link TariffsForLocationDto}
      */
     TariffsForLocationDto getTariffForOrder(Long id);
+
+    /**
+     * Get information about all employee's authorities.
+     *
+     * @param email {@link String} user's email.
+     * @return Set of {@link String} employee's authorities.
+     */
+    Set<String> getAllAuthorities(String email);
+
+    /**
+     * Method updates Authority for {@link User}.
+     *
+     * @param dto - instance of {@link UserEmployeeAuthorityDto}.
+     */
+    void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
 }

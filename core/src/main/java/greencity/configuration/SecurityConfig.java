@@ -86,6 +86,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/violation-details/{id}",
                 UBS_MANAG_LINK + "/{id}/ordersAll",
                 UBS_LINK + "/order_history/{id}",
+                ADMIN_EMPL_LINK + "/get-all-authorities",
+                ADMIN_EMPL_LINK + "/edit-authorities",
                 ADMIN_EMPL_LINK + "/**",
                 SUPER_ADMIN_LINK + "/get-all-receiving-station",
                 SUPER_ADMIN_LINK + "/getLocations",
