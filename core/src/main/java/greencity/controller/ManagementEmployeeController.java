@@ -5,11 +5,13 @@ import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -23,15 +25,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/ubs-employee")
 @RequiredArgsConstructor
 public class ManagementEmployeeController {
     private final UBSManagementEmployeeService employeeService;
+    private final UBSClientService ubsClientService;
 
     /**
      * Controller saves employee.
@@ -241,5 +247,48 @@ public class ManagementEmployeeController {
     public ResponseEntity<HttpStatus> deleteEmployeeImage(@PathVariable Long id) {
         employeeService.deleteEmployeeImage(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Controller to get information about all employee's authorities.
+     *
+     * @return @return Set of {@link String}
+     *
+     * @author Inna Yashna.
+     */
+    @ApiOperation(value = "Get information about all employee's authorities")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
+    @GetMapping("/get-all-authorities")
+    public ResponseEntity<Object> getAllAuthorities(@RequestParam String email) {
+        Set<String> authorities = ubsClientService.getAllAuthorities(email);
+        return ResponseEntity.status(HttpStatus.OK).body(authorities);
+    }
+
+    /**
+     * Controller edit an employee`s authorities.
+     *
+     * @return {@link UserEmployeeAuthorityDto}
+     *
+     * @author Inna Yashna.
+     */
+    @ApiOperation(value = "Edit an employee`s authorities")
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = HttpStatuses.OK, response = UserEmployeeAuthorityDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
+    @PutMapping("/edit-authorities")
+    public ResponseEntity<Object> editAuthorities(@Valid @RequestBody UserEmployeeAuthorityDto dto,
+        @ApiIgnore Principal principal) {
+        ubsClientService.updateEmployeesAuthorities(dto, principal.getName());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

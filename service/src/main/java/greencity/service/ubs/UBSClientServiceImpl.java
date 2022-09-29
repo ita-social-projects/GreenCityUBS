@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -1931,5 +1932,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         } else {
             throw new EntityNotFoundException(ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST + id);
         }
+    }
+
+    @Override
+    public Set<String> getAllAuthorities(String email) {
+        return userRemoteClient.getAllAuthorities(email);
+    }
+
+    @Override
+    public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+        userRemoteClient.updateEmployeesAuthorities(dto, email);
     }
 }

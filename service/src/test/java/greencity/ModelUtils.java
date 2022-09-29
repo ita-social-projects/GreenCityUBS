@@ -3457,4 +3457,15 @@ public class ModelUtils {
     public static List<Address> getMaximumAmountOfAddresses() {
         return List.of(new Address(), new Address(), new Address(), new Address());
     }
+
+    public static List<String> getAllAuthorities() {
+        return Collections.singletonList("SEE_CLIENTS_PAGE");
+    }
+
+    public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
+        return UserEmployeeAuthorityDto.builder()
+            .employeeId(1L)
+            .authorities(getAllAuthorities())
+            .build();
+    }
 }
