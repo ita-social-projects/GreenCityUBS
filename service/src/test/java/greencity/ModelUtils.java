@@ -3453,4 +3453,8 @@ public class ModelUtils {
             .nameEng("Test")
             .build();
     }
+
+    public static List<Address> getMaximumAmountOfAddresses() {
+        return List.of(new Address(), new Address(), new Address(), new Address());
+    }
 }
