@@ -107,6 +107,7 @@ public final class ErrorMessage {
     public static final String USE_ONLY_UKRAINIAN_LETTERS = "use only Ukrainian letters";
     public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
+    public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
 
     /**
      * Constructor.
