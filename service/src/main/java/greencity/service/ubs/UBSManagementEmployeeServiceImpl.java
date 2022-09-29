@@ -84,9 +84,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         EmployeeFilterCriteria employeeFilterCriteria) {
         Page<Employee> employees =
             employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
-        List<EmployeeDto> employeeDtos = employees.stream()
+        List<EmployeeDto> employeesDto = employees.stream()
             .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
-        return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
+        return new PageImpl<>(employeesDto, employees.getPageable(), employees.getTotalElements());
     }
 
     /**

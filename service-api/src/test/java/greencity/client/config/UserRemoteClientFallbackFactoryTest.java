@@ -1,6 +1,7 @@
 package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,5 +58,16 @@ class UserRemoteClientFallbackFactoryTest {
     void sendEmailNotification() {
         NotificationDto dto = NotificationDto.builder().build();
         assertDoesNotThrow(() -> client.sendEmailNotification(dto, USER_EMAIL));
+    }
+
+    @Test
+    void getAllAuthorities() {
+        assertThrows(RemoteServerUnavailableException.class, () -> client.getAllAuthorities(USER_EMAIL));
+    }
+
+    @Test
+    void updateEmployeesAuthorities() {
+        UserEmployeeAuthorityDto dto = UserEmployeeAuthorityDto.builder().build();
+        assertDoesNotThrow(() -> client.updateEmployeesAuthorities(dto, USER_EMAIL));
     }
 }

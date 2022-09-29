@@ -1,15 +1,18 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
+import java.util.HashSet;
+import java.util.Set;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.Mockito.*;
@@ -52,7 +57,8 @@ class ManagementEmployeeControllerTest {
     private MockMvc mockMvc;
     @Mock
     private UBSManagementEmployeeService service;
-
+    @Mock
+    private UBSClientService ubsClientService;
     @Mock
     UserRemoteClient userRemoteClient;
     @Mock
@@ -197,5 +203,31 @@ class ManagementEmployeeControllerTest {
     void deletePosition() throws Exception {
         mockMvc.perform(delete(UBS_LINK + DELETE_POSITION_LINK + "/1").principal(principal)).andExpect(status().isOk());
         verify(service, times(1)).deletePosition(1L);
+    }
+
+    @Test
+    void getAllAuthorities() throws Exception {
+        Set<String> authorities = new HashSet<>();
+        authorities.add("ADMIN");
+        when(ubsClientService.getAllAuthorities(anyString())).thenReturn(authorities);
+        mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
+            .andExpect(status().isOk());
+        verify(ubsClientService).getAllAuthorities("test@mail.com");
+    }
+
+    @Test
+    void editAuthorities() throws Exception {
+        UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put(UBS_LINK + "/edit-authorities")
+            .principal(principal)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        String email = principal.getName();
+        verify(ubsClientService).updateEmployeesAuthorities(dto, email);
     }
 }
