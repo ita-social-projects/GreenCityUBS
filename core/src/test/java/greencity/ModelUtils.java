@@ -655,10 +655,8 @@ public class ModelUtils {
     }
 
     public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
-        List<String> authorities = new ArrayList<>();
-        authorities.add("SEE_CLIENTS_PAGE");
         return UserEmployeeAuthorityDto.builder()
-            .authorities(authorities)
+            .authorities(Collections.singletonList("SEE_CLIENTS_PAGE"))
             .employeeId(1L)
             .build();
     }

@@ -212,7 +212,7 @@ class ManagementEmployeeControllerTest {
         when(ubsClientService.getAllAuthorities(anyString())).thenReturn(authorities);
         mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
             .andExpect(status().isOk());
-        verify(ubsClientService, times(1)).getAllAuthorities("test@mail.com");
+        verify(ubsClientService).getAllAuthorities("test@mail.com");
     }
 
     @Test
@@ -228,6 +228,6 @@ class ManagementEmployeeControllerTest {
             .andExpect(status().isOk());
 
         String email = principal.getName();
-        verify(ubsClientService, times(1)).updateEmployeesAuthorities(dto, email);
+        verify(ubsClientService).updateEmployeesAuthorities(dto, email);
     }
 }

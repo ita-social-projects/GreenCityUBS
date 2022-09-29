@@ -3805,9 +3805,7 @@ public class ModelUtils {
     }
 
     public static List<String> getAllAuthorities() {
-        List<String> authorities = new ArrayList<>();
-        authorities.add("SEE_CLIENTS_PAGE");
-        return authorities;
+        return Collections.singletonList("SEE_CLIENTS_PAGE");
     }
 
     public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
