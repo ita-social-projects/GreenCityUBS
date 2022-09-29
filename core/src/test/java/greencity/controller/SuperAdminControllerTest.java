@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
@@ -244,14 +243,10 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void updateCourierTest() {
-        List dtoList = List.of(CourierTranslationDto.builder()
+        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
             .name("УБС")
-            .languageCode("ua")
-            .build(),
-            CourierTranslationDto.builder()
-                .name("UBS")
-                .languageCode("en")
-                .build());
+            .nameEng("UBS")
+            .build());
         CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
             .courierTranslationDtos(dtoList)

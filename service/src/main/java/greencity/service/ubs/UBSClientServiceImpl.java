@@ -92,15 +92,8 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.enums.*;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.BotType;
-import greencity.entity.enums.CertificateStatus;
-import greencity.entity.enums.CourierLimit;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
-import greencity.entity.enums.PaymentType;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Certificate;
@@ -121,22 +114,7 @@ import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LanguageRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
@@ -204,7 +182,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
-    private final LanguageRepository languageRepository;
     @Value("${greencity.payment.fondy-payment-key}")
     private String fondyPaymentKey;
     @Value("${greencity.payment.merchant-id}")
@@ -231,6 +208,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
     private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
 
     @Override
     @Transactional
@@ -477,6 +455,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser = userRepository.findByUuid(uuid);
         List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
 
+        if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
+            throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
+        }
+
         OrderAddressDtoRequest dtoRequest =
             getLocationDto(googleApiService.getResultFromGeoCode(addressRequestDto.getSearchAddress()));
         OrderAddressDtoRequest addressRequestDtoForNullCheck =
@@ -484,14 +466,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         addressRequestDtoForNullCheck.setId(0L);
         checkNullFieldsOnGoogleResponse(dtoRequest, addressRequestDtoForNullCheck);
 
-        if (addresses != null) {
-            checkIfAddressExist(addresses, dtoRequest);
+        checkIfAddressExist(addresses, dtoRequest);
 
-            addresses.forEach(addressItem -> {
-                addressItem.setActual(false);
-                addressRepo.save(addressItem);
-            });
-        }
+        addresses.forEach(addressItem -> {
+            addressItem.setActual(false);
+            addressRepo.save(addressItem);
+        });
 
         Address address = modelMapper.map(dtoRequest, Address.class);
 
@@ -706,6 +686,20 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPages.getTotalElements(),
             orderPages.getPageable().getPageNumber(),
             orderPages.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
+        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
+        if (order == null) {
+            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
+
+        return getOrdersData(order);
     }
 
     private OrdersDataForUserDto getOrdersData(Order order) {
@@ -1513,9 +1507,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     @Override
-    public void deleteOrder(Long id) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    public void deleteOrder(String uuid, Long id) {
+        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
+        if (order == null) {
+            throw new NotFoundException(ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+        }
         orderRepository.delete(order);
     }
 

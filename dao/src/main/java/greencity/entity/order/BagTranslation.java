@@ -7,10 +7,9 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"bag", "language"})
-@ToString(exclude = {"bag", "language"})
-@Getter
-@Setter
+@EqualsAndHashCode(exclude = {"bag"})
+@ToString(exclude = {"bag"})
+@Data
 @Builder
 @Table(name = "bag_translations")
 public class BagTranslation {

@@ -2,11 +2,9 @@ package greencity.dto;
 
 import lombok.*;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 @Builder
 public class TitleDto {
     private String key;

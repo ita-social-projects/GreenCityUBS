@@ -5,10 +5,10 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.entity.enums.NotificationType;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
-import greencity.entity.enums.PaymentStatus;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
@@ -18,8 +18,6 @@ import greencity.entity.user.Violation;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.*;
-import greencity.service.ubs.ViberService;
-import greencity.ubstelegrambot.TelegramService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +32,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.*;
-import static greencity.entity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,12 +62,6 @@ class NotificationServiceImplTest {
 
     @Mock
     private NotificationTemplateRepository templateRepository;
-
-    @Mock
-    private TelegramService telegramService;
-
-    @Mock
-    private ViberService viberService;
 
     @Mock
     private Clock clock;

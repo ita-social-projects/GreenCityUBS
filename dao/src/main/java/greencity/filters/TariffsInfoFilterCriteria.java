@@ -1,14 +1,14 @@
 package greencity.filters;
 
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import lombok.*;
 
 import java.io.Serializable;
 
-@Getter
-@Builder
-@EqualsAndHashCode
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TariffsInfoFilterCriteria implements Serializable {
     private Integer region;
     private Integer[] location;

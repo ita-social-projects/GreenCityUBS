@@ -1,18 +1,16 @@
 package greencity.entity.order;
 
-import greencity.entity.language.Language;
 import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
-@EqualsAndHashCode(exclude = {"courier", "language"})
-@ToString(exclude = {"courier", "language"})
+@EqualsAndHashCode(exclude = {"courier"})
+@ToString(exclude = {"courier"})
 @Table(name = "courier_translations")
 public class CourierTranslation {
     @Id
@@ -22,9 +20,9 @@ public class CourierTranslation {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
-    private Courier courier;
+    @Column(nullable = false)
+    private String nameEng;
 
     @ManyToOne
-    private Language language;
+    private Courier courier;
 }

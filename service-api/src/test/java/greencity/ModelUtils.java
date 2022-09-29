@@ -7,7 +7,6 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.table.UbsTableCreationDto;
 import greencity.dto.user.UserVO;
 import greencity.dto.violation.UserViolationMailDto;
-import greencity.entity.language.Language;
 import greencity.entity.order.Courier;
 import greencity.entity.order.CourierTranslation;
 import greencity.entity.user.Location;
@@ -53,7 +52,7 @@ public class ModelUtils {
     public CourierTranslationDto getCourierTranslationDto() {
         return CourierTranslationDto.builder()
             .name("Test")
-            .languageCode("null")
+            .nameEng("Test")
             .build();
     }
 
@@ -61,8 +60,8 @@ public class ModelUtils {
         return CourierTranslation.builder()
             .id(2L)
             .name("Ukrainian")
+            .nameEng("Ukrainian")
             .courier(new Courier())
-            .language(new Language())
             .build();
     }
 

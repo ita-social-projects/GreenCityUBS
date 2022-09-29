@@ -1,9 +1,9 @@
 package greencity.repository;
 
 import greencity.entity.coords.Coordinates;
-import greencity.entity.enums.AddressStatus;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.AddressStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
@@ -698,7 +698,7 @@ public class ModelUtils {
     }
 
     public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_District() {
-        return Arrays.asList(getBOTViews_84());
+        return List.of(getBOTViews_84());
     }
 
     public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Responsible_Caller() {
@@ -708,7 +708,7 @@ public class ModelUtils {
     }
 
     public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_By_Logic_Man() {
-        return Arrays.asList(
+        return List.of(
             getBOTViews_88());
     }
 
@@ -727,12 +727,12 @@ public class ModelUtils {
     }
 
     public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Search() {
-        return Arrays.asList(
+        return List.of(
             getBOTViews_90());
     }
 
     public static List<BigOrderTableViews> getListBOTViewsOSC_Filter_Search_by_Client_name() {
-        return Arrays.asList(
+        return List.of(
             getBOTViews_93());
     }
 

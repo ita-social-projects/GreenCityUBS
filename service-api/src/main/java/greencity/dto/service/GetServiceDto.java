@@ -15,6 +15,8 @@ import java.time.LocalDate;
 public class GetServiceDto {
     @NotNull
     String name;
+    @NotNull
+    String nameEng;
     Integer capacity;
     @NotNull
     Integer price;
@@ -26,6 +28,5 @@ public class GetServiceDto {
     String createdBy;
     LocalDate editedAt;
     String editedBy;
-    String languageCode;
     Long courierId;
 }

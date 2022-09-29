@@ -2,13 +2,10 @@ package greencity.filters;
 
 import lombok.*;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserFilterCriteria {
     private String[] userRegistrationDate;
     private String[] orderDate;

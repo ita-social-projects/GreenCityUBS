@@ -1,11 +1,9 @@
 package greencity.ubstelegrambot;
 
-import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramBot;
@@ -23,7 +21,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Optional;
 
-import static greencity.entity.enums.NotificationReceiverType.OTHER;
+import static greencity.enums.NotificationReceiverType.OTHER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

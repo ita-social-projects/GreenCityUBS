@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.MinAmountOfBag;
+import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import lombok.*;
 
@@ -55,7 +55,7 @@ public class Bag {
     @ManyToOne
     private Location location;
 
-    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL)
     private List<BagTranslation> bagTranslations;
 
     @ManyToOne

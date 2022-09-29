@@ -1,8 +1,8 @@
 package greencity.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import greencity.entity.enums.OrderPaymentStatus;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 

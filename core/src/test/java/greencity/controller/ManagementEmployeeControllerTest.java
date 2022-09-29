@@ -67,7 +67,7 @@ class ManagementEmployeeControllerTest {
     @InjectMocks
     ManagementEmployeeController controller;
 
-    private Principal principal = getUuid();
+    private final Principal principal = getUuid();
 
     @BeforeEach
     void setup() {

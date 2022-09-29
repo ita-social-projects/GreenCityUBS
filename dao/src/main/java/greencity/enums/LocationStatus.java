@@ -1,4 +1,4 @@
-package greencity.entity.enums;
+package greencity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

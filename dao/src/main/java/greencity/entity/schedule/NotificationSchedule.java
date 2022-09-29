@@ -1,6 +1,6 @@
 package greencity.entity.schedule;
 
-import greencity.entity.enums.NotificationType;
+import greencity.enums.NotificationType;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;

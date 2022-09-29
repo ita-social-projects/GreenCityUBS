@@ -14,7 +14,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
@@ -151,6 +151,14 @@ public interface UBSClientService {
      * @author Oleksandr Khomiakov
      */
     PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
+
+    /**
+     * Method that returns info about order for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleg Postolovskyi
+     */
+    OrdersDataForUserDto getOrderForUser(String uuid, Long id);
 
     /**
      * Method returns list all bonuses of user.
@@ -315,7 +323,7 @@ public interface UBSClientService {
      * @param id - current order id.
      * @author Max Boyarchuk
      */
-    void deleteOrder(Long id);
+    void deleteOrder(String uuid, Long id);
 
     /**
      * Method return link with Fondy payment .

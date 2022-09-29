@@ -1,6 +1,6 @@
 package greencity.dto.order;
 
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 

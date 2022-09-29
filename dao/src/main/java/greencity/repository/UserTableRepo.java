@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.SortingOrder;
+import greencity.enums.SortingOrder;
 import greencity.entity.user.User;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;

@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.enums.OrderStatus;
+import greencity.enums.OrderStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import org.springframework.data.domain.Page;
@@ -64,4 +64,12 @@ public interface OrdersForUserRepository extends PagingAndSortingRepository<Orde
      * @return {@link Page} of {@link Order}.
      */
     Page<Order> getAllByUserUuidAndOrderStatusIn(Pageable pageable, String uuid, List<OrderStatus> statuses);
+
+    /**
+     * Returns an order for the specified user.
+     *
+     * @param uuid {@link User}'s uuid.
+     * @return {@link Order}.
+     */
+    Order getAllByUserUuidAndId(String uuid, Long id);
 }

@@ -1,6 +1,6 @@
 package greencity.filters;
 
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import greencity.entity.order.Courier;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;

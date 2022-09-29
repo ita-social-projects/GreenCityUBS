@@ -1,6 +1,6 @@
 package greencity.entity.order;
 
-import greencity.entity.enums.LocationStatus;
+import greencity.enums.LocationStatus;
 import greencity.entity.user.Location;
 import lombok.*;
 

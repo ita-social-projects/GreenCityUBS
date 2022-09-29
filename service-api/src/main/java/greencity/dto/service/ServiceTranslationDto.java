@@ -13,8 +13,8 @@ import javax.validation.constraints.NotNull;
 public class ServiceTranslationDto {
     @NotNull
     private String name;
+    @NonNull
+    private String nameEng;
     @NotNull
     private String description;
-    @NotNull
-    private Long languageId;
 }

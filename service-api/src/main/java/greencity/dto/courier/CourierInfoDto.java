@@ -1,6 +1,6 @@
 package greencity.dto.courier;
 
-import greencity.entity.enums.CourierLimit;
+import greencity.enums.CourierLimit;
 import lombok.*;
 
 @Getter
