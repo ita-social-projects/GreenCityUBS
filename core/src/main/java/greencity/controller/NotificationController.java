@@ -90,7 +90,6 @@ public class NotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @GetMapping(value = "quantityUnreadenNotifications")
     public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid) {
