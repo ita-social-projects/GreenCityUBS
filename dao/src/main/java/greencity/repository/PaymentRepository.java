@@ -16,10 +16,7 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
      *
      * @return list of {@link Order}.
      */
-    @Query("select p from Payment p "
-        + "join Order o on p.order.id = o.id "
-        + "where p.order.id = :orderId")
-    List<Payment> paymentInfo(long orderId);
+    List<Payment> findAllByOrderId(long orderId);
 
     /**
      * This method deletes payment by id.
@@ -33,17 +30,6 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
      * @return {@link List} of {@link Payment}
      */
     List<Payment> findAllByOrder(Order order);
-
-    /**
-     * This method find amount by orderId.
-     *
-     * @param orderId {@link Long}
-     * @return {@link Payment}
-     * @author Roman Sulymka
-     */
-    @Query(value = "select distinct amount from payment"
-        + " where order_id = :orderId", nativeQuery = true)
-    Long findAmountByOrderId(@Param(value = "orderId") Long orderId);
 
     /**
      * Method return total paid sum made by order.

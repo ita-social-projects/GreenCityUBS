@@ -44,16 +44,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> undeliveredAddresses();
 
     /**
-     * Finds list of Orders which the route and date garbage collection is defined.
-     *
-     * @return a {@link List} of {@link Order}.
-     */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM orders o INNER JOIN  ubs_user u ON o.ubs_user_id = u.id "
-            + "WHERE o.order_status LIKE 'ON_THE_ROUTE'")
-    List<Order> getAllUsersInWhichTheRouteIsDefined();
-
-    /**
      * Method returns {@link Optional Order}.
      *
      * @return list of {@link Order}.
@@ -77,58 +67,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> getAllOrdersOfUser(@Param(value = "uuid") String uuid);
 
     /**
-     * Method return list of {@link Order} orders for user.
-     *
-     * @return {@link Order}.
-     */
-
-    @Query(value = "SELECT * FROM orders as o "
-        + "JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
-        + "JOIN users as u ON ubs.users_id = u.id "
-        + "WHERE u.uuid = :uuid", nativeQuery = true)
-    List<Order> findAllOrdersByUserUuid(@Param("uuid") String uuid);
-
-    /**
-     * Method update status to 'ON_THE_ROUTE' for {@link Order} in which order
-     * status is 'confirmed' and deliver from is current date.
-     */
-    @Modifying
-    @Query(value = "UPDATE ORDERS SET ORDER_STATUS = 'ON_THE_ROUTE' "
-        + "WHERE ORDER_STATUS = 'CONFIRMED' AND DATE(DELIVER_FROM) <= CURRENT_DATE", nativeQuery = true)
-    void updateOrderStatusToOnTheRoute();
-
-    /**
      * Method that returns all orders by it's {@link OrderPaymentStatus}.
      */
     List<Order> findAllByOrderPaymentStatus(OrderPaymentStatus orderPaymentStatus);
-
-    /**
-     * Method which is find eco number from shop.
-     *
-     * @param ecoNumber {@link String}.
-     * @param orderId   {@link Long}.
-     * @return {@link String}.
-     * @author Yuriy Bahlay.
-     */
-    @Query(value = " SELECT additional_order FROM ORDER_ADDITIONAL "
-        + "WHERE orders_id = :order_id AND additional_order =:eco_number ", nativeQuery = true)
-    String findEcoNumberFromShop(@Param("eco_number") String ecoNumber, @Param("order_id") Long orderId);
-
-    /**
-     * This is method which is update eco number from shop.
-     *
-     * @param newEcoNumber {@link String}.
-     * @param oldEcoNumber {@link String}.
-     * @param orderId      {@link Long}.
-     * @author Yuriy Bahlay.
-     */
-    @Modifying
-    @Transactional
-    @Query(value = " UPDATE ORDER_ADDITIONAL SET additional_order = :new_eco_number "
-        + " WHERE orders_id = :order_id AND additional_order = :old_eco_number", nativeQuery = true)
-    void setOrderAdditionalNumber(@Param("new_eco_number") String newEcoNumber,
-        @Param("old_eco_number") String oldEcoNumber,
-        @Param("order_id") Long orderId);
 
     /**
      * Method changes order_status for all not blocked orders.
@@ -203,47 +144,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void unblockAllOrders(@Param("employee_id") Long employeeId);
 
     /**
-     * Method gets all orders for user by Id.
-     *
-     * @author Roman Sulymka
-     */
-
-    @Query(value = "SELECT distinct * FROM orders"
-        + "    INNER JOIN payment p on orders.id = p.order_id"
-        + "    INNER JOIN users ON orders.users_id = users.id"
-        + "    INNER JOIN ubs_user uu on orders.ubs_user_id = uu.id"
-        + "    WHERE orders.users_id = :userId", nativeQuery = true)
-    List<Order> getAllOrdersByUserId(@Param(value = "userId") Long userId);
-
-    /**
-     * Method gets user fistname by orderId.
-     *
-     * @author Roman Sulymka
-     */
-    @Query(value = "select distinct first_name from orders"
-        + " Inner Join ubs_user uu on orders.ubs_user_id = uu.id"
-        + " where orders.users_id = :userId limit 1", nativeQuery = true)
-    String getUsersFirstNameByOrderId(@Param(value = "userId") Long userId);
-
-    /**
-     * Method gets user lastname by orderId.
-     *
-     * @author Roman Sulymka
-     */
-    @Query(value = "select distinct last_name from orders"
-        + " Inner Join ubs_user uu on orders.ubs_user_id = uu.id"
-        + " where orders.users_id = :userId limit 1", nativeQuery = true)
-    String getUsersLastNameByOrderId(@Param(value = "userId") Long userId);
-
-    /**
      * Method gets user order by order id.
      *
      * @author Max Boiarchuk
      */
-    @Query(value = "select * from orders o "
-        + "join users u on o.users_id = u.id "
-        + "where o.id = :orderId", nativeQuery = true)
-    Optional<Order> getUserByOrderId(@Param(value = "orderId") Long orderId);
+    Optional<Order> findUserById(@Param(value = "orderId") Long orderId);
 
     /**
      * Method for getting last order of user by user's uuid if such order exists.

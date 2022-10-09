@@ -99,12 +99,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             throw new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId());
         }
         dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-        if (employeeRepository.checkIfPhoneNumberUnique(dto.getPhoneNumber(), dto.getId()) != null) {
+        if (employeeRepository.existsByPhoneNumberAndId(dto.getPhoneNumber(), dto.getId())) {
             throw new UnprocessableEntityException(
                 ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
         }
         if (dto.getEmail() != null
-            && employeeRepository.checkIfEmailUnique(dto.getEmail(), dto.getId()) != null) {
+            && employeeRepository.existsByEmailAndId(dto.getEmail(), dto.getId())) {
             throw new UnprocessableEntityException(
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }

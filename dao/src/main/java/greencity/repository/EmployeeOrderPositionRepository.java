@@ -22,8 +22,6 @@ public interface EmployeeOrderPositionRepository extends CrudRepository<Employee
      * @return {@link List}of{@link EmployeeOrderPosition}
      * @author Bohdan Fedorkiv
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM employee_order_position WHERE order_id = :orderId ")
     List<EmployeeOrderPosition> findAllByOrderId(Long orderId);
 
     /**
@@ -33,10 +31,7 @@ public interface EmployeeOrderPositionRepository extends CrudRepository<Employee
      * @return {@link Long}.
      * @author Yuriy Bahlay.
      */
-    @Query(" SELECT eop.position.id "
-        + " FROM EmployeeOrderPosition eop "
-        + " WHERE eop.employee.id = :employeeId ")
-    Long findPositionOfEmployeeAssignedForOrder(@Param("employeeId") Long employeeId);
+    Long findByEmployeeId(Long employeeId);
 
     /**
      * Method verify if Employee already assigned for current Order.

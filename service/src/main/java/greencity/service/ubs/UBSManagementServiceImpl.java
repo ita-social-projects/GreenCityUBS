@@ -209,7 +209,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      */
     @Override
     public PaymentTableInfoDto returnOverpaymentInfo(Long orderId, Long sumToPay, Long marker) {
-        Order order = orderRepository.getUserByOrderId(orderId).orElseThrow(
+        Order order = orderRepository.findUserById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         Long overpayment = calculateOverpayment(order, sumToPay);
         PaymentTableInfoDto dto = getPaymentInfo(orderId, sumToPay);
@@ -233,7 +233,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         SortingOrder sortingOrder) {
         PageRequest pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
             Sort.by(Sort.Direction.fromString(sortingOrder.toString()), columnName));
-        Page<Certificate> certificates = certificateRepository.getAll(pageRequest);
+        Page<Certificate> certificates = certificateRepository.findAll(pageRequest);
         return getAllCertificatesTranslationDto(certificates);
     }
 
@@ -655,7 +655,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Optional<Long> confirmWasteWas = Optional.empty();
-                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
                         Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
                 }
@@ -681,7 +681,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Optional<Long> exporterWasteWas = Optional.empty();
-                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()))) {
+                if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     exporterWasteWas =
                         Optional
                             .ofNullable(updateOrderRepository.getExporterWaste(orderId, entry.getKey().longValue()));
@@ -873,7 +873,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public OrderDetailStatusDto getOrderDetailStatus(Long id) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Payment> payment = paymentRepository.paymentInfo(id);
+        List<Payment> payment = paymentRepository.findAllByOrderId(id);
         if (payment.isEmpty()) {
             throw new NotFoundException(PAYMENT_NOT_FOUND + id);
         }
@@ -888,7 +888,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public OrderDetailStatusDto updateOrderDetailStatus(Long id, OrderDetailStatusRequestDto dto, String email) {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Payment> payment = paymentRepository.paymentInfo(id);
+        List<Payment> payment = paymentRepository.findAllByOrderId(id);
         if (payment.isEmpty()) {
             throw new NotFoundException(PAYMENT_NOT_FOUND + id);
         }
@@ -924,7 +924,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             orderRepository.save(order);
         }
         if (nonNull(dto.getOrderPaymentStatus())) {
-            paymentRepository.paymentInfo(id)
+            paymentRepository.findAllByOrderId(id)
                 .forEach(x -> x.setPaymentStatus(PaymentStatus.valueOf(dto.getOrderPaymentStatus())));
             paymentRepository.saveAll(payment);
         }
@@ -1415,10 +1415,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
             Position position = positionRepository.findById(employeeOrderPositionDTO.getPositionId())
                 .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
-            Employee employee = employeeRepository.findByName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
-                .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
+            Employee employee =
+                employeeRepository.findByFirstNameAndLastName(dtoFirstAndLastName[0], dtoFirstAndLastName[1])
+                    .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND));
             Long oldEmployeePositionId =
-                employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(employee.getId());
+                employeeOrderPositionRepository.findByEmployeeId(employee.getId());
             if (nonNull(oldEmployeePositionId) && oldEmployeePositionId != 0 && oldEmployeePositionId != 1) {
                 collectEventsAboutUpdatingEmployeesAssignedForOrder(oldEmployeePositionId, order, currentUser);
             }
@@ -1508,7 +1509,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         EMPLOYEE_NOT_FOUND + assignForOrderEmployee.getEmployeeId()));
                 checkAvailableOrderForEmployee(order, employeeForAssigning.getEmail());
                 Long positionForEmployee =
-                    employeeRepository.findPositionForEmployee(assignForOrderEmployee.getEmployeeId())
+                    employeeRepository.findPositionById(assignForOrderEmployee.getEmployeeId())
                         .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
                 if (positionForEmployee != 1) {
                     EmployeeOrderPosition employeeOrderPositions = EmployeeOrderPosition.builder()
@@ -1675,7 +1676,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private List<Employee> listAvailableEmployeeWithPosition(Order order, Position position) {
-        List<Employee> employees = employeeRepository.getAllEmployeeByPositionId(position.getId());
+        List<Employee> employees = employeeRepository.findAllByEmployeePositionId(position.getId());
         List<Employee> emps = new ArrayList<>();
         for (Employee emp : employees) {
             boolean status = false;

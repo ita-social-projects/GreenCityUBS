@@ -141,7 +141,7 @@ class UBSManagementServiceImplTest {
         Page<Certificate> certificates1 = new PageImpl<>(certificates, pageable, certificates.size());
         when(modelMapper.map(certificates.get(0), CertificateDtoForSearching.class))
             .thenReturn(certificateDtoForSearching);
-        when(certificateRepository.getAll(pageable)).thenReturn(certificates1);
+        when(certificateRepository.findAll(pageable)).thenReturn(certificates1);
         PageableDto<CertificateDtoForSearching> actual =
             ubsManagementService.getAllCertificates(pageable, "points", SortingOrder.DESC);
         assertEquals(certificateDtoForSearchingPageableDto, actual);
@@ -318,7 +318,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkReturnOverpaymentInfo() {
         Order order = ModelUtils.getOrder();
-        when(orderRepository.getUserByOrderId(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         order.setUser(ModelUtils.getUser());
@@ -344,7 +344,7 @@ class UBSManagementServiceImplTest {
     @Test
     void checkReturnOverpaymentThroweExceptioninGetPaymentInfo() {
         Order order = ModelUtils.getOrder();
-        when(orderRepository.getUserByOrderId(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findUserById(1L)).thenReturn(Optional.of(order));
 
         Assertions.assertThrows(NotFoundException.class, () -> ubsManagementService.returnOverpaymentInfo(1L, 1L, 1L));
     }
@@ -518,7 +518,7 @@ class UBSManagementServiceImplTest {
         payment.add(Payment.builder().build());
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.findAllByOrderId(anyLong())).thenReturn(payment);
         when(paymentRepository.saveAll(any())).thenReturn(payment);
         when(orderRepository.save(any())).thenReturn(order);
 
@@ -608,7 +608,7 @@ class UBSManagementServiceImplTest {
         payment.add(Payment.builder().build());
 
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(paymentRepository.paymentInfo(anyLong())).thenReturn(payment);
+        when(paymentRepository.findAllByOrderId(anyLong())).thenReturn(payment);
         when(paymentRepository.saveAll(any())).thenReturn(payment);
         when(orderRepository.save(any())).thenReturn(order);
 
@@ -645,7 +645,7 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         when(employeeOrderPositionRepository.findAllByOrderId(anyLong())).thenReturn(newList);
         when(positionRepository.findAll()).thenReturn(positionList);
-        when(employeeRepository.getAllEmployeeByPositionId(anyLong())).thenReturn(employeeList);
+        when(employeeRepository.findAllByEmployeePositionId(anyLong())).thenReturn(employeeList);
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         assertEquals(dto, ubsManagementService.getAllEmployeesByPosition(order.getId(), "test@gmail.com"));
     }
@@ -688,7 +688,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testGetOrderDetailStatus() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
-        when(paymentRepository.paymentInfo(1L)).thenReturn(TEST_PAYMENT_LIST);
+        when(paymentRepository.findAllByOrderId(1L)).thenReturn(TEST_PAYMENT_LIST);
 
         OrderDetailStatusDto actual = ubsManagementService.getOrderDetailStatus(1L);
 
@@ -697,7 +697,7 @@ class UBSManagementServiceImplTest {
         assertEquals(ORDER_DETAIL_STATUS_DTO.getDate(), actual.getDate());
 
         verify(orderRepository).findById(1L);
-        verify(paymentRepository).paymentInfo(1L);
+        verify(paymentRepository).findAllByOrderId(1L);
     }
 
     @Test
@@ -711,7 +711,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testGetOrderDetailStatusThrowsPaymentNotFoundException() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER));
-        when(paymentRepository.paymentInfo(1)).thenReturn(Collections.emptyList());
+        when(paymentRepository.findAllByOrderId(1)).thenReturn(Collections.emptyList());
 
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.getOrderDetailStatus(1L));
@@ -829,16 +829,17 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(positionRepository.findById(2L)).thenReturn(Optional.ofNullable(TEST_POSITION));
-        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
+        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            .thenReturn(Optional.ofNullable(TEST_EMPLOYEE));
         when(employeeOrderPositionRepository.saveAll(anyIterable()))
             .thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
-        when(employeeOrderPositionRepository.findPositionOfEmployeeAssignedForOrder(1L)).thenReturn(diffParam);
+        when(employeeOrderPositionRepository.findByEmployeeId(1L)).thenReturn(diffParam);
         when(employeeOrderPositionRepository.findAllByOrderId(1L)).thenReturn(TEST_EMPLOYEE_ORDER_POSITION);
         ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc");
         verify(employeeOrderPositionRepository).findAllByOrderId(1L);
         verify(orderRepository).findById(1L);
         verify(positionRepository).findById(2L);
-        verify(employeeRepository).findByName(anyString(), anyString());
+        verify(employeeRepository).findByFirstNameAndLastName(anyString(), anyString());
         verify(employeeOrderPositionRepository).saveAll(anyIterable());
         Order order = TEST_ORDER_UPDATE_POSITION;
         verify(eventService, times(1)).save(eventName,
@@ -871,7 +872,7 @@ class UBSManagementServiceImplTest {
         when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(TEST_ORDER_UPDATE_POSITION));
         when(positionRepository.findById(2L)).thenReturn(Optional.of(TEST_POSITION));
-        when(employeeRepository.findByName(anyString(), anyString())).thenReturn(Optional.empty());
+        when(employeeRepository.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.updatePositions(TEST_EMPLOYEE_POSITION_DTO_RESPONSE, "abc"));
@@ -1195,7 +1196,7 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.empty());
+        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.empty());
         AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
         assertThrows(NotFoundException.class,
             () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
@@ -1217,7 +1218,7 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(1L));
+        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.of(1L));
         AssignEmployeesForOrderDto assignEmployeeForOrderDto = assignEmployeesForOrderDto();
         assertThrows(FoundException.class,
             () -> ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto, "abc"));
@@ -1245,7 +1246,7 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(employeeRepository.findPositionForEmployee(1L)).thenReturn(Optional.of(diffParam));
+        when(employeeRepository.findPositionById(1L)).thenReturn(Optional.of(diffParam));
         ubsManagementService.assignEmployeesWithThePositionsToTheOrder(assignEmployeeForOrderDto(), "abc");
         verify(employeeOrderPositionRepository, times(1)).save(any());
         verify(eventService, times(1)).save(eventName,
@@ -1347,7 +1348,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
-        when(paymentRepository.paymentInfo(1L))
+        when(paymentRepository.findAllByOrderId(1L))
             .thenReturn(List.of(ModelUtils.getPayment()));
         lenient().when(ubsManagementServiceMock.updateOrderDetailStatus(1L, orderDetailStatusRequestDto, "abc"))
             .thenReturn(ModelUtils.getTestOrderDetailStatusDto());

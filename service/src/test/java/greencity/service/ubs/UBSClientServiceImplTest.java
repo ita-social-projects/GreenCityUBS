@@ -336,9 +336,8 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        });
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
     }
 
     @Test
@@ -393,9 +392,7 @@ class UBSClientServiceImplTest {
 
     @Test
     void checkCertificateWithNoAvailable() {
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.checkCertificate("randomstring");
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> ubsService.checkCertificate("randomstring"));
     }
 
     @Test
@@ -1087,9 +1084,8 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBags()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null);
-        });
+        assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", null));
     }
 
     @Test
@@ -1716,7 +1712,7 @@ class UBSClientServiceImplTest {
         var tariff = ModelUtils.getTariffInfo();
         when(orderRepository.getLastOrderOfUserByUUIDIfExists(anyString()))
             .thenReturn(Optional.of(ModelUtils.getOrder()));
-        when(tariffsInfoRepository.findTariffsInfoByOrder(anyLong())).thenReturn(tariff);
+        when(tariffsInfoRepository.findTariffsInfoByOrdersId(anyLong())).thenReturn(tariff);
         OrderCourierPopUpDto dto = ubsService.getInfoForCourierOrdering("35467585763t4sfgchjfuyetf", Optional.empty());
         verify(modelMapper).map(tariff, TariffsForLocationDto.class);
         assertTrue(dto.getOrderIsPresent());
@@ -1824,9 +1820,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        });
+        Assertions.assertThrows(NotFoundException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
     }
 
@@ -1860,10 +1855,8 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        });
-
+        Assertions.assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
     }
 
     @Test

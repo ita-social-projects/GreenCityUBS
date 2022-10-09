@@ -23,14 +23,6 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
     Page<UserNotification> findAllByUser(User user, Pageable pageable);
 
     /**
-     * The method returns last notification by User and Type.
-     *
-     * @return {@link Optional} of {@link UserNotification}.
-     */
-    Optional<UserNotification> findTop1UserNotificationByUserAndNotificationTypeOrderByNotificationTimeDesc(User user,
-        NotificationType type);
-
-    /**
      * The method returns last notification by {@link NotificationType} and
      * orderNumber from
      * {@link greencity.entity.notifications.NotificationParameter}.

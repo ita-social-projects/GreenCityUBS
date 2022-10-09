@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Certificate;
+import greencity.enums.CertificateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,8 +31,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
      * @return list of {@link Certificate}.
      * @author Nazar Struk
      */
-    @Query(value = "SELECT c from Certificate c")
-    Page<Certificate> getAll(Pageable page);
+    Page<Certificate> findAll(Pageable page);
 
     /**
      * The query for searching all certificates by order id.
@@ -47,10 +47,8 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
     /**
      * The query for get all Certificate.
      *
-     * @param temp is list Certificate
+     * @param code is list Certificate
      * @return set of {@link Certificate}
      */
-    @Query(value = "SELECT * FROM Certificate AS c "
-        + "where c.code in (:temp) and c.status = 'ACTIVE'", nativeQuery = true)
-    Set<Certificate> getAllByListId(List<String> temp);
+    Set<Certificate> findAllByCodeAndCertificateStatus(List<String> code, CertificateStatus status);
 }
