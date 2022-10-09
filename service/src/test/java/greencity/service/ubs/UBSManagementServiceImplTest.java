@@ -97,18 +97,11 @@ class UBSManagementServiceImplTest {
 
     @Mock(lenient = true)
     private NotificationServiceImpl notificationService;
-
-    @Mock
-    private BagsInfoRepo bagsInfoRepo;
-
-    @Mock
-    private AdditionalBagsInfoRepo additionalBagsInfoRepo;
-
     @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    private UpdateOrderDetail updateOrderRepository;
+    private UpdateOrderDetailRepository updateOrderRepository;
 
     @InjectMocks
     private UBSManagementServiceImpl ubsManagementService;
@@ -757,7 +750,7 @@ class UBSManagementServiceImplTest {
         Map<String, Object> mapOne = Map.of("One", "Two");
         Map<String, Object> mapTwo = Map.of("One", "Two");
         List<Map<String, Object>> mockBagInfoRepository = Arrays.asList(mapOne, mapTwo);
-        when(bagsInfoRepo.getBagInfo(1L)).thenReturn(mockBagInfoRepository);
+        when(bagRepository.getBagInfo(1L)).thenReturn(mockBagInfoRepository);
         for (Map<String, Object> map : mockBagInfoRepository) {
             when(objectMapper.convertValue(map, DetailsOrderInfoDto.class)).thenReturn(getTestDetailsOrderInfoDto());
             detailsOrderInfoDtoList.add(getTestDetailsOrderInfoDto());
@@ -887,7 +880,7 @@ class UBSManagementServiceImplTest {
     @Test
     void testGetAdditionalBagsInfo() {
         when(userRepository.findUserByOrderId(1L)).thenReturn(Optional.of(TEST_USER));
-        when(additionalBagsInfoRepo.getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail()))
+        when(bagRepository.getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail()))
             .thenReturn(TEST_MAP_ADDITIONAL_BAG_LIST);
         when(objectMapper.convertValue(any(), eq(AdditionalBagInfoDto.class)))
             .thenReturn(TEST_ADDITIONAL_BAG_INFO_DTO);
@@ -897,7 +890,7 @@ class UBSManagementServiceImplTest {
         assertEquals(TEST_ADDITIONAL_BAG_INFO_DTO_LIST, actual);
 
         verify(userRepository).findUserByOrderId(1L);
-        verify(additionalBagsInfoRepo).getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail());
+        verify(bagRepository).getAdditionalBagInfo(1L, TEST_USER.getRecipientEmail());
         verify(objectMapper).convertValue(any(), eq(AdditionalBagInfoDto.class));
     }
 

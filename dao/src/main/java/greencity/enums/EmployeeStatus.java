@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
 public enum EmployeeStatus {
     ACTIVE(1),
     INACTIVE(2);

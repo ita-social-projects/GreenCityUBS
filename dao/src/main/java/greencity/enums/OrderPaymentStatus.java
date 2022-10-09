@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
 public enum OrderPaymentStatus {
     PAID(1),
     UNPAID(2),

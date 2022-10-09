@@ -75,12 +75,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
     private final BagTranslationRepository bagTranslationRepository;
-    private final UpdateOrderDetail updateOrderRepository;
-    private final BagsInfoRepo bagsInfoRepository;
+    private final UpdateOrderDetailRepository updateOrderRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
-    private final AdditionalBagsInfoRepo additionalBagsInfoRepo;
     private final NotificationServiceImpl notificationService;
     private final FileService fileService;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
@@ -555,8 +553,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue()))) {
+                if (Boolean.TRUE
+                    .equals(!(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0))) {
                     updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
@@ -568,8 +566,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (Boolean.TRUE.equals(!updateOrderRepository.ifRecordExist(orderId,
-                    entry.getKey().longValue()))) {
+                if (Boolean.TRUE
+                    .equals(!(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0))) {
                     updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
@@ -1017,7 +1015,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     public List<DetailsOrderInfoDto> getOrderBagsDetails(Long orderId) {
         List<DetailsOrderInfoDto> detailsOrderInfoDtos = new ArrayList<>();
-        List<Map<String, Object>> ourResult = bagsInfoRepository.getBagInfo(orderId);
+        List<Map<String, Object>> ourResult = bagRepository.getBagInfo(orderId);
         for (Map<String, Object> array : ourResult) {
             DetailsOrderInfoDto dto = objectMapper.convertValue(array, DetailsOrderInfoDto.class);
             detailsOrderInfoDtos.add(dto);
@@ -1127,7 +1125,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         String recipientEmail = user.getRecipientEmail();
         List<AdditionalBagInfoDto> ourResult1 = new ArrayList<>();
-        List<Map<String, Object>> ourResult = additionalBagsInfoRepo.getAdditionalBagInfo(orderId, recipientEmail);
+        List<Map<String, Object>> ourResult = bagRepository.getAdditionalBagInfo(orderId, recipientEmail);
         for (Map<String, Object> array : ourResult) {
             AdditionalBagInfoDto dto = objectMapper.convertValue(array, AdditionalBagInfoDto.class);
             ourResult1.add(dto);

@@ -13,12 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 @Repository
-/**
- * The method returns all certificates with sorting in desc order.
- *
- * @return list of {@link Certificate}.
- * @author Nazar Struk
- */
 public interface CertificateRepository extends JpaRepository<Certificate, String> {
     /**
      * Method update status to expired for all {@link Certificate} in which
