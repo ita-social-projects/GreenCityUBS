@@ -1907,7 +1907,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public TariffsForLocationDto getTariffForOrder(Long id) {
-        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrderId(id);
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrdersId(id);
         if (tariffsInfo.isPresent()) {
             return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
         } else {

@@ -42,5 +42,5 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @param orderId - id of order
      * @return - Optional of {@link TariffsInfo} if order with such id exists in DB
      */
-    Optional<TariffsInfo> findByOrderId(@Param("orderId") Long orderId);
+    Optional<TariffsInfo> findByOrdersId(@Param("orderId") Long orderId);
 }

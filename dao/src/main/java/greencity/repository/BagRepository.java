@@ -42,7 +42,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      */
     @Query(value = "SELECT  distinct u.recipient_name , u.recipient_phone , "
         + "u.recipient_email, a.city , a.street , a.house_number , a.district , a.address_comment, "
-        + "(SELECT string_agg(payment_id::text,',') AS pay_id "
+        + "(SELECT string_agg(payment_id,',') AS pay_id "
         + "FROM payment WHERE recipient_email = :recipientEmail) "
         + "FROM payment "
         + "JOIN orders o on o.id = payment.order_id "

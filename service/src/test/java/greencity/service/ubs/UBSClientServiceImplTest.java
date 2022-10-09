@@ -1923,17 +1923,17 @@ class UBSClientServiceImplTest {
     @Test
     void getTariffForOrderTest() {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
-        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.findByOrdersId(anyLong())).thenReturn(Optional.of(tariffsInfo));
         when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
             .thenReturn(ModelUtils.getTariffsForLocationDto());
         var dto = ubsService.getTariffForOrder(1L);
-        verify(tariffsInfoRepository, times(1)).findByOrderId(anyLong());
+        verify(tariffsInfoRepository, times(1)).findByOrdersId(anyLong());
         verify(modelMapper).map(tariffsInfo, TariffsForLocationDto.class);
     }
 
     @Test
     void getTariffForOrderFailTest() {
-        when(tariffsInfoRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.findByOrdersId(anyLong())).thenReturn(Optional.empty());
         Assertions.assertThrows(EntityNotFoundException.class, () -> ubsService.getTariffForOrder(1L));
     }
 }
