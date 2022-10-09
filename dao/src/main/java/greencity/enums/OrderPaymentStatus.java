@@ -1,5 +1,12 @@
 package greencity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
 public enum OrderPaymentStatus {
     PAID(1),
     UNPAID(2),
@@ -7,10 +14,6 @@ public enum OrderPaymentStatus {
     PAYMENT_REFUNDED(4);
 
     private int statusValue;
-
-    OrderPaymentStatus(final int statusValue) {
-        this.statusValue = statusValue;
-    }
 
     /**
      * This is method get status value.

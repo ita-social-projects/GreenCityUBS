@@ -1,14 +1,17 @@
 package greencity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
 public enum EmployeeStatus {
     ACTIVE(1),
     INACTIVE(2);
 
     private int statusValue;
-
-    EmployeeStatus(final int value) {
-        this.statusValue = value;
-    }
 
     /**
      * Method for getting a value of employeeStatus, which is used for translating

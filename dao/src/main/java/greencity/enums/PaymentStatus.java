@@ -1,5 +1,12 @@
 package greencity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
 public enum PaymentStatus {
     PAID(1),
     UNPAID(2),
@@ -7,10 +14,6 @@ public enum PaymentStatus {
     PAYMENT_REFUNDED(4);
 
     private int value;
-
-    PaymentStatus(int value) {
-        this.value = value;
-    }
 
     /**
      * Method for getting a value of paymentStatus, which is used for translating

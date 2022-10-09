@@ -9,20 +9,13 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Builder
 @Table(name = "notification_parameters")
 public class NotificationParameter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    /**
-     * Constructor.
-     */
-    public NotificationParameter(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
 
     @ManyToOne
     @JoinColumn(name = "notification_id", nullable = false)
