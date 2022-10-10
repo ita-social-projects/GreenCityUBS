@@ -554,7 +554,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(!(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0))) {
+                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
                     updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
@@ -567,7 +567,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
                 if (Boolean.TRUE
-                    .equals(!(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0))) {
+                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
                     updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
                     updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }

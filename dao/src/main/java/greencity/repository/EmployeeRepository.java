@@ -52,7 +52,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @return {@link Boolean}
      * @author Mykola Danylko
      */
-    Boolean existsByPhoneNumberAndId(String phoneNumber, Long id);
+    boolean existsByPhoneNumberAndId(String phoneNumber, Long id);
 
     /**
      * Method checks if {@link String} email exist except current employee.
