@@ -402,7 +402,7 @@ public interface UBSClientService {
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
 
     /**
-     * Methods returns all locations
+     * Methods returns all locations.
      *
      * @return {@link LocationSummaryDto}.
      * @author Max Nazaruk

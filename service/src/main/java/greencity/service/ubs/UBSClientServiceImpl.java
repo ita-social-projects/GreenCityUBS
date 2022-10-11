@@ -29,7 +29,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.LocationInfoDto;
 import greencity.dto.location.LocationSummaryDto;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -1944,13 +1943,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
         userRemoteClient.updateEmployeesAuthorities(dto, email);
-    }
-
-    @Override
-    public List<LocationInfoDto> getAllLocation() {
-        return regionRepository.findAll().stream()
-                .map(i -> modelMapper.map(i, LocationInfoDto.class))
-                .collect(Collectors.toList());
     }
 
     @Override
