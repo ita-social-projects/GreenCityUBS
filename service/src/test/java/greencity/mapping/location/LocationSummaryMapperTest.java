@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class LocationSummaryMapperTest {
     @InjectMocks
     private LocationSummaryMapper mapper;
+
     @Test
     void convert() {
         Region region = ModelUtils.getRegion();

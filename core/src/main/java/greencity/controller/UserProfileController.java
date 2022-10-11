@@ -9,16 +9,14 @@ import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @Validated
@@ -29,7 +27,7 @@ public class UserProfileController {
 
     /**
      * Controller returns user`s data or update {@link UserProfileDto} date.
-     * 
+     *
      * @param userUuid             {@link UserProfileDto} id.
      * @param userProfileUpdateDto {@link UserProfileDto}
      * @return {@link UserProfileDto}.
@@ -50,7 +48,6 @@ public class UserProfileController {
 
     /**
      * Controller returns user's profile ..
-     *
      *
      * @author Liubomyr Bratakh
      */
@@ -89,16 +86,16 @@ public class UserProfileController {
     }
 
     /**
-     * Controller return info about all locations
+     * Controller return info about all locations.
      *
      * @return {@link ResponseEntity} list of locations.
      * @author Max Nazaruk.
      */
     @ApiOperation(value = "Get info about cities in each region")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @GetMapping("/getLocationSummary")
     public ResponseEntity<List<LocationSummaryDto>> getLocationSummary() {
