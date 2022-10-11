@@ -401,7 +401,11 @@ public interface UBSClientService {
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
 
-    List<LocationInfoDto> getAllLocation();
-
+    /**
+     * Methods returns all locations
+     *
+     * @return {@link LocationSummaryDto}.
+     * @author Max Nazaruk
+     */
     List<LocationSummaryDto> getSummaryLocation();
 }
