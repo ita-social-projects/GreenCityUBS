@@ -16,7 +16,7 @@ class LocationSummaryMapperTest {
 
     @Test
     void convert() {
-        Region region = ModelUtils.getRegion();
+        Region region = ModelUtils.getRegionForSummary();
         LocationSummaryDto dto = ModelUtils.getInfoAboutLocationSummaryDto();
         Assertions.assertEquals(dto, mapper.convert(region));
     }

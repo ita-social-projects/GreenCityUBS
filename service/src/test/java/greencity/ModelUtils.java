@@ -1979,6 +1979,29 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<Location> getLocationForSummary() {
+        return List.of(Location.builder()
+            .locationStatus(LocationStatus.ACTIVE)
+            .nameEn("Kyiv")
+            .nameUk("Київ")
+            .coordinates(Coordinates.builder()
+                .longitude(3.21d)
+                .latitude(5.43d).build())
+            .region(getRegionForMapper())
+                .id(1L)
+            .build(),
+            Location.builder()
+                .locationStatus(LocationStatus.ACTIVE)
+                .nameEn("Bucha")
+                .nameUk("Буча")
+                .coordinates(Coordinates.builder()
+                    .longitude(4.32d)
+                    .latitude(4.21d).build())
+                .region(getRegionForMapper())
+                .id(11L)
+                .build());
+    }
+
     public static Courier getCourier() {
         return Courier.builder()
             .id(1L)
@@ -2582,6 +2605,15 @@ public class ModelUtils {
             .build();
     }
 
+    public static Region getRegionForSummary() {
+        return Region.builder()
+            .id(1L)
+            .ukrName("Київська область")
+            .enName("Kyiv region")
+            .locations(getLocationForSummary())
+            .build();
+    }
+
     public static LocationInfoDto getInfoAboutLocationDto() {
         return LocationInfoDto.builder()
             .regionId(1L)
@@ -2592,24 +2624,24 @@ public class ModelUtils {
     public static List<LocationToCityDto> getCitiesInUa() {
         return List.of(
             LocationToCityDto.builder().cityName("Київ").cityId(1L)
-                .coordinates(CoordinatesDto.builder().longitude(10.0).latitude(25.0).build()).build(),
-            LocationToCityDto.builder().cityName("Львів").cityId(2L)
-                .coordinates(CoordinatesDto.builder().longitude(100.0).latitude(125.0).build()).build());
+                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
+            LocationToCityDto.builder().cityName("Буча").cityId(11L)
+                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
     }
 
     public static List<LocationToCityDto> getCitiesInEn() {
         return List.of(
             LocationToCityDto.builder().cityName("Kyiv").cityId(1L)
-                .coordinates(CoordinatesDto.builder().longitude(10.0).latitude(25.0).build()).build(),
-            LocationToCityDto.builder().cityName("Lviv").cityId(2L)
-                .coordinates(CoordinatesDto.builder().longitude(100.0).latitude(125.0).build()).build());
+                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
+            LocationToCityDto.builder().cityName("Bucha").cityId(11L)
+                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
     }
 
     public static LocationSummaryDto getInfoAboutLocationSummaryDto() {
         return LocationSummaryDto.builder()
             .regionId(1L)
-            .nameUa("Київ")
-            .nameEn("Kyiv")
+            .nameUa("Київська область")
+            .nameEn("Kyiv region")
             .citiesEn(getCitiesInEn())
             .citiesUa(getCitiesInUa())
             .build();
