@@ -2589,6 +2589,28 @@ public class ModelUtils {
             .locationsDto(getLocationsDto()).build();
     }
 
+    public static List<LocationToCityDto> getCitiesInUa() {
+        return List.of(
+                LocationToCityDto.builder().cityName("Київ").cityId(1L).coordinates(CoordinatesDto.builder().longitude(10.0).latitude(25.0).build()).build(),
+                LocationToCityDto.builder().cityName("Львів").cityId(2L).coordinates(CoordinatesDto.builder().longitude(100.0).latitude(125.0).build()).build());
+    }
+
+    public static List<LocationToCityDto> getCitiesInEn() {
+        return List.of(
+                LocationToCityDto.builder().cityName("Kyiv").cityId(1L).coordinates(CoordinatesDto.builder().longitude(10.0).latitude(25.0).build()).build(),
+                LocationToCityDto.builder().cityName("Lviv").cityId(2L).coordinates(CoordinatesDto.builder().longitude(100.0).latitude(125.0).build()).build());
+    }
+
+    public static LocationSummaryDto getInfoAboutLocationSummaryDto() {
+        return LocationSummaryDto.builder()
+                .regionId(1L)
+                .nameUa("Київ")
+                .nameEn("Kyiv")
+                .citiesEn(getCitiesInEn())
+                .citiesUa(getCitiesInUa())
+                .build();
+    }
+
     public static List<LocationsDto> getLocationsDto() {
         return List.of(LocationsDto.builder()
             .locationTranslationDtoList(getLocationTranslationDto())

@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.service.ubs.UBSClientService;
@@ -11,11 +12,13 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @Validated
@@ -83,5 +86,16 @@ public class UserProfileController {
         @RequestParam Long id) {
         ubsClientService.markUserAsDeactivated(id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @ApiOperation(value = "Get info about cities in each region")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/getLocationSummary")
+    public ResponseEntity<List<LocationSummaryDto>> getLocationSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getSummaryLocation());
     }
 }
