@@ -90,9 +90,6 @@ public class ModelUtils {
     public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
-    public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
-    public static final Page<UserNotification> TEST_PAGE =
-        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
@@ -104,6 +101,9 @@ public class ModelUtils {
     public static final Position TEST_POSITION = createPosition();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
+    public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
+    public static final Page<UserNotification> TEST_PAGE =
+        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final AdditionalBagInfoDto TEST_ADDITIONAL_BAG_INFO_DTO = createAdditionalBagInfoDto();
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
@@ -112,14 +112,14 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
-    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
-    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
-        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
-    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
+    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
+        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
+    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
     public static CourierUpdateDto getUpdateCourierDto() {
@@ -1988,7 +1988,7 @@ public class ModelUtils {
                 .longitude(3.21d)
                 .latitude(5.43d).build())
             .region(getRegionForMapper())
-                .id(1L)
+            .id(1L)
             .build(),
             Location.builder()
                 .locationStatus(LocationStatus.ACTIVE)
