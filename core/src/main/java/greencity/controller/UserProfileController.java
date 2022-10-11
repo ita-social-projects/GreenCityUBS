@@ -88,6 +88,12 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * Controller return info about all locations
+     *
+     * @return {@link ResponseEntity} list of locations.
+     * @author Max Nazaruk.
+     */
     @ApiOperation(value = "Get info about cities in each region")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
