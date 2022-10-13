@@ -2,7 +2,6 @@ package greencity.repository;
 
 import greencity.entity.user.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
@@ -17,10 +16,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * @author Vadym Makitra
      * @author Yurii Fedorko
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM regions r "
-            + "WHERE r.name_en = :nameEn "
-            + "OR r.name_uk = :nameUk")
-    Optional<Region> findRegionByName(@Param("nameEn") String nameEn,
-        @Param("nameUk") String nameUk);
+    Optional<Region> findRegionByEnNameAndUkrName(@Param("EnName") String nameEn,
+        @Param("UkrName") String nameUk);
 }

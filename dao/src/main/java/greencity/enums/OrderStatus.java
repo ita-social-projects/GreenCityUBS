@@ -14,8 +14,8 @@ public enum OrderStatus {
     PAID(9, "PAID");
 
     private static final String CANCELED_STR = "CANCELED";
-    private int statusValue;
-    private String[] possibleStatus;
+    private final int statusValue;
+    private final String[] possibleStatus;
 
     OrderStatus(final int value, String... possibleStatus) {
         this.statusValue = value;

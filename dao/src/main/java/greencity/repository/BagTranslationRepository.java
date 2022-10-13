@@ -42,8 +42,7 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * @return {@link StringBuilder}.
      * @author Yuriy Bahlay.
      */
-    @Query(value = "SELECT b.name FROM BagTranslation AS b WHERE b.bag.id =:bagId")
-    StringBuilder findNameByBagId(@Param("bagId") Integer bagId);
+    StringBuilder findNameByBagId(Integer bagId);
 
     /**
      * This is method which type of bag by english name.
@@ -52,6 +51,5 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * @return {@link StringBuilder}.
      * @author Max Boiarchuk.
      */
-    @Query(value = "SELECT b.nameEng FROM BagTranslation AS b WHERE b.bag.id =:bagId")
-    StringBuilder findNameEngByBagId(@Param("bagId") Integer bagId);
+    StringBuilder findNameEngByBagId(Integer bagId);
 }

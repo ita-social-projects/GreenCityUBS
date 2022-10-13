@@ -101,8 +101,9 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
         userNotification.setOrder(order);
         UserNotification notification = userNotificationRepository.save(userNotification);
-        NotificationParameter notificationParameter =
-            new NotificationParameter("orderNumber", order.getId().toString());
+        NotificationParameter notificationParameter = new NotificationParameter();
+        notificationParameter.setKey("orderNumber");
+        notificationParameter.setValue(order.getId().toString());
         notificationParameter.setUserNotification(notification);
         NotificationParameter createdParameter = notificationParameterRepository.save(notificationParameter);
         notification.setParameters(Collections.singleton(createdParameter));
