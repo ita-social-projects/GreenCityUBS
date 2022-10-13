@@ -14,8 +14,8 @@ import static java.util.Objects.nonNull;
 
 @Repository
 public class UserViolationsTableRepo {
-    private CriteriaBuilder criteriaBuilder;
-    private EntityManager entityManager;
+    private final CriteriaBuilder criteriaBuilder;
+    private final EntityManager entityManager;
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.

@@ -16,14 +16,6 @@ public class NotificationParameter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Constructor.
-     */
-    public NotificationParameter(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
-
     @ManyToOne
     @JoinColumn(name = "notification_id", nullable = false)
     private UserNotification userNotification;

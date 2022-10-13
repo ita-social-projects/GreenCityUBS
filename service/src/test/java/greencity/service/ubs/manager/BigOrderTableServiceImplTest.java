@@ -51,24 +51,6 @@ class BigOrderTableServiceImplTest {
 
         verify(bigOrderTableRepository).findAll(orderPage, orderSearchCriteria, tariffsInfoIds);
     }
-//    @Test
-//    void getOrdersCorrectCalculateWhenAllValueNotNull() {
-//        var pageView = ModelUtils.getBigOrderedTableViewPage();
-//        var bigOrderTableDTOPage = ModelUtils.getBigOrderTableDTOPage();
-//        var bigOrderTable = ModelUtils.getBigOrderTableDto();
-//        var orderPage = getOrderPage();
-//        var orderSearchCriteria = getOrderSearchCriteria();
-//        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
-//        Optional<User> user = Optional.of(ModelUtils.getUser());
-//        List<Long> tariffsInfoIds = new ArrayList<>();
-//        when(userRepository.findByUuid("uuid")).thenReturn(user.get());
-//        when(employeeRepository.findByEmail(user.get().getRecipientEmail())).thenReturn(employee);
-//        when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds)).thenReturn(Page.empty());
-//        when(modelMapper.map(pageView.getContent().get(0), BigOrderTableDTO.class)).thenReturn(bigOrderTable);
-//
-//        assertEquals(bigOrderTableService.getOrders(orderPage, orderSearchCriteria, "uuid").getContent(),
-//            bigOrderTableDTOPage.getContent());
-//    }
 
     @Test
     void changeOrderTableView() {

@@ -129,7 +129,7 @@ class UBSManagementEmployeeServiceImplTest {
         Pageable pageable = PageRequest.of(0, 5, Sort.by(
             Sort.Direction.fromString(SortingOrder.DESC.toString()), "points"));
         when(employeeCriteriaRepository.findAll(employeePage, employeeFilterCriteria))
-            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1l));
+            .thenReturn(new PageImpl<>(List.of(getEmployee()), pageable, 1L));
         employeeService.findAll(employeePage, employeeFilterCriteria);
         verify(employeeCriteriaRepository, times(1))
             .findAll(employeePage, employeeFilterCriteria);
@@ -142,8 +142,8 @@ class UBSManagementEmployeeServiceImplTest {
         Position position = ModelUtils.getPosition();
 
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
+        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
             .thenReturn(true);
@@ -151,8 +151,8 @@ class UBSManagementEmployeeServiceImplTest {
         employeeService.update(dto, null);
 
         verify(repository, times(1)).save(any());
-        verify(repository, times(1)).checkIfEmailUnique(anyString(), anyLong());
-        verify(repository, times(1)).checkIfPhoneNumberUnique(anyString(), anyLong());
+        verify(repository, times(1)).existsByEmailAndId(anyString(), anyLong());
+        verify(repository, times(1)).existsByPhoneNumberAndId(anyString(), anyLong());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
         verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(station.getId(),
             station.getName());
@@ -169,7 +169,7 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeePhoneAlreadyExistsTest() {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
+        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(true);
         assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
     }
 
@@ -177,8 +177,8 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeeEmailAlreadyExistsTest() {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(getEmployee(), null, null);
+        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
+        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(true);
         assertThrows(UnprocessableEntityException.class, () -> employeeService.update(dto, null));
     }
 
@@ -186,8 +186,8 @@ class UBSManagementEmployeeServiceImplTest {
     void updateEmployeePositionNotFoundTest() {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
+        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false, true);
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
     }
@@ -197,8 +197,8 @@ class UBSManagementEmployeeServiceImplTest {
         EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
         Position position = ModelUtils.getPosition();
         when(repository.existsById(any())).thenReturn(true);
-        when(repository.checkIfPhoneNumberUnique(anyString(), anyLong())).thenReturn(null);
-        when(repository.checkIfEmailUnique(anyString(), anyLong())).thenReturn(null);
+        when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
+        when(repository.existsByEmailAndId(anyString(), anyLong())).thenReturn(false);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(false);
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, null));
@@ -209,7 +209,7 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployee();
         employee.setImagePath("Pass");
         System.out.println(employee.getEmployeeStatus());
-        when(repository.findById(1L)).thenReturn(Optional.ofNullable(employee));
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
         employeeService.deleteEmployee(1L);
         verify(repository).findById(1L);
         System.out.println(employee.getEmployeeStatus());

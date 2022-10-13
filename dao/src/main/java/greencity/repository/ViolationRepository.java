@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ViolationRepository extends CrudRepository<Violation, Long> {
@@ -16,17 +15,6 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      * @return optional of {@link Violation} .
      */
     Optional<Violation> findByOrderId(Long orderId);
-
-    /**
-     * Method gets all violations for user by id.
-     *
-     * @author Roman Sulymka
-     */
-    @Query(value = "select * from violations_description_mapping"
-        + "    INNER JOIN orders o on o.id = violations_description_mapping.order_id"
-        + "    INNER JOIN users on o.users_id = users.id"
-        + "    WHERE users.id = :userId", nativeQuery = true)
-    List<Violation> getAllViolationsByUserId(@Param(value = "userId") Long userId);
 
     /**
      * Method gets orderId for user by violationId.

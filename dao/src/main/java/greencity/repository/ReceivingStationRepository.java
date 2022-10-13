@@ -22,11 +22,4 @@ public interface ReceivingStationRepository extends JpaRepository<ReceivingStati
      * @return {@link Boolean}
      */
     boolean existsReceivingStationByIdAndName(Long id, String name);
-
-    /**
-     * Method do find by name field.
-     *
-     * @return {@link ReceivingStation}
-     */
-    ReceivingStation findByName(String name);
 }

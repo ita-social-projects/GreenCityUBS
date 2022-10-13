@@ -165,18 +165,23 @@ public class UserTableRepo {
         Expression<?> sortBy = userRoot.get(RECIPIENT_NAME);
         Optional<Join<User, ?>> first = userRoot.getJoins().stream().findFirst();
         if (nonNull(column)) {
-            if (column.equals(ORDER_DATE)) {
-                if (first.isPresent()) {
-                    sortBy = criteriaBuilder.max(first.get().get(ORDER_DATE));
-                }
-            } else if (column.equals("number_of_orders")) {
-                if (first.isPresent()) {
-                    sortBy = criteriaBuilder.count(first.get().get("user"));
-                }
-            } else if (column.equals("clientName")) {
-                sortBy = userRoot.get(RECIPIENT_NAME);
-            } else {
-                sortBy = userRoot.get(column);
+            switch (column) {
+                case ORDER_DATE:
+                    if (first.isPresent()) {
+                        sortBy = criteriaBuilder.max(first.get().get(ORDER_DATE));
+                    }
+                    break;
+                case "number_of_orders":
+                    if (first.isPresent()) {
+                        sortBy = criteriaBuilder.count(first.get().get("user"));
+                    }
+                    break;
+                case "clientName":
+                    sortBy = userRoot.get(RECIPIENT_NAME);
+                    break;
+                default:
+                    sortBy = userRoot.get(column);
+                    break;
             }
         }
         if (sortingOrder.equals(SortingOrder.DESC)) {

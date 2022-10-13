@@ -17,11 +17,11 @@ import java.util.Map;
 @SpringBootTest(classes = UbsApplication.class)
 class AdditionalBagsInfoRepoTest extends IntegrationTestBase {
     @Autowired
-    AdditionalBagsInfoRepo additionalBagsInfoRepo;
+    BagRepository additionalBagsInfo;
 
     @Test
     void findById() {
         List<Map<String, Object>> expected = new ArrayList<>();
-        Assertions.assertEquals(expected, additionalBagsInfoRepo.getAdditionalBagInfo(1L, "test@mail.com"));
+        Assertions.assertEquals(expected, additionalBagsInfo.getAdditionalBagInfo(1L, "test@mail.com"));
     }
 }

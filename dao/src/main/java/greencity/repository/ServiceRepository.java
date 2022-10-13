@@ -9,30 +9,13 @@ import java.util.Optional;
 
 public interface ServiceRepository extends JpaRepository<Service, Long> {
     /**
-     * Method that return Service by order id and courier id.
-     * 
-     * @param orderId   {@link Long}
-     * @param courierId {@link Long}
-     * @return {@link Service}
-     * @author Vadym Makitra
-     */
-    @Query(nativeQuery = true,
-        value = "select * from service s "
-            + "join tariffs_info cl on s.id = cl.courier_id "
-            + "join orders o on cl.courier_id = o.tariffs_info_id "
-            + "where o.id = :orderId and cl.courier_id = :courierId ")
-    Service findServiceByOrderIdAndCourierId(@Param("orderId") Long orderId, @Param("courierId") Long courierId);
-
-    /**
      * Method that return service by id.
      *
-     * @param serviceId {@link Long}
+     * @param id {@link Long}
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    @Query(nativeQuery = true,
-        value = "select * from service s where s.id = :serviceId")
-    Optional<Service> findServiceById(@Param("serviceId") Long serviceId);
+    Optional<Service> findServiceById(Long id);
 
     /**
      * Method that return full price by courier id.
