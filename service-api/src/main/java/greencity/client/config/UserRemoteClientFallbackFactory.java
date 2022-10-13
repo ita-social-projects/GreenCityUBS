@@ -1,6 +1,5 @@
 package greencity.client.config;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
@@ -9,7 +8,6 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserVO;
-import greencity.exceptions.BadRequestException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
