@@ -16,8 +16,6 @@ import java.util.Locale;
 @Slf4j
 public class LanguageValidator implements ConstraintValidator<ValidLanguage, Locale> {
     private List<String> codes;
-
-    @Autowired
     private LanguageService languageService;
 
     @Override

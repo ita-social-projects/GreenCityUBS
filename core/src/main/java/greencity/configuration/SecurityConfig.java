@@ -76,6 +76,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities."))
             .and()
             .authorizeRequests()
+            .antMatchers(HttpMethod.PUT,
+                ADMIN_EMPL_LINK + "/edit-authorities")
+            .permitAll()
+            .antMatchers(HttpMethod.GET,
+                ADMIN_EMPL_LINK + "/get-all-authorities")
+            .permitAll()
             .antMatchers(HttpMethod.GET,
                 UBS_MANAG_LINK + "/getAllCertificates",
                 UBS_MANAG_LINK + "/bigOrderTable",
