@@ -7,18 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.entity.user.employee.Employee;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -39,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.google.maps.model.AddressComponentType;
@@ -1911,11 +1902,15 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public Set<String> getAllAuthorities(String email) {
+        Employee employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         return userRemoteClient.getAllAuthorities(email);
     }
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+        Employee employee = employeeRepository.findById(dto.getEmployeeId())
+                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto, email);
     }
 }
