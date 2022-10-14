@@ -93,6 +93,6 @@ public interface UserRemoteClient {
      *
      * @param dto {@link UserEmployeeAuthorityDto}
      */
-    @PutMapping("user/edit-authorities")
+    @PutMapping("/user/edit-authorities")
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, @RequestParam(EMAIL) String email);
 }

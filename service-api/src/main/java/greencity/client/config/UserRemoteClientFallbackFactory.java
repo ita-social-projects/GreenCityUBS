@@ -12,6 +12,7 @@ import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,8 +56,8 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public Set<String> getAllAuthorities(String email) {
-                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY,
-                    throwable);
+                log.error(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY, throwable);
+                return Collections.singleton(throwable.getMessage());
             }
 
             @Override

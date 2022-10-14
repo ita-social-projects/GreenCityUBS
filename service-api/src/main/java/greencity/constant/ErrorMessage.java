@@ -43,7 +43,6 @@ public final class ErrorMessage {
     public static final String RECEIVING_STATION_ALREADY_EXISTS = "Receiving station already exists: ";
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
-    public static final String EMPLOYEES_ASSIGNED_STATION = "There are employees assigned to this receiving station.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String PARSING_URL_FAILED = "Can't parse image's url: ";
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
@@ -64,8 +63,6 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_IS_NOT_ASSIGN =
         "Employee service could not be assign for order or this is manager which assign managers";
     public static final String SERVICE_IS_NOT_FOUND_BY_ID = "couldn't found service with id: ";
-    public static final String LANGUAGE_IS_NOT_FOUND_BY_CODE = "couldn't found language with code: ";
-    public static final String LANGUAGE_IS_NOT_FOUND_BY_ID = "couldn't found language with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
@@ -91,7 +88,6 @@ public final class ErrorMessage {
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =
         "Cannot access another user's order cancellation reason";
-    public static final String CANNOT_FIND_LANGUAGE_OF_TRANSLATION = "Cannot find language of translation";
     public static final String USER_WITH_THIS_EMAIL_DOES_NOT_EXIST = "User with this email does not exist: ";
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
