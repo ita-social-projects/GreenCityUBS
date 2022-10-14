@@ -62,7 +62,7 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void getAllAuthorities() {
-        assertThrows(RemoteServerUnavailableException.class, () -> client.getAllAuthorities(USER_EMAIL));
+        assertDoesNotThrow(() -> client.getAllAuthorities(USER_EMAIL));
     }
 
     @Test
