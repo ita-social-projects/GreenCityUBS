@@ -42,5 +42,5 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * @return {@link BagTranslation}.
      * @author Yuriy Bahlay.
      */
-    BagTranslation findBagTranslationByBag_Id(Integer bagId);
+    BagTranslation findBagTranslationByBagId(Integer bagId);
 }

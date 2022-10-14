@@ -336,7 +336,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
         Address address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag_Id(bag.getId());
+            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(bag.getId());
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
             bagInfoDto.setName(bagTranslation.getName());
             bagInfoDto.setNameEng(bagTranslation.getNameEng());
@@ -649,7 +649,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag_Id(entry.getKey());
+            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(entry.getKey());
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
@@ -676,7 +676,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBag_Id(entry.getKey());
+            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(entry.getKey());
             if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
