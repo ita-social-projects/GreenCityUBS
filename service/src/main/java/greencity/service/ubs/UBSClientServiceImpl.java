@@ -1940,7 +1940,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<LocationSummaryDto> getLocationSummary() {
         return regionRepository.findAll().stream()
-            .map(i -> modelMapper.map(i, LocationSummaryDto.class))
+            .map(location -> modelMapper.map(location, LocationSummaryDto.class))
             .collect(Collectors.toList());
     }
 }
