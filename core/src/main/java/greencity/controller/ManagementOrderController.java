@@ -1,5 +1,7 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
@@ -37,7 +39,10 @@ import greencity.service.ubs.manager.BigOrderTableServiceView;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,7 +65,9 @@ import java.util.Set;
 @RestController
 @RequestMapping("/ubs/management")
 @RequiredArgsConstructor
+@Slf4j
 public class ManagementOrderController {
+    // CHECKSTYLE:OFF
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
@@ -975,6 +982,7 @@ public class ManagementOrderController {
      *
      * @author Bahlay Yuriy.
      */
+    @SuppressWarnings("checkstyle:WhitespaceAround")
     @ApiOperation(value = "update order admin page info")
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED),
@@ -986,11 +994,23 @@ public class ManagementOrderController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PatchMapping("/update-order-page-admin-info/{id}")
-    public ResponseEntity<HttpStatus> updatePageAdminInfo(
+    public ResponseEntity<?> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
-        @RequestParam String lang, Principal principal) {
-        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        @RequestParam String lang, Principal principal) throws JsonProcessingException {
+        try {
+            ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (Exception e) {
+            log.error(logStackTrace(e));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ObjectMapper().writeValueAsString(logStackTrace(e)));
+        }
+    }
+
+    private String logStackTrace(Exception e) {
+        return Arrays.stream(e.getStackTrace())
+            .map(StackTraceElement::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     /**
