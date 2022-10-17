@@ -406,5 +406,5 @@ public interface UBSClientService {
      * @return {@link LocationSummaryDto}.
      * @author Max Nazaruk
      */
-    List<LocationSummaryDto> getSummaryLocation();
+    List<LocationSummaryDto> getLocationSummary();
 }

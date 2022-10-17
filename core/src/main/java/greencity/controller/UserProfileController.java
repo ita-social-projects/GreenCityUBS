@@ -99,6 +99,6 @@ public class UserProfileController {
     })
     @GetMapping("/getLocationSummary")
     public ResponseEntity<List<LocationSummaryDto>> getLocationSummary() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getSummaryLocation());
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLocationSummary());
     }
 }
