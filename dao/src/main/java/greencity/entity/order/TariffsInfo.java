@@ -19,7 +19,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees"})
+@ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders"})
 @EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees"})
 public class TariffsInfo {
     @Id

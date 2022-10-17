@@ -16,8 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"tariffsInfo", "orders"})
-@ToString(exclude = {"tariffsInfo", "orders"})
+@EqualsAndHashCode(exclude = {"tariffsInfo"})
 @Table(name = "receiving_stations")
 public class ReceivingStation {
     @Id
