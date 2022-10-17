@@ -137,7 +137,7 @@ public class OrderController {
     public ResponseEntity<FondyOrderResponse> processOrder(
         @ApiIgnore @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
-        @Valid @PathVariable("id") Optional<Long> id) {
+        @Valid @PathVariable(value = "id", required = false) Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
             if (orderDetailStatusDto.getPaymentStatus().equals("PAID")) {
