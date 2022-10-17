@@ -67,7 +67,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class ManagementOrderController {
-    // CHECKSTYLE:OFF
     private final UBSManagementService ubsManagementService;
     private final CertificateService certificateService;
     private final CoordinateService coordinateService;
@@ -994,23 +993,11 @@ public class ManagementOrderController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PatchMapping("/update-order-page-admin-info/{id}")
-    public ResponseEntity<?> updatePageAdminInfo(
+    public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
         @RequestParam String lang, Principal principal) throws JsonProcessingException {
-        try {
-            ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (Exception e) {
-            log.error(logStackTrace(e));
-            return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ObjectMapper().writeValueAsString(logStackTrace(e)));
-        }
-    }
-
-    private String logStackTrace(Exception e) {
-        return Arrays.stream(e.getStackTrace())
-            .map(StackTraceElement::toString)
-            .collect(Collectors.joining("\n"));
+        ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
