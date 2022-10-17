@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
@@ -1017,7 +1016,7 @@ public class ManagementOrderController {
     @PatchMapping("/update-order-page-admin-info/{id}")
     public ResponseEntity<HttpStatus> updatePageAdminInfo(
         @RequestBody @Valid UpdateOrderPageAdminDto updateOrderPageDto, @PathVariable(name = "id") Long orderId,
-        @RequestParam String lang, Principal principal) throws JsonProcessingException {
+        @RequestParam String lang, Principal principal) {
         ubsManagementService.updateOrderAdminPageInfo(updateOrderPageDto, orderId, lang, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
