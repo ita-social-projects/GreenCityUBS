@@ -908,7 +908,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusAdjustmentDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -981,7 +981,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1000,7 +1000,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1018,7 +1018,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusNotTakenOutDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1036,7 +1036,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusOnThe_RouteDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1055,7 +1055,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusDoneDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1075,7 +1075,7 @@ class UBSManagementServiceImplTest {
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
@@ -1094,7 +1094,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusCanseledDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);
         when(bagTranslationRepository.findBagTranslationByBagId(1)).thenReturn(getBagTranslation());
-        when(updateOrderRepository.updateExporter(anyInt(), anyLong(), anyLong())).thenReturn(true);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
             .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
