@@ -1903,14 +1903,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         return userRemoteClient.getAllAuthorities(email);
     }
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto, email);
     }
 }
