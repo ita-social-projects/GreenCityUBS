@@ -556,37 +556,27 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                try {
-                    if (Boolean.TRUE
-                        .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                        log.info("IF_RECORD_EXIST{}",
-                            updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()));
-                        updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                        updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
-                    }
-                    updateOrderRepository
-                        .updateConfirm(entry.getValue(), orderId,
-                            entry.getKey().longValue());
-                } catch (Exception ex) {
-                    log.error(logStackTrace(ex));
+                if (Boolean.TRUE
+                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
+                updateOrderRepository
+                    .updateConfirm(entry.getValue(), orderId,
+                        entry.getKey().longValue());
             }
         }
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                try {
-                    if (Boolean.TRUE
-                        .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                        updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                        updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
-                    }
-                    updateOrderRepository
-                        .updateExporter(entry.getValue(), orderId,
-                            entry.getKey().longValue());
-                } catch (Exception ex) {
-                    log.error(logStackTrace(ex));
+                if (Boolean.TRUE
+                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                 }
+                updateOrderRepository
+                    .updateExporter(entry.getValue(), orderId,
+                        entry.getKey().longValue());
             }
         }
 
@@ -616,12 +606,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (wasPaid + discount == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
         }
-    }
-
-    private String logStackTrace(Exception e) {
-        return Arrays.stream(e.getStackTrace())
-            .map(StackTraceElement::toString)
-            .collect(Collectors.joining("\n"));
     }
 
     private void recalculateCertificates(long amount, Order order) {
