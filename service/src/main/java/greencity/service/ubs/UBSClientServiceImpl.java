@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,7 +18,7 @@ import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.user.employee.Employee;
-import lombok.Data;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.json.JSONObject;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
-
 import greencity.client.FondyClient;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
@@ -53,6 +51,8 @@ import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.FondyOrderResponse;
@@ -82,7 +82,6 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.enums.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
 import greencity.entity.order.BagTranslation;
@@ -98,20 +97,105 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.AddressStatus;
+import greencity.enums.BotType;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.*;
+import greencity.repository.AddressRepository;
+import greencity.repository.BagRepository;
+import greencity.repository.BagTranslationRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.EventRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderPaymentStatusTranslationRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.OrderStatusTranslationRepository;
+import greencity.repository.OrdersForUserRepository;
+import greencity.repository.PaymentRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSuserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import javax.annotation.Nullable;
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
+import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PAYMENT_STATUS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BIG_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TO_MUCH_BIG_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 
@@ -121,6 +205,14 @@ import static java.util.stream.Collectors.joining;
 @Service
 @Data
 public class UBSClientServiceImpl implements UBSClientService {
+    private static final Integer BAG_CAPACITY = 120;
+    private static final String FAILED_STATUS = "failure";
+    private static final String APPROVED_STATUS = "approved";
+    private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
+    private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
+    private static final String VIBER_PART_3_OF_LINK = "&context=";
+    private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
@@ -140,9 +232,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GoogleApiService googleApiService;
-
+    private final RegionRepository regionRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
+    private final EventService eventService;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -164,15 +257,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String resultUrlForPersonalCabinetOfUser;
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
-    private static final Integer BAG_CAPACITY = 120;
-    private final EventService eventService;
-    private static final String FAILED_STATUS = "failure";
-    private static final String APPROVED_STATUS = "approved";
-    private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
-    private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
-    private static final String VIBER_PART_3_OF_LINK = "&context=";
-    private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
-    private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
 
     @Override
     @Transactional
@@ -1911,5 +1995,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto, email);
+    }
+
+    @Override
+    public List<LocationSummaryDto> getLocationSummary() {
+        return regionRepository.findAll().stream()
+            .map(location -> modelMapper.map(location, LocationSummaryDto.class))
+            .collect(Collectors.toList());
     }
 }
