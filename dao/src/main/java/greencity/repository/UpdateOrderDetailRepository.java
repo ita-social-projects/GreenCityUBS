@@ -15,9 +15,10 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET EXPORTED_QUANTITY = :valueExported "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    Boolean updateExporter(Integer valueExported, Long orderId, Long bagId);
+    void updateExporter(Integer valueExported, Long orderId, Long bagId);
 
     /**
      * Method for update Amount value.
@@ -26,9 +27,10 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET AMOUNT = :valueAmount "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    Boolean updateAmount(Integer valueAmount, Long orderId, Long bagId);
+    void updateAmount(Integer valueAmount, Long orderId, Long bagId);
 
     /**
      * Method for update Confirm value.
@@ -50,7 +52,7 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @author Orest Mahdziak
      */
     @Query(value = "INSERT INTO ORDER_BAG_MAPPING (ORDER_ID,BAG_ID) VALUES (:orderId,:bagId)", nativeQuery = true)
-    Boolean insertNewRecord(Long orderId, Long bagId);
+    void insertNewRecord(Long orderId, Long bagId);
 
     /**
      * Method for getting Confirm waste value.
