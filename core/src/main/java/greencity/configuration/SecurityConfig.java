@@ -87,6 +87,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/{id}/ordersAll",
                 UBS_LINK + "/order_history/{id}",
                 ADMIN_EMPL_LINK + "/**",
+                ADMIN_LINK + "/notification/get-all",
+                ADMIN_LINK + "/notification/{id}",
                 SUPER_ADMIN_LINK + "/get-all-receiving-station",
                 SUPER_ADMIN_LINK + "/getLocations",
                 SUPER_ADMIN_LINK + "/getCouriers",
@@ -121,6 +123,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/blockOrders",
                 UBS_MANAG_LINK + "/unblockOrders",
                 ADMIN_EMPL_LINK + "/**",
+                ADMIN_LINK + "/notification/update",
                 SUPER_ADMIN_LINK + "/update-courier",
                 SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/**")
@@ -147,8 +150,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
-                ADMIN_LINK + "/notification/get-all",
-                ADMIN_LINK + "/notification/{id}",
                 ADMIN_LINK + "/**",
                 "/accountinfo",
                 "/removewebhook",
@@ -168,7 +169,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/update-recipients-data",
-                ADMIN_LINK + "/notification/update",
                 ADMIN_LINK + "/**",
                 "/notifications/updateTemplateForOTHER",
                 "/notifications/updateTemplateForSITE")
