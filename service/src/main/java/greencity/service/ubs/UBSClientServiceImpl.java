@@ -18,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -140,9 +141,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GoogleApiService googleApiService;
-
+    private final EventService eventService;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
+    private final RegionRepository regionRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -165,7 +167,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
     private static final Integer BAG_CAPACITY = 120;
-    private final EventService eventService;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
@@ -1911,5 +1912,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto, email);
+    }
+
+    @Override
+    public List<LocationSummaryDto> getLocationSummary() {
+        return regionRepository.findAll().stream()
+            .map(location -> modelMapper.map(location, LocationSummaryDto.class))
+            .collect(Collectors.toList());
     }
 }
