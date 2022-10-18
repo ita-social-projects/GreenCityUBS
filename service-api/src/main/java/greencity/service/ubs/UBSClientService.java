@@ -7,6 +7,7 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.FondyPaymentResponse;
@@ -398,4 +399,12 @@ public interface UBSClientService {
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email);
+
+    /**
+     * Methods returns all locations.
+     *
+     * @return {@link LocationSummaryDto}.
+     * @author Max Nazaruk
+     */
+    List<LocationSummaryDto> getLocationSummary();
 }
