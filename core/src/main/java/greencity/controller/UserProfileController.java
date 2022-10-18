@@ -2,20 +2,21 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.location.LocationSummaryDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.validation.Valid;
 
 @RestController
 @Validated
@@ -26,7 +27,7 @@ public class UserProfileController {
 
     /**
      * Controller returns user`s data or update {@link UserProfileDto} date.
-     * 
+     *
      * @param userUuid             {@link UserProfileDto} id.
      * @param userProfileUpdateDto {@link UserProfileDto}
      * @return {@link UserProfileDto}.
@@ -47,7 +48,6 @@ public class UserProfileController {
 
     /**
      * Controller returns user's profile ..
-     *
      *
      * @author Liubomyr Bratakh
      */
@@ -83,5 +83,22 @@ public class UserProfileController {
         @RequestParam Long id) {
         ubsClientService.markUserAsDeactivated(id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller return info about all locations.
+     *
+     * @return {@link ResponseEntity} list of locations.
+     * @author Max Nazaruk.
+     */
+    @ApiOperation(value = "Get info about cities in each region")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationSummaryDto.class),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @GetMapping("/location-summary")
+    public ResponseEntity<List<LocationSummaryDto>> getLocationSummary() {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLocationSummary());
     }
 }
