@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.google.maps.model.AddressComponentType;
@@ -1904,7 +1903,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        return userRemoteClient.getAllAuthorities(email);
+        return userRemoteClient.getAllAuthorities(employee.getEmail());
     }
 
     @Override
