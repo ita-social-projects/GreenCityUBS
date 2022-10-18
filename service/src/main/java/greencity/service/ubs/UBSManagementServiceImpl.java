@@ -559,6 +559,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 try {
                     if (Boolean.TRUE
                         .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                        log.info("IF_RECORD_EXIST{}",
+                            updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()));
                         updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
                         updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
                     }
