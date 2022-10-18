@@ -51,6 +51,7 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "INSERT INTO ORDER_BAG_MAPPING (ORDER_ID,BAG_ID) VALUES (:orderId,:bagId)", nativeQuery = true)
     void insertNewRecord(Long orderId, Long bagId);
 
