@@ -169,7 +169,6 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 
-
 /**
  * Implementation of {@link UBSClientService}.
  */
