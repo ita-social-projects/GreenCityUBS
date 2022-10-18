@@ -36,6 +36,7 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
@@ -65,6 +66,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
@@ -554,27 +556,35 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
         if (nonNull(confirmed)) {
             for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
-                if (Boolean.TRUE
-                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                try {
+                    if (Boolean.TRUE
+                        .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                        updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                        updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                    }
+                    updateOrderRepository
+                        .updateConfirm(entry.getValue(), orderId,
+                            entry.getKey().longValue());
+                } catch (Exception ex) {
+                    log.error(logStackTrace(ex));
                 }
-                updateOrderRepository
-                    .updateConfirm(entry.getValue(), orderId,
-                        entry.getKey().longValue());
             }
         }
 
         if (nonNull(exported)) {
             for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
-                if (Boolean.TRUE
-                    .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
-                    updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
-                    updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                try {
+                    if (Boolean.TRUE
+                        .equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) <= 0)) {
+                        updateOrderRepository.insertNewRecord(orderId, entry.getKey().longValue());
+                        updateOrderRepository.updateAmount(0, orderId, entry.getKey().longValue());
+                    }
+                    updateOrderRepository
+                        .updateExporter(entry.getValue(), orderId,
+                            entry.getKey().longValue());
+                } catch (Exception ex) {
+                    log.error(logStackTrace(ex));
                 }
-                updateOrderRepository
-                    .updateExporter(entry.getValue(), orderId,
-                        entry.getKey().longValue());
             }
         }
 
@@ -604,6 +614,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (wasPaid + discount == 0) {
             orderRepository.updateOrderPaymentStatus(orderId, OrderPaymentStatus.UNPAID.name());
         }
+    }
+
+    private String logStackTrace(Exception e) {
+        return Arrays.stream(e.getStackTrace())
+            .map(StackTraceElement::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     private void recalculateCertificates(long amount, Order order) {
