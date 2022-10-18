@@ -39,19 +39,8 @@ public interface BagTranslationRepository extends JpaRepository<BagTranslation, 
      * This is method which type of bag.
      *
      * @param bagId {@link Integer}.
-     * @return {@link StringBuilder}.
+     * @return {@link BagTranslation}.
      * @author Yuriy Bahlay.
      */
-    @Query(value = "SELECT b.name FROM BagTranslation AS b WHERE b.bag.id =:bagId")
-    StringBuilder findNameByBagId(@Param("bagId") Integer bagId);
-
-    /**
-     * This is method which type of bag by english name.
-     *
-     * @param bagId {@link Integer}.
-     * @return {@link StringBuilder}.
-     * @author Max Boiarchuk.
-     */
-    @Query(value = "SELECT b.nameEng FROM BagTranslation AS b WHERE b.bag.id =:bagId")
-    StringBuilder findNameEngByBagId(@Param("bagId") Integer bagId);
+    BagTranslation findBagTranslationByBagId(Integer bagId);
 }

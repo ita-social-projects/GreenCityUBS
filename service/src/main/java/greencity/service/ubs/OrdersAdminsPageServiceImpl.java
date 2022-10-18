@@ -291,7 +291,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> callerList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(2L);
+        List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(2L);
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
@@ -300,7 +300,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> logicManList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(3L);
+        List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(3L);
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
@@ -309,7 +309,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> navigatorList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(4L);
+        List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(4L);
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));
@@ -318,7 +318,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     }
 
     private List<OptionForColumnDTO> driverList() {
-        List<Employee> employeeList = employeeRepository.getAllEmployeeByPositionId(5L);
+        List<Employee> employeeList = employeeRepository.findAllByEmployeePositionId(5L);
         List<OptionForColumnDTO> optionForColumnDTOS = new ArrayList<>();
         for (Employee e : employeeList) {
             optionForColumnDTOS.add(modelMapper.map(e, OptionForColumnDTO.class));

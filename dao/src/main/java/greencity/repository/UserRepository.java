@@ -50,28 +50,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return number of {@link User} violations.
      */
 
-    @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS \n"
-        + "   (SELECT TRUE FROM violations_description_mapping as v join orders as o\n"
-        + " on v.order_id = o.id\n"
-        + "        WHERE v.order_id = :orderId and o.users_id = :userId)\n"
-        + "        THEN 1 ELSE 0 END AS INT);")
+    @Query(nativeQuery = true, value = "SELECT CAST(CASE WHEN EXISTS "
+        + " (SELECT TRUE FROM violations_description_mapping as v join orders as o "
+        + " on v.order_id = o.id "
+        + " WHERE v.order_id = :orderId and o.users_id = :userId) "
+        + " THEN 1 ELSE 0 END AS INT);")
     int checkIfUserHasViolationForCurrentOrder(Long userId, Long orderId);
-
-    /**
-     * Method that count orders.
-     *
-     * @author Struk Nazariy
-     */
-    @Query(nativeQuery = true, value = "select count(*) from orders")
-    int orderCounter();
-
-    /**
-     * Method that count orders.
-     *
-     * @author Struk Nazariy
-     */
-    @Query(nativeQuery = true, value = "select count(*) from orders")
-    int orderCounterForSorting();
 
     /**
      * Method that count orders.
@@ -83,17 +67,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         + "JOIN users ON o.users_id = users.id "
         + "WHERE o.id = :orderId")
     Optional<User> findUserByOrderId(Long orderId);
-
-    /**
-     * Finds list of User who have not paid of the order within three days.
-     *
-     * @param localDate - date when the user made an order.
-     * @return a {@link List} of {@link User} - which need to send a message.
-     */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM users u INNER JOIN orders o ON u.id = o.users_id "
-            + "WHERE CAST(o.order_date AS DATE) < :localDate AND o.order_status LIKE 'FORMED'")
-    List<User> getAllUsersWhoHaveNotPaid(LocalDate localDate);
 
     /**
      * Finds list of User who have no orders after {@param localDate}.
@@ -128,7 +101,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<Long> getAllUsersByTariffsInfoId(Long tariffsInfoId);
 
     /**
-     * Return list of the inactive users depends of time limits.
+     * Return list of the inactive users depends on time limits.
      */
     @Query(nativeQuery = true,
         value = "SELECT * FROM users "

@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -35,25 +34,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @return {@link TariffsInfo}
      * @author Yurii Fedorko
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info t JOIN orders o ON t.id = o.tariffs_info_id "
-            + "where o.id = :order_id")
-    TariffsInfo findTariffsInfoByOrder(@Param("order_id") Long orderId);
-
-    /**
-     * Method for searching existing tariff by courier id and specified location
-     * id's.
-     *
-     * @param courierId   - id of courier
-     * @param locationIds - list of location id's to check
-     * @return list of {@link TariffsInfo} where courier works on card contains
-     *         specified locations
-     */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info as t INNER JOIN tariffs_locations as m ON t.id = m.tariffs_info_id "
-            + "WHERE courier_id = :courierId AND m.location_id IN :locationIds")
-    List<TariffsInfo> findAllByCourierAndAndTariffLocations(@Param("courierId") Long courierId,
-        @Param("locationIds") List<Long> locationIds);
+    TariffsInfo findTariffsInfoByOrdersId(Long orderId);
 
     /**
      * Method for getting TariffInfo by order's id.
@@ -61,7 +42,5 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @param orderId - id of order
      * @return - Optional of {@link TariffsInfo} if order with such id exists in DB
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM tariffs_info t INNER JOIN orders o ON t.id = o.tariffs_info_id WHERE o.id = :orderId")
-    Optional<TariffsInfo> findByOrderId(@Param("orderId") Long orderId);
+    Optional<TariffsInfo> findByOrdersId(@Param("orderId") Long orderId);
 }

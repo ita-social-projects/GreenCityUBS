@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -66,7 +65,6 @@ public class NotificationController {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @GetMapping
     @ApiPageableWithLocale
     public ResponseEntity<PageableDto<NotificationShortDto>> getNotificationsForCurrentUser(
@@ -90,7 +88,6 @@ public class NotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @GetMapping(value = "quantityUnreadenNotifications")
     public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
         @ApiIgnore @CurrentUserUuid String userUuid) {

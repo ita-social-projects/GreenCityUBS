@@ -169,6 +169,7 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 
+
 /**
  * Implementation of {@link UBSClientService}.
  */
@@ -1686,7 +1687,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order, int sumToPay) {
         if (sumToPay != 0 && dto.getCertificates() != null) {
             Set<Certificate> certificates =
-                certificateRepository.getAllByListId(new ArrayList<>(dto.getCertificates()));
+                certificateRepository.findAllByCodeAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                    CertificateStatus.ACTIVE);
             if (certificates.isEmpty()) {
                 throw new NotFoundException(ErrorMessage.CERTIFICATE_NOT_FOUND);
             }
@@ -1918,7 +1920,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (lastOrder.isPresent()) {
             orderCourierPopUpDto.setOrderIsPresent(true);
             orderCourierPopUpDto.setTariffsForLocationDto(
-                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrder(lastOrder.get().getId()),
+                modelMapper.map(tariffsInfoRepository.findTariffsInfoByOrdersId(lastOrder.get().getId()),
                     TariffsForLocationDto.class));
         } else {
             orderCourierPopUpDto.setOrderIsPresent(false);
@@ -1944,7 +1946,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public TariffsForLocationDto getTariffForOrder(Long id) {
-        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrderId(id);
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findByOrdersId(id);
         if (tariffsInfo.isPresent()) {
             return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
         } else {

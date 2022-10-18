@@ -4,7 +4,6 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -61,7 +60,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *
      * @return list of {@link Address}.
      */
-    @Query("select a from Address a where a.user.id = :userId")
     List<Address> findAllByUserId(Long userId);
 
     /**
@@ -72,6 +70,6 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     @Query(value = "SELECT * FROM orders as o "
         + " JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
         + " JOIN address as addr ON addr.id = ubs.address_id "
-        + " WHERE o.id = :orderid", nativeQuery = true)
-    Address getAddressByOrderId(@Param("orderid") Long orderId);
+        + " WHERE o.id = :orderId", nativeQuery = true)
+    Address getAddressByOrderId(Long orderId);
 }
