@@ -68,6 +68,6 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void updateEmployeesAuthorities() {
         UserEmployeeAuthorityDto dto = UserEmployeeAuthorityDto.builder().build();
-        assertDoesNotThrow(() -> client.updateEmployeesAuthorities(dto, USER_EMAIL));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeesAuthorities(dto, USER_EMAIL));
     }
 }
