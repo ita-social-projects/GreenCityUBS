@@ -1,29 +1,113 @@
 package greencity;
 
 import com.google.common.collect.Lists;
-import com.google.maps.model.*;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
-import greencity.dto.*;
+import greencity.dto.AddNewTariffDto;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.*;
+import greencity.dto.bag.AdditionalBagInfoDto;
+import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagOrderDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.courier.*;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.GetCourierTranslationsDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.*;
-import greencity.dto.location.*;
-import greencity.dto.notification.*;
-import greencity.dto.order.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.employee.UpdateResponsibleEmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.CoordinatesDto;
+import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
+import greencity.dto.location.LocationSummaryDto;
+import greencity.dto.location.LocationToCityDto;
+import greencity.dto.location.LocationTranslationDto;
+import greencity.dto.location.LocationsDto;
+import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.SenderInfoDto;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.AssignEmployeesForOrderDto;
+import greencity.dto.order.AssignForOrderEmployee;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.EditPriceOfOrder;
+import greencity.dto.order.EmployeeOrderPositionDTO;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.SenderLocation;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderDetailDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.*;
+import greencity.dto.payment.ManualPaymentRequestDto;
+import greencity.dto.payment.OverpaymentInfoRequestDto;
+import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.*;
-import greencity.dto.tariff.*;
-import greencity.dto.user.*;
+import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceTranslationDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -31,29 +115,71 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.BagTranslation;
+import greencity.entity.order.BigOrderTableViews;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Courier;
+import greencity.entity.order.CourierTranslation;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
+import greencity.entity.order.TariffLocation;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
-import greencity.entity.user.*;
+import greencity.entity.user.Location;
+import greencity.entity.user.Region;
+import greencity.entity.user.User;
+import greencity.entity.user.Violation;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.util.Bot;
-import org.springframework.data.domain.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class ModelUtils {
 
@@ -90,9 +216,6 @@ public class ModelUtils {
     public static final Pageable TEST_PAGEABLE_NOTIFICATION_TEMPLATE = PageRequest.of(0, 5, Sort.by("id").descending());
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
     public static final Pageable TEST_PAGEABLE = PageRequest.of(0, 5, Sort.by("notificationTime").descending());
-    public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
-    public static final Page<UserNotification> TEST_PAGE =
-        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final NotificationShortDto TEST_NOTIFICATION_SHORT_DTO = createNotificationShortDto();
     public static final List<NotificationShortDto> TEST_NOTIFICATION_SHORT_DTO_LIST =
         List.of(TEST_NOTIFICATION_SHORT_DTO);
@@ -104,6 +227,9 @@ public class ModelUtils {
     public static final Position TEST_POSITION = createPosition();
     public static final Employee TEST_EMPLOYEE = createEmployee();
     public static final User TEST_USER = createUser();
+    public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
+    public static final Page<UserNotification> TEST_PAGE =
+        new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
     public static final AdditionalBagInfoDto TEST_ADDITIONAL_BAG_INFO_DTO = createAdditionalBagInfoDto();
     public static final List<AdditionalBagInfoDto> TEST_ADDITIONAL_BAG_INFO_DTO_LIST = createAdditionalBagInfoDtoList();
     public static final Map<String, Object> TEST_MAP_ADDITIONAL_BAG = createMap();
@@ -112,14 +238,14 @@ public class ModelUtils {
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final Page<NotificationTemplate> TEST_NOTIFICATION_TEMPLATE_PAGE = getNotificationTemplatePageable();
-    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
-    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
-        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
     public static final NotificationTemplate TEST_TEMPLATE = getNotificationTemplate();
-    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final NotificationSchedule NOTIFICATION_SCHEDULE = new NotificationSchedule();
     public static final NotificationScheduleDto NOTIFICATION_SCHEDULE_DTO =
         new NotificationScheduleDto().setCron("0 0 18 * * ?");
+    public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = getNotificationTemplateDto();
+    public static final List<NotificationTemplateDto> TEST_NOTIFICATION_TEMPLATE_LIST =
+        List.of(TEST_NOTIFICATION_TEMPLATE_DTO);
+    public static final PageableDto<NotificationTemplateDto> TEST_TEMPLATE_DTO = templateDtoPageableDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
 
     public static CourierUpdateDto getUpdateCourierDto() {
@@ -1979,6 +2105,29 @@ public class ModelUtils {
             .build();
     }
 
+    public static List<Location> getLocationForSummary() {
+        return List.of(Location.builder()
+            .locationStatus(LocationStatus.ACTIVE)
+            .nameEn("Kyiv")
+            .nameUk("Київ")
+            .coordinates(Coordinates.builder()
+                .longitude(3.21d)
+                .latitude(5.43d).build())
+            .region(getRegionForMapper())
+            .id(1L)
+            .build(),
+            Location.builder()
+                .locationStatus(LocationStatus.ACTIVE)
+                .nameEn("Bucha")
+                .nameUk("Буча")
+                .coordinates(Coordinates.builder()
+                    .longitude(4.32d)
+                    .latitude(4.21d).build())
+                .region(getRegionForMapper())
+                .id(11L)
+                .build());
+    }
+
     public static Courier getCourier() {
         return Courier.builder()
             .id(1L)
@@ -2582,11 +2731,46 @@ public class ModelUtils {
             .build();
     }
 
+    public static Region getRegionForSummary() {
+        return Region.builder()
+            .id(1L)
+            .ukrName("Київська область")
+            .enName("Kyiv region")
+            .locations(getLocationForSummary())
+            .build();
+    }
+
     public static LocationInfoDto getInfoAboutLocationDto() {
         return LocationInfoDto.builder()
             .regionId(1L)
             .regionTranslationDtos(getRegionTranslationsDto())
             .locationsDto(getLocationsDto()).build();
+    }
+
+    public static List<LocationToCityDto> getCitiesInUa() {
+        return List.of(
+            LocationToCityDto.builder().cityName("Київ").cityId(1L)
+                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
+            LocationToCityDto.builder().cityName("Буча").cityId(11L)
+                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
+    }
+
+    public static List<LocationToCityDto> getCitiesInEn() {
+        return List.of(
+            LocationToCityDto.builder().cityName("Kyiv").cityId(1L)
+                .coordinates(CoordinatesDto.builder().longitude(3.21d).latitude(5.43d).build()).build(),
+            LocationToCityDto.builder().cityName("Bucha").cityId(11L)
+                .coordinates(CoordinatesDto.builder().longitude(4.32d).latitude(4.21d).build()).build());
+    }
+
+    public static LocationSummaryDto getInfoAboutLocationSummaryDto() {
+        return LocationSummaryDto.builder()
+            .regionId(1L)
+            .nameUa("Київська область")
+            .nameEn("Kyiv region")
+            .citiesEn(getCitiesInEn())
+            .citiesUa(getCitiesInUa())
+            .build();
     }
 
     public static List<LocationsDto> getLocationsDto() {

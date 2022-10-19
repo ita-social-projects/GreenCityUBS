@@ -150,6 +150,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
+                ADMIN_LINK + "/notification/get-all",
+                ADMIN_LINK + "/notification/{id}",
                 ADMIN_LINK + "/**",
                 "/accountinfo",
                 "/removewebhook",
@@ -169,6 +171,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/update-recipients-data",
+                ADMIN_LINK + "/notification/update",
                 ADMIN_LINK + "/**",
                 "/notifications/updateTemplateForOTHER",
                 "/notifications/updateTemplateForSITE")

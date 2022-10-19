@@ -7,18 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +18,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.LocationSummaryDto;
+import greencity.entity.user.employee.Employee;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -150,9 +141,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final GoogleApiService googleApiService;
-
+    private final EventService eventService;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
+    private final RegionRepository regionRepository;
     @Lazy
     @Autowired
     private UBSManagementService ubsManagementService;
@@ -175,7 +167,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Value("${greencity.redirect.result-url-fondy}")
     private String resultUrlFondy;
     private static final Integer BAG_CAPACITY = 120;
-    private final EventService eventService;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "t.me/";
@@ -1911,11 +1902,22 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public Set<String> getAllAuthorities(String email) {
-        return userRemoteClient.getAllAuthorities(email);
+        Employee employee = employeeRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
+        return userRemoteClient.getAllAuthorities(employee.getEmail());
     }
 
     @Override
     public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
+        Employee employee = employeeRepository.findById(dto.getEmployeeId())
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
         userRemoteClient.updateEmployeesAuthorities(dto, email);
+    }
+
+    @Override
+    public List<LocationSummaryDto> getLocationSummary() {
+        return regionRepository.findAll().stream()
+            .map(location -> modelMapper.map(location, LocationSummaryDto.class))
+            .collect(Collectors.toList());
     }
 }

@@ -36,6 +36,7 @@ import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
@@ -65,6 +66,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
@@ -1623,6 +1625,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override
+    @Transactional
     public void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageDto, Long orderId, String lang,
         String email) {
         Order order = orderRepository.findById(orderId)

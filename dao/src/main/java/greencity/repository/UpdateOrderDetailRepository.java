@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.order.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -14,9 +15,10 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET EXPORTED_QUANTITY = :valueExported "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    Boolean updateExporter(Integer valueExported, Long orderId, Long bagId);
+    void updateExporter(Integer valueExported, Long orderId, Long bagId);
 
     /**
      * Method for update Amount value.
@@ -25,9 +27,10 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET AMOUNT = :valueAmount "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    Boolean updateAmount(Integer valueAmount, Long orderId, Long bagId);
+    void updateAmount(Integer valueAmount, Long orderId, Long bagId);
 
     /**
      * Method for update Confirm value.
@@ -36,9 +39,10 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "UPDATE ORDER_BAG_MAPPING SET CONFIRMED_QUANTITY = :valueConfirmed "
         + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
-    Boolean updateConfirm(Integer valueConfirmed, Long orderId, Long bagId);
+    void updateConfirm(Integer valueConfirmed, Long orderId, Long bagId);
 
     /**
      * Method for INSERT new record for ability to update value in next steps.
@@ -47,8 +51,9 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
      * @param bagId   bag id {@link Long}
      * @author Orest Mahdziak
      */
+    @Modifying
     @Query(value = "INSERT INTO ORDER_BAG_MAPPING (ORDER_ID,BAG_ID) VALUES (:orderId,:bagId)", nativeQuery = true)
-    Boolean insertNewRecord(Long orderId, Long bagId);
+    void insertNewRecord(Long orderId, Long bagId);
 
     /**
      * Method for getting Confirm waste value.

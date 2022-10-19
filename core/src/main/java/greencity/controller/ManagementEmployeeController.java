@@ -263,7 +263,6 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @GetMapping("/get-all-authorities")
     public ResponseEntity<Object> getAllAuthorities(@RequestParam String email) {
         Set<String> authorities = ubsClientService.getAllAuthorities(email);
