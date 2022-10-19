@@ -36,7 +36,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all")
+    @GetMapping("/get-all-templates")
     @ApiPageable
     public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -56,7 +56,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PutMapping("/update")
+    @PutMapping("/update-template")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
         @RequestBody @Valid NotificationTemplateDto notificationTemplateDto) {
         notificationTemplateService.update(notificationTemplateDto);
@@ -76,7 +76,7 @@ public class ManagementNotificationController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/{id}")
+    @GetMapping("/get-template/{id}")
     public ResponseEntity<NotificationTemplateDto> getNotificationTemplate(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findById(id));
