@@ -133,7 +133,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
-                    SUPER_ADMIN_LINK + "/setLimitDescription/{courierId}")
+                SUPER_ADMIN_LINK + "/setLimitDescription/{courierId}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PATCH,
                 UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
