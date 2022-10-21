@@ -3652,4 +3652,17 @@ public class ModelUtils {
             .authorities(getAllAuthorities())
             .build();
     }
+
+    public static NotificationScheduleDto getInfoAboutNotificationScheduleDto() {
+        return NotificationScheduleDto.builder()
+            .cron("test")
+            .build();
+    }
+
+    public static NotificationSchedule getInfoAboutNotificationSchedule() {
+        return NotificationSchedule.builder()
+            .notificationType(NotificationType.TEST)
+            .cron("test")
+            .build();
+    }
 }

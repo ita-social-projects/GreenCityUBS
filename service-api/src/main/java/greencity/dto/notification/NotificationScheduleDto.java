@@ -1,14 +1,18 @@
 package greencity.dto.notification;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotEmpty;
 
+@Builder
 @Data
 @Accessors(chain = true)
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationScheduleDto {
     @NotEmpty
     private String cron;
