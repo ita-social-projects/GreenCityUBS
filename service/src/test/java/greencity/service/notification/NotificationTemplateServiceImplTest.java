@@ -40,7 +40,7 @@ class NotificationTemplateServiceImplTest {
         NotificationTemplate template = ModelUtils.TEST_TEMPLATE;
         NotificationSchedule notificationSchedule = ModelUtils.NOTIFICATION_SCHEDULE
             .setNotificationType(NotificationType.UNPAID_ORDER);
-        when(scheduleRepo.getOne(NotificationType.UNPAID_ORDER)).thenReturn(notificationSchedule);
+        when(scheduleRepo.findNotificationScheduleByNotificationType(NotificationType.UNPAID_ORDER)).thenReturn(notificationSchedule);
         when(templateRepository.findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE)).thenReturn(
             ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
         when(modelMapper.map(template, NotificationTemplateDto.class))
