@@ -97,8 +97,8 @@ public class UserProfileController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @GetMapping("/location-summary")
-    public ResponseEntity<List<LocationSummaryDto>> getLocationSummary() {
+    @GetMapping("/locations-summary")
+    public ResponseEntity<List<LocationSummaryDto>> getLocationsSummary() {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getLocationSummary());
     }
 }

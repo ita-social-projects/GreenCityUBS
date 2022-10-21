@@ -10,8 +10,10 @@ import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +57,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
             .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class)
-                .setSchedule(getScheduleDto(notificationTemplate)))
+                .setSchedule(getScheduleDto(notificationTemplate.getNotificationType())))
             .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
@@ -80,8 +82,15 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND));
     }
 
-    private NotificationScheduleDto getScheduleDto(NotificationTemplate notificationTemplate) {
-        return modelMapper.map(scheduleRepo.getOne(
-            notificationTemplate.getNotificationType()), NotificationScheduleDto.class);
+    private NotificationScheduleDto getScheduleDto(NotificationType notificationType) {
+        NotificationSchedule notificationSchedule =
+            scheduleRepo.findNotificationScheduleByNotificationType(notificationType);
+
+        if (notificationSchedule != null) {
+            return modelMapper.map(notificationSchedule,
+                NotificationScheduleDto.class);
+        } else {
+            return null;
+        }
     }
 }
