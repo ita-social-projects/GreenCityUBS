@@ -69,7 +69,6 @@ class SuperAdminController {
     @ApiOperation(value = "Create new tariff")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = AddServiceDto.class),
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
