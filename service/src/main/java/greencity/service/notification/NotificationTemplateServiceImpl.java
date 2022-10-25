@@ -1,8 +1,11 @@
 package greencity.service.notification;
 
 import greencity.constant.ErrorMessage;
+import greencity.dto.notification.BodyDto;
 import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
+import greencity.dto.notification.TitleDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
@@ -10,6 +13,7 @@ import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
+import java.util.stream.Collector;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -49,19 +53,24 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<NotificationTemplateDto> findAll(Pageable pageable) {
+    public PageableDto<NotificationTemplateLocalizedDto> findAll(Pageable pageable) {
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id")
             .descending());
-        Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
-        List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
-            .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class)
-                .setSchedule(getScheduleDto(notificationTemplate.getNotificationType())))
+        Page<NotificationTemplate> notificationTemplatesUa =
+            notificationTemplateRepository.findAllTemplates(pageRequest, "ua");
+        Page<NotificationTemplate> notificationTemplatesEn =
+            notificationTemplateRepository.findAllTemplates(pageRequest, "en");
+        List<NotificationTemplateLocalizedDto> templateDtoList = notificationTemplatesUa.stream()
+            .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateLocalizedDto.class)
+                .setSchedule(getScheduleDto(notificationTemplate.getNotificationType()))
+                .setTitle(getTitles(notificationTemplatesEn.getContent(), notificationTemplate))
+                .setBody(getBodies(notificationTemplatesEn.getContent(), notificationTemplate)))
             .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
-            notificationTemplates.getTotalElements(),
-            notificationTemplates.getPageable().getPageNumber(),
-            notificationTemplates.getTotalPages());
+            notificationTemplatesUa.getTotalElements(),
+            notificationTemplatesUa.getPageable().getPageNumber(),
+            notificationTemplatesUa.getTotalPages());
     }
 
     /**
@@ -90,5 +99,27 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         } else {
             return null;
         }
+    }
+
+    private TitleDto getTitles(List<NotificationTemplate> notificationTemplatesEn,
+        NotificationTemplate notificationTemplate) {
+        return TitleDto.builder()
+            .uaTitle(notificationTemplate.getTitle())
+            .enTitle(notificationTemplatesEn.stream()
+                .filter(notification -> notification.getId().equals(notificationTemplate.getId() + 1)).collect(
+                    Collectors.toList())
+                .get(0).getTitle())
+            .build();
+    }
+
+    private BodyDto getBodies(List<NotificationTemplate> notificationTemplatesEn,
+        NotificationTemplate notificationTemplate) {
+        return BodyDto.builder()
+            .bodyUa(notificationTemplate.getBody())
+            .bodyEn(notificationTemplatesEn.stream()
+                .filter(notification -> notification.getId().equals(notificationTemplate.getId() + 1)).collect(
+                    Collectors.toList())
+                .get(0).getBody())
+            .build();
     }
 }

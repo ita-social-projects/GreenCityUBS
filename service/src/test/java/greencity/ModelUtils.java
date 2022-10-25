@@ -53,6 +53,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
@@ -151,6 +152,7 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
+import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -2657,7 +2659,8 @@ public class ModelUtils {
             .setId(1L)
             .setBody("test")
             .setTitle("test")
-            .setNotificationType(NotificationType.UNPAID_ORDER);
+            .setNotificationType(NotificationType.UNPAID_ORDER)
+            .setNotificationReceiverType(SITE);
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
@@ -3323,6 +3326,14 @@ public class ModelUtils {
         return UpdateNotificationTemplatesDto.builder()
             .body("test")
             .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .build();
+    }
+
+    public static NotificationTemplateLocalizedDto getNotificationTemplateLocalizeDto() {
+        return NotificationTemplateLocalizedDto.builder()
+            .id(1L)
+            .notificationType(NotificationType.UNPAID_ORDER.toString())
+            .notificationReceiverType(SITE.toString())
             .build();
     }
 

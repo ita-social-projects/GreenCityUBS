@@ -2,6 +2,7 @@ package greencity.service.notification;
 
 import greencity.ModelUtils;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
@@ -46,7 +47,7 @@ class NotificationTemplateServiceImplTest {
             ModelUtils.TEST_NOTIFICATION_TEMPLATE_PAGE);
         when(modelMapper.map(template, NotificationTemplateDto.class))
             .thenReturn(dto);
-        PageableDto<NotificationTemplateDto> actual = notificationService.findAll(
+        PageableDto<NotificationTemplateLocalizedDto> actual = notificationService.findAll(
             ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(templateRepository).findAll(ModelUtils.TEST_PAGEABLE_NOTIFICATION_TEMPLATE);
         verify(modelMapper).map(template, NotificationTemplateDto.class);
