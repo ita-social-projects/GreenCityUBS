@@ -106,7 +106,12 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         return TitleDto.builder()
             .uaTitle(notificationTemplate.getTitle())
             .enTitle(notificationTemplatesEn.stream()
-                .filter(notification -> notification.getId().equals(notificationTemplate.getId() + 1)).collect(
+                .filter(notification -> (notification.getNotificationType()
+                    .equals(notificationTemplate.getNotificationType())
+                    &&
+                    notification.getNotificationReceiverType()
+                        .equals(notificationTemplate.getNotificationReceiverType())))
+                .collect(
                     Collectors.toList())
                 .get(0).getTitle())
             .build();
@@ -117,7 +122,12 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         return BodyDto.builder()
             .bodyUa(notificationTemplate.getBody())
             .bodyEn(notificationTemplatesEn.stream()
-                .filter(notification -> notification.getId().equals(notificationTemplate.getId() + 1)).collect(
+                .filter(notification -> (notification.getNotificationType()
+                    .equals(notificationTemplate.getNotificationType())
+                    &&
+                    notification.getNotificationReceiverType()
+                        .equals(notificationTemplate.getNotificationReceiverType())))
+                .collect(
                     Collectors.toList())
                 .get(0).getBody())
             .build();

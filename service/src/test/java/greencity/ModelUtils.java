@@ -49,12 +49,14 @@ import greencity.dto.location.LocationToCityDto;
 import greencity.dto.location.LocationTranslationDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.notification.BodyDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.notification.SenderInfoDto;
+import greencity.dto.notification.TitleDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
 import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.AssignEmployeesForOrderDto;
@@ -2660,7 +2662,8 @@ public class ModelUtils {
             .setBody("test")
             .setTitle("test")
             .setNotificationType(NotificationType.UNPAID_ORDER)
-            .setNotificationReceiverType(SITE);
+            .setNotificationReceiverType(SITE)
+            .setLanguageCode("ua");
     }
 
     public static NotificationTemplateDto getNotificationTemplateDto() {
@@ -2672,10 +2675,25 @@ public class ModelUtils {
             .setSchedule(NOTIFICATION_SCHEDULE_DTO);
     }
 
+    public static PageableDto<NotificationTemplateLocalizedDto> getNotificationTemplateLocalizedDto() {
+        return new PageableDto<>(List.of(NotificationTemplateLocalizedDto.builder()
+            .id(1L)
+            .title(TitleDto.builder().enTitle("test").uaTitle("test").build())
+            .body(BodyDto.builder().bodyEn("test").bodyUa("test").build())
+            .notificationType("UNPAID_ORDER")
+            .build()), 1, 0, 1);
+    }
+
     public static Page<NotificationTemplate> getNotificationTemplatePageable() {
-        return new PageImpl<>(List.of(getNotificationTemplate()),
+        return new PageImpl<>(List.of(new NotificationTemplate()
+            .setId(1L)
+            .setBody("test")
+            .setTitle("test")
+            .setNotificationType(NotificationType.UNPAID_ORDER)
+            .setNotificationReceiverType(SITE)
+            .setLanguageCode("ua")),
             TEST_PAGEABLE_NOTIFICATION_TEMPLATE,
-            2);
+            1);
     }
 
     public static UserProfileUpdateDto updateUserProfileDto() {
