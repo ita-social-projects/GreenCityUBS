@@ -1,9 +1,7 @@
 package greencity.mapping.tariff;
 
 import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.mapping.tariff.GetTariffsInfoDtoMapper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

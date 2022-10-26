@@ -1,6 +1,11 @@
 package greencity.mapping.employee;
 
 import greencity.dto.employee.EmployeeDto;
+import greencity.entity.order.Courier;
+import greencity.entity.order.CourierTranslation;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -35,6 +40,33 @@ public class EmployeeDtoMapper extends AbstractConverter<EmployeeDto, Employee> 
                 .map(p -> Position.builder()
                     .id(p.getId())
                     .name(p.getName())
+                    .build())
+                .collect(Collectors.toSet()))
+            .tariffInfos(dto.getTariffs().stream()
+                .map(t -> TariffsInfo.builder()
+                    .id(t.getId())
+                    .minAmountOfBigBags(t.getMinAmountOfBags())
+                    .maxAmountOfBigBags(t.getMaxAmountOfBags())
+                    .minPriceOfOrder(t.getMinPriceOfOrder())
+                    .maxPriceOfOrder(t.getMaxPriceOfOrder())
+                    .courier(Courier.builder()
+                        .id(t.getCourier().getCourierId())
+                        .courierStatus(CourierStatus.ACTIVE)
+                        .courierTranslationList(t.getCourier().getCourierTranslationDtos().stream()
+                            .map(translation -> CourierTranslation.builder()
+                                .name(translation.getName())
+                                .nameEng(translation.getNameEng())
+                                .build())
+                            .collect(Collectors.toList()))
+                        .build())
+                    .receivingStationList(t.getReceivingStations().stream()
+                        .map(station -> ReceivingStation.builder()
+                            .id(station.getId())
+                            .name(station.getName())
+                            .createDate(station.getCreateDate())
+                            .build())
+                        .collect(Collectors.toSet()))
+                    .tariffLocations(t.getTariffLocations())
                     .build())
                 .collect(Collectors.toSet()))
             .build();

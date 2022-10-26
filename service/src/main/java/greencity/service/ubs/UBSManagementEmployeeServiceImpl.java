@@ -3,10 +3,11 @@ package greencity.service.ubs;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.tariff.TariffsInfoDto;
+import greencity.entity.order.TariffsInfo;
 import greencity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -14,10 +15,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.EmployeeCriteriaRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
+import greencity.repository.*;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
@@ -27,7 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +36,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
     private final ReceivingStationRepository stationRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final FileService fileService;
     private final ModelMapper modelMapper;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
@@ -45,7 +46,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public EmployeeDto save(AddEmployeeDto dto, MultipartFile image) {
+    public EmployeeDto save(EmployeeDto dto, MultipartFile image) {
         dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
         if (employeeRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new UnprocessableEntityException(
@@ -56,6 +57,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
+        setTariffsForEmployeeDto(dto);
         Employee employee = modelMapper.map(dto, Employee.class);
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
@@ -109,6 +111,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
+        setTariffsForEmployeeDto(dto);
         Employee employee = modelMapper.map(dto, Employee.class);
         if (image != null) {
             if (!employee.getImagePath().equals(defaultImagePath)) {
@@ -225,5 +228,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private boolean existReceivingStation(List<ReceivingStationDto> stations) {
         return stations.stream()
             .allMatch(s -> stationRepository.existsReceivingStationByIdAndName(s.getId(), s.getName()));
+    }
+
+    private void setTariffsForEmployeeDto(EmployeeDto dto) {
+        Set<TariffsInfoDto> tariffInfos = new HashSet<>();
+        Long courierId = dto.getCourier().getCourierId();
+        Long locationId = dto.getLocation().getLocationId();
+        TariffsInfo tariff = tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST + locationId));
+        tariffInfos.add(modelMapper.map(tariff, TariffsInfoDto.class));
+        dto.setTariffs(tariffInfos);
     }
 }

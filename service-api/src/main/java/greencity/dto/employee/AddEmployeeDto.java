@@ -3,7 +3,11 @@ package greencity.dto.employee;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.position.PositionDto;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
