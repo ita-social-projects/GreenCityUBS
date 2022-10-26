@@ -103,6 +103,7 @@ import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -964,6 +965,32 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
+            .receivingStations(List.of(ReceivingStationDto.builder()
+                .id(1L)
+                .name("Петрівка")
+                .build()))
+            .courier(getCourierDto())
+            .location(LocationsDtos.builder()
+                .locationId(1L)
+                .nameEn("location")
+                .nameUk("локація")
+                .build())
+            .tariffs(Set.of(getTariffsInfoDto()))
+            .build();
+    }
+
+    public static TariffsInfoDto getTariffsInfoDto() {
+        return TariffsInfoDto.builder()
+            .id(1L)
+            .maxAmountOfBags(20L)
+            .maxPriceOfOrder(20000L)
+            .minAmountOfBags(2L)
+            .minPriceOfOrder(500L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStations(List.of(getReceivingStationDto()))
+            .courier(getCourierDto())
             .build();
     }
 
@@ -997,6 +1024,8 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
+            .tariffInfos(Set.of(getTariffsInfo()))
+            .imagePath("path")
             .id(1L)
             .build();
     }
@@ -2095,6 +2124,7 @@ public class ModelUtils {
 
     public static Location getLocation() {
         return Location.builder()
+            .id(1L)
             .locationStatus(LocationStatus.ACTIVE)
             .nameEn("Kyiv")
             .nameUk("Київ")
@@ -3311,11 +3341,18 @@ public class ModelUtils {
     }
 
     public static TariffsInfo getTariffsInfo() {
-        return TariffsInfo.builder().id(1L).courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+        return TariffsInfo.builder()
+            .id(1L)
+            .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
             .maxAmountOfBigBags(20L)
             .maxPriceOfOrder(20000L)
             .minAmountOfBigBags(2L)
             .minPriceOfOrder(500L)
+            .tariffLocations(Set.of(TariffLocation.builder()
+                .location(getLocation())
+                .build()))
+            .receivingStationList(Set.of(getReceivingStation()))
+            .courier(getCourier())
             .build();
     }
 

@@ -3,7 +3,6 @@ package greencity.mapping.location;
 import greencity.ModelUtils;
 import greencity.dto.location.LocationInfoDto;
 import greencity.entity.user.Region;
-import greencity.mapping.location.FindAllInfoAboutLocationDtoMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +18,7 @@ class FindAllInfoAboutLocationDtoMapperTest {
     void convert() {
         Region region = ModelUtils.getRegion();
         LocationInfoDto dto = ModelUtils.getInfoAboutLocationDto();
-        Assertions.assertEquals(dto, mapper.convert(region));
+        Assertions.assertEquals(dto.getRegionId(), mapper.convert(region).getRegionId());
+        Assertions.assertEquals(dto.getRegionTranslationDtos(), mapper.convert(region).getRegionTranslationDtos());
     }
 }
