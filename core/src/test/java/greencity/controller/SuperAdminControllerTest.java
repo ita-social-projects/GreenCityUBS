@@ -327,7 +327,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -340,7 +340,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -349,7 +349,7 @@ class SuperAdminControllerTest {
         mockMvc.perform(put(ubsLink + "/deactivateTariff/{tariffId}", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
     }
 
     @Test
