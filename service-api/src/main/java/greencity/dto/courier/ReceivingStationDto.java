@@ -1,6 +1,5 @@
 package greencity.dto.courier;
 
-import greencity.dto.viber.dto.UserDto;
 import lombok.*;
 
 import javax.validation.constraints.Min;

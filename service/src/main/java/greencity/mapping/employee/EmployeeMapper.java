@@ -9,6 +9,7 @@ import greencity.dto.position.PositionDto;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.NotFoundException;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -57,7 +58,7 @@ public class EmployeeMapper extends AbstractConverter<Employee, EmployeeDto> {
                     .nameUk(location.getNameUk())
                     .locationId(location.getId())
                     .build())
-                .findFirst().get())
+                .findFirst().orElseThrow(() -> new NotFoundException("Location is not found")))
             .courier(employee.getTariffInfos().stream()
                 .map(TariffsInfo::getCourier)
                 .map(courier -> CourierDto.builder()
@@ -71,7 +72,7 @@ public class EmployeeMapper extends AbstractConverter<Employee, EmployeeDto> {
                             .build())
                         .collect(Collectors.toList()))
                     .build())
-                .findFirst().get())
+                .findFirst().orElseThrow(() -> new NotFoundException("Courier is not found")))
             .build();
     }
 }
