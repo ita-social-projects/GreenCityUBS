@@ -5,7 +5,6 @@ import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.AddingPositionDto;
@@ -80,11 +79,10 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void saveEmployee() throws Exception {
-
-        AddEmployeeDto dto = getAddEmployeeDto();
+        EmployeeDto dto = getEmployeeDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
-        MockMultipartFile jsonFile = new MockMultipartFile("addEmployeeDto",
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
             "", "application/json", responseJSON.getBytes());
 
         mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)

@@ -22,6 +22,8 @@ class EmployeeMapperTest {
         EmployeeDto dto = ModelUtils.getEmployeeDto();
         Employee employee = ModelUtils.getEmployee();
 
-        assertEquals(dto, mapper.convert(employee));
+        assertEquals(dto.getId(), mapper.convert(employee).getId());
+        assertEquals(dto.getEmail(), mapper.convert(employee).getEmail());
+        assertEquals(dto.getEmployeePositions(), mapper.convert(employee).getEmployeePositions());
     }
 }

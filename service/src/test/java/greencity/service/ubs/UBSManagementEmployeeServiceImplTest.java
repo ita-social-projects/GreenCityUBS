@@ -5,7 +5,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import greencity.ModelUtils;
+import greencity.dto.tariff.TariffsInfoDto;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +22,6 @@ import org.springframework.data.domain.Sort;
 
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
@@ -31,11 +33,8 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.EmployeeCriteriaRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
 
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -49,12 +48,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static greencity.ModelUtils.getAddEmployeeDto;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getEmployeeDto;
-import static greencity.ModelUtils.getPosition;
-import static greencity.ModelUtils.getPositionDto;
-
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
     @Mock
@@ -63,6 +56,8 @@ class UBSManagementEmployeeServiceImplTest {
     private PositionRepository positionRepository;
     @Mock
     private ReceivingStationRepository stationRepository;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private FileService fileService;
     @Mock
@@ -75,20 +70,26 @@ class UBSManagementEmployeeServiceImplTest {
     @Test
     void saveEmployee() {
         Employee employee = getEmployee();
-        employee.setId(null);
+        EmployeeDto dto = getEmployeeDto();
+        TariffsInfoDto tariffsDto = getTariffsInfoDto();
+
+        TariffsInfo tariffsInfo = getTariffsInfo();
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber())).thenReturn(false);
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
-        when(modelMapper.map(any(), any())).thenReturn(employee, getEmployeeDto());
-        when(repository.save(any())).thenReturn(getEmployee());
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(modelMapper.map(tariffsInfo, TariffsInfoDto.class)).thenReturn(tariffsDto);
+        when(repository.save(any())).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
-        AddEmployeeDto addEmployeeDto = getAddEmployeeDto();
-        EmployeeDto result = employeeService.save(addEmployeeDto, null);
-        assertEquals(1L, result.getId());
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+
+        employeeService.save(dto, null);
+
         verify(fileService, never()).upload(null);
         verify(repository, times(1)).existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber());
         verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
+        verify(modelMapper, times(3)).map(any(), any());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
         verify(stationRepository, atLeastOnce()).existsReceivingStationByIdAndName(any(), any());
@@ -98,7 +99,7 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployeeShouldThrowException() {
         Employee employee = getEmployee();
         employee.setId(null);
-        AddEmployeeDto employeeDto = getAddEmployeeDto();
+        EmployeeDto employeeDto = getEmployeeDto();
         employeeDto.setEmail("test@gmail.com");
         when(repository.existsByPhoneNumber(getAddEmployeeDto().getPhoneNumber()))
             .thenReturn(true, false, false, false);
@@ -137,9 +138,10 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeTest() {
-        EmployeeDto dto = ModelUtils.getEmployeeDtoWithReceivingStations();
+        EmployeeDto dto = ModelUtils.getEmployeeDto();
         ReceivingStation station = ModelUtils.getReceivingStation();
         Position position = ModelUtils.getPosition();
+        TariffsInfo tariffsInfo = getTariffsInfo();
 
         when(repository.existsById(any())).thenReturn(true);
         when(repository.existsByPhoneNumberAndId(anyString(), anyLong())).thenReturn(false);
@@ -147,6 +149,8 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
             .thenReturn(true);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
 
         employeeService.update(dto, null);
 

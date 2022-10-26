@@ -6,12 +6,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@EqualsAndHashCode
 public class ReceivingStationDto {
     @Min(1)
     private Long id;
