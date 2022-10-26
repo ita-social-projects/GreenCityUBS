@@ -1,6 +1,7 @@
 package greencity.service.notification;
 
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.pageble.PageableDto;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +18,7 @@ public interface NotificationTemplateService {
      *
      * @author Dima Sannytski
      */
-    PageableDto<NotificationTemplateDto> findAll(Pageable pageable);
+    PageableDto<NotificationTemplateLocalizedDto> findAll(Pageable pageable);
 
     /**
      * Method that finds and returns notification template by id.

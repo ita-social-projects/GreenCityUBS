@@ -3,6 +3,7 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.annotations.ApiOperation;
@@ -43,7 +44,7 @@ public class ManagementNotificationController {
     })
     @GetMapping("/get-all-templates")
     @ApiPageable
-    public ResponseEntity<PageableDto<NotificationTemplateDto>> getAll(@ApiIgnore Pageable pageable) {
+    public ResponseEntity<PageableDto<NotificationTemplateLocalizedDto>> getAll(@ApiIgnore Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findAll(pageable));
     }
