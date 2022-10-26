@@ -90,7 +90,7 @@ class SuperAdminControllerTest {
             .principal(principal)
             .content(ServiceResponceDtoJSON)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
     }
 
     @Test
