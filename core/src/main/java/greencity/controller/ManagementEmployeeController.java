@@ -3,7 +3,6 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.constants.HttpStatuses;
 import greencity.constants.SwaggerExampleModel;
-import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableAdvancedDto;
@@ -42,7 +41,7 @@ public class ManagementEmployeeController {
     /**
      * Controller saves employee.
      *
-     * @param addEmployeeDto {@link AddEmployeeDto}
+     * @param employeeDto {@link EmployeeDto}
      * @return {@link EmployeeDto} saved employee.
      * @author Mykola Danylko.
      */
@@ -55,13 +54,12 @@ public class ManagementEmployeeController {
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
-    @PostMapping(value = "/save-employee",
-        consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/save-employee")
     public ResponseEntity<EmployeeDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
-            required = true) @Valid @RequestPart AddEmployeeDto addEmployeeDto,
+            required = true) @Valid @RequestPart EmployeeDto employeeDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(addEmployeeDto, image));
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeDto, image));
     }
 
     /**

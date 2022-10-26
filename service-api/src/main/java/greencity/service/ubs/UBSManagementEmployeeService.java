@@ -20,7 +20,7 @@ public interface UBSManagementEmployeeService {
      * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
-    EmployeeDto save(AddEmployeeDto dto, MultipartFile image);
+    EmployeeDto save(EmployeeDto dto, MultipartFile image);
 
     /**
      * {@inheritDoc}
