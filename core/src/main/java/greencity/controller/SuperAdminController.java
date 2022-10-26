@@ -581,7 +581,7 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Edit tariffLimits by  sum of Bags")
     @ApiResponses(value = {
-        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
@@ -591,7 +591,7 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> setLimitsByAmountOfBags(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditAmountOfBagDto dto) {
         superAdminService.setTariffLimitByAmountOfBags(tariffId, dto);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -601,7 +601,7 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Edit tariff limits by sum of order")
     @ApiResponses(value = {
-        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
@@ -611,7 +611,7 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditPriceOfOrder dto) {
         superAdminService.setTariffLimitBySumOfOrder(tariffId, dto);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -621,7 +621,7 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Deactivate tariff")
     @ApiResponses(value = {
-        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
@@ -629,7 +629,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/deactivateTariff/{tariffId}")
     public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(superAdminService.deactivateTariffCard(tariffId));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateTariffCard(tariffId));
     }
 
     /**
@@ -639,7 +639,7 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Edit Locations")
     @ApiResponses(value = {
-        @ApiResponse(code = 202, message = HttpStatuses.ACCEPTED),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
@@ -648,7 +648,7 @@ class SuperAdminController {
     @PostMapping("/locations/edit")
     public ResponseEntity<HttpStatus> editLocations(@Valid @RequestBody List<EditLocationDto> editLocationDtoList) {
         superAdminService.editLocations(editLocationDtoList);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -659,16 +659,16 @@ class SuperAdminController {
      */
     @ApiOperation(value = "Change Tariff Location status")
     @ApiResponses(value = {
-        @ApiResponse(code = 202, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION_CARD', authentication)")
     @PutMapping("tariffs/{id}/locations/change-status")
-    public ResponseEntity changeLocationsInTariffStatus(@PathVariable Long id,
+    public ResponseEntity<HttpStatus> changeLocationsInTariffStatus(@PathVariable Long id,
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
         superAdminService.changeTariffLocationsStatus(id, dto, status);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
