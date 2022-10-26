@@ -44,6 +44,16 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
     Page<NotificationTemplate> findAll(Pageable pageable);
 
     /**
+     * Method that returns all notification templates with the selected language
+     * code.
+     *
+     * @author Max Nazaruk
+     */
+    @Query(value = "SELECT * FROM notification_templates where language_code = :code",
+        nativeQuery = true)
+    Page<NotificationTemplate> findAllTemplates(Pageable pageable, @Param("code") String code);
+
+    /**
      * Method that updates body in notification templates for receiving type SITE.
      *
      * @author Natalia Kozak
