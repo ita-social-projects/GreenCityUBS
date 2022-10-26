@@ -13,7 +13,6 @@ import greencity.entity.schedule.NotificationSchedule;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationScheduleRepo;
 import greencity.repository.NotificationTemplateRepository;
-import java.util.stream.Collector;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
