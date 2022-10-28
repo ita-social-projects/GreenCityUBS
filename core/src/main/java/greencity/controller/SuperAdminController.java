@@ -75,7 +75,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createTariffService")
     public ResponseEntity<AddServiceDto> createTariffService(
-        @RequestBody AddServiceDto dto,
+        @RequestBody @Valid AddServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.addTariffService(dto, uuid));
     }
