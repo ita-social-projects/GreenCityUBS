@@ -2,7 +2,7 @@ package greencity.dto.service;
 
 import greencity.dto.tariff.TariffTranslationDto;
 import lombok.*;
-
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -18,7 +18,9 @@ public class AddServiceDto {
     Integer capacity;
     @NotNull
     Integer price;
+    @NotNull
     Integer commission;
+    @Valid
     List<TariffTranslationDto> tariffTranslationDtoList;
     @NotNull
     Long locationId;
