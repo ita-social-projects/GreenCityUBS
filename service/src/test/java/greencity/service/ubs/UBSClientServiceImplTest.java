@@ -18,7 +18,9 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.entity.order.*;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -77,14 +79,6 @@ import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
-import greencity.entity.order.Bag;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -212,15 +206,22 @@ class UBSClientServiceImplTest {
 
     @Test
     void getFirstPageData() {
+        Long locationId = 1L;
+        BagTranslationDto bagTranslationDto = BagTranslationDto.builder().id(1).name("string").capacity(120).price(170)
+            .nameEng("string").locationId(1L).build();
+        BagTranslation bagTranslation = BagTranslation.builder().id(1L).description("string").name("string")
+            .bag(getBag().get()).nameEng("string").build();
+
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(new ArrayList<>(), 600);
+            new UserPointsAndAllBagsDto(List.of(bagTranslationDto), 600);
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagTranslationRepository.findAll()).thenReturn(List.of(bagTranslation));
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf");
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId);
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
