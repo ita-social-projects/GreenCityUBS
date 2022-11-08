@@ -63,7 +63,7 @@ public class OrderController {
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    @ApiOperation(value = "Get current user points and all bags list.")
+    @ApiOperation(value = "Get current user points and filtered by location bags list.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = UserPointsAndAllBagsDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),

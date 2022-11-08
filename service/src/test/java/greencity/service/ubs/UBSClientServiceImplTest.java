@@ -225,6 +225,8 @@ class UBSClientServiceImplTest {
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(userPointsAndAllBagsDtoActual.getBags().get(0).getId(),
+            Integer.valueOf(Math.toIntExact(locationId)));
     }
 
     @Test
