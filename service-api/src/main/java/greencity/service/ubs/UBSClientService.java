@@ -44,7 +44,7 @@ public interface UBSClientService {
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Oleh Bilonizhka
      */
-    UserPointsAndAllBagsDto getFirstPageData(String uuid, Long locationId);
+    UserPointsAndAllBagsDto getFirstPageData(String uuid);
 
     /**
      * Methods returns all saved user data.
