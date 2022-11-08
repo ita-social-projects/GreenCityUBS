@@ -2096,7 +2096,7 @@ public class ModelUtils {
             .commission(50)
             .price(120)
             .fullPrice(170)
-            .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
+            .location(Location.builder().locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
             .bagTranslations(List.of(BagTranslation.builder().description("ss").id(1L).build()))
