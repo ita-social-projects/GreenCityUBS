@@ -204,7 +204,7 @@ class OrdersAdminsPageServiceImplTest {
         "FORMED, ADJUSTMENT",
         "ADJUSTMENT, CONFIRMED",
         "CONFIRMED, ON_THE_ROUTE",
-        "ON_THE_ROUTE, DONE"
+        "ON_THE_ROUTE, DONE",
     })
     void orderStatusForDevelopStage(String oldStatus, String newStatus) {
         Order order = ModelUtils.getOrder();
