@@ -175,7 +175,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.PUT,
                 UBS_MANAG_LINK + "/**",
-                //SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/update-recipients-data",
                 ADMIN_LINK + "/notification/update",
                 ADMIN_LINK + "/**",
