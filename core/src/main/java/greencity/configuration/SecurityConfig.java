@@ -126,7 +126,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/update-courier",
                 SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/editTariffService/{id}",
-                SUPER_ADMIN_LINK + "/**")
+                SUPER_ADMIN_LINK + "/**",
+                "/ubs/superAdmin/editService/{id}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ADMIN_EMPL_LINK + "/**",
@@ -174,7 +175,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.PUT,
                 UBS_MANAG_LINK + "/**",
-                SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/update-recipients-data",
                 ADMIN_LINK + "/notification/update",
                 ADMIN_LINK + "/**",
