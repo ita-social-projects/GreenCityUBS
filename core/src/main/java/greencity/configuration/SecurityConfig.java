@@ -170,7 +170,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.DELETE,
                 UBS_MANAG_LINK + "/**",
-                SUPER_ADMIN_LINK + "/**",
                 ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN)
             .antMatchers(HttpMethod.PUT,
