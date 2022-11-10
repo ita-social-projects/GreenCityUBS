@@ -3,15 +3,15 @@ package greencity.enums;
 import java.util.Arrays;
 
 public enum OrderStatus {
-    FORMED(1, "ADJUSTMENT", OrderStatus.CANCELED_STR, "BROUGHT_IT_HIMSELF"),
-    ADJUSTMENT(2, "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR, "CONFIRMED"),
-    BROUGHT_IT_HIMSELF(3, "DONE"),
-    CONFIRMED(4, OrderStatus.CANCELED_STR, "FORMED", "ON_THE_ROUTE"),
-    ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT"),
+    FORMED(1, "ADJUSTMENT", "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR),
+    ADJUSTMENT(2, "FORMED", "BROUGHT_IT_HIMSELF", "CONFIRMED", OrderStatus.CANCELED_STR),
+    BROUGHT_IT_HIMSELF(3, "DONE", OrderStatus.CANCELED_STR),
+    CONFIRMED(4, "FORMED", "ON_THE_ROUTE", "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR),
+    ON_THE_ROUTE(5, "DONE", "NOT_TAKEN_OUT", OrderStatus.CANCELED_STR),
     DONE(6, "DONE"),
-    NOT_TAKEN_OUT(7, "ADJUSTMENT", "NOT_TAKEN_OUT"),
+    NOT_TAKEN_OUT(7, "ADJUSTMENT", "BROUGHT_IT_HIMSELF", OrderStatus.CANCELED_STR),
     CANCELED(8, OrderStatus.CANCELED_STR),
-    PAID(9, "PAID");
+    PAID(9, "PAID", OrderStatus.CANCELED_STR);
 
     private static final String CANCELED_STR = "CANCELED";
     private final int statusValue;
