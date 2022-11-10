@@ -3,7 +3,6 @@ package greencity.dto.bag;
 import lombok.*;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @NoArgsConstructor
@@ -23,6 +22,6 @@ public class BagTranslationDto implements Serializable {
     private Integer price;
     @NonNull
     private String nameEng;
-    @NotNull
+    @NonNull
     private Long locationId;
 }
