@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEmployeeAuthorityDto {
-    private Long employeeId;
+    private String employeeEmail;
     private List<String> authorities;
 }

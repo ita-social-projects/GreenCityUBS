@@ -4,6 +4,7 @@ import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
@@ -64,6 +65,18 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             public void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto, String email) {
                 log.error(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
+            }
+
+            @Override
+            public void signUpEmployee(EmployeeSignUpDto dto) {
+                log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
+            }
+
+            @Override
+            public void updateEmployeeEmail(String employeeEmail, String newEmployeeEmail) {
+                log.error(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED, throwable);
             }
         };
     }

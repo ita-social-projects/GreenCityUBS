@@ -44,6 +44,7 @@ public final class ErrorMessage {
     public static final String RECEIVING_STATION_NOT_FOUND_BY_ID = "Receiving station with current id doesn't exist: ";
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
+    public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
     public static final String PARSING_URL_FAILED = "Can't parse image's url: ";
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
@@ -98,6 +99,7 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_USER_DATA = "Could not retrieve user data";
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
+    public static final String EMPLOYEE_EMAIL_WAS_NOT_EDITED = "Employee's email was not edited";
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";
