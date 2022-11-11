@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 @Data
 @Builder
@@ -17,7 +16,6 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 public class EmployeeSignUpDto {
     @NotBlank
-    @Pattern(regexp = "^[a-zA-Z0-9]+([._]?[a-zA-Z0-9]+)++$")
     private String name;
 
     @NotBlank
