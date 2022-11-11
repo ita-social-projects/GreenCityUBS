@@ -1,6 +1,7 @@
 package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
@@ -69,5 +70,18 @@ class UserRemoteClientFallbackFactoryTest {
     void updateEmployeesAuthorities() {
         UserEmployeeAuthorityDto dto = UserEmployeeAuthorityDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeesAuthorities(dto, USER_EMAIL));
+    }
+
+    @Test
+    void signUpEmployee() {
+        EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
+    }
+
+    @Test
+    void updateEmployeeEmail() {
+        String oldEmail = "old@mail.com";
+        String newEmail = "new@mail.com";
+        assertThrows(RemoteServerUnavailableException.class, () -> client.updateEmployeeEmail(oldEmail, newEmail));
     }
 }
