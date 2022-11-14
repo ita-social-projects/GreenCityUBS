@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.ReceivingStation;
@@ -61,6 +63,8 @@ class UBSManagementEmployeeServiceImplTest {
     @Mock
     private FileService fileService;
     @Mock
+    private UserRemoteClient userRemoteClient;
+    @Mock
     private ModelMapper modelMapper;
     @InjectMocks
     private UBSManagementEmployeeServiceImpl employeeService;
@@ -83,7 +87,6 @@ class UBSManagementEmployeeServiceImplTest {
         when(stationRepository.existsReceivingStationByIdAndName(any(), any())).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
-
         employeeService.save(dto, null);
 
         verify(fileService, never()).upload(null);
@@ -138,6 +141,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeTest() {
+        Employee employee = getEmployee();
         EmployeeDto dto = ModelUtils.getEmployeeDto();
         ReceivingStation station = ModelUtils.getReceivingStation();
         Position position = ModelUtils.getPosition();
@@ -149,6 +153,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(stationRepository.existsReceivingStationByIdAndName(anyLong(), anyString()))
             .thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
 
