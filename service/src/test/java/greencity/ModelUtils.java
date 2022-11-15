@@ -33,13 +33,7 @@ import greencity.dto.courier.GetCourierTranslationsDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeDto;
-import greencity.dto.employee.EmployeeNameIdDto;
-import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.employee.EmployeePositionDtoResponse;
-import greencity.dto.employee.UpdateResponsibleEmployeeDto;
-import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.employee.*;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
@@ -980,6 +974,14 @@ public class ModelUtils {
                 .nameUk("локація")
                 .build())
             .tariffs(Set.of(getTariffsInfoDto()))
+            .build();
+    }
+
+    public static EmployeeSignUpDto getEmployeeSignUpDto() {
+        return EmployeeSignUpDto.builder()
+            .name("testname")
+            .email("test@gmail.com")
+            .isUbs(true)
             .build();
     }
 
@@ -3714,7 +3716,7 @@ public class ModelUtils {
 
     public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
         return UserEmployeeAuthorityDto.builder()
-            .employeeId(1L)
+            .employeeEmail("test@mail.com")
             .authorities(getAllAuthorities())
             .build();
     }

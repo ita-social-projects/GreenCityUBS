@@ -1,9 +1,11 @@
 package greencity.service.ubs;
 
+import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffsInfoDto;
@@ -37,6 +39,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final PositionRepository positionRepository;
     private final ReceivingStationRepository stationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
+    private final UserRemoteClient userRemoteClient;
     private final FileService fileService;
     private final ModelMapper modelMapper;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
@@ -64,7 +67,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             employee.setImagePath(defaultImagePath);
         }
+        signUpEmployee(employee);
         return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+    }
+
+    private void signUpEmployee(Employee employee) {
+        EmployeeSignUpDto signUpDto = EmployeeSignUpDto.builder()
+            .email(employee.getEmail())
+            .name(employee.getFirstName() + employee.getLastName())
+            .isUbs(true)
+            .build();
+        userRemoteClient.signUpEmployee(signUpDto);
     }
 
     /**
@@ -111,15 +124,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         checkValidPositionAndReceivingStation(dto.getEmployeePositions(), dto.getReceivingStations());
+        updateEmployeeEmail(dto);
         setTariffsForEmployeeDto(dto);
-        Employee employee = modelMapper.map(dto, Employee.class);
+        Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         if (image != null) {
-            if (!employee.getImagePath().equals(defaultImagePath)) {
-                fileService.delete(employee.getImagePath());
+            if (!updatedEmployee.getImagePath().equals(defaultImagePath)) {
+                fileService.delete(updatedEmployee.getImagePath());
             }
-            employee.setImagePath(fileService.upload(image));
+            updatedEmployee.setImagePath(fileService.upload(image));
         }
-        return modelMapper.map(employeeRepository.save(employee), EmployeeDto.class);
+        return modelMapper.map(employeeRepository.save(updatedEmployee), EmployeeDto.class);
     }
 
     /**
@@ -208,6 +222,14 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         } else {
             throw new UnprocessableEntityException(ErrorMessage.EMPLOYEES_ASSIGNED_POSITION);
         }
+    }
+
+    private void updateEmployeeEmail(EmployeeDto dto) {
+        Employee employee = employeeRepository.findById(dto.getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
+        String oldEmail = employee.getEmail();
+        String newEmail = dto.getEmail();
+        userRemoteClient.updateEmployeeEmail(oldEmail, newEmail);
     }
 
     private void checkValidPositionAndReceivingStation(List<PositionDto> positions,

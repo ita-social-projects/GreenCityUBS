@@ -569,7 +569,7 @@ public class ModelUtils {
     public static UserEmployeeAuthorityDto getUserEmployeeAuthorityDto() {
         return UserEmployeeAuthorityDto.builder()
             .authorities(Collections.singletonList("SEE_CLIENTS_PAGE"))
-            .employeeId(1L)
+            .employeeEmail("test@mail.com")
             .build();
     }
 }
