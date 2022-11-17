@@ -255,7 +255,7 @@ class SuperAdminControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(ubsLink + "/update-courier")
+        mockMvc.perform(put(ubsLink + "/editCourier")
             .principal(principal)
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
