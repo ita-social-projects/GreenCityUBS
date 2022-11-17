@@ -1,9 +1,9 @@
 package greencity.mapping.location;
 
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
@@ -20,13 +20,14 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
             : null;
         RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
             .nameUk(region.getUkrName()).build() : null;
+
         return TariffsForLocationDto.builder()
             .regionDto(regionDto)
-            .locationsDtosList(source.getTariffLocations().stream()
-                .map(location -> LocationsDtos.builder()
-                    .locationId(location.getId())
-                    .nameEn(location.getLocation().getNameEn())
-                    .nameUk(location.getLocation().getNameUk())
+            .locationsDtosList(source.getTariffLocations()
+                .stream().map(tariffLocation -> LocationsDtos.builder()
+                    .locationId(tariffLocation.getLocation().getId())
+                    .nameEn(tariffLocation.getLocation().getNameEn())
+                    .nameUk(tariffLocation.getLocation().getNameUk())
                     .build())
                 .collect(Collectors.toList()))
             .tariffInfoId(source.getId())

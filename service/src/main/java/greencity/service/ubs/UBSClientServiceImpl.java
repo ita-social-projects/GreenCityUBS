@@ -1841,7 +1841,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 x -> new ArrayList<>(List.of(modelMapper.map(x, LocationsDtos.class))),
                 (x, y) -> {
                     x.addAll(y);
-                    return new ArrayList<>(x);
+                    return new ArrayList<>(x).stream().distinct().collect(Collectors.toList());
                 }));
 
         return map.entrySet().stream()
