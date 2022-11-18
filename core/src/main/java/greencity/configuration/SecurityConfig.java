@@ -122,6 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_MANAG_LINK + "/changingOrder",
                 UBS_MANAG_LINK + "/blockOrders",
                 UBS_MANAG_LINK + "/unblockOrders",
+                UBS_MANAG_LINK + "/save-reason/{id}",
                 ADMIN_EMPL_LINK + "/**",
                 ADMIN_LINK + "/notification/update-template",
                 SUPER_ADMIN_LINK + "/update-courier",
