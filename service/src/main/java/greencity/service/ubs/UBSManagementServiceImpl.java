@@ -1464,7 +1464,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     @Override
-    public ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images) {
+    public ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images) {
         final Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         List<String> pictures = new ArrayList<>();
