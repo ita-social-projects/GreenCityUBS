@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -85,7 +86,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", locationId);
+        verify(ubsClientService).getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
     }
 
     @Test
