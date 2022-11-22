@@ -222,7 +222,7 @@ public interface UBSManagementService {
     /**
      * Method that save ReasonNotTakeBagDto.
      */
-    ReasonNotTakeBagDto saveReason(Long orderId, String description, List<MultipartFile> images);
+    ReasonNotTakeBagDto saveReason(Long orderId, String description, MultipartFile[] images);
 
     /**
      * This method assign Employee with it's position for current order.
