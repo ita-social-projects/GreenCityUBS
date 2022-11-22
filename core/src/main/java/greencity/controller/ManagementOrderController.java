@@ -918,10 +918,10 @@ public class ManagementOrderController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 422, message = HttpStatuses.UNPROCESSABLE_ENTITY)})
     @PutMapping(value = "/save-reason/{id}",
-        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<ReasonNotTakeBagDto> saveReason(@PathVariable("id") Long id,
-        @RequestParam String description,
-        @RequestPart(required = false) List<MultipartFile> images) {
+        @RequestPart String description,
+        @RequestPart(required = false) @Nullable MultipartFile[] images) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ubsManagementService.saveReason(id, description, images));
     }
 
