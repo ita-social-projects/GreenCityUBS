@@ -2619,6 +2619,7 @@ public class ModelUtils {
     public static ServiceTranslationDto getServiceTranslationDto() {
         return ServiceTranslationDto.builder()
             .description("Test")
+            .descriptionEng("Test")
             .nameEng("Test")
             .name("Test")
             .build();
