@@ -341,6 +341,7 @@ public class ModelUtils {
             .name("Test")
             .nameEng("Test")
             .description("Test")
+            .descriptionEng("Test")
             .build());
     }
 
