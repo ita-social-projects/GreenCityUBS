@@ -223,14 +223,19 @@ public class UBSClientServiceImpl implements UBSClientService {
      * {@inheritDoc}
      */
     @Override
-    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Long locationId) {
+    public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> locationId) {
         User user = userRepository.findByUuid(uuid);
         int currentUserPoints = user.getCurrentPoints();
         List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
-            .filter(obj -> obj.getLocationId().equals(locationId))
             .collect(Collectors.toList());
+
+        if (locationId.isPresent()) {
+            btdList = btdList.stream().filter(obj -> obj.getLocationId().equals(locationId.get()))
+                .collect(Collectors.toList());
+        }
+
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 

@@ -221,7 +221,7 @@ class UBSClientServiceImplTest {
         when(bagTranslationRepository.findAll()).thenReturn(List.of(bagTranslation));
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
-            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", locationId);
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
