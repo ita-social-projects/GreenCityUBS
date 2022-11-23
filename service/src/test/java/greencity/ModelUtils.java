@@ -2253,6 +2253,7 @@ public class ModelUtils {
             .locationId(1L)
             .price(100)
             .description("test")
+            .descriptionEng("test")
             .name("test")
             .nameEng("test")
             .build();
@@ -2294,6 +2295,7 @@ public class ModelUtils {
             .name("Test")
             .description("Test")
             .nameEng("Test")
+            .descriptionEng("Test")
             .build();
     }
 
@@ -2532,6 +2534,7 @@ public class ModelUtils {
             .description("Test")
             .name("Test")
             .nameEng("Test")
+            .descriptionEng("Test")
             .id(1L)
             .service(Service.builder()
                 .id(1L)
@@ -2605,6 +2608,7 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .description("test")
+            .descriptionEng("test")
             .fullPrice(150)
             .editedAt(LocalDate.now())
             .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
@@ -2645,6 +2649,7 @@ public class ModelUtils {
             .price(100)
             .commission(50)
             .description("Test")
+            .descriptionEng("Test")
             .fullPrice(150)
             .id(1L)
             .createdAt(LocalDate.now())

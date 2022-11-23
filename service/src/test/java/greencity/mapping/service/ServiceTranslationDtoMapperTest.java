@@ -22,5 +22,6 @@ class ServiceTranslationDtoMapperTest {
         Assertions.assertEquals(dto.getName(), mapper.convert(serviceTranslation).getName());
         Assertions.assertEquals(dto.getDescription(), mapper.convert(serviceTranslation).getDescription());
         Assertions.assertEquals(dto.getNameEng(), mapper.convert(serviceTranslation).getNameEng());
+        Assertions.assertEquals(dto.getDescriptionEng(), mapper.convert(serviceTranslation).getDescriptionEng());
     }
 }

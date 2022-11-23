@@ -22,6 +22,7 @@ public class GetServiceDto {
     Integer price;
     Integer commission;
     String description;
+    String descriptionEng;
     Integer fullPrice;
     Long id;
     LocalDate createdAt;
