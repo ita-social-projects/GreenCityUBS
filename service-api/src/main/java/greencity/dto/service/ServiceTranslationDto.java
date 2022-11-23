@@ -19,5 +19,4 @@ public class ServiceTranslationDto {
     private String description;
     @NotNull
     private String descriptionEng;
-
 }
