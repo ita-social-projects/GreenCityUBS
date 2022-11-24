@@ -154,6 +154,11 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    void getActiveLocations() throws Exception {
+        mockMvc.perform(get((ubsLink + "/getActiveLocations"))).andExpect(status().isOk());
+    }
+
+    @Test
     void deleteService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
             .andExpect(status().isOk());

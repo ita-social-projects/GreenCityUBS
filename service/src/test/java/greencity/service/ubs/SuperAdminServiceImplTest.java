@@ -291,6 +291,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void getActiveLocationsTest() {
+        List<Region> regionList = ModelUtils.getAllRegion();
+
+        when(regionRepository.findAll()).thenReturn(regionList);
+
+        superAdminService.getActiveLocations();
+
+        verify(regionRepository).findAll();
+    }
+
+    @Test
     void addLocationTest() {
         List<LocationCreateDto> locationCreateDtoList = ModelUtils.getLocationCreateDtoList();
         Region region = ModelUtils.getRegion();
