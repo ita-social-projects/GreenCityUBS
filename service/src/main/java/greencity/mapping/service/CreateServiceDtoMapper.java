@@ -16,7 +16,11 @@ public class CreateServiceDtoMapper extends AbstractConverter<Service, CreateSer
     protected CreateServiceDto convert(Service source) {
         List<ServiceTranslation> serviceTranslationList = source.getServiceTranslations();
         List<ServiceTranslationDto> dtos = serviceTranslationList.stream().map(
-            i -> new ServiceTranslationDto(i.getName(), i.getNameEng(), i.getDescription(), i.getDescriptionEng()))
+            item -> new ServiceTranslationDto(
+                item.getName(),
+                item.getNameEng(),
+                item.getDescription(),
+                item.getDescriptionEng()))
             .collect(Collectors.toList());
         source.setFullPrice(source.getBasePrice() + source.getCommission());
         return CreateServiceDto.builder()

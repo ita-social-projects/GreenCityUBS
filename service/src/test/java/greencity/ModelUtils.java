@@ -2252,10 +2252,10 @@ public class ModelUtils {
             .commission(50)
             .locationId(1L)
             .price(100)
-            .description("test")
-            .descriptionEng("test")
-            .name("test")
-            .nameEng("test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
             .build();
 
     }
@@ -2292,10 +2292,10 @@ public class ModelUtils {
 
     public static ServiceTranslation getServiceTranslation() {
         return ServiceTranslation.builder()
-            .name("Test")
-            .description("Test")
-            .nameEng("Test")
-            .descriptionEng("Test")
+            .name("Name")
+            .description("Description")
+            .nameEng("NameEng")
+            .descriptionEng("DescriptionEng")
             .build();
     }
 
@@ -2531,10 +2531,10 @@ public class ModelUtils {
 
     public static List<ServiceTranslation> getServiceTranslationList() {
         return List.of(ServiceTranslation.builder()
-            .description("Test")
-            .name("Test")
-            .nameEng("Test")
-            .descriptionEng("Test")
+            .description("Description")
+            .name("Name")
+            .nameEng("NameEng")
+            .descriptionEng("DescriptionEng")
             .id(1L)
             .service(Service.builder()
                 .id(1L)
@@ -2602,13 +2602,13 @@ public class ModelUtils {
         User user = getUser();
         return GetServiceDto.builder()
             .id(1L)
-            .name("test")
-            .nameEng("test")
+            .name("Name")
+            .nameEng("NameEng")
             .capacity(120)
             .price(100)
             .commission(50)
-            .description("test")
-            .descriptionEng("test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .fullPrice(150)
             .editedAt(LocalDate.now())
             .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
@@ -2618,10 +2618,10 @@ public class ModelUtils {
 
     public static ServiceTranslationDto getServiceTranslationDto() {
         return ServiceTranslationDto.builder()
-            .description("Test")
-            .descriptionEng("Test")
-            .nameEng("Test")
-            .name("Test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .nameEng("NameEng")
+            .name("Name")
             .build();
     }
 
@@ -2644,13 +2644,13 @@ public class ModelUtils {
     public static GetServiceDto getAllInfoAboutService() {
         User user = getUser();
         return GetServiceDto.builder()
-            .name("Test")
-            .nameEng("Test")
+            .name("Name")
+            .nameEng("NameEng")
             .capacity(120)
             .price(100)
             .commission(50)
-            .description("Test")
-            .descriptionEng("Test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .fullPrice(150)
             .id(1L)
             .createdAt(LocalDate.now())
