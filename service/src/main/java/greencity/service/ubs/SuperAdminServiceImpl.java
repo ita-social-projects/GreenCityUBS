@@ -85,6 +85,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                     .name(tariffTranslationDto.getName())
                     .nameEng(tariffTranslationDto.getNameEng())
                     .description(tariffTranslationDto.getDescription())
+                    .descriptionEng(tariffTranslationDto.getDescriptionEng())
                     .build())
                 .collect(Collectors.toList()))
             .build();
@@ -103,6 +104,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private GetTariffServiceDto getTariffService(BagTranslation bagTranslation) {
         return GetTariffServiceDto.builder()
             .description(bagTranslation.getDescription())
+            .descriptionEng(bagTranslation.getDescriptionEng())
             .price(bagTranslation.getBag().getPrice())
             .capacity(bagTranslation.getBag().getCapacity())
             .name(bagTranslation.getName())

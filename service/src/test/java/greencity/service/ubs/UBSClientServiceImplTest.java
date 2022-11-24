@@ -207,10 +207,22 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageData() {
         Long locationId = 1L;
-        BagTranslationDto bagTranslationDto = BagTranslationDto.builder().id(1).name("string").capacity(120).price(170)
-            .nameEng("string").locationId(1L).build();
-        BagTranslation bagTranslation = BagTranslation.builder().id(1L).description("string").name("string")
-            .bag(getBag().get()).nameEng("string").build();
+        BagTranslationDto bagTranslationDto = BagTranslationDto.builder()
+            .id(1)
+            .name("Name")
+            .capacity(120)
+            .price(170)
+            .nameEng("NameEng")
+            .locationId(1L)
+            .build();
+        BagTranslation bagTranslation = BagTranslation.builder()
+            .id(1L)
+            .name("Name")
+            .description("Description")
+            .bag(getBag().get())
+            .nameEng("NameEng")
+            .descriptionEng("DescriptionEng")
+            .build();
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
             new UserPointsAndAllBagsDto(List.of(bagTranslationDto), 600);

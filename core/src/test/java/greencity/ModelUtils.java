@@ -323,7 +323,8 @@ public class ModelUtils {
         return List.of(TariffTranslationDto.builder()
             .name("Test")
             .nameEng("a")
-            .description("Test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .build());
     }
 

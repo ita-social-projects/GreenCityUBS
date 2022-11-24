@@ -2051,7 +2051,8 @@ public class ModelUtils {
 
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
-            .description("Test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .nameEng("a")
             .name("Test")
             .build());
@@ -2101,7 +2102,10 @@ public class ModelUtils {
             .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
-            .bagTranslations(List.of(BagTranslation.builder().description("ss").id(1L).build()))
+            .bagTranslations(List.of(BagTranslation.builder()
+                .description("Description")
+                .descriptionEng("DescriptionEng")
+                .id(1L).build()))
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
@@ -2125,6 +2129,7 @@ public class ModelUtils {
             .nameEng("a")
             .name("Бавовняна сумка")
             .description("Description")
+            .descriptionEng("DescriptionEng")
             .build();
     }
 
@@ -2199,7 +2204,8 @@ public class ModelUtils {
 
     public static List<BagTranslation> getBagTransaltion() {
         return List.of(BagTranslation.builder()
-            .description("Test")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .name("Test")
             .nameEng("a")
             .build());
@@ -2584,14 +2590,16 @@ public class ModelUtils {
         return BagTranslation
             .builder()
             .id(1L)
-            .description("dd")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .bag(Bag.builder().id(1).minAmountOfBags(MinAmountOfBag.EXCLUDE)
                 .location(Location.builder()
                     .id(1L)
                     .locationStatus(LocationStatus.ACTIVE)
                     .build())
                 .build())
-            .nameEng("a")
+            .name("Name")
+            .nameEng("NameEng")
             .build();
     }
 
