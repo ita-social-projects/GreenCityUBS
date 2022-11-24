@@ -27,7 +27,7 @@ class AddServiceDtoMapperTest {
         Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getNameEng(),
             convertDto.getTariffTranslationDtoList().get(0).getNameEng());
         Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getDescriptionEng(),
-                convertDto.getTariffTranslationDtoList().get(0).getDescriptionEng());
+            convertDto.getTariffTranslationDtoList().get(0).getDescriptionEng());
         Assertions.assertEquals(150, bag.getFullPrice());
     }
 }
