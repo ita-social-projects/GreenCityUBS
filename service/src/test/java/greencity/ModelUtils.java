@@ -2269,7 +2269,6 @@ public class ModelUtils {
             .fullPrice(150)
             .createdAt(LocalDate.now())
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .serviceTranslations(getServiceTranslationList())
             .courier(getCourier())
             .serviceTranslations(List.of(getServiceTranslation()))
             .build();
