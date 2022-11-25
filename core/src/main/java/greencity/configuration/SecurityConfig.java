@@ -91,7 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ADMIN_LINK + "/notification/get-template/{id}",
                 SUPER_ADMIN_LINK + "/get-all-receiving-station",
                 SUPER_ADMIN_LINK + "/getLocations",
-                SUPER_ADMIN_LINK + "//getActiveLocations",
+                SUPER_ADMIN_LINK + "/getActiveLocations",
                 SUPER_ADMIN_LINK + "/getCouriers",
                 SUPER_ADMIN_LINK + "/tariffs",
                 SUPER_ADMIN_LINK + "/getTariffService",

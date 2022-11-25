@@ -249,7 +249,7 @@ class SuperAdminController {
      * @return {@link LocationInfoDto}
      * @author Safarov Renat
      */
-    @ApiOperation(value = "Get info about active locations and min amount of bag for this location")
+    @ApiOperation(value = "Get info about active locations and min amount of bags for every location")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = LocationInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),

@@ -244,10 +244,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public List<LocationInfoDto> getActiveLocations() {
-        return regionRepository.findAll().stream()
-            .filter(region -> !region.getLocations().isEmpty())
-            .map(region -> modelMapper.map(region, LocationInfoDto.class))
-            .collect(Collectors.toList());
+        return regionRepository.findRegionsWithActiveLocations().stream()
+                .distinct()
+                .map(region -> modelMapper.map(region, LocationInfoDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
