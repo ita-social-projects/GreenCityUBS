@@ -294,11 +294,11 @@ class SuperAdminServiceImplTest {
     void getActiveLocationsTest() {
         List<Region> regionList = ModelUtils.getAllRegion();
 
-        when(regionRepository.findAll()).thenReturn(regionList);
+        when(regionRepository.findRegionsWithActiveLocations()).thenReturn(regionList);
 
         superAdminService.getActiveLocations();
 
-        verify(regionRepository).findAll();
+        verify(regionRepository).findRegionsWithActiveLocations();
     }
 
     @Test
