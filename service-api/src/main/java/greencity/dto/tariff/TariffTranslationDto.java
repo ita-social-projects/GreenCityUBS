@@ -15,10 +15,13 @@ public class TariffTranslationDto {
     @NotNull
     @NotEmpty
     private String name;
+    @NonNull
+    @NotEmpty
+    private String nameEng;
     @NotNull
     @NotEmpty
     private String description;
     @NonNull
     @NotEmpty
-    private String nameEng;
+    private String descriptionEng;
 }

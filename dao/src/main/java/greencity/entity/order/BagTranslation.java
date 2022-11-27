@@ -20,6 +20,9 @@ public class BagTranslation {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private String descriptionEng;
+
     @Column(nullable = false, length = 60)
     private String name;
 
