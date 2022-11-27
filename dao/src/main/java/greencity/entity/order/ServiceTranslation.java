@@ -27,6 +27,8 @@ public class ServiceTranslation {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private String descriptionEng;
     @ManyToOne
     Service service;
 }

@@ -22,4 +22,5 @@ public class EditServiceDto {
     Long locationId;
     @NotNull
     String nameEng;
+    String descriptionEng;
 }

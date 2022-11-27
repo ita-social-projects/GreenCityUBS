@@ -146,5 +146,6 @@
     <include file="db/changelog/logs/ch-insert-into-order-status-translations-Yashna.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-courier_and_service_translations-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-in-notification_templates-Hlazova.xml"/>
+    <include file="db/changelog/logs/ch-add-column-description_eng-Safarov.xml"/>
 </databaseChangeLog>
 
