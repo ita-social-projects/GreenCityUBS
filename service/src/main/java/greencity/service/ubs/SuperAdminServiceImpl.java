@@ -173,6 +173,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .serviceTranslations(dto.getServiceTranslationDtoList()
                 .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
                     .description(serviceTranslationDto.getDescription())
+                    .descriptionEng(serviceTranslationDto.getDescriptionEng())
                     .name(serviceTranslationDto.getName())
                     .nameEng(serviceTranslationDto.getNameEng())
                     .build())
@@ -194,6 +195,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return GetServiceDto.builder()
             .courierId(serviceTranslation.getService().getCourier().getId())
             .description(serviceTranslation.getDescription())
+            .descriptionEng(serviceTranslation.getDescriptionEng())
             .price(serviceTranslation.getService().getBasePrice())
             .capacity(serviceTranslation.getService().getCapacity())
             .name(serviceTranslation.getName())
@@ -231,6 +233,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         serviceTranslation.setName(dto.getName());
         serviceTranslation.setNameEng(dto.getNameEng());
         serviceTranslation.setDescription(dto.getDescription());
+        serviceTranslation.setDescriptionEng(dto.getDescriptionEng());
         service.setFullPrice(dto.getPrice() + dto.getCommission());
         service.setBasePrice(dto.getPrice());
         serviceRepository.save(service);

@@ -339,9 +339,10 @@ public class ModelUtils {
 
     public static List<ServiceTranslationDto> getServiceTranslationDto() {
         return List.of(ServiceTranslationDto.builder()
-            .name("Test")
-            .nameEng("Test")
-            .description("Test")
+            .name("Name")
+            .nameEng("NameEng")
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .build());
     }
 
@@ -406,6 +407,7 @@ public class ModelUtils {
             .price(120)
             .commission(50)
             .description("Description")
+            .descriptionEng("DescriptionEng")
             .locationId(1L)
             .build();
     }

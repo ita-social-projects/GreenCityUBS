@@ -70,9 +70,10 @@ public class OrderController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/order-details/{locationId}")
+    @GetMapping("/order-details")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPoints(
-        @ApiIgnore @CurrentUserUuid String userUuid, @PathVariable Long locationId) {
+        @ApiIgnore @CurrentUserUuid String userUuid,
+        @RequestParam(required = false) Optional<Long> locationId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageData(userUuid, locationId));
     }
