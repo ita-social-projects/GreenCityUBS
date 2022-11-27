@@ -13,8 +13,10 @@ import javax.validation.constraints.NotNull;
 public class ServiceTranslationDto {
     @NotNull
     private String name;
-    @NonNull
+    @NotNull
     private String nameEng;
     @NotNull
     private String description;
+    @NotNull
+    private String descriptionEng;
 }
