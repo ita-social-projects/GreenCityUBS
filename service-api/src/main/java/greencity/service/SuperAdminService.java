@@ -102,6 +102,14 @@ public interface SuperAdminService {
     List<LocationInfoDto> getAllLocation();
 
     /**
+     * Method for get all info about active locations.
+     *
+     * @return {@link LocationInfoDto}.
+     * @author Safarov Renat.
+     */
+    List<LocationInfoDto> getActiveLocations();
+
+    /**
      * Method for adding location.
      *
      * @param dto {@link LocationCreateDto}
