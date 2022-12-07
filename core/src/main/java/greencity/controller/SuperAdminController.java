@@ -106,7 +106,7 @@ class SuperAdminController {
      * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Delete tariff by Id")
+    @ApiOperation(value = "Delete tariff service by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -633,7 +633,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deleting or deactivation of TariffsInfo.
+     * Controller for deactivation of TariffsInfo.
      *
      * @author Yurii Fedorko
      */
