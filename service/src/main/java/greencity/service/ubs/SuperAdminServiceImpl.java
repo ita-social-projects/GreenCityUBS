@@ -16,15 +16,15 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.coords.Coordinates;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -630,16 +630,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public String deactivateTariffCard(Long tariffId) {
+    @Transactional
+    public void deactivateTariffCard(Long tariffId) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        if (tariffsInfo.getOrders().isEmpty()) {
-            tariffsInfoRepository.delete(tariffsInfo);
-            return "Deleted";
-        } else {
-            tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
-            tariffsInfoRepository.save(tariffsInfo);
-            return "Deactivated";
-        }
+
+        var tariffLocations = changeTariffLocationsStatusToDeactivated(
+            tariffsInfo.getTariffLocations());
+
+        tariffsInfo.setTariffLocations(tariffLocations);
+        tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
+
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    private Set<TariffLocation> changeTariffLocationsStatusToDeactivated(Set<TariffLocation> tariffLocations) {
+        return tariffLocations.stream()
+            .map(this::deactivateTariffLocation)
+            .collect(Collectors.toSet());
+    }
+
+    private TariffLocation deactivateTariffLocation(TariffLocation tariffLocation) {
+        tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED);
+        return tariffLocation;
     }
 
     @Override
