@@ -646,8 +646,9 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/deactivateTariff/{tariffId}")
-    public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateTariffCard(tariffId));
+    public ResponseEntity<HttpStatus> deactivateTariff(@PathVariable Long tariffId) {
+        superAdminService.deactivateTariffCard(tariffId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

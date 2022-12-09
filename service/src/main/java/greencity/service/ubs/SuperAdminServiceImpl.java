@@ -41,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -632,7 +631,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public String deactivateTariffCard(Long tariffId) {
+    public void deactivateTariffCard(Long tariffId) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
 
         var tariffLocations = changeTariffLocationsStatusToDeactivated(
@@ -642,8 +641,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED);
 
         tariffsInfoRepository.save(tariffsInfo);
-
-        return "Deactivated";
     }
 
     private Set<TariffLocation> changeTariffLocationsStatusToDeactivated(Set<TariffLocation> tariffLocations) {
