@@ -106,7 +106,7 @@ class SuperAdminController {
      * @author Vadym Makitra.
      */
 
-    @ApiOperation(value = "Delete tariff by Id")
+    @ApiOperation(value = "Delete tariff service by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -633,7 +633,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for deleting or deactivation of TariffsInfo.
+     * Controller for deactivation of TariffsInfo.
      *
      * @author Yurii Fedorko
      */
@@ -646,8 +646,9 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
     @PutMapping("/deactivateTariff/{tariffId}")
-    public ResponseEntity<String> deactivateTariff(@PathVariable Long tariffId) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateTariffCard(tariffId));
+    public ResponseEntity<HttpStatus> deactivateTariff(@PathVariable Long tariffId) {
+        superAdminService.deactivateTariffCard(tariffId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**

@@ -263,9 +263,9 @@ public interface SuperAdminService {
      * this tariff.
      *
      * @param tariffId - id of tariff
-     * @return status of the tariff
+     *
      */
-    String deactivateTariffCard(Long tariffId);
+    void deactivateTariffCard(Long tariffId);
 
     /**
      * Method for editing Locations.
