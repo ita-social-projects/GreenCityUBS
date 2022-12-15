@@ -683,18 +683,19 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteTariff() {
-        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+    void deactivateTariff() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         superAdminService.deactivateTariffCard(1L);
-        verify(tariffsInfoRepository).delete(tariffsInfo);
+        verify(tariffsInfoRepository).findById(anyLong());
+        verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
     @Test
-    void deleteTariff2() {
-        TariffsInfo tariffsInfo = ModelUtils.getTariffInfoWithLimitOfBags();
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
-        assertEquals("Deactivated", superAdminService.deactivateTariffCard(1L));
+    void deactivateTariffTestThrows() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffCard(1L));
     }
 
     @Test
