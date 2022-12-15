@@ -18,4 +18,13 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
             + "join orders o on cl.id = o.courier_locations_id "
             + "where o.id = :orderId")
     Courier findCourierByOrderId(@Param("orderId") Long orderId);
+
+    /**
+     * Method to check if the courier exists by courier id.
+     *
+     * @param id - courier id.
+     * @return return true if courier exists and false if not.
+     * @author Nikita Korzh.
+     */
+    Boolean existsCourierById(Long id);
 }

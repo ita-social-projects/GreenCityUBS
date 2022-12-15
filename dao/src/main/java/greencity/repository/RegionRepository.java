@@ -33,4 +33,13 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
             + "where l.location_status = 'ACTIVE' "
             + "group by r.id, l.id")
     List<Region> findRegionsWithActiveLocations();
+
+    /**
+     * Method to check if the region exists by regionId.
+     *
+     * @param id - region id.
+     * @return return true if regions exists and false if not.
+     * @author Nikita Korzh.
+     */
+    boolean existsRegionById(Long id);
 }

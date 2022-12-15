@@ -4,13 +4,16 @@ import java.util.*;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.entity.order.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 import org.modelmapper.ModelMapper;
 
 import greencity.ModelUtils;
@@ -38,6 +41,7 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,6 +54,10 @@ import static greencity.ModelUtils.*;
 class SuperAdminServiceImplTest {
     @InjectMocks
     private SuperAdminServiceImpl superAdminService;
+
+    @Mock
+    private SuperAdminServiceImpl superAdminServiceImpl;
+
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -76,6 +84,9 @@ class SuperAdminServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private TariffLocationRepository tariffsLocationRepository;
+
+    @Mock
+    private DeactivateChosenEntityRepository deactivateChosenEntityRepository;
 
     @Test
     void addTariffServiceTest() {
@@ -746,4 +757,23 @@ class SuperAdminServiceImplTest {
         assertThrows(BadRequestException.class,
             () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
     }
+
+    @Test
+    void deactivateTariffsByRegions() {
+        Optional<List<Long>> regionsId = Optional.of(List.of(1L, 2L));
+        Optional<List<Long>> citiesId = Optional.empty();
+        Optional<List<Long>> stationsId = Optional.empty();
+        Optional<Long> courierId = Optional.empty();
+
+        DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(regionsId)
+            .citiesId(citiesId)
+            .stationsId(stationsId)
+            .courierId(courierId)
+            .build();
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(deactivateChosenEntityRepository).deactivateTariffsByRegions(regionsId.get());
+
+    }
+
 }

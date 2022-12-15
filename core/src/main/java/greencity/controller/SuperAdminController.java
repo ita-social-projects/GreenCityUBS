@@ -1,9 +1,11 @@
 package greencity.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -688,5 +690,41 @@ class SuperAdminController {
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
         superAdminService.changeTariffLocationsStatus(id, dto, status);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller for deactivation tariff with chosen parameters.
+     *
+     * @param regionsId  - one or more region id.
+     * @param citiesId   - one or more city id.
+     * @param stationsId - one or more receiving station id.
+     * @param courierId  - courier id.
+     * @author Nikita Korzh.
+     */
+    @ApiOperation(value = "Deactivation tariff with chosen parameters.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/deactivate")
+    public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
+        @RequestParam(name = "regionsId", required = false) Optional<List<Long>> regionsId,
+        @RequestParam(name = "citiesId", required = false) Optional<List<Long>> citiesId,
+        @RequestParam(name = "stationsId", required = false) Optional<List<Long>> stationsId,
+        @RequestParam(name = "courierId", required = false) Optional<Long> courierId) {
+        if (superAdminService.isValidRequest(regionsId, citiesId, stationsId, courierId)) {
+            superAdminService.deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto.builder()
+                .regionsId(regionsId)
+                .citiesId(citiesId)
+                .stationsId(stationsId)
+                .courierId(courierId)
+                .build());
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

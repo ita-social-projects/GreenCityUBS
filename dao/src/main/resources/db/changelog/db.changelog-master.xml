@@ -148,5 +148,6 @@
     <include file="db/changelog/logs/ch-drop-column-language_id-in-notification_templates-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-add-column-description_eng-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-column-description_eng-into-bag_translations-table-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-add-column-station-status-Korzh.xml"/>
 </databaseChangeLog>
 

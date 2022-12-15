@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
@@ -59,6 +60,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
     private final TariffLocationRepository tariffsLocationRepository;
+
+    private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
 
     @Override
     public AddServiceDto addTariffService(AddServiceDto dto, String uuid) {
@@ -450,6 +453,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
+        System.out.println(tariffs.size());
         List<GetTariffsInfoDto> dtos = tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
@@ -672,5 +676,247 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         } else {
             throw new BadRequestException("Unresolvable param");
         }
+    }
+
+    @Override
+    @Transactional
+    public void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto details) {
+        if (shouldDeactivateTariffsByRegions(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegions(details.getRegionsId().get());
+        } else if (shouldDeactivateTariffsByRegionsAndCities(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionsAndCities(details.getCitiesId().get(),
+                details.getRegionsId().get().get(0));
+        } else if (shouldDeactivateTariffsByCourier(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(details.getCourierId().get());
+        } else if (shouldDeactivateTariffsByReceivingStations(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByReceivingStations(
+                details.getStationsId().get());
+        } else if (shouldDeactivateTariffsByCourierAndReceivingStations(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndReceivingStations(
+                details.getCourierId().get(), details.getStationsId().get());
+        } else if (shouldDeactivateTariffsByCourierAndRegion(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByCourierAndRegion(
+                details.getRegionsId().get().get(0), details.getCourierId().get());
+        } else if (shouldDeactivateTariffsByRegionAndCityAndStation(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByRegionAndCitiesAndStations(
+                details.getRegionsId().get().get(0), details.getCitiesId().get(), details.getStationsId().get());
+        } else if (shouldDeactivateTariffsByAll(details)) {
+            deactivateTariffsForChosenParamRepository.deactivateTariffsByAllParam(
+                details.getRegionsId().get().get(0), details.getCitiesId().get(), details.getStationsId().get(),
+                details.getCourierId().get());
+        } else {
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by details.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by details and false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByAll(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
+            && details.getStationsId().isPresent() && details.getCourierId().isPresent()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .checkIfCitiesExistForRegion(details.getCitiesId().get(),
+                            details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .checkIfReceivingStationsExists(details.getStationsId().get())
+                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException(
+                        "Current region or cities or receiving or station or courier don't exists");
+                }
+            } else {
+                throw new BadRequestException("Size of regions id should be 1");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by region id, cities
+     * id and receiving stations.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by region id, cities id and
+     *         receiving stations and false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByRegionAndCityAndStation(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
+            && details.getStationsId().isPresent() && details.getCourierId().isEmpty()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .checkIfCitiesExistForRegion(details.getCitiesId().get(),
+                            details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository
+                        .checkIfReceivingStationsExists(details.getStationsId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException("Current region or cities or receiving station don't exists");
+                }
+            } else {
+                throw new BadRequestException("Size of regions id should be 1");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by region id and
+     * courier id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by region id and courier id and
+     *         false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByCourierAndRegion(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCourierId().isPresent()
+            && details.getCitiesId().isEmpty() && details.getStationsId().isEmpty()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                    return true;
+                } else {
+                    throw new NotFoundException("Current courier or region don't exists");
+                }
+            } else {
+                throw new BadRequestException("Size of regions id should be 1");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by courier id and
+     * receiving stations id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by region id and courier id and
+     *         false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByCourierAndReceivingStations(DetailsOfDeactivateTariffsDto details) {
+        if (details.getStationsId().isPresent() && details.getCourierId().isPresent()
+                && details.getRegionsId().isEmpty() && details.getCitiesId().isEmpty()) {
+            if (courierRepository.existsCourierById(details.getCourierId().get())
+                && deactivateTariffsForChosenParamRepository
+                    .checkIfReceivingStationsExists(details.getStationsId().get())) {
+                return true;
+            } else {
+                throw new NotFoundException("Current courier or receiving station don't exists");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by receiving stations
+     * id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by receiving stations and false
+     *         if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByReceivingStations(DetailsOfDeactivateTariffsDto details) {
+        if (details.getStationsId().isPresent() && details.getRegionsId().isEmpty()
+            && details.getCitiesId().isEmpty() && details.getCourierId().isEmpty()) {
+            if (deactivateTariffsForChosenParamRepository
+                .checkIfReceivingStationsExists(details.getStationsId().get())) {
+                return true;
+            } else {
+                throw new NotFoundException("Current receiving stations don't exists");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by courier id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by courier id and false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByCourier(DetailsOfDeactivateTariffsDto details) {
+        if (details.getCourierId().isPresent() && details.getRegionsId().isEmpty()
+            && details.getCitiesId().isEmpty() && details.getStationsId().isEmpty()) {
+            if (courierRepository.existsCourierById(details.getCourierId().get())) {
+                return true;
+            } else {
+                throw new NotFoundException("Current courier doesn't exists");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by region id and
+     * cities id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by region id and cities id and
+     *         false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByRegionsAndCities(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
+            && details.getStationsId().isEmpty() && details.getCourierId().isEmpty()) {
+            if (details.getRegionsId().get().size() == 1) {
+                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+                    && deactivateTariffsForChosenParamRepository.checkIfCitiesExistForRegion(
+                        details.getCitiesId().get(),
+                        details.getRegionsId().get().get(0))) {
+                    return true;
+                } else {
+                    throw new NotFoundException("Current region or cities don't exists");
+                }
+            } else {
+                throw new BadRequestException("Size of regions id should be 1");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method that checks if the tariff should be deactivated by region id.
+     *
+     * @param details - contains regions id, cities id, receiving stations id and
+     *                courier id.
+     * @return true if you have to deactivate tariff by region id and false if not.
+     * @author Nikita Korzh.
+     */
+    private boolean shouldDeactivateTariffsByRegions(DetailsOfDeactivateTariffsDto details) {
+        if (details.getRegionsId().isPresent() && details.getCitiesId().isEmpty()
+            && details.getStationsId().isEmpty() && details.getCourierId().isEmpty()) {
+            if (deactivateTariffsForChosenParamRepository.checkIfRegionsExists(details.getRegionsId().get())) {
+                return true;
+            } else {
+                throw new NotFoundException("Current region doesn't exists");
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isValidRequest(Optional<List<Long>> regionId, Optional<List<Long>> cityId,
+        Optional<List<Long>> stationId, Optional<Long> courierId) {
+        return regionId.isPresent() || cityId.isPresent() || stationId.isPresent() || courierId.isPresent();
     }
 }

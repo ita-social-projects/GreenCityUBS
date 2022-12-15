@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
@@ -17,6 +18,7 @@ import greencity.entity.order.Service;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SuperAdminService {
     /**
@@ -284,4 +286,26 @@ public interface SuperAdminService {
      *                 BadRequestException
      */
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
+
+    /**
+     * Method that deactivate tariffs for chosen parameters.
+     *
+     * @param detailsOfDeactivateTariffsDto - contains list of regionsId, list of
+     *                                      citiesId, list of stationsId and
+     *                                      courierId.
+     */
+    void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
+
+    /**
+     * Method that checks if request is validated.
+     *
+     * @param regionId  - one or more region id.
+     * @param cityId    - one or more city id.
+     * @param stationId - one or more station id.
+     * @param courierId - courier id.
+     * @return true - if valid and false - if not valid.
+     * @author Nikita Korzh.
+     */
+    boolean isValidRequest(Optional<List<Long>> regionId, Optional<List<Long>> cityId,
+        Optional<List<Long>> stationId, Optional<Long> courierId);
 }

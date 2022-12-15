@@ -154,7 +154,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
                 ADMIN_LINK + "/**",
                 "/accountinfo")
-            .hasAnyRole(ADMIN)
+            .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.GET,
                 UBS_MANAG_LINK + "/**",
                 SUPER_ADMIN_LINK + "/**",
