@@ -754,23 +754,4 @@ class SuperAdminServiceImplTest {
         assertThrows(BadRequestException.class,
             () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
     }
-
-    @Test
-    void deactivateTariffsByRegions() {
-        Optional<List<Long>> regionsId = Optional.of(List.of(1L, 2L));
-        Optional<List<Long>> citiesId = Optional.empty();
-        Optional<List<Long>> stationsId = Optional.empty();
-        Optional<Long> courierId = Optional.empty();
-
-        DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
-            .regionsId(regionsId)
-            .citiesId(citiesId)
-            .stationsId(stationsId)
-            .courierId(courierId)
-            .build();
-        superAdminService.deactivateTariffForChosenParam(details);
-        verify(deactivateChosenEntityRepository).deactivateTariffsByRegions(regionsId.get());
-
-    }
-
 }
