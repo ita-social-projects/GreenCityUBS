@@ -810,7 +810,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
      */
     private boolean shouldDeactivateTariffsByCourierAndReceivingStations(DetailsOfDeactivateTariffsDto details) {
         if (details.getStationsId().isPresent() && details.getCourierId().isPresent()
-                && details.getRegionsId().isEmpty() && details.getCitiesId().isEmpty()) {
+            && details.getRegionsId().isEmpty() && details.getCitiesId().isEmpty()) {
             if (courierRepository.existsCourierById(details.getCourierId().get())
                 && deactivateTariffsForChosenParamRepository
                     .checkIfReceivingStationsExists(details.getStationsId().get())) {
