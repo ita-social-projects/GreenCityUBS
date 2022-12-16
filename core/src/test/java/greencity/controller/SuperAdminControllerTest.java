@@ -19,7 +19,6 @@ import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
-import liquibase.pro.packaged.O;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,17 +35,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -385,11 +381,6 @@ class SuperAdminControllerTest {
 
     @Test
     void deactivateTariffFotChosenParam() throws Exception {
-        Optional<List<Long>> regionsId = Optional.of(List.of(1L));
-        Optional<List<Long>> citiesId = Optional.empty();
-        Optional<List<Long>> stationsId = Optional.empty();
-        Optional<Long> courierId = Optional.empty();
-        when(superAdminService.isValidRequest(regionsId, citiesId, stationsId, courierId)).thenReturn(true);
         mockMvc.perform(post(ubsLink + "/deactivate/")
             .param("regionsId", "1")).andExpect(status().isOk());
     }

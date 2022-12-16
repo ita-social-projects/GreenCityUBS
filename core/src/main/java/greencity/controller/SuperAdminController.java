@@ -716,7 +716,7 @@ class SuperAdminController {
         @RequestParam(name = "citiesId", required = false) Optional<List<Long>> citiesId,
         @RequestParam(name = "stationsId", required = false) Optional<List<Long>> stationsId,
         @RequestParam(name = "courierId", required = false) Optional<Long> courierId) {
-        if (superAdminService.isValidRequest(regionsId, citiesId, stationsId, courierId)) {
+        if (regionsId.isPresent() || citiesId.isPresent() || stationsId.isPresent() || courierId.isPresent()) {
             superAdminService.deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto.builder()
                 .regionsId(regionsId)
                 .citiesId(citiesId)

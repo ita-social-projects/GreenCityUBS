@@ -26,5 +26,5 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
      * @return return true if courier exists and false if not.
      * @author Nikita Korzh.
      */
-    Boolean existsCourierById(Long id);
+    boolean existsCourierById(Long id);
 }

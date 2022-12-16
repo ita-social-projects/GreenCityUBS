@@ -295,17 +295,4 @@ public interface SuperAdminService {
      *                                      courierId.
      */
     void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
-
-    /**
-     * Method that checks if request is validated.
-     *
-     * @param regionId  - one or more region id.
-     * @param cityId    - one or more city id.
-     * @param stationId - one or more station id.
-     * @param courierId - courier id.
-     * @return true - if valid and false - if not valid.
-     * @author Nikita Korzh.
-     */
-    boolean isValidRequest(Optional<List<Long>> regionId, Optional<List<Long>> cityId,
-        Optional<List<Long>> stationId, Optional<Long> courierId);
 }

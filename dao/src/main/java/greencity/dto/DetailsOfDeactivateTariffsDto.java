@@ -13,8 +13,8 @@ import java.util.Optional;
 @AllArgsConstructor
 @Builder
 public class DetailsOfDeactivateTariffsDto {
-    Optional<List<Long>> regionsId;
-    Optional<List<Long>> citiesId;
-    Optional<List<Long>> stationsId;
-    Optional<Long> courierId;
+    private Optional<List<Long>> regionsId;
+    private Optional<List<Long>> citiesId;
+    private Optional<List<Long>> stationsId;
+    private Optional<Long> courierId;
 }
