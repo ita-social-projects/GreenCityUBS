@@ -38,8 +38,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * Method to check if the region exists by regionId.
      *
      * @param id - region id.
-     * @return return true if regions exists and false if not.
+     * @return return true if region exists and false if not.
      * @author Nikita Korzh.
      */
-    boolean isRegionByIdExists(Long id);
+    boolean existsRegionById(Long id);
 }
