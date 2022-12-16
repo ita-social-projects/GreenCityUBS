@@ -697,9 +697,9 @@ class SuperAdminController {
     /**
      * Controller for deactivation tariff with chosen parameters.
      *
-     * @param regionsId  - one or more region id.
-     * @param citiesId   - one or more city id.
-     * @param stationsId - one or more receiving station id.
+     * @param regionsId  - list of regions ids.
+     * @param citiesId   - list of cities ids.
+     * @param stationsId - list of receiving stations ids.
      * @param courierId  - courier id.
      * @author Nikita Korzh.
      */
@@ -711,6 +711,7 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_TARIFF', authentication)")
     @PostMapping("/deactivate")
     public ResponseEntity<HttpStatus> deactivateTariffForChosenParam(
         @RequestParam(name = "regionsId", required = false) Optional<List<Long>> regionsId,

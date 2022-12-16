@@ -150,7 +150,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .hasAnyRole(UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 UBS_MANAG_LINK + "/**",
-                // SUPER_ADMIN_LINK + "/**",
                 UBS_LINK + "/ubs/order/{id}/cancellation/",
                 ADMIN_LINK + "/**",
                 "/accountinfo")

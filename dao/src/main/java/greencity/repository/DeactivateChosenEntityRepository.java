@@ -218,7 +218,7 @@ public class DeactivateChosenEntityRepository {
      *
      * @param citiesId - list of cities id.
      * @param regionId - region id.
-     * @return return true if cities exists for region and false if not.
+     * @return return true if cities exist for region and false if not.
      * @author Nikita Korzh.
      */
     public boolean isCitiesExistForRegion(List<Long> citiesId, Long regionId) {
@@ -231,7 +231,7 @@ public class DeactivateChosenEntityRepository {
     }
 
     /**
-     * Method to check if the regions exist.
+     * Method to check if the region exists.
      *
      * @param regionsId - list of regions id.
      * @return return true if region exists and false if not.
