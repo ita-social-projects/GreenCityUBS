@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
@@ -50,9 +49,6 @@ import static org.mockito.Mockito.*;
 class SuperAdminServiceImplTest {
     @InjectMocks
     private SuperAdminServiceImpl superAdminService;
-
-    @Mock
-    private SuperAdminServiceImpl superAdminServiceImpl;
 
     @Mock
     private UserRepository userRepository;

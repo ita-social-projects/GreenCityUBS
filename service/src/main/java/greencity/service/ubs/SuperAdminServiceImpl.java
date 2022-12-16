@@ -62,8 +62,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final TariffLocationRepository tariffsLocationRepository;
 
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
-
-    private static final String BAD_SIZE_OF_REGIONS_MESSAGE = "Region ids size should be 1 if several params are selected";
+    private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
+        "Region ids size should be 1 if several params are selected";
     private static final String REGIONS_EXIST_MESSAGE = "Current region doesn't exist: %s";
     private static final String REGIONS_OR_CITIES_EXIST_MESSAGE = "Current regions %s or cities %s don't exist.";
     private static final String COURIER_EXISTS_MESSAGE = "Current courier doesn't exist: %s";
