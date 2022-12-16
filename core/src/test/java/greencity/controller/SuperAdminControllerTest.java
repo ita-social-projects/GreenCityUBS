@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.LocationCreateDto;
@@ -38,6 +39,7 @@ import org.springframework.validation.Validator;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
@@ -371,5 +373,30 @@ class SuperAdminControllerTest {
     @Test
     void excludeBag() throws Exception {
         mockMvc.perform(patch(ubsLink + "/excludeBag/{id}", 1L)).andExpect(status().isOk());
+    }
+
+    @Test
+    void deactivateTariffForChosenParamBadRequest() throws Exception {
+        mockMvc.perform(post(ubsLink + "/deactivate"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deactivateTariffFotChosenParam() throws Exception {
+        Optional<List<Long>> regionsId = Optional.of(List.of(1L));
+        Optional<List<Long>> citiesId = Optional.empty();
+        Optional<List<Long>> stationsId = Optional.empty();
+        Optional<Long> courierId = Optional.empty();
+
+        DetailsOfDeactivateTariffsDto details = DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(regionsId)
+            .citiesId(citiesId)
+            .stationsId(stationsId)
+            .courierId(courierId)
+            .build();
+
+        mockMvc.perform(post(ubsLink + "/deactivate/")
+            .param("regionsId", "1")).andExpect(status().isOk());
+        verify(superAdminService).deactivateTariffForChosenParam(details);
     }
 }

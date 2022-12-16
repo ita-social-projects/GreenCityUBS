@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
@@ -284,4 +285,13 @@ public interface SuperAdminService {
      *                 BadRequestException
      */
     void changeTariffLocationsStatus(Long tariffId, ChangeTariffLocationStatusDto dto, String param);
+
+    /**
+     * Method that deactivate tariffs for chosen parameters.
+     *
+     * @param detailsOfDeactivateTariffsDto - contains list of regionsId, list of
+     *                                      citiesId, list of stationsId and
+     *                                      courierId.
+     */
+    void deactivateTariffForChosenParam(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
 }
