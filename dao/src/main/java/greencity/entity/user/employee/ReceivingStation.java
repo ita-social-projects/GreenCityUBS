@@ -3,6 +3,7 @@ package greencity.entity.user.employee;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
+import greencity.enums.StationStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,4 +37,8 @@ public class ReceivingStation {
     private User createdBy;
 
     private LocalDate createDate;
+
+    @Column(name = "station_status")
+    @Enumerated(EnumType.STRING)
+    private StationStatus stationStatus;
 }

@@ -49,6 +49,7 @@ import static org.mockito.Mockito.*;
 class SuperAdminServiceImplTest {
     @InjectMocks
     private SuperAdminServiceImpl superAdminService;
+
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -75,6 +76,9 @@ class SuperAdminServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private TariffLocationRepository tariffsLocationRepository;
+
+    @Mock
+    private DeactivateChosenEntityRepository deactivateChosenEntityRepository;
 
     @Test
     void addTariffServiceTest() {
