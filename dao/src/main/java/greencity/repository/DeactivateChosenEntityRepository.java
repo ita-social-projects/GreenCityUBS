@@ -11,10 +11,10 @@ import java.util.List;
 @Repository
 public class DeactivateChosenEntityRepository {
     private final EntityManager entityManager;
-    private final String region = "regionsId";
-    private final String cities = "citiesId";
-    private final String courier = "courierId";
-    private final String station = "stationsId";
+    private static final String region = "regionsId";
+    private static final String cities = "citiesId";
+    private static final String courier = "courierId";
+    private static final String station = "stationsId";
 
     /**
      * Constructor to initialize EntityManager.

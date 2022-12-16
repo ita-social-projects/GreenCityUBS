@@ -63,7 +63,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
 
-    private final String badSizeOfRegions = "Size of regions id should be 1";
+    private static final String badSizeOfRegions = "Size of regions id should be 1";
 
     @Override
     public AddServiceDto addTariffService(AddServiceDto dto, String uuid) {
@@ -743,20 +743,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByAll(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
             && details.getStationsId().isPresent() && details.getCourierId().isPresent()) {
-            if (details.getRegionsId().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+            if (details.getRegionsId().orElseThrow(BadRequestException::new).size() == 1) {
+                if (regionRepository
+                    .existsRegionById(details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
                     && deactivateTariffsForChosenParamRepository
-                        .isCitiesExistForRegion(details.getCitiesId().get(),
-                            details.getRegionsId().get().get(0))
+                        .isCitiesExistForRegion(details.getCitiesId().orElseThrow(BadRequestException::new),
+                            details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
                     && deactivateTariffsForChosenParamRepository
-                        .isReceivingStationsExists(details.getStationsId().get())
-                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+                        .isReceivingStationsExists(details.getStationsId().orElseThrow(BadRequestException::new))
+                    && courierRepository
+                        .existsCourierById(details.getCourierId().orElseThrow(BadRequestException::new))) {
                     return true;
                 } else {
                     throw new NotFoundException(
-                        "Current region or cities or receiving or station or courier don't exists"
-                            + details.getRegionsId().get() + details.getCitiesId().get()
-                            + details.getStationsId().get() + details.getCourierId().get());
+                        "Current region or cities or receiving or station or courier don't exists: "
+                            + details.getRegionsId().orElseThrow() + details.getCitiesId().orElseThrow()
+                            + details.getStationsId().orElseThrow() + details.getCourierId().orElseThrow());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
@@ -779,18 +781,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByRegionAndCityAndStation(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
             && details.getStationsId().isPresent() && details.getCourierId().isEmpty()) {
-            if (details.getRegionsId().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+            if (details.getRegionsId().orElseThrow(BadRequestException::new).size() == 1) {
+                if (regionRepository
+                    .existsRegionById(details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
                     && deactivateTariffsForChosenParamRepository
-                        .isCitiesExistForRegion(details.getCitiesId().get(),
-                            details.getRegionsId().get().get(0))
+                        .isCitiesExistForRegion(details.getCitiesId().orElseThrow(BadRequestException::new),
+                            details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
                     && deactivateTariffsForChosenParamRepository
-                        .isReceivingStationsExists(details.getStationsId().get())) {
+                        .isReceivingStationsExists(details.getStationsId().orElseThrow(BadRequestException::new))) {
                     return true;
                 } else {
-                    throw new NotFoundException("Current region or cities or receiving station don't exists"
-                        + details.getRegionsId().get() + details.getCitiesId().get()
-                        + details.getStationsId().get());
+                    throw new NotFoundException("Current region or cities or receiving station don't exists: "
+                        + details.getRegionsId().orElseThrow() + details.getCitiesId().orElseThrow()
+                        + details.getStationsId().orElseThrow());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
@@ -813,13 +816,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByCourierAndRegion(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsId().isPresent() && details.getCourierId().isPresent()
             && details.getCitiesId().isEmpty() && details.getStationsId().isEmpty()) {
-            if (details.getRegionsId().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
-                    && courierRepository.existsCourierById(details.getCourierId().get())) {
+            if (details.getRegionsId().orElseThrow(BadRequestException::new).size() == 1) {
+                if (regionRepository
+                    .existsRegionById(details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
+                    && courierRepository
+                        .existsCourierById(details.getCourierId().orElseThrow(BadRequestException::new))) {
                     return true;
                 } else {
-                    throw new NotFoundException("Current courier or region don't exists" + details.getCourierId().get()
-                        + details.getRegionsId().get());
+                    throw new NotFoundException(
+                        "Current courier or region don't exists: " + details.getCourierId().orElseThrow()
+                            + details.getRegionsId().orElseThrow());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
@@ -841,14 +847,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByCourierAndReceivingStations(DetailsOfDeactivateTariffsDto details) {
         if (details.getStationsId().isPresent() && details.getCourierId().isPresent()
             && details.getRegionsId().isEmpty() && details.getCitiesId().isEmpty()) {
-            if (courierRepository.existsCourierById(details.getCourierId().get())
+            if (courierRepository.existsCourierById(details.getCourierId().orElseThrow(BadRequestException::new))
                 && deactivateTariffsForChosenParamRepository
-                    .isReceivingStationsExists(details.getStationsId().get())) {
+                    .isReceivingStationsExists(details.getStationsId().orElseThrow(BadRequestException::new))) {
                 return true;
             } else {
                 throw new NotFoundException(
-                    "Current courier or receiving station don't exists" + details.getCourierId().get()
-                        + details.getStationsId().get());
+                    "Current courier or receiving station don't exists: " + details.getCourierId().orElseThrow()
+                        + details.getStationsId().orElseThrow());
             }
         }
         return false;
@@ -868,10 +874,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (details.getStationsId().isPresent() && details.getRegionsId().isEmpty()
             && details.getCitiesId().isEmpty() && details.getCourierId().isEmpty()) {
             if (deactivateTariffsForChosenParamRepository
-                .isReceivingStationsExists(details.getStationsId().get())) {
+                .isReceivingStationsExists(details.getStationsId().orElseThrow(BadRequestException::new))) {
                 return true;
             } else {
-                throw new NotFoundException("Current receiving stations don't exists" + details.getStationsId().get());
+                throw new NotFoundException(
+                    "Current receiving stations don't exists: " + details.getStationsId().orElseThrow());
             }
         }
         return false;
@@ -888,10 +895,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByCourier(DetailsOfDeactivateTariffsDto details) {
         if (details.getCourierId().isPresent() && details.getRegionsId().isEmpty()
             && details.getCitiesId().isEmpty() && details.getStationsId().isEmpty()) {
-            if (courierRepository.existsCourierById(details.getCourierId().get())) {
+            if (courierRepository.existsCourierById(details.getCourierId().orElseThrow(BadRequestException::new))) {
                 return true;
             } else {
-                throw new NotFoundException("Current courier doesn't exists" + details.getCourierId().get());
+                throw new NotFoundException("Current courier doesn't exists: " + details.getCourierId().orElseThrow());
             }
         }
         return false;
@@ -911,15 +918,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByRegionsAndCities(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsId().isPresent() && details.getCitiesId().isPresent()
             && details.getStationsId().isEmpty() && details.getCourierId().isEmpty()) {
-            if (details.getRegionsId().get().size() == 1) {
-                if (regionRepository.existsRegionById(details.getRegionsId().get().get(0))
+            if (details.getRegionsId().orElseThrow(BadRequestException::new).size() == 1) {
+                if (regionRepository
+                    .existsRegionById(details.getRegionsId().orElseThrow(BadRequestException::new).get(0))
                     && deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(
-                        details.getCitiesId().get(),
-                        details.getRegionsId().get().get(0))) {
+                        details.getCitiesId().orElseThrow(BadRequestException::new),
+                        details.getRegionsId().orElseThrow(BadRequestException::new).get(0))) {
                     return true;
                 } else {
-                    throw new NotFoundException("Current region or cities don't exists" + details.getRegionsId().get()
-                        + details.getCitiesId().get());
+                    throw new NotFoundException(
+                        "Current region or cities don't exists: " + details.getRegionsId().orElseThrow()
+                            + details.getCitiesId().orElseThrow());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
@@ -939,10 +948,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private boolean shouldDeactivateTariffsByRegions(DetailsOfDeactivateTariffsDto details) {
         if (details.getRegionsId().isPresent() && details.getCitiesId().isEmpty()
             && details.getStationsId().isEmpty() && details.getCourierId().isEmpty()) {
-            if (deactivateTariffsForChosenParamRepository.isRegionsExists(details.getRegionsId().get())) {
+            if (deactivateTariffsForChosenParamRepository
+                .isRegionsExists(details.getRegionsId().orElseThrow(BadRequestException::new))) {
                 return true;
             } else {
-                throw new NotFoundException("Current region doesn't exists: " + details.getRegionsId().get());
+                throw new NotFoundException("Current region doesn't exists: " + details.getRegionsId().orElseThrow());
             }
         }
         return false;
