@@ -18,7 +18,6 @@ import greencity.entity.order.Service;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface SuperAdminService {
     /**
