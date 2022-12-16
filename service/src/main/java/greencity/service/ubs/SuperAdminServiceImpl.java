@@ -755,8 +755,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 } else {
                     throw new NotFoundException(
                         "Current region or cities or receiving or station or courier don't exists"
-                                + details.getRegionsId().get() + details.getCitiesId().get()
-                                + details.getStationsId().get() + details.getCourierId().get());
+                            + details.getRegionsId().get() + details.getCitiesId().get()
+                            + details.getStationsId().get() + details.getCourierId().get());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
@@ -789,8 +789,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                     return true;
                 } else {
                     throw new NotFoundException("Current region or cities or receiving station don't exists"
-                            + details.getRegionsId().get() + details.getCitiesId().get()
-                            + details.getStationsId().get());
+                        + details.getRegionsId().get() + details.getCitiesId().get()
+                        + details.getStationsId().get());
                 }
             } else {
                 throw new BadRequestException(badSizeOfRegions);
