@@ -231,7 +231,7 @@ public class DeactivateChosenEntityRepository {
     }
 
     /**
-     * Method to check if the region exists.
+     * Method to check if the regions exist.
      *
      * @param regionsId - list of regions id.
      * @return return true if region exists and false if not.
@@ -246,7 +246,7 @@ public class DeactivateChosenEntityRepository {
     }
 
     /**
-     * Method to check if the receiving station exists.
+     * Method to check if the receiving stations exist.
      *
      * @param stationsId - list of receiving stations.
      * @return return true if receiving stations exist and false if not.
