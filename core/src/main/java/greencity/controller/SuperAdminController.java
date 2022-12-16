@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -725,7 +726,7 @@ class SuperAdminController {
                 .build());
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new BadRequestException("You should enter at least one parameter");
         }
     }
 }
