@@ -10,6 +10,7 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,7 +46,6 @@ public class UserNotification {
     private LocalDateTime notificationTime = getCurentLocalTime();
 
     private static LocalDateTime getCurentLocalTime() {
-        return LocalDateTime.now().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("Europe/Kiev"))
-            .toLocalDateTime();
+        return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
     }
 }
