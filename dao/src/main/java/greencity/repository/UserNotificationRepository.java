@@ -31,10 +31,10 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      * @return {@link Optional} of {@link UserNotification}.
      */
     @Query(nativeQuery = true, value = "select * from user_notifications "
-        + "join notification_parameters np on user_notifications.id = np.notification_id "
-        + "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber "
-        + "order by notification_time desc "
-        + "limit 1;")
+            + "join notification_parameters np on user_notifications.id = np.notification_id "
+            + "where notification_type = :type and np.key = 'orderNumber' and np.value = :orderNumber "
+            + "order by notification_time desc "
+            + "limit 1;")
     Optional<UserNotification> findLastNotificationByNotificationTypeAndOrderNumber(String type, String orderNumber);
 
     /**
@@ -51,14 +51,7 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      * @return {@link List} of {@link Long}.
      */
     @Query(nativeQuery = true, value = "SELECT distinct users_id FROM user_notifications "
-        + "WHERE CAST(notification_time AS DATE) > :dateOfLastNotification AND "
-        + "notification_type = :type")
+            + "WHERE CAST(notification_time AS DATE) > :dateOfLastNotification AND "
+            + "notification_type = :type")
     List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
-
-    /**
-     * Method to found a UserNotification by Order
-     * @param order {@link Order}
-     * @return @{link {@link List<UserNotification>}}
-     */
-    List<UserNotification> findByOrder(Order order);
 }
