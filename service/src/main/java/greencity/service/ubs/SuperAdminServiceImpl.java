@@ -514,7 +514,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .name(dto.getName())
             .createdBy(user)
             .createDate(LocalDate.now())
-                .stationStatus(StationStatus.ACTIVE)
+            .stationStatus(StationStatus.ACTIVE)
             .build();
     }
 
