@@ -149,5 +149,7 @@
     <include file="db/changelog/logs/ch-add-column-description_eng-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-column-description_eng-into-bag_translations-table-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-column-station-status-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-add-column-next-notification.xml"/>
+    <include file="db/changelog/logs/ch-add-column-notification-step.xml"/>
 </databaseChangeLog>
 
