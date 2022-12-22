@@ -1,5 +1,6 @@
 package greencity.dto.courier;
 
+import greencity.enums.StationStatus;
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -19,4 +20,6 @@ public class ReceivingStationDto {
     private String createdBy;
 
     private LocalDate createDate;
+
+    private StationStatus stationStatus;
 }
