@@ -55,5 +55,10 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
         + "notification_type = :type")
     List<Long> getUserIdByDateOfLastNotificationAndNotificationType(LocalDate dateOfLastNotification, String type);
 
+    /**
+     * Method to found a UserNotification by Order
+     * @param order {@link Order}
+     * @return @{link {@link List<UserNotification>}}
+     */
     List<UserNotification> findByOrder(Order order);
 }
