@@ -21,6 +21,7 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -35,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -513,6 +515,37 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
+    }
+
+    @Test
+    void createReceivingStationSaveCorrectValue() {
+        String receivingStationName = "Петрівка";
+        User user = TEST_USER;
+        AddingReceivingStationDto addingReceivingStationDto =
+            AddingReceivingStationDto.builder().name(receivingStationName).build();
+        ReceivingStation activatedReceivingStation = ReceivingStation.builder()
+            .name(receivingStationName)
+            .createdBy(user)
+            .createDate(LocalDate.now())
+            .stationStatus(StationStatus.ACTIVE)
+            .build();
+
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+
+        when(userRepository.findByUuid(any())).thenReturn(user);
+        when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
+        when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
+        when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
+            .thenReturn(receivingStationDto);
+
+        superAdminService.createReceivingStation(addingReceivingStationDto, user.getUuid());
+
+        verify(userRepository).findByUuid(any());
+        verify(receivingStationRepository).existsReceivingStationByName(any());
+        verify(receivingStationRepository).save(activatedReceivingStation);
+        verify(modelMapper)
+            .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+
     }
 
     @Test
