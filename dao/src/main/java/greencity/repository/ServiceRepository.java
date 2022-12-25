@@ -25,7 +25,7 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
      * @author Maksym Kuzbyt
      */
     @Query(nativeQuery = true,
-        value = "select full_price from service s "
+        value = "select sum(full_price) from service s "
             + "where s.courier_id = :courierId ")
     Integer findFullPriceByCourierId(@Param("courierId") Long courierId);
 }

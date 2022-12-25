@@ -5,10 +5,14 @@
 
     <changeSet id="Makitra-14" author="Makitra Vadym">
 
-    <insert tableName="locations">
-        <column name="id">1</column>
-        <column name="location_status">ACTIVE</column>
-    </insert>
+        <insert tableName="locations">
+            <column name="id">1</column>
+            <column name="location_status">ACTIVE</column>
+        </insert>
+        <insert tableName="locations">
+            <column name="id">2</column>
+            <column name="location_status">ACTIVE</column>
+        </insert>
         <insert tableName="courier">
             <column name="id">1</column>
             <column name="location_id">1</column>
