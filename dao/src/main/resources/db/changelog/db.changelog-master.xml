@@ -31,6 +31,7 @@
     <include file="db/changelog/logs/ch-add-column-comment-paymant-Struk.xml"/>
     <include file="db/changelog/logs/ch-add-columns-phone-number-email-receiving-station-to-employees-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-table-receiving-station-Danylko.xml"/>
+    <include file="db/changelog/logs/ch-add-column-station-status-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-table-employee-receiving-station-mapping-Danylko.xml"/>
     <include file="db/changelog/logs/ch-create-index-employee-email-Danylko.xml"/>
     <include file="db/changelog/logs/ch-add-new-order_bag_mapping-columns-Mahdziak.xml"/>
@@ -90,6 +91,7 @@
     <include file="db/changelog/logs/ch-edit-length-column-order-status-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-locations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-drop-column-min-amount-of-nig-bags-table-locations-Makitra.xml"/>
+    <include file="db/changelog/logs/ch-add-columns-for-receiving-stations-and-couriers-Bohonko.xml"/>
     <include file="db/changelog/logs/ch-add-table-regions-Makitra.xml"/>
     <include file="db/changelog/logs/ch-alter-table-column-paymentId-payment-table-Kozak.xml"/>
     <include file="db/changelog/logs/ch-add-column-sum_total_amount_without_discounts-Kyzbyt_Maksym.xml"/>
@@ -102,7 +104,6 @@
     <include file="db/changelog/logs/ch-insert-into-order_payment_status_transaltion-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-order-status-translations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-positions.xml"/>
-    <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-bags-and-bags-translations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-add-table-notification-schedule-Sannytski.xml"/>
     <include file="db/changelog/logs/ch-insert-into-region-translations-Kozak.xml"/>
@@ -120,7 +121,6 @@
     <include file="db/changelog/logs/20223101-ch-add-column-tariffs-info-id-Melnyk.xml"/>
     <include file="db/changelog/logs/20221002-ch-add-column-creator-id-in-tariffs-info-table-Melnyk.xml"/>
     <include file="db/changelog/logs/20221102-ch-add-column-created-at-into-tariffs-info-table-Melnyk.xml"/>
-    <include file="db/changelog/logs/ch-add-columns-for-receiving-stations-and-couriers-Bohonko.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Yezenitskyi.xml"/>
     <include file="db/changelog/logs/ch-drop-column-language_id-order_status_translation-Hural.xml"/>
     <include file="db/changelog/logs/ch-update-order_status_translation-Hural.xml"/>
@@ -131,7 +131,15 @@
     <include file="db/changelog/logs/2022-03-30-ch-drop-table-locationTranslations-Fedorko.xml"/>
     <include file="db/changelog/logs/ch-add-table-tariffs_info-locations_mapping-Fedorko.xml"/>
     <include file="db/changelog/logs/ch-add-table-tariffs_info-receiving_stations_mapping-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-tariff_infos_receiving_employee_mapping-Hlazova.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-users-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-regions-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-insert-info-bags-tariffs_info-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-employee-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-employee-position-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-employee-receiving-station-mapping-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-update-courier-created-by-id-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-constraint-payment-settlement_date-Yezenitskyi.xml"/>
     <include file="db/changelog/logs/ch-add-column-alternate_email-to-ubs_user-to-users-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-add-table-tariffs-locations-Fedorko.xml"/>
@@ -140,7 +148,6 @@
     <include file="db/changelog/logs/ch-add-column-certificate-initial_points_value-Postolovskyi.xml"/>
     <include file="db/changelog/logs/ch-add-big_order_table-view-Oleg-Postolovskyi.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Hlazova.xml"/>
-    <include file="db/changelog/logs/ch-add-table-tariff_infos_receiving_employee_mapping-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-update-into-notification-templates-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Hlazova-2.xml"/>
     <include file="db/changelog/logs/ch-insert-into-order-status-translations-Yashna.xml"/>

@@ -13,7 +13,7 @@
         </addColumn>
 
         <update tableName="bag_translations" >
-            <column name="name_eng" value="Safe waste"/>
+            <column name="name_eng" value="Mix waste"/>
             <where>id=1</where>
         </update>
 
