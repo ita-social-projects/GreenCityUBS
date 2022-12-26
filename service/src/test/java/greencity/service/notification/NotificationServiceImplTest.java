@@ -88,7 +88,8 @@ class NotificationServiceImplTest {
         @Test
         void testNotifyUnpaidOrders() {
             Order order = Order.builder().orderDate(LocalDateTime.now(fixedClock)).id(1L).build();
-            Order orderAfter24days = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(2L).build();
+            Order orderAfter24days =
+                Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(2L).build();
 
             UserNotification userNotification3 = new UserNotification();
             userNotification3.setId(1L);
@@ -96,7 +97,8 @@ class NotificationServiceImplTest {
             userNotification3.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
             userNotification3.setNotificationStep(NotificationStep.ATTEMPT_1);
 
-            Order order3 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L).userNotifications(Arrays.asList(userNotification3)).build();
+            Order order3 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L)
+                .userNotifications(Arrays.asList(userNotification3)).build();
 
             UserNotification userNotification4 = new UserNotification();
             userNotification4.setId(2L);
@@ -104,21 +106,19 @@ class NotificationServiceImplTest {
             userNotification4.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
             userNotification4.setNotificationStep(NotificationStep.ATTEMPT_2);
 
-            Order order4 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L).userNotifications(Arrays.asList(userNotification4)).build();
-            /*UserNotification userNotification2 = new UserNotification();
-            userNotification.setId(2L);
-            userNotification.setNextNotification(LocalDateTime.now(fixedClock));
-            userNotification.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
-            userNotification.setNotificationStep(NotificationStep.ATTEMPT_2);
-            orderAfter24days.setUserNotifications(Arrays.asList(userNotification2));*/
+            Order order4 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L)
+                .userNotifications(Arrays.asList(userNotification4)).build();
+
             List<Order> orderList = Arrays.asList(order, orderAfter24days, order3, order4);
 
             when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(orderList);
-            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    order.getId().toString())).thenReturn(Optional.empty());
+            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(
+                NotificationType.UNPAID_ORDER.toString(),
+                order.getId().toString())).thenReturn(Optional.empty());
 
-            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),"2")).thenReturn(Optional.of(userNotification3));
-            //when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),"1")).thenReturn(Optional.of(userNotification2));
+            when(userNotificationRepository
+                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(), "2"))
+                    .thenReturn(Optional.of(userNotification3));
 
             when(userNotificationRepository.save(any())).thenReturn(new UserNotification());
 
