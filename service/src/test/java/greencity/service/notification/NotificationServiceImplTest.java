@@ -5,10 +5,7 @@ import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
+import greencity.enums.*;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
@@ -41,7 +38,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
     private final static LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(1994, 3, 28, 15, 10);
-
+    private final static LocalDateTime LOCAL_DATE_TIME2 = LocalDateTime.of(2022, 12, 26, 15, 10);
     @Mock
     private OrderRepository orderRepository;
 
@@ -83,54 +80,49 @@ class NotificationServiceImplTest {
         public void setUp() {
             MockitoAnnotations.initMocks(this);
 
-            fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
+            fixedClock = Clock.fixed(LOCAL_DATE_TIME2.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
             lenient().doReturn(fixedClock.instant()).when(clock).instant();
             lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
         }
 
         @Test
         void testNotifyUnpaidOrders() {
-            List<Order> orders = List.of(
-                Order.builder().id(1L).user(getUser()).orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusDays(3))
-                    .build(),
-                Order.builder().id(2L).user(getUser())
-                    .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusMonths(1)).build(),
-                Order.builder().id(3L).user(getUser())
-                    .orderPaymentStatus(OrderPaymentStatus.UNPAID)
-                    .orderDate(LocalDateTime.now(fixedClock).minusDays(10)).build());
-
-            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID))
-                .thenReturn(orders);
-
-            doReturn(Optional.empty()).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(0).getId().toString());
-
-            UserNotification thirdOrderLastNotification = new UserNotification();
-            thirdOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
-            thirdOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(1));
-
-            UserNotification created = new UserNotification();
-            created.setNotificationType(NotificationType.UNPAID_ORDER);
-            created.setNotificationTime(LocalDateTime.now(fixedClock));
-            created.setUser(getUser());
-            created.setId(1L);
-
-            NotificationParameter createdNotificationParameter = NotificationParameter.builder().id(1L)
-                .userNotification(created).key("orderNumber")
-                .value(orders.get(0).getId().toString()).build();
-
-            createdNotificationParameter.setUserNotification(created);
-
-            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(returnOrderList());
-            notificationService.notifyUnpaidOrders();
-        }
-
-        private List<Order> returnOrderList() {
             Order order = Order.builder().orderDate(LocalDateTime.now(fixedClock)).id(1L).build();
-            return Arrays.asList(order);
+            Order orderAfter24days = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(2L).build();
+
+            UserNotification userNotification3 = new UserNotification();
+            userNotification3.setId(1L);
+            userNotification3.setNextNotification(LocalDateTime.now(fixedClock));
+            userNotification3.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
+            userNotification3.setNotificationStep(NotificationStep.ATTEMPT_1);
+
+            Order order3 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L).userNotifications(Arrays.asList(userNotification3)).build();
+
+            UserNotification userNotification4 = new UserNotification();
+            userNotification4.setId(2L);
+            userNotification4.setNextNotification(LocalDateTime.now(fixedClock));
+            userNotification4.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
+            userNotification4.setNotificationStep(NotificationStep.ATTEMPT_2);
+
+            Order order4 = Order.builder().orderDate(LocalDateTime.parse("2022-12-23T22:11:03.46045")).id(3L).userNotifications(Arrays.asList(userNotification4)).build();
+            /*UserNotification userNotification2 = new UserNotification();
+            userNotification.setId(2L);
+            userNotification.setNextNotification(LocalDateTime.now(fixedClock));
+            userNotification.setNotificationTime(LocalDateTime.of(2022, 12, 23, 12, 23));
+            userNotification.setNotificationStep(NotificationStep.ATTEMPT_2);
+            orderAfter24days.setUserNotifications(Arrays.asList(userNotification2));*/
+            List<Order> orderList = Arrays.asList(order, orderAfter24days, order3, order4);
+
+            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(orderList);
+            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                    order.getId().toString())).thenReturn(Optional.empty());
+
+            when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),"2")).thenReturn(Optional.of(userNotification3));
+            //when(userNotificationRepository.findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),"1")).thenReturn(Optional.of(userNotification2));
+
+            when(userNotificationRepository.save(any())).thenReturn(new UserNotification());
+
+            notificationService.notifyUnpaidOrders();
         }
 
         @Test
