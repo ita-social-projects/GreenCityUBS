@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Korzh-7" author="Korzh Nikita">
+
+        <insert tableName="bag_translations">
+            <column name="id">4</column>
+            <column name="name">Мікс відходів</column>
+            <column name="bag_id">4</column>
+            <column name="name_eng">Mix waste</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">5</column>
+            <column name="name">Текстильні відходи</column>
+            <column name="bag_id">5</column>
+            <column name="name_eng">Textile waste</column>
+        </insert>
+        <insert tableName="bag_translations">
+            <column name="id">6</column>
+            <column name="name">Текстильні відходи</column>
+            <column name="bag_id">6</column>
+            <column name="name_eng">Textile waste</column>
+        </insert>
+
+        <update tableName="bag">
+            <column name="tariffs_info_id">1</column>
+            <where>id=1</where>
+        </update>
+        <update tableName="bag">
+            <column name="tariffs_info_id">1</column>
+            <where>id=2</where>
+        </update>
+        <update tableName="bag">
+            <column name="tariffs_info_id">1</column>
+            <where>id=3</where>
+        </update>
+        <update tableName="bag">
+            <column name="tariffs_info_id">2</column>
+            <where>id=4</where>
+        </update>
+        <update tableName="bag">
+            <column name="tariffs_info_id">2</column>
+            <where>id=5</where>
+        </update>
+        <update tableName="bag">
+            <column name="tariffs_info_id">2</column>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

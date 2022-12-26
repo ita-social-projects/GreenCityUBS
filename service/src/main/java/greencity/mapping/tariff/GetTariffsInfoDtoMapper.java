@@ -40,7 +40,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .tariffStatus(source.getLocationStatus())
             .locationInfoDtos(source.getTariffLocations().stream()
                 .map(location -> LocationsDtos.builder()
-                    .locationId(location.getId())
+                    .locationId(location.getLocation().getId())
                     .nameEn(location.getLocation().getNameEn())
                     .nameUk(location.getLocation().getNameUk())
                     .build())
