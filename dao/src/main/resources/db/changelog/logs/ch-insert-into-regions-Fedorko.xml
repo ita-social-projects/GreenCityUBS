@@ -19,6 +19,8 @@
         <update tableName="locations">
             <column name="name_en" value="20 km"/>
             <column name="name_uk" value="20 кілометрів"/>
+            <column name="latitude" value="50.4782"/>
+            <column name="longitude" value="33.5897"/>
             <where>id=2</where>
         </update>
 
