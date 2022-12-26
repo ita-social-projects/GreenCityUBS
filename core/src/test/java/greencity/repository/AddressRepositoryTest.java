@@ -28,7 +28,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
     @Autowired
     AddressRepository addressRepository;
 
-    //@Test
+    // @Test
     void findAllByUserId() {
         Address address = ModelUtils.getAddress();
         List<Address> actual = addressRepository.findAllByUserId(1L);
@@ -52,7 +52,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
         Assertions.assertEquals(Optional.of(address.getStreetEn()), Optional.of(actual.get(0).getStreetEn()));
     }
 
-    //@Test
+    // @Test
     void undeliveredOrdersCoords() {
         Set<Coordinates> actual = addressRepository.undeliveredOrdersCoords();
         Order order = Order.builder().orderPaymentStatus(OrderPaymentStatus.PAID).build();
@@ -60,7 +60,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
         Assertions.assertNotNull(actual);
     }
 
-    //@Test
+    // @Test
     void undeliveredOrdersCoordsWithCapacityLimit() {
         Set<Coordinates> actual = addressRepository.undeliveredOrdersCoordsWithCapacityLimit(100L);
         Order order = Order.builder().orderPaymentStatus(OrderPaymentStatus.PAID).build();
@@ -68,7 +68,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
         Assertions.assertNotNull(actual);
     }
 
-    //@Test
+    // @Test
     void getAddressByOrderId() {
 
         Address address = ModelUtils.getAddress();
