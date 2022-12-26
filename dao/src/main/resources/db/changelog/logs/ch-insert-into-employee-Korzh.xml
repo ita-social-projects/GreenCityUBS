@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Korzh-2" author="Korzh Nikita">
+        <insert tableName="employees">
+            <column name="id">1</column>
+            <column name="first_name">UBSADMIN</column>
+            <column name="last_name">UBSADMIN</column>
+            <column name="phone_number">+380675554433</column>
+            <column name="email">adminubs@starmaker.email</column>
+            <column name="status">ACTIVE</column>
+        </insert>
+        
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id">1</column>
+            <column name ="tariffs_info_id">1</column>
+        </insert>
+
+        <insert tableName="tariff_infos_receiving_employee_mapping">
+            <column name="employee_id">1</column>
+            <column name ="tariffs_info_id">2</column>
+        </insert>
+    </changeSet>
+    
+</databaseChangeLog>

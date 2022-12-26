@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Korzh-3" author="Korzh Nikita">
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">1</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">2</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">3</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">4</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">5</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">6</column>
+        </insert>
+        <insert tableName="employee_position">
+            <column name="employee_id">1</column>
+            <column name="position_id">7</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
