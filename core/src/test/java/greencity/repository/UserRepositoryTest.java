@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.IntegrationTestBase;
 import greencity.UbsApplication;
 import greencity.entity.user.User;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @Sql(scripts = "/sqlFiles/userRepo/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
+@Ignore
 class UserRepositoryTest extends IntegrationTestBase {
 
     @Autowired

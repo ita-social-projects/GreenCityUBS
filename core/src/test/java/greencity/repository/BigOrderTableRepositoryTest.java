@@ -7,6 +7,7 @@ import greencity.enums.OrderStatus;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.*;
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
+@Ignore
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @Autowired
     private BigOrderTableRepository bigOrderTableRepository;

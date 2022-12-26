@@ -6,6 +6,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.ubs.Address;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.Set;
 @Sql(scripts = "/sqlFiles/addressRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
+@Ignore
 class AddressRepositoryTest extends IntegrationTestBase {
 
     @Autowired
