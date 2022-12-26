@@ -124,7 +124,10 @@ class NotificationServiceImplTest {
 
             createdNotificationParameter.setUserNotification(created);
 
-            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(returnOrderList());
+            Order order = Order.builder().orderDate(LocalDateTime.now(fixedClock)).id(1L).build();
+            List<Order> orderList = Arrays.asList(order);
+
+            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(orderList);
             notificationService.notifyUnpaidOrders();
         }
 
