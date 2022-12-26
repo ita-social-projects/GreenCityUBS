@@ -135,6 +135,7 @@
     <include file="db/changelog/logs/ch-insert-into-users-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-receiving-stations-Makitra.xml"/>
     <include file="db/changelog/logs/ch-insert-into-regions-Fedorko.xml"/>
+    <include file="db/changelog/logs/ch-insert-info-bags-tariffs_info-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-employee-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-employee-position-Korzh.xml"/>
     <include file="db/changelog/logs/ch-insert-into-employee-receiving-station-mapping-Korzh.xml"/>
