@@ -78,8 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         for (Order order : orderList) {
             Optional<UserNotification> lastNotification = userNotificationRepository
-                    .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                            order.getId().toString());
+                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                    order.getId().toString());
 
             if (checkIfUnpaidOrderNeedsNewNotification(order, lastNotification)) {
                 UserNotification userNotification = new UserNotification();
@@ -91,48 +91,37 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private boolean checkIfUnpaidOrderNeedsNewNotification(Order order, Optional<UserNotification> lastNotification) {
-
-        if(lastNotification.isEmpty()){
+        if (lastNotification.isEmpty()) {
             LocalDate now = LocalDate.now(clock);
             LocalDateTime after3Days = order.getOrderDate();
             LocalDate orderDate = after3Days.toLocalDate().plusDays(3);
-
             return now.isEqual(orderDate);
         }
-
         LocalDate now = LocalDate.now(clock);
         LocalDate nextNotification = lastNotification.get().getNextNotification().toLocalDate();
-
         return now.isEqual(nextNotification);
     }
 
     private UserNotification initialiseNotificationForUnpaidOrder(Order order, UserNotification userNotification) {
-
         Optional<UserNotification> lastNotificationOptional = userNotificationRepository
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                        order.getId().toString());
+            .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
+                order.getId().toString());
 
-        if(lastNotificationOptional.isPresent()){
+        if (lastNotificationOptional.isPresent()) {
             UserNotification lastNotification = lastNotificationOptional.get();
-
-            if(Objects.isNull(lastNotification.getNextNotification())){
+            if (Objects.isNull(lastNotification.getNextNotification())) {
                 lastNotification.setNextNotification(LocalDateTime.now(clock));
                 lastNotification.setNotificationStep(NotificationStep.ATTEMPT_1);
             }
-
             NotificationStep step = lastNotification.getNotificationStep();
-
-            LocalDateTime nextNotification =  loadNextNotification(step);
-
+            LocalDateTime nextNotification = loadNextNotification(step);
             userNotification.setNextNotification(nextNotification);
-
             userNotification.setNotificationStep(loadNotificationStep(step));
-
-        }else{
+        } else {
             userNotification.setNotificationStep(NotificationStep.ATTEMPT_1);
             userNotification.setNextNotification(LocalDateTime.now(clock).plusDays(3));
-
         }
+
         userNotification.setNotificationTime(LocalDateTime.now(clock));
         userNotification.setNotificationType(NotificationType.UNPAID_ORDER);
         userNotification.setOrder(order);
@@ -149,26 +138,20 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private NotificationStep loadNotificationStep(NotificationStep step) {
-
-        if(step.equals(NotificationStep.ATTEMPT_1))
+        if (step.equals(NotificationStep.ATTEMPT_1)) {
             return NotificationStep.ATTEMPT_2;
-
-        if(step.equals(NotificationStep.ATTEMPT_2))
+        }
+        if (step.equals(NotificationStep.ATTEMPT_2)) {
             return NotificationStep.ATTEMPT_3;
-
+        }
         return NotificationStep.ATTEMPT_1;
     }
 
     private LocalDateTime loadNextNotification(NotificationStep step) {
-
-        if(step.equals(NotificationStep.ATTEMPT_1))
+        if (step.equals(NotificationStep.ATTEMPT_1)) {
             return LocalDateTime.now(clock).plusDays(3);
-
-        if(step.equals(NotificationStep.ATTEMPT_2))
-            return LocalDateTime.now(clock).plusDays(2);
-
+        }
         return LocalDateTime.now(clock).plusDays(2);
-
     }
 
     /**
