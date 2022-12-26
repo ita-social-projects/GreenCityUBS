@@ -136,10 +136,16 @@ class NotificationServiceImplTest {
 
             when(notificationParameterRepository.save(any())).thenReturn(createdNotificationParameter);
 
+            when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(returnOrderList());
             notificationService.notifyUnpaidOrders();
 
             verify(notificationParameterRepository, times(3)).save(any());
             verify(userNotificationRepository, times(3)).save(any());
+        }
+
+        private List<Order> returnOrderList() {
+            Order order = Order.builder().orderDate(LocalDateTime.now(fixedClock)).id(1L).build();
+            return Arrays.asList(order);
         }
 
         @Test
