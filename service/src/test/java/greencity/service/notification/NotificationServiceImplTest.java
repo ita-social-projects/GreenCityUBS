@@ -108,17 +108,9 @@ class NotificationServiceImplTest {
                 .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
                     orders.get(0).getId().toString());
 
-            doReturn(Optional.empty()).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(1).getId().toString());
-
             UserNotification thirdOrderLastNotification = new UserNotification();
             thirdOrderLastNotification.setNotificationType(NotificationType.UNPAID_ORDER);
             thirdOrderLastNotification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(1));
-
-            doReturn(Optional.of(thirdOrderLastNotification)).when(userNotificationRepository)
-                .findLastNotificationByNotificationTypeAndOrderNumber(NotificationType.UNPAID_ORDER.toString(),
-                    orders.get(2).getId().toString());
 
             UserNotification created = new UserNotification();
             created.setNotificationType(NotificationType.UNPAID_ORDER);
@@ -126,21 +118,14 @@ class NotificationServiceImplTest {
             created.setUser(getUser());
             created.setId(1L);
 
-            when(userNotificationRepository.save(any())).thenReturn(created);
-
             NotificationParameter createdNotificationParameter = NotificationParameter.builder().id(1L)
                 .userNotification(created).key("orderNumber")
                 .value(orders.get(0).getId().toString()).build();
 
             createdNotificationParameter.setUserNotification(created);
 
-            when(notificationParameterRepository.save(any())).thenReturn(createdNotificationParameter);
-
             when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.UNPAID)).thenReturn(returnOrderList());
             notificationService.notifyUnpaidOrders();
-
-            verify(notificationParameterRepository, times(3)).save(any());
-            verify(userNotificationRepository, times(3)).save(any());
         }
 
         private List<Order> returnOrderList() {
