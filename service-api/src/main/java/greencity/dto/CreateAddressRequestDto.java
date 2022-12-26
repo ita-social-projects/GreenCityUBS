@@ -21,7 +21,7 @@ public class CreateAddressRequestDto {
     // CHECKSTYLE:OFF
     private static final String validationMessage = "use only English,or Ukrainian latter";
     private static final String notEmptyValidationMessage = "name must not be empty";
-    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ,0-9']*", message = validationMessage)
+    @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ .,0-9']*", message = validationMessage)
     @NotEmpty(message = notEmptyValidationMessage)
     private String searchAddress;
     @Pattern(regexp = "[A-Za-zА-Яа-яЇїІіЄєҐґ ']*", message = validationMessage)
