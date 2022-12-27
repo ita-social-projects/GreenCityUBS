@@ -16,14 +16,31 @@
             <where>id=1</where>
         </update>
 
+        <update tableName="locations">
+            <column name="name_en" value="20 km"/>
+            <column name="name_uk" value="20 кілометрів"/>
+            <column name="latitude" value="50.4782"/>
+            <column name="longitude" value="33.5897"/>
+            <where>id=2</where>
+        </update>
+
         <insert tableName="tariffs_info">
             <column name="id">1</column>
             <column name="courier_id">1</column>
-            <column name="courier_limits">LIMIT_BY_SUM_OF_ORDER</column>
+            <column name="creator_id">1</column>
+            <column name="courier_limits">LIMIT_BY_AMOUNT_OF_BAG</column>
             <column name="location_status">ACTIVE</column>
-            <column name="min_price_of_order">500</column>
-            <column name="max_price_of_order">50000</column>
             <column name="min_amount_of_big_bags">2</column>
+            <column name="max_amount_of_big_bags">999</column>
+        </insert>
+
+        <insert tableName="tariffs_info">
+            <column name="id">2</column>
+            <column name="courier_id">1</column>
+            <column name="creator_id">1</column>
+            <column name="courier_limits">LIMIT_BY_AMOUNT_OF_BAG</column>
+            <column name="location_status">ACTIVE</column>
+            <column name="min_amount_of_big_bags">20</column>
             <column name="max_amount_of_big_bags">999</column>
         </insert>
 
@@ -32,8 +49,18 @@
             <column name="location_id">1</column>
         </insert>
 
+        <insert tableName="tariffs_info_locations_mapping">
+            <column name="tariffs_info_id">2</column>
+            <column name="location_id">2</column>
+        </insert>
+
         <insert tableName="tariffs_info_receiving_stations_mapping">
             <column name="tariffs_info_id">1</column>
+            <column name="receiving_station_id">1</column>
+        </insert>
+
+        <insert tableName="tariffs_info_receiving_stations_mapping">
+            <column name="tariffs_info_id">2</column>
             <column name="receiving_station_id">1</column>
         </insert>
 
