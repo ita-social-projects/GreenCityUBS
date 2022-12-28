@@ -16,60 +16,60 @@ class ReceivingStationDtoTest {
     }
 
     @Test
-    public void testEmptyName() throws NoSuchFieldException {
+    void testEmptyName() throws NoSuchFieldException {
         nameRegex("", false);
     }
 
     @Test
-    public void testNameWithMinimumCountOfSymbols() throws NoSuchFieldException {
+    void testNameWithMinimumCountOfSymbols() throws NoSuchFieldException {
         String name = StringUtils.repeat("a", 1);
         nameRegex(name, true);
     }
 
     @Test
-    public void testNameWithMaximumCountOfSymbols() throws NoSuchFieldException {
+    void testNameWithMaximumCountOfSymbols() throws NoSuchFieldException {
         String name = StringUtils.repeat("a", 30);
         nameRegex(name, true);
     }
 
     @Test
-    public void testNameWithTooManySymbols() throws NoSuchFieldException {
+    void testNameWithTooManySymbols() throws NoSuchFieldException {
         String name = StringUtils.repeat("a", 31);
         nameRegex(name, false);
     }
 
     @Test
-    public void testNameWithEnglishLetterInBothCases() throws NoSuchFieldException {
+    void testNameWithEnglishLetterInBothCases() throws NoSuchFieldException {
         nameRegex("qweQWE", true);
     }
 
     @Test
-    public void testNameWithUkrainianLetterInBothCases() throws NoSuchFieldException {
+    void testNameWithUkrainianLetterInBothCases() throws NoSuchFieldException {
         nameRegex("абвгґіїьяюєАБВГҐІЇЬЯЮЄ", true);
     }
 
     @Test
-    public void testNameWithNumbers() throws NoSuchFieldException {
+    void testNameWithNumbers() throws NoSuchFieldException {
         nameRegex("1234567890", true);
     }
 
     @Test
-    public void testNameWithHyphen() throws NoSuchFieldException {
+    void testNameWithHyphen() throws NoSuchFieldException {
         nameRegex("qwe-qwe", true);
     }
 
     @Test
-    public void testNameWithDot() throws NoSuchFieldException {
+    void testNameWithDot() throws NoSuchFieldException {
         nameRegex("qwe.qwe", true);
     }
 
     @Test
-    public void testNameWithWhitespace() throws NoSuchFieldException {
+    void testNameWithWhitespace() throws NoSuchFieldException {
         nameRegex("qwe qwe", true);
     }
 
     @Test
-    public void testNameWithApostrophe() throws NoSuchFieldException {
+    void testNameWithApostrophe() throws NoSuchFieldException {
         nameRegex("qwe'qwe", true);
     }
 }
