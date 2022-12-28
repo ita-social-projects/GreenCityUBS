@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ReceivingStationDtoTest {
-    public void nameRegex(String name, boolean validates) throws NoSuchFieldException {
+    void nameRegex(String name, boolean validates) throws NoSuchFieldException {
         Field field = ReceivingStationDto.class.getDeclaredField("name");
         javax.validation.constraints.Pattern[] annotations =
             field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
