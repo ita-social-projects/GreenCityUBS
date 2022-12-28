@@ -6,13 +6,15 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
-import greencity.enums.EmployeeStatus;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
+import greencity.enums.EmployeeStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.EmployeeFilterCriteria;
@@ -91,16 +93,28 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return new PageImpl<>(employeeDtos, employees.getPageable(), employees.getTotalElements());
     }
 
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    public Page<EmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
+//        EmployeeFilterCriteria employeeFilterCriteria) {
+//        Page<Employee> employees =
+//            employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+//        List<EmployeeDto> employeesDto = employees.stream()
+//            .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
+//        return new PageImpl<>(employeesDto, employees.getPageable(), employees.getTotalElements());
+//    }
     /**
      * {@inheritDoc}
      */
     @Override
-    public Page<EmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
-        EmployeeFilterCriteria employeeFilterCriteria) {
+    public Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
+                                                    EmployeeFilterCriteria employeeFilterCriteria) {
         Page<Employee> employees =
-            employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
-        List<EmployeeDto> employeesDto = employees.stream()
-            .map(employee -> modelMapper.map(employee, EmployeeDto.class)).collect(Collectors.toList());
+                employeeCriteriaRepository.findAllActiveEmployees(employeePage, employeeFilterCriteria);
+        List<GetEmployeeDto> employeesDto = employees.stream()
+                .map(employee -> modelMapper.map(employee, GetEmployeeDto.class)).collect(Collectors.toList());
         return new PageImpl<>(employeesDto, employees.getPageable(), employees.getTotalElements());
     }
 
@@ -261,4 +275,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         tariffInfos.add(modelMapper.map(tariff, TariffsInfoDto.class));
         dto.setTariffs(tariffInfos);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<GetTariffInfoForEmployeeDto> getTariffsForEmployee() {
+        List<TariffsInfo> tariffs = tariffsInfoRepository.findAll();
+        return tariffs
+                .stream()
+                .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
+                .collect(Collectors.toList());
+    }
+
 }

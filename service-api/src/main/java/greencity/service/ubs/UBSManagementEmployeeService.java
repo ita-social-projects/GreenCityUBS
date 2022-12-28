@@ -1,8 +1,10 @@
 package greencity.service.ubs;
 
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.GetEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
+import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,7 @@ public interface UBSManagementEmployeeService {
     /**
      * {@inheritDoc}
      */
-    Page<EmployeeDto> findAllActiveEmployees(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
+    Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * Method updates information about employee.
@@ -90,4 +92,8 @@ public interface UBSManagementEmployeeService {
      * @author Mykola Danylko
      */
     void deleteEmployeeImage(Long id);
+
+
+    List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
+
 }

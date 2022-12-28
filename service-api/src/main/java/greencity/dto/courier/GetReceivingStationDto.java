@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.courier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegionDto {
-    private Long regionId;
-    private String nameEn;
-    private String nameUk;
+public class GetReceivingStationDto {
+    private Long stationId;
+    private String name;
 }
