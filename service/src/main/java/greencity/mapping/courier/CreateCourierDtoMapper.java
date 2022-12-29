@@ -10,8 +10,8 @@ public class CreateCourierDtoMapper extends AbstractConverter<Courier, CreateCou
     @Override
     protected CreateCourierDto convert(Courier source) {
         return CreateCourierDto.builder()
-                .nameEn(source.getNameEn())
-                .nameUk(source.getNameUk())
-                .build();
+            .nameEn(source.getNameEn())
+            .nameUk(source.getNameUk())
+            .build();
     }
 }
