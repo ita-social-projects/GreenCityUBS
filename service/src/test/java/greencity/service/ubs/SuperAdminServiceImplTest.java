@@ -35,14 +35,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -668,6 +666,78 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         superAdminService.setTariffLimitBySumOfOrder(1L, ModelUtils.getEditPriceOfOrder());
         verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithAmountOfBigBags() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithAmountOfBigBags());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithPriceOfOrder() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithPriceOfOrder());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithPriceOfOrderMaxVatueIsGreaterThanMin() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L,
+                ModelUtils.setTariffLimitsWithPriceOfOrderWhereMaxValueIsGreater()));
+    }
+
+    @Test
+    void setTariffLimitsWithAmountOfBigBagMaxVatueIsGreaterThanMin() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L,
+                ModelUtils.setTariffLimitsWithAmountOfBigBagsWhereMaxValueIsGreater()));
+    }
+
+    @Test
+    void setTariffLimitsWithBothLimitsInputed() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithBothLimitsInputed()));
+    }
+
+    @Test
+    void setTariffLimitsWithNoneLimitsInputed() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithNoneLimitsInputed()));
+    }
+
+    @Test
+    void setTariffLimitsBagWithSuitableParametersNotFound() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(List.of());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithAmountOfBigBags()));
     }
 
     @Test
