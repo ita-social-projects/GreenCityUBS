@@ -87,18 +87,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         Bag bag = Bag.builder().price(dto.getPrice())
-                .capacity(dto.getCapacity())
-                .location(location)
-                .commission(dto.getCommission())
-                .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
-                .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-                .createdAt(LocalDate.now())
-                .minAmountOfBags(MinAmountOfBag.INCLUDE)
-                .name(dto.getTariffTranslationDtoList().getName())
-                .nameEng(dto.getTariffTranslationDtoList().getNameEng())
-                .description(dto.getTariffTranslationDtoList().getDescription())
-                .descriptionEng(dto.getTariffTranslationDtoList().getDescriptionEng())
-                .build();
+            .capacity(dto.getCapacity())
+            .location(location)
+            .commission(dto.getCommission())
+            .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
+            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+            .createdAt(LocalDate.now())
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .name(dto.getTariffTranslationDtoList().getName())
+            .nameEng(dto.getTariffTranslationDtoList().getNameEng())
+            .description(dto.getTariffTranslationDtoList().getDescription())
+            .descriptionEng(dto.getTariffTranslationDtoList().getDescriptionEng())
+            .build();
         return bag;
     }
 

@@ -10,11 +10,9 @@ import org.springframework.stereotype.Component;
 public class AddServiceDtoMapper extends AbstractConverter<Bag, AddServiceDto> {
     @Override
     protected AddServiceDto convert(Bag source) {
-        TariffTranslationDto tariffTranslationDto = TariffTranslationDto.builder().
-                name(source.getName()).
-                nameEng(source.getNameEng()).
-                description(source.getDescription()).
-                descriptionEng(source.getDescriptionEng()).build();
+        TariffTranslationDto tariffTranslationDto =
+            TariffTranslationDto.builder().name(source.getName()).nameEng(source.getNameEng())
+                .description(source.getDescription()).descriptionEng(source.getDescriptionEng()).build();
 
         return AddServiceDto.builder()
             .locationId(source.getLocation().getId())

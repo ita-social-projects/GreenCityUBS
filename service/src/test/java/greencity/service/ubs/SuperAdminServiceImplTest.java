@@ -252,7 +252,8 @@ class SuperAdminServiceImplTest {
 
     @Test
     void includeBag() {
-        when(bagRepository.findById(10)).thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description").build()));
+        when(bagRepository.findById(10))
+            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description").build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
 
