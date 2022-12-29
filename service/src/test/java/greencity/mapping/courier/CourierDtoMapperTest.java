@@ -3,7 +3,6 @@ package greencity.mapping.courier;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
 import greencity.entity.user.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.getCourierTranslationDto;
+import static greencity.ModelUtils.getUser;
 import static greencity.enums.CourierStatus.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,7 +30,6 @@ public class CourierDtoMapperTest {
 
     @Test
     public void convert() {
-        CourierTranslation courierTranslation = getCourierTranslation();
 
         CourierTranslationDto courierTranslationDto = getCourierTranslationDto();
 
@@ -40,7 +38,8 @@ public class CourierDtoMapperTest {
         Courier expected = Courier.builder()
             .id(22L)
             .courierStatus(ACTIVE)
-            .courierTranslationList(List.of(courierTranslation))
+            .nameUk("УБС")
+            .nameEn("UBS")
             .createDate(LocalDate.of(2022, 8, 2))
             .createdBy(user)
             .build();
@@ -49,7 +48,7 @@ public class CourierDtoMapperTest {
 
         assertEquals(expected.getId(), actual.getCourierId());
         assertEquals(expected.getCourierStatus().toString(), actual.getCourierStatus());
-        assertEquals(courierTranslationDto.getName(), actual.getCourierTranslationDtos().get(0).getName());
+        assertEquals(courierTranslationDto.getNameUk(), actual.getNameUk());
         assertEquals(expected.getCreateDate(), actual.getCreateDate());
         assertEquals(user.getRecipientName() + " " + user.getRecipientSurname(), actual.getCreatedBy());
     }

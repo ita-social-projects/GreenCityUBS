@@ -162,10 +162,10 @@ public interface SuperAdminService {
      *
      * @param courierId        - id of courier
      * @param limitDescription - new limit description.
-     * @return {@link GetCourierTranslationsDto}
+     * @return {@link GetTariffsInfoDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription);
+    GetTariffsInfoDto setLimitDescription(Long courierId, String limitDescription);
 
     /**
      * Method for include bag into minimum set of package.

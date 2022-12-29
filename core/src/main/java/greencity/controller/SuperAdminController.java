@@ -32,7 +32,6 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.CreateCourierTranslationDto;
-import greencity.dto.courier.GetCourierTranslationsDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
@@ -390,21 +389,21 @@ class SuperAdminController {
     /**
      * Controller for set limit description.
      *
-     * @return {@link GetCourierTranslationsDto}
+     * @return {@link GetTariffsInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Set new Limit Description")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffsInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
-    @PatchMapping("/setLimitDescription/{courierId}")
-    public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
-        @PathVariable Long courierId, String limitDescription) {
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
+    @PatchMapping("/setLimitDescription/{tariffId}")
+    public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
+        @PathVariable Long tariffId, String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(superAdminService.setLimitDescription(courierId, limitDescription));
+            .body(superAdminService.setLimitDescription(tariffId, limitDescription));
     }
 
     /**

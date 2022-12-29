@@ -1,7 +1,7 @@
 package greencity.mapping.courier;
 
+import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierTranslationDto;
-import greencity.entity.order.CourierTranslation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,15 +15,14 @@ class CourierTranslationDtoMapperTest {
 
     @Test
     void convert() {
-        CourierTranslation expected = CourierTranslation.builder()
-            .id(1L)
-            .courier(null)
-            .nameEng("Test")
-            .name("Тест")
+        CourierDto expected = CourierDto.builder()
+            .courierId(1L)
+            .nameEn("Test")
+            .nameUk("Тест")
             .build();
         CourierTranslationDto actual = mapper.convert(expected);
 
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getNameEng(), actual.getNameEng());
+        assertEquals(expected.getNameUk(), actual.getNameUk());
+        assertEquals(expected.getNameEn(), actual.getNameEn());
     }
 }

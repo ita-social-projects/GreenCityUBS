@@ -66,8 +66,7 @@ class SuperAdminServiceImplTest {
     private ServiceTranslationRepository serviceTranslationRepository;
     @Mock
     private CourierRepository courierRepository;
-    @Mock
-    private CourierTranslationRepository courierTranslationRepository;
+
     @Mock
     private RegionRepository regionRepository;
     @Mock
@@ -114,20 +113,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).delete(ModelUtils.getBag().get());
-    }
-
-    @Test
-    void setLimitDescription() {
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
-        when(courierTranslationRepository.findCourierTranslationByCourier(getCourier()))
-            .thenReturn(getCourierTranslation());
-        when(courierTranslationRepository.save(getCourierTranslation())).thenReturn(getCourierTranslation());
-
-        assertEquals(getCourierTranslationsDto(), superAdminService.setLimitDescription(1L, "1"));
-
-        verify(courierRepository).findById(1L);
-        verify(courierTranslationRepository).findCourierTranslationByCourier(getCourier());
-        verify(courierTranslationRepository).save(getCourierTranslation());
     }
 
     @Test
@@ -241,27 +226,6 @@ class SuperAdminServiceImplTest {
         verify(serviceRepository).save(service);
         verify(serviceTranslationRepository).saveAll(service.getServiceTranslations());
         verify(modelMapper).map(service, CreateServiceDto.class);
-    }
-
-    @Test
-    void createCourier() {
-        Courier courier = ModelUtils.getCourier();
-        courier.setId(null);
-        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
-        when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
-        when(courierRepository.save(any())).thenReturn(courier);
-        when(courierTranslationRepository.saveAll(any()))
-            .thenReturn(ModelUtils.getCourierTranslations());
-        when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
-
-        assertEquals(createCourierDto,
-            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
-
-        verify(courierRepository).save(any());
-        verify(courierTranslationRepository).saveAll(any());
-        verify(modelMapper).map(any(), eq(CreateCourierDto.class));
     }
 
     @Test
@@ -558,62 +522,6 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deleteReceivingStation(2L));
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
-    }
-
-    @Test
-    void updateCourierTest() {
-        Courier courier = getCourier();
-
-        List<CourierTranslation> starterList = List.of(CourierTranslation.builder()
-            .id(1L)
-            .name("Тест")
-            .nameEng("Test")
-            .courier(courier)
-            .build());
-
-        courier.setCourierTranslationList(starterList);
-
-        List<CourierTranslation> listToSave = List.of(CourierTranslation.builder()
-            .id(1L)
-            .name("УБС")
-            .nameEng("UBS")
-            .courier(courier)
-            .build());
-
-        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
-            .name("УБС")
-            .nameEng("UBS")
-            .build());
-        CourierUpdateDto dto = CourierUpdateDto.builder()
-            .courierId(1L)
-            .courierTranslationDtos(dtoList)
-            .build();
-
-        Courier courierToSave = Courier.builder()
-            .id(courier.getId())
-            .courierStatus(courier.getCourierStatus())
-            .courierTranslationList(listToSave)
-            .build();
-        CourierDto courierDto = CourierDto.builder()
-            .courierId(courier.getId())
-            .courierStatus("Active")
-            .courierTranslationDtos(dtoList)
-            .build();
-
-        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
-        when(courierRepository.save(courier)).thenReturn(courierToSave);
-        when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
-            .thenReturn(listToSave);
-        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
-
-        CourierDto actual = superAdminService.updateCourier(dto);
-        CourierDto expected = CourierDto.builder()
-            .courierId(getCourier().getId())
-            .courierStatus("Active")
-            .courierTranslationDtos(dto.getCourierTranslationDtos())
-            .build();
-
-        assertEquals(expected, actual);
     }
 
     @Test

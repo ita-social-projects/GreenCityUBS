@@ -29,7 +29,6 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.GetCourierTranslationsDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
@@ -119,7 +118,6 @@ import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -149,7 +147,6 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
-import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -250,7 +247,8 @@ public class ModelUtils {
     public static CourierUpdateDto getUpdateCourierDto() {
         return CourierUpdateDto.builder()
             .courierId(1L)
-            .courierTranslationDtos(getCourierTranslationDtoList())
+            .nameUk("Test")
+            .nameEn("Test")
             .build();
     }
 
@@ -2173,24 +2171,8 @@ public class ModelUtils {
         return Courier.builder()
             .id(1L)
             .courierStatus(CourierStatus.ACTIVE)
-            .courierTranslationList(getCourierTranslations())
-            .build();
-    }
-
-    public static CourierTranslation getCourierTranslation() {
-        return CourierTranslation.builder()
-            .id(1L)
-            .name("Test")
-            .nameEng("Test")
-            .courier(getCourier())
-            .build();
-    }
-
-    public static GetCourierTranslationsDto getCourierTranslationsDto() {
-        return GetCourierTranslationsDto.builder()
-            .id(1L)
-            .nameEng("Test")
-            .name("Test")
+            .nameUk("Тест")
+            .nameEn("Test")
             .build();
     }
 
@@ -2198,7 +2180,8 @@ public class ModelUtils {
         return CourierDto.builder()
             .courierId(1L)
             .courierStatus("ACTIVE")
-            .courierTranslationDtos(getCourierTranslationDtoList())
+            .nameUk("Тест")
+            .nameEn("Test")
             .build();
     }
 
@@ -2306,16 +2289,9 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .nameUa("nameUa")
+            .nameUk("nameUa")
             .nameEn("nameEn")
             .build();
-    }
-
-    public static List<CourierTranslation> getCourierTranslations() {
-        return List.of(CourierTranslation.builder()
-            .name("Test")
-            .nameEng("Test")
-            .build());
     }
 
     public static CounterOrderDetailsDto getcounterOrderDetailsDto() {
@@ -2862,15 +2838,9 @@ public class ModelUtils {
         return List.of(CourierDto.builder()
             .courierId(1L)
             .courierStatus("ACTIVE")
-            .courierTranslationDtos(getCourierTranslationDtoList())
+            .nameUk("Тест")
+            .nameEn("Test")
             .build());
-    }
-
-    public static List<CourierTranslationDto> getCourierTranslationDtoList() {
-        return List.of(
-            CourierTranslationDto.builder()
-                .name("Test")
-                .nameEng("Test").build());
     }
 
     public static Location getLocationForCreateRegion() {
@@ -3367,10 +3337,7 @@ public class ModelUtils {
                 .locationId(location.getId())
                 .nameEn(location.getNameEn())
                 .nameUk(location.getNameUk()).build()))
-            .courierTranslationDtos(List.of(CourierTranslationDto.builder()
-                .name("UBS")
-                .nameEng("UBS")
-                .build()))
+            .courierDto(getCourierDto())
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Taras")
             .build();
@@ -3714,8 +3681,8 @@ public class ModelUtils {
 
     public static CourierTranslationDto getCourierTranslationDto() {
         return CourierTranslationDto.builder()
-            .name("Test")
-            .nameEng("Test")
+            .nameUk("Test")
+            .nameEn("Test")
             .build();
     }
 
