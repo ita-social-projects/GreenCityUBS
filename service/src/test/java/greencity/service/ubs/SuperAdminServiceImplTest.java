@@ -699,7 +699,7 @@ class SuperAdminServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> superAdminService.setTariffLimits(1L,
-                    setTariffLimitsDto));
+                setTariffLimitsDto));
     }
 
     @Test
@@ -712,7 +712,7 @@ class SuperAdminServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> superAdminService.setTariffLimits(1L,
-                    setTariffLimitsDto));
+                setTariffLimitsDto));
     }
 
     @Test
