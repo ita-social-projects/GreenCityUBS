@@ -19,5 +19,11 @@
         <insert tableName="positions">
             <column name="name">Водій</column>
         </insert>
+        <insert tableName="positions">
+            <column name="name">Супер адмін</column>
+        </insert>
+        <insert tableName="positions">
+            <column name="name">Адмін</column>
+        </insert>
     </changeSet>
 </databaseChangeLog>
