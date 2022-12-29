@@ -55,8 +55,6 @@ class SuperAdminServiceImplTest {
     @Mock
     private BagRepository bagRepository;
     @Mock
-    private BagTranslationRepository bagTranslationRepository;
-    @Mock
     private LocationRepository locationRepository;
     @Mock
     private ModelMapper modelMapper;
@@ -89,22 +87,16 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid("123233")).thenReturn(user);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(bagRepository.save(bag)).thenReturn(bag);
-        when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
     }
 
     @Test
     void getTariffServiceTest() {
-        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<>());
-
         superAdminService.getTariffService();
-
-        verify(bagTranslationRepository).findAll();
     }
 
     @Test
@@ -156,25 +148,19 @@ class SuperAdminServiceImplTest {
     @Test
     void editTariffService() {
         String uuid = "testUUid";
-        BagTranslation bagTranslation = ModelUtils.getBagTranslationForEditMethod();
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = bagTranslation.getBag();
+        Bag bag = Bag.builder().id(1).name("Test").nameEng("Name Test").build();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagTranslationRepository.findBagTranslationByBag(bag))
-            .thenReturn(bagTranslation);
-        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
         superAdminService.editTariffService(dto, 1, uuid);
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).findBagTranslationByBag(bag);
-        verify(bagTranslationRepository).save(bagTranslation);
     }
 
     @Test
@@ -266,19 +252,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void includeBag() {
-        BagTranslation bagTranslationTest = BagTranslation.builder()
-            .id(2L)
-            .bag(Bag.builder().id(2).capacity(120).price(350).build())
-            .name("Useless paper")
-            .description("Description")
-            .build();
-        bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
-        bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
-        when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
-
-        when(bagTranslationRepository.findBagTranslationByBag(bagTranslationTest.getBag()))
-            .thenReturn(bagTranslationTest);
-
+        when(bagRepository.findById(10)).thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description").build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
 
@@ -356,15 +330,12 @@ class SuperAdminServiceImplTest {
     @Test
     void excludeBag() {
         Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
-        BagTranslation bagTranslation = ModelUtils.bagTranslationDto();
 
         when(bagRepository.findById(1)).thenReturn(bag);
-        when(bagTranslationRepository.findBagTranslationByBag(ModelUtils.bagDto2())).thenReturn(bagTranslation);
 
         superAdminService.excludeBag(1);
 
         verify(bagRepository).findById(1);
-        verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
     }
 
     @Test

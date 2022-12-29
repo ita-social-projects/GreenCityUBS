@@ -64,4 +64,16 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getBagInfo(Long orderId);
+
+    /**
+     * method, that returns {@link List}of{@link Bag}.
+     *
+     * @param orderId order id
+     * @return {@link List}of{@link Bag} by orderId.
+     * @author Max Boiarchuk
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM ORDER_BAG_MAPPING AS OBM JOIN BAG AS B ON OBM.BAG_ID = B.ID "
+                    + "WHERE OBM.ORDER_ID = :orderId")
+    List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 }

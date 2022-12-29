@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 @Data
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
-    private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceTranslationRepository serviceTranslationRepository;
@@ -81,7 +80,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         User user = userRepository.findByUuid(uuid);
         Bag bag = createBagWithFewTranslation(dto, user);
         bagRepository.save(bag);
-        translationRepository.saveAll(bag.getBagTranslations());
         return modelMapper.map(bag, AddServiceDto.class);
     }
 
@@ -89,51 +87,46 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
         Bag bag = Bag.builder().price(dto.getPrice())
-            .capacity(dto.getCapacity())
-            .location(location)
-            .commission(dto.getCommission())
-            .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .createdAt(LocalDate.now())
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .bagTranslations(dto.getTariffTranslationDtoList().stream()
-                .map(tariffTranslationDto -> BagTranslation.builder()
-                    .name(tariffTranslationDto.getName())
-                    .nameEng(tariffTranslationDto.getNameEng())
-                    .description(tariffTranslationDto.getDescription())
-                    .descriptionEng(tariffTranslationDto.getDescriptionEng())
-                    .build())
-                .collect(Collectors.toList()))
-            .build();
-        bag.getBagTranslations().forEach(bagTranslation -> bagTranslation.setBag(bag));
+                .capacity(dto.getCapacity())
+                .location(location)
+                .commission(dto.getCommission())
+                .fullPrice(getFullPrice(dto.getPrice(), dto.getCommission()))
+                .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
+                .createdAt(LocalDate.now())
+                .minAmountOfBags(MinAmountOfBag.INCLUDE)
+                .name(dto.getTariffTranslationDtoList().getName())
+                .nameEng(dto.getTariffTranslationDtoList().getNameEng())
+                .description(dto.getTariffTranslationDtoList().getDescription())
+                .descriptionEng(dto.getTariffTranslationDtoList().getDescriptionEng())
+                .build();
         return bag;
     }
 
     @Override
     public List<GetTariffServiceDto> getTariffService() {
-        return translationRepository.findAll()
+        return bagRepository.findAll()
             .stream()
             .map(this::getTariffService)
             .collect(Collectors.toList());
     }
 
-    private GetTariffServiceDto getTariffService(BagTranslation bagTranslation) {
+    private GetTariffServiceDto getTariffService(Bag bag) {
         return GetTariffServiceDto.builder()
-            .description(bagTranslation.getDescription())
-            .descriptionEng(bagTranslation.getDescriptionEng())
-            .price(bagTranslation.getBag().getPrice())
-            .capacity(bagTranslation.getBag().getCapacity())
-            .name(bagTranslation.getName())
-            .commission(bagTranslation.getBag().getCommission())
-            .nameEng(bagTranslation.getNameEng())
-            .fullPrice(bagTranslation.getBag().getFullPrice())
-            .id(bagTranslation.getBag().getId())
-            .createdAt(bagTranslation.getBag().getCreatedAt())
-            .createdBy(bagTranslation.getBag().getCreatedBy())
-            .editedAt(bagTranslation.getBag().getEditedAt())
-            .editedBy(bagTranslation.getBag().getEditedBy())
-            .locationId(bagTranslation.getBag().getLocation().getId())
-            .minAmountOfBag(bagTranslation.getBag().getMinAmountOfBags().toString())
+            .description(bag.getDescription())
+            .descriptionEng(bag.getDescriptionEng())
+            .price(bag.getPrice())
+            .capacity(bag.getCapacity())
+            .name(bag.getName())
+            .commission(bag.getCommission())
+            .nameEng(bag.getNameEng())
+            .fullPrice(bag.getFullPrice())
+            .id(bag.getId())
+            .createdAt(bag.getCreatedAt())
+            .createdBy(bag.getCreatedBy())
+            .editedAt(bag.getEditedAt())
+            .editedBy(bag.getEditedBy())
+            .locationId(bag.getLocation().getId())
+            .minAmountOfBag(bag.getMinAmountOfBags().toString())
             .build();
     }
 
@@ -154,13 +147,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
         bag.setEditedAt(LocalDate.now());
         bag.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        bag.setName(dto.getName());
+        bag.setDescription(dto.getDescription());
         bagRepository.save(bag);
-        BagTranslation bagTranslation =
-            translationRepository.findBagTranslationByBag(bag);
-        bagTranslation.setName(dto.getName());
-        bagTranslation.setDescription(dto.getDescription());
-        translationRepository.save(bagTranslation);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override
@@ -434,8 +424,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
         bagRepository.save(bag);
-        BagTranslation bagTranslation = translationRepository.findBagTranslationByBag(bag);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override
@@ -447,8 +436,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagRepository.save(bag);
-        BagTranslation bagTranslation = translationRepository.findBagTranslationByBag(bag);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override

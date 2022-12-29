@@ -86,7 +86,6 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.enums.*;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Event;
@@ -125,7 +124,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UserRepository userRepository;
     private final BagRepository bagRepository;
     private final UBSuserRepository ubsUserRepository;
-    private final BagTranslationRepository bagTranslationRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
@@ -226,7 +224,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserPointsAndAllBagsDto getFirstPageData(String uuid, Optional<Long> locationId) {
         User user = userRepository.findByUuid(uuid);
         int currentUserPoints = user.getCurrentPoints();
-        List<BagTranslationDto> btdList = bagTranslationRepository.findAll()
+        List<BagTranslationDto> btdList = bagRepository.findAll()
             .stream()
             .map(this::buildBagTranslationDto)
             .collect(Collectors.toList());
@@ -239,14 +237,14 @@ public class UBSClientServiceImpl implements UBSClientService {
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
-    private BagTranslationDto buildBagTranslationDto(BagTranslation bt) {
+    private BagTranslationDto buildBagTranslationDto(Bag bt) {
         return BagTranslationDto.builder()
-            .id(bt.getBag().getId())
-            .capacity(bt.getBag().getCapacity())
-            .price(bt.getBag().getFullPrice())
+            .id(bt.getId())
+            .capacity(bt.getCapacity())
+            .price(bt.getFullPrice())
             .name(bt.getName())
             .nameEng(bt.getNameEng())
-            .locationId(bt.getBag().getLocation().getId())
+            .locationId(bt.getLocation().getId())
             .build();
     }
 
@@ -629,7 +627,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
             || order.getOrderStatus() == OrderStatus.CONFIRMED
             || order.getOrderStatus() == OrderStatus.DONE) {
-            List<BagTranslation> bags = bagTranslationRepository.findAllByOrder(orderId);
+            List<Bag> bags = bagRepository.findAllByOrder(orderId);
             return buildOrderBagDto(order, bags);
         } else {
             throw new BadRequestException(ErrorMessage.BAD_ORDER_STATUS_REQUEST + order.getOrderStatus());
@@ -783,9 +781,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private BagForUserDto buildBagForUserDto(Bag bag, int count) {
         BagForUserDto bagDto = modelMapper.map(bag, BagForUserDto.class);
-        BagTranslation bagTranslation = bag.getBagTranslations().get(0);
-        bagDto.setService(bagTranslation.getName());
-        bagDto.setServiceEng(bagTranslation.getNameEng());
+        bagDto.setService(bag.getName());
+        bagDto.setServiceEng(bag.getNameEng());
         bagDto.setCount(count);
         bagDto.setTotalPrice(count * bag.getFullPrice());
         return bagDto;
@@ -799,16 +796,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             .reduce(0L, Long::sum);
     }
 
-    private MakeOrderAgainDto buildOrderBagDto(Order order, List<BagTranslation> bags) {
+    private MakeOrderAgainDto buildOrderBagDto(Order order, List<Bag> bags) {
         List<BagOrderDto> bagOrderDtoList = new ArrayList<>();
-        for (BagTranslation bag : bags) {
+        for (Bag bag : bags) {
             bagOrderDtoList.add(BagOrderDto.builder()
-                .bagId(bag.getBag().getId())
+                .bagId(bag.getId())
                 .name(bag.getName())
                 .nameEng(bag.getNameEng())
-                .capacity(bag.getBag().getCapacity())
-                .price(bag.getBag().getPrice())
-                .bagAmount(order.getAmountOfBagsOrdered().get(bag.getBag().getId()))
+                .capacity(bag.getCapacity())
+                .price(bag.getPrice())
+                .bagAmount(order.getAmountOfBagsOrdered().get(bag.getId()))
                 .build());
         }
         return MakeOrderAgainDto.builder()

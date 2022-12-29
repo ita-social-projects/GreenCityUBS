@@ -48,15 +48,24 @@ public class Bag {
     @Column(nullable = false)
     private String editedBy;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Column(name = "name_eng")
+    private String nameEng;
+
+    @Column
+    private String description;
+
+    @Column(name = "description_eng")
+    private String descriptionEng;
+
     @Column(nullable = false, name = "min_amount_of_bags")
     @Enumerated(EnumType.STRING)
     private MinAmountOfBag minAmountOfBags;
 
     @ManyToOne
     private Location location;
-
-    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL)
-    private List<BagTranslation> bagTranslations;
 
     @ManyToOne
     private TariffsInfo tariffsInfo;

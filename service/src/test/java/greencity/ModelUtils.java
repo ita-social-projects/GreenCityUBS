@@ -114,7 +114,6 @@ import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
 import greencity.entity.order.BigOrderTableViews;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
@@ -149,7 +148,6 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
-import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -191,8 +189,6 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final BagTransDto TEST_BAG_TRANS_DTO = createBagTransDto();
-    public static final BagTranslation TEST_BAG_TRANSLATION = createBagTranslation();
-    public static final List<BagTranslation> TEST_BAG_TRANSLATION_LIST = singletonList(TEST_BAG_TRANSLATION);
     public static final Bag TEST_BAG = createBag();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
@@ -1458,19 +1454,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static BagTranslation getBagTranslation() {
-        return BagTranslation.builder()
-            .id(1L)
-            .bag(Bag.builder().id(1).capacity(120).price(350).location(Location.builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
-                .build())
-            .nameEng("a")
-            .name("Useless paper")
-            .build();
-    }
-
     public static BagOrderDto getBagOrderDto() {
         return BagOrderDto.builder()
             .bagId(1)
@@ -1748,12 +1731,6 @@ public class ModelUtils {
         return OrderDetailInfoDto.builder()
             .amount(5)
             .capacity(4)
-            .build();
-    }
-
-    private static BagTranslation createBagTranslation() {
-        return BagTranslation.builder()
-            .id(4L)
             .build();
     }
 
@@ -2049,13 +2026,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<TariffTranslationDto> getTariffTranslationDto() {
-        return List.of(TariffTranslationDto.builder()
+    public static TariffTranslationDto getTariffTranslationDto() {
+        return TariffTranslationDto.builder()
             .description("Description")
             .descriptionEng("DescriptionEng")
             .nameEng("a")
             .name("Test")
-            .build());
+            .build();
     }
 
     public static AddServiceDto addServiceDto() {
@@ -2102,10 +2079,8 @@ public class ModelUtils {
             .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
-            .bagTranslations(List.of(BagTranslation.builder()
-                .description("Description")
-                .descriptionEng("DescriptionEng")
-                .id(1L).build()))
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
@@ -2120,17 +2095,6 @@ public class ModelUtils {
             .langCode("ua")
             .build();
 
-    }
-
-    public static BagTranslation getBagTranslationForEditMethod() {
-        return BagTranslation.builder()
-            .id(1L)
-            .bag(getBag().get())
-            .nameEng("a")
-            .name("Бавовняна сумка")
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .build();
     }
 
     public static Location getLocation() {
@@ -2202,15 +2166,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<BagTranslation> getBagTransaltion() {
-        return List.of(BagTranslation.builder()
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .name("Test")
-            .nameEng("a")
-            .build());
-    }
-
     public static Bag getTariffBag() {
         return Bag.builder().price(100)
             .commission(50)
@@ -2220,7 +2175,10 @@ public class ModelUtils {
             .createdBy("Taras Ivanov")
             .location(getLocation())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .bagTranslations(getBagTransaltion()).build();
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Test")
+            .nameEng("a").build();
     }
 
     public static AdminCommentDto getAdminCommentDto() {
@@ -2572,7 +2530,10 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
-            .bagTranslations(List.of(getBagTranslation()))
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Test")
+            .nameEng("a")
             .build();
     }
 
@@ -2585,23 +2546,6 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
-            .build();
-    }
-
-    public static BagTranslation bagTranslationDto() {
-        return BagTranslation
-            .builder()
-            .id(1L)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .bag(Bag.builder().id(1).minAmountOfBags(MinAmountOfBag.EXCLUDE)
-                .location(Location.builder()
-                    .id(1L)
-                    .locationStatus(LocationStatus.ACTIVE)
-                    .build())
-                .build())
-            .name("Name")
-            .nameEng("NameEng")
             .build();
     }
 

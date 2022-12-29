@@ -319,13 +319,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<TariffTranslationDto> getTariffTranslationDto() {
-        return List.of(TariffTranslationDto.builder()
+    public static TariffTranslationDto getTariffTranslationDto() {
+        return TariffTranslationDto.builder()
             .name("Test")
             .nameEng("a")
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build());
+            .build();
     }
 
     public static AddServiceDto getAddServiceDto() {

@@ -90,7 +90,6 @@ import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -120,8 +119,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
-    @Mock
-    private BagTranslationRepository bagTranslationRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -215,14 +212,6 @@ class UBSClientServiceImplTest {
             .nameEng("NameEng")
             .locationId(1L)
             .build();
-        BagTranslation bagTranslation = BagTranslation.builder()
-            .id(1L)
-            .name("Name")
-            .description("Description")
-            .bag(getBag().get())
-            .nameEng("NameEng")
-            .descriptionEng("DescriptionEng")
-            .build();
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
             new UserPointsAndAllBagsDto(List.of(bagTranslationDto), 600);
@@ -230,7 +219,6 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(bagTranslationRepository.findAll()).thenReturn(List.of(bagTranslation));
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
@@ -441,14 +429,11 @@ class UBSClientServiceImplTest {
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(bagTranslationRepository.findAllByOrder(1L))
-            .thenReturn(List.of(getBagTranslation()));
 
         MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
 
         assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
-        verify(bagTranslationRepository, times(1)).findAllByOrder(1L);
     }
 
     @Test

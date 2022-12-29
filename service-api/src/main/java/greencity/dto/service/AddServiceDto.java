@@ -21,7 +21,7 @@ public class AddServiceDto {
     @NotNull
     Integer commission;
     @Valid
-    List<TariffTranslationDto> tariffTranslationDtoList;
+    TariffTranslationDto tariffTranslationDtoList;
     @NotNull
     Long locationId;
 }
