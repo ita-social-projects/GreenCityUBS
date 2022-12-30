@@ -247,7 +247,7 @@ public class ModelUtils {
     public static CourierUpdateDto getUpdateCourierDto() {
         return CourierUpdateDto.builder()
             .courierId(1L)
-            .nameUk("Test")
+            .nameUk("Тест")
             .nameEn("Test")
             .build();
     }
@@ -2289,8 +2289,8 @@ public class ModelUtils {
 
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
-            .nameUk("nameUa")
-            .nameEn("nameEn")
+            .nameUk("Тест")
+            .nameEn("Test")
             .build();
     }
 

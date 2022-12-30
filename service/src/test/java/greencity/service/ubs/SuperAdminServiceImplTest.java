@@ -390,11 +390,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setLimitDescriptionExceptiomTest() {
-        assertThrows(NotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1"));
-    }
-
-    @Test
     void excludeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.excludeBag(1));
     }
