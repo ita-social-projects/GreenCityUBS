@@ -468,7 +468,7 @@ class SuperAdminServiceImplTest {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-        String uuid =  ModelUtils.TEST_USER.getUuid();
+        String uuid = ModelUtils.TEST_USER.getUuid();
 
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
