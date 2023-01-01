@@ -44,8 +44,8 @@ public class CourierDtoMapperTest {
 
         assertEquals(expected.getId(), actual.getCourierId());
         assertEquals(expected.getCourierStatus().toString(), actual.getCourierStatus());
-        assertEquals(expected.getNameUk(),actual.getNameUk());
-        assertEquals(expected.getNameEn(),actual.getNameEn());
+        assertEquals(expected.getNameUk(), actual.getNameUk());
+        assertEquals(expected.getNameEn(), actual.getNameEn());
         assertEquals(expected.getCreateDate(), actual.getCreateDate());
         assertEquals(user.getRecipientName() + " " + user.getRecipientSurname(), actual.getCreatedBy());
     }
