@@ -30,11 +30,7 @@ public class CourierDtoMapperTest {
 
     @Test
     public void convert() {
-
-        CourierTranslationDto courierTranslationDto = getCourierTranslationDto();
-
         User user = getUser();
-
         Courier expected = Courier.builder()
             .id(22L)
             .courierStatus(ACTIVE)
@@ -48,7 +44,8 @@ public class CourierDtoMapperTest {
 
         assertEquals(expected.getId(), actual.getCourierId());
         assertEquals(expected.getCourierStatus().toString(), actual.getCourierStatus());
-        assertEquals(courierTranslationDto.getNameUk(), actual.getNameUk());
+        assertEquals(expected.getNameUk(),actual.getNameUk());
+        assertEquals(expected.getNameEn(),actual.getNameEn());
         assertEquals(expected.getCreateDate(), actual.getCreateDate());
         assertEquals(user.getRecipientName() + " " + user.getRecipientSurname(), actual.getCreatedBy());
     }

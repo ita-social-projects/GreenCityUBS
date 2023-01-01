@@ -1,0 +1,38 @@
+package greencity.mapping.tariff;
+
+import greencity.ModelUtils;
+import greencity.dto.TariffsForLocationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.entity.order.TariffsInfo;
+import greencity.mapping.location.TariffsForLocationDtoMapper;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class TariffsForLocationDtoMapperTest {
+
+    @InjectMocks
+    TariffsForLocationDtoMapper mapper;
+
+    @Test
+    void convert() {
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        TariffsForLocationDto dto = mapper.convert(tariffsInfo);
+
+        Assertions.assertEquals(tariffsInfo.getId(), dto.getTariffInfoId());
+        Assertions.assertEquals(tariffsInfo.getCourierLimit().toString(), dto.getCourierLimit());
+        Assertions.assertEquals(CourierDto.builder().courierId(tariffsInfo.getCourier().getId())
+            .nameUk(tariffsInfo.getCourier().getNameUk())
+            .nameEn(tariffsInfo.getCourier().getNameEn())
+            .courierStatus(tariffsInfo.getCourier().getCourierStatus().name())
+            .createDate(tariffsInfo.getCourier().getCreateDate())
+            .build(), dto.getCourierDto());
+        Assertions.assertEquals(tariffsInfo.getMinAmountOfBigBags(), dto.getMinAmountOfBigBags());
+        Assertions.assertEquals(tariffsInfo.getMaxAmountOfBigBags(), dto.getMaxAmountOfBigBags());
+        Assertions.assertEquals(tariffsInfo.getMinPriceOfOrder(), dto.getMinPriceOfOrder());
+        Assertions.assertEquals(tariffsInfo.getMaxPriceOfOrder(), dto.getMaxPriceOfOrder());
+    }
+}

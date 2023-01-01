@@ -3,7 +3,6 @@ package greencity.dto.tariff;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.enums.LocationStatus;
 import lombok.*;

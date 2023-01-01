@@ -4,7 +4,6 @@ import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;

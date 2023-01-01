@@ -24,6 +24,7 @@ import greencity.enums.MinAmountOfBag;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -439,6 +440,94 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteCourier(1L));
 
         verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void createCourier() {
+        Courier courier = ModelUtils.getCourier();
+        courier.setId(null);
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
+            .nameEn("Test1")
+            .nameUk("Тест1")
+            .build()));
+        when(courierRepository.save(any())).thenReturn(courier);
+        when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
+
+        assertEquals(createCourierDto,
+            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
+
+        verify(courierRepository).save(any());
+        verify(modelMapper).map(any(), eq(CreateCourierDto.class));
+    }
+
+    @Test
+    void createCourierAlreadyExists() {
+        Courier courier = ModelUtils.getCourier();
+        courier.setId(null);
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
+
+        assertThrows(CourierAlreadyExists.class, () -> superAdminService.createCourier(createCourierDto,
+            ModelUtils.TEST_USER.getUuid()));
+    }
+
+    @Test
+    void updateCourierTest() {
+        Courier courier = getCourier();
+
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        Courier courierToSave = Courier.builder()
+            .id(courier.getId())
+            .courierStatus(courier.getCourierStatus())
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        CourierDto courierDto = CourierDto.builder()
+            .courierId(courier.getId())
+            .courierStatus("Active")
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
+        when(courierRepository.save(courier)).thenReturn(courierToSave);
+        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
+
+        CourierDto actual = superAdminService.updateCourier(dto);
+        CourierDto expected = CourierDto.builder()
+            .courierId(getCourier().getId())
+            .courierStatus("Active")
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void updateCourierNotFound() {
+        Courier courier = getCourier();
+
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        when(courierRepository.findById(courier.getId()))
+            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+        assertThrows(NotFoundException.class, () -> superAdminService.updateCourier(dto));
     }
 
     @Test
