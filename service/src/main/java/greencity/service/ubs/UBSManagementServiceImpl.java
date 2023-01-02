@@ -649,9 +649,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Bag bag = bagRepository.findById(entry.getKey()).get();
+            Optional<Bag> bag = bagRepository.findById(entry.getKey());
 
-            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
+            if (bag.isPresent() && order.getOrderStatus() == OrderStatus.ADJUSTMENT
                 || order.getOrderStatus() == OrderStatus.CONFIRMED
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
@@ -664,7 +664,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.get().getName()).append(" ").append(capacity).append(" л: ")
                         .append(confirmWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -676,8 +676,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            Bag bag = bagRepository.findById(entry.getKey()).get();
-            if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            Optional<Bag> bag = bagRepository.findById(entry.getKey());
+            if (bag.isPresent() && order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
                 || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
@@ -692,7 +692,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
-                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.get().getName()).append(" ").append(capacity).append(" л: ")
                         .append(exporterWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
