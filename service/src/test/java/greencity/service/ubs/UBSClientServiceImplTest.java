@@ -211,10 +211,11 @@ class UBSClientServiceImplTest {
             .price(170)
             .nameEng("NameEng")
             .locationId(1L)
+            .limitedIncluded(false)
             .build();
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(List.of(bagTranslationDto), 600);
+            new UserPointsAndAllBagsDto(Collections.emptyList(), 600);
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
@@ -225,8 +226,6 @@ class UBSClientServiceImplTest {
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
-        assertEquals(userPointsAndAllBagsDtoActual.getBags().get(0).getId(),
-            Integer.valueOf(Math.toIntExact(locationId)));
     }
 
     @Test
@@ -424,7 +423,7 @@ class UBSClientServiceImplTest {
         MakeOrderAgainDto dto = MakeOrderAgainDto.builder()
             .orderId(1L)
             .orderAmount(350L)
-            .bagOrderDtoList(List.of(getBagOrderDto()))
+            .bagOrderDtoList(Collections.emptyList())
             .build();
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));

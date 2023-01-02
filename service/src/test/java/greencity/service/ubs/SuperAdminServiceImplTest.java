@@ -149,7 +149,8 @@ class SuperAdminServiceImplTest {
     void editTariffService() {
         String uuid = "testUUid";
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = Bag.builder().id(1).name("Test").nameEng("Name Test").build();
+        Bag bag = Bag.builder().id(1).name("Test").nameEng("Name Test").minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location.builder().id(1L).build()).build();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
@@ -253,7 +254,8 @@ class SuperAdminServiceImplTest {
     @Test
     void includeBag() {
         when(bagRepository.findById(10))
-            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description").build()));
+            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description")
+                .minAmountOfBags(MinAmountOfBag.EXCLUDE).build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
     }
 

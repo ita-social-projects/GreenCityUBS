@@ -423,6 +423,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new BadRequestException(ErrorMessage.BAG_WITH_THIS_STATUS_ALREADY_SET);
         }
         bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
+        bag.setLocation(Location.builder().id(1L).build());
         bagRepository.save(bag);
         return getTariffService(bag);
     }
