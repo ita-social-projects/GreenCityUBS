@@ -157,5 +157,6 @@
     <include file="db/changelog/logs/ch-add-column-description_eng-into-bag_translations-table-Safarov.xml"/>
     <include file="db/changelog/logs/ch-row-migration-bag-translation-to-bag.xml"/>
     <include file="db/changelog/logs/ch-drop-bag-translations-table.xml"/>
+    <include file="db/changelog/logs/ch-add-column-limit-included-to-bag.xml"/>
 </databaseChangeLog>
 

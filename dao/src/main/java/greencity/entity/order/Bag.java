@@ -69,4 +69,7 @@ public class Bag {
 
     @ManyToOne
     private TariffsInfo tariffsInfo;
+
+    @Column(name = "limit_included")
+    private Boolean limitIncluded;
 }

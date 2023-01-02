@@ -245,6 +245,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .name(bt.getName())
             .nameEng(bt.getNameEng())
             .locationId(bt.getLocation().getId())
+            .limitedIncluded(bt.getLimitIncluded())
             .build();
     }
 
