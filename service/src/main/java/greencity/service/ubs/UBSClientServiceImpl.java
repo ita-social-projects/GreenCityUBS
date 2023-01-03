@@ -553,20 +553,11 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
         OrderAddressDtoRequest addressRequestDto) {
-        if (dtoRequest.getRegion() == null && dtoRequest.getRegionEn() == null) {
-            dtoRequest.setRegion(addressRequestDto.getRegion());
-            dtoRequest.setRegionEn(addressRequestDto.getRegionEn());
-        }
-
-        if (dtoRequest.getDistrict() == null && dtoRequest.getDistrictEn() == null) {
-            dtoRequest.setDistrict(addressRequestDto.getDistrict());
-            dtoRequest.setDistrictEn(addressRequestDto.getDistrictEn());
-        }
-
-        if (dtoRequest.getHouseNumber() == null) {
-            dtoRequest.setHouseNumber(addressRequestDto.getHouseNumber());
-        }
-
+        dtoRequest.setRegion(Objects.isNull(dtoRequest.getRegion()) ? addressRequestDto.getRegion() : dtoRequest.getRegion());
+        dtoRequest.setRegionEn(Objects.isNull(dtoRequest.getRegionEn()) ? addressRequestDto.getRegionEn() : dtoRequest.getRegionEn());
+        dtoRequest.setDistrict(Objects.isNull(dtoRequest.getDistrict()) ? addressRequestDto.getDistrict() : dtoRequest.getDistrict());
+        dtoRequest.setDistrictEn(Objects.isNull(dtoRequest.getDistrictEn()) ? addressRequestDto.getDistrictEn() : dtoRequest.getDistrictEn());
+        dtoRequest.setHouseNumber(Objects.isNull(dtoRequest.getHouseNumber()) ? addressRequestDto.getHouseNumber() : dtoRequest.getHouseNumber());
         dtoRequest.setEntranceNumber(addressRequestDto.getEntranceNumber());
         dtoRequest.setHouseCorpus(addressRequestDto.getHouseCorpus());
         dtoRequest.setAddressComment(addressRequestDto.getAddressComment());
