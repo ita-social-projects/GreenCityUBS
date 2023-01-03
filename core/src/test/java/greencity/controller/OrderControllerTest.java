@@ -16,6 +16,9 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.UserInfoDto;
+import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
+import greencity.enums.PaymentStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
@@ -57,9 +60,6 @@ class OrderControllerTest {
     UBSClientService ubsClientService;
 
     @Mock
-    UBSuserRepository ubSuserRepository;
-
-    @Mock
     UBSManagementService ubsManagementService;
 
     @Mock
@@ -71,6 +71,9 @@ class OrderControllerTest {
     NotificationService notificationService;
     @InjectMocks
     OrderController orderController;
+
+    @Mock
+    private UBSuserRepository ubSuserRepository;
 
     private Principal principal = getPrincipal();
 
@@ -116,7 +119,7 @@ class OrderControllerTest {
     @Test
     void processOrder() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto2();
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
@@ -129,7 +132,6 @@ class OrderControllerTest {
 
         verify(ubsClientService).saveFullOrderToDB(any(), eq("35467585763t4sfgchjfuyetf"), eq(null));
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
-
     }
 
     @Test
@@ -231,10 +233,11 @@ class OrderControllerTest {
     }
 
     @Test
-    void updatesRecipientsInfoWithEmptyUser() throws Exception {
+    void updatesRecipientsInfoWithOutUser() throws Exception {
+        UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
-
-        when(ubSuserRepository.findById(1L)).thenReturn(Optional.empty());
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
+        lenient().when(ubSuserRepository.findById(ubsCustomersDtoUpdate.getRecipientId())).thenReturn(Optional.empty());
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)

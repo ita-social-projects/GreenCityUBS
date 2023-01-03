@@ -284,6 +284,57 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testSaveToDBWithoutOrderUnpaid() throws IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto(false);
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        Address address = ubSuser.getAddress();
+        address.setUser(user);
+        address.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        Assertions.assertNotNull(result);
+
+    }
+
+    @Test
     void saveToDBFailPaidOrder() {
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(1000);
@@ -809,6 +860,44 @@ class UBSClientServiceImplTest {
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
         verify(addressRepository, times(2)).save(addresses.get(0));
+    }
+
+    @Test
+    void testUpdateCurrentAddressForOrderWithNoAddress() {
+        User user = ModelUtils.getUserForCreate(AddressStatus.DELETED);
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        dtoRequest.setId(1L);
+        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
+        updateAddressRequestDto.setId(1L);
+        addresses.get(0).setActual(false);
+        //addresses.get(0).setAddressStatus(AddressStatus.DELETED);
+        addresses.get(0).setUser(user);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(modelMapper.map(dtoRequest,
+                Address.class)).thenReturn(addresses.get(0));
+
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+        when(modelMapper.map(addresses.get(0),
+                AddressDto.class))
+                .thenReturn(ModelUtils.addressDto());
+
+        OrderWithAddressesResponseDto actualWithSearchAddress =
+                ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+
+        Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
+        Assertions.assertNull(dtoRequest.getSearchAddress());
+        Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithSearchAddress);
+        verify(googleApiService).getResultFromGeoCode("fake address");
+
+        //Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
+        verify(addressRepository, times(1)).save(addresses.get(0));
     }
 
     @Test

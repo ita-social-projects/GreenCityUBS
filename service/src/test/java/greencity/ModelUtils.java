@@ -304,6 +304,9 @@ public class ModelUtils {
     }
 
     public static OrderResponseDto getOrderResponseDto() {
+        return getOrderResponseDto(true);
+    }
+    public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -311,7 +314,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .shouldBePaid(true)
+            .shouldBePaid(shouldBePaid)
             .personalData(PersonalDataDto.builder()
                 .senderEmail("test@email.ua")
                 .senderPhoneNumber("+380974563223")
@@ -3605,11 +3608,14 @@ public class ModelUtils {
     }
 
     public static User getUserForCreate() {
+        return getUserForCreate(AddressStatus.IN_ORDER);
+    }
+    public static User getUserForCreate(AddressStatus addressStatus) {
         return User.builder()
             .id(1L)
             .addresses(List.of(Address.builder().id(7L).city("fake street").cityEn("fake street")
                 .district("fake district").districtEn("fake district").region("fake region").regionEn("fake region")
-                .street("fake street name").streetEn("fake street name").houseNumber("13")
+                .street("fake street name").streetEn("fake street name").houseNumber("13").addressStatus(addressStatus)
                 .coordinates(new Coordinates(50.5555555, 50.5555555)).build()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")

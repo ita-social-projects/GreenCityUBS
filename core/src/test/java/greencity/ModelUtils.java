@@ -60,43 +60,26 @@ public class ModelUtils {
     }
 
     public static OrderResponseDto getOrderResponseDto() {
-        return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(List.of("232534634")))
-            .bags(Collections.singletonList(new BagDto(3, 999)))
-            .orderComment("comment")
-            .certificates(Collections.emptySet())
-            .pointsToUse(700)
-            .shouldBePaid(true)
-            .personalData(PersonalDataDto.builder()
-                .firstName("Anton")
-                .lastName("Antonov")
-                .id(13L)
-                .email("mail@mail.ua")
-                .phoneNumber("0678945221")
-                .build())
-            .addressId(1L)
-            .locationId(1L)
-            .build();
+        return getOrderResponseDto(true);
     }
-
-    public static OrderResponseDto getOrderResponseDto2() {
+    public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-            .additionalOrders(new HashSet<>(List.of("232534634")))
-            .bags(Collections.singletonList(new BagDto(3, 999)))
-            .orderComment("comment")
-            .certificates(Collections.emptySet())
-            .pointsToUse(700)
-            .shouldBePaid(false)
-            .personalData(PersonalDataDto.builder()
-                .firstName("Anton")
-                .lastName("Antonov")
-                .id(13L)
-                .email("mail@mail.ua")
-                .phoneNumber("0678945221")
-                .build())
-            .addressId(1L)
-            .locationId(1L)
-            .build();
+                .additionalOrders(new HashSet<>(List.of("232534634")))
+                .bags(Collections.singletonList(new BagDto(3, 999)))
+                .orderComment("comment")
+                .certificates(Collections.emptySet())
+                .pointsToUse(700)
+                .shouldBePaid(shouldBePaid)
+                .personalData(PersonalDataDto.builder()
+                        .firstName("Anton")
+                        .lastName("Antonov")
+                        .id(13L)
+                        .email("mail@mail.ua")
+                        .phoneNumber("0678945221")
+                        .build())
+                .addressId(1L)
+                .locationId(1L)
+                .build();
     }
 
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {
@@ -224,7 +207,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
+            .recipientId(2L)
             .recipientName("Anatolii")
             .recipientSurName("Petyrov")
             .recipientPhoneNumber("095123456")
@@ -254,8 +237,12 @@ public class ModelUtils {
     }
 
     public static OrderDetailStatusDto getOrderDetailStatusDto() {
+        return getOrderDetailStatusDto(PaymentStatus.PAID);
+    }
+
+    public static OrderDetailStatusDto getOrderDetailStatusDto(PaymentStatus paymentStatus) {
         return OrderDetailStatusDto.builder()
-            .paymentStatus(PaymentStatus.PAID.name())
+            .paymentStatus(paymentStatus.name())
             .orderStatus(OrderStatus.CONFIRMED.name())
             .date(LocalDateTime.now().toString())
             .build();
