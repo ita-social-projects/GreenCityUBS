@@ -771,10 +771,16 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
-        return MapUtils.isNotEmpty(order.getExportedQuantity()) ? order.getExportedQuantity()
-            : MapUtils.isNotEmpty(order.getConfirmedQuantity()) ? order.getConfirmedQuantity()
-                : MapUtils.isNotEmpty(order.getAmountOfBagsOrdered()) ? order.getAmountOfBagsOrdered()
-                    : new HashMap<>();
+        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
+            return order.getExportedQuantity();
+        }
+        if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
+            return order.getConfirmedQuantity();
+        }
+        if (MapUtils.isNotEmpty(order.getAmountOfBagsOrdered())) {
+            return order.getAmountOfBagsOrdered();
+        }
+        return new HashMap<>();
     }
 
     private BagForUserDto buildBagForUserDto(Bag bag, int count) {
