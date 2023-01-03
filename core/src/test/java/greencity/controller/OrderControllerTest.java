@@ -110,7 +110,7 @@ class OrderControllerTest {
     @Test
     void processOrder() throws Exception {
         when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
+        OrderResponseDto dto = ModelUtils.getOrderResponseDto2();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
