@@ -553,11 +553,23 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkNullFieldsOnGoogleResponse(OrderAddressDtoRequest dtoRequest,
         OrderAddressDtoRequest addressRequestDto) {
-        dtoRequest.setRegion(Objects.isNull(dtoRequest.getRegion()) ? addressRequestDto.getRegion() : dtoRequest.getRegion());
-        dtoRequest.setRegionEn(Objects.isNull(dtoRequest.getRegionEn()) ? addressRequestDto.getRegionEn() : dtoRequest.getRegionEn());
-        dtoRequest.setDistrict(Objects.isNull(dtoRequest.getDistrict()) ? addressRequestDto.getDistrict() : dtoRequest.getDistrict());
-        dtoRequest.setDistrictEn(Objects.isNull(dtoRequest.getDistrictEn()) ? addressRequestDto.getDistrictEn() : dtoRequest.getDistrictEn());
-        dtoRequest.setHouseNumber(Objects.isNull(dtoRequest.getHouseNumber()) ? addressRequestDto.getHouseNumber() : dtoRequest.getHouseNumber());
+        dtoRequest.setRegion(
+            Objects.isNull(dtoRequest.getRegion()) ? addressRequestDto.getRegion() : dtoRequest.getRegion());
+
+        dtoRequest.setRegionEn(
+            Objects.isNull(dtoRequest.getRegionEn()) ? addressRequestDto.getRegionEn() : dtoRequest.getRegionEn());
+
+        dtoRequest.setDistrict(
+            Objects.isNull(dtoRequest.getDistrict()) ? addressRequestDto.getDistrict() : dtoRequest.getDistrict());
+
+        dtoRequest.setDistrictEn(
+            Objects.isNull(dtoRequest.getDistrictEn()) ? addressRequestDto.getDistrictEn()
+                : dtoRequest.getDistrictEn());
+
+        dtoRequest.setHouseNumber(
+            Objects.isNull(dtoRequest.getHouseNumber()) ? addressRequestDto.getHouseNumber()
+                : dtoRequest.getHouseNumber());
+
         dtoRequest.setEntranceNumber(addressRequestDto.getEntranceNumber());
         dtoRequest.setHouseCorpus(addressRequestDto.getHouseCorpus());
         dtoRequest.setAddressComment(addressRequestDto.getAddressComment());
@@ -759,16 +771,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private Map<Integer, Integer> getActualBagAmountsForOrder(Order order) {
-        if (MapUtils.isNotEmpty(order.getExportedQuantity())) {
-            return order.getExportedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getConfirmedQuantity())) {
-            return order.getConfirmedQuantity();
-        }
-        if (MapUtils.isNotEmpty(order.getAmountOfBagsOrdered())) {
-            return order.getAmountOfBagsOrdered();
-        }
-        return new HashMap<>();
+        return MapUtils.isNotEmpty(order.getExportedQuantity()) ? order.getExportedQuantity()
+            : MapUtils.isNotEmpty(order.getConfirmedQuantity()) ? order.getConfirmedQuantity()
+                : MapUtils.isNotEmpty(order.getAmountOfBagsOrdered()) ? order.getAmountOfBagsOrdered()
+                    : new HashMap<>();
     }
 
     private BagForUserDto buildBagForUserDto(Bag bag, int count) {
