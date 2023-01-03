@@ -16,11 +16,14 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.UserInfoDto;
+import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
+import greencity.repository.UBSuserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +55,9 @@ class OrderControllerTest {
 
     @Mock
     UBSClientService ubsClientService;
+
+    @Mock
+    UBSuserRepository ubSuserRepository;
 
     @Mock
     UBSManagementService ubsManagementService;
@@ -214,6 +220,21 @@ class OrderControllerTest {
         UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(put(ubsLink + "/update-recipients-data")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
+    }
+
+    @Test
+    void updatesRecipientsInfoWithEmptyUser() throws Exception {
+        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
+
+        when(ubSuserRepository.findById(1L)).thenReturn(Optional.empty());
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
             .contentType(MediaType.APPLICATION_JSON)
