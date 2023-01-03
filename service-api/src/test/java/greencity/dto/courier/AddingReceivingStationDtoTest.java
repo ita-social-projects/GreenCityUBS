@@ -1,7 +1,5 @@
 package greencity.dto.courier;
 
-import org.apache.commons.lang.StringUtils;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -19,31 +17,16 @@ class AddingReceivingStationDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe"})
-    void testNameRegex(String name) throws NoSuchFieldException {
+        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe", "a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+    void testValidName(String name) throws NoSuchFieldException {
         nameRegex(name, true);
     }
 
-    @Test
-    void testEmptyName() throws NoSuchFieldException {
-        nameRegex("", false);
-    }
-
-    @Test
-    void testNameWithMinimumCountOfSymbols() throws NoSuchFieldException {
-        String name = StringUtils.repeat("a", 1);
-        nameRegex(name, true);
-    }
-
-    @Test
-    void testNameWithMaximumCountOfSymbols() throws NoSuchFieldException {
-        String name = StringUtils.repeat("a", 30);
-        nameRegex(name, true);
-    }
-
-    @Test
-    void testNameWithTooManySymbols() throws NoSuchFieldException {
-        String name = StringUtils.repeat("a", 31);
+    @ParameterizedTest
+    @ValueSource(
+            strings = {"", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+    void testInvalidName(String name) throws NoSuchFieldException {
         nameRegex(name, false);
     }
+
 }
