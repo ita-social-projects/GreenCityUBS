@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.tariff.*;
 import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,11 +43,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.AddNewTariffResponseDto;
-import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -632,6 +628,21 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditPriceOfOrder dto) {
         superAdminService.setTariffLimitBySumOfOrder(tariffId, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @ApiOperation(value = "Edit tariff limits by sum of order or by sum of Bags")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PatchMapping("/setTariffLimits/{tariffId}")
+    public ResponseEntity<HttpStatus> setLimitsForTariff(@Valid @PathVariable Long tariffId,
+        @Valid @RequestBody SetTariffLimitsDto setTariffLimits) {
+        superAdminService.setTariffLimits(tariffId, setTariffLimits);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

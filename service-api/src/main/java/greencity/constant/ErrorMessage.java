@@ -108,6 +108,12 @@ public final class ErrorMessage {
     public static final String CITY_NAME_CHARACTER_LIMIT = "A minimum of 3 to a maximum of 40 characters are allowed";
     public static final String CANNOT_ACCESS_ORDER_FOR_EMPLOYEE = "Cannot access order with id: ";
     public static final String NUMBER_OF_ADDRESSES_EXCEEDED = "Number of addresses reached maximum";
+    public static final String BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND =
+        "There are not any tariff which include big bags for this location";
+    public static final String TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY =
+        "Limits are not inputted properly. You should only input AmountOfBags or PriceOfOrder.";
+    public static final String MAX_BAG_VALUE_IS_INCORRECT = "Max bag value should be greater than min";
+    public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
 
     /**
      * Constructor.
