@@ -433,10 +433,10 @@ class UBSClientServiceImplTest {
                         .bagAmount(1)
                         .build(),
                     BagOrderDto.builder()
-                            .bagId(2)
-                            .capacity(10)
-                            .price(100)
-                            .build()))
+                        .bagId(2)
+                        .capacity(10)
+                        .price(100)
+                        .build()))
             .build();
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
