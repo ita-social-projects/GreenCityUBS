@@ -78,7 +78,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         value = "SELECT * FROM ORDER_BAG_MAPPING AS OBM JOIN BAG AS B ON OBM.BAG_ID = B.ID "
             + "WHERE OBM.ORDER_ID = :orderId")
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
-    
+
     /**
      * method, that returns {@link List} of {@link Bag}'s that matches by
      * {@link TariffsInfo} and {@link MinAmountOfBag}.
