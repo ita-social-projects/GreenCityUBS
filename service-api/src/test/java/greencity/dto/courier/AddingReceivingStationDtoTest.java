@@ -2,6 +2,8 @@ package greencity.dto.courier;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Field;
 
@@ -13,6 +15,13 @@ class AddingReceivingStationDtoTest {
         javax.validation.constraints.Pattern[] annotations =
             field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
         assertEquals(name.matches(annotations[0].regexp()), validates);
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe"})
+    void testNameRegex(String name) throws NoSuchFieldException {
+        nameRegex(name, true);
     }
 
     @Test
@@ -36,40 +45,5 @@ class AddingReceivingStationDtoTest {
     void testNameWithTooManySymbols() throws NoSuchFieldException {
         String name = StringUtils.repeat("a", 31);
         nameRegex(name, false);
-    }
-
-    @Test
-    void testNameWithEnglishLetterInBothCases() throws NoSuchFieldException {
-        nameRegex("qweQWE", true);
-    }
-
-    @Test
-    void testNameWithUkrainianLetterInBothCases() throws NoSuchFieldException {
-        nameRegex("абвгґіїьяюєАБВГҐІЇЬЯЮЄ", true);
-    }
-
-    @Test
-    void testNameWithNumbers() throws NoSuchFieldException {
-        nameRegex("1234567890", true);
-    }
-
-    @Test
-    void testNameWithHyphen() throws NoSuchFieldException {
-        nameRegex("qwe-qwe", true);
-    }
-
-    @Test
-    void testNameWithDot() throws NoSuchFieldException {
-        nameRegex("qwe.qwe", true);
-    }
-
-    @Test
-    void testNameWithWhitespace() throws NoSuchFieldException {
-        nameRegex("qwe qwe", true);
-    }
-
-    @Test
-    void testNameWithApostrophe() throws NoSuchFieldException {
-        nameRegex("qwe'qwe", true);
     }
 }
