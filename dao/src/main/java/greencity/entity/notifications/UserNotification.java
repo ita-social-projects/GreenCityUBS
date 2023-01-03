@@ -1,5 +1,6 @@
 package greencity.entity.notifications;
 
+import greencity.enums.NotificationStep;
 import greencity.enums.NotificationType;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
@@ -44,6 +45,13 @@ public class UserNotification {
 
     @Column(name = "notification_time")
     private LocalDateTime notificationTime = getCurentLocalTime();
+
+    @Column(name = "next_notification")
+    private LocalDateTime nextNotification;
+
+    @Column(nullable = false, name = "notification_step", length = 50)
+    @Enumerated(EnumType.STRING)
+    private NotificationStep notificationStep;
 
     private static LocalDateTime getCurentLocalTime() {
         return ZonedDateTime.now(ZoneId.of("Europe/Kiev")).toLocalDateTime();
