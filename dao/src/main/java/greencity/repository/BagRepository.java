@@ -1,6 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.order.Bag;
+import greencity.entity.order.TariffsInfo;
+import greencity.enums.MinAmountOfBag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -64,4 +66,14 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getBagInfo(Long orderId);
+
+    /**
+     * method, that returns {@link List} of {@link Bag}'s that matches by
+     * {@link TariffsInfo} and {@link MinAmountOfBag}.
+     *
+     * @param tariffId       order id {@link TariffsInfo}
+     * @param minAmountOfBag order id {@link MinAmountOfBag}
+     * @author Oleg Vatuliak
+     */
+    List<Bag> getBagsByTariffsInfoAndMinAmountOfBags(TariffsInfo tariffId, MinAmountOfBag minAmountOfBag);
 }
