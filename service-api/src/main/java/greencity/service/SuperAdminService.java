@@ -260,6 +260,14 @@ public interface SuperAdminService {
     void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto);
 
     /**
+     * Method for edit info about tariff limits.
+     *
+     * @param tariffId        - id of tariff
+     * @param setTariffLimits {@link SetTariffLimitsDto}
+     */
+    void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
+
+    /**
      * Method for deactivation or deleting Tariff depends on orders were made by
      * this tariff.
      *

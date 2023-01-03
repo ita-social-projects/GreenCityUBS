@@ -648,6 +648,50 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    public void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimitsDto) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+
+        if (bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(tariffsInfo, MinAmountOfBag.INCLUDE).isEmpty()) {
+            throw new BadRequestException(ErrorMessage.BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND);
+        }
+
+        if ((setTariffLimitsDto.getMinAmountOfBigBags() == 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L)
+            || setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() > 0L) {
+            throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
+        }
+
+        if (setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L) {
+            if (setTariffLimitsDto.getMinAmountOfBigBags() > setTariffLimitsDto.getMaxAmountOfBigBags()) {
+                throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);
+            }
+
+            tariffsInfo.setMinPriceOfOrder(null);
+            tariffsInfo.setMaxPriceOfOrder(null);
+
+            tariffsInfo.setMinAmountOfBigBags(setTariffLimitsDto.getMinAmountOfBigBags());
+            tariffsInfo.setMaxAmountOfBigBags(setTariffLimitsDto.getMaxAmountOfBigBags());
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        }
+
+        if (setTariffLimitsDto.getMinPriceOfOrder() > 0L && setTariffLimitsDto.getMinAmountOfBigBags() == 0L) {
+            if (setTariffLimitsDto.getMinPriceOfOrder() > setTariffLimitsDto.getMaxPriceOfOrder()) {
+                throw new BadRequestException(ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT);
+            }
+
+            tariffsInfo.setMinAmountOfBigBags(null);
+            tariffsInfo.setMaxAmountOfBigBags(null);
+
+            tariffsInfo.setMinPriceOfOrder(setTariffLimitsDto.getMinPriceOfOrder());
+            tariffsInfo.setMaxPriceOfOrder(setTariffLimitsDto.getMaxPriceOfOrder());
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        }
+
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
     @Transactional
     public void deactivateTariffCard(Long tariffId) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);

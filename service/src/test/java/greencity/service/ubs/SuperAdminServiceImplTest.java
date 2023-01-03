@@ -13,6 +13,7 @@ import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
@@ -42,9 +43,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -701,6 +704,88 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         superAdminService.setTariffLimitBySumOfOrder(1L, ModelUtils.getEditPriceOfOrder());
         verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithAmountOfBigBags() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithAmountOfBigBags());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithPriceOfOrder() {
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        superAdminService.setTariffLimits(1L, ModelUtils.setTariffLimitsWithPriceOfOrder());
+        verify(tariffsInfoRepository).save(any());
+    }
+
+    @Test
+    void setTariffLimitsWithPriceOfOrderMaxVatueIsGreaterThanMin() {
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithPriceOfOrderWhereMaxValueIsGreater();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L,
+                setTariffLimitsDto));
+    }
+
+    @Test
+    void setTariffLimitsWithAmountOfBigBagMaxVatueIsGreaterThanMin() {
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithAmountOfBigBagsWhereMaxValueIsGreater();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L,
+                setTariffLimitsDto));
+    }
+
+    @Test
+    void setTariffLimitsWithBothLimitsInputed() {
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithBothLimitsInputed();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
+    }
+
+    @Test
+    void setTariffLimitsWithNoneLimitsInputed() {
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithNoneLimitsInputed();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(ModelUtils.getBaglist());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
+    }
+
+    @Test
+    void setTariffLimitsBagWithSuitableParametersNotFound() {
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithAmountOfBigBags();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
+            .thenReturn(List.of());
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
     }
 
     @Test
