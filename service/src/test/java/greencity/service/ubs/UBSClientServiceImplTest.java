@@ -437,7 +437,7 @@ class UBSClientServiceImplTest {
                             .capacity(10)
                             .price(100)
                             .build()))
-                .build();
+            .build();
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
