@@ -224,7 +224,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
+            .recipientId(2L)
             .recipientName("Anatolii")
             .recipientSurName("Petyrov")
             .recipientPhoneNumber("095123456")
