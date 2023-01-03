@@ -97,10 +97,7 @@ import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.ServiceTranslationDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.TariffTranslationDto;
-import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -149,7 +146,6 @@ import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
-import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
@@ -3744,6 +3740,60 @@ public class ModelUtils {
         return NotificationSchedule.builder()
             .notificationType(NotificationType.TEST)
             .cron("test")
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(1L)
+            .maxAmountOfBigBags(2L)
+            .minPriceOfOrder(0L)
+            .maxPriceOfOrder(0L)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrder() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(0L)
+            .maxAmountOfBigBags(0L)
+            .minPriceOfOrder(100L)
+            .maxPriceOfOrder(200L)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBagsWhereMaxValueIsGreater() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(2L)
+            .maxAmountOfBigBags(1L)
+            .minPriceOfOrder(0L)
+            .maxPriceOfOrder(0L)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrderWhereMaxValueIsGreater() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(0L)
+            .maxAmountOfBigBags(0L)
+            .minPriceOfOrder(200L)
+            .maxPriceOfOrder(100L)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithBothLimitsInputed() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(1L)
+            .maxAmountOfBigBags(2L)
+            .minPriceOfOrder(100L)
+            .maxPriceOfOrder(200L)
+            .build();
+    }
+
+    public static SetTariffLimitsDto setTariffLimitsWithNoneLimitsInputed() {
+        return SetTariffLimitsDto.builder()
+            .minAmountOfBigBags(1L)
+            .maxAmountOfBigBags(2L)
+            .minPriceOfOrder(100L)
+            .maxPriceOfOrder(200L)
             .build();
     }
 }
