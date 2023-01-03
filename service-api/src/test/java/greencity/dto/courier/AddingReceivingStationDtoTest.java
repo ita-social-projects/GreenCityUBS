@@ -17,14 +17,15 @@ class AddingReceivingStationDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe", "a", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe", "a",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
     void testValidName(String name) throws NoSuchFieldException {
         nameRegex(name, true);
     }
 
     @ParameterizedTest
     @ValueSource(
-            strings = {"", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+        strings = {"", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
     void testInvalidName(String name) throws NoSuchFieldException {
         nameRegex(name, false);
     }
