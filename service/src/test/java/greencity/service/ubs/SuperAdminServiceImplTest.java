@@ -3,9 +3,11 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationToCityDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
@@ -27,8 +29,12 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,9 +45,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -78,7 +87,7 @@ class SuperAdminServiceImplTest {
     private TariffLocationRepository tariffsLocationRepository;
 
     @Mock
-    private DeactivateChosenEntityRepository deactivateChosenEntityRepository;
+    private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;;
 
     @Test
     void addTariffServiceTest() {
@@ -750,4 +759,452 @@ class SuperAdminServiceImplTest {
         assertThrows(BadRequestException.class,
             () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
     }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Regions")
+    @MethodSource("providerForDeactivateTariffForChosenParamByRegions")
+    void deactivateTariffForChosenParamByRegions(List<Long> regionsId, boolean isRegionsExists) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.of(regionsId),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty());
+
+        when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(isRegionsExists);
+        if (isRegionsExists) {
+            superAdminService.deactivateTariffForChosenParam(details);
+            verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegions(regionsId);
+        } else {
+            Throwable exception = assertThrows(NotFoundException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals(String.format("Current region doesn't exist: %s", regionsId), exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByRegions() {
+
+        List<Long> regionsId = ModelUtils.getAllRegion()
+            .stream()
+            .map(Region::getId)
+            .limit(1L)
+            .collect(Collectors.toList());
+
+        return Stream.of(
+            arguments(regionsId, true),
+            arguments(List.of(2L), false));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Regions And Cities")
+    @MethodSource("providerForDeactivateTariffForChosenParamByRegionsAndCities")
+    void deactivateTariffForChosenParamByRegionsAndCities(List<Long> regionsId, List<Long> citiesId,
+        boolean existsRegionById, boolean isCitiesExistForRegion) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.of(regionsId),
+            Optional.of(citiesId),
+            Optional.empty(),
+            Optional.empty());
+
+        if (regionsId.size() == 1) {
+            when(regionRepository.existsRegionById(anyLong())).thenReturn(existsRegionById);
+            if (existsRegionById) {
+                when(deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(anyList(), anyLong()))
+                    .thenReturn(isCitiesExistForRegion);
+
+            }
+            if (isCitiesExistForRegion) {
+                superAdminService.deactivateTariffForChosenParam(details);
+                verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegionsAndCities(citiesId,
+                    regionsId.get(0));
+            } else {
+                Throwable exception = assertThrows(NotFoundException.class,
+                    () -> superAdminService.deactivateTariffForChosenParam(details));
+                assertEquals(String.format("Current regions %s or cities %s don't exist.", regionsId, citiesId),
+                    exception.getMessage());
+            }
+        } else {
+            Throwable exception = assertThrows(BadRequestException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals("Region ids size should be 1 if several params are selected", exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByRegionsAndCities() {
+
+        List<Long> regionsId = ModelUtils.getAllRegion()
+            .stream()
+            .map(Region::getId)
+            .limit(1L)
+            .collect(Collectors.toList());
+
+        List<Long> regionsOverflowId = new ArrayList<>();
+        regionsOverflowId.addAll(regionsId);
+        regionsOverflowId.add(2L);
+        regionsOverflowId.add(3L);
+
+        List<Long> citiesInUaId = ModelUtils.getCitiesInUa()
+            .stream()
+            .map(LocationToCityDto::getCityId)
+            .collect(Collectors.toList());
+
+        return Stream.of(
+            arguments(regionsId, citiesInUaId, true, true),
+            arguments(List.of(2L), citiesInUaId, false, true),
+            arguments(regionsId, List.of(2L), true, false),
+            arguments(List.of(3L), List.of(2L), false, false),
+            arguments(regionsOverflowId, citiesInUaId, false, false),
+            arguments(new ArrayList<>(), citiesInUaId, false, false));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Courier")
+    @MethodSource("providerForDeactivateTariffForChosenParamByCourier")
+    void deactivateTariffForChosenParamByCourier(Long courierId, boolean existsCourierById) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(courierId));
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(existsCourierById);
+        if (existsCourierById) {
+            superAdminService.deactivateTariffForChosenParam(details);
+            verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(courierId);
+        } else {
+            Throwable exception = assertThrows(NotFoundException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals(String.format("Current courier doesn't exist: %s", courierId), exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByCourier() {
+        Long courierId = ModelUtils.getCourier().getId();
+
+        return Stream.of(
+            arguments(courierId, true),
+            arguments(2L, false));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Receiving Stations")
+    @MethodSource("providerForDeactivateTariffForChosenParamByReceivingStations")
+    void deactivateTariffForChosenParamByReceivingStations(List<Long> receivingStationsId,
+        boolean isReceivingStationsExists) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(receivingStationsId),
+            Optional.empty());
+
+        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList()))
+            .thenReturn(isReceivingStationsExists);
+        if (isReceivingStationsExists) {
+            superAdminService.deactivateTariffForChosenParam(details);
+            verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByReceivingStations(receivingStationsId);
+        } else {
+            Throwable exception = assertThrows(NotFoundException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals(String.format("Current receiving stations don't exist: %s", receivingStationsId),
+                exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByReceivingStations() {
+        List<Long> receivingStationsId = List.of(ModelUtils.getReceivingStation().getId());
+
+        return Stream.of(
+            arguments(receivingStationsId, true),
+            arguments(List.of(2L), false));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Courier And Receiving Stations")
+    @MethodSource("providerForDeactivateTariffForChosenParamByCourierAndReceivingStations")
+    void deactivateTariffForChosenParamByCourierAndReceivingStations(Long courierId,
+        List<Long> receivingStationsId,
+        boolean existsCourierById,
+        boolean isReceivingStationsExists) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(receivingStationsId),
+            Optional.of(courierId));
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(existsCourierById);
+        if (existsCourierById) {
+            when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList()))
+                .thenReturn(isReceivingStationsExists);
+        }
+        if (existsCourierById && isReceivingStationsExists) {
+            superAdminService.deactivateTariffForChosenParam(details);
+            verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourierAndReceivingStations(courierId,
+                receivingStationsId);
+        } else {
+            Throwable exception = assertThrows(NotFoundException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals(String.format("Current receiving stations: %s or courier: %s don't exist.",
+                receivingStationsId, courierId), exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByCourierAndReceivingStations() {
+
+        Long courierId = ModelUtils.getCourier().getId();
+        List<Long> receivingStationsId = List.of(ModelUtils.getReceivingStation().getId());
+
+        return Stream.of(
+            arguments(courierId, receivingStationsId, true, true),
+            arguments(2L, receivingStationsId, false, true),
+            arguments(courierId, List.of(3L), true, false),
+            arguments(2L, List.of(3L), false, false));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Courier And Region")
+    @MethodSource("providerForDeactivateTariffForChosenParamByCourierAndRegion")
+    void deactivateTariffForChosenParamByCourierAndRegion(List<Long> regionsId,
+        Long courierId,
+        boolean existsRegionById,
+        boolean existsCourierById) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.of(regionsId),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(courierId));
+
+        if (regionsId.size() == 1) {
+            when(regionRepository.existsRegionById(anyLong())).thenReturn(existsRegionById);
+            if (existsRegionById) {
+                when(courierRepository.existsCourierById(anyLong())).thenReturn(existsCourierById);
+                ;
+            }
+            if (existsCourierById && existsRegionById) {
+                superAdminService.deactivateTariffForChosenParam(details);
+                verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourierAndRegion(regionsId.get(0),
+                    courierId);
+            } else {
+                Throwable exception = assertThrows(NotFoundException.class,
+                    () -> superAdminService.deactivateTariffForChosenParam(details));
+                assertEquals(String.format("Current region: %s or courier: %s don't exist.", regionsId, courierId),
+                    exception.getMessage());
+            }
+        } else {
+            Throwable exception = assertThrows(BadRequestException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals("Region ids size should be 1 if several params are selected", exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByCourierAndRegion() {
+
+        List<Long> regionsId = ModelUtils.getAllRegion()
+            .stream()
+            .map(Region::getId)
+            .limit(1L)
+            .collect(Collectors.toList());
+
+        List<Long> regionsOverflowId = new ArrayList<>();
+        regionsOverflowId.addAll(regionsId);
+        regionsOverflowId.add(2L);
+        regionsOverflowId.add(3L);
+
+        Long courierId = ModelUtils.getCourier().getId();
+
+        return Stream.of(
+            arguments(regionsId, courierId, true, true),
+            arguments(List.of(2L), courierId, false, true),
+            arguments(regionsId, 3L, true, false),
+            arguments(List.of(2L), 3L, false, false),
+            arguments(regionsOverflowId, courierId, false, true),
+            arguments(new ArrayList<>(), courierId, false, true));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By Region And City And Station")
+    @MethodSource("providerForDeactivateTariffForChosenParamByRegionAndCityAndStation")
+    void deactivateTariffForChosenParamByRegionAndCityAndStation(List<Long> regionsId,
+        List<Long> citiesId,
+        List<Long> receivingStationsId,
+        boolean existsRegionById,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.of(regionsId),
+            Optional.of(citiesId),
+            Optional.of(receivingStationsId),
+            Optional.empty());
+
+        if (regionsId.size() == 1) {
+            when(regionRepository.existsRegionById(anyLong())).thenReturn(existsRegionById);
+            if (existsRegionById) {
+                when(deactivateTariffsForChosenParamRepository
+                    .isCitiesExistForRegion(anyList(), anyLong())).thenReturn(isCitiesExistForRegion);
+                if (isCitiesExistForRegion) {
+                    when(deactivateTariffsForChosenParamRepository
+                        .isReceivingStationsExists(anyList())).thenReturn(isReceivingStationsExists);
+                }
+            }
+            if (existsRegionById && isCitiesExistForRegion && isReceivingStationsExists) {
+                superAdminService.deactivateTariffForChosenParam(details);
+                verify(deactivateTariffsForChosenParamRepository)
+                    .deactivateTariffsByRegionAndCitiesAndStations(regionsId.get(0), citiesId, receivingStationsId);
+            } else {
+                Throwable exception = assertThrows(NotFoundException.class,
+                    () -> superAdminService.deactivateTariffForChosenParam(details));
+                assertEquals(String.format("Current region: %s or cities: %s or receiving stations: %s don't exist.",
+                    regionsId, citiesId, receivingStationsId), exception.getMessage());
+            }
+        } else {
+            Throwable exception = assertThrows(BadRequestException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals("Region ids size should be 1 if several params are selected", exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByRegionAndCityAndStation() {
+
+        List<Long> regionsId = ModelUtils.getAllRegion()
+            .stream()
+            .map(Region::getId)
+            .limit(1L)
+            .collect(Collectors.toList());
+
+        List<Long> regionsOverflowId = new ArrayList<>();
+        regionsOverflowId.addAll(regionsId);
+        regionsOverflowId.add(2L);
+        regionsOverflowId.add(3L);
+
+        List<Long> citiesInUaId = ModelUtils.getCitiesInUa()
+            .stream()
+            .map(LocationToCityDto::getCityId)
+            .collect(Collectors.toList());
+
+        List<Long> receivingStationsId = List.of(ModelUtils.getReceivingStation().getId());
+
+        return Stream.of(
+            arguments(regionsId, citiesInUaId, receivingStationsId, true, true, true),
+            arguments(List.of(2L), citiesInUaId, receivingStationsId, false, true, true),
+            arguments(List.of(2L), List.of(3L), receivingStationsId, false, false, true),
+            arguments(List.of(2L), citiesInUaId, List.of(4L), false, true, false),
+            arguments(regionsId, List.of(3L), receivingStationsId, true, false, true),
+            arguments(regionsId, List.of(3L), List.of(4L), true, false, false),
+            arguments(regionsId, citiesInUaId, List.of(4L), true, true, false),
+            arguments(List.of(2L), List.of(3L), List.of(4L), false, false, false),
+            arguments(regionsOverflowId, citiesInUaId, receivingStationsId, false, true, true),
+            arguments(new ArrayList<>(), citiesInUaId, receivingStationsId, false, false, true));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Deactivate Tariff By All")
+    @MethodSource("providerForDeactivateTariffForChosenParamByAll")
+    void deactivateTariffForChosenParamByAll(List<Long> regionsId,
+        List<Long> citiesId,
+        List<Long> receivingStationsId,
+        Long courierId,
+        boolean existsRegionById,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists,
+        boolean existsCourierById) {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.of(regionsId),
+            Optional.of(citiesId),
+            Optional.of(receivingStationsId),
+            Optional.of(courierId));
+
+        if (regionsId.size() == 1) {
+            when(regionRepository.existsRegionById(anyLong())).thenReturn(existsRegionById);
+            if (existsRegionById) {
+                when(deactivateTariffsForChosenParamRepository
+                    .isCitiesExistForRegion(anyList(), anyLong())).thenReturn(isCitiesExistForRegion);
+                if (isCitiesExistForRegion) {
+                    when(deactivateTariffsForChosenParamRepository
+                        .isReceivingStationsExists(anyList())).thenReturn(isReceivingStationsExists);
+                    if (isReceivingStationsExists) {
+                        when(courierRepository.existsCourierById(courierId)).thenReturn(existsCourierById);
+                    }
+                }
+            }
+            if (existsRegionById && isCitiesExistForRegion && isReceivingStationsExists && existsCourierById) {
+                superAdminService.deactivateTariffForChosenParam(details);
+                verify(deactivateTariffsForChosenParamRepository)
+                    .deactivateTariffsByAllParam(regionsId.get(0), citiesId, receivingStationsId, courierId);
+            } else {
+                Throwable exception = assertThrows(NotFoundException.class,
+                    () -> superAdminService.deactivateTariffForChosenParam(details));
+                assertEquals(String.format(
+                    "Current region: %s or cities: %s or receiving stations: %s or courier: %s don't exist.",
+                    regionsId, citiesId, receivingStationsId, courierId), exception.getMessage());
+            }
+        } else {
+            Throwable exception = assertThrows(BadRequestException.class,
+                () -> superAdminService.deactivateTariffForChosenParam(details));
+            assertEquals("Region ids size should be 1 if several params are selected", exception.getMessage());
+        }
+    }
+
+    static Stream<Arguments> providerForDeactivateTariffForChosenParamByAll() {
+
+        List<Long> regionsId = ModelUtils.getAllRegion()
+            .stream()
+            .map(Region::getId)
+            .limit(1L)
+            .collect(Collectors.toList());
+
+        List<Long> regionsOverflowId = new ArrayList<>();
+        regionsOverflowId.addAll(regionsId);
+        regionsOverflowId.add(2L);
+        regionsOverflowId.add(3L);
+
+        List<Long> citiesInUaId = ModelUtils.getCitiesInUa()
+            .stream()
+            .map(LocationToCityDto::getCityId)
+            .collect(Collectors.toList());
+
+        List<Long> receivingStationsId = List.of(ModelUtils.getReceivingStation().getId());
+
+        Long courierId = ModelUtils.getCourier().getId();
+
+        return Stream.of(
+            arguments(regionsId, citiesInUaId, receivingStationsId, courierId, true, true, true, true),
+            arguments(List.of(2L), citiesInUaId, receivingStationsId, courierId, false, true, true, true),
+            arguments(regionsId, List.of(3L), receivingStationsId, courierId, true, false, true, true),
+            arguments(regionsId, citiesInUaId, List.of(4L), courierId, true, true, false, true),
+            arguments(regionsId, citiesInUaId, receivingStationsId, 5L, true, true, true, false),
+            arguments(List.of(2L), List.of(3L), receivingStationsId, courierId, false, false, true, true),
+            arguments(List.of(2L), citiesInUaId, List.of(4L), courierId, false, true, false, true),
+            arguments(List.of(2L), citiesInUaId, receivingStationsId, 5L, false, true, true, false),
+            arguments(regionsId, List.of(3L), List.of(4L), courierId, true, false, false, true),
+            arguments(regionsId, List.of(3L), receivingStationsId, 5L, true, false, true, false),
+            arguments(regionsId, citiesInUaId, List.of(4L), 5L, true, true, false, false),
+            arguments(List.of(2L), List.of(3L), List.of(4L), courierId, false, false, false, true),
+            arguments(List.of(2L), List.of(3L), receivingStationsId, 5L, false, false, true, false),
+            arguments(regionsId, List.of(3L), List.of(4L), 5L, true, false, false, false),
+            arguments(List.of(2L), List.of(3L), List.of(4L), 5L, false, false, false, false),
+            arguments(regionsOverflowId, citiesInUaId, receivingStationsId, courierId, false, true, true, true),
+            arguments(new ArrayList<>(), citiesInUaId, receivingStationsId, courierId, false, false, true, true));
+    }
+
+    @Test
+    @DisplayName("Deactivate Tariff By All Empty")
+    void deactivateTariffForChosenParamByAllEmpty() {
+
+        DetailsOfDeactivateTariffsDto details = new DetailsOfDeactivateTariffsDto(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty());
+
+        Throwable exception = assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        assertEquals("Bad request. Please choose another combination of parameters", exception.getMessage());
+    }
+
 }
