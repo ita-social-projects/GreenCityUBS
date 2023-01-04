@@ -26,6 +26,7 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -484,6 +485,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .name(dto.getName())
             .createdBy(user)
             .createDate(LocalDate.now())
+            .stationStatus(StationStatus.ACTIVE)
             .build();
     }
 

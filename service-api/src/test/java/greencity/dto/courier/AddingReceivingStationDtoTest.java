@@ -1,0 +1,33 @@
+package greencity.dto.courier;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.lang.reflect.Field;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class AddingReceivingStationDtoTest {
+    void nameRegex(String name, boolean validates) throws NoSuchFieldException {
+        Field field = AddingReceivingStationDto.class.getDeclaredField("name");
+        javax.validation.constraints.Pattern[] annotations =
+            field.getAnnotationsByType(javax.validation.constraints.Pattern.class);
+        assertEquals(name.matches(annotations[0].regexp()), validates);
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {"qweQWE", "абвгґіїьяюєАБВГҐІЇЬЯЮЄ", "1234567890", "qwe-qwe", "qwe.qwe", "qwe qwe", "qwe'qwe", "a",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+    void testValidName(String name) throws NoSuchFieldException {
+        nameRegex(name, true);
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = {"", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+    void testInvalidName(String name) throws NoSuchFieldException {
+        nameRegex(name, false);
+    }
+
+}
