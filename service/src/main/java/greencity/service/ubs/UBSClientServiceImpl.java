@@ -406,10 +406,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         Long id = userRepository.findByUuid(uuid).getId();
-        List<AddressDto> addressDtoList = addressRepo.findAllByUserId(id)
+        List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
             .stream()
             .sorted(Comparator.comparing(Address::getId))
-            .filter(u -> u.getAddressStatus() != AddressStatus.DELETED)
             .map(u -> modelMapper.map(u, AddressDto.class))
             .collect(Collectors.toList());
         return new OrderWithAddressesResponseDto(addressDtoList);
@@ -423,7 +422,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
-        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         if (addresses.size() == MAXIMUM_NUMBER_OF_ADDRESSES) {
             throw new BadRequestException(ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED);
@@ -461,7 +460,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User currentUser = userRepository.findByUuid(uuid);
-        List<Address> addresses = addressRepo.findAllByUserId(currentUser.getId());
+        List<Address> addresses = addressRepo.findAllNonDeletedAddressesByUserId(currentUser.getId());
 
         OrderAddressDtoRequest dtoRequest;
         if (addressRequestDto.getSearchAddress() != null) {
@@ -503,7 +502,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkIfAddressExist(List<Address> addresses, OrderAddressDtoRequest dtoRequest) {
         boolean exist = addresses.stream()
-            .filter(status -> !status.getAddressStatus().equals(AddressStatus.DELETED))
             .map(address -> modelMapper.map(address, OrderAddressDtoRequest.class))
             .anyMatch(addressDto -> addressDto.equals(dtoRequest));
 
@@ -1168,12 +1166,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     public UserProfileDto getProfileData(String uuid) {
         createUserByUuidIfUserDoesNotExist(uuid);
         User user = userRepository.findByUuid(uuid);
-        List<Address> allAddress = addressRepo.findAllByUserId(user.getId());
+        List<Address> allAddress = addressRepo.findAllNonDeletedAddressesByUserId(user.getId());
         UserProfileDto userProfileDto = modelMapper.map(user, UserProfileDto.class);
         List<Bot> botList = getListOfBots(user.getUuid());
         List<AddressDto> addressDto =
             allAddress.stream()
-                .filter(a -> a.getAddressStatus() != AddressStatus.DELETED)
                 .map(a -> modelMapper.map(a, AddressDto.class))
                 .collect(Collectors.toList());
         userProfileDto.setAddressDto(addressDto);
