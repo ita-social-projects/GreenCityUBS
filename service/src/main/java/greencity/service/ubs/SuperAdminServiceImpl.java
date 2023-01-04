@@ -393,7 +393,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffsInfoDto setLimitDescription(Long tariffId, String limitDescription) {
-        return GetTariffsInfoDto.builder().build();
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override

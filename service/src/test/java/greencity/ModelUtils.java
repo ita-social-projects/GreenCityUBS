@@ -3681,7 +3681,7 @@ public class ModelUtils {
 
     public static CourierTranslationDto getCourierTranslationDto() {
         return CourierTranslationDto.builder()
-            .nameUk("Test")
+            .nameUk("Тест")
             .nameEn("Test")
             .build();
     }
