@@ -63,6 +63,9 @@ public class TariffsInfo {
     @Column(name = "max_price_of_order")
     private Long maxPriceOfOrder;
 
+    @Column(name = "limit_description")
+    private String limitDescription;
+
     @Column(name = "courier_limits")
     @Enumerated(EnumType.STRING)
     private CourierLimit courierLimit;
