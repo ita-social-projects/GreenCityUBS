@@ -251,12 +251,13 @@ class SuperAdminControllerTest {
     @SneakyThrows
     void updateCourierTest() {
         List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
-            .name("УБС")
-            .nameEng("UBS")
+            .nameUk("УБС")
+            .nameEn("UBS")
             .build());
         CourierUpdateDto dto = CourierUpdateDto.builder()
             .courierId(1L)
-            .courierTranslationDtos(dtoList)
+            .nameEn("Test")
+            .nameEn("Тест")
             .build();
 
         ObjectMapper objectMapper = new ObjectMapper();

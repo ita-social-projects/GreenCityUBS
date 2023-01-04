@@ -3,7 +3,6 @@ package greencity.mapping.courier;
 import greencity.ModelUtils;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +21,8 @@ class CreateCourierDtoMapperTest {
         Courier courier = ModelUtils.getCourier();
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
 
-        List<CourierTranslation> courierTranslations = courier.getCourierTranslationList();
-        String en = courierTranslations.get(0).getNameEng();
-        String ua = courierTranslations.get(0).getName();
-
         CreateCourierDto createCourierDto = mapper.convert(courier);
-        Assertions.assertEquals(createCourierDto.getNameUa(), ua);
-        Assertions.assertEquals(createCourierDto.getNameEn(), en);
+        Assertions.assertEquals(createCourierDto.getNameUk(), dto.getNameUk());
+        Assertions.assertEquals(createCourierDto.getNameEn(), dto.getNameEn());
     }
 }
