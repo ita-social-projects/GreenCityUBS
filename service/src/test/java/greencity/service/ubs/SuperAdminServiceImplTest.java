@@ -923,7 +923,7 @@ class SuperAdminServiceImplTest {
                     .thenReturn(isCitiesExistForRegion);
 
             }
-            if (isCitiesExistForRegion) {
+            if (isCitiesExistForRegion && existsRegionById) {
                 superAdminService.deactivateTariffForChosenParam(details);
                 verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegionsAndCities(citiesId,
                     regionsId.get(0));
