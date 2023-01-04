@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Safarov-3" author="Safarov Renat">
+        <createTable tableName="order_address">
+
+            <column name="id" autoIncrement="true" startWith="1" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="city" type="varchar" defaultValue="Kyiv">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_comment" type="varchar(200)"/>
+            <column name="latitude" type="double"/>
+            <column name="longitude" type="double"/>
+            <column name="district" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entrance_number" type="varchar(4)"/>
+            <column name="house_corpus" type="varchar(5)"/>
+            <column name="house_number" type="varchar(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actual" type="Boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(15)" defaultValue="NEW">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_en" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region_en" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street_en" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="district_en" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

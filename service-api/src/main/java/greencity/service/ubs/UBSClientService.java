@@ -15,6 +15,7 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.OrderStatus;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.Address;
@@ -276,10 +277,10 @@ public interface UBSClientService {
      *
      * @param userProfileDto {@link UserProfileDto}.
      * @param savedUser      {@link User}.
-     * @param savedAddress   {@link Address}.
+     * @param savedAddress   {@link OrderAddress}.
      * @author Liyubomy Pater.
      */
-    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
+    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, OrderAddress savedAddress);
 
     /**
      * Methods saves all entered by user data to database.

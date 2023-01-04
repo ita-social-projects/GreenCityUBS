@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.ubs.OrderAddress;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -740,7 +741,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        Address address = order.getUbsUser().getAddress();
+        //Address address = order.getUbsUser().getAddress();
+        var address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
             .addressCityEng(address.getCityEn())
@@ -1250,7 +1252,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser,
-        Address savedAddress) {
+        OrderAddress savedAddress) {
         UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
         ubSuser.setAddress(savedAddress);
         return ubsUserRepository.save(ubSuser);
@@ -1313,9 +1315,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         checkIfAddressHasBeenDeleted(address);
 
         checkAddressUser(address, currentUser);
-        address.setAddressStatus(AddressStatus.IN_ORDER);
+        //todo: создать объект AddressOrder и замапить его передав address
+        OrderAddress orderAddress = null;
+        address.setAddressStatus(AddressStatus.IN_ORDER); // сетить?
 
-        userData.setAddress(address);
+        //todo: засетить объект класса AddressOrder в userData
+        userData.setAddress(orderAddress);
 
         if (userData.getAddress().getAddressComment() == null) {
             userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
