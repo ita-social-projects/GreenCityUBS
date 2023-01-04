@@ -62,24 +62,25 @@ public class ModelUtils {
     public static OrderResponseDto getOrderResponseDto() {
         return getOrderResponseDto(true);
     }
+
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
-                .additionalOrders(new HashSet<>(List.of("232534634")))
-                .bags(Collections.singletonList(new BagDto(3, 999)))
-                .orderComment("comment")
-                .certificates(Collections.emptySet())
-                .pointsToUse(700)
-                .shouldBePaid(shouldBePaid)
-                .personalData(PersonalDataDto.builder()
-                        .firstName("Anton")
-                        .lastName("Antonov")
-                        .id(13L)
-                        .email("mail@mail.ua")
-                        .phoneNumber("0678945221")
-                        .build())
-                .addressId(1L)
-                .locationId(1L)
-                .build();
+            .additionalOrders(new HashSet<>(List.of("232534634")))
+            .bags(Collections.singletonList(new BagDto(3, 999)))
+            .orderComment("comment")
+            .certificates(Collections.emptySet())
+            .pointsToUse(700)
+            .shouldBePaid(shouldBePaid)
+            .personalData(PersonalDataDto.builder()
+                .firstName("Anton")
+                .lastName("Antonov")
+                .id(13L)
+                .email("mail@mail.ua")
+                .phoneNumber("0678945221")
+                .build())
+            .addressId(1L)
+            .locationId(1L)
+            .build();
     }
 
     public static OrderAddressDtoRequest getOrderAddressDtoRequest() {

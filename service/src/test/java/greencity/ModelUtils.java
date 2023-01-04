@@ -305,6 +305,7 @@ public class ModelUtils {
     public static OrderResponseDto getOrderResponseDto() {
         return getOrderResponseDto(true);
     }
+
     public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
@@ -3578,6 +3579,7 @@ public class ModelUtils {
     public static User getUserForCreate() {
         return getUserForCreate(AddressStatus.IN_ORDER);
     }
+
     public static User getUserForCreate(AddressStatus addressStatus) {
         return User.builder()
             .id(1L)
