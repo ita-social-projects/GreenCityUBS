@@ -1315,5 +1315,4 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
         assertEquals("Bad request. Please choose another combination of parameters", exception.getMessage());
     }
-
 }
