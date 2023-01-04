@@ -22,9 +22,11 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -36,7 +38,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,8 +69,7 @@ class SuperAdminServiceImplTest {
     private ServiceTranslationRepository serviceTranslationRepository;
     @Mock
     private CourierRepository courierRepository;
-    @Mock
-    private CourierTranslationRepository courierTranslationRepository;
+
     @Mock
     private RegionRepository regionRepository;
     @Mock
@@ -105,20 +110,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deleteTariffService(1);
 
         verify(bagRepository).delete(ModelUtils.getBag().get());
-    }
-
-    @Test
-    void setLimitDescription() {
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(getCourier()));
-        when(courierTranslationRepository.findCourierTranslationByCourier(getCourier()))
-            .thenReturn(getCourierTranslation());
-        when(courierTranslationRepository.save(getCourierTranslation())).thenReturn(getCourierTranslation());
-
-        assertEquals(getCourierTranslationsDto(), superAdminService.setLimitDescription(1L, "1"));
-
-        verify(courierRepository).findById(1L);
-        verify(courierTranslationRepository).findCourierTranslationByCourier(getCourier());
-        verify(courierTranslationRepository).save(getCourierTranslation());
     }
 
     @Test
@@ -227,27 +218,6 @@ class SuperAdminServiceImplTest {
         verify(serviceRepository).save(service);
         verify(serviceTranslationRepository).saveAll(service.getServiceTranslations());
         verify(modelMapper).map(service, CreateServiceDto.class);
-    }
-
-    @Test
-    void createCourier() {
-        Courier courier = ModelUtils.getCourier();
-        courier.setId(null);
-        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
-
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
-        when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
-        when(courierRepository.save(any())).thenReturn(courier);
-        when(courierTranslationRepository.saveAll(any()))
-            .thenReturn(ModelUtils.getCourierTranslations());
-        when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
-
-        assertEquals(createCourierDto,
-            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
-
-        verify(courierRepository).save(any());
-        verify(courierTranslationRepository).saveAll(any());
-        verify(modelMapper).map(any(), eq(CreateCourierDto.class));
     }
 
     @Test
@@ -399,11 +369,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setLimitDescriptionExceptiomTest() {
-        assertThrows(NotFoundException.class, () -> superAdminService.setLimitDescription(1L, "1"));
-    }
-
-    @Test
     void excludeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.excludeBag(1));
     }
@@ -456,6 +421,94 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void createCourier() {
+        Courier courier = ModelUtils.getCourier();
+        courier.setId(null);
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
+            .nameEn("Test1")
+            .nameUk("Тест1")
+            .build()));
+        when(courierRepository.save(any())).thenReturn(courier);
+        when(modelMapper.map(any(), eq(CreateCourierDto.class))).thenReturn(createCourierDto);
+
+        assertEquals(createCourierDto,
+            superAdminService.createCourier(createCourierDto, ModelUtils.TEST_USER.getUuid()));
+
+        verify(courierRepository).save(any());
+        verify(modelMapper).map(any(), eq(CreateCourierDto.class));
+    }
+
+    @Test
+    void createCourierAlreadyExists() {
+        Courier courier = ModelUtils.getCourier();
+        courier.setId(null);
+        CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
+        String uuid = ModelUtils.TEST_USER.getUuid();
+
+        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
+
+        assertThrows(CourierAlreadyExists.class, () -> superAdminService.createCourier(createCourierDto, uuid));
+    }
+
+    @Test
+    void updateCourierTest() {
+        Courier courier = getCourier();
+
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        Courier courierToSave = Courier.builder()
+            .id(courier.getId())
+            .courierStatus(courier.getCourierStatus())
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        CourierDto courierDto = CourierDto.builder()
+            .courierId(courier.getId())
+            .courierStatus("Active")
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
+        when(courierRepository.save(courier)).thenReturn(courierToSave);
+        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
+
+        CourierDto actual = superAdminService.updateCourier(dto);
+        CourierDto expected = CourierDto.builder()
+            .courierId(getCourier().getId())
+            .courierStatus("Active")
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void updateCourierNotFound() {
+        Courier courier = getCourier();
+
+        CourierUpdateDto dto = CourierUpdateDto.builder()
+            .courierId(1L)
+            .nameUk("УБС")
+            .nameEn("UBS")
+            .build();
+
+        when(courierRepository.findById(courier.getId()))
+            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+        assertThrows(NotFoundException.class, () -> superAdminService.updateCourier(dto));
+    }
+
+    @Test
     void getAllTariffsInfoTest() {
         when(tariffsInfoRepository.findAll(any(TariffsInfoSpecification.class)))
             .thenReturn(List.of(ModelUtils.getTariffsInfo()));
@@ -486,6 +539,37 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
+    }
+
+    @Test
+    void createReceivingStationSaveCorrectValue() {
+        String receivingStationName = "Петрівка";
+        User user = TEST_USER;
+        AddingReceivingStationDto addingReceivingStationDto =
+            AddingReceivingStationDto.builder().name(receivingStationName).build();
+        ReceivingStation activatedReceivingStation = ReceivingStation.builder()
+            .name(receivingStationName)
+            .createdBy(user)
+            .createDate(LocalDate.now())
+            .stationStatus(StationStatus.ACTIVE)
+            .build();
+
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+
+        when(userRepository.findByUuid(any())).thenReturn(user);
+        when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
+        when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
+        when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
+            .thenReturn(receivingStationDto);
+
+        superAdminService.createReceivingStation(addingReceivingStationDto, user.getUuid());
+
+        verify(userRepository).findByUuid(any());
+        verify(receivingStationRepository).existsReceivingStationByName(any());
+        verify(receivingStationRepository).save(activatedReceivingStation);
+        verify(modelMapper)
+            .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+
     }
 
     @Test
@@ -531,62 +615,6 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deleteReceivingStation(2L));
 
         assertEquals(ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID + 2L, thrown1.getMessage());
-    }
-
-    @Test
-    void updateCourierTest() {
-        Courier courier = getCourier();
-
-        List<CourierTranslation> starterList = List.of(CourierTranslation.builder()
-            .id(1L)
-            .name("Тест")
-            .nameEng("Test")
-            .courier(courier)
-            .build());
-
-        courier.setCourierTranslationList(starterList);
-
-        List<CourierTranslation> listToSave = List.of(CourierTranslation.builder()
-            .id(1L)
-            .name("УБС")
-            .nameEng("UBS")
-            .courier(courier)
-            .build());
-
-        List<CourierTranslationDto> dtoList = List.of(CourierTranslationDto.builder()
-            .name("УБС")
-            .nameEng("UBS")
-            .build());
-        CourierUpdateDto dto = CourierUpdateDto.builder()
-            .courierId(1L)
-            .courierTranslationDtos(dtoList)
-            .build();
-
-        Courier courierToSave = Courier.builder()
-            .id(courier.getId())
-            .courierStatus(courier.getCourierStatus())
-            .courierTranslationList(listToSave)
-            .build();
-        CourierDto courierDto = CourierDto.builder()
-            .courierId(courier.getId())
-            .courierStatus("Active")
-            .courierTranslationDtos(dtoList)
-            .build();
-
-        when(courierRepository.findById(dto.getCourierId())).thenReturn(Optional.of(courier));
-        when(courierRepository.save(courier)).thenReturn(courierToSave);
-        when(courierTranslationRepository.saveAll(courier.getCourierTranslationList()))
-            .thenReturn(listToSave);
-        when(modelMapper.map(courierToSave, CourierDto.class)).thenReturn(courierDto);
-
-        CourierDto actual = superAdminService.updateCourier(dto);
-        CourierDto expected = CourierDto.builder()
-            .courierId(getCourier().getId())
-            .courierStatus("Active")
-            .courierTranslationDtos(dto.getCourierTranslationDtos())
-            .build();
-
-        assertEquals(expected, actual);
     }
 
     @Test

@@ -15,5 +15,5 @@ public class CreateCourierDto {
     private String nameEn;
 
     @NotNull
-    private String nameUa;
+    private String nameUk;
 }

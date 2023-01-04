@@ -1,5 +1,6 @@
 package greencity.dto.courier;
 
+import greencity.enums.StationStatus;
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -13,10 +14,12 @@ import java.time.LocalDate;
 public class ReceivingStationDto {
     @Min(1)
     private Long id;
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z0-9-'\\s.]{1,30}")
     private String name;
 
     private String createdBy;
 
     private LocalDate createDate;
+
+    private StationStatus stationStatus;
 }

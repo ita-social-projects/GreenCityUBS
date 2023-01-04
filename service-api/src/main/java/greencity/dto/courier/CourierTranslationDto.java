@@ -10,6 +10,7 @@ import lombok.*;
 @Builder
 
 public class CourierTranslationDto {
-    private String name;
-    private String nameEng;
+    private Long id;
+    private String nameUk;
+    private String nameEn;
 }

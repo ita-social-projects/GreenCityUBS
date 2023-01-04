@@ -22,7 +22,7 @@ class UpdateCourierDtoMapperTest {
         Courier actual = ModelUtils.getCourier();
 
         assertEquals(expected.getCourierId(), updateCourierDtoMapper.convert(actual).getCourierId());
-        assertEquals(expected.getCourierTranslationDtos(),
-            updateCourierDtoMapper.convert(actual).getCourierTranslationDtos());
+        assertEquals(expected.getNameUk(), updateCourierDtoMapper.convert(actual).getNameUk());
+        assertEquals(expected.getNameEn(), updateCourierDtoMapper.convert(actual).getNameEn());
     }
 }

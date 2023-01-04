@@ -23,6 +23,7 @@ public class TariffsInfoDto {
     private LocationStatus locationStatus;
     private List<ReceivingStationDto> receivingStations;
     private CourierDto courier;
+    private String limitDescription;
     private Long minAmountOfBags;
     private Long maxAmountOfBags;
     private Long minPriceOfOrder;
