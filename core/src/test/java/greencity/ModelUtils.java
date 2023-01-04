@@ -478,7 +478,7 @@ public class ModelUtils {
     public static CreateCourierDto getCreateCourierDto() {
         return CreateCourierDto.builder()
             .nameEn("nameEn")
-            .nameUa("nameUa")
+            .nameUk("nameUa")
             .build();
     }
 
@@ -524,10 +524,11 @@ public class ModelUtils {
     public static GetTariffsInfoDto getAllTariffsInfoDto() {
         return GetTariffsInfoDto.builder()
             .cardId(1L)
-            .courierTranslationDtos(List.of(CourierTranslationDto.builder()
-                .name("UBS")
-                .nameEng("UBS")
-                .build()))
+            .courierDto(CourierDto.builder()
+                .courierId(1L)
+                .nameUk("Тест")
+                .nameEn("Test")
+                .build())
             .createdAt(LocalDate.of(22, 2, 12))
             .creator("Me")
             .build();

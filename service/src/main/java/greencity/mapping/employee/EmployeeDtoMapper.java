@@ -2,13 +2,12 @@ package greencity.mapping.employee;
 
 import greencity.dto.employee.EmployeeDto;
 import greencity.entity.order.Courier;
-import greencity.entity.order.CourierTranslation;
 import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -52,12 +51,8 @@ public class EmployeeDtoMapper extends AbstractConverter<EmployeeDto, Employee> 
                     .courier(Courier.builder()
                         .id(t.getCourier().getCourierId())
                         .courierStatus(CourierStatus.ACTIVE)
-                        .courierTranslationList(t.getCourier().getCourierTranslationDtos().stream()
-                            .map(translation -> CourierTranslation.builder()
-                                .name(translation.getName())
-                                .nameEng(translation.getNameEng())
-                                .build())
-                            .collect(Collectors.toList()))
+                        .nameUk(t.getCourier().getNameUk())
+                        .nameEn(t.getCourier().getNameEn())
                         .build())
                     .receivingStationList(t.getReceivingStations().stream()
                         .map(station -> ReceivingStation.builder()

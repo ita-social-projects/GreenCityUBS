@@ -162,10 +162,10 @@ public interface SuperAdminService {
      *
      * @param courierId        - id of courier
      * @param limitDescription - new limit description.
-     * @return {@link GetCourierTranslationsDto}
+     * @return {@link GetTariffsInfoDto}
      * @author Vadym Makitra
      */
-    GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription);
+    GetTariffsInfoDto setLimitDescription(Long courierId, String limitDescription);
 
     /**
      * Method for include bag into minimum set of package.
@@ -258,6 +258,14 @@ public interface SuperAdminService {
      * @param dto      {@link EditPriceOfOrder}
      */
     void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto);
+
+    /**
+     * Method for edit info about tariff limits.
+     *
+     * @param tariffId        - id of tariff
+     * @param setTariffLimits {@link SetTariffLimitsDto}
+     */
+    void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
 
     /**
      * Method for deactivation or deleting Tariff depends on orders were made by
