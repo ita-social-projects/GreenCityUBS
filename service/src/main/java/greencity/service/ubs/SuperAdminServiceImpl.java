@@ -26,6 +26,7 @@ import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
 import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -54,7 +55,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
     private final CourierRepository courierRepository;
-    private final CourierTranslationRepository courierTranslationRepository;
     private final RegionRepository regionRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
@@ -356,48 +356,33 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         checkIfCourierAlreadyExists(courierRepository.findAll(), dto);
 
-        Courier courier = createCourierWithTranslation(dto);
+        Courier courier = new Courier();
         courier.setCreatedBy(user);
         courier.setCourierStatus(CourierStatus.ACTIVE);
         courier.setCreateDate(LocalDate.now());
-
+        courier.setNameEn(dto.getNameEn());
+        courier.setNameUk(dto.getNameUk());
         courierRepository.save(courier);
-        courierTranslationRepository.saveAll(courier.getCourierTranslationList());
         return modelMapper.map(courier, CreateCourierDto.class);
-    }
-
-    private Courier createCourierWithTranslation(CreateCourierDto dto) {
-        Courier courier = Courier.builder()
-            .courierTranslationList(
-                List.of(
-                    CourierTranslation.builder().name(dto.getNameUa()).nameEng(dto.getNameEn()).build()))
-            .build();
-        courier.getCourierTranslationList().forEach(courierTranslation -> courierTranslation.setCourier(courier));
-        return courier;
     }
 
     private void checkIfCourierAlreadyExists(List<Courier> couriers, CreateCourierDto createCourierDto) {
         couriers
-            .forEach(courier -> courier.getCourierTranslationList().forEach(courierTranslation -> {
-                if (courierTranslation.getNameEng().equals(createCourierDto.getNameEn())
-                    || courierTranslation.getName().equals(createCourierDto.getNameUa())) {
+            .forEach(courier -> {
+                if (courier.getNameEn().equals(createCourierDto.getNameEn())
+                    || courier.getNameUk().equals(createCourierDto.getNameUk())) {
                     throw new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS);
                 }
-            }));
+            });
     }
 
     @Override
     public CourierDto updateCourier(CourierUpdateDto dto) {
         Courier courier = courierRepository.findById(dto.getCourierId())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-        List<CourierTranslation> listToUpdate = courier.getCourierTranslationList();
-        List<CourierTranslationDto> updatedList = dto.getCourierTranslationDtos();
-        for (CourierTranslation originalCourierTranslation : listToUpdate) {
-            originalCourierTranslation.setName(updatedList.get(0).getName());
-            originalCourierTranslation.setNameEng(updatedList.get(0).getNameEng());
-        }
+        courier.setNameUk(dto.getNameUk());
+        courier.setNameEn(dto.getNameEn());
         courierRepository.save(courier);
-        courierTranslationRepository.saveAll(courier.getCourierTranslationList());
         return modelMapper.map(courier, CourierDto.class);
     }
 
@@ -407,22 +392,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .collect(Collectors.toList());
     }
 
-    private GetCourierTranslationsDto getAllCouriers(CourierTranslation courierTranslation) {
-        return GetCourierTranslationsDto.builder()
-            .id(courierTranslation.getCourier().getId())
-            .name(courierTranslation.getName())
-            .nameEng(courierTranslation.getNameEng())
-            .build();
-    }
-
     @Override
-    public GetCourierTranslationsDto setLimitDescription(Long courierId, String limitDescription) {
-        Courier courier = courierRepository.findById(courierId).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
-        CourierTranslation courierTranslation =
-            courierTranslationRepository.findCourierTranslationByCourier(courier);
-        courierTranslationRepository.save(courierTranslation);
-        return getAllCouriers(courierTranslation);
+    public GetTariffsInfoDto setLimitDescription(Long tariffId, String limitDescription) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -513,6 +485,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .name(dto.getName())
             .createdBy(user)
             .createDate(LocalDate.now())
+            .stationStatus(StationStatus.ACTIVE)
             .build();
     }
 
@@ -642,6 +615,50 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
         tariffsInfo.setMinPriceOfOrder(dto.getMinPriceOfOrder());
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    @Override
+    public void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimitsDto) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+
+        if (bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(tariffsInfo, MinAmountOfBag.INCLUDE).isEmpty()) {
+            throw new BadRequestException(ErrorMessage.BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND);
+        }
+
+        if ((setTariffLimitsDto.getMinAmountOfBigBags() == 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L)
+            || setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() > 0L) {
+            throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
+        }
+
+        if (setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L) {
+            if (setTariffLimitsDto.getMinAmountOfBigBags() > setTariffLimitsDto.getMaxAmountOfBigBags()) {
+                throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);
+            }
+
+            tariffsInfo.setMinPriceOfOrder(null);
+            tariffsInfo.setMaxPriceOfOrder(null);
+
+            tariffsInfo.setMinAmountOfBigBags(setTariffLimitsDto.getMinAmountOfBigBags());
+            tariffsInfo.setMaxAmountOfBigBags(setTariffLimitsDto.getMaxAmountOfBigBags());
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
+            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        }
+
+        if (setTariffLimitsDto.getMinPriceOfOrder() > 0L && setTariffLimitsDto.getMinAmountOfBigBags() == 0L) {
+            if (setTariffLimitsDto.getMinPriceOfOrder() > setTariffLimitsDto.getMaxPriceOfOrder()) {
+                throw new BadRequestException(ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT);
+            }
+
+            tariffsInfo.setMinAmountOfBigBags(null);
+            tariffsInfo.setMaxAmountOfBigBags(null);
+
+            tariffsInfo.setMinPriceOfOrder(setTariffLimitsDto.getMinPriceOfOrder());
+            tariffsInfo.setMaxPriceOfOrder(setTariffLimitsDto.getMaxPriceOfOrder());
+            tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
+            tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
+        }
+
         tariffsInfoRepository.save(tariffsInfo);
     }
 

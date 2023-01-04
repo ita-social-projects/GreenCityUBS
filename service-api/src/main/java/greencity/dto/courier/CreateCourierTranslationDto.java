@@ -14,5 +14,5 @@ public class CreateCourierTranslationDto {
     @NotNull
     private String name;
     @NotNull
-    private String nameEng;
+    private String nameEn;
 }

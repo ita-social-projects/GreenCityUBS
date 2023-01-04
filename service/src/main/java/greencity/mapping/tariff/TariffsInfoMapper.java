@@ -1,7 +1,6 @@
 package greencity.mapping.tariff;
 
 import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.tariff.TariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
@@ -22,12 +21,9 @@ public class TariffsInfoMapper extends AbstractConverter<TariffsInfo, TariffsInf
             .maxPriceOfOrder(tariffsInfo.getMaxPriceOfOrder())
             .courier(CourierDto.builder()
                 .courierId(tariffsInfo.getCourier().getId())
-                .courierTranslationDtos(tariffsInfo.getCourier().getCourierTranslationList().stream()
-                    .map(translation -> CourierTranslationDto.builder()
-                        .name(translation.getName())
-                        .nameEng(translation.getNameEng())
-                        .build())
-                    .collect(Collectors.toList()))
+                .courierStatus(tariffsInfo.getCourier().getCourierStatus().name())
+                .nameUk(tariffsInfo.getCourier().getNameUk())
+                .nameEn(tariffsInfo.getCourier().getNameEn())
                 .build())
             .receivingStations(tariffsInfo.getReceivingStationList().stream()
                 .map(s -> ReceivingStationDto.builder()

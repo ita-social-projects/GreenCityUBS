@@ -2,7 +2,7 @@ package greencity.mapping.tariff;
 
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
-import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CourierDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.entity.order.TariffsInfo;
@@ -29,12 +29,6 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .maxPriceOfOrder(source.getMaxPriceOfOrder())
             .minPriceOfOrder(source.getMinPriceOfOrder())
             .regionDto(regionDto)
-            .courierTranslationDtos(source.getCourier().getCourierTranslationList().stream()
-                .map(courierTranslation -> CourierTranslationDto.builder()
-                    .name(courierTranslation.getName())
-                    .nameEng(courierTranslation.getNameEng())
-                    .build())
-                .collect(Collectors.toList()))
             .createdAt(source.getCreatedAt())
             .creator(source.getCreator() != null ? source.getCreator().getRecipientEmail() : "unknown")
             .tariffStatus(source.getLocationStatus())
@@ -53,7 +47,12 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .createdBy(receivingStation.getCreatedBy().getRecipientEmail())
                     .build())
                 .collect(Collectors.toList()))
-            .courierId(source.getCourier().getId())
+            .courierDto(CourierDto.builder()
+                .courierId(source.getCourier().getId())
+                .nameEn(source.getCourier().getNameEn())
+                .nameUk(source.getCourier().getNameUk())
+                .build())
+            .limitDescription(source.getLimitDescription())
             .build();
     }
 }

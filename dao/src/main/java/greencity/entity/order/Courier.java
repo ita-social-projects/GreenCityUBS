@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(
-    exclude = {"courierTranslationList", "services", "tariffsInfoList"})
+    exclude = {"services", "tariffsInfoList"})
 @Table(name = "courier")
 public class Courier {
     @Id
@@ -24,8 +24,11 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     private CourierStatus courierStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
-    private List<CourierTranslation> courierTranslationList;
+    @Column(nullable = false)
+    private String nameUk;
+
+    @Column(nullable = false)
+    private String nameEn;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
     private List<TariffsInfo> tariffsInfoList;

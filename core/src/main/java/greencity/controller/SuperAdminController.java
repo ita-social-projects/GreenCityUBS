@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.tariff.*;
 import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,6 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.CreateCourierTranslationDto;
-import greencity.dto.courier.GetCourierTranslationsDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
@@ -42,11 +42,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.AddNewTariffResponseDto;
-import greencity.dto.tariff.ChangeTariffLocationStatusDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -390,21 +385,21 @@ class SuperAdminController {
     /**
      * Controller for set limit description.
      *
-     * @return {@link GetCourierTranslationsDto}
+     * @return {@link GetTariffsInfoDto}
      * @author Vadym Makitra
      */
     @ApiOperation(value = "Set new Limit Description")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetCourierTranslationsDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetTariffsInfoDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
-    @PatchMapping("/setLimitDescription/{courierId}")
-    public ResponseEntity<GetCourierTranslationsDto> setLimitDescription(
-        @PathVariable Long courierId, String limitDescription) {
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
+    @PatchMapping("/setLimitDescription/{tariffId}")
+    public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
+        @PathVariable Long tariffId, String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(superAdminService.setLimitDescription(courierId, limitDescription));
+            .body(superAdminService.setLimitDescription(tariffId, limitDescription));
     }
 
     /**
@@ -632,6 +627,21 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> setLimitsByPriceOfOrder(@Valid @PathVariable Long tariffId,
         @Valid @RequestBody EditPriceOfOrder dto) {
         superAdminService.setTariffLimitBySumOfOrder(tariffId, dto);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @ApiOperation(value = "Edit tariff limits by sum of order or by sum of Bags")
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_PRICING_CARD', authentication)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+    })
+    @PatchMapping("/setTariffLimits/{tariffId}")
+    public ResponseEntity<HttpStatus> setLimitsForTariff(@Valid @PathVariable Long tariffId,
+        @Valid @RequestBody SetTariffLimitsDto setTariffLimits) {
+        superAdminService.setTariffLimits(tariffId, setTariffLimits);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

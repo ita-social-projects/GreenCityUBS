@@ -3,7 +3,7 @@ package greencity.mapping.location;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.TariffsForLocationDto;
-import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CourierDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
@@ -31,17 +31,18 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
                     .build())
                 .collect(Collectors.toList()))
             .tariffInfoId(source.getId())
+            .courierDto(CourierDto.builder()
+                .courierId(source.getCourier().getId())
+                .nameEn(source.getCourier().getNameEn())
+                .nameUk(source.getCourier().getNameUk())
+                .courierStatus(source.getCourier().getCourierStatus().name())
+                .build())
             .courierLimit(source.getCourierLimit().toString())
             .maxPriceOfOrder(source.getMaxPriceOfOrder())
             .minPriceOfOrder(source.getMinPriceOfOrder())
             .maxAmountOfBigBags(source.getMaxAmountOfBigBags())
             .minAmountOfBigBags(source.getMinAmountOfBigBags())
-            .courierTranslationDtos(source.getCourier().getCourierTranslationList().stream()
-                .map(x -> CourierTranslationDto.builder()
-                    .nameEng(x.getNameEng())
-                    .name(x.getName())
-                    .build())
-                .collect(Collectors.toList()))
+            .limitDescription(source.getLimitDescription())
             .build();
     }
 }

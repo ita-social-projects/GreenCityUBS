@@ -31,7 +31,7 @@ class AddressRepositoryTest extends IntegrationTestBase {
     // @Test
     void findAllByUserId() {
         Address address = ModelUtils.getAddress();
-        List<Address> actual = addressRepository.findAllByUserId(1L);
+        List<Address> actual = addressRepository.findAllNonDeletedAddressesByUserId(1L);
 
         Assertions.assertEquals(Optional.of(address.getUser().getId()), Optional.of(actual.get(0).getUser().getId()));
         Assertions.assertEquals(Optional.of(address.getCoordinates()), Optional.of(actual.get(0).getCoordinates()));

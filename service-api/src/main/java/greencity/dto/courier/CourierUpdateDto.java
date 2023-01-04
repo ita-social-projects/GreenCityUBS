@@ -2,8 +2,6 @@ package greencity.dto.courier;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,5 +10,6 @@ import java.util.List;
 @Builder
 public class CourierUpdateDto {
     private Long courierId;
-    private List<CourierTranslationDto> courierTranslationDtos;
+    private String nameEn;
+    private String nameUk;
 }
