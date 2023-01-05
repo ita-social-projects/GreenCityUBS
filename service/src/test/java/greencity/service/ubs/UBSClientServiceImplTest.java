@@ -750,7 +750,7 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUserForCreate();
         List<Address> addresses = user.getAddresses();
         String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto(true);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);

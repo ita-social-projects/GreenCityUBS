@@ -3559,11 +3559,15 @@ public class ModelUtils {
     }
 
     public static OrderAddressDtoRequest getTestOrderAddressLocationDto() {
+        return getTestOrderAddressLocationDto(true);
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressLocationDto(boolean withDistrictRegionHouse) {
         return OrderAddressDtoRequest.builder()
             .id(0L)
-            .region("fake region")
+            .region(withDistrictRegionHouse ? "fake region" : null)
             .city("fake street")
-            .district("fake district")
+            .district(withDistrictRegionHouse ? "fake district" : null)
             .entranceNumber("1")
             .houseNumber("13")
             .houseCorpus("1")
@@ -3571,8 +3575,8 @@ public class ModelUtils {
             .streetEn("fake street name")
             .coordinates(new Coordinates(50.5555555d, 50.5555555d))
             .cityEn("fake street")
-            .districtEn("fake district")
-            .regionEn("fake region")
+            .districtEn(withDistrictRegionHouse ? "fake district" : null)
+            .regionEn(withDistrictRegionHouse ? "fake region" : null)
             .build();
     }
 
