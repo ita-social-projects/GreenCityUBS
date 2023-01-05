@@ -662,7 +662,7 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
@@ -670,7 +670,7 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsException3() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
