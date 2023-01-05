@@ -30,6 +30,7 @@ import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -656,6 +656,18 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(2)).save(any());
+    }
+
+    @Test
+    void addNewTariffThrowsExceptionWhenListOfLocationsIsEmptyTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
+            dto.getRegionId())).thenReturn(Collections.emptyList());
+        Throwable t = assertThrows(NotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+        Assertions.assertEquals("List of locations can not be empty", t.getMessage());
     }
 
     @Test
