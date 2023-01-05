@@ -40,7 +40,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -518,7 +517,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Set<Location> locationSet = new HashSet<>(locationRepository
             .findAllByIdAndRegionId(locationId.stream().distinct().collect(Collectors.toList()), regionId));
         if (locationSet.isEmpty()) {
-            throw new EntityNotFoundException("List of locations can not be empty");
+            throw new NotFoundException("List of locations can not be empty");
         }
         return locationSet;
     }
@@ -527,7 +526,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
             .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
         if (receivingStations.isEmpty()) {
-            throw new EntityNotFoundException("List of receiving stations can not be empty");
+            throw new NotFoundException("List of receiving stations can not be empty");
         }
         return receivingStations;
     }
@@ -578,16 +577,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
         var tariffLocationListList = tariffsLocationRepository
             .findAllByCourierIdAndLocationIds(courierId, locationIds);
-        List<Long> alreadyExistsTariff = tariffLocationListList.stream()
+        return tariffLocationListList.stream()
             .map(tariffLocation -> tariffLocation.getLocation().getId())
             .collect(Collectors.toList());
-        locationIds.removeAll(alreadyExistsTariff);
-        return alreadyExistsTariff;
     }
 
     private Courier tryToFindCourier(Long courierId) {
         return courierRepository.findById(courierId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
     }
 
     @Override
