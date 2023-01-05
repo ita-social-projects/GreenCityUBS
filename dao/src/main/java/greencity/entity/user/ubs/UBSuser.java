@@ -19,12 +19,13 @@ import java.util.List;
 public class UBSuser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /*@ManyToOne
     private Address address;*/
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     private OrderAddress address;
 
     @ManyToOne

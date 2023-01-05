@@ -19,15 +19,16 @@ import java.util.List;
 @Table(name = "address")
 @ToString(exclude = {"ubsUsers", "user"})
 public class Address {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @OneToMany(mappedBy = "address")
     private List<UBSuser> ubsUsers;
 
     @ManyToOne
     private User user;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Size(min = 1, max = 20, message = "Invalid region name")
     @Column(columnDefinition = "varchar(30)", nullable = false)
