@@ -7,11 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -3708,6 +3704,87 @@ public class ModelUtils {
         return NotificationSchedule.builder()
             .notificationType(NotificationType.TEST)
             .cron("test")
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithEmptyParams() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.empty())
+            .citiesId(Optional.empty())
+            .stationsId(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegion() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.empty())
+            .stationsId(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCities() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.of(List.of(1L, 11L)))
+            .stationsId(Optional.empty())
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourier() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.empty())
+            .citiesId(Optional.empty())
+            .stationsId(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.empty())
+            .citiesId(Optional.empty())
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.empty())
+            .citiesId(Optional.empty())
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithCourierAndRegion() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.empty())
+            .stationsId(Optional.empty())
+            .courierId(Optional.of(1L))
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.of(List.of(1L, 11L)))
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.empty())
+            .build();
+    }
+
+    public static DetailsOfDeactivateTariffsDto getDetailsOfDeactivateTariffsDtoWithAllParams() {
+        return DetailsOfDeactivateTariffsDto.builder()
+            .regionsId(Optional.of(List.of(1L)))
+            .citiesId(Optional.of(List.of(1L, 11L)))
+            .stationsId(Optional.of(List.of(1L, 12L)))
+            .courierId(Optional.of(1L))
             .build();
     }
 
