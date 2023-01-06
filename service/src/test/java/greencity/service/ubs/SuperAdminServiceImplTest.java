@@ -7,6 +7,7 @@ import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
@@ -31,6 +32,7 @@ import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -86,9 +88,26 @@ class SuperAdminServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private TariffLocationRepository tariffsLocationRepository;
-
     @Mock
-    private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;;
+    private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
+
+    @AfterEach
+    void afterEach() {
+        verifyNoMoreInteractions(
+            userRepository,
+            bagRepository,
+            bagTranslationRepository,
+            locationRepository,
+            modelMapper,
+            serviceRepository,
+            serviceTranslationRepository,
+            courierRepository,
+            regionRepository,
+            receivingStationRepository,
+            tariffsInfoRepository,
+            tariffsLocationRepository,
+            deactivateTariffsForChosenParamRepository);
+    }
 
     @Test
     void addTariffServiceTest() {
@@ -103,9 +122,11 @@ class SuperAdminServiceImplTest {
 
         superAdminService.addTariffService(dto, "123233");
 
+        verify(userRepository).findByUuid("123233");
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
         verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
+        verify(modelMapper).map(bag, AddServiceDto.class);
     }
 
     @Test
@@ -141,12 +162,15 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteTariffServiceThrowException() {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteTariffService(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
     void editTariffService_Throw_Exception() {
         EditTariffServiceDto dto = new EditTariffServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
+        verify(userRepository).findByUuid(anyString());
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -255,6 +279,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(bagTranslationTest);
 
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
+        verify(bagRepository).save(any(Bag.class));
     }
 
     @Test
@@ -266,6 +291,7 @@ class SuperAdminServiceImplTest {
         superAdminService.getAllLocation();
 
         verify(regionRepository).findAll();
+        regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
     @Test
@@ -277,6 +303,7 @@ class SuperAdminServiceImplTest {
         superAdminService.getActiveLocations();
 
         verify(regionRepository).findRegionsWithActiveLocations();
+        regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
     @Test
@@ -290,6 +317,8 @@ class SuperAdminServiceImplTest {
         superAdminService.addLocation(locationCreateDtoList);
 
         verify(regionRepository).findRegionByEnNameAndUkrName("Kyiv region", "Київська область");
+        verify(locationRepository).findLocationByNameAndRegionId(anyString(), anyString(), anyLong());
+        verify(locationRepository).save(any(Location.class));
     }
 
     @Test
@@ -314,6 +343,7 @@ class SuperAdminServiceImplTest {
         superAdminService.activateLocation(1L);
 
         verify(locationRepository).findById(1L);
+        verify(locationRepository).save(location);
     }
 
     @Test
@@ -326,6 +356,7 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateLocation(1L);
 
         verify(locationRepository).findById(1L);
+        verify(locationRepository).save(any());
     }
 
     @Test
@@ -340,23 +371,28 @@ class SuperAdminServiceImplTest {
 
         verify(bagRepository).findById(1);
         verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
+        verify(bagRepository).save(bag.get());
     }
 
     @Test
     void addTariffServiceExceptionTest() {
         AddServiceDto dto = ModelUtils.addServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
+        verify(userRepository).findByUuid(anyString());
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
     void deleteServiceExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteService(1L));
+        verify(serviceRepository).findById(anyLong());
     }
 
     @Test
     void editServiceExceptionTest() {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+        verify(serviceRepository).findServiceById(anyLong());
 
     }
 
@@ -375,6 +411,7 @@ class SuperAdminServiceImplTest {
     @Test
     void deactivateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocation(1L));
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
@@ -390,6 +427,7 @@ class SuperAdminServiceImplTest {
     @Test
     void activateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.activateLocation(1L));
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
@@ -403,6 +441,7 @@ class SuperAdminServiceImplTest {
     @Test
     void excludeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.excludeBag(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -417,6 +456,7 @@ class SuperAdminServiceImplTest {
     @Test
     void includeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.includeBag(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -571,6 +611,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
+        verify(userRepository).findByUuid(any());
     }
 
     @Test
@@ -662,6 +703,7 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(2)).save(any());
+        verify(tariffsLocationRepository).saveAll(anySet());
     }
 
     @Test
@@ -670,6 +712,9 @@ class SuperAdminServiceImplTest {
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         assertThrows(EntityNotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+        verify(courierRepository).findById(anyLong());
+        verify(receivingStationRepository).findAllById(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), anyList());
     }
 
     @Test
@@ -874,7 +919,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateTariffForChosenParam(details);
         verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L));
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegions(List.of(1L));
-        verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -886,7 +930,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateTariffForChosenParam(details);
         verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L, 2L));
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegions(List.of(1L, 2L));
-        verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -897,7 +940,7 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L));
-        verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegions(anyList());
     }
 
     @Test
@@ -910,7 +953,6 @@ class SuperAdminServiceImplTest {
         verify(regionRepository).existsRegionById(1L);
         verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegionsAndCities(List.of(1L, 11L), 1L);
-        verifyNoMoreInteractions(regionRepository, deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -923,7 +965,8 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(regionRepository).existsRegionById(1L);
         verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
-        verifyNoMoreInteractions(regionRepository, deactivateTariffsForChosenParamRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegionsAndCities(anyList(),
+            anyLong());
     }
 
     @Test
@@ -934,7 +977,8 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(regionRepository).existsRegionById(1L);
-        verifyNoMoreInteractions(regionRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegionsAndCities(anyList(),
+            anyLong());
     }
 
     @Test
@@ -945,7 +989,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateTariffForChosenParam(details);
         verify(courierRepository).existsCourierById(1L);
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(1L);
-        verifyNoMoreInteractions(courierRepository, deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -956,7 +999,7 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(courierRepository).existsCourierById(1L);
-        verifyNoMoreInteractions(courierRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourier(anyLong());
     }
 
     @Test
@@ -967,7 +1010,6 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateTariffForChosenParam(details);
         verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByReceivingStations(List.of(1L, 12L));
-        verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -978,7 +1020,7 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
-        verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByReceivingStations(anyList());
     }
 
     @Test
@@ -993,7 +1035,6 @@ class SuperAdminServiceImplTest {
         verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
         verify(deactivateTariffsForChosenParamRepository)
             .deactivateTariffsByCourierAndReceivingStations(1L, List.of(1L, 12L));
-        verifyNoMoreInteractions(courierRepository, deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -1005,7 +1046,8 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(courierRepository).existsCourierById(1L);
-        verifyNoMoreInteractions(courierRepository);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByCourierAndReceivingStations(anyLong(), anyList());
     }
 
     @Test
@@ -1019,7 +1061,8 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(courierRepository).existsCourierById(1L);
         verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
-        verifyNoMoreInteractions(courierRepository, deactivateTariffsForChosenParamRepository);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByCourierAndReceivingStations(anyLong(), anyList());
     }
 
     @Test
@@ -1032,7 +1075,6 @@ class SuperAdminServiceImplTest {
         verify(regionRepository).existsRegionById(1L);
         verify(courierRepository).existsCourierById(1L);
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourierAndRegion(1L, 1L);
-        verifyNoMoreInteractions(regionRepository, courierRepository, deactivateTariffsForChosenParamRepository);
     }
 
     @Test
@@ -1045,7 +1087,8 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(regionRepository).existsRegionById(1L);
         verify(courierRepository).existsCourierById(1L);
-        verifyNoMoreInteractions(regionRepository, courierRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourierAndRegion(anyLong(),
+            anyLong());
     }
 
     @Test
@@ -1056,7 +1099,8 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verify(regionRepository).existsRegionById(1L);
-        verifyNoMoreInteractions(regionRepository);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourierAndRegion(anyLong(),
+            anyLong());
     }
 
     @Test
@@ -1082,6 +1126,8 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verifyForTariffWithRegionAndCityAndStation(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByRegionAndCitiesAndStations(anyLong(), anyList(), anyList());
     }
 
     static Stream<Arguments> deactivateTariffByNotExistingRegionOrCityOrStationProvider() {
@@ -1119,6 +1165,8 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.deactivateTariffForChosenParam(details));
         verifyForTariffWithAllParams(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists,
             isCourierExists);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByAllParam(anyLong(), anyList(), anyList(), anyLong());
     }
 
     private static Stream<Arguments> deactivateTariffByAllWithNotExistingParamProvider() {
@@ -1187,7 +1235,6 @@ class SuperAdminServiceImplTest {
         boolean isCitiesExistForRegion,
         boolean isReceivingStationsExists) {
         verify(regionRepository).existsRegionById(1L);
-        verifyNoMoreInteractions(regionRepository);
         if (isRegionExists) {
             verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
             if (isCitiesExistForRegion) {
@@ -1197,7 +1244,6 @@ class SuperAdminServiceImplTest {
                         .deactivateTariffsByRegionAndCitiesAndStations(1L, List.of(1L, 11L), List.of(1L, 12L));
                 }
             }
-            verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
         }
     }
 
@@ -1226,21 +1272,18 @@ class SuperAdminServiceImplTest {
         boolean isReceivingStationsExists,
         boolean isCourierExists) {
         verify(regionRepository).existsRegionById(1L);
-        verifyNoMoreInteractions(regionRepository);
         if (isRegionExists) {
             verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
             if (isCitiesExistForRegion) {
                 verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
                 if (isReceivingStationsExists) {
                     verify(courierRepository).existsCourierById(1L);
-                    verifyNoMoreInteractions(courierRepository);
                     if (isCourierExists) {
                         verify(deactivateTariffsForChosenParamRepository)
                             .deactivateTariffsByAllParam(1L, List.of(1L, 11L), List.of(1L, 12L), 1L);
                     }
                 }
             }
-            verifyNoMoreInteractions(deactivateTariffsForChosenParamRepository);
         }
     }
 }
