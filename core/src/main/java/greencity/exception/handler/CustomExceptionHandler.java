@@ -4,6 +4,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.AllArgsConstructor;
@@ -165,6 +166,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(MappingException.class)
     public final ResponseEntity<Object> handleModelMapperMappingException(WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link CourierAlreadyExists}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(CourierAlreadyExists.class)
+    public final ResponseEntity<Object> handleCourierAlreadyExistsException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
