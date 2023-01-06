@@ -159,25 +159,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Exception handler for {@link MappingException}.
+     * Exception handler for {@link MappingException} {@link CourierAlreadyExists}.
      *
      * @param request {@link WebRequest} with error details.
      * @return {@link ResponseEntity} with http status and exception message.
      */
-    @ExceptionHandler(MappingException.class)
-    public final ResponseEntity<Object> handleModelMapperMappingException(WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
-    }
-
-    /**
-     * Exception handler for {@link CourierAlreadyExists}.
-     *
-     * @param request {@link WebRequest} with error details.
-     * @return {@link ResponseEntity} with http status and exception message.
-     */
-    @ExceptionHandler(CourierAlreadyExists.class)
-    public final ResponseEntity<Object> handleCourierAlreadyExistsException(WebRequest request) {
+    @ExceptionHandler({MappingException.class, CourierAlreadyExists.class})
+    public final ResponseEntity<Object> handleModelMapperMappingAndCourierAlreadyExistsException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
