@@ -26,7 +26,7 @@ import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.courier.CourierAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -477,7 +477,7 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
-        assertThrows(CourierAlreadyExists.class, () -> superAdminService.createCourier(createCourierDto, uuid));
+        assertThrows(CourierAlreadyExistsException.class, () -> superAdminService.createCourier(createCourierDto, uuid));
     }
 
     @Test

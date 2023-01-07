@@ -1,12 +1,12 @@
 package greencity.exceptions.courier;
 
-public class CourierAlreadyExists extends RuntimeException {
+public class CourierAlreadyExistsException extends RuntimeException {
     /**
      * Constructor with message.
      *
      * @param message message, that explains cause of the exception.
      */
-    public CourierAlreadyExists(String message) {
+    public CourierAlreadyExistsException(String message) {
         super(message);
     }
 }

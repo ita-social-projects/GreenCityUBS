@@ -30,7 +30,7 @@ import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
-import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.courier.CourierAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -371,7 +371,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .forEach(courier -> {
                 if (courier.getNameEn().equals(createCourierDto.getNameEn())
                     || courier.getNameUk().equals(createCourierDto.getNameUk())) {
-                    throw new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS);
+                    throw new CourierAlreadyExistsException(ErrorMessage.COURIER_ALREADY_EXISTS);
                 }
             });
     }
