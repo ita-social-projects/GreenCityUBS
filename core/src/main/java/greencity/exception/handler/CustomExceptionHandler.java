@@ -35,19 +35,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Method interceptor exception {@link BadRequestException},
-     *                              {@link ConstraintViolationException},
-     *                              {@link MappingException},
-     *                              {@link CourierAlreadyExistsException}.
+     * {@link ConstraintViolationException}, {@link MappingException},
+     * {@link CourierAlreadyExistsException}.
      *
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
     @ExceptionHandler({
-            BadRequestException.class,
-            ConstraintViolationException.class,
-            MappingException.class,
-            CourierAlreadyExistsException.class
+        BadRequestException.class,
+        ConstraintViolationException.class,
+        MappingException.class,
+        CourierAlreadyExistsException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
@@ -162,5 +161,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
     }
-
 }
