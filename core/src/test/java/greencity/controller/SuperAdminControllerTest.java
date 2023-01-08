@@ -18,6 +18,7 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.courier.CourierAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
@@ -43,6 +44,7 @@ import java.util.Optional;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -218,6 +220,27 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierIfCourierAlreadyExistsException() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = userRemoteClient.findUuidByEmail(principal.getName());
+
+        Mockito.when(superAdminService.createCourier(dto, uuid)).thenThrow(CourierAlreadyExistsException.class);
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        Mockito.verify(mockValidator).supports(any());
+        Mockito.verify(userRemoteClient, times(2)).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).createCourier(dto, uuid);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient, mockValidator);
     }
 
     @Test
