@@ -531,6 +531,15 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void courierAlreadyExistsException() {
+        try {
+            throw new CourierAlreadyExistsException(ErrorMessage.COURIER_ALREADY_EXISTS);
+        } catch (CourierAlreadyExistsException e) {
+            assertEquals(e.getMessage(), ErrorMessage.COURIER_ALREADY_EXISTS);
+        }
+    }
+
+    @Test
     void updateCourierTest() {
         Courier courier = getCourier();
 
