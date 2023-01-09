@@ -93,8 +93,6 @@ class SuperAdminServiceImplTest {
     void afterEach() {
         verifyNoMoreInteractions(
             userRepository,
-            bagRepository,
-            bagTranslationRepository,
             locationRepository,
             modelMapper,
             serviceRepository,
@@ -122,7 +120,6 @@ class SuperAdminServiceImplTest {
         verify(userRepository).findByUuid("123233");
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
         verify(modelMapper).map(bag, AddServiceDto.class);
     }
 
@@ -346,7 +343,6 @@ class SuperAdminServiceImplTest {
         superAdminService.excludeBag(1);
 
         verify(bagRepository).findById(1);
-        verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
         verify(bagRepository).save(bag.get());
     }
 
