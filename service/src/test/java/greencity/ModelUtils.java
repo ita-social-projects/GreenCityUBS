@@ -2044,6 +2044,13 @@ public class ModelUtils {
             .build();
     }
 
+    public static SetLimitDesriptionDto getLimitDescriptionDto() {
+        return SetLimitDesriptionDto.builder()
+            .limitDescription("Description")
+            .tariffId(1)
+            .build();
+    }
+
     public static List<TariffTranslationDto> getTariffTranslationDto() {
         return List.of(TariffTranslationDto.builder()
             .description("Description")
