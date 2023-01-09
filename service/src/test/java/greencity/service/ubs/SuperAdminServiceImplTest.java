@@ -523,8 +523,9 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
-        assertThrows(CourierAlreadyExistsException.class,
+        Throwable throwable = assertThrows(CourierAlreadyExistsException.class,
             () -> superAdminService.createCourier(createCourierDto, uuid));
+        assertEquals(throwable.getMessage(), ErrorMessage.COURIER_ALREADY_EXISTS);
     }
 
     @Test
