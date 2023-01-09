@@ -526,6 +526,8 @@ class SuperAdminServiceImplTest {
         Throwable throwable = assertThrows(CourierAlreadyExistsException.class,
             () -> superAdminService.createCourier(createCourierDto, uuid));
         assertEquals(throwable.getMessage(), ErrorMessage.COURIER_ALREADY_EXISTS);
+        verify(userRepository).findByUuid(anyString());
+        verify(courierRepository).findAll();
     }
 
     @Test

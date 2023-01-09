@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
+import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -44,6 +45,8 @@ import java.util.Optional;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -229,13 +232,17 @@ class SuperAdminControllerTest {
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = userRemoteClient.findUuidByEmail(principal.getName());
 
-        Mockito.when(superAdminService.createCourier(dto, uuid)).thenThrow(CourierAlreadyExistsException.class);
+        Mockito.when(superAdminService.createCourier(dto, uuid))
+            .thenThrow(new CourierAlreadyExistsException(ErrorMessage.COURIER_ALREADY_EXISTS));
 
         mockMvc.perform(post(ubsLink + "/createCourier")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
 
         Mockito.verify(mockValidator).supports(any());
         Mockito.verify(userRemoteClient, times(2)).findUuidByEmail(principal.getName());
