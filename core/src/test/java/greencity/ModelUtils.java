@@ -29,6 +29,7 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetLimitDesriptionDto;
 import greencity.dto.tariff.TariffTranslationDto;
 import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -378,6 +379,13 @@ public class ModelUtils {
             .commission(50)
             .description("Description")
             .langCode("ua")
+            .build();
+    }
+
+    public static SetLimitDesriptionDto getLimitDescriptionDto() {
+        return SetLimitDesriptionDto.builder()
+            .limitDescription("Description")
+            .tariffId(1)
             .build();
     }
 

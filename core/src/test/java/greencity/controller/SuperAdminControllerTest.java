@@ -16,6 +16,7 @@ import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetLimitDesriptionDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.filters.TariffsInfoFilterCriteria;
@@ -361,8 +362,15 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void setLimitDescription() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{courierId}", 1L))
+    @SneakyThrows
+    void setLimitDescriptionTest() throws Exception {
+        SetLimitDesriptionDto dto = ModelUtils.getLimitDescriptionDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{tariffId}", 1L)
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 

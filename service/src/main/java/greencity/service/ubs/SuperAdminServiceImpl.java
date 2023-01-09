@@ -394,7 +394,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffsInfoDto setLimitDescription(Long tariffId, String limitDescription) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        tariffsInfo.setLimitDescription(limitDescription);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
     }
 
     @Override
