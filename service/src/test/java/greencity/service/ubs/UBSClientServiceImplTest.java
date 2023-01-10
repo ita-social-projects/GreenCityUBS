@@ -205,28 +205,21 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageData() {
         Long locationId = 1L;
-        BagTranslationDto bagTranslationDto = BagTranslationDto.builder()
-            .id(1)
-            .name("Name")
-            .capacity(120)
-            .price(170)
-            .nameEng("NameEng")
-            .locationId(1L)
-            .limitedIncluded(false)
-            .build();
 
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(Collections.emptyList(), 600);
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag4list());
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
     }
 
     @Test
@@ -332,6 +325,13 @@ class UBSClientServiceImplTest {
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
 
+        verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(bagRepository, times(2)).findById(any());
+        verify(ubsUserRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
+        verify(addressRepository, times(1)).findById(any());
+        verify(orderRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -482,21 +482,26 @@ class UBSClientServiceImplTest {
                         .capacity(10)
                         .price(100)
                         .bagAmount(1)
+                        .name("name")
+                        .nameEng("nameEng")
                         .build(),
                     BagOrderDto.builder()
                         .bagId(2)
                         .capacity(10)
                         .price(100)
+                        .name("name")
+                        .nameEng("nameEng")
                         .build()))
             .build();
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(bagRepository.findAllByOrder(dto.getOrderId())).thenReturn(ModelUtils.getBaglist());
+        when(bagRepository.findAllByOrder(dto.getOrderId())).thenReturn(ModelUtils.getBag4list());
         MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
 
         assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
+        verify(bagRepository, times(1)).findAllByOrder(any());
     }
 
     @Test
@@ -891,9 +896,11 @@ class UBSClientServiceImplTest {
         Assertions.assertNull(dtoRequest.getSearchAddress());
         Assertions.assertEquals(OrderWithAddressesResponseDto.builder().addressList(Collections.emptyList()).build(),
             actualWithSearchAddress);
-        verify(googleApiService).getResultFromGeoCode("fake address");
 
+        verify(googleApiService).getResultFromGeoCode("fake address");
         verify(addressRepository, times(1)).save(addresses.get(0));
+        verify(addressRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
     }
 
     @Test

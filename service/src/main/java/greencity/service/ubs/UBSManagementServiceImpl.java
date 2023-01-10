@@ -656,7 +656,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.FORMED
                 || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
                 Optional<Long> confirmWasteWas = Optional.empty();
-                Bag bag = bagOptional.isPresent() ? bagOptional.get() : Bag.builder().build();
+                Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
                         Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
@@ -683,7 +683,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 || order.getOrderStatus() == OrderStatus.DONE
                 || order.getOrderStatus() == OrderStatus.CANCELED) {
                 Optional<Long> exporterWasteWas = Optional.empty();
-                Bag bag = bagOptional.isPresent() ? bagOptional.get() : Bag.builder().build();
+                Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     exporterWasteWas =
                         Optional
