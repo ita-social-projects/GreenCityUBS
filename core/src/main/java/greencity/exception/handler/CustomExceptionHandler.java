@@ -50,6 +50,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
