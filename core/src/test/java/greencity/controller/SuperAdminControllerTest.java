@@ -19,7 +19,7 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.courier.CourierAlreadyExistsException;
+import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
@@ -233,14 +233,14 @@ class SuperAdminControllerTest {
         String uuid = userRemoteClient.findUuidByEmail(principal.getName());
 
         Mockito.when(superAdminService.createCourier(dto, uuid))
-            .thenThrow(new CourierAlreadyExistsException(ErrorMessage.COURIER_ALREADY_EXISTS));
+            .thenThrow(new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS));
 
         mockMvc.perform(post(ubsLink + "/createCourier")
             .principal(principal)
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierAlreadyExistsException))
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierAlreadyExists))
             .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
