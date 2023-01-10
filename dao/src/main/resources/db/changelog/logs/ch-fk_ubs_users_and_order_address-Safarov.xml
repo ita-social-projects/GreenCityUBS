@@ -8,10 +8,13 @@
                 baseTableName="ubs_user"
                 constraintName="fk_ubs_user_to_address"/>
 
+        <!--<dropColumn tableName="ubs_user">
+            <column name="address_id"/>
+        </dropColumn>-->
+
         <addForeignKeyConstraint baseTableName="ubs_user" baseColumnNames="id"
                                  constraintName="fk_ubs_user_to_order_address"
                                  referencedTableName="order_address"
                                  referencedColumnNames="id"/>
-
     </changeSet>
 </databaseChangeLog>

@@ -21,6 +21,8 @@ import javax.persistence.EntityNotFoundException;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
+import greencity.entity.user.ubs.OrderAddress;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -88,20 +90,6 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.AddressRepository;
-import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UBSuserRepository;
-import greencity.repository.UserRepository;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 
@@ -140,6 +128,8 @@ class UBSClientServiceImplTest {
     private FondyClient fondyClient;
     @Mock
     private AddressRepository addressRepository;
+    @Mock
+    private OrderAddressRepository orderAddressRepository;
     @Mock
     private OrderRepository orderRepository;
     @InjectMocks
@@ -260,9 +250,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -285,7 +274,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
@@ -335,8 +323,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1035,9 +1022,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1052,7 +1038,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
@@ -1062,7 +1047,6 @@ class UBSClientServiceImplTest {
         verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
         verify(liqPayService).getCheckoutResponse(any());
     }
@@ -1104,12 +1088,6 @@ class UBSClientServiceImplTest {
         bag.setCapacity(100);
         bag.setFullPrice(1);
 
-        UBSuser ubSuser = getUBSuser();
-
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
-
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
         Payment payment1 = getPayment();
@@ -1139,9 +1117,9 @@ class UBSClientServiceImplTest {
         Optional<Bag> bag = ModelUtils.getBag();
 
         UBSuser ubSuser = getUBSuser();
+        ubSuser.setId(null);
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1303,8 +1281,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1329,7 +1306,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(ModelUtils.getCertificate()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
@@ -1359,8 +1335,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser().setId(null);
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1378,7 +1354,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        //when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1402,8 +1378,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1447,8 +1423,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1493,8 +1469,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1536,8 +1512,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1553,7 +1529,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        //when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
@@ -1857,8 +1833,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user);
         address.setAddressStatus(AddressStatus.DELETED);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1876,7 +1852,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        //when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
@@ -1905,8 +1881,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user1);
+        OrderAddress address = ubSuser.getAddress();
+        //address.setUser(user1);
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1924,7 +1900,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        //when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
         Assertions.assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));

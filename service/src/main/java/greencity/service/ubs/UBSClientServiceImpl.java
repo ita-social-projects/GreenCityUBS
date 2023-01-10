@@ -972,6 +972,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
             mappedFromDtoUser.setAddress(getSavedOrderAddress(addressId, currentUser));
+            if (mappedFromDtoUser.getAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getAddress().setAddressComment(dto.getAddressComment());
+            }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
 
@@ -1318,9 +1321,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         // Уже должен быть созданный ubsUser
         //userData.setAddress(orderAddress);
 
-        if (userData.getAddress().getAddressComment() == null) {
+        /*if (userData.getAddress().getAddressComment() == null) {
             userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
-        }
+        }*/
         // todo: ubsUser уже должен быть сформирован и иметь все данные
 
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
