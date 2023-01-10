@@ -3482,7 +3482,7 @@ public class ModelUtils {
             .build();
     }
 
-    /*public static Address getAddress() {
+    public static Address getAddress() {
         return Address.builder()
                 .id(1L)
                 .houseNumber("1a")
@@ -3498,7 +3498,7 @@ public class ModelUtils {
                         .build())
                 .addressComment(null)
                 .build();
-    }*/
+    }
 
     public static OrderAddressDtoRequest getTestOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
