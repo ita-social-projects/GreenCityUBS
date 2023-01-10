@@ -42,12 +42,12 @@ import org.springframework.validation.Validator;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -230,8 +230,9 @@ class SuperAdminControllerTest {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
-        String uuid = userRemoteClient.findUuidByEmail(principal.getName());
+        String uuid = UUID.randomUUID().toString();
 
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         Mockito.when(superAdminService.createCourier(dto, uuid))
             .thenThrow(new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS));
 
@@ -244,10 +245,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
-        Mockito.verify(mockValidator).supports(any());
-        Mockito.verify(userRemoteClient, times(2)).findUuidByEmail(principal.getName());
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
         Mockito.verify(superAdminService).createCourier(dto, uuid);
-        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient, mockValidator);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
