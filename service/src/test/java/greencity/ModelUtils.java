@@ -15,14 +15,7 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.BagDto;
-import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagInfoDto;
-import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagOrderDto;
-import greencity.dto.bag.BagTransDto;
-import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.bag.*;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
@@ -98,11 +91,7 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.*;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -2341,6 +2330,58 @@ public class ModelUtils {
                 .build());
     }
 
+    public static List<Bag> getBag4list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(20)
+            .location(Location.builder().id(1L).build())
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(21)
+                .location(Location.builder().id(1L).build())
+                .name("name")
+                .nameEng("nameEng")
+                .limitIncluded(false)
+                .build());
+    }
+
+    public static List<Bag> getBag5list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(20)
+            .location(Location.builder().id(1L).build())
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(21)
+                .location(Location.builder().id(1L).build())
+                .name("name")
+                .nameEng("nameEng")
+                .limitIncluded(false)
+                .minAmountOfBags(MinAmountOfBag.INCLUDE)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")
@@ -3802,5 +3843,29 @@ public class ModelUtils {
             .minPriceOfOrder(100L)
             .maxPriceOfOrder(200L)
             .build();
+    }
+
+    public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDto() {
+        return new UserPointsAndAllBagsDto(
+            Arrays.asList(
+                BagTranslationDto.builder()
+                    .id(1)
+                    .name("name")
+                    .capacity(10)
+                    .price(20)
+                    .nameEng("nameEng")
+                    .locationId(1L)
+                    .limitedIncluded(false)
+                    .build(),
+                BagTranslationDto.builder()
+                    .id(2)
+                    .name("name")
+                    .capacity(10)
+                    .price(21)
+                    .nameEng("nameEng")
+                    .locationId(1L)
+                    .limitedIncluded(false)
+                    .build()),
+            600);
     }
 }

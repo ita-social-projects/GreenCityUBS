@@ -125,7 +125,9 @@ class SuperAdminServiceImplTest {
 
     @Test
     void getTariffServiceTest() {
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag5list());
         superAdminService.getTariffService();
+        verify(bagRepository, times(1)).findAll();
     }
 
     @Test
@@ -252,9 +254,10 @@ class SuperAdminServiceImplTest {
     void includeBag() {
         when(bagRepository.findById(10))
             .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description")
-                .minAmountOfBags(MinAmountOfBag.EXCLUDE).build()));
+                .minAmountOfBags(MinAmountOfBag.EXCLUDE).location(Location.builder().id(1L).build()).build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
         verify(bagRepository).save(any(Bag.class));
+        verify(bagRepository, times(1)).findById(anyInt());
     }
 
     @Test

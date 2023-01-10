@@ -721,6 +721,7 @@ class UBSManagementServiceImplTest {
         }.getType())).thenReturn(TEST_BAG_MAPPING_DTO_LIST);
         when(bagRepository.findBagByOrderId(1L)).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(TEST_BAG, BagInfoDto.class)).thenReturn(TEST_BAG_INFO_DTO);
+        when(bagRepository.findAllByOrder(1L)).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
@@ -732,6 +733,7 @@ class UBSManagementServiceImplTest {
         verify(modelMapper).map(TEST_ORDER, new TypeToken<List<BagMappingDto>>() {
         }.getType());
         verify(bagRepository).findBagByOrderId(1L);
+        verify(bagRepository, times(1)).findAllByOrder(anyLong());
         verify(modelMapper).map(TEST_BAG, BagInfoDto.class);
         verify(modelMapper).map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()));
