@@ -423,14 +423,14 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteCourierTest() {
+    void deactivateCourierTest() {
         Courier courier = ModelUtils.getCourier();
         courier.setCourierStatus(CourierStatus.DELETED);
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
         when(courierRepository.save(courier)).thenReturn(courier);
 
-        superAdminService.deleteCourier(1L);
+        superAdminService.deactivateCourier(1L);
         assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
 
         verify(courierRepository).findById(1L);
@@ -441,7 +441,7 @@ class SuperAdminServiceImplTest {
     void deleteCourierThrowCourierNotFoundException() {
         when(courierRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> superAdminService.deleteCourier(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.deactivateCourier(1L));
 
         verify(courierRepository).findById(1L);
     }

@@ -190,7 +190,7 @@ public interface SuperAdminService {
      *
      * @param id - courier Id.
      */
-    void deleteCourier(Long id);
+    CourierDto deactivateCourier(Long id);
 
     /**
      * Method for getting all info about tariffs.
