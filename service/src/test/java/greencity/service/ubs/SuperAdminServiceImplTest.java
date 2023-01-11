@@ -683,8 +683,6 @@ class SuperAdminServiceImplTest {
         assertFalse(actual);
     }
 
-
-
     @Test
     void editTariffTest() {
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
