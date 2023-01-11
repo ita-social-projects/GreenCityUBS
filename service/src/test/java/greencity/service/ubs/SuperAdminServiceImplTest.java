@@ -425,16 +425,10 @@ class SuperAdminServiceImplTest {
     @Test
     void deactivateCourierTest() {
         Courier courier = ModelUtils.getCourier();
-        courier.setCourierStatus(CourierStatus.DELETED);
-
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(courierRepository.save(courier)).thenReturn(courier);
-
         superAdminService.deactivateCourier(1L);
         assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
-
         verify(courierRepository).findById(1L);
-        verify(courierRepository).save(courier);
     }
 
     @Test
