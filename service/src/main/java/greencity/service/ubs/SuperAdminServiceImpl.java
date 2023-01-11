@@ -31,6 +31,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -40,6 +41,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -576,10 +578,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
         var tariffLocationListList = tariffsLocationRepository
-            .findAllByCourierIdAndLocationIds(courierId, locationIds);
-        return tariffLocationListList.stream()
-            .map(tariffLocation -> tariffLocation.getLocation().getId())
-            .collect(Collectors.toList());
+                .findAllByCourierIdAndLocationIds(courierId, locationIds);
+        List<Long> alreadyExistsTariff = tariffLocationListList.stream()
+                .map(tariffLocation -> tariffLocation.getLocation().getId())
+                .collect(Collectors.toList());
+        if (locationIds.removeAll(alreadyExistsTariff)) {
+            throw new TariffAlreadyExists(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        }
+        return alreadyExistsTariff;
     }
 
     private Courier tryToFindCourier(Long courierId) {

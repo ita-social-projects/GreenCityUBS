@@ -6,6 +6,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.tariff.TariffAlreadyExists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -167,5 +168,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleModelMapperMappingException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link TariffAlreadyExists}.
+     *
+     * @param request {@link WebRequest} with error details.
+     * @return {@link ResponseEntity} with http status and exception message.
+     */
+    @ExceptionHandler(TariffAlreadyExists.class)
+    public final ResponseEntity<Object> handleTariffAlreadyExistsException(WebRequest request) {
+        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
 }
