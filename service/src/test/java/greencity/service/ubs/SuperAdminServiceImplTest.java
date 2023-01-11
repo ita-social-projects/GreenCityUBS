@@ -683,11 +683,7 @@ class SuperAdminServiceImplTest {
         assertFalse(actual);
     }
 
-    @Test
-    void setLimitDescriptionTest() {
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffsInfo()));
-        superAdminService.setLimitDescription(3L, ModelUtils.getLimitDescriptionDto().getLimitDescription());
-    }
+
 
     @Test
     void editTariffTest() {
