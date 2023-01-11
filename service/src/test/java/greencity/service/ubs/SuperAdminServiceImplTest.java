@@ -685,8 +685,14 @@ class SuperAdminServiceImplTest {
 
     @Test
     void setLimitDescriptionTest() {
+        TariffsInfo tariffInfo = getTariffInfo();
+        tariffInfo.setLocationStatus(LocationStatus.ACTIVE);
+        GetTariffsInfoDto allTariffsInfoDto = getAllTariffsInfoDto();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffsInfo()));
-        superAdminService.setLimitDescription(3L, ModelUtils.getLimitDescriptionDto().getLimitDescription());
+        when(modelMapper.map(tariffInfo, GetTariffsInfoDto.class)).thenReturn(allTariffsInfoDto);
+        superAdminService.setLimitDescription(anyLong(), ModelUtils.getLimitDescriptionDto().getLimitDescription());
+        verify(tariffsInfoRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(tariffInfo, GetTariffsInfoDto.class);
     }
 
     @Test
