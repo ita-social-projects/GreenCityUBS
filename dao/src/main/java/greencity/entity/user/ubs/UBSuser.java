@@ -26,6 +26,7 @@ public class UBSuser {
     private Address address;*/
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
+    @JoinColumn(name = "id")
     private OrderAddress address;
 
     @ManyToOne

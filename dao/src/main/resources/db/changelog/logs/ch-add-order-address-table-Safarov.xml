@@ -8,7 +8,7 @@
             <column name="id" autoIncrement="true" startWith="1" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="city" type="varchar" defaultValue="Kyiv">
+            <column name="city" type="varchar(30)" defaultValue="Kyiv">
                 <constraints nullable="false"/>
             </column>
             <column name="address_comment" type="varchar(200)"/>
@@ -34,16 +34,16 @@
             <column name="region" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
-            <column name="city_en" type="varchar(255)">
+            <column name="city_en" type="varchar">
                 <constraints nullable="false"/>
             </column>
-            <column name="region_en" type="varchar(255)">
+            <column name="region_en" type="varchar">
                 <constraints nullable="false"/>
             </column>
-            <column name="street_en" type="varchar(255)">
+            <column name="street_en" type="varchar">
                 <constraints nullable="false"/>
             </column>
-            <column name="district_en" type="varchar(255)">
+            <column name="district_en" type="varchar">
                 <constraints nullable="false"/>
             </column>
         </createTable>
