@@ -36,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.ui.Model;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
@@ -425,10 +426,14 @@ class SuperAdminServiceImplTest {
     @Test
     void deactivateCourierTest() {
         Courier courier = ModelUtils.getCourier();
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        superAdminService.deactivateCourier(1L);
+        CourierDto courierDto = ModelUtils.getCourierDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
+        superAdminService.deactivateCourier(anyLong());
         assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
-        verify(courierRepository).findById(1L);
+        verify(courierRepository).findById(anyLong());
+        verify(courierRepository).save(any());
+        verify(modelMapper, times(1)).map(courier, CourierDto.class);
     }
 
     @Test
