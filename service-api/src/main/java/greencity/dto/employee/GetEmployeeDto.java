@@ -17,22 +17,12 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetEmployeeDto {
-    @Min(1)
     private Long id;
-    @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String firstName;
-    @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String lastName;
-    @NotNull
-    @ValidPhoneNumber
     private String phoneNumber;
-    @Email
     private String email;
     private String image;
-    @NotEmpty
     private List<PositionDto> employeePositions;
-
-    private Set<GetTariffInfoForEmployeeDto> tariffs;
+    private List<GetTariffInfoForEmployeeDto> tariffs;
 }

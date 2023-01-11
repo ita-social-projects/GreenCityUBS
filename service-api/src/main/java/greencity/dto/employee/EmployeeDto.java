@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.LocationsDtos;
 import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffsInfoDto;
@@ -42,7 +43,7 @@ public class EmployeeDto {
     @NotNull
     private LocationsDtos location;
     @NotNull
-    private CourierDto courier;
+    private CourierTranslationDto courier;
     @JsonIgnore
     private Set<TariffsInfoDto> tariffs;
 }

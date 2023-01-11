@@ -64,6 +64,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      */
     Boolean existsByEmailAndId(String email, Long id);
 
+    @Query(value = "SELECT em from Employee em where em.email=:email and not em.id =:id")
+    List<Employee> findEmployeeWithEmailAndNotId(String email, Long id);
+
+    @Query(value = "SELECT em from Employee em where em.phoneNumber =:phone and not em.id =:id")
+    List<Employee> findEmployeeWithPhoneAndNotId(String phone, Long id);
+
     /**
      * Method return all employees depends on their positions.
      *

@@ -2,6 +2,8 @@ package greencity.service.ubs;
 
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.GetEmployeeDto;
+import greencity.dto.employee.SaveEmployeeDto;
+import greencity.dto.employee.UpdateEmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -21,17 +23,18 @@ public interface UBSManagementEmployeeService {
      * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
-    EmployeeDto save(EmployeeDto dto, MultipartFile image);
+    SaveEmployeeDto save(SaveEmployeeDto dto, MultipartFile image);
 
     /**
      * {@inheritDoc}
      */
-    Page<EmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
+    Page<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * {@inheritDoc}
      */
-    Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage, EmployeeFilterCriteria employeeFilterCriteria);
+    Page<GetEmployeeDto> findAllActiveEmployees(EmployeePage employeePage,
+        EmployeeFilterCriteria employeeFilterCriteria);
 
     /**
      * Method updates information about employee.
@@ -41,7 +44,7 @@ public interface UBSManagementEmployeeService {
      * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
-    EmployeeDto update(EmployeeDto dto, MultipartFile image);
+    UpdateEmployeeDto update(UpdateEmployeeDto dto, MultipartFile image);
 
     /**
      * Method updates information about position.
@@ -92,7 +95,6 @@ public interface UBSManagementEmployeeService {
      * @author Mykola Danylko
      */
     void deleteEmployeeImage(Long id);
-
 
     List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
 

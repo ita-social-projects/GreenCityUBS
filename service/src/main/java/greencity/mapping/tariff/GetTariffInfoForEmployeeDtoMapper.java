@@ -19,43 +19,36 @@ public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<Tariffs
     @Override
     protected GetTariffInfoForEmployeeDto convert(TariffsInfo source) {
         Region region = source.getTariffLocations() != null
-                ? source.getTariffLocations().iterator().next().getLocation().getRegion()
-                : null;
+            ? source.getTariffLocations().iterator().next().getLocation().getRegion()
+            : null;
         RegionDto regionDto = region != null ? RegionDto.builder().regionId(region.getId()).nameEn(region.getEnName())
-                .nameUk(region.getUkrName()).build() : null;
+            .nameUk(region.getUkrName()).build() : null;
 
         List<LocationsDtos> locationsDtos = source.getTariffLocations().stream()
-                .map(tariffLocation -> LocationsDtos.builder()
-                        .locationId(tariffLocation.getLocation().getId())
-                        .nameUk(tariffLocation.getLocation().getNameUk())
-                        .nameEn(tariffLocation.getLocation().getNameEn())
-                        .build())
-                .collect(Collectors.toList());
+            .map(tariffLocation -> LocationsDtos.builder()
+                .locationId(tariffLocation.getLocation().getId())
+                .nameUk(tariffLocation.getLocation().getNameUk())
+                .nameEn(tariffLocation.getLocation().getNameEn())
+                .build())
+            .collect(Collectors.toList());
 
         List<GetReceivingStationDto> getReceivingStationDtos = source.getReceivingStationList()
-                .stream()
-                .map(receivingStation -> GetReceivingStationDto.builder()
-                        .stationId(receivingStation.getId())
-                        .name(receivingStation.getName())
-                        .build())
-                .collect(Collectors.toList());
-
-        List<CourierTranslationDto> courierTranslationsDto = source.getCourier().getCourierTranslationList()
-                .stream()
-                .map(courierTranslation -> CourierTranslationDto.builder()
-                                .name(courierTranslation.getName())
-                                .nameEng(courierTranslation.getNameEng())
-                                .build())
-                .collect(Collectors.toList());
-
+            .stream()
+            .map(receivingStation -> GetReceivingStationDto.builder()
+                .stationId(receivingStation.getId())
+                .name(receivingStation.getName())
+                .build())
+            .collect(Collectors.toList());
 
         return GetTariffInfoForEmployeeDto.builder()
-                .id(source.getId())
-                .region(regionDto)
-                .locationsDtos(locationsDtos)
-                .receivingStationDtos(getReceivingStationDtos)
-                .courierTranslationDtos(courierTranslationsDto)
-                .courierId(source.getCourier().getId())
-                .build();
+            .id(source.getId())
+            .region(regionDto)
+            .locationsDtos(locationsDtos)
+            .receivingStationDtos(getReceivingStationDtos)
+            .courier(CourierTranslationDto.builder()
+                .id(source.getCourier().getId())
+                .nameEn(source.getCourier().getNameEn())
+                .nameUk(source.getCourier().getNameUk()).build())
+            .build();
     }
 }

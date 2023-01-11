@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Builder
@@ -21,7 +22,5 @@ public class GetTariffInfoForEmployeeDto {
     private RegionDto region;
     private List<LocationsDtos> locationsDtos;
     private List<GetReceivingStationDto> receivingStationDtos;
-    private List<CourierTranslationDto> courierTranslationDtos;
-    private Long courierId;
-
+    private CourierTranslationDto courier;
 }

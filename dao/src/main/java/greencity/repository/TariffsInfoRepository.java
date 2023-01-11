@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>, JpaSpecificationExecutor<TariffsInfo> {
@@ -43,4 +45,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
      * @return - Optional of {@link TariffsInfo} if order with such id exists in DB
      */
     Optional<TariffsInfo> findByOrdersId(@Param("orderId") Long orderId);
+
+    @Query("SELECT ti FROM TariffsInfo ti where ti.id in(:tariffId)")
+    Set<TariffsInfo> findTariffsInfoById(@Param("tariffId") List<Long> tariffId);
 }

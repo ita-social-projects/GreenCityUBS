@@ -2,6 +2,7 @@ package greencity.mapping.employee;
 
 import greencity.dto.LocationsDtos;
 import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.PositionDto;
@@ -60,10 +61,8 @@ public class EmployeeMapper extends AbstractConverter<Employee, EmployeeDto> {
                 .findFirst().orElseThrow(() -> new NotFoundException("Location is not found")))
             .courier(employee.getTariffInfos().stream()
                 .map(TariffsInfo::getCourier)
-                .map(courier -> CourierDto.builder()
-                    .courierId(courier.getId())
-                    .createDate(courier.getCreateDate())
-                    .courierStatus(courier.getCourierStatus().name())
+                .map(courier -> CourierTranslationDto.builder()
+                    .id(courier.getId())
                     .nameUk(courier.getNameUk())
                     .nameEn(courier.getNameEn())
                     .build())

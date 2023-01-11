@@ -962,7 +962,7 @@ public class ModelUtils {
                 .id(1L)
                 .name("Петрівка")
                 .build()))
-            .courier(getCourierDto())
+            .courier(getCourierTranslationDto())
             .location(LocationsDtos.builder()
                 .locationId(1L)
                 .nameEn("location")

@@ -7,17 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaveEmployeeDto {
+public class UpdateEmployeeDto {
+    @Min(1)
+    private Long id;
     @NotNull
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
     private String firstName;
@@ -34,4 +33,5 @@ public class SaveEmployeeDto {
     private List<PositionDto> employeePositions;
     @NotEmpty
     private List<Long> tariffId;
+
 }
