@@ -341,7 +341,7 @@ public class ModelUtils {
             .capacity(120)
             .commission(10)
             .price(100)
-            .tariffTranslationDtoList(getTariffTranslationDto())
+            .tariffTranslationDto(getTariffTranslationDto())
             .build();
     }
 

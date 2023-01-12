@@ -19,7 +19,7 @@ public class AddServiceDtoMapper extends AbstractConverter<Bag, AddServiceDto> {
             .commission(source.getCommission())
             .capacity(source.getCapacity())
             .price(source.getPrice())
-            .tariffTranslationDtoList(tariffTranslationDto)
+            .tariffTranslationDto(tariffTranslationDto)
             .build();
     }
 }

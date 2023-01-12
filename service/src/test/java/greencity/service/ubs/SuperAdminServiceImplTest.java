@@ -169,8 +169,15 @@ class SuperAdminServiceImplTest {
     void editTariffService() {
         String uuid = "testUUid";
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = Bag.builder().id(1).name("Test").nameEng("Name Test").minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .location(Location.builder().id(1L).build()).build();
+        Bag bag = Bag.builder()
+            .id(1)
+            .name("Test")
+            .nameEng("Name Test")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location.builder()
+                .id(1L)
+                .build())
+            .build();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");

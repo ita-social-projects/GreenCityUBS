@@ -2030,7 +2030,7 @@ public class ModelUtils {
             .commission(50)
             .capacity(100)
             .price(100)
-            .tariffTranslationDtoList(getTariffTranslationDto())
+            .tariffTranslationDto(getTariffTranslationDto())
             .locationId(1L)
             .build();
     }

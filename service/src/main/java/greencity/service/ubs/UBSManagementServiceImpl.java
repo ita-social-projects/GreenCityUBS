@@ -651,10 +651,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
 
-            if (bagOptional.isPresent() && order.getOrderStatus() == OrderStatus.ADJUSTMENT
-                || order.getOrderStatus() == OrderStatus.CONFIRMED
-                || order.getOrderStatus() == OrderStatus.FORMED
-                || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+            if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
                 Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
@@ -678,10 +675,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
-            if (bagOptional.isPresent() && order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-                || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELED) {
+            if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
                 Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
@@ -700,6 +694,20 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 }
             }
         }
+    }
+
+    private boolean checkOrderStatusAboutConfirmWaste(Order order) {
+        return order.getOrderStatus() == OrderStatus.ADJUSTMENT
+            || order.getOrderStatus() == OrderStatus.CONFIRMED
+            || order.getOrderStatus() == OrderStatus.FORMED
+            || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT;
+    }
+
+    private boolean checkOrderStatusAboutExportedWaste(Order order) {
+        return order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            || order.getOrderStatus() == OrderStatus.DONE
+            || order.getOrderStatus() == OrderStatus.CANCELED;
     }
 
     /**
