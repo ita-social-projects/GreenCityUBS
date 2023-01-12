@@ -19,7 +19,7 @@ public class OrderAddressMapper extends AbstractConverter<Address, OrderAddress>
             .houseCorpus(address.getHouseCorpus())
             .entranceNumber(address.getEntranceNumber())
             .addressComment(address.getAddressComment())
-            .actual(false)
+            .actual(address.getActual())
             .addressStatus(address.getAddressStatus())
             .coordinates(Coordinates.builder()
                 .latitude(address.getCoordinates().getLatitude())

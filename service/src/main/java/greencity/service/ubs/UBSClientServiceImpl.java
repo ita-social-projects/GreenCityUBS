@@ -1332,8 +1332,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         checkAddressUser(address, currentUser);
 
-        address.setAddressStatus(AddressStatus.IN_ORDER);
-
         OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
 
         orderAddressRepository.save(orderAddress);

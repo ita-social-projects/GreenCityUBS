@@ -50,7 +50,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN orders o on o.id = payment.order_id "
         + "JOIN users u on u.id = o.users_id "
         + "JOIN ubs_user uu on uu.id = o.ubs_user_id "
-        + "JOIN order_address a on uu.address_id = a.id "
+        + "JOIN order_address a on uu.id = a.id "
         + "WHERE ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getAdditionalBagInfo(Long orderId, String recipientEmail);
 

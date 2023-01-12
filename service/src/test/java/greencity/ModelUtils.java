@@ -4,12 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.maps.model.*;
 import greencity.constant.AppConstant;
 import greencity.dto.*;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
-import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.*;
@@ -1116,27 +1110,62 @@ public class ModelUtils {
             .id(1L)
             .entranceNumber("7a")
             .houseCorpus("2")
-            .houseNumber("7")
-            .street("Gorodotska")
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .district("Zaliznuchnuy")
-            .city("Lviv")
+            .houseNumber("25")
+            .street("Street")
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .district("Distinct")
+            .city("City")
             .actual(false)
             .build();
     }
 
-    public static Address address() {
+    public static Address getAddress() {
         return Address.builder()
-            .id(addressDto().getId())
-            .city(addressDto().getCity())
-            .district(addressDto().getDistrict())
-            .street(addressDto().getStreet())
-            .coordinates(addressDto().getCoordinates())
-            .entranceNumber(addressDto().getEntranceNumber())
-            .houseNumber(addressDto().getHouseNumber())
-            .houseCorpus(addressDto().getHouseCorpus())
-            .actual(addressDto().getActual())
-            .addressStatus(AddressStatus.DELETED)
+            .id(1L)
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static OrderAddress getOrderAddress() {
+        return OrderAddress.builder()
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
             .build();
     }
 
@@ -1263,7 +1292,7 @@ public class ModelUtils {
     public static User getUser() {
         return User.builder()
             .id(1L)
-            .addresses(singletonList(address()))
+            .addresses(singletonList(getAddress()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
@@ -1670,7 +1699,7 @@ public class ModelUtils {
         location.setLocationStatus(LocationStatus.ACTIVE);
         return User.builder()
             .id(1L)
-            .addresses(singletonList(address()))
+            .addresses(singletonList(getAddress()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
@@ -3488,24 +3517,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static Address getAddress() {
-        return Address.builder()
-            .id(1L)
-            .houseNumber("1a")
-            .actual(true)
-            .entranceNumber("str")
-            .district("3a")
-            .houseCorpus("2a")
-            .city("Kiev")
-            .street("Gorodotska")
-            .coordinates(Coordinates.builder()
-                .longitude(2.2)
-                .latitude(3.2)
-                .build())
-            .addressComment(null)
-            .build();
-    }
-
     public static OrderAddressDtoRequest getTestOrderAddressDtoRequest() {
         return OrderAddressDtoRequest.builder()
             .id(0L)
@@ -3566,13 +3577,16 @@ public class ModelUtils {
             .addressList(List.of(
                 AddressDto.builder()
                     .id(1L)
-                    .city("Lviv")
-                    .district("Zaliznuchnuy")
+                    .city("City")
+                    .district("Distinct")
                     .entranceNumber("7a")
                     .houseCorpus("2")
-                    .houseNumber("7")
-                    .street("Gorodotska")
-                    .coordinates(new Coordinates(2.3, 5.6))
+                    .houseNumber("25")
+                    .street("Street")
+                    .coordinates(Coordinates.builder()
+                        .latitude(50.4459068)
+                        .longitude(30.4477005)
+                        .build())
                     .actual(false)
                     .build()))
             .build();
