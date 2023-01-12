@@ -4,13 +4,13 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.tariff.TariffAlreadyExists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,17 +35,23 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     private ErrorAttributes errorAttributes;
 
     /**
-     * Method interceptor exception {@link BadRequestException}.
+     * Method interceptor exception {@link BadRequestException},
+     * {@link ConstraintViolationException}, {@link MappingException},
+     * {@link CourierAlreadyExists}.
      *
-     * @param ex      Exception which should be intercepted.
      * @param request contain detail about occur exception.
      * @return ResponseEntity which contain http status and body with message of
      *         exception.
      */
-    @ExceptionHandler({ConstraintViolationException.class, BadRequestException.class})
-    public final ResponseEntity<Object> handleBadRequestExeption(BadRequestException ex, WebRequest request) {
+    @ExceptionHandler({
+        BadRequestException.class,
+        ConstraintViolationException.class,
+        MappingException.class,
+        CourierAlreadyExists.class
+    })
+    public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
-        log.trace(ex.getMessage(), ex);
+        log.trace(exceptionResponse.getMessage(), exceptionResponse.getTrace());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
@@ -156,18 +162,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleRemoteServerUnavailableException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
-    }
-
-    /**
-     * Exception handler for {@link MappingException}.
-     *
-     * @param request {@link WebRequest} with error details.
-     * @return {@link ResponseEntity} with http status and exception message.
-     */
-    @ExceptionHandler(MappingException.class)
-    public final ResponseEntity<Object> handleModelMapperMappingException(WebRequest request) {
-        ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
     /**
