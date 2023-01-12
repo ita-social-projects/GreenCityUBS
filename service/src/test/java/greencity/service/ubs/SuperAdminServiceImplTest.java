@@ -714,6 +714,10 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(ModelUtils.getUser());
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
             dto.getRegionId())).thenReturn(Collections.emptyList());
@@ -722,10 +726,10 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
+        verify(userRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
         verify(receivingStationRepository).findAllById(List.of(1L));
         verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
-
-        verifyNoMoreInteractions(courierRepository, receivingStationRepository, locationRepository);
     }
 
     @Test
