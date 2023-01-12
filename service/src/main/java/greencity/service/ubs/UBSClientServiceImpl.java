@@ -237,15 +237,15 @@ public class UBSClientServiceImpl implements UBSClientService {
         return new UserPointsAndAllBagsDto(btdList, currentUserPoints);
     }
 
-    private BagTranslationDto buildBagTranslationDto(Bag bt) {
+    private BagTranslationDto buildBagTranslationDto(Bag bag) {
         return BagTranslationDto.builder()
-            .id(bt.getId())
-            .capacity(bt.getCapacity())
-            .price(bt.getFullPrice())
-            .name(bt.getName())
-            .nameEng(bt.getNameEng())
-            .locationId(bt.getLocation().getId())
-            .limitedIncluded(bt.getLimitIncluded())
+            .id(bag.getId())
+            .capacity(bag.getCapacity())
+            .price(bag.getFullPrice())
+            .name(bag.getName())
+            .nameEng(bag.getNameEng())
+            .locationId(bag.getLocation().getId())
+            .limitedIncluded(bag.getLimitIncluded())
             .build();
     }
 

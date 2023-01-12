@@ -1012,6 +1012,24 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
+    void testSetOrderDetailFormedWithBagNoPresent() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.empty());
+
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(), "test@gmail.com");
+
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
     void testSetOrderDetailNotTakenOut() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusNotTakenOutDto()));
         when(bagRepository.findCapacityById(1)).thenReturn(1);

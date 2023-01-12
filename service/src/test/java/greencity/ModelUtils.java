@@ -15,7 +15,15 @@ import greencity.dto.TariffsForLocationDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.*;
+import greencity.dto.bag.AdditionalBagInfoDto;
+import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagOrderDto;
+import greencity.dto.bag.BagTranslationDto;
+import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
@@ -26,7 +34,14 @@ import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateResponsibleEmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
@@ -90,8 +105,17 @@ import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.ServiceTranslationDto;
-import greencity.dto.tariff.*;
-import greencity.dto.user.*;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -2030,7 +2054,7 @@ public class ModelUtils {
             .commission(50)
             .capacity(100)
             .price(100)
-            .tariffTranslationDtoList(getTariffTranslationDto())
+            .tariffTranslationDto(getTariffTranslationDto())
             .locationId(1L)
             .build();
     }

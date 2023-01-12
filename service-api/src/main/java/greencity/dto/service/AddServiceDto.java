@@ -4,7 +4,6 @@ import greencity.dto.tariff.TariffTranslationDto;
 import lombok.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Getter
 @Setter
@@ -21,7 +20,7 @@ public class AddServiceDto {
     @NotNull
     Integer commission;
     @Valid
-    TariffTranslationDto tariffTranslationDtoList;
+    TariffTranslationDto tariffTranslationDto;
     @NotNull
     Long locationId;
 }

@@ -86,7 +86,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Bag createBagWithFewTranslation(AddServiceDto dto, User user) {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        Bag bag = Bag.builder().price(dto.getPrice())
+        return Bag.builder().price(dto.getPrice())
             .capacity(dto.getCapacity())
             .location(location)
             .commission(dto.getCommission())
@@ -94,12 +94,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
             .createdAt(LocalDate.now())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .name(dto.getTariffTranslationDtoList().getName())
-            .nameEng(dto.getTariffTranslationDtoList().getNameEng())
-            .description(dto.getTariffTranslationDtoList().getDescription())
-            .descriptionEng(dto.getTariffTranslationDtoList().getDescriptionEng())
+            .name(dto.getTariffTranslationDto().getName())
+            .nameEng(dto.getTariffTranslationDto().getNameEng())
+            .description(dto.getTariffTranslationDto().getDescription())
+            .descriptionEng(dto.getTariffTranslationDto().getDescriptionEng())
             .build();
-        return bag;
     }
 
     @Override
