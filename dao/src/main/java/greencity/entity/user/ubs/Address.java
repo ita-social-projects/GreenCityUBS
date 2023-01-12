@@ -1,13 +1,12 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
-import greencity.enums.AddressStatus;
 import greencity.entity.user.User;
+import greencity.enums.AddressStatus;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor

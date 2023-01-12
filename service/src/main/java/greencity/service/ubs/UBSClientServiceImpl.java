@@ -1306,18 +1306,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
         int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        // OrderAddress orderAddress = getSavedOrderAddress(dto, currentUser);
-
-        // todo: засетить объект класса AddressOrder в userData
-        // Уже должен быть созданный ubsUser
-        // userData.setAddress(orderAddress);
-
-        /*
-         * if (userData.getAddress().getAddressComment() == null) {
-         * userData.getAddress().setAddressComment(dto.getPersonalData().
-         * getAddressComment()); }
-         */
-        // todo: ubsUser уже должен быть сформирован и иметь все данные
 
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 

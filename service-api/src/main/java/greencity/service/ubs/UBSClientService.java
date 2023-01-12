@@ -15,20 +15,13 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
-import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.OrderStatus;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public interface UBSClientService {
     /**
