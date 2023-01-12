@@ -577,10 +577,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private List<Long> verifyIfTariffExists(List<Long> locationIds, Long courierId) {
         var tariffLocationListList = tariffsLocationRepository
-                .findAllByCourierIdAndLocationIds(courierId, locationIds);
+            .findAllByCourierIdAndLocationIds(courierId, locationIds);
         List<Long> alreadyExistsTariff = tariffLocationListList.stream()
-                .map(tariffLocation -> tariffLocation.getLocation().getId())
-                .collect(Collectors.toList());
+            .map(tariffLocation -> tariffLocation.getLocation().getId())
+            .collect(Collectors.toList());
         if (alreadyExistsTariff.stream().anyMatch(locationIds::contains)) {
             throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
         }

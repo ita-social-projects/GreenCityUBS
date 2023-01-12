@@ -729,19 +729,19 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void addNewTariffThrowsExceptionWhenSuchTariffIsAlreadyExistsTest () {
+    void addNewTariffThrowsExceptionWhenSuchTariffIsAlreadyExistsTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         TariffLocation tariffLocation = TariffLocation
-                .builder()
-                .id(1L)
-                .location(ModelUtils.getLocation())
-                .build();
+            .builder()
+            .id(1L)
+            .location(ModelUtils.getLocation())
+            .build();
         when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
-                dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
+            dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
 
-        assertThrows(TariffAlreadyExists.class,
-                () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+        assertThrows(TariffAlreadyExistsException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
         verifyNoMoreInteractions(courierRepository, tariffsLocationRepository);

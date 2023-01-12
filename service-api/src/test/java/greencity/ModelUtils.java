@@ -124,10 +124,10 @@ public class ModelUtils {
 
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
-                .regionId(1L)
-                .courierId(1L)
-                .locationIdList(List.of(1L))
-                .receivingStationsIdList(List.of(1L))
-                .build();
+            .regionId(1L)
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(List.of(1L))
+            .build();
     }
 }

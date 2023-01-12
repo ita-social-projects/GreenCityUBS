@@ -23,7 +23,7 @@ public class AddNewTariffDtoTest {
         final Validator validator = factory.getValidator();
 
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
-                validator.validate(dto);
+            validator.validate(dto);
 
         assertThat(constraintViolations.size()).isZero();
     }
@@ -31,16 +31,16 @@ public class AddNewTariffDtoTest {
     @Test
     void testAddNewTariffDtoWithInvalidRegionIdFieldTest() {
         AddNewTariffDto dto = new AddNewTariffDto(
-                null,
-                null,
-                Collections.emptyList(),
-                null);
+            null,
+            null,
+            Collections.emptyList(),
+            null);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
 
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
-                validator.validate(dto);
+            validator.validate(dto);
 
         assertThat(constraintViolations.size()).isEqualTo(4);
     }
