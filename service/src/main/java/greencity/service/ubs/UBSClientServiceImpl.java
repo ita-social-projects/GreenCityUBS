@@ -742,7 +742,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        // Address address = order.getUbsUser().getAddress();
         var address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
