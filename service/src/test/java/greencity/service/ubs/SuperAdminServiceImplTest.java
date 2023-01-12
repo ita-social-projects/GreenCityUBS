@@ -19,16 +19,18 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.*;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
-import greencity.exceptions.tariff.TariffAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -688,7 +689,7 @@ class SuperAdminServiceImplTest {
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
                 dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
 
-        assertThrows(TariffAlreadyExists.class,
+        assertThrows(TariffAlreadyExistsException.class,
                 () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);

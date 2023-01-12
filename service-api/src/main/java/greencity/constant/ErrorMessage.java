@@ -93,7 +93,7 @@ public final class ErrorMessage {
     public static final String LANGUAGE_ERROR = "Invalid language code";
     public static final String TARIFF_NOT_FOUND = "Couldn't found tariff with id: ";
     public static final String TARIFF_FOR_LOCATION_NOT_EXIST = "Could not find tariff for location with id: ";
-    public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for this courier, location, receiving station and region is already exists";
+    public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
