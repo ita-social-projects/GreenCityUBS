@@ -1306,7 +1306,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
         int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
