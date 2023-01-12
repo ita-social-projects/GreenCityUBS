@@ -273,16 +273,6 @@ public interface UBSClientService {
     PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
 
     /**
-     * Methods for saving UbsUser when User is saving profile data.
-     *
-     * @param userProfileDto {@link UserProfileDto}.
-     * @param savedUser      {@link User}.
-     * @param savedAddress   {@link OrderAddress}.
-     * @author Liyubomy Pater.
-     */
-    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, OrderAddress savedAddress);
-
-    /**
      * Methods saves all entered by user data to database.
      * 
      * @param dto     {@link OrderResponseDto} user entered data;

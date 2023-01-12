@@ -661,13 +661,13 @@ class UBSClientServiceImplTest {
         Address address1 = Address.builder()
             .addressStatus(AddressStatus.NEW).id(13L).city("Kyiv").district("Svyatoshyn")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
-            .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5)).ubsUsers(new LinkedList<>())
+            .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
 
         Address address2 = Address.builder()
             .addressStatus(AddressStatus.NEW).id(42L).city("Lviv").district("Syhiv")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
-            .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5)).ubsUsers(new LinkedList<>())
+            .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5))
             .build();
 
         return Arrays.asList(address1, address2);
@@ -1934,19 +1934,6 @@ class UBSClientServiceImplTest {
 
         Assertions.assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
-    }
-
-    @Test
-    void testCreateUbsUserBasedUserProfileData() {
-        UserProfileDto userProfileDto = ModelUtils.userProfileDto().setRecipientEmail("mail@mail.ua");
-        PersonalDataDto dto = ModelUtils.getPersonalDataDto2();
-        UBSuser ubsUser = getUBSuser().setId(1L);
-
-        when(ubsUserRepository.findByEmail("mail@mail.ua")).thenReturn(Optional.of(ubsUser));
-        when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubsUser);
-
-        ubsService.createUbsUserBasedUserProfileData(userProfileDto, ModelUtils.getUser(), ubsUser.getAddress());
-        verify(ubsUserRepository, times(2)).save(ubsUser);
     }
 
     @Test

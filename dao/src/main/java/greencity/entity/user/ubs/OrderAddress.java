@@ -10,14 +10,13 @@ import javax.validation.constraints.Size;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode/*(exclude = {"ubsUsers", "user"})*/
+@EqualsAndHashCode
 @Getter
 @Setter
 @Builder
 @Table(name = "order_address")
-@ToString/*(exclude = {"ubsUsers", "user"})*/
+@ToString
 public class OrderAddress {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

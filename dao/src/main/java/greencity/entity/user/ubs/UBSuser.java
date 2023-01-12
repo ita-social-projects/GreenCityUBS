@@ -17,13 +17,9 @@ import java.util.List;
 @Table(name = "ubs_user")
 @Entity
 public class UBSuser {
-
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*@ManyToOne
-    private Address address;*/
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")

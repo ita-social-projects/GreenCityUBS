@@ -742,7 +742,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        //Address address = order.getUbsUser().getAddress();
+        // Address address = order.getUbsUser().getAddress();
         var address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
@@ -940,7 +940,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId + "_"
@@ -1255,15 +1256,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return personalDataDto;
     }
 
-    @Override
-    public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser,
-        OrderAddress savedAddress) {
-        /*UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
-        ubSuser.setAddress(savedAddress);
-        return ubsUserRepository.save(ubSuser);*/
-        return null;
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -1315,15 +1307,17 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
         int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        //OrderAddress orderAddress = getSavedOrderAddress(dto, currentUser);
+        // OrderAddress orderAddress = getSavedOrderAddress(dto, currentUser);
 
-        //todo: засетить объект класса AddressOrder в userData
+        // todo: засетить объект класса AddressOrder в userData
         // Уже должен быть созданный ubsUser
-        //userData.setAddress(orderAddress);
+        // userData.setAddress(orderAddress);
 
-        /*if (userData.getAddress().getAddressComment() == null) {
-            userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
-        }*/
+        /*
+         * if (userData.getAddress().getAddressComment() == null) {
+         * userData.getAddress().setAddressComment(dto.getPersonalData().
+         * getAddressComment()); }
+         */
         // todo: ubsUser уже должен быть сформирован и иметь все данные
 
         formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);

@@ -12,20 +12,16 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {/*"ubsUsers",*/ "user"})
+@EqualsAndHashCode(exclude = {"user"})
 @Getter
 @Setter
 @Builder
 @Table(name = "address")
-@ToString(exclude = {/*"ubsUsers",*/ "user"})
+@ToString(exclude = {"user"})
 public class Address {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    /*@OneToMany(mappedBy = "address")
-    private List<UBSuser> ubsUsers;*/
 
     @ManyToOne
     private User user;
