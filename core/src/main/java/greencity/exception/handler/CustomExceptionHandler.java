@@ -7,11 +7,11 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.tariff.TariffAlreadyExists;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -45,10 +45,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler({
-            BadRequestException.class,
-            ConstraintViolationException.class,
-            MappingException.class,
-            CourierAlreadyExists.class
+        BadRequestException.class,
+        ConstraintViolationException.class,
+        MappingException.class,
+        CourierAlreadyExists.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
