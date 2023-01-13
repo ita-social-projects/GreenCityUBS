@@ -31,7 +31,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
-import greencity.exceptions.tariff.TariffAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -582,7 +582,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .map(tariffLocation -> tariffLocation.getLocation().getId())
             .collect(Collectors.toList());
         if (alreadyExistsTariff.stream().anyMatch(locationIds::contains)) {
-            throw new TariffAlreadyExists(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+            throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
         }
         return alreadyExistsTariff;
     }

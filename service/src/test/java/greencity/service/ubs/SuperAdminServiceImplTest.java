@@ -26,7 +26,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
-import greencity.exceptions.tariff.TariffAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -770,7 +770,7 @@ class SuperAdminServiceImplTest {
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
             dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
 
-        assertThrows(TariffAlreadyExists.class,
+        assertThrows(TariffAlreadyExistsException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
