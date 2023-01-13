@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-1" author="Julia Seti">
+
+        <addColumn tableName="service">
+            <column name="name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name_eng" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description_eng" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <renameColumn tableName="service" oldColumnName="base_price" newColumnName="price"/>
+
+        <modifyDataType tableName="service" columnName="created_by" newDataType="BIGINT"/>
+        <modifyDataType tableName="service" columnName="edited_by" newDataType="BIGINT"/>
+
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="service"
+                                 constraintName="fk_service_to_employee_created"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employees"/>
+
+        <addForeignKeyConstraint baseColumnNames="edited_by" baseTableName="service"
+                                 constraintName="fk_service_to_employee_edited"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employees"/>
+
+
+
+        <dropColumn tableName="service">
+            <column name="capacity"/>
+            <column name="full_price"/>
+            <column name="commission"/>
+            <column name="courier_id"/>
+        </dropColumn>
+
+    </changeSet>
+</databaseChangeLog>
