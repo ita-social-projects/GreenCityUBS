@@ -7,7 +7,7 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
-import greencity.exceptions.tariff.TariffAlreadyExistsException;
+import greencity.exceptions.tariff.TariffAlreadyExists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -165,12 +165,12 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Exception handler for {@link TariffAlreadyExistsException}.
+     * Exception handler for {@link TariffAlreadyExists}.
      *
      * @param request {@link WebRequest} with error details.
      * @return {@link ResponseEntity} with http status and exception message.
      */
-    @ExceptionHandler(TariffAlreadyExistsException.class)
+    @ExceptionHandler(TariffAlreadyExists.class)
     public final ResponseEntity<Object> handleTariffAlreadyExistsException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);

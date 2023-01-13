@@ -26,12 +26,11 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
-import greencity.exceptions.tariff.TariffAlreadyExistsException;
+import greencity.exceptions.tariff.TariffAlreadyExists;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.stream.Collectors;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -772,7 +770,7 @@ class SuperAdminServiceImplTest {
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
             dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
 
-        assertThrows(TariffAlreadyExistsException.class,
+        assertThrows(TariffAlreadyExists.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
@@ -1237,15 +1235,6 @@ class SuperAdminServiceImplTest {
         doMockForTariffWithAllParams(true, true, true, true);
         superAdminService.deactivateTariffForChosenParam(details);
         verifyForTariffWithAllParams(true, true, true, true);
-    }
-
-    @Test
-    void customExceptionForTariffAlreadyExistsExceptionTest() {
-        try {
-            new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
-        } catch (TariffAlreadyExistsException e) {
-            assertEquals(e.getMessage(), ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
-        }
     }
 
     @ParameterizedTest

@@ -1,12 +1,12 @@
 package greencity.exceptions.tariff;
 
-public class TariffAlreadyExistsException extends RuntimeException {
+public class TariffAlreadyExists extends RuntimeException {
     /**
      * Constructor with message.
      *
      * @param message message, that explains cause of the exception.
      */
-    public TariffAlreadyExistsException(String message) {
+    public TariffAlreadyExists(String message) {
         super(message);
     }
 }
