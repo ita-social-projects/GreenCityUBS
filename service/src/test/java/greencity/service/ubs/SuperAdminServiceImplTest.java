@@ -1240,7 +1240,7 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void customExceptionForTariffAlreadyExistsExceptionTest () {
+    void customExceptionForTariffAlreadyExistsExceptionTest() {
         try {
             new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
         } catch (TariffAlreadyExistsException e) {
