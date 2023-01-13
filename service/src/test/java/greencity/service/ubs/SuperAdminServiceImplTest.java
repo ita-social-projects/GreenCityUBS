@@ -1239,6 +1239,15 @@ class SuperAdminServiceImplTest {
         verifyForTariffWithAllParams(true, true, true, true);
     }
 
+    @Test
+    void customExceptionForTariffAlreadyExistsExceptionTest () {
+        try {
+            new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        } catch (TariffAlreadyExistsException e) {
+            assertEquals(e.getMessage(), ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("deactivateTariffByAllWithNotExistingParamProvider")
     void deactivateTariffByAllWithNotExistingParamThrows(
