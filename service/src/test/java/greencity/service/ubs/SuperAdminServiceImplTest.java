@@ -263,6 +263,26 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addServiceThrowsExceptionWhenCourierNonFoundTest() {
+        User user = ModelUtils.getUser();
+        CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, user.getUuid()));
+
+        verify(userRepository).findByUuid(user.getUuid());
+        verify(courierRepository).findById(anyLong());
+    }
+
+    @Test
+    void setLimitDescriptionThrowsUnsupportedOperationExceptionTest() {
+        assertThrows(UnsupportedOperationException.class,
+            () -> superAdminService.setLimitDescription(1L, "limitDescription"));
+    }
+
+    @Test
     void includeBag() {
         BagTranslation bagTranslationTest = BagTranslation.builder()
             .id(2L)
@@ -664,6 +684,14 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void updateReceivingStationThrowsExceptionWhenReceivingStationNonFoundTest() {
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> superAdminService.updateReceivingStation(receivingStationDto));
+        verify(receivingStationRepository).findById(anyLong());
+    }
+
+    @Test
     void getAllReceivingStation() {
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
         when(modelMapper.map(any(), any())).thenReturn(getReceivingStationDto());
@@ -771,12 +799,28 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void checkIfTariffExistsTest() {
+    void checkIfTariffDoesNotExistsTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
             .thenReturn(Collections.emptyList());
         boolean actual = superAdminService.checkIfTariffExists(dto);
         assertFalse(actual);
+    }
+
+    @Test
+    void checkIfTariffExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        TariffLocation tariffLocation = TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(ModelUtils.getTariffsInfo())
+            .location(ModelUtils.getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
+            .thenReturn(List.of(tariffLocation));
+        boolean actual = superAdminService.checkIfTariffExists(dto);
+        assertTrue(actual);
     }
 
     @Test
