@@ -21,6 +21,7 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
@@ -51,8 +52,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private final ServiceRepository serviceRepository;
-    private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
     private final CourierRepository courierRepository;
     private final RegionRepository regionRepository;
@@ -60,7 +61,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
     private final TariffLocationRepository tariffsLocationRepository;
-
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
     private static final String BAD_SIZE_OF_REGIONS_MESSAGE =
         "Region ids size should be 1 if several params are selected";
@@ -164,39 +164,28 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public CreateServiceDto addService(CreateServiceDto dto, String uuid) {
-        User user = userRepository.findByUuid(uuid);
-        Service service = createServiceWithTranslation(dto, user);
-        service.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
+    public CreateServiceDto addService(CreateServiceDto dto, long id) { // Id or Uuid ???
+        Service service = createService(dto, id);
         serviceRepository.save(service);
-        serviceTranslationRepository.saveAll(service.getServiceTranslations());
         return modelMapper.map(service, CreateServiceDto.class);
     }
 
-    private Service createServiceWithTranslation(CreateServiceDto dto, User user) {
-        Long id = dto.getCourierId();
-        Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+    private Service createService(CreateServiceDto dto, long id) { // Id or Uuid ???
+        Employee employee = employeeRepository.findById(id).get();
+        Long tariffsInfoId = dto.getTariffsInfoId();
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffsInfoId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffsInfoId));
 
-        Service service = Service.builder()
-            .basePrice(dto.getPrice())
-            .commission(dto.getCommission())
-            .fullPrice(dto.getPrice() + dto.getCommission())
-            .capacity(dto.getCapacity())
-            .createdAt(LocalDate.now())
-            .courier(courier)
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .serviceTranslations(dto.getServiceTranslationDtoList()
-                .stream().map(serviceTranslationDto -> ServiceTranslation.builder()
-                    .description(serviceTranslationDto.getDescription())
-                    .descriptionEng(serviceTranslationDto.getDescriptionEng())
-                    .name(serviceTranslationDto.getName())
-                    .nameEng(serviceTranslationDto.getNameEng())
-                    .build())
-                .collect(Collectors.toList()))
-            .build();
-        service.getServiceTranslations().forEach(serviceTranslation -> serviceTranslation.setService(service));
-        return service;
+        return Service.builder()
+                .price(dto.getPrice() )
+                .createdAt(LocalDate.now())
+                .createdBy(employee)
+                .name(dto.getName())
+                .nameEng(dto.getNameEng())
+                .description(dto.getDescription())
+                .descriptionEng(dto.getDescriptionEng())
+                .tariffsInfo(tariffsInfo)
+                .build();
     }
 
     @Override

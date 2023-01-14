@@ -2,6 +2,7 @@ package greencity.dto.service;
 
 import lombok.*;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -12,11 +13,18 @@ import java.util.List;
 @Builder
 @ToString
 public class CreateServiceDto {
-    Integer capacity;
+
+    String name;
+
+    String nameEng;
+
+    String description;
+
+    String descriptionEng;
+
     @NotNull
     Integer price;
-    Integer commission;
+
     @NotNull
-    Long courierId;
-    List<ServiceTranslationDto> serviceTranslationDtoList;
+    Long tariffsInfoId;
 }

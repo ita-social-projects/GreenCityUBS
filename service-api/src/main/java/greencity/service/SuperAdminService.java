@@ -65,7 +65,7 @@ public interface SuperAdminService {
      * @return {@link Service}
      * @author Vadym Makitra
      */
-    CreateServiceDto addService(CreateServiceDto dto, String uuid);
+    CreateServiceDto addService(CreateServiceDto dto, long id); // Id or Uuid ???
 
     /**
      * Method for get All service.
