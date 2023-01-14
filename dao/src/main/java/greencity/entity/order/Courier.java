@@ -13,8 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(
-    exclude = {"services", "tariffsInfoList"})
+@EqualsAndHashCode(exclude = {"tariffsInfoList"})
 @Table(name = "courier")
 public class Courier {
     @Id
@@ -32,9 +31,6 @@ public class Courier {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
     private List<TariffsInfo> tariffsInfoList;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courier")
-    List<Service> services;
 
     @ManyToOne
     private User createdBy;
