@@ -171,7 +171,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createService(CreateServiceDto dto, long id) { // Id or Uuid ???
-        Employee employee = employeeRepository.findById(id).get();
+        Employee employee = employeeRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         Long tariffsInfoId = dto.getTariffsInfoId();
         TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffsInfoId).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffsInfoId));
@@ -189,11 +190,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<GetServiceDto> getService() {
-        return serviceTranslationRepository.findAll()
-            .stream()
-            .map(this::getService)
-            .collect(Collectors.toList());
+    public GetServiceDto getService(long id) {
+        Service service = serviceRepository.findServiceById(id).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        return modelMapper.map(service, GetServiceDto.class);
     }
 
     private GetServiceDto getService(ServiceTranslation serviceTranslation) {

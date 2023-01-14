@@ -14,20 +14,11 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 public class GetServiceDto {
     @NotNull
+    Integer price;
+    @NotNull
     String name;
     @NotNull
     String nameEng;
-    Integer capacity;
-    @NotNull
-    Integer price;
-    Integer commission;
     String description;
     String descriptionEng;
-    Integer fullPrice;
-    Long id;
-    LocalDate createdAt;
-    String createdBy;
-    LocalDate editedAt;
-    String editedBy;
-    Long courierId;
 }

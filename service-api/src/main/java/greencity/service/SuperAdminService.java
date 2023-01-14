@@ -61,19 +61,19 @@ public interface SuperAdminService {
      * Method for add new Service.
      *
      * @param dto  {@link CreateServiceDto}
-     * @param uuid {@link String} - user uuid.
+     * @param uuid {@link String} - user uuid. // Id or Uuid ???
      * @return {@link Service}
      * @author Vadym Makitra
      */
     CreateServiceDto addService(CreateServiceDto dto, long id); // Id or Uuid ???
 
     /**
-     * Method for get All service.
+     * Method for get service by Id.
      *
      * @return {@link GetServiceDto}
      * @author Vadym Makitra
      */
-    List<GetServiceDto> getService();
+    GetServiceDto getService(long id);
 
     /**
      * Method for delete service by Id.

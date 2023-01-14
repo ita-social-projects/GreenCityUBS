@@ -13,9 +13,9 @@ import java.util.List;
 @Builder
 @ToString
 public class CreateServiceDto {
-
+    @NotNull
     String name;
-
+    @NotNull
     String nameEng;
 
     String description;

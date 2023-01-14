@@ -177,9 +177,10 @@ class SuperAdminController {
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
-    @GetMapping("/getService")
-    public ResponseEntity<List<GetServiceDto>> getService() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService());
+    @GetMapping("/getService/{id}")
+    public ResponseEntity<GetServiceDto> getService(
+            @Valid @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(id));
     }
 
     /**
