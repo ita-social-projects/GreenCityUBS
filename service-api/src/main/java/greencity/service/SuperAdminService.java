@@ -88,11 +88,11 @@ public interface SuperAdminService {
      *
      * @param id   - id of current service.
      * @param dto  - entered info about field that need to edit.
-     * @param uuid - user uuid.
+     * @param uuid - user uuid.                                     // employeeId or Uuid ???
      * @return {@link GetServiceDto} - info about edited service.
      * @author Vadym Makitra
      */
-    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
+    GetServiceDto editService(long id, EditServiceDto dto, long employeeId); // employeeId or Uuid ???
 
     /**
      * Method for get all info about location.

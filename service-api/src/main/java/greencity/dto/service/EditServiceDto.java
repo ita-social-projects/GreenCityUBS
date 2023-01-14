@@ -12,15 +12,11 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class EditServiceDto {
     @NotNull
-    String name;
-    Integer capacity;
-    @NotNull
     Integer price;
-    Integer commission;
-    String description;
     @NotNull
-    Long locationId;
+    String name;
     @NotNull
     String nameEng;
+    String description;
     String descriptionEng;
 }

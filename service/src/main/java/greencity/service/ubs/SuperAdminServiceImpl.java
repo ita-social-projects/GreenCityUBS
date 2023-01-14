@@ -196,25 +196,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return modelMapper.map(service, GetServiceDto.class);
     }
 
-    private GetServiceDto getService(ServiceTranslation serviceTranslation) {
-        return GetServiceDto.builder()
-            .courierId(serviceTranslation.getService().getCourier().getId())
-            .description(serviceTranslation.getDescription())
-            .descriptionEng(serviceTranslation.getDescriptionEng())
-            .price(serviceTranslation.getService().getBasePrice())
-            .capacity(serviceTranslation.getService().getCapacity())
-            .name(serviceTranslation.getName())
-            .nameEng(serviceTranslation.getNameEng())
-            .commission(serviceTranslation.getService().getCommission())
-            .fullPrice(serviceTranslation.getService().getFullPrice())
-            .id(serviceTranslation.getService().getId())
-            .createdAt(serviceTranslation.getService().getCreatedAt())
-            .createdBy(serviceTranslation.getService().getCreatedBy())
-            .editedAt(serviceTranslation.getService().getEditedAt())
-            .editedBy(serviceTranslation.getService().getEditedBy())
-            .build();
-    }
-
     @Override
     public void deleteService(long id) {
         Service service = serviceRepository.findById(id).orElseThrow(
@@ -223,26 +204,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
+    public GetServiceDto editService(long id, EditServiceDto dto, long employeeId) { // employeeId or Uuid ???
         Service service = serviceRepository.findServiceById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
-        User user = userRepository.findByUuid(uuid);
-        service.setCapacity(dto.getCapacity());
-        service.setCommission(dto.getCommission());
-        service.setBasePrice(dto.getPrice());
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + employeeId));
+
+        service.setPrice(dto.getPrice());
+        service.setName(dto.getName());
+        service.setNameEng(dto.getNameEng());
+        service.setDescription(dto.getDescription());
+        service.setDescriptionEng(dto.getDescriptionEng());
         service.setEditedAt(LocalDate.now());
-        service.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
-        ServiceTranslation serviceTranslation = serviceTranslationRepository
-            .findServiceTranslationsByService(service);
-        serviceTranslation.setService(service);
-        serviceTranslation.setName(dto.getName());
-        serviceTranslation.setNameEng(dto.getNameEng());
-        serviceTranslation.setDescription(dto.getDescription());
-        serviceTranslation.setDescriptionEng(dto.getDescriptionEng());
-        service.setFullPrice(dto.getPrice() + dto.getCommission());
-        service.setBasePrice(dto.getPrice());
-        serviceRepository.save(service);
-        return getService(serviceTranslation);
+        service.setEditedBy(employee);
+        return modelMapper.map(service, GetServiceDto.class);
     }
 
     @Override

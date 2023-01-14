@@ -220,8 +220,8 @@ class SuperAdminController {
     public ResponseEntity<GetServiceDto> editService(
         @Valid @PathVariable Long id,
         @RequestBody @Valid EditServiceDto dto,
-        @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
+        @ApiIgnore @CurrentUserUuid Long employeeId) { // employeeId or Uuid ???
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, employeeId)); // employeeId or Uuid ???
     }
 
     /**
