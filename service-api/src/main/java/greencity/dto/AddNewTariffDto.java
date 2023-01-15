@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Setter
+@EqualsAndHashCode
 public class AddNewTariffDto {
     @NotNull
     @Min(1)

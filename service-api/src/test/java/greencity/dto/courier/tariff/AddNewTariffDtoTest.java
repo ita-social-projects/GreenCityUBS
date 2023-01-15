@@ -14,10 +14,10 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AddNewTariffDtoTest {
+class AddNewTariffDtoTest {
 
     @Test
-    void givenValidDtoWhenValidatedThenNoValidationError() {
+    void addNewTariffDtoWithValidFieldsTest() {
         var dto = ModelUtils.getAddNewTariffDto();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -26,11 +26,11 @@ public class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations.size()).isZero();
+        assertThat(constraintViolations).isEmpty();
     }
 
     @Test
-    void testAddNewTariffDtoWithInvalidFieldsTest() {
+    void addNewTariffDtoWithNullAndEmptyFieldsTest() {
         AddNewTariffDto dto = new AddNewTariffDto(
             null,
             null,
@@ -43,15 +43,15 @@ public class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations.size()).isEqualTo(4);
+        assertThat(constraintViolations).hasSize(4);
     }
 
     @Test
-    void testAddNewTariffDtoWithInvalidValuesInLocationIdOrReceivingStationsIdListsTest() {
+    void addNewTariffDtoWithInvalidValuesTest() {
         AddNewTariffDto dto = new AddNewTariffDto(
-            null,
-            null,
-            List.of(-1L),
+            0L,
+            0L,
+            List.of(0L),
             List.of(0L));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -60,6 +60,6 @@ public class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations.size()).isEqualTo(4);
+        assertThat(constraintViolations).hasSize(4);
     }
 }

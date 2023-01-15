@@ -4,12 +4,12 @@ import greencity.constant.ErrorMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class TariffAlreadyExistsExceptionTest {
+class TariffAlreadyExistsExceptionTest {
 
     @Test
-    void givenValidDtoWhenValidatedThenNoValidationError() {
+    void tariffAlreadyExistsExceptionMessageTest() {
         String message = "Tariff for such locations is already exists";
         TariffAlreadyExistsException t = new TariffAlreadyExistsException(message);
-        Assertions.assertEquals(t.getMessage(), ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        Assertions.assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS, t.getMessage());
     }
 }

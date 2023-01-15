@@ -263,12 +263,13 @@ class SuperAdminServiceImplTest {
     @Test
     void addServiceThrowsExceptionWhenCourierNonFoundTest() {
         User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, user.getUuid()));
+        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, userUuid));
 
         verify(userRepository).findByUuid(user.getUuid());
         verify(courierRepository).findById(anyLong());
@@ -754,6 +755,7 @@ class SuperAdminServiceImplTest {
         verify(courierRepository).findById(1L);
         verify(userRepository).findByUuid("35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findAllById(List.of(1L));
         verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
     }
@@ -774,6 +776,8 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(dto.getCourierId(),
+            dto.getLocationIdList());
         verifyNoMoreInteractions(courierRepository, tariffsLocationRepository);
     }
 
@@ -803,6 +807,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(Collections.emptyList());
         boolean actual = superAdminService.checkIfTariffExists(dto);
         assertFalse(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
     }
 
     @Test
@@ -819,6 +824,7 @@ class SuperAdminServiceImplTest {
             .thenReturn(List.of(tariffLocation));
         boolean actual = superAdminService.checkIfTariffExists(dto);
         assertTrue(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
     }
 
     @Test
