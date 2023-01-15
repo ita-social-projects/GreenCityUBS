@@ -8,10 +8,8 @@ public class TariffAlreadyExistsExceptionTest {
 
     @Test
     void givenValidDtoWhenValidatedThenNoValidationError() {
-        try {
-            new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
-        } catch (TariffAlreadyExistsException e) {
-            Assertions.assertEquals(e.getMessage(), ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
-        }
+        String message = "Tariff for such locations is already exists";
+        TariffAlreadyExistsException t = new TariffAlreadyExistsException(message);
+        Assertions.assertEquals(t.getMessage(), ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
     }
 }
