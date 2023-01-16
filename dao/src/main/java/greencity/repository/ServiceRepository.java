@@ -28,4 +28,5 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
         value = "select sum(full_price) from service s "
             + "where s.courier_id = :courierId ")
     Integer findFullPriceByCourierId(@Param("courierId") Long courierId);
+
 }

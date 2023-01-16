@@ -164,21 +164,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public CreateServiceDto addService(CreateServiceDto dto, long id) { // Id or Uuid ???
-        Service service = createService(dto, id);
-        serviceRepository.save(service);
-        return modelMapper.map(service, CreateServiceDto.class);
+    public GetServiceDto addService(CreateServiceDto dto, String uuid) {
+        Service service = createService(dto, uuid);
+        return modelMapper.map(serviceRepository.save(service), GetServiceDto.class);
     }
 
-    private Service createService(CreateServiceDto dto, long id) { // Id or Uuid ???
-        Employee employee = employeeRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
-        Long tariffsInfoId = dto.getTariffsInfoId();
-        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffsInfoId).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffsInfoId));
+    private Service createService(CreateServiceDto dto, String uuid) {
+        Employee employee = employeeRepository.findByUuid(uuid);
+        long tariffId = dto.getTariffId();
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
 
         return Service.builder()
-                .price(dto.getPrice() )
+                .price(dto.getPrice())
                 .createdAt(LocalDate.now())
                 .createdBy(employee)
                 .name(dto.getName())
@@ -191,10 +189,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto getService(long id) {
-        Service service = serviceRepository.findServiceById(id).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + id));
+        Service service = tariffsInfo.getService();
         return modelMapper.map(service, GetServiceDto.class);
     }
+
 
     @Override
     public void deleteService(long id) {
@@ -204,11 +204,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto editService(long id, EditServiceDto dto, long employeeId) { // employeeId or Uuid ???
+    public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
         Service service = serviceRepository.findServiceById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
-        Employee employee = employeeRepository.findById(employeeId).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + employeeId));
+        Employee employee = employeeRepository.findByUuid(uuid);
 
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());

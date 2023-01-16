@@ -61,22 +61,23 @@ public interface SuperAdminService {
      * Method for add new Service.
      *
      * @param dto  {@link CreateServiceDto}
-     * @param uuid {@link String} - user uuid. // Id or Uuid ???
-     * @return {@link Service}
-     * @author Vadym Makitra
+     * @param uuid {@link String} - employee uuid.
+     * @return {@link GetServiceDto}
+     * @author Julia Seti
      */
-    CreateServiceDto addService(CreateServiceDto dto, long id); // Id or Uuid ???
+    GetServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
-     * Method for get service by Id.
+     * Method for get service by tariff id.
      *
+     * @param id {@link Long} - tariff id.
      * @return {@link GetServiceDto}
-     * @author Vadym Makitra
+     * @author Julia Seti
      */
     GetServiceDto getService(long id);
 
     /**
-     * Method for delete service by Id.
+     * Method for delete service by id.
      *
      * @param id - Service Id.
      * @author Vadym Makitra
@@ -84,15 +85,15 @@ public interface SuperAdminService {
     void deleteService(long id);
 
     /**
-     * Method for editing service by Id.
+     * Method for editing service by id.
      *
      * @param id   - id of current service.
      * @param dto  - entered info about field that need to edit.
-     * @param uuid - user uuid.                                     // employeeId or Uuid ???
+     * @param uuid - employee uuid.
      * @return {@link GetServiceDto} - info about edited service.
-     * @author Vadym Makitra
+     * @author Julia Seti
      */
-    GetServiceDto editService(long id, EditServiceDto dto, long employeeId); // employeeId or Uuid ???
+    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.

@@ -157,31 +157,34 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createService")
-    public ResponseEntity<CreateServiceDto> createServices(
+    public ResponseEntity<GetServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(dto, uuid));
     }
 
     /**
-     * Controller for getting all info about service.
+     * Controller for getting info about service by tariff id.
      *
+     * @param tariffId {@link Long} - tariff id.
      * @return {@link GetServiceDto}
-     * @author Vadym Makitra
+     *
+     * @author Julia Seti
      */
 
-    @ApiOperation(value = "Get all info about service")
+    @ApiOperation(value = "Get info about service by tariff id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
-    @GetMapping("/getService/{id}")
+    @GetMapping("/getService/{tariffId}")
     public ResponseEntity<GetServiceDto> getService(
-            @Valid @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(id));
+            @Valid @PathVariable Long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
+
 
     /**
      * Controller for delete service by Id.
@@ -204,7 +207,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for edit service by Id.
+     * Controller for edit service by id.
      *
      * @author Vadym Makitra
      */
@@ -220,8 +223,8 @@ class SuperAdminController {
     public ResponseEntity<GetServiceDto> editService(
         @Valid @PathVariable Long id,
         @RequestBody @Valid EditServiceDto dto,
-        @ApiIgnore @CurrentUserUuid Long employeeId) { // employeeId or Uuid ???
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, employeeId)); // employeeId or Uuid ???
+        @ApiIgnore @CurrentUserUuid String uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
     }
 
     /**

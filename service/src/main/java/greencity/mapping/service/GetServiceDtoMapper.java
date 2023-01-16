@@ -10,6 +10,7 @@ public class GetServiceDtoMapper extends AbstractConverter<Service, GetServiceDt
     @Override
     protected GetServiceDto convert(Service source) {
         return GetServiceDto.builder()
+                .id(source.getId())
                 .price(source.getPrice())
                 .name(source.getName())
                 .nameEng(source.getNameEng())
