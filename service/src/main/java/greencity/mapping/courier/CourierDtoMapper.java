@@ -20,8 +20,8 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
             .nameEn(source.getNameEn())
             .nameUk(source.getNameUk())
             .createDate(source.getCreateDate() != null ? createdAt : LocalDate.now())
-            .createdBy(source.getCreatedBy().getFirstName() + " " +
-                    source.getCreatedBy().getLastName())
+            .createdBy(source.getCreatedBy().getFirstName() + " "
+                + source.getCreatedBy().getLastName())
             .build();
     }
 }

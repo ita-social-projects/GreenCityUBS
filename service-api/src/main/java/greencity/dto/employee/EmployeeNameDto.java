@@ -1,6 +1,5 @@
 package greencity.dto.employee;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
