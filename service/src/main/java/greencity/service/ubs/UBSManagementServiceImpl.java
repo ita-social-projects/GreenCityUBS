@@ -28,6 +28,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
@@ -336,7 +337,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
-        Address address = order.getUbsUser().getAddress();
+        OrderAddress address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(bag.getId());
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -399,7 +400,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
+    private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
             .addressId(address.getId())
             .addressCity(address.getCity())

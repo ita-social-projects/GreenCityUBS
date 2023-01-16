@@ -15,19 +15,13 @@ import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.*;
-import greencity.enums.OrderStatus;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.payment.PaymentLinkException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public interface UBSClientService {
     /**
@@ -270,16 +264,6 @@ public interface UBSClientService {
      * @author Liyubomy Pater.
      */
     PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
-
-    /**
-     * Methods for saving UbsUser when User is saving profile data.
-     *
-     * @param userProfileDto {@link UserProfileDto}.
-     * @param savedUser      {@link User}.
-     * @param savedAddress   {@link Address}.
-     * @author Liyubomy Pater.
-     */
-    UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser, Address savedAddress);
 
     /**
      * Methods saves all entered by user data to database.

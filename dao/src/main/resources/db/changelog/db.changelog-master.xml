@@ -159,5 +159,9 @@
     <include file="db/changelog/logs/ch-update-into-courier-Korzh.xml"/>
     <include file="db/changelog/logs/ch-drop-table-courier-translation-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-column-limit-description-to-tariffs-info-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-add-order-address-table-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-update_big_order_table-view-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-drop-column_address_id-in-ubs_user-Safarov.xml"/>
 </databaseChangeLog>
 
