@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.LocationSummaryDto;
 import greencity.entity.user.employee.Employee;
+import greencity.entity.user.ubs.OrderAddress;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -129,6 +130,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
     private final AddressRepository addressRepo;
+    private final OrderAddressRepository orderAddressRepository;
     private final LiqPayService liqPayService;
     private final UserRemoteClient userRemoteClient;
     private final FondyClient fondyClient;
@@ -323,7 +325,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
         UBSuser userData;
-        userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
@@ -742,7 +744,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        Address address = order.getUbsUser().getAddress();
+        var address = order.getUbsUser().getAddress();
         return AddressInfoDto.builder()
             .addressCity(address.getCity())
             .addressCityEng(address.getCityEn())
@@ -938,7 +940,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private PaymentRequestDto formPaymentRequest(Long orderId, int sumToPay) {
-        Order order = orderRepository.findById(orderId).orElseThrow(null);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
         PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
             .merchantId(Integer.parseInt(merchantId))
             .orderId(orderId + "_"
@@ -955,7 +958,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentRequestDto;
     }
 
-    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, User currentUser) {
+    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
@@ -969,6 +972,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
+            mappedFromDtoUser.setAddress(getSavedOrderAddress(addressId, currentUser));
+            if (mappedFromDtoUser.getAddress().getAddressComment() == null) {
+                mappedFromDtoUser.getAddress().setAddressComment(dto.getAddressComment());
+            }
             ubsUserRepository.save(mappedFromDtoUser);
             currentUser.getUbsUsers().add(mappedFromDtoUser);
 
@@ -1249,14 +1256,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return personalDataDto;
     }
 
-    @Override
-    public UBSuser createUbsUserBasedUserProfileData(UserProfileDto userProfileDto, User savedUser,
-        Address savedAddress) {
-        UBSuser ubSuser = formUserDataToBeSaved(convertUserProfileDtoToPersonalDataDto(userProfileDto), savedUser);
-        ubSuser.setAddress(savedAddress);
-        return ubsUserRepository.save(ubSuser);
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -1283,7 +1282,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPay = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPay);
 
-        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), currentUser);
+        final UBSuser userData = formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), currentUser);
 
         getOrder(dto, currentUser, amountOfBagsOrderedMap, sumToPay, order, orderCertificates, userData);
 
@@ -1308,23 +1307,24 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void getOrder(OrderResponseDto dto, User currentUser, Map<Integer, Integer> amountOfBagsOrderedMap,
         int sumToPay, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        Address address = addressRepo.findById(dto.getAddressId()).orElseThrow(() -> new NotFoundException(
-            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + dto.getAddressId()));
+        formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
+
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+    }
+
+    private OrderAddress getSavedOrderAddress(Long addressId, User currentUser) {
+        Address address = addressRepo.findById(addressId).orElseThrow(() -> new NotFoundException(
+            ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
 
         checkIfAddressHasBeenDeleted(address);
 
         checkAddressUser(address, currentUser);
-        address.setAddressStatus(AddressStatus.IN_ORDER);
 
-        userData.setAddress(address);
+        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
 
-        if (userData.getAddress().getAddressComment() == null) {
-            userData.getAddress().setAddressComment(dto.getPersonalData().getAddressComment());
-        }
+        orderAddressRepository.save(orderAddress);
 
-        formAndSaveOrder(order, orderCertificates, amountOfBagsOrderedMap, userData, currentUser, sumToPay);
-
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+        return orderAddress;
     }
 
     private LiqPayOrderResponse buildOrderResponse(Order order, String button) {

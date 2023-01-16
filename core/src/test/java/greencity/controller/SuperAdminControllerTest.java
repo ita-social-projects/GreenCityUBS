@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
+import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -18,6 +19,8 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
@@ -40,9 +43,12 @@ import org.springframework.validation.Validator;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -218,6 +224,56 @@ class SuperAdminControllerTest {
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createCourierIfCourierAlreadyExistsException() throws Exception {
+        CreateCourierDto dto = ModelUtils.getCreateCourierDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.createCourier(dto, uuid))
+            .thenThrow(new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS));
+
+        mockMvc.perform(post(ubsLink + "/createCourier")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierAlreadyExists))
+            .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).createCourier(dto, uuid);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void addNewTariffIfTariffAlreadyExistsException() throws Exception {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.addNewTariff(dto, uuid))
+            .thenThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS));
+
+        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isConflict())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addNewTariff(dto, uuid);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
