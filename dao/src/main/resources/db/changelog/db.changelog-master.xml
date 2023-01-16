@@ -161,5 +161,6 @@
     <include file="db/changelog/logs/ch-add-column-limit-description-to-tariffs-info-Korzh.xml"/>
     <include file="db/changelog/logs/ch-alter-table-service-add-columns-service-translations-drop-columns-Seti.xml"/>
     <include file="db/changelog/logs/ch-drop-table-service-translations-Seti.xml"/>
+    <include file="db/changelog/logs/сh-add-column-uuid-user-Korzh.xml"/>
 </databaseChangeLog>
 
