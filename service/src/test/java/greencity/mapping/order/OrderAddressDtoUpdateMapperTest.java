@@ -19,14 +19,14 @@ class OrderAddressDtoUpdateMapperTest {
     @Test
     void convert() {
 
-        Address address = ModelUtils.address();
+        Address address = ModelUtils.getAddress();
 
         OrderAddressDtoResponse expected = OrderAddressDtoResponse.builder()
-            .district("Zaliznuchnuy")
-            .street("Gorodotska")
+            .district("Distinct")
+            .street("Street")
             .houseCorpus("2")
             .entranceNumber("7a")
-            .houseNumber("7")
+            .houseNumber("25")
             .build();
 
         OrderAddressDtoResponse actual = orderAddressDtoUpdateMapper.convert(address);
