@@ -75,8 +75,8 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Max Boiarchuk
      */
     @Query(nativeQuery = true,
-        value = "SELECT * FROM ORDER_BAG_MAPPING AS OBM JOIN BAG AS B ON OBM.BAG_ID = B.ID "
-            + "WHERE OBM.ORDER_ID = :orderId")
+        value = "SELECT * FROM order_bag_mapping AS obm JOIN bag AS b ON obm.bag_id = b.id "
+            + "WHERE obm.order_id = :orderId")
     List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
     /**
@@ -85,7 +85,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      *
      * @param tariffId       order id {@link TariffsInfo}
      * @param minAmountOfBag order id {@link MinAmountOfBag}
-     * @author Oleg Vatuliak
+     * @author José Castellanos
      */
     List<Bag> getBagsByTariffsInfoAndMinAmountOfBags(TariffsInfo tariffId, MinAmountOfBag minAmountOfBag);
 }

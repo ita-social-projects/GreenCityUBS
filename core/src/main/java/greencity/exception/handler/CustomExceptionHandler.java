@@ -9,7 +9,6 @@ import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

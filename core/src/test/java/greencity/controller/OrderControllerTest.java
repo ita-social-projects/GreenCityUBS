@@ -16,6 +16,7 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.user.UserInfoDto;
+import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSuserRepository;
 import greencity.service.ubs.NotificationService;
@@ -33,15 +34,30 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.util.NestedServletException;
 
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static greencity.ModelUtils.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getRedirectionConfig;
+import static greencity.ModelUtils.getUbsCustomersDto;
+import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
+import static greencity.ModelUtils.getUserInfoDto;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -229,17 +245,20 @@ class OrderControllerTest {
 
     @Test
     void updatesRecipientsInfoWithOutUser() throws Exception {
-        UbsCustomersDto ubsCustomersDto = getUbsCustomersDto();
-        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
-        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null)).thenReturn(ubsCustomersDto);
-        lenient().when(ubSuserRepository.findById(ubsCustomersDtoUpdate.getRecipientId())).thenReturn(Optional.empty());
         ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(put(ubsLink + "/update-recipients-data")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-            .principal(principal))
-            .andExpect(status().isOk());
+        UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
+        when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
+            .thenThrow(UBSuserNotFoundException.class);
 
+        try {
+            mockMvc.perform(put(ubsLink + "/update-recipients-data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+                .principal(principal))
+                .andExpect(status().isBadRequest());
+        } catch (NestedServletException e) {
+            assertTrue(e.getCause() instanceof UBSuserNotFoundException);
+        }
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 
