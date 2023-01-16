@@ -24,6 +24,9 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "varchar(60)")
+    private String uuid;
+
     @Column(name = "first_name", length = 30, nullable = false)
     private String firstName;
 
