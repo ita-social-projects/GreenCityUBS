@@ -20,6 +20,7 @@ import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
@@ -247,6 +248,31 @@ class SuperAdminControllerTest {
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
         Mockito.verify(superAdminService).createCourier(dto, uuid);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void addNewTariffIfTariffAlreadyExistsException() throws Exception {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.addNewTariff(dto, uuid))
+            .thenThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS));
+
+        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isConflict())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addNewTariff(dto, uuid);
         Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
