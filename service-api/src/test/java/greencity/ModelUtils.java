@@ -1,5 +1,6 @@
 package greencity;
 
+import greencity.dto.AddNewTariffDto;
 import greencity.dto.courier.CourierTranslationDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentRequestDtoLiqPay;
@@ -9,6 +10,8 @@ import greencity.dto.user.UserVO;
 import greencity.dto.violation.UserViolationMailDto;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
+
+import java.util.List;
 
 public class ModelUtils {
 
@@ -116,6 +119,15 @@ public class ModelUtils {
             .language("eng")
             .paytypes("card")
             .resultUrl("resultUrl")
+            .build();
+    }
+
+    public static AddNewTariffDto getAddNewTariffDto() {
+        return AddNewTariffDto.builder()
+            .regionId(1L)
+            .courierId(1L)
+            .locationIdList(List.of(1L))
+            .receivingStationsIdList(List.of(1L))
             .build();
     }
 }
