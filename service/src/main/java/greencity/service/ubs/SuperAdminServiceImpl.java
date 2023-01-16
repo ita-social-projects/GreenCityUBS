@@ -445,11 +445,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
-            .sorted(Comparator.comparing(tariff -> tariff.getTariffStatus().getPriority()))
             .collect(Collectors.toList());
-        dtos.forEach(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
-            .sorted(Comparator.comparing(LocationsDtos::getNameUk))
-            .collect(Collectors.toList())));
         return dtos;
     }
 
