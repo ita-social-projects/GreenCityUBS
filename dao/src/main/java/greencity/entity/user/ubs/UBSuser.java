@@ -17,8 +17,13 @@ import java.util.List;
 @Table(name = "ubs_user")
 @Entity
 public class UBSuser {
-    @ManyToOne
-    private Address address;
+    @Id
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    private OrderAddress address;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
@@ -26,10 +31,6 @@ public class UBSuser {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ubsUser")
     private List<Order> orders;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Column(name = "first_name", length = 30, nullable = false)
     private String firstName;

@@ -3,7 +3,7 @@ package greencity.mapping.user;
 import greencity.ModelUtils;
 import greencity.dto.address.AddressDto;
 import greencity.entity.user.ubs.Address;
-import greencity.mapping.user.AddressDtoMapper;
+import greencity.enums.AddressStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +21,10 @@ class AddressDtoMapperTest {
     @Test
     void convert() {
         AddressDto addressDto = ModelUtils.addressDto();
-        Address expectedAddress = ModelUtils.address();
+
+        Address expectedAddress = ModelUtils.getAddress();
+        expectedAddress.setAddressStatus(AddressStatus.DELETED);
+
         Address actualAddress = addressDtoMapper.convert(addressDto);
 
         assertEquals(expectedAddress.getId(), actualAddress.getId());

@@ -1,108 +1,30 @@
 package greencity;
 
 import com.google.common.collect.Lists;
-import com.google.maps.model.AddressComponent;
-import com.google.maps.model.AddressComponentType;
-import com.google.maps.model.GeocodingResult;
-import com.google.maps.model.Geometry;
-import com.google.maps.model.LatLng;
+import com.google.maps.model.*;
 import greencity.constant.AppConstant;
-import greencity.dto.AddNewTariffDto;
-import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDtos;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TariffsForLocationDto;
-import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.AdditionalBagInfoDto;
-import greencity.dto.bag.BagDto;
-import greencity.dto.bag.BagForUserDto;
-import greencity.dto.bag.BagInfoDto;
-import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagOrderDto;
-import greencity.dto.bag.BagTransDto;
-import greencity.dto.bag.EditAmountOfBagDto;
+import greencity.dto.bag.*;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
-import greencity.dto.courier.CourierUpdateDto;
-import greencity.dto.courier.CreateCourierDto;
-import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.courier.*;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.*;
-import greencity.dto.location.AddLocationTranslationDto;
-import greencity.dto.location.CoordinatesDto;
-import greencity.dto.location.LocationCreateDto;
-import greencity.dto.location.LocationInfoDto;
-import greencity.dto.location.LocationSummaryDto;
-import greencity.dto.location.LocationToCityDto;
-import greencity.dto.location.LocationTranslationDto;
-import greencity.dto.location.LocationsDto;
-import greencity.dto.location.RegionTranslationDto;
-import greencity.dto.notification.BodyDto;
-import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.NotificationScheduleDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateDto;
-import greencity.dto.notification.NotificationTemplateLocalizedDto;
-import greencity.dto.notification.SenderInfoDto;
+import greencity.dto.location.*;
 import greencity.dto.notification.TitleDto;
-import greencity.dto.notification.UpdateNotificationTemplatesDto;
-import greencity.dto.order.AdminCommentDto;
-import greencity.dto.order.AssignEmployeesForOrderDto;
-import greencity.dto.order.AssignForOrderEmployee;
-import greencity.dto.order.BigOrderTableDTO;
-import greencity.dto.order.CounterOrderDetailsDto;
+import greencity.dto.notification.*;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.EcoNumberDto;
-import greencity.dto.order.EditPriceOfOrder;
-import greencity.dto.order.EmployeeOrderPositionDTO;
-import greencity.dto.order.ExportDetailsDto;
-import greencity.dto.order.ExportDetailsDtoUpdate;
-import greencity.dto.order.GroupedOrderDto;
-import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderClientDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderDetailStatusDto;
-import greencity.dto.order.OrderDetailStatusRequestDto;
-import greencity.dto.order.OrderDto;
-import greencity.dto.order.OrderFondyClientDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.SenderLocation;
-import greencity.dto.order.UpdateAllOrderPageDto;
-import greencity.dto.order.UpdateOrderDetailDto;
-import greencity.dto.order.UpdateOrderPageAdminDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.dto.payment.OverpaymentInfoRequestDto;
-import greencity.dto.payment.PaymentInfoDto;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.PaymentResponseDtoLiqPay;
-import greencity.dto.payment.PaymentTableInfoDto;
+import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.AddServiceDto;
-import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
-import greencity.dto.service.ServiceTranslationDto;
+import greencity.dto.service.*;
 import greencity.dto.tariff.*;
-import greencity.dto.user.AddBonusesToUserDto;
-import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
-import greencity.dto.user.UserProfileDto;
-import greencity.dto.user.UserProfileUpdateDto;
+import greencity.dto.user.*;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -110,21 +32,7 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Bag;
-import greencity.entity.order.BagTranslation;
-import greencity.entity.order.BigOrderTableViews;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Courier;
-import greencity.entity.order.Event;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
-import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
-import greencity.entity.order.TariffLocation;
-import greencity.entity.order.TariffsInfo;
+import greencity.entity.order.*;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.user.Location;
@@ -136,39 +44,17 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.AddressStatus;
-import greencity.enums.CancellationReason;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.EmployeeStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
+import greencity.enums.*;
 import greencity.util.Bot;
+import org.springframework.data.domain.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import java.util.*;
 
 import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -341,9 +227,9 @@ public class ModelUtils {
             .senderPhoneNumber("+380974563223")
             .senderLastName("TestLast")
             .senderFirstName("TestFirst")
-            .address(Address.builder()
+            .address(OrderAddress.builder()
                 .id(1L)
-                .user(null)
+                // .user(null)
                 .houseNumber("1a")
                 .actual(true)
                 .entranceNumber("str")
@@ -367,9 +253,9 @@ public class ModelUtils {
             .email("mail@mail.ua")
             .id(1L)
             .phoneNumber("067894522")
-            .address(Address.builder()
+            .address(OrderAddress.builder()
                 .id(1L)
-                .user(null)
+                // .user(null)
                 .houseNumber("1a")
                 .actual(true)
                 .entranceNumber("str")
@@ -425,7 +311,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(Address.builder()
+                .address(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -438,10 +324,15 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    .user(User.builder().id(1L).build())
+                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
-            .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").uuid("UUID").build())
+            .user(User.builder()
+                .id(1L)
+                .recipientName("Yuriy")
+                .recipientSurname("Gerasum")
+                .uuid("UUID")
+                .build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
             .adminComment("Admin")
@@ -596,7 +487,7 @@ public class ModelUtils {
                 .id(++id)
                 .ubsUser(UBSuser.builder()
                     .id(++userId)
-                    .address(Address.builder()
+                    .address(OrderAddress.builder()
                         .coordinates(coordinates)
                         .build())
                     .build())
@@ -1219,27 +1110,62 @@ public class ModelUtils {
             .id(1L)
             .entranceNumber("7a")
             .houseCorpus("2")
-            .houseNumber("7")
-            .street("Gorodotska")
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
-            .district("Zaliznuchnuy")
-            .city("Lviv")
+            .houseNumber("25")
+            .street("Street")
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .district("Distinct")
+            .city("City")
             .actual(false)
             .build();
     }
 
-    public static Address address() {
+    public static Address getAddress() {
         return Address.builder()
-            .id(addressDto().getId())
-            .city(addressDto().getCity())
-            .district(addressDto().getDistrict())
-            .street(addressDto().getStreet())
-            .coordinates(addressDto().getCoordinates())
-            .entranceNumber(addressDto().getEntranceNumber())
-            .houseNumber(addressDto().getHouseNumber())
-            .houseCorpus(addressDto().getHouseCorpus())
-            .actual(addressDto().getActual())
-            .addressStatus(AddressStatus.DELETED)
+            .id(1L)
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
+            .build();
+    }
+
+    public static OrderAddress getOrderAddress() {
+        return OrderAddress.builder()
+            .region("Region")
+            .city("City")
+            .street("Street")
+            .district("Distinct")
+            .houseNumber("25")
+            .houseCorpus("2")
+            .entranceNumber("7a")
+            .addressComment("Address Comment")
+            .actual(false)
+            .addressStatus(AddressStatus.NEW)
+            .coordinates(Coordinates.builder()
+                .latitude(50.4459068)
+                .longitude(30.4477005)
+                .build())
+            .regionEn("RegionEng")
+            .cityEn("CityEng")
+            .streetEn("StreetEng")
+            .districtEn("DistinctEng")
             .build();
     }
 
@@ -1366,7 +1292,7 @@ public class ModelUtils {
     public static User getUser() {
         return User.builder()
             .id(1L)
-            .addresses(singletonList(address()))
+            .addresses(singletonList(getAddress()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
@@ -1426,7 +1352,7 @@ public class ModelUtils {
                 .senderFirstName("TestFirst")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(Address.builder()
+                .address(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -1439,7 +1365,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    .user(User.builder().id(1L).build())
+                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .certificates(Collections.emptySet())
@@ -1645,8 +1571,8 @@ public class ModelUtils {
             .build();
     }
 
-    private static Address createAddress() {
-        return Address.builder()
+    private static OrderAddress createAddress() {
+        return OrderAddress.builder()
             .id(2L)
             .build();
     }
@@ -1773,7 +1699,7 @@ public class ModelUtils {
         location.setLocationStatus(LocationStatus.ACTIVE);
         return User.builder()
             .id(1L)
-            .addresses(singletonList(address()))
+            .addresses(singletonList(getAddress()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
@@ -3012,7 +2938,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(Address.builder()
+                .address(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -3025,7 +2951,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    .user(User.builder().id(1L).build())
+                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").currentPoints(100).build())
@@ -3285,7 +3211,7 @@ public class ModelUtils {
                 .email("mail@mail.ua")
                 .id(1L)
                 .phoneNumber("067894522")
-                .address(Address.builder()
+                .address(OrderAddress.builder()
                     .id(1L)
                     .city("Lviv")
                     .street("Levaya")
@@ -3298,7 +3224,7 @@ public class ModelUtils {
                         .latitude(49.83)
                         .longitude(23.88)
                         .build())
-                    .user(User.builder().id(1L).build())
+                    // .user(User.builder().id(1L).build())
                     .build())
                 .build())
             .user(User.builder().id(1L).recipientName("Yuriy").recipientSurname("Gerasum").build())
@@ -3652,13 +3578,16 @@ public class ModelUtils {
             .addressList(List.of(
                 AddressDto.builder()
                     .id(1L)
-                    .city("Lviv")
-                    .district("Zaliznuchnuy")
+                    .city("City")
+                    .district("Distinct")
                     .entranceNumber("7a")
                     .houseCorpus("2")
-                    .houseNumber("7")
-                    .street("Gorodotska")
-                    .coordinates(new Coordinates(2.3, 5.6))
+                    .houseNumber("25")
+                    .street("Street")
+                    .coordinates(Coordinates.builder()
+                        .latitude(50.4459068)
+                        .longitude(30.4477005)
+                        .build())
                     .actual(false)
                     .build()))
             .build();
