@@ -21,6 +21,7 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
@@ -51,6 +52,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
+
+    private final EmployeeRepository employeeRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
@@ -352,12 +355,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public CreateCourierDto createCourier(CreateCourierDto dto, String uuid) {
-        User user = userRepository.findByUuid(uuid);
+        Employee employee = employeeRepository.findByUuid(uuid);
 
         checkIfCourierAlreadyExists(courierRepository.findAll(), dto);
 
         Courier courier = new Courier();
-        courier.setCreatedBy(user);
+        courier.setCreatedBy(employee);
         courier.setCourierStatus(CourierStatus.ACTIVE);
         courier.setCreateDate(LocalDate.now());
         courier.setNameEn(dto.getNameEn());
@@ -472,18 +475,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public ReceivingStationDto createReceivingStation(AddingReceivingStationDto dto, String uuid) {
         if (!receivingStationRepository.existsReceivingStationByName(dto.getName())) {
-            User user = userRepository.findByUuid(uuid);
-            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, user));
+            Employee employee = employeeRepository.findByUuid(uuid);
+            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, employee));
             return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new UnprocessableEntityException(
             ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
-    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, User user) {
+    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, Employee employee) {
         return ReceivingStation.builder()
             .name(dto.getName())
-            .createdBy(user)
+            .createdBy(employee)
             .createDate(LocalDate.now())
             .stationStatus(StationStatus.ACTIVE)
             .build();
@@ -569,7 +572,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
-            .creator(userRepository.findByUuid(userUUID))
+            .creator(employeeRepository.findByUuid(userUUID))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
         return tariffsInfoRepository.save(tariffsInfo);

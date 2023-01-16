@@ -34,7 +34,7 @@ public class ReceivingStation {
     private List<Order> orders;
 
     @ManyToOne
-    private User createdBy;
+    private Employee createdBy;
 
     private LocalDate createDate;
 

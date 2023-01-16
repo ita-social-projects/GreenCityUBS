@@ -20,6 +20,7 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
@@ -80,6 +81,8 @@ class SuperAdminServiceImplTest {
     @Mock
     private CourierRepository courierRepository;
 
+    @Mock
+    private EmployeeRepository employeeRepository;
     @Mock
     private RegionRepository regionRepository;
     @Mock
@@ -621,25 +624,25 @@ class SuperAdminServiceImplTest {
     @Test
     void createReceivingStationSaveCorrectValue() {
         String receivingStationName = "Петрівка";
-        User user = TEST_USER;
+        Employee employee = getEmployee();
         AddingReceivingStationDto addingReceivingStationDto =
             AddingReceivingStationDto.builder().name(receivingStationName).build();
         ReceivingStation activatedReceivingStation = ReceivingStation.builder()
             .name(receivingStationName)
-            .createdBy(user)
+            .createdBy(employee)
             .createDate(LocalDate.now())
             .stationStatus(StationStatus.ACTIVE)
             .build();
 
         ReceivingStationDto receivingStationDto = getReceivingStationDto();
 
-        when(userRepository.findByUuid(any())).thenReturn(user);
+        when(employeeRepository.findByUuid(any())).thenReturn(employee);
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
         when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
         when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
             .thenReturn(receivingStationDto);
 
-        superAdminService.createReceivingStation(addingReceivingStationDto, user.getUuid());
+        superAdminService.createReceivingStation(addingReceivingStationDto, employee.getUuid());
 
         verify(userRepository).findByUuid(any());
         verify(receivingStationRepository).existsReceivingStationByName(any());

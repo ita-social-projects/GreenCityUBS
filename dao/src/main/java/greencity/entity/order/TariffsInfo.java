@@ -20,7 +20,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders"})
-@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees"})
+@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees","creator"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +46,7 @@ public class TariffsInfo {
     private LocationStatus locationStatus;
 
     @ManyToOne
-    private User creator;
+    private Employee creator;
 
     @Column(nullable = false)
     private LocalDate createdAt;

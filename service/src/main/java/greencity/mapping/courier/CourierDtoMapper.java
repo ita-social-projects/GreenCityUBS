@@ -2,6 +2,7 @@ package greencity.mapping.courier;
 
 import greencity.dto.courier.CourierDto;
 import greencity.entity.order.Courier;
+import greencity.entity.user.employee.Employee;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,8 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
             .nameEn(source.getNameEn())
             .nameUk(source.getNameUk())
             .createDate(source.getCreateDate() != null ? createdAt : LocalDate.now())
-            .createdBy(Optional.ofNullable(source.getCreatedBy())
-                .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
-                .orElse(" "))
+            .createdBy(source.getCreatedBy().getFirstName() + " " +
+                    source.getCreatedBy().getLastName())
             .build();
     }
 }

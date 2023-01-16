@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -100,6 +101,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @author Liubomyr Pater.
      */
     Optional<Employee> findByEmail(String email);
+
+    /**
+     * Method that return employee by his uuid.
+     *
+     * @param uuid {@link String}
+     * @return employee.
+     */
+    Employee findByUuid(String uuid);
 
     /**
      * Method find current tariffsInfo for Employee.

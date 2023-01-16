@@ -159,5 +159,8 @@
     <include file="db/changelog/logs/ch-update-into-courier-Korzh.xml"/>
     <include file="db/changelog/logs/ch-drop-table-courier-translation-Korzh.xml"/>
     <include file="db/changelog/logs/ch-add-column-limit-description-to-tariffs-info-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-modify-employee-table-Korzh.xml"/>
+    <include file="db/changelog/logs/сg-change-constraint-for-user-Korzh.xml"/>
+    <include file="db/changelog/logs/ch-add-column-uuid-to-employees-Korzh.xml"/>
 </databaseChangeLog>
 

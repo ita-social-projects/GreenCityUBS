@@ -1270,7 +1270,7 @@ public class ModelUtils {
             .id(1L)
             .name("Петрівка")
             .createDate(LocalDate.EPOCH)
-            .createdBy(getUser())
+            .createdBy(getEmployee())
             .build();
     }
 
@@ -3337,7 +3337,8 @@ public class ModelUtils {
                 .nameUk(location.getNameUk()).build()))
             .courierDto(getCourierDto())
             .createdAt(LocalDate.of(22, 2, 12))
-            .creator("Taras")
+            .creator(EmployeeNameDto.builder()
+                    .email("sss@gmail.com").build())
             .build();
     }
 
@@ -3443,7 +3444,7 @@ public class ModelUtils {
                     .build())
                 .build()))
             .locationStatus(LocationStatus.ACTIVE)
-            .creator(ModelUtils.getUser())
+            .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)
             .minAmountOfBigBags(2L)
@@ -3452,7 +3453,7 @@ public class ModelUtils {
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
                 .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
+                .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
     }
@@ -3471,7 +3472,7 @@ public class ModelUtils {
                     .build())
                 .build()))
             .locationStatus(LocationStatus.ACTIVE)
-            .creator(ModelUtils.getUser())
+            .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)
             .minAmountOfBigBags(5L)
