@@ -450,7 +450,7 @@ class SuperAdminController {
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PatchMapping("/courier/{id}")
+    @PatchMapping("/deactivateCourier/{id}")
     public ResponseEntity<CourierDto> deactivateCourier(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateCourier(id));
     }
