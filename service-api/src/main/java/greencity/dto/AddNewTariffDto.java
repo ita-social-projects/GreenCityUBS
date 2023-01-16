@@ -2,6 +2,7 @@ package greencity.dto;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Min;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Setter
+@EqualsAndHashCode
 public class AddNewTariffDto {
     @NotNull
     @Min(1)
@@ -18,7 +20,7 @@ public class AddNewTariffDto {
     @NotNull
     @Min(1)
     private Long courierId;
-    @NotNull
+    @NotEmpty
     private List<@Min(1) Long> locationIdList;
     @NotNull
     private List<@Min(1) Long> receivingStationsIdList;
