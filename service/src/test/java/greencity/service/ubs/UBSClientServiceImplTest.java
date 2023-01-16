@@ -297,9 +297,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -321,7 +320,6 @@ class UBSClientServiceImplTest {
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
@@ -332,7 +330,6 @@ class UBSClientServiceImplTest {
         verify(bagRepository, times(2)).findById(any());
         verify(ubsUserRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
-        verify(addressRepository, times(1)).findById(any());
         verify(orderRepository, times(1)).findById(anyLong());
     }
 
