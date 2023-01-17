@@ -494,9 +494,9 @@ class SuperAdminServiceImplTest {
         when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
 
         superAdminService.deactivateCourier(anyLong());
-        courier.setCourierStatus(CourierStatus.DELETED);
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
 
-        assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
+        assertEquals(CourierStatus.DEACTIVATED, courier.getCourierStatus());
         verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(anyLong());
         verify(courierRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(courier, CourierDto.class);
@@ -506,7 +506,7 @@ class SuperAdminServiceImplTest {
     void deactivateCourierThrowBadRequestException() {
         Courier courier = getCourier();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
-        courier.setCourierStatus(CourierStatus.DELETED);
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
         assertThrows(BadRequestException.class, () -> superAdminService.deactivateCourier(anyLong()));
     }
 
