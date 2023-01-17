@@ -155,6 +155,9 @@
     <include file="db/changelog/logs/ch-drop-column-language_id-in-notification_templates-Hlazova.xml"/>
     <include file="db/changelog/logs/ch-add-column-description_eng-Safarov.xml"/>
     <include file="db/changelog/logs/ch-add-column-description_eng-into-bag_translations-table-Safarov.xml"/>
+    <include file="db/changelog/logs/ch-row-migration-bag-translation-to-bag.xml"/>
+    <include file="db/changelog/logs/ch-drop-bag-translations-table.xml"/>
+    <include file="db/changelog/logs/ch-add-column-limit-included-to-bag.xml"/>
     <include file="db/changelog/logs/сh-add-columns-name-nameUk-nameEng-limit-to-courier-Korzh.xml"/>
     <include file="db/changelog/logs/ch-update-into-courier-Korzh.xml"/>
     <include file="db/changelog/logs/ch-drop-table-courier-translation-Korzh.xml"/>
