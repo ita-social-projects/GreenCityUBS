@@ -1,10 +1,9 @@
 package greencity.entity.order;
 
-import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,8 +18,9 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders"})
-@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees"})
+@ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
+@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
+    "courier", "creator"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +46,7 @@ public class TariffsInfo {
     private LocationStatus locationStatus;
 
     @ManyToOne
-    private User creator;
+    private Employee creator;
 
     @Column(nullable = false)
     private LocalDate createdAt;

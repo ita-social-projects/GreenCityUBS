@@ -2,6 +2,7 @@ package greencity.dto.tariff;
 
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.employee.EmployeeNameDto;
 import greencity.entity.order.TariffLocation;
 import greencity.enums.LocationStatus;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,6 @@ public class TariffsInfoDto {
     private Long maxAmountOfBags;
     private Long minPriceOfOrder;
     private Long maxPriceOfOrder;
-    private String creator;
+    private EmployeeNameDto creator;
     private LocalDate createdAt;
 }

@@ -11,6 +11,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.*;
 import greencity.dto.notification.NotificationDto;
@@ -538,7 +539,10 @@ public class ModelUtils {
                 .nameEn("Test")
                 .build())
             .createdAt(LocalDate.of(22, 2, 12))
-            .creator("Me")
+            .creator(EmployeeNameDto.builder()
+                .firstName("Test")
+                .lastName("Test")
+                .build())
             .build();
     }
 
