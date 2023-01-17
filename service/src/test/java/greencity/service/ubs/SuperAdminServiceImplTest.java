@@ -624,7 +624,7 @@ class SuperAdminServiceImplTest {
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
             .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
-
+        when(employeeRepository.findByUuid(test)).thenReturn(Optional.ofNullable(getEmployee()));
         superAdminService.createReceivingStation(stationDto, test);
 
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
