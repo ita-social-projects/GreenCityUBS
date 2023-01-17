@@ -19,8 +19,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
-@EqualsAndHashCode(
-    exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
+@EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
+    "courier", "creator"})
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

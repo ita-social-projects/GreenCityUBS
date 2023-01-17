@@ -16,8 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders",
-    "employeeOrderPositions", "orders", "createdTariffs"})
+@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders", "employeeOrderPositions", "orders", "tariffs"})
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -68,7 +67,7 @@ public class Employee {
     private Set<TariffsInfo> tariffInfos;
 
     @OneToMany(mappedBy = "creator")
-    private List<TariffsInfo> createdTariffs;
+    private List<TariffsInfo> tariffs;
 
     @OneToMany(mappedBy = "employee")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
