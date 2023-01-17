@@ -45,6 +45,8 @@ import static greencity.ModelUtils.getRedirectionConfig;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static greencity.ModelUtils.getUserInfoDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -247,18 +249,20 @@ class OrderControllerTest {
     void updatesRecipientsInfoWithOutUser() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         UbsCustomersDtoUpdate ubsCustomersDtoUpdate = getUbsCustomersDtoUpdate();
+
         when(ubsClientService.updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null))
             .thenThrow(UBSuserNotFoundException.class);
 
-        try {
-            mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                .principal(principal))
-                .andExpect(status().isBadRequest());
-        } catch (NestedServletException e) {
-            assertTrue(e.getCause() instanceof UBSuserNotFoundException);
-        }
+        NestedServletException exception =
+            assertThrows(NestedServletException.class, () -> {
+                mockMvc.perform(put(ubsLink + "/update-recipients-data")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+                    .principal(principal))
+                    .andExpect(status().isBadRequest());
+            });
+
+        assertTrue(exception.getCause() instanceof UBSuserNotFoundException);
         verify(ubsClientService).updateUbsUserInfoInOrder(ubsCustomersDtoUpdate, null);
     }
 

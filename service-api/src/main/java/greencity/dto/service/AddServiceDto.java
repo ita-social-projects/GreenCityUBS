@@ -14,13 +14,13 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 public class AddServiceDto {
     @NotNull
-    Integer capacity;
+    private Integer capacity;
     @NotNull
-    Integer price;
+    private Integer price;
     @NotNull
-    Integer commission;
+    private Integer commission;
     @Valid
-    TariffTranslationDto tariffTranslationDto;
+    private TariffTranslationDto tariffTranslationDto;
     @NotNull
-    Long locationId;
+    private Long locationId;
 }
