@@ -487,25 +487,26 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteCourierTest() {
-        Courier courier = ModelUtils.getCourier();
+    void deactivateCourierTest() {
+        Courier courier = getCourier();
+        CourierDto courierDto = getCourierDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
+
+        superAdminService.deactivateCourier(anyLong());
         courier.setCourierStatus(CourierStatus.DELETED);
 
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(courierRepository.save(courier)).thenReturn(courier);
-
-        superAdminService.deleteCourier(1L);
         assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
-
-        verify(courierRepository).findById(1L);
-        verify(courierRepository).save(courier);
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(anyLong());
+        verify(courierRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(courier, CourierDto.class);
     }
 
     @Test
     void deleteCourierThrowCourierNotFoundException() {
         when(courierRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> superAdminService.deleteCourier(1L));
+        assertThrows(NotFoundException.class, () -> superAdminService.deactivateCourier(1L));
 
         verify(courierRepository).findById(1L);
     }

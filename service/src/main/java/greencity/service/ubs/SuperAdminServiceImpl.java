@@ -423,12 +423,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return getTariffService(bagTranslation);
     }
 
+    @Transactional
     @Override
-    public void deleteCourier(Long id) {
+    public CourierDto deactivateCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
+            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+        if (CourierStatus.DELETED == courier.getCourierStatus()) {
+            throw new BadRequestException(ErrorMessage.CANNOT_DEACTIVATE_COURIER + courier.getId());
+        }
+        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
         courier.setCourierStatus(CourierStatus.DELETED);
-        courierRepository.save(courier);
+        return modelMapper.map(courier, CourierDto.class);
     }
 
     private Integer getFullPrice(Integer price, Integer commission) {
