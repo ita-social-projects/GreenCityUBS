@@ -350,7 +350,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public CreateCourierDto createCourier(CreateCourierDto dto, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid);
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
 
         checkIfCourierAlreadyExists(courierRepository.findAll(), dto);
 
@@ -465,7 +466,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public ReceivingStationDto createReceivingStation(AddingReceivingStationDto dto, String uuid) {
         if (!receivingStationRepository.existsReceivingStationByName(dto.getName())) {
-            Employee employee = employeeRepository.findByUuid(uuid);
+            Employee employee = employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
             ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, employee));
             return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
@@ -556,13 +558,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
     }
 
-    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String userUUID, Courier courier) {
+    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String uuid, Courier courier) {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
-            .creator(employeeRepository.findByUuid(userUUID))
+            .creator(employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
         return tariffsInfoRepository.save(tariffsInfo);

@@ -531,7 +531,10 @@ public class ModelUtils {
                 .nameEn("Test")
                 .build())
             .createdAt(LocalDate.of(22, 2, 12))
-            .creator(EmployeeNameDto.builder().firstName("Test").lastName("Test").build())
+            .creator(EmployeeNameDto.builder()
+                .firstName("Test")
+                .lastName("Test")
+                .build())
             .build();
     }
 

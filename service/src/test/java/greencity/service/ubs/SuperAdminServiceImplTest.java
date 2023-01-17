@@ -519,7 +519,7 @@ class SuperAdminServiceImplTest {
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
 
-        when(employeeRepository.findByUuid(anyString())).thenReturn(ModelUtils.getEmployee());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
             .nameEn("Test1")
             .nameUk("Тест1")
@@ -541,7 +541,7 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         String uuid = ModelUtils.TEST_USER.getUuid();
 
-        when(employeeRepository.findByUuid(anyString())).thenReturn(ModelUtils.getEmployee());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
         Throwable throwable = assertThrows(CourierAlreadyExists.class,
@@ -654,7 +654,7 @@ class SuperAdminServiceImplTest {
 
         ReceivingStationDto receivingStationDto = getReceivingStationDto();
 
-        when(employeeRepository.findByUuid(any())).thenReturn(employee);
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(employee));
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
         when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
         when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
@@ -728,7 +728,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(ModelUtils.getLocationList());
-        when(employeeRepository.findByUuid(any())).thenReturn(ModelUtils.getEmployee());
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(getEmployee()));
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -744,7 +744,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
-        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(ModelUtils.getEmployee());
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(Collections.emptyList());
