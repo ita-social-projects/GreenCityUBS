@@ -85,7 +85,7 @@ public final class ErrorMessage {
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
     public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
     public static final String USER_HAS_NO_OVERPAYMENT = "This user has no overpayment";
-    public static final String CANNOT_DEACTIVATE_COURIER = "Cannot deactivate courier, courier is already deactivated";
+    public static final String CANNOT_DEACTIVATE_COURIER = "courier is already deactivated with id: ";
     public static final String CANNOT_DELETE_ADDRESS = "Cannot delete another user's address";
     public static final String CANNOT_ACCESS_PERSONAL_INFO = "Cannot access another user's personal info";
     public static final String CANNOT_ACCESS_ORDER_CANCELLATION_REASON =

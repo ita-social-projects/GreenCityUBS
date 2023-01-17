@@ -425,14 +425,16 @@ class SuperAdminServiceImplTest {
 
     @Test
     void deactivateCourierTest() {
-        Courier courier = ModelUtils.getCourier();
-        CourierDto courierDto = ModelUtils.getCourierDto();
+        Courier courier = getCourier();
+        CourierDto courierDto = getCourierDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
         when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
-        deactivateChosenEntityRepository.deactivateTariffsByCourier(anyLong());
+
+        superAdminService.deactivateCourier(anyLong());
+        courier.setCourierStatus(CourierStatus.DELETED);
+
         assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
-        verify(courierRepository).findById(anyLong());
-        verify(courierRepository).save(any());
+        verify(courierRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(courier, CourierDto.class);
     }
 

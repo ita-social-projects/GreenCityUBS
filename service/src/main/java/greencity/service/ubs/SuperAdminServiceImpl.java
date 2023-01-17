@@ -429,12 +429,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public CourierDto deactivateCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
-        if (courier.getCourierStatus() == CourierStatus.DELETED) {
-            throw new BadRequestException(ErrorMessage.CANNOT_DEACTIVATE_COURIER);
+            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+        if (CourierStatus.DELETED == courier.getCourierStatus()) {
+            throw new BadRequestException(ErrorMessage.CANNOT_DEACTIVATE_COURIER + courier.getId());
         }
-        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(courier.getId());
-        courierRepository.save(courier);
+        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
+        courier.setCourierStatus(CourierStatus.DELETED);
         return modelMapper.map(courier, CourierDto.class);
     }
 
