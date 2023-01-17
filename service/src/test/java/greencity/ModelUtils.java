@@ -860,7 +860,7 @@ public class ModelUtils {
                 .nameEn("location")
                 .nameUk("локація")
                 .build())
-            .tariffs(Set.of(getTariffsInfoDto()))
+            // .tariffs(Set.of(getTariffsInfoDto()))
             .build();
     }
 
@@ -917,7 +917,7 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .tariffInfos(Set.of(getTariffsInfo()))
+            // .tariffInfos(Set.of(getTariffsInfo()))
             .imagePath("path")
             .id(1L)
             .build();

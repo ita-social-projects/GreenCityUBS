@@ -519,7 +519,7 @@ class SuperAdminServiceImplTest {
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(ModelUtils.getEmployee());
         when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
             .nameEn("Test1")
             .nameUk("Тест1")
@@ -541,13 +541,13 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         String uuid = ModelUtils.TEST_USER.getUuid();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(ModelUtils.getEmployee());
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
         Throwable throwable = assertThrows(CourierAlreadyExists.class,
             () -> superAdminService.createCourier(createCourierDto, uuid));
         assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS, throwable.getMessage());
-        verify(userRepository).findByUuid(anyString());
+        verify(employeeRepository).findByUuid(anyString());
         verify(courierRepository).findAll();
     }
 
@@ -636,7 +636,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
-        verify(userRepository).findByUuid(any());
+        verify(employeeRepository).findByUuid(any());
     }
 
     @Test
@@ -662,7 +662,7 @@ class SuperAdminServiceImplTest {
 
         superAdminService.createReceivingStation(addingReceivingStationDto, employee.getUuid());
 
-        verify(userRepository).findByUuid(any());
+        verify(employeeRepository).findByUuid(any());
         verify(receivingStationRepository).existsReceivingStationByName(any());
         verify(receivingStationRepository).save(activatedReceivingStation);
         verify(modelMapper)
@@ -728,7 +728,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(ModelUtils.getLocationList());
-        when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(any())).thenReturn(ModelUtils.getEmployee());
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -744,7 +744,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
 
         when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
-        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(ModelUtils.getEmployee());
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
             .thenReturn(Collections.emptyList());
@@ -756,7 +756,7 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(courierRepository).findById(1L);
-        verify(userRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(employeeRepository).findByUuid("35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(1)).save(any());
         verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
         verify(receivingStationRepository).findAllById(List.of(1L));
