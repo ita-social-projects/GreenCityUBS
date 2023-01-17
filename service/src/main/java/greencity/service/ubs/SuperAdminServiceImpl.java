@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.LocationsDtos;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -23,11 +22,7 @@ import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
-import greencity.enums.StationStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -441,12 +436,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
-        List<GetTariffsInfoDto> dtos = tariffs
+        return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
             .collect(Collectors.toList());
-        return dtos;
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {

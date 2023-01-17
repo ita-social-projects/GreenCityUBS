@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

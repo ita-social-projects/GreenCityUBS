@@ -1,10 +1,9 @@
 package greencity.entity.order;
 
-import greencity.enums.CourierLimit;
-import greencity.enums.LocationStatus;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.CourierLimit;
+import greencity.enums.LocationStatus;
 import lombok.*;
 
 import javax.persistence.*;

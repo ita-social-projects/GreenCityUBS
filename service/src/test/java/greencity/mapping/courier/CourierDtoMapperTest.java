@@ -1,9 +1,7 @@
 package greencity.mapping.courier;
 
 import greencity.dto.courier.CourierDto;
-import greencity.dto.courier.CourierTranslationDto;
 import greencity.entity.order.Courier;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static greencity.ModelUtils.*;
+import static greencity.ModelUtils.getEmployee;
 import static greencity.enums.CourierStatus.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

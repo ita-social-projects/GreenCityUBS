@@ -2,7 +2,6 @@ package greencity.entity.order;
 
 import greencity.entity.user.employee.Employee;
 import greencity.enums.CourierStatus;
-import greencity.entity.user.User;
 import lombok.*;
 
 import javax.persistence.*;

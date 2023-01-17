@@ -2,7 +2,6 @@ package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.User;
 import greencity.enums.StationStatus;
 import lombok.*;
 
