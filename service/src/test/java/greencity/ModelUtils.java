@@ -6,15 +6,45 @@ import greencity.constant.AppConstant;
 import greencity.dto.*;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.*;
+import greencity.dto.bag.AdditionalBagInfoDto;
+import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagOrderDto;
+import greencity.dto.bag.BagTranslationDto;
+import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.*;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.*;
-import greencity.dto.location.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateResponsibleEmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.CoordinatesDto;
+import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
+import greencity.dto.location.LocationSummaryDto;
+import greencity.dto.location.LocationToCityDto;
+import greencity.dto.location.LocationTranslationDto;
+import greencity.dto.location.LocationsDto;
+import greencity.dto.location.RegionTranslationDto;
+import greencity.dto.notification.BodyDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationScheduleDto;
+import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateLocalizedDto;
+import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.TitleDto;
 import greencity.dto.notification.*;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -22,9 +52,22 @@ import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.*;
 import greencity.dto.position.PositionDto;
-import greencity.dto.service.*;
-import greencity.dto.tariff.*;
-import greencity.dto.user.*;
+import greencity.dto.service.AddServiceDto;
+import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
+import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceTranslationDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserProfileDto;
+import greencity.dto.user.UserProfileUpdateDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
@@ -32,7 +75,20 @@ import greencity.entity.coords.Coordinates;
 import greencity.entity.notifications.NotificationParameter;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.BigOrderTableViews;
+import greencity.entity.order.Certificate;
+import greencity.entity.order.ChangeOfPoints;
+import greencity.entity.order.Courier;
+import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.OrderPaymentStatusTranslation;
+import greencity.entity.order.OrderStatusTranslation;
+import greencity.entity.order.Payment;
+import greencity.entity.order.Service;
+import greencity.entity.order.ServiceTranslation;
+import greencity.entity.order.TariffLocation;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.schedule.NotificationSchedule;
 import greencity.entity.user.Location;
@@ -72,8 +128,6 @@ public class ModelUtils {
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
     public static final BagTransDto TEST_BAG_TRANS_DTO = createBagTransDto();
-    public static final BagTranslation TEST_BAG_TRANSLATION = createBagTranslation();
-    public static final List<BagTranslation> TEST_BAG_TRANSLATION_LIST = singletonList(TEST_BAG_TRANSLATION);
     public static final Bag TEST_BAG = createBag();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
@@ -193,6 +247,10 @@ public class ModelUtils {
     }
 
     public static OrderResponseDto getOrderResponseDto() {
+        return getOrderResponseDto(true);
+    }
+
+    public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
@@ -200,7 +258,7 @@ public class ModelUtils {
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .shouldBePaid(true)
+            .shouldBePaid(shouldBePaid)
             .personalData(PersonalDataDto.builder()
                 .senderEmail("test@email.ua")
                 .senderPhoneNumber("+380974563223")
@@ -1380,19 +1438,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static BagTranslation getBagTranslation() {
-        return BagTranslation.builder()
-            .id(1L)
-            .bag(Bag.builder().id(1).capacity(120).price(350).location(Location.builder()
-                .id(1L)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build())
-                .build())
-            .nameEng("a")
-            .name("Useless paper")
-            .build();
-    }
-
     public static BagOrderDto getBagOrderDto() {
         return BagOrderDto.builder()
             .bagId(1)
@@ -1670,12 +1715,6 @@ public class ModelUtils {
         return OrderDetailInfoDto.builder()
             .amount(5)
             .capacity(4)
-            .build();
-    }
-
-    private static BagTranslation createBagTranslation() {
-        return BagTranslation.builder()
-            .id(4L)
             .build();
     }
 
@@ -1971,13 +2010,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<TariffTranslationDto> getTariffTranslationDto() {
-        return List.of(TariffTranslationDto.builder()
+    public static TariffTranslationDto getTariffTranslationDto() {
+        return TariffTranslationDto.builder()
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .nameEng("a")
-            .name("Test")
-            .build());
+            .nameEng("nameEng")
+            .name("name")
+            .build();
     }
 
     public static AddServiceDto addServiceDto() {
@@ -1985,7 +2024,7 @@ public class ModelUtils {
             .commission(50)
             .capacity(100)
             .price(100)
-            .tariffTranslationDtoList(getTariffTranslationDto())
+            .tariffTranslationDto(getTariffTranslationDto())
             .locationId(1L)
             .build();
     }
@@ -2024,10 +2063,8 @@ public class ModelUtils {
             .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
             .createdBy("User")
-            .bagTranslations(List.of(BagTranslation.builder()
-                .description("Description")
-                .descriptionEng("DescriptionEng")
-                .id(1L).build()))
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .build());
     }
@@ -2042,17 +2079,6 @@ public class ModelUtils {
             .langCode("ua")
             .build();
 
-    }
-
-    public static BagTranslation getBagTranslationForEditMethod() {
-        return BagTranslation.builder()
-            .id(1L)
-            .bag(getBag().get())
-            .nameEng("a")
-            .name("Бавовняна сумка")
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .build();
     }
 
     public static Location getLocation() {
@@ -2109,15 +2135,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<BagTranslation> getBagTransaltion() {
-        return List.of(BagTranslation.builder()
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .name("Test")
-            .nameEng("a")
-            .build());
-    }
-
     public static Bag getTariffBag() {
         return Bag.builder().price(100)
             .commission(50)
@@ -2127,7 +2144,10 @@ public class ModelUtils {
             .createdBy("Taras Ivanov")
             .location(getLocation())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .bagTranslations(getBagTransaltion()).build();
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("name")
+            .nameEng("nameEng").build();
     }
 
     public static AdminCommentDto getAdminCommentDto() {
@@ -2304,6 +2324,58 @@ public class ModelUtils {
                 .build());
     }
 
+    public static List<Bag> getBag4list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(20)
+            .location(Location.builder().id(1L).build())
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(21)
+                .location(Location.builder().id(1L).build())
+                .name("name")
+                .nameEng("nameEng")
+                .limitIncluded(false)
+                .build());
+    }
+
+    public static List<Bag> getBag5list() {
+        return List.of(Bag.builder()
+            .id(1)
+            .price(100)
+            .capacity(10)
+            .commission(21)
+            .fullPrice(20)
+            .location(Location.builder().id(1L).build())
+            .name("name")
+            .nameEng("nameEng")
+            .limitIncluded(false)
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .build(),
+            Bag.builder()
+                .id(2)
+                .price(100)
+                .capacity(10)
+                .commission(21)
+                .fullPrice(21)
+                .location(Location.builder().id(1L).build())
+                .name("name")
+                .nameEng("nameEng")
+                .limitIncluded(false)
+                .minAmountOfBags(MinAmountOfBag.INCLUDE)
+                .build());
+    }
+
     public static List<Certificate> getCertificateList() {
         return List.of(Certificate.builder()
             .code("uuid")
@@ -2472,7 +2544,10 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
-            .bagTranslations(List.of(getBagTranslation()))
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Test")
+            .nameEng("a")
             .build();
     }
 
@@ -2485,23 +2560,6 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
-            .build();
-    }
-
-    public static BagTranslation bagTranslationDto() {
-        return BagTranslation
-            .builder()
-            .id(1L)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .bag(Bag.builder().id(1).minAmountOfBags(MinAmountOfBag.EXCLUDE)
-                .location(Location.builder()
-                    .id(1L)
-                    .locationStatus(LocationStatus.ACTIVE)
-                    .build())
-                .build())
-            .name("Name")
-            .nameEng("NameEng")
             .build();
     }
 
@@ -3537,11 +3595,15 @@ public class ModelUtils {
     }
 
     public static OrderAddressDtoRequest getTestOrderAddressLocationDto() {
+        return getTestOrderAddressLocationDto(true);
+    }
+
+    public static OrderAddressDtoRequest getTestOrderAddressLocationDto(boolean withDistrictRegionHouse) {
         return OrderAddressDtoRequest.builder()
             .id(0L)
-            .region("fake region")
+            .region(withDistrictRegionHouse ? "fake region" : null)
             .city("fake street")
-            .district("fake district")
+            .district(withDistrictRegionHouse ? "fake district" : null)
             .entranceNumber("1")
             .houseNumber("13")
             .houseCorpus("1")
@@ -3549,17 +3611,21 @@ public class ModelUtils {
             .streetEn("fake street name")
             .coordinates(new Coordinates(50.5555555d, 50.5555555d))
             .cityEn("fake street")
-            .districtEn("fake district")
-            .regionEn("fake region")
+            .districtEn(withDistrictRegionHouse ? "fake district" : null)
+            .regionEn(withDistrictRegionHouse ? "fake region" : null)
             .build();
     }
 
     public static User getUserForCreate() {
+        return getUserForCreate(AddressStatus.IN_ORDER);
+    }
+
+    public static User getUserForCreate(AddressStatus addressStatus) {
         return User.builder()
             .id(1L)
             .addresses(List.of(Address.builder().id(7L).city("fake street").cityEn("fake street")
                 .district("fake district").districtEn("fake district").region("fake region").regionEn("fake region")
-                .street("fake street name").streetEn("fake street name").houseNumber("13")
+                .street("fake street name").streetEn("fake street name").houseNumber("13").addressStatus(addressStatus)
                 .coordinates(new Coordinates(50.5555555, 50.5555555)).build()))
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
@@ -3774,5 +3840,29 @@ public class ModelUtils {
             .minPriceOfOrder(100L)
             .maxPriceOfOrder(200L)
             .build();
+    }
+
+    public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDto() {
+        return new UserPointsAndAllBagsDto(
+            Arrays.asList(
+                BagTranslationDto.builder()
+                    .id(1)
+                    .name("name")
+                    .capacity(10)
+                    .price(20)
+                    .nameEng("nameEng")
+                    .locationId(1L)
+                    .limitedIncluded(false)
+                    .build(),
+                BagTranslationDto.builder()
+                    .id(2)
+                    .name("name")
+                    .capacity(10)
+                    .price(21)
+                    .nameEng("nameEng")
+                    .locationId(1L)
+                    .limitedIncluded(false)
+                    .build()),
+            600);
     }
 }

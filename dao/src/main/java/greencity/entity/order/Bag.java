@@ -2,11 +2,24 @@ package greencity.entity.order;
 
 import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.Column;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+import javax.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -48,6 +61,18 @@ public class Bag {
     @Column(nullable = false)
     private String editedBy;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Column(name = "name_eng")
+    private String nameEng;
+
+    @Column
+    private String description;
+
+    @Column(name = "description_eng")
+    private String descriptionEng;
+
     @Column(nullable = false, name = "min_amount_of_bags")
     @Enumerated(EnumType.STRING)
     private MinAmountOfBag minAmountOfBags;
@@ -55,9 +80,9 @@ public class Bag {
     @ManyToOne
     private Location location;
 
-    @OneToMany(mappedBy = "bag", cascade = CascadeType.ALL)
-    private List<BagTranslation> bagTranslations;
-
     @ManyToOne
     private TariffsInfo tariffsInfo;
+
+    @Column(name = "limit_included")
+    private Boolean limitIncluded;
 }
