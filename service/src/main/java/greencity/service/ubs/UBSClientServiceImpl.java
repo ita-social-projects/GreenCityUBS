@@ -1907,7 +1907,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     public Set<String> getAllAuthorities(String email) {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException(EMPLOYEE_DOESNT_EXIST));
-        return userRemoteClient.getAllAuthorities(employee.getEmail());
+        Set<String> authorities = userRemoteClient.getAllAuthorities(employee.getEmail());
+        if (authorities.isEmpty()) {
+            throw new NotFoundException(COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY);
+        }
+        return authorities;
     }
 
     @Override

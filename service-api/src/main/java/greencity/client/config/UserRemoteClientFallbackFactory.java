@@ -58,7 +58,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public Set<String> getAllAuthorities(String email) {
                 log.error(ErrorMessage.COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY, throwable);
-                return Collections.singleton(throwable.getMessage());
+                return Collections.emptySet();
             }
 
             @Override
