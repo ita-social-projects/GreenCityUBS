@@ -402,12 +402,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return AddressExportDetailsDto.builder()
             .addressId(address.getId())
             .addressCity(address.getCity())
+            .addressCityEng(address.getCityEn())
             .addressStreet(address.getStreet())
+            .addressStreetEng(address.getStreetEn())
             .addressDistrict(address.getDistrict())
+            .addressDistrictEng(address.getDistrictEn())
             .addressEntranceNumber(address.getEntranceNumber())
             .addressHouseCorpus(address.getHouseCorpus())
             .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
+            .addressRegionEng(address.getRegionEn())
             .build();
     }
 
