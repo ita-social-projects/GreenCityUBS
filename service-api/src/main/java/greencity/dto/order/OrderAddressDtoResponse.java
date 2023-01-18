@@ -12,7 +12,9 @@ import java.io.Serializable;
 @Builder
 public class OrderAddressDtoResponse implements Serializable {
     private String district;
+    private String districtEng;
     private String street;
+    private String streetEng;
     private String houseCorpus;
     private String entranceNumber;
     private String houseNumber;

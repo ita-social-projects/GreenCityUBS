@@ -23,7 +23,9 @@ class OrderAddressDtoUpdateMapperTest {
 
         OrderAddressDtoResponse expected = OrderAddressDtoResponse.builder()
             .district("Distinct")
+            .districtEng("DistinctEng")
             .street("Street")
+            .streetEng("StreetEng")
             .houseCorpus("2")
             .entranceNumber("7a")
             .houseNumber("25")
