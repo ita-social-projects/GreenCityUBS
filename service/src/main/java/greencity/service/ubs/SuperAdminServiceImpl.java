@@ -155,35 +155,57 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private Service createService(CreateServiceDto dto, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
         long tariffId = dto.getTariffId();
-        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
-        Optional<Service> service = serviceRepository.findServiceByTariffsInfoId(tariffId);
+        Employee employee = getEmployeeByUuid(uuid);
+        TariffsInfo tariffsInfo = getTariffsInfoById(tariffId);
+        Optional<Service> service = getServiceByTariffsInfoId(tariffId);
         if (service.isEmpty()) {
             return Service.builder()
-                .price(dto.getPrice())
-                .createdAt(LocalDate.now())
-                .createdBy(employee)
-                .name(dto.getName())
-                .nameEng(dto.getNameEng())
-                .description(dto.getDescription())
-                .descriptionEng(dto.getDescriptionEng())
-                .tariffsInfo(tariffsInfo)
-                .build();
+                    .price(dto.getPrice())
+                    .createdAt(LocalDate.now())
+                    .createdBy(employee)
+                    .name(dto.getName())
+                    .nameEng(dto.getNameEng())
+                    .description(dto.getDescription())
+                    .descriptionEng(dto.getDescriptionEng())
+                    .tariffsInfo(tariffsInfo)
+                    .build();
         } else {
             throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS);
         }
     }
 
+    private Employee getEmployeeByUuid(String uuid) {
+        Optional<Employee> employee = employeeRepository.findByUuid(uuid);
+        if (employee.isPresent()) {
+            return employee.get();
+        } else {
+            throw new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid);
+        }
+    }
+
+    private TariffsInfo getTariffsInfoById(long tariffId) {
+        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findById(tariffId);
+        if (tariffsInfo.isPresent()) {
+            return tariffsInfo.get();
+        } else {
+            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
+        }
+    }
+
+    private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
+        return serviceRepository.findServiceByTariffsInfoId(tariffId);
+    }
+
     @Override
     public GetServiceDto getService(long tariffId) {
-        tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
-        Service service = serviceRepository.findServiceByTariffsInfoId(tariffId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
-        return modelMapper.map(service, GetServiceDto.class);
+        getTariffsInfoById(tariffId);
+        Optional<Service> service = getServiceByTariffsInfoId(tariffId);
+        if (service.isPresent()) {
+            return modelMapper.map(service, GetServiceDto.class);
+        } else {
+            throw new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId);
+        }
     }
 
     @Override

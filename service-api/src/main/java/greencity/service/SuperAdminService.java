@@ -14,7 +14,6 @@ import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.Service;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
