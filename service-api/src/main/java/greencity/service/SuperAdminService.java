@@ -70,11 +70,11 @@ public interface SuperAdminService {
     /**
      * Method for get service by tariff id.
      *
-     * @param id {@link Long} - tariff id.
+     * @param tariffId {@link Long} - tariff id.
      * @return {@link GetServiceDto}
      * @author Julia Seti
      */
-    GetServiceDto getService(long id);
+    GetServiceDto getService(long tariffId);
 
     /**
      * Method for delete service by id.

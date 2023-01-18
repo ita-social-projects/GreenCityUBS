@@ -26,7 +26,6 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffTranslationDto;
@@ -337,21 +336,14 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<ServiceTranslationDto> getServiceTranslationDto() {
-        return List.of(ServiceTranslationDto.builder()
-            .name("Name")
-            .nameEng("NameEng")
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .build());
-    }
-
     public static CreateServiceDto createServiceDto() {
         return CreateServiceDto.builder()
-            .capacity(120)
-            .commission(10)
+            .name("Name")
+            .nameEng("NameEng")
             .price(100)
-            .serviceTranslationDtoList(getServiceTranslationDto())
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .tariffId(1L)
             .build();
     }
 
@@ -401,14 +393,11 @@ public class ModelUtils {
 
     public static EditServiceDto getEditServiceDto() {
         return EditServiceDto.builder()
-            .name("Бавовняна сумка")
-            .nameEng("Engl")
-            .capacity(120)
-            .price(120)
-            .commission(50)
+            .name("Name")
+            .nameEng("NameEng")
+            .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .locationId(1L)
             .build();
     }
 

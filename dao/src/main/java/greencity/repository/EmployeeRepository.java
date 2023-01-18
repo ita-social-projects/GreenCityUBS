@@ -116,10 +116,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Long> findTariffsInfoForEmployee(Long employeeId);
 
     /**
-     * Method find current Employee by uuid.
+     * Method that return employee by his uuid.
      *
-     * @param uuid {@link String}.
-     * @return {@link Employee}.
+     * @param uuid {@link String}
+     * @return employee.
      */
-    Employee findByUuid(String uuid);
+    Optional<Employee> findByUuid(String uuid);
 }

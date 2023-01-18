@@ -32,6 +32,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -165,17 +166,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetServiceDto addService(CreateServiceDto dto, String uuid) {
-        Service service = createService(dto, uuid);
-        return modelMapper.map(serviceRepository.save(service), GetServiceDto.class);
+        Service service = serviceRepository.save(createService(dto, uuid));
+        return modelMapper.map(service, GetServiceDto.class);
     }
 
     private Service createService(CreateServiceDto dto, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid);
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
         long tariffId = dto.getTariffId();
-        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
-
-        return Service.builder()
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
+        Optional<Service> service = serviceRepository.findServiceByTariffsInfoId(tariffId);
+        if (service.isEmpty()) {
+            return Service.builder()
                 .price(dto.getPrice())
                 .createdAt(LocalDate.now())
                 .createdBy(employee)
@@ -185,30 +188,33 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .descriptionEng(dto.getDescriptionEng())
                 .tariffsInfo(tariffsInfo)
                 .build();
+        } else {
+            throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS);
+        }
     }
 
     @Override
-    public GetServiceDto getService(long id) {
-        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + id));
-        Service service = tariffsInfo.getService();
+    public GetServiceDto getService(long tariffId) {
+        tariffsInfoRepository.findById(tariffId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
+        Service service = serviceRepository.findServiceByTariffsInfoId(tariffId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
         return modelMapper.map(service, GetServiceDto.class);
     }
 
-
     @Override
     public void deleteService(long id) {
-        Service service = serviceRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        Service service = serviceRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         serviceRepository.delete(service);
     }
 
     @Override
     public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
-        Service service = serviceRepository.findServiceById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
-        Employee employee = employeeRepository.findByUuid(uuid);
-
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+        Service service = serviceRepository.findServiceById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
@@ -216,6 +222,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setDescriptionEng(dto.getDescriptionEng());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
+        serviceRepository.save(service);
         return modelMapper.map(service, GetServiceDto.class);
     }
 

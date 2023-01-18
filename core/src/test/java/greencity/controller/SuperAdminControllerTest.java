@@ -19,13 +19,16 @@ import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -126,33 +129,212 @@ class SuperAdminControllerTest {
     }
 
     @Test
+    void createService() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createServiceIfServiceAlreadyExistsException() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.addService(Mockito.any(CreateServiceDto.class), Mockito.anyString()))
+            .thenThrow(new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS));
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof ServiceAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addService(Mockito.any(CreateServiceDto.class), Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void createServiceIfEmployeeNotFoundException() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.addService(Mockito.any(CreateServiceDto.class), Mockito.anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addService(Mockito.any(CreateServiceDto.class), Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void createServiceIfTariffNotFoundException() throws Exception {
+        CreateServiceDto dto = ModelUtils.createServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+
+        Mockito.when(superAdminService.addService(Mockito.any(CreateServiceDto.class), Mockito.anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
+
+        mockMvc.perform(post(ubsLink + "/createService")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addService(Mockito.any(CreateServiceDto.class), Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getService() throws Exception {
+        mockMvc.perform(get(ubsLink + "/1/getService"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getServiceIfServiceNotFoundException() throws Exception {
+        long tariffId = 1L;
+        Mockito.when(superAdminService.getService(tariffId))
+            .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
+
+        mockMvc.perform(get(ubsLink + "/" + tariffId + "/getService"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(superAdminService).getService(tariffId);
+        Mockito.verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getServiceIfTariffNotFoundException() throws Exception {
+        long tariffId = 1L;
+        Mockito.when(superAdminService.getService(tariffId))
+            .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
+
+        mockMvc.perform(get(ubsLink + "/" + tariffId + "/getService"))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND + tariffId,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(superAdminService).getService(tariffId);
+        Mockito.verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
     void editService() throws Exception {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponseDtoJSON = objectMapper.writeValueAsString(dto);
+        String requestedJson = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(ubsLink + "/editService/" + 1L)
-            .content(ServiceResponseDtoJSON)
+            .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))
             .andExpect(status().isOk());
     }
 
     @Test
-    void createService() throws Exception {
-        CreateServiceDto dto = ModelUtils.createServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String ServiceResponceDtoJSON = objectMapper.writeValueAsString(dto);
+    void editServiceIfServiceNotFoundException() throws Exception {
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+        long id = 1L;
 
-        mockMvc.perform(post(ubsLink + "/createService")
-            .principal(principal)
-            .content(ServiceResponceDtoJSON)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito
+            .when(superAdminService.editService(Mockito.anyLong(), Mockito.any(EditServiceDto.class),
+                Mockito.anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+
+        mockMvc.perform(put(ubsLink + "/editService/" + id)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).editService(Mockito.anyLong(), Mockito.any(EditServiceDto.class),
+            Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
-    void getService() throws Exception {
-        mockMvc.perform(get(ubsLink + "/getService")).andExpect(status().isOk());
+    void editServiceIfEmployeeNotFoundException() throws Exception {
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito
+            .when(superAdminService.editService(Mockito.anyLong(), Mockito.any(EditServiceDto.class),
+                Mockito.anyString()))
+            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+
+        mockMvc.perform(put(ubsLink + "/editService/" + 1L)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON)
+            .principal(principal))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).editService(Mockito.anyLong(), Mockito.any(EditServiceDto.class),
+            Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void deleteService() throws Exception {
+        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteServiceIfServiceNotFoundException() throws Exception {
+        long id = 1L;
+        Mockito.doThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id))
+            .when(superAdminService).deleteService(id);
+
+        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
+            .andExpect(status().isNotFound())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(superAdminService).deleteService(id);
+        Mockito.verifyNoMoreInteractions(superAdminService);
     }
 
     @Test
@@ -163,12 +345,6 @@ class SuperAdminControllerTest {
     @Test
     void getActiveLocations() throws Exception {
         mockMvc.perform(get((ubsLink + "/getActiveLocations"))).andExpect(status().isOk());
-    }
-
-    @Test
-    void deleteService() throws Exception {
-        mockMvc.perform(delete(ubsLink + "/deleteService/" + 1L))
-            .andExpect(status().isOk());
     }
 
     @Test

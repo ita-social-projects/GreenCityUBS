@@ -1,7 +1,6 @@
 package greencity.mapping.service;
 
 import greencity.ModelUtils;
-import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.GetServiceDto;
 import greencity.entity.order.Service;
 import org.junit.jupiter.api.Assertions;

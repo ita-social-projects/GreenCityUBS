@@ -96,7 +96,6 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -122,7 +121,6 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
@@ -2225,63 +2223,64 @@ public class ModelUtils {
 
     public static CreateServiceDto getCreateServiceDto() {
         return CreateServiceDto.builder()
-            .capacity(120)
-            .commission(50)
+            .name("Name")
+            .nameEng("NameEng")
             .price(100)
-            .serviceTranslationDtoList(List.of(getServiceTranslationDto()))
-            .courierId(1L)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .tariffId(1L)
             .build();
     }
 
     public static EditServiceDto getEditServiceDto() {
         return EditServiceDto.builder()
-            .capacity(120)
-            .commission(50)
-            .locationId(1L)
+            .name("Name")
+            .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .name("Name")
-            .nameEng("NameEng")
             .build();
 
     }
 
     public static Service getService() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         return Service.builder()
-            .capacity(120)
-            .basePrice(100)
-            .commission(50)
-            .fullPrice(150)
+            .id(1L)
+            .price(100)
             .createdAt(LocalDate.now())
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courier(getCourier())
-            .serviceTranslations(List.of(getServiceTranslation()))
+            .createdBy(employee)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
+            .build();
+    }
+
+    public static Service getNewService() {
+        Employee employee = ModelUtils.getEmployee();
+        return Service.builder()
+            .price(100)
+            .createdAt(LocalDate.now())
+            .createdBy(employee)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
             .build();
     }
 
     public static Service getEditedService() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         return Service.builder()
             .id(1L)
-            .capacity(120)
-            .basePrice(100)
-            .commission(50)
-            .fullPrice(150)
-            .editedAt(LocalDate.now())
-            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .serviceTranslations(getServiceTranslationList())
-            .courier(getCourier())
-            .build();
-    }
-
-    public static ServiceTranslation getServiceTranslation() {
-        return ServiceTranslation.builder()
             .name("Name")
-            .description("Description")
             .nameEng("NameEng")
+            .price(100)
+            .description("Description")
             .descriptionEng("DescriptionEng")
+            .editedAt(LocalDate.now())
+            .editedBy(employee)
             .build();
     }
 
@@ -2508,26 +2507,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<ServiceTranslation> getServiceTranslationList() {
-        return List.of(ServiceTranslation.builder()
-            .description("Description")
-            .name("Name")
-            .nameEng("NameEng")
-            .descriptionEng("DescriptionEng")
-            .id(1L)
-            .service(Service.builder()
-                .id(1L)
-                .capacity(120)
-                .basePrice(100)
-                .commission(50)
-                .fullPrice(150)
-                .courier(getCourier())
-                .createdAt(LocalDate.now())
-                .createdBy("Taras Ivanov")
-                .build())
-            .build());
-    }
-
     public static Location getLocationDto() {
         return Location.builder()
             .id(1L)
@@ -2580,29 +2559,14 @@ public class ModelUtils {
     }
 
     public static GetServiceDto getServiceDto() {
-        User user = getUser();
+        Employee employee = getEmployee();
         return GetServiceDto.builder()
             .id(1L)
             .name("Name")
             .nameEng("NameEng")
-            .capacity(120)
             .price(100)
-            .commission(50)
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .fullPrice(150)
-            .editedAt(LocalDate.now())
-            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courierId(1L)
-            .build();
-    }
-
-    public static ServiceTranslationDto getServiceTranslationDto() {
-        return ServiceTranslationDto.builder()
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .nameEng("NameEng")
-            .name("Name")
             .build();
     }
 
@@ -2619,24 +2583,6 @@ public class ModelUtils {
             .maxAmountOfBigBags(99L)
             .minAmountOfBigBags(2L)
             .locationId(1L)
-            .build();
-    }
-
-    public static GetServiceDto getAllInfoAboutService() {
-        User user = getUser();
-        return GetServiceDto.builder()
-            .name("Name")
-            .nameEng("NameEng")
-            .capacity(120)
-            .price(100)
-            .commission(50)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .fullPrice(150)
-            .id(1L)
-            .createdAt(LocalDate.now())
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courierId(1L)
             .build();
     }
 

@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Builder
 @EqualsAndHashCode
 public class GetServiceDto {
-
     Long id;
 
     @NotNull
