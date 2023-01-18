@@ -193,7 +193,7 @@ class SuperAdminServiceImplTest {
 
         when(serviceRepository.findById(service.getId())).thenReturn(Optional.of(service));
 
-        superAdminService.deleteService(service.getId());
+        superAdminService.deleteService(1L);
 
         verify(serviceRepository).findById(1L);
         verify(serviceRepository).delete(service);
@@ -206,7 +206,7 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.findById(service.getId())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.deleteService(service.getId()));
+            () -> superAdminService.deleteService(1L));
 
         verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).delete(service);
@@ -219,7 +219,7 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findServiceByTariffsInfoId(service.getId())).thenReturn(Optional.of(service));
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
         when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.getService(1L));
@@ -235,7 +235,7 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findServiceByTariffsInfoId(service.getId())).thenReturn(Optional.empty());
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.getService(1L));
