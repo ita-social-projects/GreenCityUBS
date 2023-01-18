@@ -30,7 +30,7 @@ class OrdersForUserServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("provideSortingOrdersAndColumnsForGetAllOrders")
-    void getAllOrders(SortingOrder sortingOrder, String column){
+    void getAllOrders(SortingOrder sortingOrder, String column) {
         Sort sort = Sort.by(Sort.Direction.valueOf(sortingOrder.toString()), column);
         when(ordersForUserRepository.getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L))
             .thenReturn(Page.empty());
@@ -40,11 +40,10 @@ class OrdersForUserServiceImplTest {
         verify(ordersForUserRepository).getAllOrdersByUserId(PageRequest.of(10, 10, sort), 1L);
     }
 
-    private static Stream<Arguments> provideSortingOrdersAndColumnsForGetAllOrders(){
+    private static Stream<Arguments> provideSortingOrdersAndColumnsForGetAllOrders() {
         return Stream.of(
-                Arguments.of(SortingOrder.ASC, "payment_amount"),
-                Arguments.of(SortingOrder.DESC, "payment_amount"),
-                Arguments.of(SortingOrder.ASC,"order_status")
-        );
+            Arguments.of(SortingOrder.ASC, "payment_amount"),
+            Arguments.of(SortingOrder.DESC, "payment_amount"),
+            Arguments.of(SortingOrder.ASC, "order_status"));
     }
 }

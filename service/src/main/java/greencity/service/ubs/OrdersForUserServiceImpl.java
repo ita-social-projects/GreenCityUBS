@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Data
 @AllArgsConstructor
 public class OrdersForUserServiceImpl implements OrdersForUserService {
     OrderRepository orderRepository;
@@ -32,9 +31,9 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
         String username = getUsername(userId);
 
         List<UserOrdersDto> userOrdersDtoList = ordersForUserRepository
-                .getAllOrdersByUserId(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
-                .stream().map(this::getAllOrders)
-                .collect(Collectors.toList());
+            .getAllOrdersByUserId(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
+            .stream().map(this::getAllOrders)
+            .collect(Collectors.toList());
         return new UserWithOrdersDto(username, userOrdersDtoList);
     }
 
