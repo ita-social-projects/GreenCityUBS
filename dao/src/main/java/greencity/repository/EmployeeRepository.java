@@ -102,6 +102,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Optional<Employee> findByEmail(String email);
 
     /**
+     * Method that return employee by his uuid.
+     *
+     * @param uuid {@link String}
+     * @return employee.
+     */
+    Optional<Employee> findByUuid(String uuid);
+
+    /**
      * Method find current tariffsInfo for Employee.
      *
      * @param employeeId {@link Long}.

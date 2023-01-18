@@ -23,6 +23,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.employee.EmployeePositionDtoResponse;
@@ -918,7 +919,6 @@ public class ModelUtils {
                 .nameEn("location")
                 .nameUk("локація")
                 .build())
-            .tariffs(Set.of(getTariffsInfoDto()))
             .build();
     }
 
@@ -975,7 +975,6 @@ public class ModelUtils {
                 .id(1L)
                 .name("Водій")
                 .build()))
-            .tariffInfos(Set.of(getTariffsInfo()))
             .imagePath("path")
             .id(1L)
             .build();
@@ -1254,7 +1253,7 @@ public class ModelUtils {
             .id(1L)
             .name("Петрівка")
             .createDate(LocalDate.EPOCH)
-            .createdBy(getUser())
+            .createdBy(getEmployee())
             .build();
     }
 
@@ -3321,7 +3320,8 @@ public class ModelUtils {
                 .nameUk(location.getNameUk()).build()))
             .courierDto(getCourierDto())
             .createdAt(LocalDate.of(22, 2, 12))
-            .creator("Taras")
+            .creator(EmployeeNameDto.builder()
+                .email("sss@gmail.com").build())
             .build();
     }
 
@@ -3427,7 +3427,7 @@ public class ModelUtils {
                     .build())
                 .build()))
             .locationStatus(LocationStatus.ACTIVE)
-            .creator(ModelUtils.getUser())
+            .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)
             .minAmountOfBigBags(2L)
@@ -3436,7 +3436,7 @@ public class ModelUtils {
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
                 .name("receivingStation")
-                .createdBy(ModelUtils.createUser())
+                .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
     }
@@ -3455,7 +3455,7 @@ public class ModelUtils {
                     .build())
                 .build()))
             .locationStatus(LocationStatus.ACTIVE)
-            .creator(ModelUtils.getUser())
+            .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
             .maxAmountOfBigBags(100L)
             .minAmountOfBigBags(5L)

@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.LocationsDtos;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -21,12 +20,9 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
-import greencity.enums.StationStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -50,6 +46,8 @@ import java.util.stream.Collectors;
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
     private final UserRepository userRepository;
+
+    private final EmployeeRepository employeeRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceTranslationRepository serviceTranslationRepository;
     private final LocationRepository locationRepository;
@@ -341,12 +339,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public CreateCourierDto createCourier(CreateCourierDto dto, String uuid) {
-        User user = userRepository.findByUuid(uuid);
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
 
         checkIfCourierAlreadyExists(courierRepository.findAll(), dto);
 
         Courier courier = new Courier();
-        courier.setCreatedBy(user);
+        courier.setCreatedBy(employee);
         courier.setCourierStatus(CourierStatus.ACTIVE);
         courier.setCreateDate(LocalDate.now());
         courier.setNameEn(dto.getNameEn());
@@ -425,16 +424,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
-        List<GetTariffsInfoDto> dtos = tariffs
+        return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
-            .sorted(Comparator.comparing(tariff -> tariff.getTariffStatus().getPriority()))
             .collect(Collectors.toList());
-        dtos.forEach(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
-            .sorted(Comparator.comparing(LocationsDtos::getNameUk))
-            .collect(Collectors.toList())));
-        return dtos;
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
@@ -459,18 +453,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public ReceivingStationDto createReceivingStation(AddingReceivingStationDto dto, String uuid) {
         if (!receivingStationRepository.existsReceivingStationByName(dto.getName())) {
-            User user = userRepository.findByUuid(uuid);
-            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, user));
+            Employee employee = employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
+            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, employee));
             return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new UnprocessableEntityException(
             ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
-    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, User user) {
+    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, Employee employee) {
         return ReceivingStation.builder()
             .name(dto.getName())
-            .createdBy(user)
+            .createdBy(employee)
             .createDate(LocalDate.now())
             .stationStatus(StationStatus.ACTIVE)
             .build();
@@ -550,13 +545,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
     }
 
-    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String userUUID, Courier courier) {
+    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String uuid, Courier courier) {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
-            .creator(userRepository.findByUuid(userUUID))
+            .creator(employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
         return tariffsInfoRepository.save(tariffsInfo);
