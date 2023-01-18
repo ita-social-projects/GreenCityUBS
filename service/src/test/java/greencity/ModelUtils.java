@@ -21,7 +21,15 @@ import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.courier.*;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.*;
+import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameDto;
+import greencity.dto.employee.EmployeeNameIdDto;
+import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.employee.EmployeePositionDtoResponse;
+import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateResponsibleEmployeeDto;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationCreateDto;
@@ -1631,11 +1639,15 @@ public class ModelUtils {
             .addressId(1L)
             .addressHouseNumber("1")
             .addressEntranceNumber("3")
-            .addressDistrict("Syhiv")
-            .addressStreet("Stys")
+            .addressDistrict("District")
+            .addressDistrictEng("DistrictEng")
+            .addressStreet("Street")
+            .addressStreetEng("StreetEng")
             .addressHouseCorpus("2")
-            .addressCity("s")
-            .addressRegion("s")
+            .addressCity("City")
+            .addressCityEng("CityEng")
+            .addressRegion("Region")
+            .addressRegionEng("RegionEng")
             .build();
     }
 
@@ -1643,8 +1655,10 @@ public class ModelUtils {
         return OrderAddressDtoResponse.builder()
             .houseNumber("1")
             .entranceNumber("3")
-            .district("Syhiv")
-            .street("Stys")
+            .district("District")
+            .districtEng("DistrictEng")
+            .street("Street")
+            .streetEng("StreetEng")
             .houseCorpus("2")
             .build();
     }
@@ -2467,13 +2481,17 @@ public class ModelUtils {
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()
                 .addressId(1L)
-                .addressDistrict("aaaaaaa")
-                .addressStreet("aaaaa")
+                .addressDistrict("District")
+                .addressDistrictEng("DistrictEng")
+                .addressStreet("Street")
+                .addressStreetEng("StreetEng")
                 .addressEntranceNumber("12")
                 .addressHouseCorpus("123")
                 .addressHouseNumber("121")
-                .addressCity("dsfsdf")
-                .addressRegion("sdfsdfsd")
+                .addressCity("City")
+                .addressCityEng("CityEng")
+                .addressRegion("Region")
+                .addressRegionEng("RegionEng")
                 .build())
             .ecoNumberFromShop(EcoNumberDto.builder()
                 .ecoNumber(Set.of("1111111111"))
@@ -3177,13 +3195,17 @@ public class ModelUtils {
     public static OrderAddressExportDetailsDtoUpdate getOrderAddressExportDetailsDtoUpdate() {
         return OrderAddressExportDetailsDtoUpdate.builder()
             .addressId(1L)
-            .addressStreet("s")
-            .addressCity("ss")
-            .addressDistrict("s")
-            .addressHouseCorpus("ss")
-            .addressEntranceNumber("ss")
-            .addressRegion("ss")
-            .addressHouseNumber("ss")
+            .addressStreet("Street")
+            .addressStreetEng("StreetEng")
+            .addressCity("City")
+            .addressCityEng("City")
+            .addressDistrict("District")
+            .addressDistrictEng("DistrictEng")
+            .addressHouseCorpus("12")
+            .addressEntranceNumber("2")
+            .addressRegion("Region")
+            .addressRegionEng("RegionEng")
+            .addressHouseNumber("123")
             .build();
 
     }
