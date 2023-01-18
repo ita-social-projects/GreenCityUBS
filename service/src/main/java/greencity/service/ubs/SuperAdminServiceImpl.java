@@ -161,15 +161,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Optional<Service> service = getServiceByTariffsInfoId(tariffId);
         if (service.isEmpty()) {
             return Service.builder()
-                    .price(dto.getPrice())
-                    .createdAt(LocalDate.now())
-                    .createdBy(employee)
-                    .name(dto.getName())
-                    .nameEng(dto.getNameEng())
-                    .description(dto.getDescription())
-                    .descriptionEng(dto.getDescriptionEng())
-                    .tariffsInfo(tariffsInfo)
-                    .build();
+                .price(dto.getPrice())
+                .createdAt(LocalDate.now())
+                .createdBy(employee)
+                .name(dto.getName())
+                .nameEng(dto.getNameEng())
+                .description(dto.getDescription())
+                .descriptionEng(dto.getDescriptionEng())
+                .tariffsInfo(tariffsInfo)
+                .build();
         } else {
             throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS);
         }
@@ -202,7 +202,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         getTariffsInfoById(tariffId);
         Optional<Service> service = getServiceByTariffsInfoId(tariffId);
         if (service.isPresent()) {
-            return modelMapper.map(service, GetServiceDto.class);
+            return modelMapper.map(service.get(), GetServiceDto.class);
         } else {
             throw new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId);
         }
