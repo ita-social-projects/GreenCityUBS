@@ -3,9 +3,11 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
@@ -18,29 +20,38 @@ import greencity.entity.order.*;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -55,8 +66,6 @@ class SuperAdminServiceImplTest {
     @Mock
     private BagRepository bagRepository;
     @Mock
-    private BagTranslationRepository bagTranslationRepository;
-    @Mock
     private LocationRepository locationRepository;
     @Mock
     private ModelMapper modelMapper;
@@ -68,6 +77,8 @@ class SuperAdminServiceImplTest {
     private CourierRepository courierRepository;
 
     @Mock
+    private EmployeeRepository employeeRepository;
+    @Mock
     private RegionRepository regionRepository;
     @Mock
     private ReceivingStationRepository receivingStationRepository;
@@ -75,9 +86,24 @@ class SuperAdminServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private TariffLocationRepository tariffsLocationRepository;
-
     @Mock
-    private DeactivateChosenEntityRepository deactivateChosenEntityRepository;
+    private DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
+
+    @AfterEach
+    void afterEach() {
+        verifyNoMoreInteractions(
+            userRepository,
+            locationRepository,
+            modelMapper,
+            serviceRepository,
+            serviceTranslationRepository,
+            courierRepository,
+            regionRepository,
+            receivingStationRepository,
+            tariffsInfoRepository,
+            tariffsLocationRepository,
+            deactivateTariffsForChosenParamRepository);
+    }
 
     @Test
     void addTariffServiceTest() {
@@ -88,22 +114,20 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid("123233")).thenReturn(user);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(bagRepository.save(bag)).thenReturn(bag);
-        when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
+        verify(userRepository).findByUuid("123233");
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
+        verify(modelMapper).map(bag, AddServiceDto.class);
     }
 
     @Test
     void getTariffServiceTest() {
-        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<>());
-
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag5list());
         superAdminService.getTariffService();
-
-        verify(bagTranslationRepository).findAll();
+        verify(bagRepository, times(1)).findAll();
     }
 
     @Test
@@ -130,36 +154,41 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteTariffServiceThrowException() {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteTariffService(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
     void editTariffService_Throw_Exception() {
         EditTariffServiceDto dto = new EditTariffServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
+        verify(userRepository).findByUuid(anyString());
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
     void editTariffService() {
         String uuid = "testUUid";
-        BagTranslation bagTranslation = ModelUtils.getBagTranslationForEditMethod();
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = bagTranslation.getBag();
+        Bag bag = Bag.builder()
+            .id(1)
+            .name("Test")
+            .nameEng("Name Test")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location.builder()
+                .id(1L)
+                .build())
+            .build();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagTranslationRepository.findBagTranslationByBag(bag))
-            .thenReturn(bagTranslation);
-        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
         superAdminService.editTariffService(dto, 1, uuid);
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).findBagTranslationByBag(bag);
-        verify(bagTranslationRepository).save(bagTranslation);
     }
 
     @Test
@@ -229,21 +258,34 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addServiceThrowsExceptionWhenCourierNonFoundTest() {
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> superAdminService.addService(createServiceDto, userUuid));
+
+        verify(userRepository).findByUuid(user.getUuid());
+        verify(courierRepository).findById(anyLong());
+    }
+
+    @Test
+    void setLimitDescriptionThrowsUnsupportedOperationExceptionTest() {
+        assertThrows(UnsupportedOperationException.class,
+            () -> superAdminService.setLimitDescription(1L, "limitDescription"));
+    }
+
+    @Test
     void includeBag() {
-        BagTranslation bagTranslationTest = BagTranslation.builder()
-            .id(2L)
-            .bag(Bag.builder().id(2).capacity(120).price(350).build())
-            .name("Useless paper")
-            .description("Description")
-            .build();
-        bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
-        bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
-        when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
-
-        when(bagTranslationRepository.findBagTranslationByBag(bagTranslationTest.getBag()))
-            .thenReturn(bagTranslationTest);
-
+        when(bagRepository.findById(10))
+            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description")
+                .minAmountOfBags(MinAmountOfBag.EXCLUDE).location(Location.builder().id(1L).build()).build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
+        verify(bagRepository).save(any(Bag.class));
+        verify(bagRepository, times(1)).findById(anyInt());
     }
 
     @Test
@@ -255,6 +297,7 @@ class SuperAdminServiceImplTest {
         superAdminService.getAllLocation();
 
         verify(regionRepository).findAll();
+        regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
     @Test
@@ -266,6 +309,7 @@ class SuperAdminServiceImplTest {
         superAdminService.getActiveLocations();
 
         verify(regionRepository).findRegionsWithActiveLocations();
+        regionList.forEach(region -> verify(modelMapper).map(region, LocationInfoDto.class));
     }
 
     @Test
@@ -279,6 +323,8 @@ class SuperAdminServiceImplTest {
         superAdminService.addLocation(locationCreateDtoList);
 
         verify(regionRepository).findRegionByEnNameAndUkrName("Kyiv region", "Київська область");
+        verify(locationRepository).findLocationByNameAndRegionId(anyString(), anyString(), anyLong());
+        verify(locationRepository).save(any(Location.class));
     }
 
     @Test
@@ -303,6 +349,7 @@ class SuperAdminServiceImplTest {
         superAdminService.activateLocation(1L);
 
         verify(locationRepository).findById(1L);
+        verify(locationRepository).save(location);
     }
 
     @Test
@@ -315,37 +362,40 @@ class SuperAdminServiceImplTest {
         superAdminService.deactivateLocation(1L);
 
         verify(locationRepository).findById(1L);
+        verify(locationRepository).save(any());
     }
 
     @Test
     void excludeBag() {
         Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
-        BagTranslation bagTranslation = ModelUtils.bagTranslationDto();
 
         when(bagRepository.findById(1)).thenReturn(bag);
-        when(bagTranslationRepository.findBagTranslationByBag(ModelUtils.bagDto2())).thenReturn(bagTranslation);
 
         superAdminService.excludeBag(1);
 
         verify(bagRepository).findById(1);
-        verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
+        verify(bagRepository).save(bag.get());
     }
 
     @Test
     void addTariffServiceExceptionTest() {
         AddServiceDto dto = ModelUtils.addServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
+        verify(userRepository).findByUuid(anyString());
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
     void deleteServiceExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.deleteService(1L));
+        verify(serviceRepository).findById(anyLong());
     }
 
     @Test
     void editServiceExceptionTest() {
         EditServiceDto dto = ModelUtils.getEditServiceDto();
         assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
+        verify(serviceRepository).findServiceById(anyLong());
 
     }
 
@@ -364,6 +414,7 @@ class SuperAdminServiceImplTest {
     @Test
     void deactivateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.deactivateLocation(1L));
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
@@ -379,6 +430,7 @@ class SuperAdminServiceImplTest {
     @Test
     void activateLocationExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.activateLocation(1L));
+        verify(locationRepository).findById(anyLong());
     }
 
     @Test
@@ -392,6 +444,7 @@ class SuperAdminServiceImplTest {
     @Test
     void excludeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.excludeBag(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -406,6 +459,7 @@ class SuperAdminServiceImplTest {
     @Test
     void includeBagExceptionTest() {
         assertThrows(NotFoundException.class, () -> superAdminService.includeBag(1));
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -447,7 +501,7 @@ class SuperAdminServiceImplTest {
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
             .nameEn("Test1")
             .nameUk("Тест1")
@@ -469,10 +523,14 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         String uuid = ModelUtils.TEST_USER.getUuid();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
-        assertThrows(CourierAlreadyExists.class, () -> superAdminService.createCourier(createCourierDto, uuid));
+        Throwable throwable = assertThrows(CourierAlreadyExists.class,
+            () -> superAdminService.createCourier(createCourierDto, uuid));
+        assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS, throwable.getMessage());
+        verify(employeeRepository).findByUuid(anyString());
+        verify(courierRepository).findAll();
     }
 
     @Test
@@ -548,7 +606,7 @@ class SuperAdminServiceImplTest {
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
             .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
-
+        when(employeeRepository.findByUuid(test)).thenReturn(Optional.ofNullable(getEmployee()));
         superAdminService.createReceivingStation(stationDto, test);
 
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
@@ -560,6 +618,38 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
+        verify(employeeRepository).findByUuid(any());
+    }
+
+    @Test
+    void createReceivingStationSaveCorrectValue() {
+        String receivingStationName = "Петрівка";
+        Employee employee = getEmployee();
+        AddingReceivingStationDto addingReceivingStationDto =
+            AddingReceivingStationDto.builder().name(receivingStationName).build();
+        ReceivingStation activatedReceivingStation = ReceivingStation.builder()
+            .name(receivingStationName)
+            .createdBy(employee)
+            .createDate(LocalDate.now())
+            .stationStatus(StationStatus.ACTIVE)
+            .build();
+
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(employee));
+        when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
+        when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
+        when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
+            .thenReturn(receivingStationDto);
+
+        superAdminService.createReceivingStation(addingReceivingStationDto, employee.getUuid());
+
+        verify(employeeRepository).findByUuid(any());
+        verify(receivingStationRepository).existsReceivingStationByName(any());
+        verify(receivingStationRepository).save(activatedReceivingStation);
+        verify(modelMapper)
+            .map(any(ReceivingStation.class), eq(ReceivingStationDto.class));
+
     }
 
     @Test
@@ -575,6 +665,14 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository).findById(anyLong());
         verify(receivingStationRepository).save(any());
         verify(modelMapper).map(any(), eq(ReceivingStationDto.class));
+    }
+
+    @Test
+    void updateReceivingStationThrowsExceptionWhenReceivingStationNonFoundTest() {
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> superAdminService.updateReceivingStation(receivingStationDto));
+        verify(receivingStationRepository).findById(anyLong());
     }
 
     @Test
@@ -612,7 +710,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(ModelUtils.getLocationList());
-        when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(getEmployee()));
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -620,31 +718,98 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
         superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf");
         verify(tariffsInfoRepository, times(2)).save(any());
+        verify(tariffsLocationRepository).saveAll(anySet());
+    }
+
+    @Test
+    void addNewTariffThrowsExceptionWhenListOfLocationsIsEmptyTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
+        when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
+            dto.getRegionId())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(employeeRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(receivingStationRepository).findAllById(List.of(1L));
+        verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
+    }
+
+    @Test
+    void addNewTariffThrowsExceptionWhenSuchTariffIsAlreadyExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        TariffLocation tariffLocation = TariffLocation
+            .builder()
+            .id(1L)
+            .location(ModelUtils.getLocation())
+            .build();
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
+            dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
+
+        assertThrows(TariffAlreadyExistsException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(dto.getCourierId(),
+            dto.getLocationIdList());
+        verifyNoMoreInteractions(courierRepository, tariffsLocationRepository);
     }
 
     @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+        verify(courierRepository).findById(anyLong());
+        verify(receivingStationRepository).findAllById(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), anyList());
     }
 
     @Test
     void addNewTariffThrowsException3() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
-    void checkIfTariffExistsTest() {
+    void checkIfTariffDoesNotExistsTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
             .thenReturn(Collections.emptyList());
         boolean actual = superAdminService.checkIfTariffExists(dto);
         assertFalse(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
+    }
+
+    @Test
+    void checkIfTariffExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        TariffLocation tariffLocation = TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(ModelUtils.getTariffsInfo())
+            .location(ModelUtils.getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
+            .thenReturn(List.of(tariffLocation));
+        boolean actual = superAdminService.checkIfTariffExists(dto);
+        assertTrue(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
     }
 
     @Test
@@ -822,5 +987,381 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffsInfo));
         assertThrows(BadRequestException.class,
             () -> superAdminService.changeTariffLocationsStatus(1L, dto, "unresolvable"));
+    }
+
+    @Test
+    void deactivateTariffByOneRegion() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegion();
+
+        when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L));
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegions(List.of(1L));
+    }
+
+    @Test
+    void deactivateTariffByTwoRegions() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegion();
+        details.setRegionsId(Optional.of(List.of(1L, 2L)));
+
+        when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L, 2L));
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegions(List.of(1L, 2L));
+    }
+
+    @Test
+    void deactivateTariffByNotExistingRegionThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegion();
+
+        when(deactivateTariffsForChosenParamRepository.isRegionsExists(anyList())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(deactivateTariffsForChosenParamRepository).isRegionsExists(List.of(1L));
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegions(anyList());
+    }
+
+    @Test
+    void deactivateTariffByOneRegionAndCities() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(true);
+        when(deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(anyList(), anyLong())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(regionRepository).existsRegionById(1L);
+        verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByRegionsAndCities(List.of(1L, 11L), 1L);
+    }
+
+    @Test
+    void deactivateTariffByOneRegionAndNotExistingCitiesThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(true);
+        when(deactivateTariffsForChosenParamRepository.isCitiesExistForRegion(anyList(), anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(regionRepository).existsRegionById(1L);
+        verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegionsAndCities(anyList(),
+            anyLong());
+    }
+
+    @Test
+    void deactivateTariffByOneNotExistingRegionAndCitiesThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(regionRepository).existsRegionById(1L);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByRegionsAndCities(anyList(),
+            anyLong());
+    }
+
+    @Test
+    void deactivateTariffByCourier() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourier();
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(1L);
+    }
+
+    @Test
+    void deactivateTariffByNotExistingCourierThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourier();
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourier(anyLong());
+    }
+
+    @Test
+    void deactivateTariffByReceivingStations() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithReceivingStations();
+
+        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByReceivingStations(List.of(1L, 12L));
+    }
+
+    @Test
+    void deactivateTariffByNotExistingReceivingStationsThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithReceivingStations();
+
+        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByReceivingStations(anyList());
+    }
+
+    @Test
+    void deactivateTariffByCourierAndReceivingStations() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations();
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
+        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+        verify(deactivateTariffsForChosenParamRepository)
+            .deactivateTariffsByCourierAndReceivingStations(1L, List.of(1L, 12L));
+    }
+
+    @Test
+    void deactivateTariffByNotExistingCourierAndReceivingStationsTrows() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations();
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByCourierAndReceivingStations(anyLong(), anyList());
+    }
+
+    @Test
+    void deactivateTariffByCourierAndNotExistingReceivingStationsTrows() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndReceivingStations();
+
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
+        when(deactivateTariffsForChosenParamRepository.isReceivingStationsExists(anyList())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByCourierAndReceivingStations(anyLong(), anyList());
+    }
+
+    @Test
+    void deactivateTariffByCourierAndOneRegion() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndRegion();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(true);
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verify(regionRepository).existsRegionById(1L);
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourierAndRegion(1L, 1L);
+    }
+
+    @Test
+    void deactivateTariffByNotExistingCourierAndOneRegionThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndRegion();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(true);
+        when(courierRepository.existsCourierById(anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(regionRepository).existsRegionById(1L);
+        verify(courierRepository).existsCourierById(1L);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourierAndRegion(anyLong(),
+            anyLong());
+    }
+
+    @Test
+    void deactivateTariffByCourierAndNotExistingRegionThrows() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndRegion();
+
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(false);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verify(regionRepository).existsRegionById(1L);
+        verify(deactivateTariffsForChosenParamRepository, never()).deactivateTariffsByCourierAndRegion(anyLong(),
+            anyLong());
+    }
+
+    @Test
+    void deactivateTariffByOneRegionAndCityAndStation() {
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation();
+
+        doMockForTariffWithRegionAndCityAndStation(true, true, true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verifyForTariffWithRegionAndCityAndStation(true, true, true);
+    }
+
+    @ParameterizedTest
+    @MethodSource("deactivateTariffByNotExistingRegionOrCityOrStationProvider")
+    void deactivateTariffByNotExistingRegionAndCityAndStationThrows(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists) {
+
+        DetailsOfDeactivateTariffsDto details =
+            ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation();
+        doMockForTariffWithRegionAndCityAndStation(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verifyForTariffWithRegionAndCityAndStation(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByRegionAndCitiesAndStations(anyLong(), anyList(), anyList());
+    }
+
+    static Stream<Arguments> deactivateTariffByNotExistingRegionOrCityOrStationProvider() {
+        return Stream.of(
+            arguments(false, true, true),
+            arguments(false, false, true),
+            arguments(false, true, false),
+            arguments(true, false, true),
+            arguments(true, false, false),
+            arguments(true, true, false),
+            arguments(false, false, false));
+    }
+
+    @Test
+    void deactivateTariffByAllValidParams() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithAllParams();
+
+        doMockForTariffWithAllParams(true, true, true, true);
+        superAdminService.deactivateTariffForChosenParam(details);
+        verifyForTariffWithAllParams(true, true, true, true);
+    }
+
+    @ParameterizedTest
+    @MethodSource("deactivateTariffByAllWithNotExistingParamProvider")
+    void deactivateTariffByAllWithNotExistingParamThrows(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists,
+        boolean isCourierExists) {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithAllParams();
+
+        doMockForTariffWithAllParams(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists,
+            isCourierExists);
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+        verifyForTariffWithAllParams(isRegionExists, isCitiesExistForRegion, isReceivingStationsExists,
+            isCourierExists);
+        verify(deactivateTariffsForChosenParamRepository, never())
+            .deactivateTariffsByAllParam(anyLong(), anyList(), anyList(), anyLong());
+    }
+
+    private static Stream<Arguments> deactivateTariffByAllWithNotExistingParamProvider() {
+        return Stream.of(
+            arguments(false, true, true, true),
+            arguments(true, false, true, true),
+            arguments(true, true, false, true),
+            arguments(true, true, true, false),
+            arguments(false, false, true, true),
+            arguments(false, true, false, true),
+            arguments(false, true, true, false),
+            arguments(false, true, false, false),
+            arguments(true, false, false, true),
+            arguments(true, false, true, false),
+            arguments(true, true, false, false),
+            arguments(false, false, false, true),
+            arguments(false, false, true, false),
+            arguments(true, false, false, false),
+            arguments(false, false, false, false));
+    }
+
+    @Test
+    void deactivateTariffByAllEmptyParams() {
+        DetailsOfDeactivateTariffsDto details = ModelUtils.getDetailsOfDeactivateTariffsDtoWithEmptyParams();
+
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
+    @ParameterizedTest
+    @MethodSource("deactivateTariffByDifferentParamWithTwoRegionsProvider")
+    void deactivateTariffByDifferentParamWithTwoRegionsThrows(DetailsOfDeactivateTariffsDto details) {
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateTariffForChosenParam(details));
+    }
+
+    private static Stream<Arguments> deactivateTariffByDifferentParamWithTwoRegionsProvider() {
+        return Stream.of(
+            arguments(ModelUtils.getDetailsOfDeactivateTariffsDtoWithCourierAndRegion()
+                .setRegionsId(Optional.of(List.of(1L, 2L)))),
+            arguments(ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCities()
+                .setRegionsId(Optional.of(List.of(1L, 2L)))),
+            arguments(ModelUtils.getDetailsOfDeactivateTariffsDtoWithRegionAndCityAndStation()
+                .setRegionsId(Optional.of(List.of(1L, 2L)))),
+            arguments(ModelUtils.getDetailsOfDeactivateTariffsDtoWithAllParams()
+                .setRegionsId(Optional.of(List.of(1L, 2L)))));
+    }
+
+    private void doMockForTariffWithRegionAndCityAndStation(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists) {
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(isRegionExists);
+        if (isRegionExists) {
+            when(deactivateTariffsForChosenParamRepository
+                .isCitiesExistForRegion(anyList(), anyLong())).thenReturn(isCitiesExistForRegion);
+            if (isCitiesExistForRegion) {
+                when(deactivateTariffsForChosenParamRepository
+                    .isReceivingStationsExists(anyList())).thenReturn(isReceivingStationsExists);
+            }
+        }
+    }
+
+    private void verifyForTariffWithRegionAndCityAndStation(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists) {
+        verify(regionRepository).existsRegionById(1L);
+        if (isRegionExists) {
+            verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
+            if (isCitiesExistForRegion) {
+                verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+                if (isReceivingStationsExists) {
+                    verify(deactivateTariffsForChosenParamRepository)
+                        .deactivateTariffsByRegionAndCitiesAndStations(1L, List.of(1L, 11L), List.of(1L, 12L));
+                }
+            }
+        }
+    }
+
+    private void doMockForTariffWithAllParams(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists,
+        boolean isCourierExists) {
+        when(regionRepository.existsRegionById(anyLong())).thenReturn(isRegionExists);
+        if (isRegionExists) {
+            when(deactivateTariffsForChosenParamRepository
+                .isCitiesExistForRegion(anyList(), anyLong())).thenReturn(isCitiesExistForRegion);
+            if (isCitiesExistForRegion) {
+                when(deactivateTariffsForChosenParamRepository
+                    .isReceivingStationsExists(anyList())).thenReturn(isReceivingStationsExists);
+                if (isReceivingStationsExists) {
+                    when(courierRepository.existsCourierById(anyLong())).thenReturn(isCourierExists);
+                }
+            }
+        }
+    }
+
+    private void verifyForTariffWithAllParams(
+        boolean isRegionExists,
+        boolean isCitiesExistForRegion,
+        boolean isReceivingStationsExists,
+        boolean isCourierExists) {
+        verify(regionRepository).existsRegionById(1L);
+        if (isRegionExists) {
+            verify(deactivateTariffsForChosenParamRepository).isCitiesExistForRegion(List.of(1L, 11L), 1L);
+            if (isCitiesExistForRegion) {
+                verify(deactivateTariffsForChosenParamRepository).isReceivingStationsExists(List.of(1L, 12L));
+                if (isReceivingStationsExists) {
+                    verify(courierRepository).existsCourierById(1L);
+                    if (isCourierExists) {
+                        verify(deactivateTariffsForChosenParamRepository)
+                            .deactivateTariffsByAllParam(1L, List.of(1L, 11L), List.of(1L, 12L), 1L);
+                    }
+                }
+            }
+        }
     }
 }

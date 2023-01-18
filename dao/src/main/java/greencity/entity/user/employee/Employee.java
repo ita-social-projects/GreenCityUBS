@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -15,8 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders",
-    "employeeOrderPositions", "orders"})
+@EqualsAndHashCode(exclude = {"employeePosition", "attachedOrders", "employeeOrderPositions", "orders", "tariffs"})
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -34,6 +34,9 @@ public class Employee {
 
     @Column(length = 170, unique = true)
     private String email;
+
+    @Column(nullable = false, columnDefinition = "varchar(60)")
+    private String uuid;
 
     @Column(name = "image_path")
     private String imagePath;
@@ -62,6 +65,9 @@ public class Employee {
         joinColumns = {@JoinColumn(name = "employee_id")},
         inverseJoinColumns = {@JoinColumn(name = "tariffs_info_id")})
     private Set<TariffsInfo> tariffInfos;
+
+    @OneToMany(mappedBy = "creator")
+    private List<TariffsInfo> tariffs;
 
     @OneToMany(mappedBy = "employee")
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)

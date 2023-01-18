@@ -2,7 +2,6 @@ package greencity.entity.user.employee;
 
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.User;
 import greencity.enums.StationStatus;
 import lombok.*;
 
@@ -17,7 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"tariffsInfo"})
+@EqualsAndHashCode(exclude = {"tariffsInfo", "createdBy"})
 @Table(name = "receiving_stations")
 public class ReceivingStation {
     @Id
@@ -34,7 +33,7 @@ public class ReceivingStation {
     private List<Order> orders;
 
     @ManyToOne
-    private User createdBy;
+    private Employee createdBy;
 
     private LocalDate createDate;
 

@@ -20,14 +20,14 @@ class AddServiceDtoMapperTest {
         AddServiceDto dto = ModelUtils.addServiceDto();
         AddServiceDto convertDto = mapper.convert(bag);
 
-        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getName(),
-            convertDto.getTariffTranslationDtoList().get(0).getName());
-        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getDescription(),
-            convertDto.getTariffTranslationDtoList().get(0).getDescription());
-        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getNameEng(),
-            convertDto.getTariffTranslationDtoList().get(0).getNameEng());
-        Assertions.assertEquals(dto.getTariffTranslationDtoList().get(0).getDescriptionEng(),
-            convertDto.getTariffTranslationDtoList().get(0).getDescriptionEng());
+        Assertions.assertEquals(dto.getTariffTranslationDto().getName(),
+            convertDto.getTariffTranslationDto().getName());
+        Assertions.assertEquals(dto.getTariffTranslationDto().getDescription(),
+            convertDto.getTariffTranslationDto().getDescription());
+        Assertions.assertEquals(dto.getTariffTranslationDto().getNameEng(),
+            convertDto.getTariffTranslationDto().getNameEng());
+        Assertions.assertEquals(dto.getTariffTranslationDto().getDescriptionEng(),
+            convertDto.getTariffTranslationDto().getDescriptionEng());
         Assertions.assertEquals(150, bag.getFullPrice());
     }
 }

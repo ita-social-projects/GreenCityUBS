@@ -28,6 +28,7 @@ import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.FoundException;
@@ -76,7 +77,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final BagRepository bagRepository;
-    private final BagTranslationRepository bagTranslationRepository;
     private final UpdateOrderDetailRepository updateOrderRepository;
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
@@ -336,12 +336,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
         Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
-        Address address = order.getUbsUser().getAddress();
+        OrderAddress address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(bag.getId());
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(bagTranslation.getName());
-            bagInfoDto.setNameEng(bagTranslation.getNameEng());
+            bagInfoDto.setName(bag.getName());
+            bagInfoDto.setNameEng(bag.getNameEng());
             bagInfo.add(bagInfoDto);
         });
         UserInfoDto userInfoDto =
@@ -399,7 +398,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      *
      * @author Yuriy Bahlay.
      */
-    private AddressExportDetailsDto getAddressDtoForAdminPage(Address address) {
+    private AddressExportDetailsDto getAddressDtoForAdminPage(OrderAddress address) {
         return AddressExportDetailsDto.builder()
             .addressId(address.getId())
             .addressCity(address.getCity())
@@ -651,13 +650,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(entry.getKey());
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
 
-            if (order.getOrderStatus() == OrderStatus.ADJUSTMENT
-                || order.getOrderStatus() == OrderStatus.CONFIRMED
-                || order.getOrderStatus() == OrderStatus.FORMED
-                || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT) {
+            if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
+                Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
                         Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
@@ -666,7 +663,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
-                    values.append(bagTranslation.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
                         .append(confirmWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
@@ -678,12 +675,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         Long orderId, int countOfChanges, StringBuilder values) {
         for (Map.Entry<Integer, Integer> entry : exported.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
-            BagTranslation bagTranslation = bagTranslationRepository.findBagTranslationByBagId(entry.getKey());
-            if (order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
-                || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
-                || order.getOrderStatus() == OrderStatus.DONE
-                || order.getOrderStatus() == OrderStatus.CANCELED) {
+            Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
+            if (bagOptional.isPresent() && checkOrderStatusAboutExportedWaste(order)) {
                 Optional<Long> exporterWasteWas = Optional.empty();
+                Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     exporterWasteWas =
                         Optional
@@ -694,12 +689,26 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                         countOfChanges++;
                     }
-                    values.append(bagTranslation.getName()).append(" ").append(capacity).append(" л: ")
+                    values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
                         .append(exporterWasteWas.orElse(0L))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }
         }
+    }
+
+    private boolean checkOrderStatusAboutConfirmWaste(Order order) {
+        return order.getOrderStatus() == OrderStatus.ADJUSTMENT
+            || order.getOrderStatus() == OrderStatus.CONFIRMED
+            || order.getOrderStatus() == OrderStatus.FORMED
+            || order.getOrderStatus() == OrderStatus.NOT_TAKEN_OUT;
+    }
+
+    private boolean checkOrderStatusAboutExportedWaste(Order order) {
+        return order.getOrderStatus() == OrderStatus.ON_THE_ROUTE
+            || order.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF
+            || order.getOrderStatus() == OrderStatus.DONE
+            || order.getOrderStatus() == OrderStatus.CANCELED;
     }
 
     /**
@@ -954,7 +963,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
 
-        dto.setName(bagTranslationRepository.findAllByOrder(order.getId())
+        dto.setName(bagRepository.findAllByOrder(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagTransDto.class))
             .collect(Collectors.toList()));

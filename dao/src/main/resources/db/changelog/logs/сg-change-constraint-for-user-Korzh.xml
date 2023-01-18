@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Korzh-14" author="Nikita Korzh">
+        <dropForeignKeyConstraint baseTableName="tariffs_info"
+                                  constraintName="fk_creator_to_tariffs_info"/>
+
+        <addForeignKeyConstraint baseTableName="tariffs_info"
+                                 baseColumnNames="creator_id"
+                                 constraintName="fk_creator_to_tariffs_info"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <dropForeignKeyConstraint baseTableName="courier"
+                                  constraintName="FK_user_id"/>
+
+        <addForeignKeyConstraint baseTableName="courier"
+                                 baseColumnNames="created_by_id"
+                                 constraintName="fk_creator_to_courier"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+
+        <dropForeignKeyConstraint baseTableName="receiving_stations"
+                                  constraintName="FK_created_by"/>
+
+        <addForeignKeyConstraint baseTableName="receiving_stations"
+                                 baseColumnNames="created_by_id"
+                                 constraintName="fk_creator_to_receiving_stations"
+                                 referencedTableName="employees"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
