@@ -3,8 +3,9 @@ package greencity.mapping.tariff;
 import greencity.dto.LocationsDtos;
 import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.courier.ReceivingStationDto;
+import greencity.dto.employee.EmployeeNameDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Region;
 import org.modelmapper.AbstractConverter;
@@ -30,7 +31,12 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .minPriceOfOrder(source.getMinPriceOfOrder())
             .regionDto(regionDto)
             .createdAt(source.getCreatedAt())
-            .creator(source.getCreator() != null ? source.getCreator().getRecipientEmail() : "unknown")
+            .creator(EmployeeNameDto.builder()
+                .id(source.getCreator().getId())
+                .firstName(source.getCreator().getFirstName())
+                .lastName(source.getCreator().getLastName())
+                .phoneNumber(source.getCreator().getPhoneNumber())
+                .email(source.getCreator().getEmail()).build())
             .tariffStatus(source.getLocationStatus())
             .locationInfoDtos(source.getTariffLocations().stream()
                 .map(location -> LocationsDtos.builder()
@@ -44,7 +50,7 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
                     .id(receivingStation.getId())
                     .createDate(receivingStation.getCreateDate())
                     .name(receivingStation.getName())
-                    .createdBy(receivingStation.getCreatedBy().getRecipientEmail())
+                    .createdBy(receivingStation.getCreatedBy().getEmail())
                     .build())
                 .collect(Collectors.toList()))
             .courierDto(CourierDto.builder()

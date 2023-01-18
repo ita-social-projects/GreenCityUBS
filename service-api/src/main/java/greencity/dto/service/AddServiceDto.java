@@ -4,7 +4,6 @@ import greencity.dto.tariff.TariffTranslationDto;
 import lombok.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Getter
 @Setter
@@ -15,13 +14,13 @@ import java.util.List;
 @EqualsAndHashCode
 public class AddServiceDto {
     @NotNull
-    Integer capacity;
+    private Integer capacity;
     @NotNull
-    Integer price;
+    private Integer price;
     @NotNull
-    Integer commission;
+    private Integer commission;
     @Valid
-    List<TariffTranslationDto> tariffTranslationDtoList;
+    private TariffTranslationDto tariffTranslationDto;
     @NotNull
-    Long locationId;
+    private Long locationId;
 }

@@ -22,13 +22,13 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -172,7 +172,7 @@ class SuperAdminControllerTest {
 
         Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         Mockito.when(superAdminService.addService(Mockito.any(CreateServiceDto.class), Mockito.anyString()))
-            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
         mockMvc.perform(post(ubsLink + "/createService")
             .principal(principal)
@@ -180,7 +180,7 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND,
+            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 result.getResolvedException().getMessage()));
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
@@ -192,7 +192,9 @@ class SuperAdminControllerTest {
     void createServiceIfTariffNotFoundException() throws Exception {
         CreateServiceDto dto = ModelUtils.createServiceDto();
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
 
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
         Mockito.when(superAdminService.addService(Mockito.any(CreateServiceDto.class), Mockito.anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
@@ -298,7 +300,7 @@ class SuperAdminControllerTest {
         Mockito
             .when(superAdminService.editService(Mockito.anyLong(), Mockito.any(EditServiceDto.class),
                 Mockito.anyString()))
-            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
         mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .content(requestedJson)
@@ -306,7 +308,7 @@ class SuperAdminControllerTest {
             .principal(principal))
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND,
+            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 result.getResolvedException().getMessage()));
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
@@ -423,6 +425,31 @@ class SuperAdminControllerTest {
 
         Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
         Mockito.verify(superAdminService).createCourier(dto, uuid);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+    }
+
+    @Test
+    void addNewTariffIfTariffAlreadyExistsException() throws Exception {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = UUID.randomUUID().toString();
+
+        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(superAdminService.addNewTariff(dto, uuid))
+            .thenThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS));
+
+        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+            .principal(principal)
+            .content(requestedJson)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isConflict())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof TariffAlreadyExistsException))
+            .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
+                result.getResolvedException().getMessage()));
+
+        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(superAdminService).addNewTariff(dto, uuid);
         Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 

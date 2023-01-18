@@ -18,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     /**
-     * Method gets all {@link Employee} employee.
+     * Method gets all employees.
      *
      * @param pageable {@link Pageable}
      * @return list of {@link Employee}
@@ -27,7 +27,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAll(Pageable pageable);
 
     /**
-     * Method checks if {@link String} phoneNumber already exist.
+     * Method checks if employee with phoneNumber already exists.
      *
      * @param phoneNumber {@link String}
      * @return {@link Boolean}
@@ -36,7 +36,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
 
     /**
-     * Method checks if {@link String} email already exist.
+     * Method checks if employee with email already exists.
      *
      * @param email {@link String}
      * @return {@link Boolean}
@@ -45,7 +45,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByEmail(String email);
 
     /**
-     * Method checks if {@link String} phoneNumber exist except current employee.
+     * Method checks if employee exists with phoneNumber and id.
      *
      * @param phoneNumber {@link String}
      * @param id          {@link Long}
@@ -55,7 +55,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByPhoneNumberAndId(String phoneNumber, Long id);
 
     /**
-     * Method checks if {@link String} email exist except current employee.
+     * Method checks if employee exists with email and id.
      *
      * @param email {@link String}
      * @param id    {@link Long}
@@ -87,7 +87,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * Method find current position for Employee.
      *
      * @param employeeId {@link Long}.
-     * @return {@link Long}.
+     * @return {@link Optional} of {@link Long}.
      * @author Yuriy Bahlay.
      */
     Optional<Long> findPositionById(Long employeeId);
@@ -102,10 +102,18 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Optional<Employee> findByEmail(String email);
 
     /**
+     * Method that return employee by his uuid.
+     *
+     * @param uuid {@link String}
+     * @return employee.
+     */
+    Optional<Employee> findByUuid(String uuid);
+
+    /**
      * Method find current tariffsInfo for Employee.
      *
      * @param employeeId {@link Long}.
-     * @return {@link Long}.
+     * @return {@link List} of {@link Long}.
      * @author Hlazova Nataliia.
      */
     @Query(
@@ -114,12 +122,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             + "WHERE EMPLOYEE_ID = :employeeId",
         nativeQuery = true)
     List<Long> findTariffsInfoForEmployee(Long employeeId);
-
-    /**
-     * Method that return employee by his uuid.
-     *
-     * @param uuid {@link String}
-     * @return employee.
-     */
-    Optional<Employee> findByUuid(String uuid);
 }

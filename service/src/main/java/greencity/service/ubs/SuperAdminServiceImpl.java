@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.LocationsDtos;
 import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.AddLocationTranslationDto;
@@ -23,16 +22,13 @@ import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
-import greencity.enums.StationStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -42,7 +38,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +46,6 @@ import java.util.stream.Collectors;
 @Data
 public class SuperAdminServiceImpl implements SuperAdminService {
     private final BagRepository bagRepository;
-    private final BagTranslationRepository translationRepository;
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final ServiceRepository serviceRepository;
@@ -82,14 +76,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         User user = userRepository.findByUuid(uuid);
         Bag bag = createBagWithFewTranslation(dto, user);
         bagRepository.save(bag);
-        translationRepository.saveAll(bag.getBagTranslations());
         return modelMapper.map(bag, AddServiceDto.class);
     }
 
     private Bag createBagWithFewTranslation(AddServiceDto dto, User user) {
         final Location location = locationRepository.findById(dto.getLocationId()).orElseThrow(
             () -> new NotFoundException(ErrorMessage.LOCATION_DOESNT_FOUND));
-        Bag bag = Bag.builder().price(dto.getPrice())
+        return Bag.builder().price(dto.getPrice())
             .capacity(dto.getCapacity())
             .location(location)
             .commission(dto.getCommission())
@@ -97,44 +90,38 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
             .createdAt(LocalDate.now())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .bagTranslations(dto.getTariffTranslationDtoList().stream()
-                .map(tariffTranslationDto -> BagTranslation.builder()
-                    .name(tariffTranslationDto.getName())
-                    .nameEng(tariffTranslationDto.getNameEng())
-                    .description(tariffTranslationDto.getDescription())
-                    .descriptionEng(tariffTranslationDto.getDescriptionEng())
-                    .build())
-                .collect(Collectors.toList()))
+            .name(dto.getTariffTranslationDto().getName())
+            .nameEng(dto.getTariffTranslationDto().getNameEng())
+            .description(dto.getTariffTranslationDto().getDescription())
+            .descriptionEng(dto.getTariffTranslationDto().getDescriptionEng())
             .build();
-        bag.getBagTranslations().forEach(bagTranslation -> bagTranslation.setBag(bag));
-        return bag;
     }
 
     @Override
     public List<GetTariffServiceDto> getTariffService() {
-        return translationRepository.findAll()
+        return bagRepository.findAll()
             .stream()
             .map(this::getTariffService)
             .collect(Collectors.toList());
     }
 
-    private GetTariffServiceDto getTariffService(BagTranslation bagTranslation) {
+    private GetTariffServiceDto getTariffService(Bag bag) {
         return GetTariffServiceDto.builder()
-            .description(bagTranslation.getDescription())
-            .descriptionEng(bagTranslation.getDescriptionEng())
-            .price(bagTranslation.getBag().getPrice())
-            .capacity(bagTranslation.getBag().getCapacity())
-            .name(bagTranslation.getName())
-            .commission(bagTranslation.getBag().getCommission())
-            .nameEng(bagTranslation.getNameEng())
-            .fullPrice(bagTranslation.getBag().getFullPrice())
-            .id(bagTranslation.getBag().getId())
-            .createdAt(bagTranslation.getBag().getCreatedAt())
-            .createdBy(bagTranslation.getBag().getCreatedBy())
-            .editedAt(bagTranslation.getBag().getEditedAt())
-            .editedBy(bagTranslation.getBag().getEditedBy())
-            .locationId(bagTranslation.getBag().getLocation().getId())
-            .minAmountOfBag(bagTranslation.getBag().getMinAmountOfBags().toString())
+            .description(bag.getDescription())
+            .descriptionEng(bag.getDescriptionEng())
+            .price(bag.getPrice())
+            .capacity(bag.getCapacity())
+            .name(bag.getName())
+            .commission(bag.getCommission())
+            .nameEng(bag.getNameEng())
+            .fullPrice(bag.getFullPrice())
+            .id(bag.getId())
+            .createdAt(bag.getCreatedAt())
+            .createdBy(bag.getCreatedBy())
+            .editedAt(bag.getEditedAt())
+            .editedBy(bag.getEditedBy())
+            .locationId(bag.getLocation().getId())
+            .minAmountOfBag(bag.getMinAmountOfBags().toString())
             .build();
     }
 
@@ -155,13 +142,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
         bag.setEditedAt(LocalDate.now());
         bag.setEditedBy(user.getRecipientName() + " " + user.getRecipientSurname());
+        bag.setName(dto.getName());
+        bag.setDescription(dto.getDescription());
         bagRepository.save(bag);
-        BagTranslation bagTranslation =
-            translationRepository.findBagTranslationByBag(bag);
-        bagTranslation.setName(dto.getName());
-        bagTranslation.setDescription(dto.getDescription());
-        translationRepository.save(bagTranslation);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override
@@ -172,7 +156,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Service createService(CreateServiceDto dto, String uuid) {
         Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
         long tariffId = dto.getTariffId();
         TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId));
@@ -212,7 +196,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
         Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
         Service service = serviceRepository.findServiceById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
         service.setPrice(dto.getPrice());
@@ -322,12 +306,13 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public CreateCourierDto createCourier(CreateCourierDto dto, String uuid) {
-        User user = userRepository.findByUuid(uuid);
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
 
         checkIfCourierAlreadyExists(courierRepository.findAll(), dto);
 
         Courier courier = new Courier();
-        courier.setCreatedBy(user);
+        courier.setCreatedBy(employee);
         courier.setCourierStatus(CourierStatus.ACTIVE);
         courier.setCreateDate(LocalDate.now());
         courier.setNameEn(dto.getNameEn());
@@ -376,8 +361,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.INCLUDE);
         bagRepository.save(bag);
-        BagTranslation bagTranslation = translationRepository.findBagTranslationByBag(bag);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override
@@ -389,8 +373,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         bag.setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
         bagRepository.save(bag);
-        BagTranslation bagTranslation = translationRepository.findBagTranslationByBag(bag);
-        return getTariffService(bagTranslation);
+        return getTariffService(bag);
     }
 
     @Override
@@ -408,16 +391,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         List<TariffsInfo> tariffs = tariffsInfoRepository.findAll(new TariffsInfoSpecification(filterCriteria));
-        List<GetTariffsInfoDto> dtos = tariffs
+        return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
-            .sorted(Comparator.comparing(tariff -> tariff.getTariffStatus().getPriority()))
             .collect(Collectors.toList());
-        dtos.forEach(tariff -> tariff.setLocationInfoDtos(tariff.getLocationInfoDtos().stream()
-            .sorted(Comparator.comparing(LocationsDtos::getNameUk))
-            .collect(Collectors.toList())));
-        return dtos;
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
@@ -442,18 +420,19 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public ReceivingStationDto createReceivingStation(AddingReceivingStationDto dto, String uuid) {
         if (!receivingStationRepository.existsReceivingStationByName(dto.getName())) {
-            User user = userRepository.findByUuid(uuid);
-            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, user));
+            Employee employee = employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
+            ReceivingStation receivingStation = receivingStationRepository.save(buildReceivingStation(dto, employee));
             return modelMapper.map(receivingStation, ReceivingStationDto.class);
         }
         throw new UnprocessableEntityException(
             ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS + dto.getName());
     }
 
-    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, User user) {
+    private ReceivingStation buildReceivingStation(AddingReceivingStationDto dto, Employee employee) {
         return ReceivingStation.builder()
             .name(dto.getName())
-            .createdBy(user)
+            .createdBy(employee)
             .createDate(LocalDate.now())
             .stationStatus(StationStatus.ACTIVE)
             .build();
@@ -488,7 +467,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Set<Location> locationSet = new HashSet<>(locationRepository
             .findAllByIdAndRegionId(locationId.stream().distinct().collect(Collectors.toList()), regionId));
         if (locationSet.isEmpty()) {
-            throw new EntityNotFoundException("List of locations can not be empty");
+            throw new NotFoundException("List of locations can not be empty");
         }
         return locationSet;
     }
@@ -497,7 +476,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Set<ReceivingStation> receivingStations = new HashSet<>(receivingStationRepository
             .findAllById(receivingStationIdList.stream().distinct().collect(Collectors.toList())));
         if (receivingStations.isEmpty()) {
-            throw new EntityNotFoundException("List of receiving stations can not be empty");
+            throw new NotFoundException("List of receiving stations can not be empty");
         }
         return receivingStations;
     }
@@ -533,13 +512,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
     }
 
-    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String userUUID, Courier courier) {
+    private TariffsInfo createTariff(AddNewTariffDto addNewTariffDto, String uuid, Courier courier) {
         TariffsInfo tariffsInfo = TariffsInfo.builder()
             .createdAt(LocalDate.now())
             .courier(courier)
             .receivingStationList(findReceivingStationsForTariff(addNewTariffDto.getReceivingStationsIdList()))
             .locationStatus(LocationStatus.NEW)
-            .creator(userRepository.findByUuid(userUUID))
+            .creator(employeeRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .build();
         return tariffsInfoRepository.save(tariffsInfo);
@@ -551,13 +531,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         List<Long> alreadyExistsTariff = tariffLocationListList.stream()
             .map(tariffLocation -> tariffLocation.getLocation().getId())
             .collect(Collectors.toList());
-        locationIds.removeAll(alreadyExistsTariff);
+        if (alreadyExistsTariff.stream().anyMatch(locationIds::contains)) {
+            throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS);
+        }
         return alreadyExistsTariff;
     }
 
     private Courier tryToFindCourier(Long courierId) {
         return courierRepository.findById(courierId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId));
     }
 
     @Override

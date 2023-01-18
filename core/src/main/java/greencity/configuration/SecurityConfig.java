@@ -95,7 +95,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/getCouriers",
                 SUPER_ADMIN_LINK + "/tariffs",
                 SUPER_ADMIN_LINK + "/getTariffService",
-                SUPER_ADMIN_LINK + "/getService",
+                SUPER_ADMIN_LINK + "/{tariffId}/getService",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,

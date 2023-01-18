@@ -50,7 +50,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN orders o on o.id = payment.order_id "
         + "JOIN users u on u.id = o.users_id "
         + "JOIN ubs_user uu on uu.id = o.ubs_user_id "
-        + "JOIN address a on uu.address_id = a.id "
+        + "JOIN order_address a on uu.id = a.id "
         + "WHERE ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getAdditionalBagInfo(Long orderId, String recipientEmail);
 
@@ -66,6 +66,18 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getBagInfo(Long orderId);
+
+    /**
+     * method, that returns {@link List}of{@link Bag}.
+     *
+     * @param orderId order id
+     * @return {@link List}of{@link Bag} by orderId.
+     * @author José Castellanos
+     */
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM order_bag_mapping AS obm JOIN bag AS b ON obm.bag_id = b.id "
+            + "WHERE obm.order_id = :orderId")
+    List<Bag> findAllByOrder(@Param("orderId") Long orderId);
 
     /**
      * method, that returns {@link List} of {@link Bag}'s that matches by

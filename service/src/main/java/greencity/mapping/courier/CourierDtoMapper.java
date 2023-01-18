@@ -6,7 +6,6 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Component
 public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
@@ -19,9 +18,8 @@ public class CourierDtoMapper extends AbstractConverter<Courier, CourierDto> {
             .nameEn(source.getNameEn())
             .nameUk(source.getNameUk())
             .createDate(source.getCreateDate() != null ? createdAt : LocalDate.now())
-            .createdBy(Optional.ofNullable(source.getCreatedBy())
-                .map(user -> user.getRecipientName() + " " + user.getRecipientSurname())
-                .orElse(" "))
+            .createdBy(source.getCreatedBy().getFirstName() + " "
+                + source.getCreatedBy().getLastName())
             .build();
     }
 }

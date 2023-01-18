@@ -22,15 +22,13 @@ import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.MinAmountOfBag;
-import greencity.enums.StationStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
+import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
@@ -45,7 +43,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
@@ -69,17 +66,13 @@ class SuperAdminServiceImplTest {
     @Mock
     private BagRepository bagRepository;
     @Mock
-    private BagTranslationRepository bagTranslationRepository;
-    @Mock
     private LocationRepository locationRepository;
     @Mock
     private ModelMapper modelMapper;
     @Mock
     private ServiceRepository serviceRepository;
-
     @Mock
     private CourierRepository courierRepository;
-
     @Mock
     private RegionRepository regionRepository;
     @Mock
@@ -97,7 +90,6 @@ class SuperAdminServiceImplTest {
             userRepository,
             employeeRepository,
             bagRepository,
-            bagTranslationRepository,
             locationRepository,
             modelMapper,
             serviceRepository,
@@ -118,24 +110,20 @@ class SuperAdminServiceImplTest {
         when(userRepository.findByUuid("123233")).thenReturn(user);
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(bagRepository.save(bag)).thenReturn(bag);
-        when(bagTranslationRepository.saveAll(bag.getBagTranslations())).thenReturn(ModelUtils.getBagTransaltion());
 
         superAdminService.addTariffService(dto, "123233");
 
         verify(userRepository).findByUuid("123233");
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).saveAll(bag.getBagTranslations());
         verify(modelMapper).map(bag, AddServiceDto.class);
     }
 
     @Test
     void getTariffServiceTest() {
-        when(bagTranslationRepository.findAll()).thenReturn(new ArrayList<>());
-
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag5list());
         superAdminService.getTariffService();
-
-        verify(bagTranslationRepository).findAll();
+        verify(bagRepository, times(1)).findAll();
     }
 
     @Test
@@ -176,25 +164,27 @@ class SuperAdminServiceImplTest {
     @Test
     void editTariffService() {
         String uuid = "testUUid";
-        BagTranslation bagTranslation = ModelUtils.getBagTranslationForEditMethod();
         EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = bagTranslation.getBag();
+        Bag bag = Bag.builder()
+            .id(1)
+            .name("Test")
+            .nameEng("Name Test")
+            .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .location(Location.builder()
+                .id(1L)
+                .build())
+            .build();
         User user = new User();
         user.setRecipientName("John");
         user.setRecipientSurname("Doe");
 
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-        when(bagTranslationRepository.findBagTranslationByBag(bag))
-            .thenReturn(bagTranslation);
-        when(bagTranslationRepository.save(bagTranslation)).thenReturn(bagTranslation);
 
         superAdminService.editTariffService(dto, 1, uuid);
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag);
-        verify(bagTranslationRepository).findBagTranslationByBag(bag);
-        verify(bagTranslationRepository).save(bagTranslation);
     }
 
     @Test
@@ -286,17 +276,35 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void editServiceThrowNotFoundException() {
+    void editServiceServiceNotFoundException() {
         EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
+        Employee employee = ModelUtils.getEmployee();
         String uuid = UUID.randomUUID().toString();
 
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.findServiceById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editService(1L, editServiceDto, uuid));
 
+        verify(employeeRepository).findByUuid(uuid);
         verify(serviceRepository).findServiceById(1L);
-        verify(employeeRepository, never()).findByUuid(uuid);
+        verify(serviceRepository, never()).save(any(Service.class));
+        verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
+    }
+
+    @Test
+    void editServiceEmployeeNotFoundException() {
+        EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editService(1L, editServiceDto, uuid));
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(serviceRepository, never()).findServiceById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
         verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
     }
@@ -376,22 +384,19 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setLimitDescriptionThrowsUnsupportedOperationExceptionTest() {
+        assertThrows(UnsupportedOperationException.class,
+            () -> superAdminService.setLimitDescription(1L, "limitDescription"));
+    }
+
+    @Test
     void includeBag() {
-        BagTranslation bagTranslationTest = BagTranslation.builder()
-            .id(2L)
-            .bag(Bag.builder().id(2).capacity(120).price(350).build())
-            .name("Useless paper")
-            .description("Description")
-            .build();
-        bagTranslationTest.getBag().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
-        bagTranslationTest.getBag().setLocation(ModelUtils.getLocation());
-        when(bagRepository.findById(10)).thenReturn(Optional.of(bagTranslationTest.getBag()));
-
-        when(bagTranslationRepository.findBagTranslationByBag(bagTranslationTest.getBag()))
-            .thenReturn(bagTranslationTest);
-
+        when(bagRepository.findById(10))
+            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description")
+                .minAmountOfBags(MinAmountOfBag.EXCLUDE).location(Location.builder().id(1L).build()).build()));
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
         verify(bagRepository).save(any(Bag.class));
+        verify(bagRepository, times(1)).findById(anyInt());
     }
 
     @Test
@@ -474,15 +479,12 @@ class SuperAdminServiceImplTest {
     @Test
     void excludeBag() {
         Optional<Bag> bag = Optional.ofNullable(ModelUtils.bagDto());
-        BagTranslation bagTranslation = ModelUtils.bagTranslationDto();
 
         when(bagRepository.findById(1)).thenReturn(bag);
-        when(bagTranslationRepository.findBagTranslationByBag(ModelUtils.bagDto2())).thenReturn(bagTranslation);
 
         superAdminService.excludeBag(1);
 
         verify(bagRepository).findById(1);
-        verify(bagTranslationRepository).findBagTranslationByBag(ModelUtils.bagDto2());
         verify(bagRepository).save(bag.get());
     }
 
@@ -492,20 +494,6 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
         verify(userRepository).findByUuid(anyString());
         verify(locationRepository).findById(anyLong());
-    }
-
-    @Test
-    void deleteServiceExceptionTest() {
-        assertThrows(NotFoundException.class, () -> superAdminService.deleteService(1L));
-        verify(serviceRepository).findById(anyLong());
-    }
-
-    @Test
-    void editServiceExceptionTest() {
-        EditServiceDto dto = ModelUtils.getEditServiceDto();
-        assertThrows(NotFoundException.class, () -> superAdminService.editService(1L, dto, "uuid"));
-        verify(serviceRepository).findServiceById(anyLong());
-
     }
 
     @Test
@@ -610,7 +598,7 @@ class SuperAdminServiceImplTest {
         courier.setId(null);
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(Courier.builder()
             .nameEn("Test1")
             .nameUk("Тест1")
@@ -632,13 +620,13 @@ class SuperAdminServiceImplTest {
         CreateCourierDto createCourierDto = ModelUtils.getCreateCourierDto();
         String uuid = ModelUtils.TEST_USER.getUuid();
 
-        when(userRepository.findByUuid(anyString())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(anyString())).thenReturn(Optional.ofNullable(getEmployee()));
         when(courierRepository.findAll()).thenReturn(List.of(getCourier(), getCourier()));
 
         Throwable throwable = assertThrows(CourierAlreadyExists.class,
             () -> superAdminService.createCourier(createCourierDto, uuid));
         assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS, throwable.getMessage());
-        verify(userRepository).findByUuid(anyString());
+        verify(employeeRepository).findByUuid(anyString());
         verify(courierRepository).findAll();
     }
 
@@ -715,7 +703,7 @@ class SuperAdminServiceImplTest {
         lenient().when(modelMapper.map(any(ReceivingStation.class), eq(ReceivingStationDto.class)))
             .thenReturn(getReceivingStationDto());
         when(receivingStationRepository.save(any())).thenReturn(getReceivingStation(), getReceivingStation());
-
+        when(employeeRepository.findByUuid(test)).thenReturn(Optional.ofNullable(getEmployee()));
         superAdminService.createReceivingStation(stationDto, test);
 
         verify(receivingStationRepository, times(1)).existsReceivingStationByName(any());
@@ -727,33 +715,33 @@ class SuperAdminServiceImplTest {
             () -> superAdminService.createReceivingStation(stationDto, test));
         assertEquals(thrown.getMessage(), ErrorMessage.RECEIVING_STATION_ALREADY_EXISTS
             + stationDto.getName());
-        verify(userRepository).findByUuid(any());
+        verify(employeeRepository).findByUuid(any());
     }
 
     @Test
     void createReceivingStationSaveCorrectValue() {
         String receivingStationName = "Петрівка";
-        User user = TEST_USER;
+        Employee employee = getEmployee();
         AddingReceivingStationDto addingReceivingStationDto =
             AddingReceivingStationDto.builder().name(receivingStationName).build();
         ReceivingStation activatedReceivingStation = ReceivingStation.builder()
             .name(receivingStationName)
-            .createdBy(user)
+            .createdBy(employee)
             .createDate(LocalDate.now())
             .stationStatus(StationStatus.ACTIVE)
             .build();
 
         ReceivingStationDto receivingStationDto = getReceivingStationDto();
 
-        when(userRepository.findByUuid(any())).thenReturn(user);
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(employee));
         when(receivingStationRepository.existsReceivingStationByName(any())).thenReturn(false);
         when(receivingStationRepository.save(any())).thenReturn(activatedReceivingStation);
         when(modelMapper.map(any(), eq(ReceivingStationDto.class)))
             .thenReturn(receivingStationDto);
 
-        superAdminService.createReceivingStation(addingReceivingStationDto, user.getUuid());
+        superAdminService.createReceivingStation(addingReceivingStationDto, employee.getUuid());
 
-        verify(userRepository).findByUuid(any());
+        verify(employeeRepository).findByUuid(any());
         verify(receivingStationRepository).existsReceivingStationByName(any());
         verify(receivingStationRepository).save(activatedReceivingStation);
         verify(modelMapper)
@@ -774,6 +762,14 @@ class SuperAdminServiceImplTest {
         verify(receivingStationRepository).findById(anyLong());
         verify(receivingStationRepository).save(any());
         verify(modelMapper).map(any(), eq(ReceivingStationDto.class));
+    }
+
+    @Test
+    void updateReceivingStationThrowsExceptionWhenReceivingStationNonFoundTest() {
+        ReceivingStationDto receivingStationDto = getReceivingStationDto();
+        when(receivingStationRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> superAdminService.updateReceivingStation(receivingStationDto));
+        verify(receivingStationRepository).findById(anyLong());
     }
 
     @Test
@@ -811,7 +807,7 @@ class SuperAdminServiceImplTest {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId()))
             .thenReturn(ModelUtils.getLocationList());
-        when(userRepository.findByUuid(any())).thenReturn(ModelUtils.getUser());
+        when(employeeRepository.findByUuid(any())).thenReturn(Optional.ofNullable(getEmployee()));
         when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
@@ -823,10 +819,55 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void addNewTariffThrowsExceptionWhenListOfLocationsIsEmptyTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(employeeRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(Optional.ofNullable(getEmployee()));
+        when(tariffsInfoRepository.save(any())).thenReturn(ModelUtils.getTariffInfo());
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(Collections.emptyList());
+        when(receivingStationRepository.findAllById(List.of(1L))).thenReturn(ModelUtils.getReceivingList());
+        when(locationRepository.findAllByIdAndRegionId(dto.getLocationIdList(),
+            dto.getRegionId())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(employeeRepository).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).save(any());
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(1L, List.of(1L));
+        verify(receivingStationRepository).findAllById(List.of(1L));
+        verify(locationRepository).findAllByIdAndRegionId(dto.getLocationIdList(), dto.getRegionId());
+    }
+
+    @Test
+    void addNewTariffThrowsExceptionWhenSuchTariffIsAlreadyExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        TariffLocation tariffLocation = TariffLocation
+            .builder()
+            .id(1L)
+            .location(ModelUtils.getLocation())
+            .build();
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getCourier()));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(dto.getCourierId(),
+            dto.getLocationIdList())).thenReturn(List.of(tariffLocation));
+
+        assertThrows(TariffAlreadyExistsException.class,
+            () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
+
+        verify(courierRepository).findById(1L);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(dto.getCourierId(),
+            dto.getLocationIdList());
+        verifyNoMoreInteractions(courierRepository, tariffsLocationRepository);
+    }
+
+    @Test
     void addNewTariffThrowsException2() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getCourier()));
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
         verify(courierRepository).findById(anyLong());
         verify(receivingStationRepository).findAllById(any());
@@ -837,17 +878,35 @@ class SuperAdminServiceImplTest {
     void addNewTariffThrowsException3() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> superAdminService.addNewTariff(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
-    void checkIfTariffExistsTest() {
+    void checkIfTariffDoesNotExistsTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
             .thenReturn(Collections.emptyList());
         boolean actual = superAdminService.checkIfTariffExists(dto);
         assertFalse(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
+    }
+
+    @Test
+    void checkIfTariffExistsTest() {
+        AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
+        TariffLocation tariffLocation = TariffLocation
+            .builder()
+            .id(1L)
+            .tariffsInfo(ModelUtils.getTariffsInfo())
+            .location(ModelUtils.getLocation())
+            .locationStatus(LocationStatus.ACTIVE)
+            .build();
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
+            .thenReturn(List.of(tariffLocation));
+        boolean actual = superAdminService.checkIfTariffExists(dto);
+        assertTrue(actual);
+        verify(tariffsLocationRepository).findAllByCourierIdAndLocationIds(anyLong(), any());
     }
 
     @Test
