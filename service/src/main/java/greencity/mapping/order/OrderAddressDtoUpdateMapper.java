@@ -11,7 +11,9 @@ public class OrderAddressDtoUpdateMapper extends AbstractConverter<Address, Orde
     protected OrderAddressDtoResponse convert(Address dtoUpdate) {
         return OrderAddressDtoResponse.builder()
             .district(dtoUpdate.getDistrict())
+            .districtEng(dtoUpdate.getDistrictEn())
             .street(dtoUpdate.getStreet())
+            .streetEng(dtoUpdate.getStreetEn())
             .houseCorpus(dtoUpdate.getHouseCorpus())
             .entranceNumber(dtoUpdate.getEntranceNumber())
             .houseNumber(dtoUpdate.getHouseNumber())
