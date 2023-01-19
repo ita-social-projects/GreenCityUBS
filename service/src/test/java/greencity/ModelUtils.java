@@ -3879,4 +3879,11 @@ public class ModelUtils {
                     .build()),
             600);
     }
+
+    public static TariffsInfoDto getLimitDescriptionDto() {
+        return TariffsInfoDto.builder()
+            .limitDescription("Description")
+            .id(1L)
+            .build();
+    }
 }
