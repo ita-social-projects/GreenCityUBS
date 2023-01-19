@@ -62,6 +62,7 @@ public interface SuperAdminService {
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - employee uuid.
      * @return {@link GetServiceDto}
+     * @author Vadym Makitra
      * @author Julia Seti
      */
     GetServiceDto addService(CreateServiceDto dto, String uuid);
@@ -71,6 +72,7 @@ public interface SuperAdminService {
      *
      * @param tariffId {@link Long} - tariff id.
      * @return {@link GetServiceDto}
+     * @author Vadym Makitra
      * @author Julia Seti
      */
     GetServiceDto getService(long tariffId);
@@ -90,6 +92,7 @@ public interface SuperAdminService {
      * @param dto  - entered info about field that need to edit.
      * @param uuid - employee uuid.
      * @return {@link GetServiceDto} - info about edited service.
+     * @author Vadym Makitra
      * @author Julia Seti
      */
     GetServiceDto editService(long id, EditServiceDto dto, String uuid);

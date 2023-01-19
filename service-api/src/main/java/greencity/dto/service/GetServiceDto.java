@@ -1,6 +1,12 @@
 package greencity.dto.service;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,6 +18,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @EqualsAndHashCode
 public class GetServiceDto {
+    @NotNull
     Long id;
 
     @NotNull
@@ -23,7 +30,9 @@ public class GetServiceDto {
     @NotNull
     String nameEng;
 
+    @NotNull
     String description;
 
+    @NotNull
     String descriptionEng;
 }
