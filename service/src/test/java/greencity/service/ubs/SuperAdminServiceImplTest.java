@@ -493,7 +493,7 @@ class SuperAdminServiceImplTest {
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
         courier.setCourierStatus(CourierStatus.DEACTIVATED);
         assertThrows(BadRequestException.class,
-                () -> superAdminService.deactivateCourier(1L));
+            () -> superAdminService.deactivateCourier(1L));
         verify(courierRepository).findById(1L);
     }
 
