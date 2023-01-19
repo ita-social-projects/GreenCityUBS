@@ -2,13 +2,18 @@ package greencity.service.ubs;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +69,7 @@ class ViolationServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
+
     @Test
     void getAllViolations() {
         when(violationRepository.getNumberOfViolationsByUser(anyLong())).thenReturn(5L);
@@ -105,16 +111,21 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     void checkAddUserViolation() {
+        Employee employee = ModelUtils.getEmployee();
+        List<Long> tariffsInfo = employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList());
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
+        order.setTariffsInfo(employee.getTariffInfos().iterator().next());
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+//        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(1);
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfo);
         violationService.addUserViolation(add, new MultipartFile[2], "abc");
 
         assertEquals(1, user.getViolations());
