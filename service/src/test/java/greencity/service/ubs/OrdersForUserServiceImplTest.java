@@ -44,6 +44,7 @@ class OrdersForUserServiceImplTest {
         return Stream.of(
             Arguments.of(SortingOrder.ASC, "payment_amount"),
             Arguments.of(SortingOrder.DESC, "payment_amount"),
-            Arguments.of(SortingOrder.ASC, "order_status"));
+            Arguments.of(SortingOrder.ASC, "order_status"),
+            Arguments.of(SortingOrder.DESC, "order_status"));
     }
 }
