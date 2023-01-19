@@ -500,9 +500,12 @@ class SuperAdminServiceImplTest {
     @Test
     void deactivateCourierThrowNotFoundException() {
         when(courierRepository.findById(anyLong()))
-            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-        assertThrows(NotFoundException.class,
+            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + 1L));
+
+        Exception thrownNotFoundEx = assertThrows(NotFoundException.class,
             () -> superAdminService.deactivateCourier(1L));
+
+        assertEquals(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + 1L, thrownNotFoundEx.getMessage());
         verify(courierRepository).findById(1L);
     }
 

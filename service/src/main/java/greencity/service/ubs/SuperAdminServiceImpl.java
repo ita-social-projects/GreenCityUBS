@@ -413,7 +413,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Transactional
     public CourierDto deactivateCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
-            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+            () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
         if (CourierStatus.DEACTIVATED == courier.getCourierStatus()) {
             throw new BadRequestException(ErrorMessage.CANNOT_DEACTIVATE_COURIER + courier.getId());
         }
