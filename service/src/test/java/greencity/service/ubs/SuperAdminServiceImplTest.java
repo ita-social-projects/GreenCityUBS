@@ -14,8 +14,7 @@ import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -260,18 +259,17 @@ class SuperAdminServiceImplTest {
     @Test
     void getService() {
         Service service = ModelUtils.getService();
-        GetServiceDto getServiceDto = ModelUtils.getServiceDto();
-        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        ServiceDto serviceDto = ModelUtils.getServiceDto();
 
         when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
-        when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
+        when(modelMapper.map(service, ServiceDto.class)).thenReturn(serviceDto);
 
-        assertEquals(getServiceDto, superAdminService.getService(1L));
+        assertEquals(serviceDto, superAdminService.getService(1L));
 
         verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
-        verify(modelMapper).map(service, GetServiceDto.class);
+        verify(modelMapper).map(service, ServiceDto.class);
     }
 
     @Test
@@ -300,54 +298,53 @@ class SuperAdminServiceImplTest {
     void editService() {
         Service service = ModelUtils.getEditedService();
         Employee employee = ModelUtils.getEmployee();
-        EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
-        GetServiceDto getServiceDto = ModelUtils.getServiceDto();
+        ServiceDto serviceDto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
         when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(service);
-        when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
+        when(modelMapper.map(service, ServiceDto.class)).thenReturn(serviceDto);
 
-        assertEquals(getServiceDto, superAdminService.editService(1L, editServiceDto, uuid));
+        assertEquals(serviceDto, superAdminService.editService(serviceDto, uuid));
 
         verify(serviceRepository).findById(1L);
         verify(employeeRepository).findByUuid(uuid);
         verify(serviceRepository).save(service);
-        verify(modelMapper).map(service, GetServiceDto.class);
+        verify(modelMapper).map(service, ServiceDto.class);
     }
 
     @Test
     void editServiceServiceNotFoundException() {
-        EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
+        ServiceDto serviceDto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
         when(serviceRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.editService(1L, editServiceDto, uuid));
+            () -> superAdminService.editService(serviceDto, uuid));
 
         verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
-        verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
+        verify(modelMapper, never()).map(any(Service.class), any(ServiceDto.class));
     }
 
     @Test
     void editServiceEmployeeNotFoundException() {
         Service service = ModelUtils.getEditedService();
-        EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
+        ServiceDto serviceDto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
         when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> superAdminService.editService(1L, editServiceDto, uuid));
+            () -> superAdminService.editService(serviceDto, uuid));
 
         verify(employeeRepository).findByUuid(uuid);
         verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
-        verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
+        verify(modelMapper, never()).map(any(Service.class), any(ServiceDto.class));
     }
 
     @Test
@@ -356,7 +353,7 @@ class SuperAdminServiceImplTest {
         Service service = ModelUtils.getNewService();
         Employee employee = ModelUtils.getEmployee();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
-        GetServiceDto getServiceDto = ModelUtils.getServiceDto();
+        ServiceDto serviceDto = ModelUtils.getServiceDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         String uuid = UUID.randomUUID().toString();
 
@@ -365,16 +362,16 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(createdService);
-        when(modelMapper.map(createdService, GetServiceDto.class)).thenReturn(getServiceDto);
+        when(modelMapper.map(createdService, ServiceDto.class)).thenReturn(serviceDto);
 
-        assertEquals(getServiceDto, superAdminService.addService(createServiceDto, uuid));
+        assertEquals(serviceDto, superAdminService.addService(createServiceDto, uuid));
 
         verify(employeeRepository).findByUuid(uuid);
         verify(tariffsInfoRepository).existsById(1L);
         verify(tariffsInfoRepository).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(serviceRepository).save(service);
-        verify(modelMapper).map(createdService, GetServiceDto.class);
+        verify(modelMapper).map(createdService, ServiceDto.class);
     }
 
     @Test
@@ -412,7 +409,6 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addServiceThrowTariffNotFoundException() {
-        Employee employee = ModelUtils.getEmployee();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
         String uuid = UUID.randomUUID().toString();
 

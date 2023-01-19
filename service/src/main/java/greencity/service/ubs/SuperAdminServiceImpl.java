@@ -16,8 +16,7 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
@@ -181,9 +180,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto addService(CreateServiceDto dto, String uuid) {
+    public ServiceDto addService(CreateServiceDto dto, String uuid) {
         Service service = serviceRepository.save(createService(dto, uuid));
-        return modelMapper.map(service, GetServiceDto.class);
+        return modelMapper.map(service, ServiceDto.class);
     }
 
     private Service createService(CreateServiceDto dto, String uuid) {
@@ -207,9 +206,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto getService(long tariffId) {
+    public ServiceDto getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> modelMapper.map(it, GetServiceDto.class))
+            .map(it -> modelMapper.map(it, ServiceDto.class))
             .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
     }
 
@@ -219,8 +218,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
-        Service service = getServiceById(id);
+    public ServiceDto editService(ServiceDto dto, String uuid) {
+        Service service = getServiceById(dto.getId());
         Employee employee = getEmployeeByUuid(uuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
@@ -230,7 +229,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
         serviceRepository.save(service);
-        return modelMapper.map(service, GetServiceDto.class);
+        return modelMapper.map(service, ServiceDto.class);
     }
 
     private Employee getEmployeeByUuid(String uuid) {

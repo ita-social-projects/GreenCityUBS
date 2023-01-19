@@ -1,7 +1,7 @@
 package greencity.mapping.service;
 
 import greencity.ModelUtils;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.entity.order.Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,14 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class GetServiceDtoMapperTest {
+class ServiceDtoMapperTest {
     @InjectMocks
-    private GetServiceDtoMapper mapper;
+    private ServiceDtoMapper mapper;
 
     @Test
     void convert() {
         Service service = ModelUtils.getService();
-        GetServiceDto convertDto = mapper.convert(service);
+        ServiceDto convertDto = mapper.convert(service);
 
         Assertions.assertEquals(service.getId(), convertDto.getId());
         Assertions.assertEquals(service.getName(), convertDto.getName());

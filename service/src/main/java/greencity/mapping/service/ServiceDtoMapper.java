@@ -1,15 +1,15 @@
 package greencity.mapping.service;
 
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.entity.order.Service;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetServiceDtoMapper extends AbstractConverter<Service, GetServiceDto> {
+public class ServiceDtoMapper extends AbstractConverter<Service, ServiceDto> {
     @Override
-    protected GetServiceDto convert(Service source) {
-        return GetServiceDto.builder()
+    protected ServiceDto convert(Service source) {
+        return ServiceDto.builder()
             .id(source.getId())
             .price(source.getPrice())
             .name(source.getName())

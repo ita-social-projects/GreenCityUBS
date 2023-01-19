@@ -6,19 +6,37 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.location.*;
+import greencity.dto.location.AddLocationTranslationDto;
+import greencity.dto.location.LocationCreateDto;
+import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationScheduleDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.UpdateNotificationTemplatesDto;
-import greencity.dto.order.*;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.AssignEmployeesForOrderDto;
+import greencity.dto.order.AssignForOrderEmployee;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.OverpaymentInfoRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
@@ -26,22 +44,34 @@ import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffTranslationDto;
-import greencity.dto.user.*;
+import greencity.dto.user.AddBonusesToUserDto;
+import greencity.dto.user.AddingPointsToUserDto;
+import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserInfoDto;
+import greencity.dto.user.UserProfileDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.ubs.Address;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -400,8 +430,9 @@ public class ModelUtils {
             .signature("Test Signature").build();
     }
 
-    public static EditServiceDto getEditServiceDto() {
-        return EditServiceDto.builder()
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
+            .id(1L)
             .name("Name")
             .nameEng("NameEng")
             .price(100)

@@ -10,8 +10,7 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
@@ -61,21 +60,21 @@ public interface SuperAdminService {
      *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - employee uuid.
-     * @return {@link GetServiceDto}
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    GetServiceDto addService(CreateServiceDto dto, String uuid);
+    ServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
      * Method for get service by tariff id.
      *
      * @param tariffId {@link Long} - tariff id.
-     * @return {@link GetServiceDto}
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    GetServiceDto getService(long tariffId);
+    ServiceDto getService(long tariffId);
 
     /**
      * Method for delete service by id.
@@ -88,14 +87,13 @@ public interface SuperAdminService {
     /**
      * Method for editing service by id.
      *
-     * @param id   - id of current service.
      * @param dto  - entered info about field that need to edit.
      * @param uuid - employee uuid.
-     * @return {@link GetServiceDto} - info about edited service.
+     * @return {@link ServiceDto} - info about edited service.
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
+    ServiceDto editService(ServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.

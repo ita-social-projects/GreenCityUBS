@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @ToString
 @Builder
 @EqualsAndHashCode
-public class GetServiceDto {
+public class ServiceDto {
     @NotNull
     Long id;
 

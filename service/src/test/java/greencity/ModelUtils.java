@@ -1,9 +1,18 @@
 package greencity;
 
 import com.google.common.collect.Lists;
-import com.google.maps.model.*;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
-import greencity.dto.*;
+import greencity.dto.AddNewTariffDto;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -18,7 +27,11 @@ import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.courier.*;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
@@ -47,16 +60,51 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.TitleDto;
-import greencity.dto.notification.*;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.AssignEmployeesForOrderDto;
+import greencity.dto.order.AssignForOrderEmployee;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.EditPriceOfOrder;
+import greencity.dto.order.EmployeeOrderPositionDTO;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.SenderLocation;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderDetailDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.*;
+import greencity.dto.payment.ManualPaymentRequestDto;
+import greencity.dto.payment.OverpaymentInfoRequestDto;
+import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
@@ -101,15 +149,39 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.util.Bot;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -2183,8 +2255,9 @@ public class ModelUtils {
             .build();
     }
 
-    public static EditServiceDto getEditServiceDto() {
-        return EditServiceDto.builder()
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
+            .id(1L)
             .name("Name")
             .nameEng("NameEng")
             .price(100)
@@ -2548,18 +2621,6 @@ public class ModelUtils {
                 .id(1L)
                 .locationStatus(LocationStatus.ACTIVE)
                 .build())
-            .build();
-    }
-
-    public static GetServiceDto getServiceDto() {
-        Employee employee = getEmployee();
-        return GetServiceDto.builder()
-            .id(1L)
-            .name("Name")
-            .nameEng("NameEng")
-            .price(100)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
             .build();
     }
 
