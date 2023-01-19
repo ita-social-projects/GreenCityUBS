@@ -67,7 +67,7 @@ public final class ErrorMessage {
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
-    public static final String CANNOT_DEACTIVATE_COURIER = "courier is already deactivated with id: ";
+    public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
     public static final String BAG_WITH_THIS_STATUS_ALREADY_SET = "Bag with this status already set.";
     public static final String LIQPAY_PAYMENT_WITH_SELECTED_ID_NOT_FOUND =
         "Payment with selected id does not belong LiqPay.";
