@@ -4,7 +4,11 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
@@ -16,13 +20,20 @@ import greencity.dto.tariff.ChangeTariffLocationStatusDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Courier;
+import greencity.entity.order.Service;
+import greencity.entity.order.TariffLocation;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.*;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -31,7 +42,17 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DeactivateChosenEntityRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,15 +65,39 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static greencity.ModelUtils.TEST_USER;
+import static greencity.ModelUtils.getAllTariffsInfoDto;
+import static greencity.ModelUtils.getCourier;
+import static greencity.ModelUtils.getCourierDto;
+import static greencity.ModelUtils.getCourierDtoList;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getReceivingStation;
+import static greencity.ModelUtils.getReceivingStationDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anySet;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceImplTest {
@@ -218,40 +263,37 @@ class SuperAdminServiceImplTest {
         GetServiceDto getServiceDto = ModelUtils.getServiceDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
         when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.getService(1L));
 
-        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(modelMapper).map(service, GetServiceDto.class);
     }
 
     @Test
     void getServiceThrowServiceNotFoundException() {
-        Service service = ModelUtils.getService();
-        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
-
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.getService(1L));
 
-        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
     }
 
     @Test
     void getServiceThrowTariffNotFoundException() {
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.getService(1L));
 
-        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).existsById(1L);
     }
 
     @Test
@@ -262,14 +304,14 @@ class SuperAdminServiceImplTest {
         GetServiceDto getServiceDto = ModelUtils.getServiceDto();
         String uuid = UUID.randomUUID().toString();
 
-        when(serviceRepository.findServiceById(1L)).thenReturn(Optional.of(service));
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(service);
         when(modelMapper.map(service, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.editService(1L, editServiceDto, uuid));
 
-        verify(serviceRepository).findServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(employeeRepository).findByUuid(uuid);
         verify(serviceRepository).save(service);
         verify(modelMapper).map(service, GetServiceDto.class);
@@ -278,33 +320,32 @@ class SuperAdminServiceImplTest {
     @Test
     void editServiceServiceNotFoundException() {
         EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
-        Employee employee = ModelUtils.getEmployee();
         String uuid = UUID.randomUUID().toString();
 
-        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
-        when(serviceRepository.findServiceById(1L)).thenReturn(Optional.empty());
+        when(serviceRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editService(1L, editServiceDto, uuid));
 
-        verify(employeeRepository).findByUuid(uuid);
-        verify(serviceRepository).findServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
         verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
     }
 
     @Test
     void editServiceEmployeeNotFoundException() {
+        Service service = ModelUtils.getEditedService();
         EditServiceDto editServiceDto = ModelUtils.getEditServiceDto();
         String uuid = UUID.randomUUID().toString();
 
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.editService(1L, editServiceDto, uuid));
 
         verify(employeeRepository).findByUuid(uuid);
-        verify(serviceRepository, never()).findServiceById(1L);
+        verify(serviceRepository).findById(1L);
         verify(serviceRepository, never()).save(any(Service.class));
         verify(modelMapper, never()).map(any(Service.class), any(GetServiceDto.class));
     }
@@ -319,15 +360,17 @@ class SuperAdminServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         String uuid = UUID.randomUUID().toString();
 
-        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(tariffsInfoRepository.existsById(tariffsInfo.getId())).thenReturn(true);
         when(serviceRepository.findServiceByTariffsInfoId(tariffsInfo.getId())).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(serviceRepository.save(service)).thenReturn(createdService);
         when(modelMapper.map(createdService, GetServiceDto.class)).thenReturn(getServiceDto);
 
         assertEquals(getServiceDto, superAdminService.addService(createServiceDto, uuid));
 
         verify(employeeRepository).findByUuid(uuid);
+        verify(tariffsInfoRepository).existsById(1L);
         verify(tariffsInfoRepository).findById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(serviceRepository).save(service);
@@ -337,20 +380,16 @@ class SuperAdminServiceImplTest {
     @Test
     void addServiceThrowServiceAlreadyExistsException() {
         Service createdService = ModelUtils.getService();
-        Employee employee = ModelUtils.getEmployee();
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
-        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         String uuid = UUID.randomUUID().toString();
 
-        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
-        when(serviceRepository.findServiceByTariffsInfoId(tariffsInfo.getId())).thenReturn(Optional.of(createdService));
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(createdService));
 
         assertThrows(ServiceAlreadyExistsException.class,
             () -> superAdminService.addService(createServiceDto, uuid));
 
-        verify(employeeRepository).findByUuid(uuid);
-        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
     }
 
@@ -359,11 +398,15 @@ class SuperAdminServiceImplTest {
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
         String uuid = UUID.randomUUID().toString();
 
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.addService(createServiceDto, uuid));
 
+        verify(tariffsInfoRepository).existsById(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(employeeRepository).findByUuid(uuid);
     }
 
@@ -373,14 +416,12 @@ class SuperAdminServiceImplTest {
         CreateServiceDto createServiceDto = ModelUtils.getCreateServiceDto();
         String uuid = UUID.randomUUID().toString();
 
-        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(NotFoundException.class,
             () -> superAdminService.addService(createServiceDto, uuid));
 
-        verify(employeeRepository).findByUuid(uuid);
-        verify(tariffsInfoRepository).findById(1L);
+        verify(tariffsInfoRepository).existsById(1L);
     }
 
     @Test

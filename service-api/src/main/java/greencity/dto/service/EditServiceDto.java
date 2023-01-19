@@ -1,6 +1,11 @@
 package greencity.dto.service;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +22,8 @@ public class EditServiceDto {
     String name;
     @NotNull
     String nameEng;
+    @NotNull
     String description;
+    @NotNull
     String descriptionEng;
 }

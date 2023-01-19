@@ -6,7 +6,12 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.tariff.*;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -145,6 +150,7 @@ class SuperAdminController {
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
      * @return {@link GetServiceDto}
+     * @author Vadym Makitra
      * @author Julia Seti.
      */
 
@@ -170,7 +176,7 @@ class SuperAdminController {
      *
      * @param tariffId {@link Long} - tariff id.
      * @return {@link GetServiceDto}
-     *
+     * @author Vadym Makitra
      * @author Julia Seti
      */
 
@@ -190,7 +196,8 @@ class SuperAdminController {
 
     /**
      * Controller for delete service by Id.
-     *
+     * 
+     * @param id {@link Long} - service id.
      * @author Vadym Makitra
      */
 
@@ -211,8 +218,13 @@ class SuperAdminController {
 
     /**
      * Controller for edit service by id.
-     *
+     * 
+     * @param id   {@link Long} - service id.
+     * @param dto  {@link EditServiceDto}
+     * @param uuid {@link String}
+     * @return {@link GetServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
 
     @ApiOperation(value = "Edit service by Id")

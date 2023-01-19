@@ -4,7 +4,11 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.bag.EditAmountOfBagDto;
-import greencity.dto.courier.*;
+import greencity.dto.courier.AddingReceivingStationDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.AddLocationTranslationDto;
 import greencity.dto.location.EditLocationDto;
 import greencity.dto.location.LocationCreateDto;
@@ -14,15 +18,28 @@ import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.GetServiceDto;
-import greencity.dto.tariff.*;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.*;
+import greencity.entity.order.Bag;
+import greencity.entity.order.Courier;
+import greencity.entity.order.Service;
+import greencity.entity.order.TariffLocation;
+import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.*;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.StationStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -31,7 +48,17 @@ import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
-import greencity.repository.*;
+import greencity.repository.BagRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DeactivateChosenEntityRepository;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.ReceivingStationRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.ServiceRepository;
+import greencity.repository.TariffLocationRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,7 +66,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -156,10 +188,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Service createService(CreateServiceDto dto, String uuid) {
         long tariffId = dto.getTariffId();
-        Employee employee = getEmployeeByUuid(uuid);
-        TariffsInfo tariffsInfo = getTariffsInfoById(tariffId);
-        Optional<Service> service = getServiceByTariffsInfoId(tariffId);
-        if (service.isEmpty()) {
+        if (getServiceByTariffsInfoId(tariffId).isEmpty()) {
+            Employee employee = getEmployeeByUuid(uuid);
+            TariffsInfo tariffsInfo = getTariffById(tariffId);
             return Service.builder()
                 .price(dto.getPrice())
                 .createdAt(LocalDate.now())
@@ -171,56 +202,26 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .tariffsInfo(tariffsInfo)
                 .build();
         } else {
-            throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS);
+            throw new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS + tariffId);
         }
-    }
-
-    private Employee getEmployeeByUuid(String uuid) {
-        Optional<Employee> employee = employeeRepository.findByUuid(uuid);
-        if (employee.isPresent()) {
-            return employee.get();
-        } else {
-            throw new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid);
-        }
-    }
-
-    private TariffsInfo getTariffsInfoById(long tariffId) {
-        Optional<TariffsInfo> tariffsInfo = tariffsInfoRepository.findById(tariffId);
-        if (tariffsInfo.isPresent()) {
-            return tariffsInfo.get();
-        } else {
-            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
-        }
-    }
-
-    private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
-        return serviceRepository.findServiceByTariffsInfoId(tariffId);
     }
 
     @Override
     public GetServiceDto getService(long tariffId) {
-        getTariffsInfoById(tariffId);
-        Optional<Service> service = getServiceByTariffsInfoId(tariffId);
-        if (service.isPresent()) {
-            return modelMapper.map(service.get(), GetServiceDto.class);
-        } else {
-            throw new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId);
-        }
+        return getServiceByTariffsInfoId(tariffId)
+            .map(it -> modelMapper.map(it, GetServiceDto.class))
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
     }
 
     @Override
     public void deleteService(long id) {
-        Service service = serviceRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
-        serviceRepository.delete(service);
+        serviceRepository.delete(getServiceById(id));
     }
 
     @Override
     public GetServiceDto editService(long id, EditServiceDto dto, String uuid) {
-        Employee employee = employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
-        Service service = serviceRepository.findServiceById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+        Service service = getServiceById(id);
+        Employee employee = getEmployeeByUuid(uuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
@@ -230,6 +231,29 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setEditedBy(employee);
         serviceRepository.save(service);
         return modelMapper.map(service, GetServiceDto.class);
+    }
+
+    private Employee getEmployeeByUuid(String uuid) {
+        return employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
+    }
+
+    private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
+        if (tariffsInfoRepository.existsById(tariffId)) {
+            return serviceRepository.findServiceByTariffsInfoId(tariffId);
+        } else {
+            throw new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + tariffId);
+        }
+    }
+
+    private Service getServiceById(long id) {
+        return serviceRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
+    }
+
+    private TariffsInfo getTariffById(long id) {
+        return tariffsInfoRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND + id));
     }
 
     @Override

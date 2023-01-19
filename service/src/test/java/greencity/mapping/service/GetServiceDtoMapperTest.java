@@ -17,14 +17,13 @@ class GetServiceDtoMapperTest {
     @Test
     void convert() {
         Service service = ModelUtils.getService();
-        GetServiceDto dto = ModelUtils.getServiceDto();
         GetServiceDto convertDto = mapper.convert(service);
 
-        Assertions.assertEquals(dto.getId(), convertDto.getId());
-        Assertions.assertEquals(dto.getName(), convertDto.getName());
-        Assertions.assertEquals(dto.getNameEng(), convertDto.getNameEng());
-        Assertions.assertEquals(dto.getDescription(), convertDto.getDescription());
-        Assertions.assertEquals(dto.getNameEng(), convertDto.getNameEng());
-        Assertions.assertEquals(dto.getPrice(), convertDto.getPrice());
+        Assertions.assertEquals(service.getId(), convertDto.getId());
+        Assertions.assertEquals(service.getName(), convertDto.getName());
+        Assertions.assertEquals(service.getNameEng(), convertDto.getNameEng());
+        Assertions.assertEquals(service.getDescription(), convertDto.getDescription());
+        Assertions.assertEquals(service.getNameEng(), convertDto.getNameEng());
+        Assertions.assertEquals(service.getPrice(), convertDto.getPrice());
     }
 }
