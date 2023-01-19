@@ -18,11 +18,8 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class OrdersForUserServiceImpl implements OrdersForUserService {
-    OrderRepository orderRepository;
-    UserRepository userRepository;
-    UBSuserRepository ubSuserRepository;
-    OrdersForUserRepository ordersForUserRepository;
-    PaymentRepository paymentRepository;
+    private UserRepository userRepository;
+    private OrdersForUserRepository ordersForUserRepository;
 
     @Override
     public UserWithOrdersDto getAllOrders(Pageable page, Long userId, SortingOrder sortingOrder, String column) {
