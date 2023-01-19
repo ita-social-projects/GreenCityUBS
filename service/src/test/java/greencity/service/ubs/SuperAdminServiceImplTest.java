@@ -498,6 +498,15 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void deactivateCourierThrowNotFoundException() {
+        when(courierRepository.findById(anyLong()))
+            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateCourier(anyLong()));
+        verify(courierRepository).findById(anyLong());
+    }
+
+    @Test
     void createCourier() {
         Courier courier = ModelUtils.getCourier();
         courier.setId(null);
