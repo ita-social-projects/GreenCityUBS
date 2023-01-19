@@ -273,9 +273,14 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setLimitDescriptionThrowsUnsupportedOperationExceptionTest() {
-        assertThrows(UnsupportedOperationException.class,
-            () -> superAdminService.setLimitDescription(1L, "limitDescription"));
+    void setLimitDescriptionTest() {
+        TariffsInfo tariffInfo = getTariffInfo();
+        GetTariffsInfoDto allTariffsInfoDto = getAllTariffsInfoDto();
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffInfo));
+        when(modelMapper.map(tariffInfo, GetTariffsInfoDto.class)).thenReturn(allTariffsInfoDto);
+        superAdminService.setLimitDescription(anyLong(), ModelUtils.getLimitDescriptionDto().getLimitDescription());
+        verify(tariffsInfoRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(tariffInfo, GetTariffsInfoDto.class);
     }
 
     @Test
