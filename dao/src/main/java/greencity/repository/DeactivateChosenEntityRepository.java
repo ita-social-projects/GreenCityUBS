@@ -95,7 +95,7 @@ public class DeactivateChosenEntityRepository {
      * @author Nikita Korzh.
      */
     public void deactivateTariffsByCourier(Long courierId) {
-        entityManager.createQuery("update Courier c set c.courierStatus = 'DELETED' where c.id =:courierId")
+        entityManager.createQuery("update Courier c set c.courierStatus = 'DEACTIVATED' where c.id =:courierId")
             .setParameter(COURIER_ID, courierId)
             .executeUpdate();
 
