@@ -18,15 +18,16 @@ class ReadAddressByOrderDtoMapperTest {
 
     @Test
     void convert() {
-        Address address = ModelUtils.address();
+        Address address = ModelUtils.getAddress();
         ReadAddressByOrderDto expected = ReadAddressByOrderDto.builder()
             .district(address.getDistrict())
             .entranceNumber(address.getEntranceNumber())
             .houseCorpus(address.getHouseCorpus())
             .street(address.getStreet())
             .houseNumber(address.getHouseNumber())
+            .comment(address.getAddressComment())
             .build();
-        ReadAddressByOrderDto actual = readAddressByOrderDtoMapper.convert(ModelUtils.address());
+        ReadAddressByOrderDto actual = readAddressByOrderDtoMapper.convert(ModelUtils.getAddress());
 
         assertEquals(expected, actual);
     }

@@ -18,9 +18,12 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import greencity.dto.bag.BagOrderDto;
 import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
+import greencity.entity.user.ubs.OrderAddress;
+import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -90,7 +93,6 @@ import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
-import greencity.repository.BagTranslationRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
@@ -121,8 +123,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith({MockitoExtension.class})
 class UBSClientServiceImplTest {
     @Mock
-    private BagTranslationRepository bagTranslationRepository;
-    @Mock
     private UserRepository userRepository;
     @Mock
     private BagRepository bagRepository;
@@ -140,6 +140,8 @@ class UBSClientServiceImplTest {
     private FondyClient fondyClient;
     @Mock
     private AddressRepository addressRepository;
+    @Mock
+    private OrderAddressRepository orderAddressRepository;
     @Mock
     private OrderRepository orderRepository;
     @InjectMocks
@@ -207,38 +209,21 @@ class UBSClientServiceImplTest {
     @Test
     void getFirstPageData() {
         Long locationId = 1L;
-        BagTranslationDto bagTranslationDto = BagTranslationDto.builder()
-            .id(1)
-            .name("Name")
-            .capacity(120)
-            .price(170)
-            .nameEng("NameEng")
-            .locationId(1L)
-            .build();
-        BagTranslation bagTranslation = BagTranslation.builder()
-            .id(1L)
-            .name("Name")
-            .description("Description")
-            .bag(getBag().get())
-            .nameEng("NameEng")
-            .descriptionEng("DescriptionEng")
-            .build();
 
-        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected =
-            new UserPointsAndAllBagsDto(List.of(bagTranslationDto), 600);
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
 
         User user = ModelUtils.getUserWithLastLocation();
         user.setCurrentPoints(600);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        when(bagTranslationRepository.findAll()).thenReturn(List.of(bagTranslation));
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag4list());
 
         UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
             ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.of(locationId));
 
         assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
-        assertEquals(userPointsAndAllBagsDtoActual.getBags().get(0).getId(),
-            Integer.valueOf(Math.toIntExact(locationId)));
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
     }
 
     @Test
@@ -260,9 +245,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -285,7 +269,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
@@ -293,6 +276,53 @@ class UBSClientServiceImplTest {
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
 
+    }
+
+    @Test
+    void testSaveToDBWithoutOrderUnpaid() throws IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto(false);
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+            .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
+
+        FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        Assertions.assertNotNull(result);
+
+        verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
+        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(bagRepository, times(2)).findById(any());
+        verify(ubsUserRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(dto.getPersonalData(), UBSuser.class);
+        verify(orderRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -335,8 +365,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -436,19 +465,33 @@ class UBSClientServiceImplTest {
         MakeOrderAgainDto dto = MakeOrderAgainDto.builder()
             .orderId(1L)
             .orderAmount(350L)
-            .bagOrderDtoList(List.of(getBagOrderDto()))
+            .bagOrderDtoList(
+                Arrays.asList(
+                    BagOrderDto.builder()
+                        .bagId(1)
+                        .capacity(10)
+                        .price(100)
+                        .bagAmount(1)
+                        .name("name")
+                        .nameEng("nameEng")
+                        .build(),
+                    BagOrderDto.builder()
+                        .bagId(2)
+                        .capacity(10)
+                        .price(100)
+                        .name("name")
+                        .nameEng("nameEng")
+                        .build()))
             .build();
         Order order = getOrderDoneByUser();
         order.setAmountOfBagsOrdered(Collections.singletonMap(1, 1));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(bagTranslationRepository.findAllByOrder(1L))
-            .thenReturn(List.of(getBagTranslation()));
-
+        when(bagRepository.findAllByOrder(dto.getOrderId())).thenReturn(ModelUtils.getBag4list());
         MakeOrderAgainDto result = ubsService.makeOrderAgain(new Locale("en"), 1L);
 
         assertEquals(dto, result);
         verify(orderRepository, times(1)).findById(1L);
-        verify(bagTranslationRepository, times(1)).findAllByOrder(1L);
+        verify(bagRepository, times(1)).findAllByOrder(any());
     }
 
     @Test
@@ -674,13 +717,13 @@ class UBSClientServiceImplTest {
         Address address1 = Address.builder()
             .addressStatus(AddressStatus.NEW).id(13L).city("Kyiv").district("Svyatoshyn")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Peremohy av.")
-            .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5)).ubsUsers(new LinkedList<>())
+            .user(user).actual(true).coordinates(new Coordinates(12.5, 34.5))
             .build();
 
         Address address2 = Address.builder()
             .addressStatus(AddressStatus.NEW).id(42L).city("Lviv").district("Syhiv")
             .entranceNumber("1").houseCorpus("1").houseNumber("55").street("Lvivska st.")
-            .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5)).ubsUsers(new LinkedList<>())
+            .user(user).actual(true).coordinates(new Coordinates(13.5, 36.5))
             .build();
 
         return Arrays.asList(address1, address2);
@@ -702,7 +745,7 @@ class UBSClientServiceImplTest {
         User user = ModelUtils.getUserForCreate();
         List<Address> addresses = user.getAddresses();
         String uuid = user.getUuid();
-        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto(true);
 
         when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
@@ -812,6 +855,42 @@ class UBSClientServiceImplTest {
             ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
         Assertions.assertEquals(ModelUtils.getAddressDtoResponse(), actualWithoutSearchAddress);
         verify(addressRepository, times(2)).save(addresses.get(0));
+    }
+
+    @Test
+    void testUpdateCurrentAddressForOrderWithNoAddress() {
+        User user = ModelUtils.getUserForCreate(AddressStatus.DELETED);
+        List<Address> addresses = user.getAddresses();
+        String uuid = user.getUuid();
+        OrderAddressDtoRequest dtoRequest = ModelUtils.getTestOrderAddressLocationDto();
+        dtoRequest.setId(1L);
+        OrderAddressDtoRequest updateAddressRequestDto = ModelUtils.getTestOrderAddressDtoRequest();
+        updateAddressRequestDto.setId(1L);
+        addresses.get(0).setActual(false);
+        addresses.get(0).setUser(user);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(googleApiService.getResultFromGeoCode("fake address")).thenReturn(ModelUtils.getGeocodingResult());
+
+        when(addressRepository.findById(user.getId())).thenReturn(Optional.ofNullable(addresses.get(0)));
+        when(modelMapper.map(dtoRequest,
+            Address.class)).thenReturn(addresses.get(0));
+
+        when(addressRepository.save(addresses.get(0))).thenReturn(addresses.get(0));
+
+        OrderWithAddressesResponseDto actualWithSearchAddress =
+            ubsService.updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
+
+        Assertions.assertNotNull(updateAddressRequestDto.getSearchAddress());
+        Assertions.assertNull(dtoRequest.getSearchAddress());
+        Assertions.assertEquals(OrderWithAddressesResponseDto.builder().addressList(Collections.emptyList()).build(),
+            actualWithSearchAddress);
+
+        verify(googleApiService).getResultFromGeoCode("fake address");
+        verify(addressRepository, times(1)).save(addresses.get(0));
+        verify(addressRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
     }
 
     @Test
@@ -1035,9 +1114,8 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
@@ -1052,7 +1130,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
@@ -1062,7 +1139,6 @@ class UBSClientServiceImplTest {
         verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
         verify(liqPayService).getCheckoutResponse(any());
     }
@@ -1104,12 +1180,6 @@ class UBSClientServiceImplTest {
         bag.setCapacity(100);
         bag.setFullPrice(1);
 
-        UBSuser ubSuser = getUBSuser();
-
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
-        address.setAddressStatus(AddressStatus.NEW);
-
         Order order1 = getOrder();
         order1.setPayment(new ArrayList<>());
         Payment payment1 = getPayment();
@@ -1139,9 +1209,9 @@ class UBSClientServiceImplTest {
         Optional<Bag> bag = ModelUtils.getBag();
 
         UBSuser ubSuser = getUBSuser();
+        ubSuser.setId(null);
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1303,8 +1373,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1329,13 +1398,12 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(certificateRepository.findById("1111-1234")).thenReturn(Optional.of(ModelUtils.getCertificate()));
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
-        assertNotNull(result);
+        Assertions.assertNotNull(result);
     }
 
     @Test
@@ -1345,6 +1413,7 @@ class UBSClientServiceImplTest {
         user.setUbsUsers(ModelUtils.getUbsUsers());
 
         OrderResponseDto dto = getOrderResponseDto();
+        dto.setAddressId(1L);
         dto.setPointsToUse(6000);
         dto.getBags().get(0).setAmount(15);
         Order order = getOrder();
@@ -1359,8 +1428,11 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser().setId(null);
 
-        Address address = ubSuser.getAddress();
+        OrderAddress orderAddress = ubSuser.getAddress();
+        Address address = getAddress();
         address.setUser(user);
+
+        orderAddress.setAddressStatus(AddressStatus.NEW);
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1376,9 +1448,10 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
+        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
+        when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
 
         FondyOrderResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
         Assertions.assertNotNull(result);
@@ -1402,8 +1475,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1447,8 +1519,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1493,8 +1564,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1536,8 +1606,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Order order1 = getOrder();
@@ -1553,7 +1622,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
         when(orderRepository.findById(any())).thenReturn(Optional.of(order1));
         when(liqPayService.getCheckoutResponse(any())).thenReturn("Test");
 
@@ -1563,7 +1631,6 @@ class UBSClientServiceImplTest {
         verify(ubsUserRepository).findById(1L);
         verify(modelMapper).map(dto, Order.class);
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(addressRepository).findById(any());
         verify(orderRepository).findById(any());
         verify(liqPayService).getCheckoutResponse(any());
     }
@@ -1771,7 +1838,104 @@ class UBSClientServiceImplTest {
             .getById(
                 (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
+    }
 
+    @Test
+    void testOrdersForUserWithExportedQuantity() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        OrdersDataForUserDto ordersDataForUserDto = ModelUtils.getOrderStatusDto();
+        Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+        Bag bag = ModelUtils.bagDto();
+
+        List<Bag> bags = new ArrayList<>();
+        List<Order> orderList = new ArrayList<>();
+
+        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
+        bag.setCapacity(120);
+        bag.setFullPrice(1200);
+        order.setExportedQuantity(Map.of(1, 10));
+        bags.add(bag);
+        order.setUser(user);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
+        Page<Order> page = new PageImpl<>(orderList, pageable, 1);
+
+        when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
+            .thenReturn(page);
+        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.getById(
+            (long) order.getOrderPaymentStatus().getStatusValue()))
+                .thenReturn(orderPaymentStatusTranslation);
+
+        PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
+
+        assertEquals(dto.getTotalElements(), orderList.size());
+        assertEquals(dto.getPage().get(0).getId(), order.getId());
+
+        verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
+        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+            .getById(
+                (long) order.getOrderPaymentStatus().getStatusValue());
+        verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
+    }
+
+    @Test
+    void testOrdersForUserWithConfirmedQuantity() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        OrdersDataForUserDto ordersDataForUserDto = ModelUtils.getOrderStatusDto();
+        Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+        Bag bag = ModelUtils.bagDto();
+
+        List<Bag> bags = new ArrayList<>();
+        List<Order> orderList = new ArrayList<>();
+
+        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
+        bag.setCapacity(120);
+        bag.setFullPrice(1200);
+        order.setConfirmedQuantity(Map.of(1, 10));
+        bags.add(bag);
+        order.setUser(user);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
+        Page<Order> page = new PageImpl<>(orderList, pageable, 1);
+
+        when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
+            .thenReturn(page);
+        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.getById(
+            (long) order.getOrderPaymentStatus().getStatusValue()))
+                .thenReturn(orderPaymentStatusTranslation);
+
+        PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
+
+        assertEquals(dto.getTotalElements(), orderList.size());
+        assertEquals(dto.getPage().get(0).getId(), order.getId());
+
+        verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
+        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+            .getById(
+                (long) order.getOrderPaymentStatus().getStatusValue());
+        verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
     }
 
     @Test
@@ -1857,8 +2021,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.DELETED);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1876,7 +2039,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
             ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
@@ -1905,8 +2067,7 @@ class UBSClientServiceImplTest {
 
         UBSuser ubSuser = getUBSuser();
 
-        Address address = ubSuser.getAddress();
-        address.setUser(user1);
+        OrderAddress address = ubSuser.getAddress();
         address.setAddressStatus(AddressStatus.NEW);
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
@@ -1924,7 +2085,6 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(Optional.of(ubSuser));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
-        when(addressRepository.findById(any())).thenReturn(Optional.of(address));
 
         Assertions.assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
@@ -1963,19 +2123,6 @@ class UBSClientServiceImplTest {
 
         Assertions.assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
-    }
-
-    @Test
-    void testCreateUbsUserBasedUserProfileData() {
-        UserProfileDto userProfileDto = ModelUtils.userProfileDto().setRecipientEmail("mail@mail.ua");
-        PersonalDataDto dto = ModelUtils.getPersonalDataDto2();
-        UBSuser ubsUser = getUBSuser().setId(1L);
-
-        when(ubsUserRepository.findByEmail("mail@mail.ua")).thenReturn(Optional.of(ubsUser));
-        when(modelMapper.map(dto, UBSuser.class)).thenReturn(ubsUser);
-
-        ubsService.createUbsUserBasedUserProfileData(userProfileDto, ModelUtils.getUser(), ubsUser.getAddress());
-        verify(ubsUserRepository, times(2)).save(ubsUser);
     }
 
     @Test

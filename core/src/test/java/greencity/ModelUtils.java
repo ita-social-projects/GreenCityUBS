@@ -11,6 +11,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
+import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.location.*;
 import greencity.dto.notification.NotificationDto;
@@ -60,13 +61,17 @@ public class ModelUtils {
     }
 
     public static OrderResponseDto getOrderResponseDto() {
+        return getOrderResponseDto(true);
+    }
+
+    public static OrderResponseDto getOrderResponseDto(boolean shouldBePaid) {
         return OrderResponseDto.builder()
             .additionalOrders(new HashSet<>(List.of("232534634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
-            .shouldBePaid(true)
+            .shouldBePaid(shouldBePaid)
             .personalData(PersonalDataDto.builder()
                 .firstName("Anton")
                 .lastName("Antonov")
@@ -204,7 +209,7 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
+            .recipientId(2L)
             .recipientName("Anatolii")
             .recipientSurName("Petyrov")
             .recipientPhoneNumber("095123456")
@@ -234,8 +239,12 @@ public class ModelUtils {
     }
 
     public static OrderDetailStatusDto getOrderDetailStatusDto() {
+        return getOrderDetailStatusDto(PaymentStatus.PAID);
+    }
+
+    public static OrderDetailStatusDto getOrderDetailStatusDto(PaymentStatus paymentStatus) {
         return OrderDetailStatusDto.builder()
-            .paymentStatus(PaymentStatus.PAID.name())
+            .paymentStatus(paymentStatus.name())
             .orderStatus(OrderStatus.CONFIRMED.name())
             .date(LocalDateTime.now().toString())
             .build();
@@ -319,13 +328,13 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<TariffTranslationDto> getTariffTranslationDto() {
-        return List.of(TariffTranslationDto.builder()
+    public static TariffTranslationDto getTariffTranslationDto() {
+        return TariffTranslationDto.builder()
             .name("Test")
             .nameEng("a")
             .description("Description")
             .descriptionEng("DescriptionEng")
-            .build());
+            .build();
     }
 
     public static AddServiceDto getAddServiceDto() {
@@ -333,7 +342,7 @@ public class ModelUtils {
             .capacity(120)
             .commission(10)
             .price(100)
-            .tariffTranslationDtoList(getTariffTranslationDto())
+            .tariffTranslationDto(getTariffTranslationDto())
             .build();
     }
 
@@ -530,7 +539,10 @@ public class ModelUtils {
                 .nameEn("Test")
                 .build())
             .createdAt(LocalDate.of(22, 2, 12))
-            .creator("Me")
+            .creator(EmployeeNameDto.builder()
+                .firstName("Test")
+                .lastName("Test")
+                .build())
             .build();
     }
 

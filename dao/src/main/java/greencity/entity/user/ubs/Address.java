@@ -1,33 +1,29 @@
 package greencity.entity.user.ubs;
 
 import greencity.entity.coords.Coordinates;
-import greencity.enums.AddressStatus;
 import greencity.entity.user.User;
+import greencity.enums.AddressStatus;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"ubsUsers", "user"})
+@EqualsAndHashCode(exclude = {"user"})
 @Getter
 @Setter
 @Builder
 @Table(name = "address")
-@ToString(exclude = {"ubsUsers", "user"})
+@ToString(exclude = {"user"})
 public class Address {
-    @OneToMany(mappedBy = "address")
-    private List<UBSuser> ubsUsers;
-
-    @ManyToOne
-    private User user;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    private User user;
 
     @Size(min = 1, max = 20, message = "Invalid region name")
     @Column(columnDefinition = "varchar(30)", nullable = false)

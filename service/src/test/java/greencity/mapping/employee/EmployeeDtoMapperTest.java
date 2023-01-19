@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,7 +22,9 @@ class EmployeeDtoMapperTest {
     @Test
     void convert() {
         EmployeeDto dto = ModelUtils.getEmployeeDto();
+        dto.setTariffs(Set.of(ModelUtils.getTariffsInfoDto()));
         Employee employee = ModelUtils.getEmployee();
+        employee.setTariffInfos(Set.of(ModelUtils.getTariffsInfo()));
 
         assertEquals(employee.getId(), mapper.convert(dto).getId());
         assertEquals(employee.getFirstName(), mapper.convert(dto).getFirstName());
