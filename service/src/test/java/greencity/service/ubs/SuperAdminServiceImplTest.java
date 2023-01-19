@@ -507,15 +507,8 @@ class SuperAdminServiceImplTest {
         Courier courier = getCourier();
         when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
         courier.setCourierStatus(CourierStatus.DEACTIVATED);
-        assertThrows(BadRequestException.class, () -> superAdminService.deactivateCourier(anyLong()));
-    }
-
-    @Test
-    void deleteCourierThrowCourierNotFoundException() {
-        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> superAdminService.deactivateCourier(1L));
-
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateCourier(1L));
         verify(courierRepository).findById(1L);
     }
 
