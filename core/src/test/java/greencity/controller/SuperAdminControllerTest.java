@@ -418,12 +418,6 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void setLimitDescription() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{courierId}", 1L))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     @SneakyThrows
     void setLimitDescriptionTest() throws Exception {
         TariffsInfoDto dto = ModelUtils.getLimitDescriptionDto();
