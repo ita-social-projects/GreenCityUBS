@@ -8,18 +8,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityNotFoundException;
-
 import greencity.dto.bag.BagOrderDto;
-import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
 import greencity.entity.user.ubs.OrderAddress;
@@ -1159,9 +1155,8 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
 
-        Assertions.assertThrows(BadRequestException.class,
+        Assertions.assertThrows(NotFoundException.class,
             () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
@@ -1535,7 +1530,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(
                 ModelUtils.getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                    .setMinPriceOfOrder(50000L)));
+                    .setMinQuantity(50000L)));
 
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
@@ -1580,7 +1575,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(
                 ModelUtils.getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                    .setMaxPriceOfOrder(500L)));
+                    .setMaxQuantity(500L)));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {

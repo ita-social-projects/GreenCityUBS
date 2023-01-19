@@ -12,9 +12,7 @@ import lombok.*;
  * {@inheritDoc}
  */
 public class CourierInfoDto {
-    Long minAmountOfBigBags;
-    Long maxAmountOfBigBags;
-    Long minPriceOfOrder;
-    Long maxPriceOfOrder;
+    Long minQuantity;
+    Long maxQuantity;
     CourierLimit courierLimit;
 }

@@ -38,10 +38,8 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
                 .courierStatus(source.getCourier().getCourierStatus().name())
                 .build())
             .courierLimit(source.getCourierLimit().toString())
-            .maxPriceOfOrder(source.getMaxPriceOfOrder())
-            .minPriceOfOrder(source.getMinPriceOfOrder())
-            .maxAmountOfBigBags(source.getMaxAmountOfBigBags())
-            .minAmountOfBigBags(source.getMinAmountOfBigBags())
+            .maxQuantity(source.getMaxQuantity())
+            .minQuantity(source.getMinQuantity())
             .limitDescription(source.getLimitDescription())
             .build();
     }

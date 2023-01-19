@@ -51,7 +51,7 @@ public class TariffsInfo {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column(name = "min_amount_of_big_bags")
+    /*@Column(name = "min_amount_of_big_bags")
     private Long minAmountOfBigBags;
 
     @Column(name = "max_amount_of_big_bags")
@@ -61,8 +61,13 @@ public class TariffsInfo {
     private Long minPriceOfOrder;
 
     @Column(name = "max_price_of_order")
-    private Long maxPriceOfOrder;
+    private Long maxPriceOfOrder;*/
 
+    @Column(name = "min_quantity")
+    private Long minQuantity;
+
+    @Column(name = "max_quantity")
+    private Long maxQuantity;
     @Column(name = "limit_description")
     private String limitDescription;
 

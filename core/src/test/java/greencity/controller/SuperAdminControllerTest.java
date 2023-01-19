@@ -81,6 +81,7 @@ class SuperAdminControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
+                //.apply(springSecurity())
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))

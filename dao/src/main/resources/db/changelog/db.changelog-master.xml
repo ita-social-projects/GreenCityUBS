@@ -169,5 +169,6 @@
     <include file="db/changelog/logs/ch-fk_ubs_users_and_order_address-Safarov.xml"/>
     <include file="db/changelog/logs/ch-update_big_order_table-view-Safarov.xml"/>
     <include file="db/changelog/logs/ch-drop-column_address_id-in-ubs_user-Safarov.xml"/>
+    <include file="db/changelog/logs/сh-add-column-min-max-delete-min-max-amount-and-price.xml"/>
 </databaseChangeLog>
 
