@@ -464,4 +464,10 @@ class SuperAdminControllerTest {
             .param("regionsId", "1")).andExpect(status().isOk());
         verify(superAdminService).deactivateTariffForChosenParam(details);
     }
+
+    @Test
+    void deactivateCourier() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
+        verify(superAdminService).deactivateCourier(1L);
+    }
 }
