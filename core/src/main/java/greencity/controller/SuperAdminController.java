@@ -398,7 +398,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @PatchMapping("/setLimitDescription/{tariffId}")
     public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
-        @PathVariable Long tariffId, String limitDescription) {
+        @PathVariable Long tariffId, @RequestBody String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(superAdminService.setLimitDescription(tariffId, limitDescription));
     }
