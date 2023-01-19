@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"tariffsInfo"})
+@EqualsAndHashCode(exclude = {"tariffsInfo", "editedBy", "editedAt"})
 @ToString(exclude = {"tariffsInfo"})
 @Table(name = "service")
 
@@ -42,11 +42,11 @@ public class Service {
     @JoinColumn(name = "created_by", nullable = false)
     private Employee createdBy;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate editedAt;
 
     @ManyToOne
-    @JoinColumn(name = "edited_by", nullable = false)
+    @JoinColumn(name = "edited_by")
     private Employee editedBy;
 
     @OneToOne
