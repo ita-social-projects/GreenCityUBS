@@ -7,7 +7,6 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.repository.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
