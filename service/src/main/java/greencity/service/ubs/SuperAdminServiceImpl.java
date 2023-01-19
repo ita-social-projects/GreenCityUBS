@@ -594,8 +594,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        tariffsInfo.setMaxAmountOfBigBags(dto.getMaxAmountOfBigBags());
-        tariffsInfo.setMinAmountOfBigBags(dto.getMinAmountOfBigBags());
+        tariffsInfo.setMinQuantity(dto.getMaxAmountOfBigBags());
+        tariffsInfo.setMaxQuantity(dto.getMinAmountOfBigBags());
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
@@ -605,8 +605,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        tariffsInfo.setMaxPriceOfOrder(dto.getMaxPriceOfOrder());
-        tariffsInfo.setMinPriceOfOrder(dto.getMinPriceOfOrder());
+        tariffsInfo.setMinQuantity(dto.getMaxPriceOfOrder());
+        tariffsInfo.setMaxQuantity(dto.getMinPriceOfOrder());
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }
@@ -629,11 +629,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinPriceOfOrder(null);
-            tariffsInfo.setMaxPriceOfOrder(null);
-
-            tariffsInfo.setMinAmountOfBigBags(setTariffLimitsDto.getMinAmountOfBigBags());
-            tariffsInfo.setMaxAmountOfBigBags(setTariffLimitsDto.getMaxAmountOfBigBags());
+            tariffsInfo.setMinQuantity(setTariffLimitsDto.getMinAmountOfBigBags());
+            tariffsInfo.setMaxQuantity(setTariffLimitsDto.getMaxAmountOfBigBags());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }
@@ -643,11 +640,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 throw new BadRequestException(ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinAmountOfBigBags(null);
-            tariffsInfo.setMaxAmountOfBigBags(null);
-
-            tariffsInfo.setMinPriceOfOrder(setTariffLimitsDto.getMinPriceOfOrder());
-            tariffsInfo.setMaxPriceOfOrder(setTariffLimitsDto.getMaxPriceOfOrder());
+            tariffsInfo.setMinQuantity(setTariffLimitsDto.getMinPriceOfOrder());
+            tariffsInfo.setMaxQuantity(setTariffLimitsDto.getMaxPriceOfOrder());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }

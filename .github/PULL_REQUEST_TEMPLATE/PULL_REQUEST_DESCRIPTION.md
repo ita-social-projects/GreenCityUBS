@@ -34,7 +34,7 @@ https://github.com/ita-social-projects/GreenCity/issues/4980
 
 ## How to test
 1. Go to Tariffs Info at Greencity Client as Employee
-2. Select one
+2. Select one 
 3. Select only one radio button and set min and max
 -------------------
 1. If you want to use swagger you should send the following request /ubs/superAdmin/setLimitsByAmountOfBags/{tariffId}

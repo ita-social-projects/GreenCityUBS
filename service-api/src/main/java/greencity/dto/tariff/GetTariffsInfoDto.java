@@ -29,8 +29,6 @@ public class GetTariffsInfoDto {
     private EmployeeNameDto creator;
     private LocalDate createdAt;
     private String courierLimit;
-    private Long minAmountOfBags;
-    private Long maxAmountOfBags;
-    private Long minPriceOfOrder;
-    private Long maxPriceOfOrder;
+    private Long minQuantity;
+    private Long maxQuantity;
 }
