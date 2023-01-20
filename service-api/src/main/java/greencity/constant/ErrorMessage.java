@@ -64,8 +64,8 @@ public final class ErrorMessage {
     public static final String EMPLOYEE_DOESNT_EXIST = "Employee doesn't exist";
     public static final String EMPLOYEE_IS_NOT_ASSIGN =
         "Employee service could not be assign for order or this is manager which assign managers";
-    public static final String SERVICE_IS_NOT_FOUND_BY_ID = "couldn't found service with id: ";
-    public static final String SERVICE_IS_NOT_FOUND_BY_TARIFF_ID = "couldn't found service for tariff with id: ";
+    public static final String SERVICE_IS_NOT_FOUND_BY_ID = "Couldn't found service with id: ";
+    public static final String SERVICE_IS_NOT_FOUND_BY_TARIFF_ID = "Couldn't found service for tariff with id: ";
     public static final String SERVICE_ALREADY_EXISTS = "Service already exists for tariff with id: ";
     public static final String LOCATION_STATUS_IS_ALREADY_EXIST =
         "Current location already has status that's you wanna chose";

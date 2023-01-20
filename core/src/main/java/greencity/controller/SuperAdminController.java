@@ -155,7 +155,6 @@ class SuperAdminController {
 
     @ApiOperation(value = "Add new service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ServiceDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
@@ -225,7 +224,7 @@ class SuperAdminController {
      * @author Julia Seti
      */
 
-    @ApiOperation(value = "Edit service by Id")
+    @ApiOperation(value = "Edit service")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),

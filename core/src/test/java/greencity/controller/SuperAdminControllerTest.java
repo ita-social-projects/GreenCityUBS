@@ -231,7 +231,7 @@ class SuperAdminControllerTest {
             .param("tariffId", "1L"))
             .andExpect(status().isOk());
 
-        Mockito.verify(superAdminService, times(1)).getService(1L);
+        Mockito.verify(superAdminService).getService(1L);
         Mockito.verifyNoMoreInteractions(superAdminService);
     }
 
@@ -349,7 +349,7 @@ class SuperAdminControllerTest {
             .param("id", "1L"))
             .andExpect(status().isOk());
 
-        verify(superAdminService, times(1)).deleteService(1L);
+        verify(superAdminService).deleteService(1L);
         verifyNoMoreInteractions(superAdminService);
     }
 
@@ -375,7 +375,7 @@ class SuperAdminControllerTest {
     void getLocations() throws Exception {
         mockMvc.perform(get(ubsLink + "/getLocations")).andExpect(status().isOk());
 
-        verify(superAdminService, times(1)).getAllLocation();
+        verify(superAdminService).getAllLocation();
         verifyNoMoreInteractions(superAdminService);
     }
 
@@ -383,7 +383,7 @@ class SuperAdminControllerTest {
     void getActiveLocations() throws Exception {
         mockMvc.perform(get((ubsLink + "/getActiveLocations"))).andExpect(status().isOk());
 
-        verify(superAdminService, times(1)).getActiveLocations();
+        verify(superAdminService).getActiveLocations();
         verifyNoMoreInteractions(superAdminService);
     }
 

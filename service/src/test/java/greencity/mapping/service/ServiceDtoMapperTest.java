@@ -23,7 +23,7 @@ class ServiceDtoMapperTest {
         Assertions.assertEquals(service.getName(), convertDto.getName());
         Assertions.assertEquals(service.getNameEng(), convertDto.getNameEng());
         Assertions.assertEquals(service.getDescription(), convertDto.getDescription());
-        Assertions.assertEquals(service.getNameEng(), convertDto.getNameEng());
+        Assertions.assertEquals(service.getDescriptionEng(), convertDto.getDescriptionEng());
         Assertions.assertEquals(service.getPrice(), convertDto.getPrice());
     }
 }

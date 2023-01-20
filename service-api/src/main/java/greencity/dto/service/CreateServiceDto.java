@@ -17,20 +17,20 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class CreateServiceDto {
     @NotNull
-    String name;
+    private String name;
 
     @NotNull
-    String nameEng;
+    private String nameEng;
 
     @NotNull
-    String description;
+    private String description;
 
     @NotNull
-    String descriptionEng;
+    private String descriptionEng;
 
     @NotNull
-    Integer price;
+    private Integer price;
 
     @NotNull
-    Long tariffId;
+    private Long tariffId;
 }

@@ -180,15 +180,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto addService(CreateServiceDto dto, String uuid) {
-        Service service = serviceRepository.save(createService(dto, uuid));
+    public ServiceDto addService(CreateServiceDto dto, String employeeUuid) {
+        Service service = serviceRepository.save(createService(dto, employeeUuid));
         return modelMapper.map(service, ServiceDto.class);
     }
 
-    private Service createService(CreateServiceDto dto, String uuid) {
+    private Service createService(CreateServiceDto dto, String employeeUuid) {
         long tariffId = dto.getTariffId();
         if (getServiceByTariffsInfoId(tariffId).isEmpty()) {
-            Employee employee = getEmployeeByUuid(uuid);
+            Employee employee = getEmployeeByUuid(employeeUuid);
             TariffsInfo tariffsInfo = getTariffById(tariffId);
             return Service.builder()
                 .price(dto.getPrice())
@@ -218,9 +218,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto editService(ServiceDto dto, String uuid) {
+    public ServiceDto editService(ServiceDto dto, String employeeUuid) {
         Service service = getServiceById(dto.getId());
-        Employee employee = getEmployeeByUuid(uuid);
+        Employee employee = getEmployeeByUuid(employeeUuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
@@ -232,9 +232,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return modelMapper.map(service, ServiceDto.class);
     }
 
-    private Employee getEmployeeByUuid(String uuid) {
-        return employeeRepository.findByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid));
+    private Employee getEmployeeByUuid(String employeeUuid) {
+        return employeeRepository.findByUuid(employeeUuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employeeUuid));
     }
 
     private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
