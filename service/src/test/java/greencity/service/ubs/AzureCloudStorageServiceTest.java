@@ -8,10 +8,7 @@ import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,6 +48,12 @@ class AzureCloudStorageServiceTest {
 
     @Mock
     BlobClient blobClient;
+
+    @Captor
+    ArgumentCaptor<String> connectionString;
+
+    @Captor
+    ArgumentCaptor<String> containerName;
 
     @Test
     void upload() {
