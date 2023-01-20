@@ -1,7 +1,6 @@
 package greencity.exceptions.image;
 
 public class FileIsNullException extends RuntimeException {
-
     /**
      * Constructor with message.
      *
