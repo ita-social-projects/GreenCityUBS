@@ -10,11 +10,9 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
-import greencity.entity.order.Service;
 import greencity.filters.TariffsInfoFilterCriteria;
 
 import java.util.List;
@@ -61,22 +59,25 @@ public interface SuperAdminService {
      * Method for add new Service.
      *
      * @param dto  {@link CreateServiceDto}
-     * @param uuid {@link String} - user uuid.
-     * @return {@link Service}
+     * @param uuid {@link String} - employee uuid.
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    CreateServiceDto addService(CreateServiceDto dto, String uuid);
+    ServiceDto addService(CreateServiceDto dto, String uuid);
 
     /**
-     * Method for get All service.
+     * Method for get service by tariff id.
      *
-     * @return {@link GetServiceDto}
+     * @param tariffId {@link Long} - tariff id.
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    List<GetServiceDto> getService();
+    ServiceDto getService(long tariffId);
 
     /**
-     * Method for delete service by Id.
+     * Method for delete service by id.
      *
      * @param id - Service Id.
      * @author Vadym Makitra
@@ -84,15 +85,15 @@ public interface SuperAdminService {
     void deleteService(long id);
 
     /**
-     * Method for editing service by Id.
+     * Method for editing service by id.
      *
-     * @param id   - id of current service.
      * @param dto  - entered info about field that need to edit.
-     * @param uuid - user uuid.
-     * @return {@link GetServiceDto} - info about edited service.
+     * @param uuid - employee uuid.
+     * @return {@link ServiceDto} - info about edited service.
      * @author Vadym Makitra
+     * @author Julia Seti
      */
-    GetServiceDto editService(long id, EditServiceDto dto, String uuid);
+    ServiceDto editService(ServiceDto dto, String uuid);
 
     /**
      * Method for get all info about location.
@@ -186,11 +187,11 @@ public interface SuperAdminService {
     GetTariffServiceDto excludeBag(Integer id);
 
     /**
-     * Method for delete courier.
+     * Method for change status courier and tariffs to deactivate.
      *
      * @param id - courier Id.
      */
-    void deleteCourier(Long id);
+    CourierDto deactivateCourier(Long id);
 
     /**
      * Method for getting all info about tariffs.

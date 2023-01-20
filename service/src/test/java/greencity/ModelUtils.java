@@ -1,9 +1,18 @@
 package greencity;
 
 import com.google.common.collect.Lists;
-import com.google.maps.model.*;
+import com.google.maps.model.AddressComponent;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
-import greencity.dto.*;
+import greencity.dto.AddNewTariffDto;
+import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.LocationsDtos;
+import greencity.dto.OptionForColumnDTO;
+import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -18,7 +27,11 @@ import greencity.dto.bag.EditAmountOfBagDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.courier.*;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CourierUpdateDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
@@ -47,17 +60,51 @@ import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateLocalizedDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.notification.TitleDto;
-import greencity.dto.notification.*;
+import greencity.dto.notification.UpdateNotificationTemplatesDto;
+import greencity.dto.order.AdminCommentDto;
+import greencity.dto.order.AssignEmployeesForOrderDto;
+import greencity.dto.order.AssignForOrderEmployee;
+import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.DetailsOrderInfoDto;
+import greencity.dto.order.EcoNumberDto;
+import greencity.dto.order.EditPriceOfOrder;
+import greencity.dto.order.EmployeeOrderPositionDTO;
+import greencity.dto.order.ExportDetailsDto;
+import greencity.dto.order.ExportDetailsDtoUpdate;
+import greencity.dto.order.GroupedOrderDto;
+import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderClientDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderDetailStatusRequestDto;
+import greencity.dto.order.OrderDto;
+import greencity.dto.order.OrderFondyClientDto;
+import greencity.dto.order.OrderPaymentDetailDto;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.SenderLocation;
+import greencity.dto.order.UpdateAllOrderPageDto;
+import greencity.dto.order.UpdateOrderDetailDto;
+import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.*;
+import greencity.dto.payment.ManualPaymentRequestDto;
+import greencity.dto.payment.OverpaymentInfoRequestDto;
+import greencity.dto.payment.PaymentInfoDto;
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseDtoLiqPay;
+import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
-import greencity.dto.service.ServiceTranslationDto;
+import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
@@ -87,7 +134,6 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.Service;
-import greencity.entity.order.ServiceTranslation;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
@@ -103,15 +149,39 @@ import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.CertificateStatus;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.MinAmountOfBag;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.util.Bot;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.ViolationLevel.MAJOR;
@@ -2176,63 +2246,65 @@ public class ModelUtils {
 
     public static CreateServiceDto getCreateServiceDto() {
         return CreateServiceDto.builder()
-            .capacity(120)
-            .commission(50)
-            .price(100)
-            .serviceTranslationDtoList(List.of(getServiceTranslationDto()))
-            .courierId(1L)
-            .build();
-    }
-
-    public static EditServiceDto getEditServiceDto() {
-        return EditServiceDto.builder()
-            .capacity(120)
-            .commission(50)
-            .locationId(1L)
+            .name("Name")
+            .nameEng("NameEng")
             .price(100)
             .description("Description")
             .descriptionEng("DescriptionEng")
+            .tariffId(1L)
+            .build();
+    }
+
+    public static ServiceDto getServiceDto() {
+        return ServiceDto.builder()
+            .id(1L)
             .name("Name")
             .nameEng("NameEng")
+            .price(100)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
             .build();
 
     }
 
     public static Service getService() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         return Service.builder()
-            .capacity(120)
-            .basePrice(100)
-            .commission(50)
-            .fullPrice(150)
+            .id(1L)
+            .price(100)
             .createdAt(LocalDate.now())
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courier(getCourier())
-            .serviceTranslations(List.of(getServiceTranslation()))
+            .createdBy(employee)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
+            .build();
+    }
+
+    public static Service getNewService() {
+        Employee employee = ModelUtils.getEmployee();
+        return Service.builder()
+            .price(100)
+            .createdAt(LocalDate.now())
+            .createdBy(employee)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .name("Name")
+            .nameEng("NameEng")
             .build();
     }
 
     public static Service getEditedService() {
-        User user = ModelUtils.getUser();
+        Employee employee = ModelUtils.getEmployee();
         return Service.builder()
             .id(1L)
-            .capacity(120)
-            .basePrice(100)
-            .commission(50)
-            .fullPrice(150)
-            .editedAt(LocalDate.now())
-            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .serviceTranslations(getServiceTranslationList())
-            .courier(getCourier())
-            .build();
-    }
-
-    public static ServiceTranslation getServiceTranslation() {
-        return ServiceTranslation.builder()
             .name("Name")
-            .description("Description")
             .nameEng("NameEng")
+            .price(100)
+            .description("Description")
             .descriptionEng("DescriptionEng")
+            .editedAt(LocalDate.now())
+            .editedBy(employee)
             .build();
     }
 
@@ -2515,26 +2587,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static List<ServiceTranslation> getServiceTranslationList() {
-        return List.of(ServiceTranslation.builder()
-            .description("Description")
-            .name("Name")
-            .nameEng("NameEng")
-            .descriptionEng("DescriptionEng")
-            .id(1L)
-            .service(Service.builder()
-                .id(1L)
-                .capacity(120)
-                .basePrice(100)
-                .commission(50)
-                .fullPrice(150)
-                .courier(getCourier())
-                .createdAt(LocalDate.now())
-                .createdBy("Taras Ivanov")
-                .build())
-            .build());
-    }
-
     public static Location getLocationDto() {
         return Location.builder()
             .id(1L)
@@ -2572,33 +2624,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static GetServiceDto getServiceDto() {
-        User user = getUser();
-        return GetServiceDto.builder()
-            .id(1L)
-            .name("Name")
-            .nameEng("NameEng")
-            .capacity(120)
-            .price(100)
-            .commission(50)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .fullPrice(150)
-            .editedAt(LocalDate.now())
-            .editedBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courierId(1L)
-            .build();
-    }
-
-    public static ServiceTranslationDto getServiceTranslationDto() {
-        return ServiceTranslationDto.builder()
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .nameEng("NameEng")
-            .name("Name")
-            .build();
-    }
-
     public static EditPriceOfOrder getEditPriceOfOrder() {
         return EditPriceOfOrder.builder()
             .maxPriceOfOrder(500000L)
@@ -2612,24 +2637,6 @@ public class ModelUtils {
             .maxAmountOfBigBags(99L)
             .minAmountOfBigBags(2L)
             .locationId(1L)
-            .build();
-    }
-
-    public static GetServiceDto getAllInfoAboutService() {
-        User user = getUser();
-        return GetServiceDto.builder()
-            .name("Name")
-            .nameEng("NameEng")
-            .capacity(120)
-            .price(100)
-            .commission(50)
-            .description("Description")
-            .descriptionEng("DescriptionEng")
-            .fullPrice(150)
-            .id(1L)
-            .createdAt(LocalDate.now())
-            .createdBy(user.getRecipientName() + " " + user.getRecipientSurname())
-            .courierId(1L)
             .build();
     }
 
@@ -3878,5 +3885,12 @@ public class ModelUtils {
                     .limitedIncluded(false)
                     .build()),
             600);
+    }
+
+    public static TariffsInfoDto getLimitDescriptionDto() {
+        return TariffsInfoDto.builder()
+            .limitDescription("Description")
+            .id(1L)
+            .build();
     }
 }

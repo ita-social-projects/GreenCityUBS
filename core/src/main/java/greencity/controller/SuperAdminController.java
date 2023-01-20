@@ -6,7 +6,13 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import greencity.dto.DetailsOfDeactivateTariffsDto;
-import greencity.dto.tariff.*;
+import greencity.dto.service.ServiceDto;
+import greencity.dto.tariff.AddNewTariffResponseDto;
+import greencity.dto.tariff.ChangeTariffLocationStatusDto;
+import greencity.dto.tariff.EditTariffServiceDto;
+import greencity.dto.tariff.GetTariffServiceDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,8 +46,6 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
-import greencity.dto.service.EditServiceDto;
-import greencity.dto.service.GetServiceDto;
 import greencity.entity.order.Courier;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -144,47 +148,54 @@ class SuperAdminController {
      *
      * @param dto  {@link CreateServiceDto}
      * @param uuid {@link String} - user uuid.
-     * @return {@link CreateServiceDto}
-     * @author Vadym Makitra.
+     * @return {@link ServiceDto}
+     * @author Vadym Makitra
+     * @author Julia Seti.
      */
 
     @ApiOperation(value = "Add new service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = CreateServiceDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = ServiceDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/createService")
-    public ResponseEntity<CreateServiceDto> createServices(
+    public ResponseEntity<ServiceDto> createServices(
         @RequestBody CreateServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(dto, uuid));
     }
 
     /**
-     * Controller for getting all info about service.
+     * Controller for getting info about service by tariff id.
      *
-     * @return {@link GetServiceDto}
+     * @param tariffId {@link Long} - tariff id.
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
 
-    @ApiOperation(value = "Get all info about service")
+    @ApiOperation(value = "Get info about service by tariff id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
-    @GetMapping("/getService")
-    public ResponseEntity<List<GetServiceDto>> getService() {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService());
+    @GetMapping("/{tariffId}/getService")
+    public ResponseEntity<ServiceDto> getService(
+        @Valid @PathVariable Long tariffId) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
 
     /**
      * Controller for delete service by Id.
-     *
+     * 
+     * @param id {@link Long} - service id.
      * @author Vadym Makitra
      */
 
@@ -192,7 +203,8 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @DeleteMapping("/deleteService/{id}")
@@ -203,24 +215,28 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for edit service by Id.
+     * Controller for edit service by id.
      *
+     * @param dto  {@link ServiceDto}
+     * @param uuid {@link String}
+     * @return {@link ServiceDto}
      * @author Vadym Makitra
+     * @author Julia Seti
      */
 
-    @ApiOperation(value = "Edit service by Id")
+    @ApiOperation(value = "Edit service")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = GetServiceDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = ServiceDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
-    @PutMapping("/editService/{id}")
-    public ResponseEntity<GetServiceDto> editService(
-        @Valid @PathVariable Long id,
-        @RequestBody @Valid EditServiceDto dto,
+    @PutMapping("/editService")
+    public ResponseEntity<ServiceDto> editService(
+        @RequestBody @Valid ServiceDto dto,
         @ApiIgnore @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(dto, uuid));
     }
 
     /**
@@ -398,7 +414,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @PatchMapping("/setLimitDescription/{tariffId}")
     public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
-        @PathVariable Long tariffId, String limitDescription) {
+        @PathVariable Long tariffId, @RequestBody String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(superAdminService.setLimitDescription(tariffId, limitDescription));
     }
@@ -440,21 +456,20 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for delete courier's.
+     * Controller for deactivate courier's.
      *
      * @param id - courier id that will need to be deleted;
      */
-    @ApiOperation(value = "Delete courier's by Id")
+    @ApiOperation(value = "Deactivate courier's by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
-    @DeleteMapping("/courier/{id}")
-    public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
-        superAdminService.deleteCourier(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PatchMapping("/deactivateCourier/{id}")
+    public ResponseEntity<CourierDto> deactivateCourier(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateCourier(id));
     }
 
     /**
