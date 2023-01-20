@@ -71,6 +71,7 @@ import static java.util.Objects.nonNull;
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
+    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -301,9 +302,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getAddressId());
+        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
-            addressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
+            orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
             eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
@@ -975,7 +976,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setOrderId(order.getId());
     }
 
-    private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
+    private OrderAddress updateAddressOrderInfo(OrderAddress address, OrderAddressExportDetailsDtoUpdate dto) {
         Optional.ofNullable(dto.getAddressCity()).ifPresent(address::setCity);
         Optional.ofNullable(dto.getAddressCityEng()).ifPresent(address::setCityEn);
         Optional.ofNullable(dto.getAddressRegion()).ifPresent(address::setRegion);
