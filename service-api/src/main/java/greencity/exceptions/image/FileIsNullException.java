@@ -6,7 +6,5 @@ public class FileIsNullException extends RuntimeException {
      *
      * @param message message, that explains cause of the exception.
      */
-    public FileIsNullException(String message) {
-        super(message);
-    }
+    public FileIsNullException(String message) {super(message);}
 }
