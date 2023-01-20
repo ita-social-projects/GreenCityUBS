@@ -7,6 +7,7 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         BadRequestException.class,
         ConstraintViolationException.class,
         MappingException.class,
-        CourierAlreadyExists.class
+        CourierAlreadyExists.class,
+        ServiceAlreadyExistsException.class
     })
     public final ResponseEntity<Object> handleBadRequestException(WebRequest request) {
         ExceptionResponce exceptionResponse = new ExceptionResponce(getErrorAttributes(request));

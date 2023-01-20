@@ -21,13 +21,14 @@ import java.util.Set;
 @ToString(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees", "creator"})
 @EqualsAndHashCode(exclude = {"services", "bags", "receivingStationList", "tariffLocations", "orders", "employees",
     "courier", "creator"})
+
 public class TariffsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
-    private List<Service> services;
+    @OneToOne(mappedBy = "tariffsInfo")
+    private Service service;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Bag> bags;
@@ -73,7 +74,7 @@ public class TariffsInfo {
     @ManyToOne
     private Courier courier;
 
-    @OneToMany(mappedBy = "tariffsInfo", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private Set<TariffLocation> tariffLocations;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")

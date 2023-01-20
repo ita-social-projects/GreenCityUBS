@@ -1,20 +1,18 @@
 package greencity.entity.order;
 
+import greencity.entity.user.employee.Employee;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(
-    exclude = {"serviceTranslations", "courier", "tariffsInfo"})
-@ToString(
-    exclude = {"serviceTranslations", "courier", "tariffsInfo"})
+@EqualsAndHashCode(exclude = {"tariffsInfo", "editedBy", "editedAt"})
+@ToString(exclude = {"tariffsInfo"})
 @Table(name = "service")
 
 public class Service {
@@ -22,36 +20,35 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private Integer capacity;
+    @Column(nullable = false)
+    private Integer price;
 
     @Column(nullable = false)
-    private Integer basePrice;
-
-    @Column
-    private Integer commission;
+    private String name;
 
     @Column(nullable = false)
-    private Integer fullPrice;
+    private String nameEng;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String descriptionEng;
 
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column(nullable = false)
-    private String createdBy;
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    private Employee createdBy;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate editedAt;
 
-    @Column(nullable = false)
-    private String editedBy;
-
     @ManyToOne
-    Courier courier;
+    @JoinColumn(name = "edited_by")
+    private Employee editedBy;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
-    List<ServiceTranslation> serviceTranslations;
-
-    @ManyToOne
+    @OneToOne
     private TariffsInfo tariffsInfo;
 }

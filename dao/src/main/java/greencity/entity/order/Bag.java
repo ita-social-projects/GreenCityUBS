@@ -26,10 +26,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(
-    exclude = {"bagTranslations", "location"})
-@ToString(
-    exclude = {"bagTranslations", "location"})
+@EqualsAndHashCode(exclude = {"location"})
+@ToString(exclude = {"location"})
 @Builder
 @Table(name = "bag")
 public class Bag {
