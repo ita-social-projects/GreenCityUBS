@@ -19,10 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -52,7 +49,7 @@ class ValuesForUserTableServiceImplTest {
             .build();
         Pageable pageable = PageRequest.of(1, 1);
         Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfo = employee.getTariffInfos().stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<Long> tariffsInfo = List.of(1L, 2L, 3L);
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfo);
         when(userRepository.getAllUsersByTariffsInfoId(anyLong())).thenReturn(tariffsInfo);

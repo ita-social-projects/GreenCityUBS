@@ -108,22 +108,20 @@ class ViolationServiceImplTest {
     }
 
     @Test
-//    @Disabled
     void checkAddUserViolation() {
         Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfo =
-            employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList());
+        List<Long> tariffsInfos = List.of(1L, 2L, 3L);
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
-        order.setTariffsInfo(employee.getTariffInfos().iterator().next());
+        order.setTariffsInfo(tariffsInfo);
         order.setUser(user);
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-//        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
         when(userRepository.countTotalUsersViolations(1L)).thenReturn(1);
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(employee));
-        when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfo);
+        when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfos);
         violationService.addUserViolation(add, new MultipartFile[2], "abc");
 
         assertEquals(1, user.getViolations());
