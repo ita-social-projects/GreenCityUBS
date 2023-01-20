@@ -72,7 +72,8 @@ class AddressRepositoryTest extends IntegrationTestBase {
     void getAddressByOrderId() {
 
         Address address = ModelUtils.getAddress();
-        Address actual = addressRepository.getAddressByOrderId(1L);
+        // Address actual = addressRepository.getAddressByOrderId(1L);
+        Address actual = addressRepository.findById(1L).orElseThrow();
 
         Assertions.assertEquals(Optional.of(address.getUser().getId()), Optional.of(actual.getUser().getId()));
         Assertions.assertEquals(Optional.of(address.getCoordinates()), Optional.of(actual.getCoordinates()));

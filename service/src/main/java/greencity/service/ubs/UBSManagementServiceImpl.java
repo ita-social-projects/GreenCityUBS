@@ -291,7 +291,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (orderRepository.findById(orderId).isEmpty()) {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
-        return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+        return modelMapper.map(orderAddressRepository.getOrderAddressByOrderId(orderId), ReadAddressByOrderDto.class);
     }
 
     /**
