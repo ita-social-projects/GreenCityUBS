@@ -67,7 +67,6 @@ class ViolationServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
-
     @Test
     void getAllViolations() {
         when(violationRepository.getNumberOfViolationsByUser(anyLong())).thenReturn(5L);
@@ -112,7 +111,8 @@ class ViolationServiceImplTest {
 //    @Disabled
     void checkAddUserViolation() {
         Employee employee = ModelUtils.getEmployee();
-        List<Long> tariffsInfo = employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList());
+        List<Long> tariffsInfo =
+            employee.getTariffInfos().stream().map(TariffsInfo::getId).collect(Collectors.toList());
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
         order.setTariffsInfo(employee.getTariffInfos().iterator().next());
