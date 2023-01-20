@@ -381,8 +381,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    @Transactional
     public GetTariffsInfoDto setLimitDescription(Long tariffId, String limitDescription) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
+        tariffsInfo.setLimitDescription(limitDescription);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
     }
 
     @Override
@@ -410,11 +413,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public void deleteCourier(Long id) {
+    @Transactional
+    public CourierDto deactivateCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
             () -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + id));
-        courier.setCourierStatus(CourierStatus.DELETED);
-        courierRepository.save(courier);
+        if (CourierStatus.DEACTIVATED == courier.getCourierStatus()) {
+            throw new BadRequestException(ErrorMessage.CANNOT_DEACTIVATE_COURIER + courier.getId());
+        }
+        deactivateTariffsForChosenParamRepository.deactivateTariffsByCourier(id);
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
+        return modelMapper.map(courier, CourierDto.class);
     }
 
     private Integer getFullPrice(Integer price, Integer commission) {

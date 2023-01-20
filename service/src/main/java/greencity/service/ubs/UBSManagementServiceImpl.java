@@ -402,12 +402,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return AddressExportDetailsDto.builder()
             .addressId(address.getId())
             .addressCity(address.getCity())
+            .addressCityEng(address.getCityEn())
             .addressStreet(address.getStreet())
+            .addressStreetEng(address.getStreetEn())
             .addressDistrict(address.getDistrict())
+            .addressDistrictEng(address.getDistrictEn())
             .addressEntranceNumber(address.getEntranceNumber())
             .addressHouseCorpus(address.getHouseCorpus())
             .addressHouseNumber(address.getHouseNumber())
             .addressRegion(address.getRegion())
+            .addressRegionEng(address.getRegionEn())
             .build();
     }
 
@@ -972,27 +976,18 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
-        if (nonNull(dto.getAddressCity())) {
-            address.setCity(dto.getAddressCity());
-        }
-        if (nonNull(dto.getAddressRegion())) {
-            address.setRegion(dto.getAddressRegion());
-        }
-        if (nonNull(dto.getAddressHouseNumber())) {
-            address.setHouseNumber(dto.getAddressHouseNumber());
-        }
-        if (nonNull(dto.getAddressEntranceNumber())) {
-            address.setEntranceNumber(dto.getAddressEntranceNumber());
-        }
-        if (nonNull(dto.getAddressDistrict())) {
-            address.setDistrict(dto.getAddressDistrict());
-        }
-        if (nonNull(dto.getAddressStreet())) {
-            address.setStreet(dto.getAddressStreet());
-        }
-        if (nonNull(dto.getAddressHouseCorpus())) {
-            address.setHouseCorpus(dto.getAddressHouseCorpus());
-        }
+        Optional.ofNullable(dto.getAddressCity()).ifPresent(address::setCity);
+        Optional.ofNullable(dto.getAddressCityEng()).ifPresent(address::setCityEn);
+        Optional.ofNullable(dto.getAddressRegion()).ifPresent(address::setRegion);
+        Optional.ofNullable(dto.getAddressRegionEng()).ifPresent(address::setRegionEn);
+        Optional.ofNullable(dto.getAddressDistrict()).ifPresent(address::setDistrict);
+        Optional.ofNullable(dto.getAddressDistrictEng()).ifPresent(address::setDistrictEn);
+        Optional.ofNullable(dto.getAddressStreet()).ifPresent(address::setStreet);
+        Optional.ofNullable(dto.getAddressStreetEng()).ifPresent(address::setStreetEn);
+        Optional.ofNullable(dto.getAddressHouseNumber()).ifPresent(address::setHouseNumber);
+        Optional.ofNullable(dto.getAddressHouseCorpus()).ifPresent(address::setHouseCorpus);
+        Optional.ofNullable(dto.getAddressEntranceNumber()).ifPresent(address::setEntranceNumber);
+
         return address;
     }
 

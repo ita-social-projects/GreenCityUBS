@@ -273,9 +273,14 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setLimitDescriptionThrowsUnsupportedOperationExceptionTest() {
-        assertThrows(UnsupportedOperationException.class,
-            () -> superAdminService.setLimitDescription(1L, "limitDescription"));
+    void setLimitDescriptionTest() {
+        TariffsInfo tariffInfo = getTariffInfo();
+        GetTariffsInfoDto allTariffsInfoDto = getAllTariffsInfoDto();
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffInfo));
+        when(modelMapper.map(tariffInfo, GetTariffsInfoDto.class)).thenReturn(allTariffsInfoDto);
+        superAdminService.setLimitDescription(anyLong(), ModelUtils.getLimitDescriptionDto().getLimitDescription());
+        verify(tariffsInfoRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(tariffInfo, GetTariffsInfoDto.class);
     }
 
     @Test
@@ -472,26 +477,40 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void deleteCourierTest() {
-        Courier courier = ModelUtils.getCourier();
-        courier.setCourierStatus(CourierStatus.DELETED);
+    void deactivateCourierTest() {
+        Courier courier = getCourier();
+        CourierDto courierDto = getCourierDto();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        when(modelMapper.map(courier, CourierDto.class)).thenReturn(courierDto);
 
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(courierRepository.save(courier)).thenReturn(courier);
+        superAdminService.deactivateCourier(anyLong());
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
 
-        superAdminService.deleteCourier(1L);
-        assertEquals(CourierStatus.DELETED, courier.getCourierStatus());
-
-        verify(courierRepository).findById(1L);
-        verify(courierRepository).save(courier);
+        assertEquals(CourierStatus.DEACTIVATED, courier.getCourierStatus());
+        verify(deactivateTariffsForChosenParamRepository).deactivateTariffsByCourier(anyLong());
+        verify(courierRepository, times(1)).findById(anyLong());
+        verify(modelMapper, times(1)).map(courier, CourierDto.class);
     }
 
     @Test
-    void deleteCourierThrowCourierNotFoundException() {
-        when(courierRepository.findById(1L)).thenReturn(Optional.empty());
+    void deactivateCourierThrowBadRequestException() {
+        Courier courier = getCourier();
+        when(courierRepository.findById(anyLong())).thenReturn(Optional.of(courier));
+        courier.setCourierStatus(CourierStatus.DEACTIVATED);
+        assertThrows(BadRequestException.class,
+            () -> superAdminService.deactivateCourier(1L));
+        verify(courierRepository).findById(1L);
+    }
 
-        assertThrows(NotFoundException.class, () -> superAdminService.deleteCourier(1L));
+    @Test
+    void deactivateCourierThrowNotFoundException() {
+        when(courierRepository.findById(anyLong()))
+            .thenThrow(new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + 1L));
 
+        Exception thrownNotFoundEx = assertThrows(NotFoundException.class,
+            () -> superAdminService.deactivateCourier(1L));
+
+        assertEquals(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + 1L, thrownNotFoundEx.getMessage());
         verify(courierRepository).findById(1L);
     }
 

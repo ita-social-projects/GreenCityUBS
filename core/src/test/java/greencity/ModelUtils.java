@@ -31,6 +31,7 @@ import greencity.dto.service.ServiceTranslationDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.TariffTranslationDto;
+import greencity.dto.tariff.TariffsInfoDto;
 import greencity.dto.user.*;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
@@ -586,6 +587,13 @@ public class ModelUtils {
         return UserEmployeeAuthorityDto.builder()
             .authorities(Collections.singletonList("SEE_CLIENTS_PAGE"))
             .employeeEmail("test@mail.com")
+            .build();
+    }
+
+    public static TariffsInfoDto getLimitDescriptionDto() {
+        return TariffsInfoDto.builder()
+            .limitDescription("Description")
+            .id(1L)
             .build();
     }
 }

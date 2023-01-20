@@ -398,7 +398,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @PatchMapping("/setLimitDescription/{tariffId}")
     public ResponseEntity<GetTariffsInfoDto> setLimitDescription(
-        @PathVariable Long tariffId, String limitDescription) {
+        @PathVariable Long tariffId, @RequestBody String limitDescription) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(superAdminService.setLimitDescription(tariffId, limitDescription));
     }
@@ -440,21 +440,20 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for delete courier's.
+     * Controller for deactivate courier's.
      *
      * @param id - courier id that will need to be deleted;
      */
-    @ApiOperation(value = "Delete courier's by Id")
+    @ApiOperation(value = "Deactivate courier's by Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_COURIER', authentication)")
-    @DeleteMapping("/courier/{id}")
-    public ResponseEntity<HttpStatuses> deleteCourier(@PathVariable Long id) {
-        superAdminService.deleteCourier(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PatchMapping("/deactivateCourier/{id}")
+    public ResponseEntity<CourierDto> deactivateCourier(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateCourier(id));
     }
 
     /**
