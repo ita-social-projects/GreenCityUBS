@@ -48,6 +48,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -176,31 +177,6 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void createServiceIfEmployeeNotFoundException() throws Exception {
-        CreateServiceDto dto = ModelUtils.createServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
-        String uuid = UUID.randomUUID().toString();
-
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.addService(any(CreateServiceDto.class), anyString()))
-            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
-
-        mockMvc.perform(post(ubsLink + "/createService")
-            .principal(principal)
-            .param("uuid", uuid)
-            .content(requestedJson)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
-                result.getResolvedException().getMessage()));
-
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).addService(any(CreateServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
-    }
-
-    @Test
     void createServiceIfTariffNotFoundException() throws Exception {
         CreateServiceDto dto = ModelUtils.createServiceDto();
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
@@ -237,20 +213,14 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void getServiceIfServiceNotFoundException() throws Exception {
-        long tariffId = 1L;
-        Mockito.when(superAdminService.getService(tariffId))
-            .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
-
-        mockMvc.perform(get(ubsLink + "/" + tariffId + "/getService")
+    void getServiceIfServiceNotFound() throws Exception {
+        Mockito.when(superAdminService.getService(1L)).thenReturn(Collections.emptyList());
+        mockMvc.perform(get(ubsLink + "/1/getService")
             .principal(principal)
             .param("tariffId", "1L"))
-            .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId,
-                result.getResolvedException().getMessage()));
+            .andExpect(status().isOk());
 
-        Mockito.verify(superAdminService).getService(tariffId);
+        Mockito.verify(superAdminService).getService(1L);
         Mockito.verifyNoMoreInteractions(superAdminService);
     }
 
@@ -311,31 +281,6 @@ class SuperAdminControllerTest {
             .andExpect(status().isNotFound())
             .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
-                result.getResolvedException().getMessage()));
-
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).editService(any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
-    }
-
-    @Test
-    void editServiceIfEmployeeNotFoundException() throws Exception {
-        ServiceDto dto = ModelUtils.getServiceDto();
-        String requestedJson = new ObjectMapper().writeValueAsString(dto);
-        String uuid = UUID.randomUUID().toString();
-
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.editService(any(ServiceDto.class), anyString()))
-            .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
-
-        mockMvc.perform(put(ubsLink + "/editService")
-            .principal(principal)
-            .param("uuid", uuid)
-            .content(requestedJson)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 result.getResolvedException().getMessage()));
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());

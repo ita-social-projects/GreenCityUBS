@@ -74,7 +74,7 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto getService(long tariffId);
+    List<ServiceDto> getService(long tariffId);
 
     /**
      * Method for delete service by id.

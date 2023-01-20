@@ -71,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -188,7 +189,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private Service createService(CreateServiceDto dto, String employeeUuid) {
         long tariffId = dto.getTariffId();
         if (getServiceByTariffsInfoId(tariffId).isEmpty()) {
-            Employee employee = getEmployeeByUuid(employeeUuid);
+            Employee employee = employeeRepository.findEmployeeByUuid(employeeUuid);
             TariffsInfo tariffsInfo = getTariffById(tariffId);
             return Service.builder()
                 .price(dto.getPrice())
@@ -206,10 +207,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto getService(long tariffId) {
+    public List<ServiceDto> getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> modelMapper.map(it, ServiceDto.class))
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
+            .map(it -> List.of(modelMapper.map(it, ServiceDto.class)))
+            .orElse(Collections.emptyList());
     }
 
     @Override
@@ -220,7 +221,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public ServiceDto editService(ServiceDto dto, String employeeUuid) {
         Service service = getServiceById(dto.getId());
-        Employee employee = getEmployeeByUuid(employeeUuid);
+        Employee employee = employeeRepository.findEmployeeByUuid(employeeUuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());
         service.setNameEng(dto.getNameEng());
@@ -230,11 +231,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         service.setEditedBy(employee);
         serviceRepository.save(service);
         return modelMapper.map(service, ServiceDto.class);
-    }
-
-    private Employee getEmployeeByUuid(String employeeUuid) {
-        return employeeRepository.findByUuid(employeeUuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employeeUuid));
     }
 
     private Optional<Service> getServiceByTariffsInfoId(long tariffId) {
