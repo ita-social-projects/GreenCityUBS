@@ -59,6 +59,11 @@ class AzureCloudStorageServiceTest {
         when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
         doReturn("blobUrl").when(blobClient).getBlobUrl();
         azureCloudStorageService.upload(multipartFile);
+        assertNotNull(multipartFile);
+        assertNotNull(azureCloudStorageService.getConnectionString());
+        assertNotNull(azureCloudStorageService.getContainerName());
+        verify(containerClient).getBlobClient(anyString());
+        verify(blobClient).upload(any(InputStream.class), anyLong());
         verify(blobClient).getBlobUrl();
     }
 
@@ -69,6 +74,10 @@ class AzureCloudStorageServiceTest {
         when(blobClient.exists()).thenReturn(true);
         doNothing().when(blobClient).delete();
         azureCloudStorageService.delete("url/somepath/somefile.txt");
+        assertNotNull(azureCloudStorageService.getConnectionString());
+        assertNotNull(azureCloudStorageService.getContainerName());
+        verify(containerClient).getBlobClient(anyString());
+        assertEquals(true, blobClient.exists());
         verify(blobClient).delete();
     }
 
