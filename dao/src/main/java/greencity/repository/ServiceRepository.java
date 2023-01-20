@@ -18,6 +18,15 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
     Optional<Service> findServiceById(Long id);
 
     /**
+     * Method that return service by TariffsInfo id.
+     *
+     * @param tariffId {@link Long} - TariffsInfo id
+     * @return {@link Optional} of {@link Service}
+     * @author Julia Seti
+     */
+    Optional<Service> findServiceByTariffsInfoId(Long tariffId);
+
+    /**
      * Method that return sum of full price by courier id.
      *
      * @param courierId {@link Long}

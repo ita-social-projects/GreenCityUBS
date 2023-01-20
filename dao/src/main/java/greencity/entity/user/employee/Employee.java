@@ -1,5 +1,6 @@
 package greencity.entity.user.employee;
 
+import greencity.entity.order.Service;
 import greencity.enums.EmployeeStatus;
 import greencity.entity.order.Order;
 import greencity.entity.order.TariffsInfo;
@@ -75,4 +76,10 @@ public class Employee {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "blockedByEmployee")
     private Set<Order> orders;
+
+    @OneToMany(mappedBy = "createdBy")
+    private Set<Service> createdServices;
+
+    @OneToMany(mappedBy = "editedBy")
+    private Set<Service> editedServices;
 }
