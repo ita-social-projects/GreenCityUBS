@@ -1,54 +1,13 @@
 package greencity.service.ubs;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
-import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.tariff.TariffsInfoDto;
-import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.employee.ReceivingStation;
-import greencity.repository.*;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
-import greencity.constant.AppConstant;
-import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeDto;
-import greencity.dto.position.AddingPositionDto;
-import greencity.dto.position.PositionDto;
-import greencity.enums.EmployeeStatus;
-import greencity.enums.SortingOrder;
-import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.UnprocessableEntityException;
-import greencity.filters.EmployeeFilterCriteria;
-import greencity.filters.EmployeePage;
-
-import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {

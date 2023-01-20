@@ -22,7 +22,6 @@ import greencity.dto.courier.*;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
-import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
@@ -920,25 +919,6 @@ public class ModelUtils {
             .courier(getCourierDto())
             .build();
     }
-
-    public static EmployeeDto getEmployeeDtoWithReceivingStations() {
-        return EmployeeDto.builder()
-            .id(1L)
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .receivingStations(List.of(ReceivingStationDto.builder()
-                .id(1L)
-                .name("Петрівка")
-                .build()))
-            .build();
-    }
-
     public static Employee getEmployee() {
         return Employee.builder()
             .id(1L)
