@@ -608,4 +608,11 @@ public class ModelUtils {
             .employeeEmail("test@mail.com")
             .build();
     }
+
+    public static TariffsInfoDto getLimitDescriptionDto() {
+        return TariffsInfoDto.builder()
+            .limitDescription("Description")
+            .id(1L)
+            .build();
+    }
 }

@@ -187,11 +187,11 @@ public interface SuperAdminService {
     GetTariffServiceDto excludeBag(Integer id);
 
     /**
-     * Method for delete courier.
+     * Method for change status courier and tariffs to deactivate.
      *
      * @param id - courier Id.
      */
-    void deleteCourier(Long id);
+    CourierDto deactivateCourier(Long id);
 
     /**
      * Method for getting all info about tariffs.
