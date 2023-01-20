@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class GetEmployeeDtoMapper extends AbstractConverter<Employee, GetEmployeeDto> {
-
     @Override
     protected GetEmployeeDto convert(Employee source) {
         List<PositionDto> positionDtos = source.getEmployeePosition()

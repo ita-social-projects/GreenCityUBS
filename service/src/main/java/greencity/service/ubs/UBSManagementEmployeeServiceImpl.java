@@ -3,15 +3,11 @@ package greencity.service.ubs;
 import greencity.client.UserRemoteClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.employee.EmployeeSignUpDto;
-import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.employee.SaveEmployeeDto;
-import greencity.dto.employee.UpdateEmployeeDto;
+import greencity.dto.employee.*;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
@@ -31,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,16 +50,14 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public SaveEmployeeDto save(SaveEmployeeDto dto, MultipartFile image) {
         dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-        if (employeeRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            throw new UnprocessableEntityException(
-                ErrorMessage.CURRENT_PHONE_NUMBER_ALREADY_EXISTS + dto.getPhoneNumber());
-        }
         if (dto.getEmail() != null && employeeRepository.existsByEmail(dto.getEmail())) {
             throw new UnprocessableEntityException(
                 ErrorMessage.CURRENT_EMAIL_ALREADY_EXISTS + dto.getEmail());
         }
         checkValidPosition(dto.getEmployeePositions());
+
         Employee employee = modelMapper.map(dto, Employee.class);
+        employee.setUuid(UUID.randomUUID().toString());
         employee.setTariffInfos(tariffsInfoRepository.findTariffsInfoById(dto.getTariffId()));
         if (image != null) {
             employee.setImagePath(fileService.upload(image));
@@ -77,6 +72,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         EmployeeSignUpDto signUpDto = EmployeeSignUpDto.builder()
             .email(employee.getEmail())
             .name(employee.getFirstName() + employee.getLastName())
+            .uuid(employee.getUuid())
+            .positions(employee.getEmployeePosition().stream()
+                .map(position -> PositionDto.builder()
+                    .id(position.getId())
+                    .name(position.getName())
+                    .build())
+                .collect(Collectors.toList()))
             .isUbs(true)
             .build();
         userRemoteClient.signUpEmployee(signUpDto);
@@ -112,32 +114,19 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     @Transactional
     public UpdateEmployeeDto update(UpdateEmployeeDto dto, MultipartFile image) {
-        if (!employeeRepository.existsById(dto.getId())) {
-            throw new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId());
-        }
-        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-//        checkIfAnotherUserExistsWithCurrentPhone(dto)
-//        checkIfAnotherUserExistsWithCurrentEmail(dto)
-        if (employeeRepository.findEmployeeWithPhoneAndNotId(dto.getPhoneNumber(), dto.getId()).isEmpty()
-            ) {
-            throw new BadRequestException("Phone number already exist in another employee or user: "
-                + dto.getPhoneNumber());
-        }
-        if (employeeRepository.findEmployeeWithEmailAndNotId(dto.getEmail(), dto.getId()).isEmpty()
-            ) {
-            throw new BadRequestException("Email already exist in another employee or user:"
-                + dto.getEmail());
+        final Employee upEmployee = employeeRepository.findById(dto.getId()).orElseThrow(
+            () -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
+        if (!employeeRepository.findEmployeeWithEmailAndNotId(dto.getEmail(), dto.getId()).isEmpty()) {
+            throw new BadRequestException("Email already exist in another employee: " + dto.getEmail());
         }
         checkValidPosition(dto.getEmployeePositions());
-        if (!employeeRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            updateUserPhone(dto);
-        }
-        if (!employeeRepository.existsByEmail(dto.getEmail())) {
-            updateUserEmail(dto);
-            updateEmployeeEmail(dto);
-        }
+        dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
+        updateEmployeeEmail(dto);
+        updateEmployeeAuthorities(dto);
+
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
         updatedEmployee.setTariffInfos(tariffsInfoRepository.findTariffsInfoById(dto.getTariffId()));
+        updatedEmployee.setUuid(upEmployee.getUuid());
         if (image != null) {
             if (!updatedEmployee.getImagePath().equals(defaultImagePath)) {
                 fileService.delete(updatedEmployee.getImagePath());
@@ -149,10 +138,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return modelMapper.map(employeeRepository.save(updatedEmployee), UpdateEmployeeDto.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
+    @Transactional
     public PositionDto update(PositionDto dto) {
         if (!positionRepository.existsById(dto.getId())) {
             throw new NotFoundException(ErrorMessage.POSITION_NOT_FOUND_BY_ID + dto.getId());
@@ -162,6 +149,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             return modelMapper.map(positionRepository.save(position), PositionDto.class);
         }
         throw new UnprocessableEntityException(ErrorMessage.CURRENT_POSITION_ALREADY_EXISTS + dto.getName());
+    }
+
+    private void updateEmployeeAuthorities(UpdateEmployeeDto dto) {
+        UpdateEmployeeAuthoritiesDto authoritiesDto =
+            UpdateEmployeeAuthoritiesDto.builder()
+                .email(dto.getEmail())
+                .positions(dto.getEmployeePositions())
+                .build();
+        userRemoteClient.updateAuthorities(authoritiesDto);
     }
 
     /**
@@ -242,42 +238,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
         String oldEmail = employee.getEmail();
         String newEmail = dto.getEmail();
-        userRemoteClient.updateEmployeeEmail(oldEmail, newEmail);
-    }
-
-    private void updateUserEmail(UpdateEmployeeDto dto) {
-        Employee employee = employeeRepository.findById(dto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
-        String oldEmail = employee.getEmail();
-        User user = userRepository.findByRecipientEmail(oldEmail)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND + employee.getEmail()));
-        user.setRecipientEmail(dto.getEmail());
-        userRepository.save(user);
-    }
-
-    private void updateUserPhone(UpdateEmployeeDto dto) {
-        Employee employee = employeeRepository.findById(dto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
-        String oldPhone = employee.getPhoneNumber();
-        User user = userRepository.findByRecipientPhone(oldPhone)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_PHONE + employee.getPhoneNumber()));
-        user.setRecipientPhone(dto.getPhoneNumber());
-        userRepository.save(user);
-    }
-
-    private boolean checkIfAnotherUserExistsWithCurrentEmail(UpdateEmployeeDto dto) {
-        Employee employee = employeeRepository.findById(dto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
-        String oldPhoneNumber = employee.getPhoneNumber();
-        return userRepository.existUserByEmailExceptOne(dto.getEmail(), oldPhoneNumber).isEmpty();
-    }
-
-    private boolean checkIfAnotherUserExistsWithCurrentPhone(UpdateEmployeeDto dto) {
-        Employee employee = employeeRepository.findById(dto.getId())
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
-        String oldEmail = employee.getEmail();
-
-        return userRepository.existUserByPhoneExceptOne(dto.getPhoneNumber(), oldEmail).isEmpty();
+        if (!oldEmail.equals(newEmail)) {
+            userRemoteClient.updateEmployeeEmail(oldEmail, newEmail);
+        }
     }
 
     private void checkValidPosition(List<PositionDto> positions) {
@@ -302,5 +265,4 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
             .collect(Collectors.toList());
     }
-
 }

@@ -17,7 +17,6 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetTariffInfoForEmployeeDto {
-
     private Long id;
     private RegionDto region;
     private List<LocationsDtos> locationsDtos;

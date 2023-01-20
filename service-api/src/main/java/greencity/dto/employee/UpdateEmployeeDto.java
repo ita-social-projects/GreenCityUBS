@@ -33,5 +33,4 @@ public class UpdateEmployeeDto {
     private List<PositionDto> employeePositions;
     @NotEmpty
     private List<Long> tariffId;
-
 }

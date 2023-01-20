@@ -306,5 +306,4 @@ public class ManagementEmployeeController {
     public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
     }
-
 }

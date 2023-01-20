@@ -5,6 +5,7 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
@@ -77,6 +78,12 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             public void updateEmployeeEmail(String employeeEmail, String newEmployeeEmail) {
                 log.error(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED, throwable);
+            }
+
+            @Override
+            public void updateAuthorities(UpdateEmployeeAuthoritiesDto dto) {
+                log.error(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE);
+                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITIES_DONT_UPDATE, throwable);
             }
         };
     }

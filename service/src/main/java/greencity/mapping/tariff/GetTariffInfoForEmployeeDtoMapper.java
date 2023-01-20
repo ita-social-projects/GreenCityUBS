@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class GetTariffInfoForEmployeeDtoMapper extends AbstractConverter<TariffsInfo, GetTariffInfoForEmployeeDto> {
-
     @Override
     protected GetTariffInfoForEmployeeDto convert(TariffsInfo source) {
         Region region = source.getTariffLocations() != null

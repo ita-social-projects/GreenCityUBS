@@ -102,6 +102,7 @@ public final class ErrorMessage {
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
     public static final String EMPLOYEE_EMAIL_WAS_NOT_EDITED = "Employee's email was not edited";
+    public static final String EMPLOYEE_AUTHORITIES_DONT_UPDATE = "Employee's authorities was not updated";
     public static final String COMMENT_ERROR = "Invalid comment= ";
     public static final String TOO_MUCH_POINTS_FOR_ORDER = "Too much points for order, maximum amount: ";
     public static final String TARIFF_FOR_ORDER_NOT_EXIST = "Could not find tariff for order with id: ";

@@ -125,16 +125,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true,
         value = "UPDATE users SET current_points = current_points + :returnPoints WHERE id = :userId")
     void updateUserCurrentPoints(Long userId, int returnPoints);
-
-    Optional<User> findByRecipientEmail(String email);
-
-    Optional<User> findByRecipientPhone(String phone);
-
-    @Query(value = "Select u from User u  where u.recipientPhone =: newPhoneNumber and " +
-        "not u.recipientEmail =: oldEmail")
-    Optional<User> existUserByPhoneExceptOne(String newPhoneNumber, String oldEmail);
-
-    @Query(value = "Select u from User u  where u.recipientEmail =: newEmail and " +
-        "not u.recipientPhone =: oldPhone")
-    Optional<User> existUserByEmailExceptOne(String newEmail, String oldPhone);
 }

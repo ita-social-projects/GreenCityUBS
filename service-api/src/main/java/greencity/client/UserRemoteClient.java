@@ -4,6 +4,7 @@ import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeeSignUpDto;
+import greencity.dto.employee.UpdateEmployeeAuthoritiesDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.PasswordStatusDto;
@@ -111,6 +112,14 @@ public interface UserRemoteClient {
      * @param employeeEmail    {@link String}
      * @param newEmployeeEmail {@link String}
      */
-    @PutMapping("user/update-employee-email")
+    @PutMapping("/user/update-employee-email")
     void updateEmployeeEmail(@RequestParam String employeeEmail, @RequestParam String newEmployeeEmail);
+
+    /**
+     * Update authorities in chosen employee.
+     *
+     * @param dto contains email and list of positions.
+     */
+    @PutMapping("/user/update-authorities")
+    void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
 }

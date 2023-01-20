@@ -96,6 +96,11 @@ public interface UBSManagementEmployeeService {
      */
     void deleteEmployeeImage(Long id);
 
+    /**
+     * Method that return list of GetTariffInfoForEmployeeDto.
+     *
+     * @return list of GetTariffInfoForEmployeeDto.
+     * @author Nikita Korzh.
+     */
     List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
-
 }
