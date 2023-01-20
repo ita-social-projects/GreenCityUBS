@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import com.azure.storage.blob.*;
+import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileIsNullException;
 import greencity.exceptions.image.FileNotSavedException;
@@ -49,12 +50,6 @@ class AzureCloudStorageServiceTest {
     @Mock
     BlobClient blobClient;
 
-    @Captor
-    ArgumentCaptor<String> connectionString;
-
-    @Captor
-    ArgumentCaptor<String> containerName;
-
     @Test
     void upload() {
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
@@ -92,17 +87,21 @@ class AzureCloudStorageServiceTest {
             throw new IOException();
         }).when(blobClient).upload(any(InputStream.class), anyLong());
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
-        assertThrows(FileNotSavedException.class, () -> azureCloudStorageService.upload(multipartFile));
+        FileNotSavedException ex = assertThrows(FileNotSavedException.class, () -> azureCloudStorageService.upload(multipartFile));
+        assertEquals(ErrorMessage.FILE_NOT_SAVED, ex.getMessage());
     }
 
     @Test
     void checkUploadNullImage() {
         MultipartFile multipartFile = null;
-        assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
+        FileIsNullException ex = assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
+        assertEquals(ErrorMessage.FILE_IS_NULL, ex.getMessage());
     }
 
     @Test
     void checkDeleteThrowsException() {
-        assertThrows(BadRequestException.class, () -> azureCloudStorageService.delete("aa#26#1"));
+        String url = "aa#26#1";
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> azureCloudStorageService.delete(url));
+        assertEquals(ErrorMessage.PARSING_URL_FAILED + url, ex.getMessage());
     }
 }
