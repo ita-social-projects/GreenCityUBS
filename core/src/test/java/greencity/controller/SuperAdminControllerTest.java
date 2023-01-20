@@ -21,6 +21,7 @@ import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
+import greencity.dto.tariff.TariffsInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -632,8 +633,15 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void setLimitDescription() throws Exception {
-        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{courierId}", 1L))
+    @SneakyThrows
+    void setLimitDescriptionTest() throws Exception {
+        TariffsInfoDto dto = ModelUtils.getLimitDescriptionDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(patch(ubsLink + "/setLimitDescription/{tariffId}", 1L)
+            .principal(principal)
+            .content(responseJSON)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
@@ -670,5 +678,11 @@ class SuperAdminControllerTest {
         mockMvc.perform(post(ubsLink + "/deactivate/")
             .param("regionsId", "1")).andExpect(status().isOk());
         verify(superAdminService).deactivateTariffForChosenParam(details);
+    }
+
+    @Test
+    void deactivateCourier() throws Exception {
+        mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
+        verify(superAdminService).deactivateCourier(1L);
     }
 }
