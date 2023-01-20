@@ -87,14 +87,16 @@ class AzureCloudStorageServiceTest {
             throw new IOException();
         }).when(blobClient).upload(any(InputStream.class), anyLong());
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
-        FileNotSavedException ex = assertThrows(FileNotSavedException.class, () -> azureCloudStorageService.upload(multipartFile));
+        FileNotSavedException ex =
+            assertThrows(FileNotSavedException.class, () -> azureCloudStorageService.upload(multipartFile));
         assertEquals(ErrorMessage.FILE_NOT_SAVED, ex.getMessage());
     }
 
     @Test
     void checkUploadNullImage() {
         MultipartFile multipartFile = null;
-        FileIsNullException ex = assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
+        FileIsNullException ex =
+            assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
         assertEquals(ErrorMessage.FILE_IS_NULL, ex.getMessage());
     }
 
