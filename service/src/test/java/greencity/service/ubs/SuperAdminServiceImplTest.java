@@ -422,7 +422,7 @@ class SuperAdminServiceImplTest {
 
     @Test
     void setLimitDescriptionTest() {
-        TariffsInfo tariffInfo = getTariffInfo();
+        TariffsInfo tariffInfo = ModelUtils.getTariffInfo();
         GetTariffsInfoDto allTariffsInfoDto = getAllTariffsInfoDto();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(tariffInfo));
         when(modelMapper.map(tariffInfo, GetTariffsInfoDto.class)).thenReturn(allTariffsInfoDto);
