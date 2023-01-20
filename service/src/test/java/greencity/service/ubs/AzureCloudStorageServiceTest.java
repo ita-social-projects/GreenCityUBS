@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.azure.storage.blob.*;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.image.FileIsNullException;
 import greencity.exceptions.image.FileNotSavedException;
 import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +81,12 @@ class AzureCloudStorageServiceTest {
         }).when(blobClient).upload(any(InputStream.class), anyLong());
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
         assertThrows(FileNotSavedException.class, () -> azureCloudStorageService.upload(multipartFile));
+    }
+
+    @Test
+    void checkUploadNullImage() {
+        MultipartFile multipartFile = null;
+        assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
     }
 
     @Test
