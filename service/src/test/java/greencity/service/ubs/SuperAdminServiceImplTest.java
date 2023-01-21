@@ -265,23 +265,11 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
         when(modelMapper.map(service, ServiceDto.class)).thenReturn(serviceDto);
 
-        assertEquals(serviceDto, superAdminService.getService(1L));
+        assertEquals(List.of(serviceDto), superAdminService.getService(1L));
 
         verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(modelMapper).map(service, ServiceDto.class);
-    }
-
-    @Test
-    void getServiceThrowServiceNotFoundException() {
-        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
-        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class,
-            () -> superAdminService.getService(1L));
-
-        verify(tariffsInfoRepository).existsById(1L);
-        verify(serviceRepository).findServiceByTariffsInfoId(1L);
     }
 
     @Test
