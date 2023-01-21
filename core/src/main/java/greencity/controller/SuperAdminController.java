@@ -187,7 +187,7 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/{tariffId}/getService")
-    public ResponseEntity<ServiceDto> getService(
+    public ResponseEntity<List<ServiceDto>> getService(
         @Valid @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
