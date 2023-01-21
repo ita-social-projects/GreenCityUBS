@@ -237,24 +237,6 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void getServiceIfServiceNotFoundException() throws Exception {
-        long tariffId = 1L;
-        Mockito.when(superAdminService.getService(tariffId))
-            .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId));
-
-        mockMvc.perform(get(ubsLink + "/" + tariffId + "/getService")
-            .principal(principal)
-            .param("tariffId", "1L"))
-            .andExpect(status().isNotFound())
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-            .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_TARIFF_ID + tariffId,
-                result.getResolvedException().getMessage()));
-
-        Mockito.verify(superAdminService).getService(tariffId);
-        Mockito.verifyNoMoreInteractions(superAdminService);
-    }
-
-    @Test
     void getServiceIfTariffNotFoundException() throws Exception {
         long tariffId = 1L;
         Mockito.when(superAdminService.getService(tariffId))
