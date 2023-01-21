@@ -335,7 +335,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
-        Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
+        Integer servicePrice = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
+            .map(it -> it.getPrice())
+            .orElse(0);
         OrderAddress address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -366,7 +368,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId, email))
             .comment(order.getComment())
-            .courierPricePerPackage(fullPrice)
+            .courierPricePerPackage(servicePrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
     }

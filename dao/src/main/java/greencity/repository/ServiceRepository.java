@@ -25,16 +25,4 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
      * @author Julia Seti
      */
     Optional<Service> findServiceByTariffsInfoId(Long tariffId);
-
-    /**
-     * Method that return sum of full price by courier id.
-     *
-     * @param courierId {@link Long}
-     * @return {@link Integer}
-     * @author Maksym Kuzbyt
-     */
-    @Query(nativeQuery = true,
-        value = "select sum(full_price) from service s "
-            + "where s.courier_id = :courierId ")
-    Integer findFullPriceByCourierId(@Param("courierId") Long courierId);
 }
