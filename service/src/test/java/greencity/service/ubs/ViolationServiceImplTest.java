@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import greencity.constant.ErrorMessage;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
@@ -35,6 +36,8 @@ import greencity.repository.UserRepository;
 import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
+
+import javax.persistence.EntityNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -128,7 +131,7 @@ class ViolationServiceImplTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     void checkAddUserViolationThrowsException() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -136,11 +139,12 @@ class ViolationServiceImplTest {
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
+//        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
+//        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
 
-        assertThrows(NotFoundException.class,
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
             () -> violationService.addUserViolation(add, new MultipartFile[2], "abc"));
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
