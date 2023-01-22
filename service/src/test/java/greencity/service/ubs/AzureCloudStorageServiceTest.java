@@ -5,14 +5,11 @@ import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileIsNullException;
 import greencity.exceptions.image.FileNotSavedException;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.web.MockMultipartFile;
@@ -24,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +47,7 @@ class AzureCloudStorageServiceTest {
     BlobClient blobClient;
 
     @Test
-    void upload() {
+    void checkUpload() {
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
         doReturn(containerClient).when(azureCloudStorageService).containerClient();
         when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
@@ -66,7 +62,7 @@ class AzureCloudStorageServiceTest {
     }
 
     @Test
-    void delete() {
+    void checkDelete() {
         doReturn(containerClient).when(azureCloudStorageService).containerClient();
         when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
         when(blobClient.exists()).thenReturn(true);
@@ -98,6 +94,12 @@ class AzureCloudStorageServiceTest {
         FileIsNullException ex =
             assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
         assertEquals(ErrorMessage.FILE_IS_NULL, ex.getMessage());
+    }
+
+    @Test
+    void checkInvalidConnectionString() {
+        azureCloudStorageService = new AzureCloudStorageService(new MockEnvironment());
+        assertThrows(IllegalArgumentException.class, () -> azureCloudStorageService.containerClient());
     }
 
     @Test
