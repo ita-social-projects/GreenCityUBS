@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.web.MockMultipartFile;
@@ -31,8 +32,9 @@ class AzureCloudStorageServiceTest {
     @BeforeEach
     void setUp() {
         MockEnvironment mockEnvironment = new MockEnvironment();
-        mockEnvironment.setProperty("azure.connection.string", "testString");
-        mockEnvironment.setProperty("azure.container.name", "testContainer");
+        mockEnvironment.setProperty("azure.connection.string",
+            "DefaultEndpointsProtocol=https;AccountName=csb10032000a548f571;AccountKey=qV2VLVZlzxuEq8zGTgeiVE9puJiELNRPZcB9YgTSjZ3wKdWVA7kPjSOp6ESHlVMTJfHxB6N+iaV2TOlbe1GTvg==;EndpointSuffix=core.windows.net");
+        mockEnvironment.setProperty("azure.container.name", "allfiles");
         propertyResolver = mockEnvironment;
         azureCloudStorageService = spy(new AzureCloudStorageService(propertyResolver));
     }
@@ -115,6 +117,12 @@ class AzureCloudStorageServiceTest {
     void checkInvalidConnectionString() {
         azureCloudStorageService = new AzureCloudStorageService(new MockEnvironment());
         assertThrows(IllegalArgumentException.class, () -> azureCloudStorageService.containerClient());
+    }
+
+    @Test
+    void checkContainerClient() {
+        BlobContainerClient client = azureCloudStorageService.containerClient();
+        assertEquals(propertyResolver.getProperty("azure.container.name"), client.getBlobContainerName());
     }
 
     @Test
