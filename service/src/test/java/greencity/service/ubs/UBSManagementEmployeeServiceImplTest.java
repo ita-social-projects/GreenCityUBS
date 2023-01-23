@@ -68,7 +68,7 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployee();
         SaveEmployeeDto dto = getSaveEmployeeDto();
         MockMultipartFile file = new MockMultipartFile("employeeDto",
-                "", "application/json", "random Bytes".getBytes());
+            "", "application/json", "random Bytes".getBytes());
 
         when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
@@ -120,7 +120,7 @@ class UBSManagementEmployeeServiceImplTest {
         Position position = ModelUtils.getPosition();
 
         MockMultipartFile file = new MockMultipartFile("employeeDto",
-                "", "application/json", "random Bytes".getBytes());
+            "", "application/json", "random Bytes".getBytes());
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
