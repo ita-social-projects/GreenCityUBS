@@ -95,7 +95,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/getCouriers",
                 SUPER_ADMIN_LINK + "/tariffs",
                 SUPER_ADMIN_LINK + "/getTariffService",
-                SUPER_ADMIN_LINK + "/getService",
+                SUPER_ADMIN_LINK + "/{tariffId}/getService",
                 SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
@@ -129,8 +129,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 SUPER_ADMIN_LINK + "/update-courier",
                 SUPER_ADMIN_LINK + "/update-receiving-station",
                 SUPER_ADMIN_LINK + "/editTariffService/{id}",
-                SUPER_ADMIN_LINK + "/**",
-                "/ubs/superAdmin/editService/{id}")
+                SUPER_ADMIN_LINK + "/editService",
+                SUPER_ADMIN_LINK + "/**")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ADMIN_EMPL_LINK + "/**",
@@ -142,7 +142,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.PATCH,
                 SUPER_ADMIN_LINK + "/setLimitDescription/{courierId}",
                 SUPER_ADMIN_LINK + "/setLimitsByAmountOfBags/{tariffId}",
-                SUPER_ADMIN_LINK + "/setLimitsByAmountOfBags/{tariffId}",
+                SUPER_ADMIN_LINK + "/setLimitsBySumOfOrder/{tariffId}",
                 SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                 SUPER_ADMIN_LINK + "/deactivateCourier/{id}")
             .hasAnyRole(ADMIN, UBS_EMPLOYEE)

@@ -71,6 +71,7 @@ import static java.util.Objects.nonNull;
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
+    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -290,7 +291,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         if (orderRepository.findById(orderId).isEmpty()) {
             throw new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId);
         }
-        return modelMapper.map(addressRepository.getAddressByOrderId(orderId), ReadAddressByOrderDto.class);
+        return modelMapper.map(orderAddressRepository.getOrderAddressByOrderId(orderId), ReadAddressByOrderDto.class);
     }
 
     /**
@@ -301,9 +302,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         String email) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        Optional<Address> addressForAdminPage = addressRepository.findById(dtoUpdate.getAddressId());
+        Optional<OrderAddress> addressForAdminPage = orderAddressRepository.findById(dtoUpdate.getAddressId());
         if (addressForAdminPage.isPresent()) {
-            addressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
+            orderAddressRepository.save(updateAddressOrderInfo(addressForAdminPage.get(), dtoUpdate));
             eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE, email, order);
             return addressForAdminPage.map(value -> modelMapper.map(value, OrderAddressDtoResponse.class));
         } else {
@@ -335,7 +336,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
         List<BagInfoDto> bagInfo = new ArrayList<>();
         List<Bag> bags = bagRepository.findAll();
-        Integer fullPrice = serviceRepository.findFullPriceByCourierId(order.getTariffsInfo().getCourier().getId());
+        Integer servicePrice = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
+            .map(it -> it.getPrice())
+            .orElse(0);
         OrderAddress address = order.getUbsUser().getAddress();
         bags.forEach(bag -> {
             BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
@@ -366,7 +369,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .exportDetailsDto(getOrderExportDetails(orderId))
             .employeePositionDtoRequest(getAllEmployeesByPosition(orderId, email))
             .comment(order.getComment())
-            .courierPricePerPackage(fullPrice)
+            .courierPricePerPackage(servicePrice)
             .courierInfo(modelMapper.map(order.getTariffsInfo(), CourierInfoDto.class))
             .build();
     }
@@ -975,7 +978,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setOrderId(order.getId());
     }
 
-    private Address updateAddressOrderInfo(Address address, OrderAddressExportDetailsDtoUpdate dto) {
+    private OrderAddress updateAddressOrderInfo(OrderAddress address, OrderAddressExportDetailsDtoUpdate dto) {
         Optional.ofNullable(dto.getAddressCity()).ifPresent(address::setCity);
         Optional.ofNullable(dto.getAddressCityEng()).ifPresent(address::setCityEn);
         Optional.ofNullable(dto.getAddressRegion()).ifPresent(address::setRegion);
