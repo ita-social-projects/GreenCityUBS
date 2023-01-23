@@ -67,9 +67,10 @@ class ValuesForUserTableServiceImplTest {
 
     @Test
     void checkGetAllFieldsIfEmployeeIsNull() {
-
+        CustomerPage customerPage = new CustomerPage();
+        UserFilterCriteria userFilterCriteria = new UserFilterCriteria();
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> valuesForUserTableService
-            .getAllFields(new CustomerPage(), "column", SortingOrder.ASC, new UserFilterCriteria(), "email"));
+            .getAllFields(customerPage, "column", SortingOrder.ASC, userFilterCriteria, "email"));
         assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND, ex.getMessage());
     }
 
