@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.employee.SaveEmployeeDto;
+import greencity.dto.employee.UpdateEmployeeDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
@@ -52,6 +53,7 @@ class ManagementEmployeeControllerTest {
     private final String GET_ALL_POSITIONS_LINK = "/get-all-positions";
     private final String DELETE_POSITION_LINK = "/delete-position/";
     private final String DELETE_IMAGE_LINK = "/delete-employee-image/";
+    private final String GET_ALL_TARIFFS = "/getTariffs";
 
     private MockMvc mockMvc;
     @Mock
@@ -77,20 +79,20 @@ class ManagementEmployeeControllerTest {
             .build();
     }
 
-//    @Test
-//    void saveEmployee() throws Exception {
-//        //SaveEmployeeDto dto = getSaveEmployeeDto();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String responseJSON = objectMapper.writeValueAsString(dto);
-//        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
-//            "", "application/json", responseJSON.getBytes());
-//
-//        mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
-//            .file(jsonFile)
-//            .principal(principal)
-//            .contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isCreated());
-//    }
+    @Test
+    void saveEmployeeTest() throws Exception {
+        SaveEmployeeDto dto = new SaveEmployeeDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
+            "", "application/json", responseJSON.getBytes());
+
+        mockMvc.perform(multipart(UBS_LINK + SAVE_LINK)
+            .file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
 
     @Test
     void saveBadRequestTest() throws Exception {
@@ -124,25 +126,26 @@ class ManagementEmployeeControllerTest {
         verify(service).findAllActiveEmployees(employeePage, employeeFilterCriteria);
     }
 
-//    @Test
-//    void updateEmployeeBadRequest() throws Exception {
-//        EmployeeDto dto = getEmployeeDto();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String responseJSON = objectMapper.writeValueAsString(dto);
-//        MockMultipartFile jsonFile = new MockMultipartFile("EmployeeDto",
-//            "", "application/json", responseJSON.getBytes());
-//        MockMultipartHttpServletRequestBuilder builder =
-//            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
-//        builder.with(request -> {
-//            request.setMethod("PUT");
-//            return request;
-//        });
-//
-//        mockMvc.perform(builder.file(jsonFile)
-//            .principal(principal)
-//            .contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isBadRequest());
-//    }
+    @Test
+    void updateEmployeeTest() throws Exception {
+        UpdateEmployeeDto dto = new UpdateEmployeeDto();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJSON = objectMapper.writeValueAsString(dto);
+        MockMultipartFile jsonFile = new MockMultipartFile("employeeDto",
+            "", "application/json", responseJSON.getBytes());
+        MockMultipartHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart(UBS_LINK + UPDATE_LINK);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+
+        mockMvc.perform(builder.file(jsonFile)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+        verify(service, times(1)).update(dto, null);
+    }
 
     @Test
     void deleteEmployeeTest() throws Exception {
@@ -227,5 +230,12 @@ class ManagementEmployeeControllerTest {
 
         String email = principal.getName();
         verify(ubsClientService).updateEmployeesAuthorities(dto, email);
+    }
+
+    @Test
+    void getTariffInfoForEmployeeTest() throws Exception {
+        mockMvc.perform(get(UBS_LINK + GET_ALL_TARIFFS)
+            .principal(principal)).andExpect(status().isOk());
+        verify(service, times(1)).getTariffsForEmployee();
     }
 }

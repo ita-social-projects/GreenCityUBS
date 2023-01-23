@@ -1,7 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.user.User;
-import greencity.entity.user.employee.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

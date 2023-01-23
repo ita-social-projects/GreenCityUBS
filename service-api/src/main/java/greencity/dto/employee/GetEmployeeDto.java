@@ -1,6 +1,5 @@
 package greencity.dto.employee;
 
-import greencity.annotations.ValidPhoneNumber;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import lombok.AllArgsConstructor;
@@ -8,9 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
