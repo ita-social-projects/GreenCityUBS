@@ -56,6 +56,7 @@ public class TariffsInfo {
 
     @Column(name = "max_quantity")
     private Long maxQuantity;
+
     @Column(name = "limit_description")
     private String limitDescription;
 
