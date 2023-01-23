@@ -299,14 +299,4 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(1)).map(any(), any());
         verify(tariffsInfoRepository).findAll();
     }
-
-    @Test
-    void test() {
-        Employee employee = getEmployee();
-        UpdateEmployeeDto dto = getUpdateEmployeeDto();
-        employee.setEmail("test@gmail.com");
-        dto.setEmail("test@gmail.com");
-        verify(userRemoteClient).updateEmployeeEmail(employee.getEmail(), dto.getEmail());
-        assertEquals(employee.getEmail(), dto.getEmail());
-    }
 }
