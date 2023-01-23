@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.entity.order.Order;
+import greencity.constant.ErrorMessage;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.SortingOrder;
@@ -10,7 +10,6 @@ import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
-import org.glassfish.hk2.utilities.Stub;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,29 +18,31 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ValuesForUserTableServiceImplTest {
 
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Mock
-    UserTableRepo userTableRepo;
+    private UserTableRepo userTableRepo;
 
     @Mock
-    EmployeeRepository employeeRepository;
+    private EmployeeRepository employeeRepository;
 
     @InjectMocks
-    ValuesForUserTableServiceImpl valuesForUserTableService;
+    private ValuesForUserTableServiceImpl valuesForUserTableService;
 
     @Test
-    void getAllFields() {
+    void checkGetAllFields() {
         User user = User.builder()
             .orders(new ArrayList<>())
             .violations(5)
@@ -57,9 +58,19 @@ class ValuesForUserTableServiceImplTest {
             any(CustomerPage.class), Mockito.<Long>anyList())).thenReturn(new PageImpl<>(List.of(user), pageable, 1L));
         valuesForUserTableService.getAllFields(new CustomerPage(), "column", SortingOrder.ASC, new UserFilterCriteria(),
             employee.getEmail());
-
+        verify(employeeRepository).findByEmail(anyString());
+        verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
+        verify(userRepository, times(tariffsInfo.size())).getAllUsersByTariffsInfoId(anyLong());
         verify(userTableRepo).findAll(any(UserFilterCriteria.class), anyString(), any(SortingOrder.class),
             any(CustomerPage.class), Mockito.<Long>anyList());
+    }
+
+    @Test
+    void checkGetAllFieldsIfEmployeeIsNull() {
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> valuesForUserTableService
+            .getAllFields(new CustomerPage(), "column", SortingOrder.ASC, new UserFilterCriteria(), "email"));
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND, ex.getMessage());
     }
 
 }

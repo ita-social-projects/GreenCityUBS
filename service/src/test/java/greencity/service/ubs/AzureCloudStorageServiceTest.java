@@ -3,11 +3,13 @@ package greencity.service.ubs;
 import com.azure.storage.blob.*;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.image.FileIsNullException;
 import greencity.exceptions.image.FileNotSavedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.PropertyResolver;
@@ -29,8 +31,8 @@ class AzureCloudStorageServiceTest {
     @BeforeEach
     void setUp() {
         MockEnvironment mockEnvironment = new MockEnvironment();
-        mockEnvironment.setProperty("azure.connection.string", " ");
-        mockEnvironment.setProperty("azure.container.name", " ");
+        mockEnvironment.setProperty("azure.connection.string", "testString");
+        mockEnvironment.setProperty("azure.container.name", "testContainer");
         propertyResolver = mockEnvironment;
         azureCloudStorageService = spy(new AzureCloudStorageService(propertyResolver));
     }
@@ -41,10 +43,10 @@ class AzureCloudStorageServiceTest {
     private AzureCloudStorageService azureCloudStorageService;
 
     @Mock
-    BlobContainerClient containerClient;
+    private BlobContainerClient containerClient;
 
     @Mock
-    BlobClient blobClient;
+    private BlobClient blobClient;
 
     @Test
     void checkUpload() {
@@ -53,9 +55,11 @@ class AzureCloudStorageServiceTest {
         when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
         doReturn("blobUrl").when(blobClient).getBlobUrl();
         azureCloudStorageService.upload(multipartFile);
-        assertNotNull(multipartFile);
         assertNotNull(azureCloudStorageService.getConnectionString());
         assertNotNull(azureCloudStorageService.getContainerName());
+        assertEquals(propertyResolver.getProperty("azure.connection.string"),
+            azureCloudStorageService.getConnectionString());
+        assertEquals(propertyResolver.getProperty("azure.container.name"), azureCloudStorageService.getContainerName());
         verify(containerClient).getBlobClient(anyString());
         verify(blobClient).upload(any(InputStream.class), anyLong());
         verify(blobClient).getBlobUrl();
@@ -75,6 +79,17 @@ class AzureCloudStorageServiceTest {
         verify(blobClient).delete();
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {false})
+    @NullSource
+    void checkDeleteIfClientNullOrFalse(Boolean exists) {
+        doReturn(containerClient).when(azureCloudStorageService).containerClient();
+        when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
+        when(blobClient.exists()).thenReturn(exists);
+        azureCloudStorageService.delete("url/somepath/somefile.txt");
+        verify(blobClient, never()).delete();
+    }
+
     @Test
     void checkUploadThrowsException() {
         doReturn(containerClient).when(azureCloudStorageService).containerClient();
@@ -91,8 +106,8 @@ class AzureCloudStorageServiceTest {
     @Test
     void checkUploadNullImage() {
         MultipartFile multipartFile = null;
-        FileIsNullException ex =
-            assertThrows(FileIsNullException.class, () -> azureCloudStorageService.upload(multipartFile));
+        IllegalArgumentException ex =
+            assertThrows(IllegalArgumentException.class, () -> azureCloudStorageService.upload(multipartFile));
         assertEquals(ErrorMessage.FILE_IS_NULL, ex.getMessage());
     }
 
