@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public class DeactivateChosenEntityRepository {
     private final EntityManager entityManager;
-    private static final String REGIONS_ID = "regionsId";
     private static final String REGION_ID = "regionId";
+    private static final String REGIONS_ID = "regionsId";
     private static final String CITIES_ID = "citiesId";
     private static final String COURIER_ID = "courierId";
     private static final String STATIONS_ID = "stationsId";
