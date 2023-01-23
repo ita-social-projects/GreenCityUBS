@@ -594,8 +594,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        tariffsInfo.setMinQuantity(dto.getMaxAmountOfBigBags());
-        tariffsInfo.setMaxQuantity(dto.getMinAmountOfBigBags());
+        tariffsInfo.setMinQuantity(dto.getMinQuantity());
+        tariffsInfo.setMaxQuantity(dto.getMaxQuantity());
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
@@ -605,8 +605,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        tariffsInfo.setMinQuantity(dto.getMaxPriceOfOrder());
-        tariffsInfo.setMaxQuantity(dto.getMinPriceOfOrder());
+        tariffsInfo.setMinQuantity(dto.getMinQuantity());
+        tariffsInfo.setMaxQuantity(dto.getMaxQuantity());
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }

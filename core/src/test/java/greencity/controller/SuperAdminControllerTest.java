@@ -81,7 +81,6 @@ class SuperAdminControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
-                //.apply(springSecurity())
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRemoteClient))
@@ -386,7 +385,7 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void editInfoAboutTariff() {
-        var dto = EditPriceOfOrder.builder().maxPriceOfOrder(10000L).minPriceOfOrder(1000L).build();
+        var dto = EditPriceOfOrder.builder().maxQuantity(10000L).minQuantity(1000L).build();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(patch(ubsLink + "/setLimitsBySumOfOrder/{tariffId}", 1L)

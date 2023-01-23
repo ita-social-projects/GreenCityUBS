@@ -424,8 +424,8 @@ public class ModelUtils {
 
     public static EditAmountOfBagDto getAmountOfSum() {
         return EditAmountOfBagDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
+            .minQuantity(1L)
+            .maxQuantity(2L)
             .build();
     }
 

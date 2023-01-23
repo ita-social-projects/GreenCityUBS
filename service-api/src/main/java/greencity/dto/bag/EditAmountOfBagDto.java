@@ -13,9 +13,9 @@ import javax.validation.constraints.NotNull;
 public class EditAmountOfBagDto {
     @NotNull
     @Min(1)
-    private Long minAmountOfBigBags;
+    private Long minQuantity;
     @NotNull
     @Min(1)
-    private Long maxAmountOfBigBags;
+    private Long maxQuantity;
     private Long locationId;
 }

@@ -2599,16 +2599,16 @@ public class ModelUtils {
 
     public static EditPriceOfOrder getEditPriceOfOrder() {
         return EditPriceOfOrder.builder()
-            .maxPriceOfOrder(500000L)
-            .minPriceOfOrder(300L)
+            .maxQuantity(500000L)
+            .minQuantity(300L)
             .locationId(1L)
             .build();
     }
 
     public static EditAmountOfBagDto getAmountOfBagDto() {
         return EditAmountOfBagDto.builder()
-            .maxAmountOfBigBags(99L)
-            .minAmountOfBigBags(2L)
+            .maxQuantity(99L)
+            .minQuantity(2L)
             .locationId(1L)
             .build();
     }
