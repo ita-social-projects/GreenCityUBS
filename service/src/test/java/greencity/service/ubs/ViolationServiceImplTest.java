@@ -131,7 +131,6 @@ class ViolationServiceImplTest {
     }
 
     @Test
-//    @Disabled
     void checkAddUserViolationThrowsException() {
         User user = ModelUtils.getTestUser();
         Order order = user.getOrders().get(0);
@@ -139,8 +138,6 @@ class ViolationServiceImplTest {
         AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
         add.setOrderID(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
-//        when(userRepository.findUserByUuid("abc")).thenReturn(Optional.of(user));
-//        when(violationRepository.findByOrderId(order.getId())).thenReturn(Optional.of(ModelUtils.getViolation()));
 
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
             () -> violationService.addUserViolation(add, new MultipartFile[2], "abc"));
