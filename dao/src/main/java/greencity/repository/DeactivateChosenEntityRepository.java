@@ -12,6 +12,7 @@ import java.util.List;
 public class DeactivateChosenEntityRepository {
     private final EntityManager entityManager;
     private static final String REGIONS_ID = "regionsId";
+    private static final String REGION_ID = "regionId";
     private static final String CITIES_ID = "citiesId";
     private static final String COURIER_ID = "courierId";
     private static final String STATIONS_ID = "stationsId";
@@ -64,14 +65,14 @@ public class DeactivateChosenEntityRepository {
      */
     public void deactivateTariffsByRegionsAndCities(List<Long> citiesId, Long regionId) {
         entityManager.createQuery("update Location l set l.locationStatus = 'DEACTIVATED'"
-            + " where l.region.id =: regionsId and l.id in (:citiesId)")
-            .setParameter(REGIONS_ID, regionId)
+            + " where l.region.id =: regionId and l.id in (:citiesId)")
+            .setParameter(REGION_ID, regionId)
             .setParameter(CITIES_ID, citiesId)
             .executeUpdate();
 
         entityManager.createQuery("select tl from TariffLocation tl left join tl.location l "
-            + "where l.region.id =: regionsId and tl.location.id in (:citiesId)", TariffLocation.class)
-            .setParameter(REGIONS_ID, regionId)
+            + "where l.region.id =: regionId and tl.location.id in (:citiesId)", TariffLocation.class)
+            .setParameter(REGION_ID, regionId)
             .setParameter(CITIES_ID, citiesId)
             .getResultList()
             .forEach(tariffLocation -> tariffLocation.setLocationStatus(LocationStatus.DEACTIVATED));
@@ -158,10 +159,10 @@ public class DeactivateChosenEntityRepository {
     public void deactivateTariffsByCourierAndRegion(Long regionId, Long courierId) {
         entityManager.createQuery("select ti from TariffsInfo ti left join ti.tariffLocations tl "
             + "left join tl.location l "
-            + "where ti.courier.id =: courierId and l.region.id =: regionsId",
+            + "where ti.courier.id =: courierId and l.region.id =: regionId",
             TariffsInfo.class)
             .setParameter(COURIER_ID, courierId)
-            .setParameter(REGIONS_ID, regionId)
+            .setParameter(REGION_ID, regionId)
             .getResultList()
             .forEach(tariffsInfo -> tariffsInfo.setLocationStatus(LocationStatus.DEACTIVATED));
     }
@@ -178,9 +179,9 @@ public class DeactivateChosenEntityRepository {
     public void deactivateTariffsByRegionAndCitiesAndStations(Long regionId, List<Long> citiesId,
         List<Long> stationsId) {
         entityManager.createQuery("select ti from TariffsInfo ti left join ti.receivingStationList rs "
-            + "left join ti.tariffLocations tl  left join tl.location l where l.region.id =: regionsId and "
-            + "tl.location.id in (:citiesId) and rs.id in(:stationId)", TariffsInfo.class)
-            .setParameter(REGIONS_ID, regionId)
+            + "left join ti.tariffLocations tl  left join tl.location l where l.region.id =: regionId and "
+            + "tl.location.id in (:citiesId) and rs.id in(:stationsId)", TariffsInfo.class)
+            .setParameter(REGION_ID, regionId)
             .setParameter(CITIES_ID, citiesId)
             .setParameter(STATIONS_ID, stationsId)
             .getResultList()
@@ -201,11 +202,11 @@ public class DeactivateChosenEntityRepository {
         List<Long> stationsId, Long courierId) {
         entityManager.createQuery("select ti from TariffsInfo ti left join ti.receivingStationList rs "
             + "left join ti.tariffLocations tl  left join tl.location l"
-            + " where l.region.id =: regionsId and "
+            + " where l.region.id =: regionId and "
             + "tl.location.id in (:citiesId) and "
-            + "rs.id in(:stationId) and ti.courier.id =: courierId",
+            + "rs.id in(:stationsId) and ti.courier.id =: courierId",
             TariffsInfo.class)
-            .setParameter(REGIONS_ID, regionId)
+            .setParameter(REGION_ID, regionId)
             .setParameter(CITIES_ID, citiesId)
             .setParameter(STATIONS_ID, stationsId)
             .setParameter(COURIER_ID, courierId)
@@ -223,9 +224,9 @@ public class DeactivateChosenEntityRepository {
      */
     public boolean isCitiesExistForRegion(List<Long> citiesId, Long regionId) {
         Long size = entityManager.createQuery("select count(l) from Location l where l.id in(:citiesId)"
-            + " and l.region.id = :regionsId", Long.class)
+            + " and l.region.id = :regionId", Long.class)
             .setParameter(CITIES_ID, citiesId)
-            .setParameter(REGIONS_ID, regionId)
+            .setParameter(REGION_ID, regionId)
             .getSingleResult();
         return size == citiesId.size();
     }
