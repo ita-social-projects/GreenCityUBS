@@ -11,13 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class EmployeeSaveDtoMapperTest {
+class EmployeeSaveDtoMapperTest {
 
     @InjectMocks
     private EmployeeSaveDtoMapper mapper;
 
     @Test
-    public void convertEmployeeToSaveEmployeeDtoTest() {
+    void convertEmployeeToSaveEmployeeDtoTest() {
         Employee employee = ModelUtils.getEmployee();
         SaveEmployeeDto dto = ModelUtils.getSaveEmployeeDto();
         assertEquals(mapper.convert(employee), dto);
