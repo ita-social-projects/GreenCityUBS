@@ -2,8 +2,7 @@ package greencity.mapping.order;
 
 import greencity.ModelUtils;
 import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.entity.user.ubs.Address;
-import greencity.mapping.order.OrderAddressDtoUpdateMapper;
+import greencity.entity.user.ubs.OrderAddress;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,7 @@ class OrderAddressDtoUpdateMapperTest {
     @Test
     void convert() {
 
-        Address address = ModelUtils.getAddress();
+        OrderAddress address = ModelUtils.getOrderAddress();
 
         OrderAddressDtoResponse expected = OrderAddressDtoResponse.builder()
             .district("Distinct")
