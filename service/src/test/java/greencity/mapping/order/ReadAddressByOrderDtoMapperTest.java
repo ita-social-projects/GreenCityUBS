@@ -2,8 +2,7 @@ package greencity.mapping.order;
 
 import greencity.ModelUtils;
 import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.entity.user.ubs.Address;
-import greencity.mapping.order.ReadAddressByOrderDtoMapper;
+import greencity.entity.user.ubs.OrderAddress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +17,7 @@ class ReadAddressByOrderDtoMapperTest {
 
     @Test
     void convert() {
-        Address address = ModelUtils.getAddress();
+        OrderAddress address = ModelUtils.getOrderAddress();
         ReadAddressByOrderDto expected = ReadAddressByOrderDto.builder()
             .district(address.getDistrict())
             .entranceNumber(address.getEntranceNumber())
@@ -27,7 +26,7 @@ class ReadAddressByOrderDtoMapperTest {
             .houseNumber(address.getHouseNumber())
             .comment(address.getAddressComment())
             .build();
-        ReadAddressByOrderDto actual = readAddressByOrderDtoMapper.convert(ModelUtils.getAddress());
+        ReadAddressByOrderDto actual = readAddressByOrderDtoMapper.convert(ModelUtils.getOrderAddress());
 
         assertEquals(expected, actual);
     }
