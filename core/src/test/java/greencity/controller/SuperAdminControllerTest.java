@@ -227,10 +227,29 @@ class SuperAdminControllerTest {
 
     @Test
     void getService() throws Exception {
+        ServiceDto dto = ModelUtils.getServiceDto();
+
+        when(superAdminService.getService(1L)).thenReturn(dto);
+
         mockMvc.perform(get(ubsLink + "/1/getService")
             .principal(principal)
             .param("tariffId", "1L"))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andReturn();
+
+        verify(superAdminService).getService(1L);
+        verifyNoMoreInteractions(superAdminService);
+    }
+
+    @Test
+    void getServiceIfServiceNotExists() throws Exception {
+        when(superAdminService.getService(1L)).thenReturn(null);
+
+        mockMvc.perform(get(ubsLink + "/1/getService")
+            .principal(principal)
+            .param("tariffId", "1L"))
+            .andExpect(status().isOk())
+            .andReturn();
 
         Mockito.verify(superAdminService).getService(1L);
         Mockito.verifyNoMoreInteractions(superAdminService);

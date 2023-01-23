@@ -79,10 +79,7 @@ import static greencity.ModelUtils.getCourierDtoList;
 import static greencity.ModelUtils.getEmployee;
 import static greencity.ModelUtils.getReceivingStation;
 import static greencity.ModelUtils.getReceivingStationDto;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -265,11 +262,23 @@ class SuperAdminServiceImplTest {
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(service));
         when(modelMapper.map(service, ServiceDto.class)).thenReturn(serviceDto);
 
-        assertEquals(List.of(serviceDto), superAdminService.getService(1L));
+        assertEquals(serviceDto, superAdminService.getService(1L));
 
         verify(tariffsInfoRepository).existsById(1L);
         verify(serviceRepository).findServiceByTariffsInfoId(1L);
         verify(modelMapper).map(service, ServiceDto.class);
+    }
+
+    @Test
+    void getServiceIfServiceNotExists() {
+        when(tariffsInfoRepository.existsById(1L)).thenReturn(true);
+        when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.empty());
+
+        assertNull(superAdminService.getService(1L));
+
+        verify(tariffsInfoRepository).existsById(1L);
+        verify(serviceRepository).findServiceByTariffsInfoId(1L);
+        verify(modelMapper, never()).map(any(Service.class), any(ServiceDto.class));
     }
 
     @Test

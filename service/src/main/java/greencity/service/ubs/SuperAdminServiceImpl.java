@@ -201,10 +201,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<ServiceDto> getService(long tariffId) {
+    public ServiceDto getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> List.of(modelMapper.map(it, ServiceDto.class)))
-            .orElse(Collections.emptyList());
+            .map(it -> modelMapper.map(it, ServiceDto.class))
+            .orElse(null);
     }
 
     @Override
