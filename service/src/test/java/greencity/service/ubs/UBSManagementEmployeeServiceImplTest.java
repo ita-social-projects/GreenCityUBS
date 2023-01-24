@@ -31,7 +31,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,6 +82,23 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void saveEmployeeWithDefaultImagePathTest() {
+        Employee employee = getEmployee();
+        SaveEmployeeDto dto = getSaveEmployeeDto();
+
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(repository.save(any())).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(true);
+        employeeService.save(dto, null);
+
+        verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(modelMapper, times(2)).map(any(), any());
+        verify(repository, times(1)).save(any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+    }
+
+    @Test
     void saveEmployeeShouldThrowExceptionTest() {
         Employee employee = getEmployee();
         employee.setId(null);
@@ -126,6 +142,22 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         employeeService.update(dto, file);
+
+        verify(modelMapper, times(2)).map(any(), any());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());
+        verify(repository, times(2)).findById(anyLong());
+    }
+
+    @Test
+    void updateEmployeeWithDefaultImagePathTest() {
+        Employee employee = getEmployee();
+        UpdateEmployeeDto dto = getUpdateEmployeeDto();
+        Position position = ModelUtils.getPosition();
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndName(position.getId(), position.getName())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        employeeService.update(dto, null);
 
         verify(modelMapper, times(2)).map(any(), any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(position.getId(), position.getName());

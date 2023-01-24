@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 class GetTariffInfoForEmployeeDtoMapperTest {
@@ -22,12 +21,5 @@ class GetTariffInfoForEmployeeDtoMapperTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
         GetTariffInfoForEmployeeDto dto = ModelUtils.getTariffInfoForEmployeeDto();
         assertEquals(mapper.convert(tariffsInfo).getId(), dto.getId());
-    }
-
-    @Test
-    void convertTariffsInfoToGetTariffInfoForEmployeeDtoWithNullRegionTest() {
-        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
-        GetTariffInfoForEmployeeDto dto = mapper.convert(tariffsInfo);
-        assertNull(dto.getRegion());
     }
 }

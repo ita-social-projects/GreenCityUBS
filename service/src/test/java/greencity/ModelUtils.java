@@ -3510,7 +3510,7 @@ public class ModelUtils {
             .tariffLocations(Set.of(TariffLocation.builder()
                 .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
                 .location(Location.builder().id(1L)
-                    .region(null)
+                    .region(ModelUtils.getRegion())
                     .nameUk("Київ")
                     .nameEn("Kyiv")
                     .coordinates(ModelUtils.getCoordinates())
