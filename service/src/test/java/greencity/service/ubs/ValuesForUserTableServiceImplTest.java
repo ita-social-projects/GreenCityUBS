@@ -2,6 +2,8 @@ package greencity.service.ubs;
 
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
+import greencity.dto.order.UserWithSomeOrderDetailDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.SortingOrder;
@@ -51,18 +53,23 @@ class ValuesForUserTableServiceImplTest {
         Pageable pageable = PageRequest.of(1, 1);
         Employee employee = ModelUtils.getEmployee();
         List<Long> tariffsInfo = List.of(1L, 2L, 3L);
+        UserWithSomeOrderDetailDto userWithSomeOrderDetail = valuesForUserTableService.mapToDto(user);
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(employee));
         when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(tariffsInfo);
         when(userRepository.getAllUsersByTariffsInfoId(anyLong())).thenReturn(tariffsInfo);
         when(userTableRepo.findAll(any(UserFilterCriteria.class), anyString(), any(SortingOrder.class),
             any(CustomerPage.class), Mockito.<Long>anyList())).thenReturn(new PageImpl<>(List.of(user), pageable, 1L));
-        valuesForUserTableService.getAllFields(new CustomerPage(), "column", SortingOrder.ASC, new UserFilterCriteria(),
+        PageableDto actual = valuesForUserTableService.getAllFields(new CustomerPage(), "column", SortingOrder.ASC,
+            new UserFilterCriteria(),
             employee.getEmail());
         verify(employeeRepository).findByEmail(anyString());
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(userRepository, times(tariffsInfo.size())).getAllUsersByTariffsInfoId(anyLong());
         verify(userTableRepo).findAll(any(UserFilterCriteria.class), anyString(), any(SortingOrder.class),
             any(CustomerPage.class), Mockito.<Long>anyList());
+        assertEquals(2L, actual.getTotalElements());
+        assertEquals(2, actual.getTotalPages());
+        assertEquals(List.of(userWithSomeOrderDetail), actual.getPage());
     }
 
     @Test
