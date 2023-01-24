@@ -37,7 +37,7 @@ class AzureCloudStorageServiceTest {
     private final String connectionString =
         "DefaultEndpointsProtocol=https;AccountName=2fdsgd;AccountKey=qV2VLads==;EndpointSuffix=core.windows.net";
 
-    private final String containerName = "allfiles";
+    private final String containerName = "container";
 
     @Mock
     private PropertyResolver propertyResolver;
