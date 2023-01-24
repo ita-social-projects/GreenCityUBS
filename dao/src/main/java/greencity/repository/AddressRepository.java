@@ -63,15 +63,4 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
     @Query(value = "SELECT * FROM address a"
         + " WHERE user_id =:userId AND a.status != 'DELETED'", nativeQuery = true)
     List<Address> findAllNonDeletedAddressesByUserId(Long userId);
-
-    /**
-     * Method return of {@link Address}addresses for current order.
-     *
-     * @return {@link Address}.
-     */
-    @Query(value = "SELECT * FROM orders as o "
-        + " JOIN ubs_user as ubs ON o.ubs_user_id = ubs.id "
-        + " JOIN address as addr ON addr.id = ubs.address_id "
-        + " WHERE o.id = :orderId", nativeQuery = true)
-    Address getAddressByOrderId(Long orderId);
 }
