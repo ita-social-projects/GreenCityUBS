@@ -145,7 +145,7 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void updateEmployeeTest() {
-        Employee employee = getEmployee();
+        Employee employee = getEmployeeForUpdateEmailCheck();
         UpdateEmployeeDto dto = getUpdateEmployeeDto();
         Position position = ModelUtils.getPosition();
 

@@ -991,6 +991,26 @@ public class ModelUtils {
             .firstName("Петро")
             .lastName("Петренко")
             .phoneNumber("+380935577455")
+            .email("test@gmail.com")
+            .employeeStatus(EmployeeStatus.ACTIVE)
+            .employeePosition(Set.of(Position.builder()
+                .id(1L)
+                .name("Водій")
+                .build()))
+            .tariffInfos(Set.of(TariffsInfo.builder()
+                .id(1L)
+                .service(new Service())
+                .build()))
+            .imagePath("path")
+            .build();
+    }
+
+    public static Employee getEmployeeForUpdateEmailCheck() {
+        return Employee.builder()
+            .id(1L)
+            .firstName("Петро")
+            .lastName("Петренко")
+            .phoneNumber("+380935577455")
             .email("test1@gmail.com")
             .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
