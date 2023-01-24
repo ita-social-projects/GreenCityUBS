@@ -65,7 +65,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -201,10 +206,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public List<ServiceDto> getService(long tariffId) {
+    public ServiceDto getService(long tariffId) {
         return getServiceByTariffsInfoId(tariffId)
-            .map(it -> List.of(modelMapper.map(it, ServiceDto.class)))
-            .orElse(Collections.emptyList());
+            .map(it -> modelMapper.map(it, ServiceDto.class))
+            .orElse(null);
     }
 
     @Override
