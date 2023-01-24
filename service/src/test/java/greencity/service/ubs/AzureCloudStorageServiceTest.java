@@ -37,15 +37,10 @@ import static org.mockito.Mockito.spy;
 @ExtendWith(MockitoExtension.class)
 class AzureCloudStorageServiceTest {
 
-    @BeforeEach
-    void setUp() {
-        MockEnvironment mockEnvironment = new MockEnvironment();
-        mockEnvironment.setProperty("azure.connection.string",
-            "DefaultEndpointsProtocol=https;AccountName=csb10032000a548f571;AccountKey=qV2VLVZlzxuEq8zGTgeiVE9puJiELNRPZcB9YgTSjZ3wKdWVA7kPjSOp6ESHlVMTJfHxB6N+iaV2TOlbe1GTvg==;EndpointSuffix=core.windows.net");
-        mockEnvironment.setProperty("azure.container.name", "allfiles");
-        propertyResolver = mockEnvironment;
-        azureCloudStorageService = spy(new AzureCloudStorageService(propertyResolver));
-    }
+    private final String connectionString =
+        "DefaultEndpointsProtocol=https;AccountName=2fdsgd;AccountKey=qV2VLads==;EndpointSuffix=core.windows.net";
+
+    private final String containerName = "allfiles";
 
     @Mock
     private PropertyResolver propertyResolver;
@@ -58,6 +53,15 @@ class AzureCloudStorageServiceTest {
     @Mock
     private BlobClient blobClient;
 
+    @BeforeEach
+    void setUp() {
+        MockEnvironment mockEnvironment = new MockEnvironment();
+        mockEnvironment.setProperty("azure.connection.string", connectionString);
+        mockEnvironment.setProperty("azure.container.name", containerName);
+        propertyResolver = mockEnvironment;
+        azureCloudStorageService = spy(new AzureCloudStorageService(propertyResolver));
+    }
+
     @Test
     void checkUpload() {
         MultipartFile multipartFile = new MockMultipartFile("Image", "Image".getBytes(StandardCharsets.UTF_8));
@@ -67,9 +71,8 @@ class AzureCloudStorageServiceTest {
         azureCloudStorageService.upload(multipartFile);
         assertNotNull(azureCloudStorageService.getConnectionString());
         assertNotNull(azureCloudStorageService.getContainerName());
-        assertEquals(propertyResolver.getProperty("azure.connection.string"),
-            azureCloudStorageService.getConnectionString());
-        assertEquals(propertyResolver.getProperty("azure.container.name"), azureCloudStorageService.getContainerName());
+        assertEquals(connectionString, azureCloudStorageService.getConnectionString());
+        assertEquals(containerName, azureCloudStorageService.getContainerName());
         verify(containerClient).getBlobClient(anyString());
         verify(blobClient).upload(any(InputStream.class), anyLong());
         verify(blobClient).getBlobUrl();
@@ -89,13 +92,20 @@ class AzureCloudStorageServiceTest {
         verify(blobClient).delete();
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false})
-    @NullSource
-    void checkDeleteIfClientNullOrFalse(Boolean exists) {
+    @Test
+    void checkDeleteIfClientNull() {
         doReturn(containerClient).when(azureCloudStorageService).containerClient();
         when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
-        when(blobClient.exists()).thenReturn(exists);
+        when(blobClient.exists()).thenReturn(null);
+        azureCloudStorageService.delete("url/somepath/somefile.txt");
+        verify(blobClient, never()).delete();
+    }
+
+    @Test
+    void checkDeleteIfClientFalse() {
+        doReturn(containerClient).when(azureCloudStorageService).containerClient();
+        when(containerClient.getBlobClient(anyString())).thenReturn(blobClient);
+        when(blobClient.exists()).thenReturn(false);
         azureCloudStorageService.delete("url/somepath/somefile.txt");
         verify(blobClient, never()).delete();
     }
@@ -130,7 +140,7 @@ class AzureCloudStorageServiceTest {
     @Test
     void checkContainerClient() {
         BlobContainerClient client = azureCloudStorageService.containerClient();
-        assertEquals(propertyResolver.getProperty("azure.container.name"), client.getBlobContainerName());
+        assertEquals(containerName, client.getBlobContainerName());
     }
 
     @Test
