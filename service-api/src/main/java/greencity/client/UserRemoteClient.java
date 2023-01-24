@@ -110,7 +110,7 @@ public interface UserRemoteClient {
      * Update employee email.
      *
      * @param newEmployeeEmail - new email of employee.
-     * @param uuid - uuid of current employee.
+     * @param uuid             - uuid of current employee.
      */
     @PutMapping("/user/update-employee-email")
     void updateEmployeeEmail(@RequestParam String newEmployeeEmail, @RequestParam String uuid);
