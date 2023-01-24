@@ -75,7 +75,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void updateEmployeeEmail(String employeeEmail, String newEmployeeEmail) {
+            public void updateEmployeeEmail(String newEmployeeEmail, String uuid) {
                 log.error(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_EMAIL_WAS_NOT_EDITED, throwable);
             }

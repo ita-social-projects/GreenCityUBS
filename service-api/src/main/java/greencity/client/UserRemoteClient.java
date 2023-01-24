@@ -107,13 +107,13 @@ public interface UserRemoteClient {
     void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
 
     /**
-     * Edit an employee's email.
+     * Update employee email.
      *
-     * @param employeeEmail    {@link String}
-     * @param newEmployeeEmail {@link String}
+     * @param newEmployeeEmail - new email of employee.
+     * @param uuid - uuid of current employee.
      */
     @PutMapping("/user/update-employee-email")
-    void updateEmployeeEmail(@RequestParam String employeeEmail, @RequestParam String newEmployeeEmail);
+    void updateEmployeeEmail(@RequestParam String newEmployeeEmail, @RequestParam String uuid);
 
     /**
      * Update authorities in chosen employee.

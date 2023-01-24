@@ -121,7 +121,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
         checkValidPosition(dto.getEmployeePositions());
         dto.setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getPhoneNumber()));
-        updateEmployeeEmail(dto);
+        updateEmployeeEmail(dto, upEmployee.getUuid());
         updateEmployeeAuthorities(dto);
 
         Employee updatedEmployee = modelMapper.map(dto, Employee.class);
@@ -233,13 +233,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
     }
 
-    private void updateEmployeeEmail(UpdateEmployeeDto dto) {
+    private void updateEmployeeEmail(UpdateEmployeeDto dto, String uuid) {
         Employee employee = employeeRepository.findById(dto.getId())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + dto.getId()));
         String oldEmail = employee.getEmail();
         String newEmail = dto.getEmail();
         if (!oldEmail.equals(newEmail)) {
-            userRemoteClient.updateEmployeeEmail(oldEmail, newEmail);
+            userRemoteClient.updateEmployeeEmail(newEmail, uuid);
         }
     }
 
