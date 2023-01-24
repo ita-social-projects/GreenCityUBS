@@ -991,7 +991,7 @@ public class ModelUtils {
             .firstName("Петро")
             .lastName("Петренко")
             .phoneNumber("+380935577455")
-            .email("test@gmail.com")
+            .email("test1@gmail.com")
             .employeeStatus(EmployeeStatus.ACTIVE)
             .employeePosition(Set.of(Position.builder()
                 .id(1L)

@@ -82,6 +82,20 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
+    void saveEmployeeWhenCheckValidPositionThrowsExceptionTest() {
+        SaveEmployeeDto dto = getSaveEmployeeDto();
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(repository.existsByEmail(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(positionRepository.existsPositionByIdAndName(any(), any())).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> employeeService.save(dto, file));
+
+        verify(repository, times(1)).existsByEmail(getAddEmployeeDto().getEmail());
+        verify(positionRepository, atLeastOnce()).existsPositionByIdAndName(any(), any());
+    }
+
+    @Test
     void saveEmployeeWithDefaultImagePathTest() {
         Employee employee = getEmployee();
         SaveEmployeeDto dto = getSaveEmployeeDto();
