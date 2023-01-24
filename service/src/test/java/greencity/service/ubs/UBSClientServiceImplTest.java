@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import greencity.dto.bag.BagOrderDto;
-import greencity.dto.bag.BagTranslationDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
 import greencity.entity.user.ubs.OrderAddress;
@@ -1307,7 +1305,7 @@ class UBSClientServiceImplTest {
 
         when(encryptionUtil.formRequestSignature(any(), eq(null), eq("1"))).thenReturn("TestValue");
         when(fondyClient.getCheckoutResponse(any())).thenReturn(getSuccessfulFondyResponse());
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(TEST_BAG_LIST);
         when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
 
         ubsService.processOrderFondyClient(dto, "uuid");
@@ -1758,7 +1756,7 @@ class UBSClientServiceImplTest {
 
         when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
             .thenReturn(order);
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -1770,7 +1768,7 @@ class UBSClientServiceImplTest {
         ubsService.getOrderForUser(user.getUuid(), 1L);
 
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
-        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
@@ -1816,7 +1814,7 @@ class UBSClientServiceImplTest {
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -1831,7 +1829,7 @@ class UBSClientServiceImplTest {
         assertEquals(dto.getPage().get(0).getId(), order.getId());
 
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
-        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
@@ -1865,7 +1863,7 @@ class UBSClientServiceImplTest {
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -1880,7 +1878,7 @@ class UBSClientServiceImplTest {
         assertEquals(dto.getPage().get(0).getId(), order.getId());
 
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
-        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
@@ -1914,7 +1912,7 @@ class UBSClientServiceImplTest {
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
-        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findBagsByOrderId(order.getId())).thenReturn(bags);
         when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -1929,7 +1927,7 @@ class UBSClientServiceImplTest {
         assertEquals(dto.getPage().get(0).getId(), order.getId());
 
         verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
-        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(bagRepository).findBagsByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))

@@ -763,7 +763,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private List<BagForUserDto> bagForUserDtosBuilder(Order order) {
         Map<Integer, Integer> actualBagAmounts = getActualBagAmountsForOrder(order);
-        List<Bag> bagsForOrder = bagRepository.findBagByOrderId(order.getId());
+        List<Bag> bagsForOrder = bagRepository.findBagsByOrderId(order.getId());
         return bagsForOrder.stream()
             .filter(bag -> actualBagAmounts.containsKey(bag.getId()))
             .map(bag -> buildBagForUserDto(bag, actualBagAmounts.get(bag.getId())))
