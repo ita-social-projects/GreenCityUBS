@@ -167,7 +167,7 @@ public class NotificationServiceImpl implements NotificationService {
                 && !payment.getPaymentStatus().equals(PaymentStatus.UNPAID))
             .map(Payment::getAmount).reduce(0L, Long::sum);
 
-        List<Bag> bags = bagRepository.findBagByOrderId(order.getId());
+        List<Bag> bags = bagRepository.findBagsByOrderId(order.getId());
         Map<Integer, Integer> amountOfBagsOrdered = order.getAmountOfBagsOrdered();
 
         Integer price = bags.stream().map(bag -> amountOfBagsOrdered.get(bag.getId()) * bag.getFullPrice())
