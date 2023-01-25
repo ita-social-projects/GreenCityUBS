@@ -1155,8 +1155,9 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(ModelUtils.getTariffInfo()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
 
-        Assertions.assertThrows(NotFoundException.class,
+        Assertions.assertThrows(BadRequestException.class,
             () -> ubsService.saveFullOrderToDBFromLiqPay(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
@@ -1530,7 +1531,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(
                 ModelUtils.getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                    .setMinQuantity(50000L)));
+                    .setMin(50000L)));
 
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
@@ -1575,7 +1576,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(
                 ModelUtils.getTariffInfoWithLimitOfBags()
                     .setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
-                    .setMaxQuantity(500L)));
+                    .setMax(500L)));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
         Assertions.assertThrows(BadRequestException.class, () -> {

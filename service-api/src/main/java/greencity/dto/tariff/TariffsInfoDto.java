@@ -25,8 +25,8 @@ public class TariffsInfoDto {
     private List<ReceivingStationDto> receivingStations;
     private CourierDto courier;
     private String limitDescription;
-    private Long minQuantity;
-    private Long maxQuantity;
+    private Long min;
+    private Long max;
     private EmployeeNameDto creator;
     private LocalDate createdAt;
 }

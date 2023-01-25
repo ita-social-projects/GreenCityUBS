@@ -52,11 +52,11 @@ public class TariffsInfo {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column(name = "min_quantity")
-    private Long minQuantity;
+    @Column(name = "min")
+    private Long min;
 
-    @Column(name = "max_quantity")
-    private Long maxQuantity;
+    @Column(name = "max")
+    private Long max;
 
     @Column(name = "limit_description")
     private String limitDescription;

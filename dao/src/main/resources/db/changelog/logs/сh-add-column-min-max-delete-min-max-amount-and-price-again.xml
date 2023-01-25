@@ -5,8 +5,8 @@
 
     <changeSet id="Jose-10" author="José Castellanos">
         <addColumn tableName="tariffs_info">
-            <column name="min_quantity" type="int8"/>
-            <column name="max_quantity" type="int8"/>
+            <column name="min" type="int8"/>
+            <column name="max" type="int8"/>
         </addColumn>
     </changeSet>
 

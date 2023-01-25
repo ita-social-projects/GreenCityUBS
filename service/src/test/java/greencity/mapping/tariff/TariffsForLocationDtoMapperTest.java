@@ -30,7 +30,7 @@ class TariffsForLocationDtoMapperTest {
             .courierStatus(tariffsInfo.getCourier().getCourierStatus().name())
             .createDate(tariffsInfo.getCourier().getCreateDate())
             .build(), dto.getCourierDto());
-        Assertions.assertEquals(tariffsInfo.getMinQuantity(), dto.getMinQuantity());
-        Assertions.assertEquals(tariffsInfo.getMaxQuantity(), dto.getMaxQuantity());
+        Assertions.assertEquals(tariffsInfo.getMin(), dto.getMin());
+        Assertions.assertEquals(tariffsInfo.getMax(), dto.getMax());
     }
 }

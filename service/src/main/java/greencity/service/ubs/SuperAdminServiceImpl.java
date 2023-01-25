@@ -601,8 +601,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public void setTariffLimitByAmountOfBags(Long tariffId, EditAmountOfBagDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
-        tariffsInfo.setMinQuantity(dto.getMinQuantity());
-        tariffsInfo.setMaxQuantity(dto.getMaxQuantity());
+        tariffsInfo.setMin(dto.getMin());
+        tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
@@ -612,8 +612,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimitBySumOfOrder(Long tariffId, EditPriceOfOrder dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
-        tariffsInfo.setMinQuantity(dto.getMinQuantity());
-        tariffsInfo.setMaxQuantity(dto.getMaxQuantity());
+        tariffsInfo.setMin(dto.getMin());
+        tariffsInfo.setMax(dto.getMax());
         tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfoRepository.save(tariffsInfo);
     }
@@ -625,30 +625,24 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(tariffsInfo, MinAmountOfBag.INCLUDE).isEmpty()) {
             throw new BadRequestException(ErrorMessage.BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND);
         }
-
-        if ((setTariffLimitsDto.getMinAmountOfBigBags() == 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L)
-            || setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() > 0L) {
-            throw new BadRequestException(ErrorMessage.TARIFF_LIMITS_ARE_INPUTTED_INCORRECTLY);
-        }
-
-        if (setTariffLimitsDto.getMinAmountOfBigBags() > 0L && setTariffLimitsDto.getMinPriceOfOrder() == 0L) {
-            if (setTariffLimitsDto.getMinAmountOfBigBags() > setTariffLimitsDto.getMaxAmountOfBigBags()) {
+        if (setTariffLimitsDto.getCourierLimit() == CourierLimit.LIMIT_BY_AMOUNT_OF_BAG) {
+            if (setTariffLimitsDto.getMin() > setTariffLimitsDto.getMax()) {
                 throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinQuantity(setTariffLimitsDto.getMinAmountOfBigBags());
-            tariffsInfo.setMaxQuantity(setTariffLimitsDto.getMaxAmountOfBigBags());
+            tariffsInfo.setMin(setTariffLimitsDto.getMin());
+            tariffsInfo.setMax(setTariffLimitsDto.getMax());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }
 
-        if (setTariffLimitsDto.getMinPriceOfOrder() > 0L && setTariffLimitsDto.getMinAmountOfBigBags() == 0L) {
-            if (setTariffLimitsDto.getMinPriceOfOrder() > setTariffLimitsDto.getMaxPriceOfOrder()) {
+        if (setTariffLimitsDto.getCourierLimit() == CourierLimit.LIMIT_BY_SUM_OF_ORDER) {
+            if (setTariffLimitsDto.getMin() > setTariffLimitsDto.getMax()) {
                 throw new BadRequestException(ErrorMessage.MAX_PRICE_VALUE_IS_INCORRECT);
             }
 
-            tariffsInfo.setMinQuantity(setTariffLimitsDto.getMinPriceOfOrder());
-            tariffsInfo.setMaxQuantity(setTariffLimitsDto.getMaxPriceOfOrder());
+            tariffsInfo.setMin(setTariffLimitsDto.getMin());
+            tariffsInfo.setMax(setTariffLimitsDto.getMax());
             tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
             tariffsInfo.setLocationStatus(LocationStatus.ACTIVE);
         }
