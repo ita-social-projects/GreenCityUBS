@@ -321,7 +321,7 @@ class NotificationServiceImplTest {
 
             Set<NotificationParameter> parameters = new HashSet<>();
 
-            when(bagRepository.findBagByOrderId(any())).thenReturn(Collections.emptyList());
+            when(bagRepository.findBagsByOrderId(any())).thenReturn(Collections.emptyList());
 
             long amountToPay = 0L;
 

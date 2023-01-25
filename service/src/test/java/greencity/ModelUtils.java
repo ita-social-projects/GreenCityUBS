@@ -67,7 +67,6 @@ import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.order.EmployeeOrderPositionDTO;
@@ -198,7 +197,6 @@ public class ModelUtils {
     public static final List<Payment> TEST_PAYMENT_LIST = createPaymentList();
     public static final OrderDetailStatusDto ORDER_DETAIL_STATUS_DTO = createOrderDetailStatusDto();
     public static final List<BagMappingDto> TEST_BAG_MAPPING_DTO_LIST = createBagMappingDtoList();
-    public static final BagTransDto TEST_BAG_TRANS_DTO = createBagTransDto();
     public static final Bag TEST_BAG = createBag();
     public static final BagInfoDto TEST_BAG_INFO_DTO = createBagInfoDto();
     public static final List<Bag> TEST_BAG_LIST = singletonList(TEST_BAG);
@@ -1765,12 +1763,6 @@ public class ModelUtils {
             .build();
     }
 
-    private static BagTransDto createBagTransDto() {
-        return BagTransDto.builder()
-            .name("test")
-            .build();
-    }
-
     private static List<BagMappingDto> createBagMappingDtoList() {
         return Collections.singletonList(
             BagMappingDto.builder()
@@ -1781,8 +1773,10 @@ public class ModelUtils {
     private static Bag createBag() {
         return Bag.builder()
             .id(2)
+            .name("Name")
+            .nameEng("NameEng")
+            .capacity(20)
             .fullPrice(100)
-            // .price(100)
             .build();
     }
 
