@@ -1014,30 +1014,6 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void setTariffLimitsWithBothLimitsInputed() {
-        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithBothLimitsInputed();
-
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
-        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
-            .thenReturn(ModelUtils.getBaglist());
-
-        assertThrows(BadRequestException.class,
-            () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
-    }
-
-    @Test
-    void setTariffLimitsWithNoneLimitsInputed() {
-        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithNoneLimitsInputed();
-
-        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
-        when(bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(any(TariffsInfo.class), any(MinAmountOfBag.class)))
-            .thenReturn(ModelUtils.getBaglist());
-
-        assertThrows(BadRequestException.class,
-            () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
-    }
-
-    @Test
     void setTariffLimitsBagWithSuitableParametersNotFound() {
         SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffLimitsWithAmountOfBigBags();
 

@@ -1003,8 +1003,8 @@ public class ModelUtils {
     public static TariffsInfoDto getTariffsInfoDto() {
         return TariffsInfoDto.builder()
             .id(1L)
-            .maxQuantity(20L)
-            .minQuantity(2L)
+            .max(20L)
+            .min(2L)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .location(getLocation())
                 .build()))
@@ -2624,16 +2624,16 @@ public class ModelUtils {
 
     public static EditPriceOfOrder getEditPriceOfOrder() {
         return EditPriceOfOrder.builder()
-            .maxQuantity(500000L)
-            .minQuantity(300L)
+            .max(500000L)
+            .min(300L)
             .locationId(1L)
             .build();
     }
 
     public static EditAmountOfBagDto getAmountOfBagDto() {
         return EditAmountOfBagDto.builder()
-            .maxQuantity(99L)
-            .minQuantity(2L)
+            .max(99L)
+            .min(2L)
             .locationId(1L)
             .build();
     }
@@ -3047,8 +3047,8 @@ public class ModelUtils {
                 .tariffLocations(Set.of(TariffLocation.builder()
                     .id(1L)
                     .build()))
-                .maxQuantity(2L)
-                .minQuantity(99L)
+                .max(99L)
+                .min(2L)
                 .build())
 
             .build();
@@ -3346,8 +3346,8 @@ public class ModelUtils {
         return TariffsInfo.builder()
             .id(1L)
             .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
-            .maxQuantity(20L)
-            .minQuantity(2L)
+            .max(20L)
+            .min(2L)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .location(getLocation())
                 .build()))
@@ -3445,8 +3445,8 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
-            .maxQuantity(6000L)
-            .minQuantity(500L)
+            .max(6000L)
+            .min(500L)
             .orders(Collections.emptyList())
             .receivingStationList(Set.of(ReceivingStation.builder()
                 .name("receivingStation")
@@ -3471,8 +3471,8 @@ public class ModelUtils {
             .locationStatus(LocationStatus.ACTIVE)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
-            .maxQuantity(100L)
-            .minQuantity(5L)
+            .max(100L)
+            .min(5L)
             .orders(List.of(ModelUtils.getOrder()))
             .build();
     }
@@ -3802,56 +3802,34 @@ public class ModelUtils {
 
     public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBags() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(0L)
-            .maxPriceOfOrder(0L)
-            .build();
+                .min(1L)
+                .max(2L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrder() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(0L)
-            .maxAmountOfBigBags(0L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
-            .build();
+                .min(100L)
+                .max(200L)
+                .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+                .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithAmountOfBigBagsWhereMaxValueIsGreater() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(2L)
-            .maxAmountOfBigBags(1L)
-            .minPriceOfOrder(0L)
-            .maxPriceOfOrder(0L)
-            .build();
+                .min(2L)
+                .max(1L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .build();
     }
 
     public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrderWhereMaxValueIsGreater() {
         return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(0L)
-            .maxAmountOfBigBags(0L)
-            .minPriceOfOrder(200L)
-            .maxPriceOfOrder(100L)
-            .build();
-    }
-
-    public static SetTariffLimitsDto setTariffLimitsWithBothLimitsInputed() {
-        return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
-            .build();
-    }
-
-    public static SetTariffLimitsDto setTariffLimitsWithNoneLimitsInputed() {
-        return SetTariffLimitsDto.builder()
-            .minAmountOfBigBags(1L)
-            .maxAmountOfBigBags(2L)
-            .minPriceOfOrder(100L)
-            .maxPriceOfOrder(200L)
-            .build();
+                  .min(200L)
+                  .max(100L)
+                  .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+               .build();
     }
 
     public static UserPointsAndAllBagsDto getUserPointsAndAllBagsDto() {

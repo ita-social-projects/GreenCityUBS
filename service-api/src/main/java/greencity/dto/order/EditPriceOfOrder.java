@@ -17,9 +17,9 @@ import javax.validation.constraints.NotNull;
 public class EditPriceOfOrder {
     @NotNull
     @Min(0)
-    private Long minQuantity;
+    private Long min;
     @NotNull
     @Min(0)
-    private Long maxQuantity;
+    private Long max;
     private Long locationId;
 }

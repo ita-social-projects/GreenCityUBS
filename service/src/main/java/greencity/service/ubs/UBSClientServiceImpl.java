@@ -284,12 +284,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo courierLocation, Integer sumWithoutDiscount) {
         if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
-            && sumWithoutDiscount < courierLocation.getMinQuantity()) {
-            throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMinQuantity());
+            && sumWithoutDiscount < courierLocation.getMin()) {
+            throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(courierLocation.getCourierLimit())
-            && sumWithoutDiscount > courierLocation.getMaxQuantity()) {
+            && sumWithoutDiscount > courierLocation.getMax()) {
             throw new BadRequestException(
-                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMaxQuantity());
+                ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT + courierLocation.getMax());
         }
     }
 
@@ -1052,12 +1052,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void checkAmountOfBagsIfCourierLimitByAmountOfBag(TariffsInfo courierLocation, Integer countOfBigBag) {
         if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMinQuantity() > countOfBigBag) {
+            && courierLocation.getMin() > countOfBigBag) {
             throw new BadRequestException(
-                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMaxQuantity());
+                NOT_ENOUGH_BIG_BAGS_EXCEPTION + courierLocation.getMin());
         } else if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())
-            && courierLocation.getMaxQuantity() < countOfBigBag) {
-            throw new BadRequestException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMaxQuantity());
+            && courierLocation.getMax() < countOfBigBag) {
+            throw new BadRequestException(TO_MUCH_BIG_BAG_EXCEPTION + courierLocation.getMax());
         }
     }
 

@@ -582,7 +582,7 @@ class SuperAdminControllerTest {
     @Test
     @SneakyThrows
     void editInfoAboutTariff() {
-        var dto = EditPriceOfOrder.builder().maxQuantity(10000L).minQuantity(1000L).build();
+        var dto = EditPriceOfOrder.builder().max(10000L).min(1000L).build();
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(dto);
         mockMvc.perform(patch(ubsLink + "/setLimitsBySumOfOrder/{tariffId}", 1L)

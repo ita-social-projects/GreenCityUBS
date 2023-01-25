@@ -15,8 +15,8 @@ public class TariffsInfoMapper extends AbstractConverter<TariffsInfo, TariffsInf
     protected TariffsInfoDto convert(TariffsInfo tariffsInfo) {
         return TariffsInfoDto.builder()
             .id(tariffsInfo.getId())
-            .minQuantity(tariffsInfo.getMinQuantity())
-            .maxQuantity(tariffsInfo.getMaxQuantity())
+            .min(tariffsInfo.getMin())
+            .max(tariffsInfo.getMax())
             .courier(CourierDto.builder()
                 .courierId(tariffsInfo.getCourier().getId())
                 .courierStatus(tariffsInfo.getCourier().getCourierStatus().name())
