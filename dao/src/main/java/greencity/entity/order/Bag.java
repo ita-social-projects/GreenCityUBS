@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.user.employee.Employee;
 import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import javax.persistence.Column;
 import javax.persistence.Enumerated;
 import javax.persistence.EnumType;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
@@ -50,14 +52,15 @@ public class Bag {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column(nullable = false)
-    private String createdBy;
+    @ManyToOne
+    @NotNull
+    private Employee createdBy;
 
     @Column(nullable = false)
     private LocalDate editedAt;
 
-    @Column(nullable = false)
-    private String editedBy;
+    @ManyToOne
+    private Employee editedBy;
 
     @Column(nullable = false)
     private String name;

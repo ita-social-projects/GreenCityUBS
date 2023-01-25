@@ -148,36 +148,120 @@ class SuperAdminServiceImplTest {
 
     @Test
     void addTariffServiceTest() {
-        User user = ModelUtils.getUser();
         Bag bag = ModelUtils.getTariffBag();
-        AddServiceDto dto = ModelUtils.addServiceDto();
+        String uuid = UUID.randomUUID().toString();
 
-        when(userRepository.findByUuid("123233")).thenReturn(user);
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(locationRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getLocation()));
         when(bagRepository.save(bag)).thenReturn(bag);
 
-        superAdminService.addTariffService(dto, "123233");
+        superAdminService.addTariffService(ModelUtils.addServiceDto(), uuid);
 
-        verify(userRepository).findByUuid("123233");
+        verify(employeeRepository).findByUuid(uuid);
         verify(locationRepository).findById(1L);
         verify(bagRepository).save(bag);
         verify(modelMapper).map(bag, AddServiceDto.class);
     }
 
     @Test
+    void addTariffServiceIfEmployeeNotFoundExceptionTest() {
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addTariffService(ModelUtils.addServiceDto(), uuid));
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository, never()).save(any(Bag.class));
+    }
+
+    @Test
+    void addTariffServiceIfLocationNotFoundExceptionTest() {
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(locationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.addTariffService(ModelUtils.addServiceDto(), uuid));
+
+        verify(employeeRepository).findByUuid(uuid);
+        verify(locationRepository).findById(1L);
+        verify(bagRepository, never()).save(any(Bag.class));
+    }
+
+    @Test
     void getTariffServiceTest() {
         when(bagRepository.findAll()).thenReturn(ModelUtils.getBag5list());
         superAdminService.getTariffService();
-        verify(bagRepository, times(1)).findAll();
+        verify(bagRepository).findAll();
     }
 
     @Test
     void deleteTariffServiceTest() {
-        when(bagRepository.findById(1)).thenReturn(ModelUtils.getBag());
-
+        Optional<Bag> bag = ModelUtils.getBag();
+        when(bagRepository.findById(1)).thenReturn(bag);
         superAdminService.deleteTariffService(1);
+        verify(bagRepository).delete(bag.get());
+    }
 
-        verify(bagRepository).delete(ModelUtils.getBag().get());
+    @Test
+    void deleteTariffServiceThrowException() {
+        when(bagRepository.findById(1)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.deleteTariffService(1));
+        verify(bagRepository).findById(1);
+        verify(bagRepository, never()).delete(any(Bag.class));
+    }
+
+    @Test
+    void editTariffService() {
+        Optional<Bag> bag = ModelUtils.getBag();
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(bagRepository.findById(1)).thenReturn(bag);
+        superAdminService.editTariffService(ModelUtils.getEditTariffServiceDto(), 1, uuid);
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository).findById(1);
+        verify(bagRepository).save(bag.get());
+    }
+
+    @Test
+    void editTariffServiceThrowException() {
+        EditTariffServiceDto dto = new EditTariffServiceDto();
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(getEmployee()));
+        when(bagRepository.findById(1)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariffService(dto, 1, uuid));
+        verify(employeeRepository).findByUuid(uuid);
+        verify(bagRepository).findById(1);
+        verify(bagRepository, never()).save(any(Bag.class));
+    }
+
+    @Test
+    void editTariffServiceIfEmployeeNotFoundException() {
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariffService(ModelUtils.getEditTariffServiceDto(), 1, uuid));
+        verify(employeeRepository).findByUuid(anyString());
+        verify(bagRepository, never()).save(any(Bag.class));
+    }
+
+    @Test
+    void editTariffServiceIfBagNotFoundException() {
+        String uuid = UUID.randomUUID().toString();
+
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(getEmployee()));
+        when(bagRepository.findById(1)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.editTariffService(ModelUtils.getEditTariffServiceDto(), 1, uuid));
+        verify(employeeRepository).findByUuid(anyString());
+        verify(bagRepository).findById(anyInt());
+        verify(bagRepository, never()).save(any(Bag.class));
     }
 
     @Test
@@ -190,46 +274,6 @@ class SuperAdminServiceImplTest {
 
         verify(courierRepository).findAll();
         verify(modelMapper).map(getCourier(), CourierDto.class);
-    }
-
-    @Test
-    void deleteTariffServiceThrowException() {
-        assertThrows(NotFoundException.class, () -> superAdminService.deleteTariffService(1));
-        verify(bagRepository).findById(anyInt());
-    }
-
-    @Test
-    void editTariffService_Throw_Exception() {
-        EditTariffServiceDto dto = new EditTariffServiceDto();
-        assertThrows(NotFoundException.class, () -> superAdminService.editTariffService(dto, 1, "testUUid"));
-        verify(userRepository).findByUuid(anyString());
-        verify(bagRepository).findById(anyInt());
-    }
-
-    @Test
-    void editTariffService() {
-        String uuid = "testUUid";
-        EditTariffServiceDto dto = ModelUtils.getEditTariffServiceDto();
-        Bag bag = Bag.builder()
-            .id(1)
-            .name("Test")
-            .nameEng("Name Test")
-            .minAmountOfBags(MinAmountOfBag.INCLUDE)
-            .location(Location.builder()
-                .id(1L)
-                .build())
-            .build();
-        User user = new User();
-        user.setRecipientName("John");
-        user.setRecipientSurname("Doe");
-
-        when(userRepository.findByUuid(uuid)).thenReturn(user);
-        when(bagRepository.findById(1)).thenReturn(Optional.of(bag));
-
-        superAdminService.editTariffService(dto, 1, uuid);
-
-        verify(bagRepository).findById(1);
-        verify(bagRepository).save(bag);
     }
 
     @Test
@@ -434,12 +478,12 @@ class SuperAdminServiceImplTest {
 
     @Test
     void includeBag() {
-        when(bagRepository.findById(10))
-            .thenReturn(Optional.of(Bag.builder().name("Useless paper").description("Description")
-                .minAmountOfBags(MinAmountOfBag.EXCLUDE).location(Location.builder().id(1L).build()).build()));
+        Optional<Bag> bag = ModelUtils.getBag();
+        bag.get().setMinAmountOfBags(MinAmountOfBag.EXCLUDE);
+        when(bagRepository.findById(10)).thenReturn(bag);
         assertEquals(MinAmountOfBag.INCLUDE.toString(), superAdminService.includeBag(10).getMinAmountOfBag());
         verify(bagRepository).save(any(Bag.class));
-        verify(bagRepository, times(1)).findById(anyInt());
+        verify(bagRepository).findById(anyInt());
     }
 
     @Test
@@ -529,14 +573,6 @@ class SuperAdminServiceImplTest {
 
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag.get());
-    }
-
-    @Test
-    void addTariffServiceExceptionTest() {
-        AddServiceDto dto = ModelUtils.addServiceDto();
-        assertThrows(NotFoundException.class, () -> superAdminService.addTariffService(dto, "uuid"));
-        verify(userRepository).findByUuid(anyString());
-        verify(locationRepository).findById(anyLong());
     }
 
     @Test
