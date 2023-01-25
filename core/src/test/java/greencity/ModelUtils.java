@@ -45,10 +45,7 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
 import greencity.dto.service.ServiceDto;
-import greencity.dto.tariff.EditTariffServiceDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
-import greencity.dto.tariff.TariffTranslationDto;
-import greencity.dto.tariff.TariffsInfoDto;
+import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
@@ -410,6 +407,16 @@ public class ModelUtils {
             .commission(50)
             .description("Description")
             .langCode("ua")
+            .build();
+    }
+
+    public static GetTariffServiceDto getTariffServiceDto() {
+        return GetTariffServiceDto.builder()
+            .name("Бавовняна сумка")
+            .capacity(120)
+            .price(120)
+            .commission(50)
+            .description("Description")
             .build();
     }
 

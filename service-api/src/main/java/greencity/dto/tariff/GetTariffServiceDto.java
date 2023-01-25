@@ -26,9 +26,9 @@ public class GetTariffServiceDto {
     private Integer fullPrice;
     private Integer id;
     private LocalDate createdAt;
-    private String createdBy;
+    private Long createdBy;
     private LocalDate editedAt;
-    private String editedBy;
+    private Long editedBy;
     private Long locationId;
     private String minAmountOfBag;
 }
