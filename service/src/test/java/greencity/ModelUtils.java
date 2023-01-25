@@ -3886,4 +3886,76 @@ public class ModelUtils {
             .id(1L)
             .build();
     }
+
+    public static Optional<Employee> getOptionalEmployee(){
+        return Optional.of(Employee.builder()
+                .id(1L)
+                .build()
+        );
+    }
+
+    public static Page<User> getUsersPage(){
+        List<User> users = List.of(
+                User.builder()
+                        .id(3L)
+                        .recipientName("name1")
+                        .recipientSurname("surname1")
+                        .recipientEmail("email1@gmail.com")
+                        .recipientPhone("+380999999999")
+                        .orders(List.of(
+                                Order.builder()
+                                        .id(1L)
+                                        .orderDate(LocalDateTime.of(2023, 1, 25, 17, 45, 53))
+                                        .build()))
+                        .violations(1)
+                        .dateOfRegistration(LocalDate.of(2023,1, 24))
+                        .currentPoints(1)
+                        .build(),
+                User.builder()
+                        .id(4L)
+                        .recipientName("name2")
+                        .recipientSurname("surname2")
+                        .recipientEmail("email2@gmail.com")
+                        .recipientPhone("+380999999998")
+                        .orders(List.of(
+                                Order.builder()
+                                        .id(2L)
+                                        .orderDate(LocalDateTime.of(2023, 1, 25, 12, 15, 24))
+                                        .build()))
+                        .violations(1)
+                        .dateOfRegistration(LocalDate.of(2023,1, 23))
+                        .currentPoints(2)
+                        .build()
+        );
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        return new PageImpl<>(users, pageable ,users.size());
+    }
+    public static PageableDto<UserWithSomeOrderDetailDto> getUserWithSomeOrderDetailDto(){
+        List<UserWithSomeOrderDetailDto> list = List.of(
+                new UserWithSomeOrderDetailDto(
+                        3L,
+                        "name1 surname1",
+                        "+380999999999",
+                        "email1@gmail.com",
+                        "2023-01-24",
+                        "2023-01-25",
+                        1,
+                        1,
+                        "1"),
+                new UserWithSomeOrderDetailDto(
+                        4L,
+                        "name2 surname2",
+                        "+380999999998",
+                        "email2@gmail.com",
+                        "2023-01-23",
+                        "2023-01-25",
+                        1,
+                        1,
+                        "2"
+                )
+                );
+        return new PageableDto<>(list,2,0,1);
+    }
 }
