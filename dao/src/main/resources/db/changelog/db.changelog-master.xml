@@ -173,4 +173,3 @@
     <include file="db/changelog/logs/ch-drop-table-service-translations-Seti.xml"/>
     <include file="/db/changelog/logs/ch-change-columns-createdby-editedby-in-table-bag-Seti.xml"/>
 </databaseChangeLog>
-

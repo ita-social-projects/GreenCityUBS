@@ -6,13 +6,15 @@ import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CapacityAndPriceMapper extends AbstractConverter<Bag, BagInfoDto> {
+public class BagInfoDtoMapper extends AbstractConverter<Bag, BagInfoDto> {
     @Override
     protected BagInfoDto convert(Bag bag) {
         return BagInfoDto.builder()
+            .id(bag.getId())
+            .name(bag.getName())
+            .nameEng(bag.getNameEng())
             .capacity(bag.getCapacity())
             .price(bag.getFullPrice())
-            .id(bag.getId())
             .build();
     }
 }

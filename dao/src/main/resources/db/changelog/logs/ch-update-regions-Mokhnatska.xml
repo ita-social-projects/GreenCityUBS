@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="UpdateRegionsTable" author="Lilia Mokhnatska">
+        <update tableName="regions">
+            <column name="name_en" value="Kyiv, Kyiv Oblast"/>
+            <where>id=1</where>
+        </update>
+        <delete tableName="regions">
+            <where>id=10</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=11</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=12</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=13</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=14</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=15</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=16</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=17</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=18</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=19</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=20</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=21</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=22</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=23</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=24</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=25</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=26</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=27</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=28</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=29</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=30</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=31</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=32</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=33</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=34</where>
+        </delete>
+        <delete tableName="regions">
+            <where>id=35</where>
+        </delete>
+    </changeSet>
+</databaseChangeLog>

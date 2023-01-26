@@ -334,18 +334,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         checkAvailableOrderForEmployee(order, email);
         CounterOrderDetailsDto prices = getPriceDetails(orderId);
-        List<BagInfoDto> bagInfo = new ArrayList<>();
-        List<Bag> bags = bagRepository.findAll();
+
+        var bagInfoDtoList = bagRepository.findBagsByOrderId(orderId).stream()
+            .map(bag -> modelMapper.map(bag, BagInfoDto.class))
+            .collect(Collectors.toList());
+
         Integer servicePrice = serviceRepository.findServiceByTariffsInfoId(order.getTariffsInfo().getId())
             .map(it -> it.getPrice())
             .orElse(0);
+
         OrderAddress address = order.getUbsUser().getAddress();
-        bags.forEach(bag -> {
-            BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
-            bagInfoDto.setName(bag.getName());
-            bagInfoDto.setNameEng(bag.getNameEng());
-            bagInfo.add(bagInfoDto);
-        });
+
         UserInfoDto userInfoDto =
             ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
@@ -355,7 +354,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .generalOrderInfo(infoAboutStatusesAndDateFormed)
             .userInfoDto(userInfoDto)
             .addressExportDetailsDto(addressDtoForAdminPage)
-            .addressComment(address.getAddressComment()).bags(bagInfo)
+            .addressComment(address.getAddressComment())
+            .bags(bagInfoDtoList)
             .orderFullPrice(setTotalPrice(prices))
             .orderDiscountedPrice(getPaymentInfo(orderId, prices.getSumAmount().longValue()).getUnPaidAmount())
             .orderBonusDiscount(prices.getBonus()).orderCertificateTotalDiscount(prices.getCertificateBonus())
@@ -740,7 +740,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
-        List<Bag> bag = bagRepository.findBagByOrderId(id);
+        List<Bag> bag = bagRepository.findBagsByOrderId(id);
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 
         double sumAmount = 0;
@@ -965,7 +965,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
         }.getType()));
 
-        dto.setCapacityAndPrice(bagRepository.findBagByOrderId(order.getId())
+        dto.setCapacityAndPrice(bagRepository.findBagsByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
             .collect(Collectors.toList()));
