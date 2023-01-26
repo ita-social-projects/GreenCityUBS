@@ -174,6 +174,7 @@ class SuperAdminServiceImplTest {
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.addTariffService(dto, uuid));
+
         verify(employeeRepository).findByUuid(uuid);
         verify(bagRepository, never()).save(any(Bag.class));
     }
@@ -207,7 +208,6 @@ class SuperAdminServiceImplTest {
     @Test
     void deleteTariffServiceTest() {
         Optional<Bag> bag = ModelUtils.getBag();
-
         when(bagRepository.findById(1)).thenReturn(bag);
         superAdminService.deleteTariffService(1);
         verify(bagRepository).delete(bag.get());
@@ -232,6 +232,7 @@ class SuperAdminServiceImplTest {
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
         when(bagRepository.findById(1)).thenReturn(bag);
         superAdminService.editTariffService(dto, 1, uuid);
+
         verify(employeeRepository).findByUuid(uuid);
         verify(bagRepository).findById(1);
         verify(bagRepository).save(bag.get());
@@ -260,6 +261,7 @@ class SuperAdminServiceImplTest {
         when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.editTariffService(dto, 1, uuid));
+
         verify(employeeRepository).findByUuid(anyString());
         verify(bagRepository, never()).save(any(Bag.class));
     }
@@ -274,6 +276,7 @@ class SuperAdminServiceImplTest {
         when(bagRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
             () -> superAdminService.editTariffService(dto, 1, uuid));
+
         verify(employeeRepository).findByUuid(anyString());
         verify(bagRepository).findById(anyInt());
         verify(bagRepository, never()).save(any(Bag.class));
