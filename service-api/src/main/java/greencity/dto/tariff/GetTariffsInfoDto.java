@@ -5,6 +5,7 @@ import greencity.dto.RegionDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameDto;
+import greencity.enums.CourierLimit;
 import greencity.enums.LocationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public class GetTariffsInfoDto {
     private String limitDescription;
     private EmployeeNameDto creator;
     private LocalDate createdAt;
-    private String courierLimit;
-    private Long minQuantity;
-    private Long maxQuantity;
+    private CourierLimit courierLimit;
+    private Long min;
+    private Long max;
 }

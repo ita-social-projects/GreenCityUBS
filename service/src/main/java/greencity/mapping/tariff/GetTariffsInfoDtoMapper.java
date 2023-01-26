@@ -24,9 +24,9 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .nameUk(region.getUkrName()).build() : null;
         return GetTariffsInfoDto.builder()
             .cardId(source.getId())
-            .courierLimit(source.getCourierLimit().toString())
-            .maxQuantity(source.getMax())
-            .minQuantity(source.getMin())
+            .courierLimit(source.getCourierLimit())
+            .max(source.getMax())
+            .min(source.getMin())
             .regionDto(regionDto)
             .createdAt(source.getCreatedAt())
             .creator(EmployeeNameDto.builder()

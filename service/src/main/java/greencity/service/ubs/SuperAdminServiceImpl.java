@@ -622,9 +622,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimitsDto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
 
+        if(setTariffLimitsDto.getMin() == setTariffLimitsDto.getMax()){
+            throw new BadRequestException(ErrorMessage.MIN_MAX_VALUE_RESTRICTION);
+        }
+
         if (bagRepository.getBagsByTariffsInfoAndMinAmountOfBags(tariffsInfo, MinAmountOfBag.INCLUDE).isEmpty()) {
             throw new BadRequestException(ErrorMessage.BAGS_WITH_MIN_AMOUNT_OF_BIG_BAGS_NOT_FOUND);
         }
+
         if (setTariffLimitsDto.getCourierLimit() == CourierLimit.LIMIT_BY_AMOUNT_OF_BAG) {
             if (setTariffLimitsDto.getMin() > setTariffLimitsDto.getMax()) {
                 throw new BadRequestException(ErrorMessage.MAX_BAG_VALUE_IS_INCORRECT);

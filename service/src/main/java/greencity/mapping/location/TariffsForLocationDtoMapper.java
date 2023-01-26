@@ -37,7 +37,7 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
                 .nameUk(source.getCourier().getNameUk())
                 .courierStatus(source.getCourier().getCourierStatus().name())
                 .build())
-            .courierLimit(source.getCourierLimit().toString())
+            .courierLimit(source.getCourierLimit())
             .max(source.getMax())
             .min(source.getMin())
             .limitDescription(source.getLimitDescription())
