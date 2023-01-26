@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="Seti-3" author="Julia Seti">
+        <renameColumn tableName="bag" oldColumnName="created_by" newColumnName="created_by_id"/>
+        <renameColumn tableName="bag" oldColumnName="edited_by" newColumnName="edited_by_id"/>
+
+        <modifyDataType tableName="bag" columnName="created_by_id" newDataType="BIGINT"/>
+        <modifyDataType tableName="bag" columnName="edited_by_id" newDataType="BIGINT"/>
+
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="bag"
+                                 constraintName="fk_bag_to_employee_created"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employees"/>
+
+        <addForeignKeyConstraint baseColumnNames="edited_by_id" baseTableName="bag"
+                                 constraintName="fk_bag_to_employee_edited"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employees"/>
+    </changeSet>
+</databaseChangeLog>

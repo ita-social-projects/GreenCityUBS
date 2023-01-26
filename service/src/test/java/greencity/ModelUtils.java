@@ -2131,7 +2131,8 @@ public class ModelUtils {
             .fullPrice(170)
             .location(Location.builder().id(1L).locationStatus(LocationStatus.ACTIVE).build())
             .createdAt(LocalDate.now())
-            .createdBy("User")
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
             .description("Description")
             .descriptionEng("DescriptionEng")
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
@@ -2210,7 +2211,7 @@ public class ModelUtils {
             .fullPrice(150)
             .capacity(100)
             .createdAt(LocalDate.now())
-            .createdBy("Taras Ivanov")
+            .createdBy(getEmployee())
             .location(getLocation())
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
             .description("Description")
@@ -2432,6 +2433,8 @@ public class ModelUtils {
             .nameEng("nameEng")
             .limitIncluded(false)
             .minAmountOfBags(MinAmountOfBag.INCLUDE)
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
             .build(),
             Bag.builder()
                 .id(2)
@@ -2444,6 +2447,8 @@ public class ModelUtils {
                 .nameEng("nameEng")
                 .limitIncluded(false)
                 .minAmountOfBags(MinAmountOfBag.INCLUDE)
+                .createdBy(getEmployee())
+                .editedBy(getEmployee())
                 .build());
     }
 
@@ -2603,6 +2608,8 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("Test")
             .nameEng("a")
+            .createdBy(getEmployee())
+            .editedBy(getEmployee())
             .build();
     }
 
