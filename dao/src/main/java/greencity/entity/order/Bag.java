@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.entity.user.employee.Employee;
 import greencity.enums.MinAmountOfBag;
 import greencity.entity.user.Location;
 import lombok.AllArgsConstructor;
@@ -10,15 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Builder;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Entity;
-import javax.persistence.Column;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
@@ -50,14 +43,16 @@ public class Bag {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    @Column(nullable = false)
-    private String createdBy;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Employee createdBy;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate editedAt;
 
-    @Column(nullable = false)
-    private String editedBy;
+    @ManyToOne
+    @JoinColumn
+    private Employee editedBy;
 
     @Column(nullable = false)
     private String name;
