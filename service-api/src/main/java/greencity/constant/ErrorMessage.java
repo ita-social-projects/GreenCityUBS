@@ -121,6 +121,7 @@ public final class ErrorMessage {
     public static final String MAX_PRICE_VALUE_IS_INCORRECT = "Max price value should be greater than min";
 
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max field must have different values";
+
     /**
      * Constructor.
      */
