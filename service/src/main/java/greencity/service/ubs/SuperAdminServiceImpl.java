@@ -149,7 +149,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .createdAt(bag.getCreatedAt())
             .createdBy(bag.getCreatedBy().getId())
             .editedAt(bag.getEditedAt())
-            .editedBy(bag.getEditedBy().getId())
+            .editedBy(bag.getEditedBy() != null ? bag.getEditedBy().getId() : null)
             .locationId(bag.getLocation().getId())
             .minAmountOfBag(bag.getMinAmountOfBags().toString())
             .build();
