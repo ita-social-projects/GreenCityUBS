@@ -46,6 +46,7 @@ public class EmployeeDtoMapper extends AbstractConverter<EmployeeDto, Employee> 
                     .id(t.getId())
                     .min(t.getMin())
                     .max(t.getMax())
+                    .courierLimit(t.getCourierLimit())
                     .courier(Courier.builder()
                         .id(t.getCourier().getCourierId())
                         .courierStatus(CourierStatus.ACTIVE)

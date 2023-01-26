@@ -23,7 +23,7 @@ class TariffsForLocationDtoMapperTest {
         TariffsForLocationDto dto = mapper.convert(tariffsInfo);
 
         Assertions.assertEquals(tariffsInfo.getId(), dto.getTariffInfoId());
-        Assertions.assertEquals(tariffsInfo.getCourierLimit().toString(), dto.getCourierLimit());
+        Assertions.assertEquals(tariffsInfo.getCourierLimit(), dto.getCourierLimit());
         Assertions.assertEquals(CourierDto.builder().courierId(tariffsInfo.getCourier().getId())
             .nameUk(tariffsInfo.getCourier().getNameUk())
             .nameEn(tariffsInfo.getCourier().getNameEn())

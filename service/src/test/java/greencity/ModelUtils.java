@@ -1005,6 +1005,7 @@ public class ModelUtils {
             .id(1L)
             .max(20L)
             .min(2L)
+            .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .location(getLocation())
                 .build()))
@@ -3049,6 +3050,7 @@ public class ModelUtils {
                     .build()))
                 .max(99L)
                 .min(2L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
                 .build())
 
             .build();
