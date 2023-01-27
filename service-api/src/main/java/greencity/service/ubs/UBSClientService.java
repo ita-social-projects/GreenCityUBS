@@ -257,15 +257,6 @@ public interface UBSClientService {
     List<EventDto> getAllEventsForOrder(Long orderId, String email);
 
     /**
-     * Methods for converting UserProfileDTO to PersonalDataDTO.
-     *
-     * @param userProfileDto {@link UserProfileDto}.
-     * @return {@link PersonalDataDto}.
-     * @author Liyubomy Pater.
-     */
-    PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto);
-
-    /**
      * Methods saves all entered by user data to database.
      * 
      * @param dto     {@link OrderResponseDto} user entered data;
