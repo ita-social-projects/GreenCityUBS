@@ -578,7 +578,8 @@ class SuperAdminController {
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+        @ApiResponse(code = 409, message = HttpStatuses.CONFLICT)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/add-new-tariff")
