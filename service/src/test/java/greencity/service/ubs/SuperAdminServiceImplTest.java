@@ -1026,6 +1026,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void setTariffsLimitWithSameMinAndMaxValue(){
+        SetTariffLimitsDto setTariffLimitsDto = ModelUtils.setTariffsLimitWithSameMinAndMaxValue();
+
+        when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getTariffInfo()));
+
+        assertThrows(BadRequestException.class,
+                () -> superAdminService.setTariffLimits(1L, setTariffLimitsDto));
+    }
+
+
+    @Test
     void editTariffTestThrows() {
         var dto = ModelUtils.getEditPriceOfOrder();
         when(tariffsInfoRepository.findById(anyLong())).thenReturn(Optional.empty());

@@ -3810,6 +3810,14 @@ public class ModelUtils {
             .build();
     }
 
+    public static SetTariffLimitsDto setTariffsLimitWithSameMinAndMaxValue(){
+        return SetTariffLimitsDto.builder()
+                .min(2L)
+                .max(2L)
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .build();
+    }
+
     public static SetTariffLimitsDto setTariffLimitsWithPriceOfOrder() {
         return SetTariffLimitsDto.builder()
             .min(100L)

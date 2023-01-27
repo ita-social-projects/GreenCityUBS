@@ -622,7 +622,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimitsDto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(tariffId);
 
-        if (setTariffLimitsDto.getMin() == setTariffLimitsDto.getMax()) {
+        if (setTariffLimitsDto.getMin().equals(setTariffLimitsDto.getMax())) {
             throw new BadRequestException(ErrorMessage.MIN_MAX_VALUE_RESTRICTION);
         }
 
