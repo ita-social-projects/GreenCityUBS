@@ -2259,29 +2259,18 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-<<<<<<< HEAD
     void getAllAuthoritiesService() {
         Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
         when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
         when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail()))
             .thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
-=======
-    void getAllAuthoritiesService(){
-        Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
-        when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
-        when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail())).thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
         Set<String> authoritiesResult = ubsService.getAllAuthorities(employeeOptional.get().getEmail());
         Set<String> authExpected = Set.of("SEE_CLIENTS_PAGE");
         assertEquals(authExpected, authoritiesResult);
     }
 
     @Test
-<<<<<<< HEAD
     void updateEmployeesAuthoritiesService() {
-=======
-    void updateEmployeesAuthoritiesService(){
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
 
         when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(ModelUtils.getEmployee()));
@@ -2289,10 +2278,6 @@ class UBSClientServiceImplTest {
         ubsService.updateEmployeesAuthorities(dto, dto.getEmployeeEmail());
 
         verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
-<<<<<<< HEAD
             dto, "test@mail.com");
-=======
-                dto, "test@mail.com");
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
     }
 }
