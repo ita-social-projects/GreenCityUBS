@@ -1063,24 +1063,7 @@ public class ModelUtils {
             .build();
     }
 
-//    public static SaveEmployeeDto getSaveEmployeeDto() {
-//        return SaveEmployeeDto
-//            .builder()
-//            .firstName("Петро")
-//            .lastName("Петренко")
-//            .phoneNumber("+380935577455")
-//            .email("test@gmail.com")
-//            .image("path")
-//            .employeePositions(List.of(PositionDto.builder()
-//                .id(1L)
-//                .name("Водій")
-//                .build()))
-//            .tariffId(List.of(1L))
-//            .build();
-//
-//    }
-
-    public static EmployeeDto getUpdateEmployeeDto() {
+    public static EmployeeDto getEmployeeDto() {
         return EmployeeDto
             .builder()
             .id(1L)
@@ -1095,7 +1078,6 @@ public class ModelUtils {
                 .build()))
             .tariffId(List.of(1L))
             .build();
-
     }
 
     public static GetEmployeeDto getGetEmployeeDto() {

@@ -17,9 +17,9 @@ class EmployeeUpdateDtoMapperTest {
     private EmployeeUpdateDtoMapper mapper;
 
     @Test
-    void convertEmployeeToUpdateEmployeeDtoTest() {
+    void convertEmployeeToEmployeeDtoTest() {
         Employee employee = ModelUtils.getEmployee();
-        EmployeeDto dto = ModelUtils.getUpdateEmployeeDto();
+        EmployeeDto dto = ModelUtils.getEmployeeDto();
         assertEquals(mapper.convert(employee), dto);
     }
 }
