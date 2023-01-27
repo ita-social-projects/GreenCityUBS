@@ -2075,7 +2075,11 @@ class UBSClientServiceImplTest {
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
         when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+<<<<<<< HEAD
 
+=======
+        // when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+>>>>>>> d4f4c5ba2cfbbc1e24c9e095ffa531ebc7032496
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
@@ -2087,7 +2091,6 @@ class UBSClientServiceImplTest {
 
         assertEquals(dto.getTotalElements(), orderList.size());
         assertEquals(dto.getPage().get(0).getId(), order.getId());
-
         verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
