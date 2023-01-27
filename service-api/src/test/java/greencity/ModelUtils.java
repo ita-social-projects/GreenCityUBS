@@ -2,6 +2,8 @@ package greencity;
 
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.courier.CourierTranslationDto;
+import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.courier.CreateCourierTranslationDto;
 import greencity.dto.payment.PaymentRequestDto;
 import greencity.dto.payment.PaymentRequestDtoLiqPay;
 import greencity.dto.payment.PaymentResponseDto;
@@ -50,10 +52,10 @@ public class ModelUtils {
             .build();
     }
 
-    public CourierTranslationDto getCourierTranslationDto() {
-        return CourierTranslationDto.builder()
-            .nameUk("Test")
-            .nameEn("Test")
+    public static CreateCourierDto getCreateCourierDto() {
+        return CreateCourierDto.builder()
+            .nameUk("Тестї11")
+            .nameEn("Test11")
             .build();
     }
 
