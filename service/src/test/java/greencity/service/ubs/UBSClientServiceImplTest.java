@@ -18,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import greencity.dto.bag.BagOrderDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.entity.order.*;
+import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.repository.*;
 import greencity.service.google.GoogleApiService;
@@ -102,7 +103,6 @@ import greencity.repository.UBSuserRepository;
 import greencity.repository.UserRepository;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
-
 import static greencity.ModelUtils.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -140,8 +140,12 @@ class UBSClientServiceImplTest {
     private OrderAddressRepository orderAddressRepository;
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
     @InjectMocks
-    UBSClientServiceImpl ubsService;
+    private UBSClientServiceImpl ubsService;
+
     @Mock
     EncryptionUtil encryptionUtil;
     @Mock
@@ -2247,6 +2251,29 @@ class UBSClientServiceImplTest {
     void updateEmployeesAuthorities() {
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
         userRemoteClient.updateEmployeesAuthorities(dto, "test@mail.com");
+        verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
+            dto, "test@mail.com");
+    }
+
+    @Test
+    void getAllAuthoritiesService() {
+        Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
+        when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
+        when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail()))
+            .thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
+        Set<String> authoritiesResult = ubsService.getAllAuthorities(employeeOptional.get().getEmail());
+        Set<String> authExpected = Set.of("SEE_CLIENTS_PAGE");
+        assertEquals(authExpected, authoritiesResult);
+    }
+
+    @Test
+    void updateEmployeesAuthoritiesService() {
+        UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
+
+        when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(ModelUtils.getEmployee()));
+
+        ubsService.updateEmployeesAuthorities(dto, dto.getEmployeeEmail());
+
         verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
             dto, "test@mail.com");
     }
