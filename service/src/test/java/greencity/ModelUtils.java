@@ -86,6 +86,7 @@ import greencity.dto.order.OrderDto;
 import greencity.dto.order.OrderFondyClientDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderStatusPageDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.ReadAddressByOrderDto;
@@ -475,6 +476,61 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .build();
+    }
+
+    public static Order getOrderWithTariffsInfo() {
+        return Order.builder()
+                .id(1L)
+                .payment(Lists.newArrayList(Payment.builder()
+                        .id(1L)
+                        .paymentId("1")
+                        .amount(20000L)
+                        .currency("UAH")
+                        .comment("avb")
+                        .paymentStatus(PaymentStatus.PAID)
+                        .build()))
+                .ubsUser(UBSuser.builder()
+                        .firstName("oleh")
+                        .lastName("ivanov")
+                        .email("mail@mail.ua")
+                        .id(1L)
+                        .phoneNumber("067894522")
+                        .address(OrderAddress.builder()
+                                .id(1L)
+                                .city("Lviv")
+                                .street("Levaya")
+                                .district("frankivskiy")
+                                .entranceNumber("5")
+                                .addressComment("near mall")
+                                .houseCorpus("1")
+                                .houseNumber("4")
+                                .coordinates(Coordinates.builder()
+                                        .latitude(49.83)
+                                        .longitude(23.88)
+                                        .build())
+                                // .user(User.builder().id(1L).build())
+                                .build())
+                        .build())
+                .user(User.builder()
+                        .id(1L)
+                        .recipientName("Yuriy")
+                        .recipientSurname("Gerasum")
+                        .uuid("UUID")
+                        .build())
+                .certificates(Collections.emptySet())
+                .pointsToUse(700)
+                .adminComment("Admin")
+                .cancellationComment("cancelled")
+                .receivingStation(ReceivingStation.builder()
+                        .id(1L)
+                        .name("Саперно-Слобідська")
+                        .build())
+                .tariffsInfo(getTariffInfo())
+                .cancellationReason(CancellationReason.OUT_OF_CITY)
+                .imageReasonNotTakingBags(List.of("foto"))
+                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
+                .build();
     }
 
     public static Order getOrderWithoutAddress() {
@@ -3871,5 +3927,12 @@ public class ModelUtils {
             .limitDescription("Description")
             .id(1L)
             .build();
+    }
+
+    public static OrderStatusPageDto getOrderStatusData() {
+        return OrderStatusPageDto.builder()
+                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+                .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
+                .build();
     }
 }
