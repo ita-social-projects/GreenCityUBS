@@ -434,22 +434,6 @@ class UBSClientServiceImplTest {
 
     @Test
     void getSecondPageDataWithUserFounded() {
-        /*
-         * String uuid = "35467585763t4sfgchjfuyetf"; PersonalDataDto expected =
-         * ModelUtils.getOrderResponseDto().getPersonalData(); User user =
-         * ModelUtils.getTestUser() .setUuid(uuid) .setRecipientEmail("mail@mail.ua")
-         * .setRecipientPhone("067894522") .setAlternateEmail("my@email.com");
-         * 
-         * when(userRepository.findByUuid(uuid)).thenReturn(null);
-         * when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable
-         * (getUbsCustomersDto())); when(modelMapper.map(user,
-         * PersonalDataDto.class)).thenReturn(expected);
-         * //assertThrows(EntityNotFoundException.class, ()->
-         * ubsService.getSecondPageData("35467585763t4sfgchjfuyetf")); PersonalDataDto
-         * actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
-         * 
-         * assertEquals(expected, actual);
-         */
 
         String uuid = "35467585763t4sfgchjfuyetf";
         PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
