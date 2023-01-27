@@ -1,14 +1,13 @@
 package greencity.dto.courier;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString
+@Builder
 public class GetReceivingStationDto {
     private Long stationId;
     private String name;

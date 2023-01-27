@@ -1,8 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.employee.GetEmployeeDto;
-import greencity.dto.employee.SaveEmployeeDto;
-import greencity.dto.employee.UpdateEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
@@ -17,13 +16,13 @@ public interface UBSManagementEmployeeService {
     /**
      * Method saves new employee.
      *
-     * @param dto   {@link SaveEmployeeDto} that contains new employee.
+     * @param dto   {@link EmployeeDto} that contains new employee.
      * @param image {@link MultipartFile} that contains employee's image.
-     * @return employeeDto {@link SaveEmployeeDto} that contains employee from
+     * @return employeeDto {@link EmployeeDto} that contains employee from
      *         database.
      * @author Mykola Danylko
      */
-    SaveEmployeeDto save(SaveEmployeeDto dto, MultipartFile image);
+    EmployeeDto save(EmployeeDto dto, MultipartFile image);
 
     /**
      * {@inheritDoc}
@@ -39,13 +38,12 @@ public interface UBSManagementEmployeeService {
     /**
      * Method updates information about employee.
      *
-     * @param dto   {@link UpdateEmployeeDto}
+     * @param dto   {@link EmployeeDto}
      * @param image {@link MultipartFile} that contains employee's image.
-     * @return employeeDto {@link UpdateEmployeeDto} that contains employee from
-     *         database.
+     * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
-    UpdateEmployeeDto update(UpdateEmployeeDto dto, MultipartFile image);
+    EmployeeDto update(EmployeeDto dto, MultipartFile image);
 
     /**
      * Method updates information about position.

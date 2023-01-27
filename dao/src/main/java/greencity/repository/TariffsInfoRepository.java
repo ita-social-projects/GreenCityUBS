@@ -49,10 +49,9 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
     /**
      * Method for getting set of tariffs.
      *
-     * @param tariffId - list of tariffIds.
+     * @param id - list of tariffIds.
      * @return - set of tariffs.
      * @author - Nikita Korzh.
      */
-    @Query("SELECT ti FROM TariffsInfo ti where ti.id in(:tariffId)")
-    Set<TariffsInfo> findTariffsInfoById(@Param("tariffId") List<Long> tariffId);
+    Set<TariffsInfo> findTariffsInfosByIdIsIn(List<Long> id);
 }

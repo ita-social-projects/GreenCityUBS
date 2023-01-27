@@ -1,6 +1,6 @@
 package greencity.mapping.employee;
 
-import greencity.dto.employee.UpdateEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
@@ -10,17 +10,17 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class UpdateEmployeeDtoMapper extends AbstractConverter<UpdateEmployeeDto, Employee> {
+public class UpdateEmployeeDtoMapper extends AbstractConverter<EmployeeDto, Employee> {
     @Override
-    protected Employee convert(UpdateEmployeeDto updateEmployeeDto) {
+    protected Employee convert(EmployeeDto employeeDto) {
         return Employee.builder()
-            .id(updateEmployeeDto.getId())
-            .firstName(updateEmployeeDto.getFirstName())
-            .lastName(updateEmployeeDto.getLastName())
-            .email(updateEmployeeDto.getEmail())
-            .phoneNumber(updateEmployeeDto.getPhoneNumber())
+            .id(employeeDto.getId())
+            .firstName(employeeDto.getFirstName())
+            .lastName(employeeDto.getLastName())
+            .email(employeeDto.getEmail())
+            .phoneNumber(employeeDto.getPhoneNumber())
             .employeeStatus(EmployeeStatus.ACTIVE)
-            .employeePosition(updateEmployeeDto.getEmployeePositions().stream().map(
+            .employeePosition(employeeDto.getEmployeePositions().stream().map(
                 positionDto -> Position.builder()
                     .id(positionDto.getId())
                     .name(positionDto.getName())

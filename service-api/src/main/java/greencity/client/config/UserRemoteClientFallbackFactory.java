@@ -13,6 +13,7 @@ import greencity.dto.user.UserVO;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -68,6 +69,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_AUTHORITY_WAS_NOT_EDITED, throwable);
             }
 
+            @PostMapping("/ownSecurity/sign-up-employee")
             @Override
             public void signUpEmployee(EmployeeSignUpDto dto) {
                 log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);

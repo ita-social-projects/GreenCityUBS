@@ -41,13 +41,13 @@ public class ManagementEmployeeController {
     /**
      * Controller saves employee.
      *
-     * @param employeeDto {@link SaveEmployeeDto}
-     * @return {@link SaveEmployeeDto} saved employee.
+     * @param employeeDto {@link EmployeeDto}
+     * @return {@link EmployeeDto} saved employee.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Save employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = SaveEmployeeDto.class),
+        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = EmployeeDto.class),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
@@ -55,9 +55,9 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('REGISTER_A_NEW_EMPLOYEE', authentication)")
     @PostMapping(value = "/save-employee")
-    public ResponseEntity<SaveEmployeeDto> saveEmployee(
+    public ResponseEntity<EmployeeDto> saveEmployee(
         @ApiParam(value = SwaggerExampleModel.ADD_NEW_EMPLOYEE,
-            required = true) @Valid @RequestPart SaveEmployeeDto employeeDto,
+            required = true) @Valid @RequestPart EmployeeDto employeeDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeDto, image));
     }
@@ -107,12 +107,12 @@ public class ManagementEmployeeController {
     /**
      * Controller updates information about employee.
      *
-     * @return {@link UpdateEmployeeDto} update employee.
+     * @return {@link EmployeeDto} update employee.
      * @author Mykola Danylko.
      */
     @ApiOperation(value = "Update information about employee")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK, response = UpdateEmployeeDto.class),
+        @ApiResponse(code = 200, message = HttpStatuses.OK, response = EmployeeDto.class),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
         @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
@@ -120,9 +120,9 @@ public class ManagementEmployeeController {
     })
     @PutMapping(value = "/update-employee",
         consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<UpdateEmployeeDto> update(
+    public ResponseEntity<EmployeeDto> update(
         @ApiParam(value = SwaggerExampleModel.EMPLOYEE_DTO,
-            required = true) @RequestPart @Valid UpdateEmployeeDto employeeDto,
+            required = true) @RequestPart @Valid EmployeeDto employeeDto,
         @ApiParam(value = "Employee image") @RequestPart(required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeDto, image));
     }

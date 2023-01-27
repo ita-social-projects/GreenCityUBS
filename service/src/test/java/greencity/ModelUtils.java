@@ -50,7 +50,6 @@ import greencity.dto.order.AssignForOrderEmployee;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
-import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.order.EmployeeOrderPositionDTO;
@@ -1064,25 +1063,25 @@ public class ModelUtils {
             .build();
     }
 
-    public static SaveEmployeeDto getSaveEmployeeDto() {
-        return SaveEmployeeDto
-            .builder()
-            .firstName("Петро")
-            .lastName("Петренко")
-            .phoneNumber("+380935577455")
-            .email("test@gmail.com")
-            .image("path")
-            .employeePositions(List.of(PositionDto.builder()
-                .id(1L)
-                .name("Водій")
-                .build()))
-            .tariffId(List.of(1L))
-            .build();
+//    public static SaveEmployeeDto getSaveEmployeeDto() {
+//        return SaveEmployeeDto
+//            .builder()
+//            .firstName("Петро")
+//            .lastName("Петренко")
+//            .phoneNumber("+380935577455")
+//            .email("test@gmail.com")
+//            .image("path")
+//            .employeePositions(List.of(PositionDto.builder()
+//                .id(1L)
+//                .name("Водій")
+//                .build()))
+//            .tariffId(List.of(1L))
+//            .build();
+//
+//    }
 
-    }
-
-    public static UpdateEmployeeDto getUpdateEmployeeDto() {
-        return UpdateEmployeeDto
+    public static EmployeeDto getUpdateEmployeeDto() {
+        return EmployeeDto
             .builder()
             .id(1L)
             .firstName("Петро")

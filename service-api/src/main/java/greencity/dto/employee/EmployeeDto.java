@@ -14,8 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateEmployeeDto {
-    @Min(1)
+public class EmployeeDto {
     private Long id;
     @NotNull
     @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")

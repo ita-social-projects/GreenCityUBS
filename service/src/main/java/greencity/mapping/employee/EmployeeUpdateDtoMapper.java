@@ -1,6 +1,6 @@
 package greencity.mapping.employee;
 
-import greencity.dto.employee.UpdateEmployeeDto;
+import greencity.dto.employee.EmployeeDto;
 import greencity.dto.position.PositionDto;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.employee.Employee;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class EmployeeUpdateDtoMapper extends AbstractConverter<Employee, UpdateEmployeeDto> {
+public class EmployeeUpdateDtoMapper extends AbstractConverter<Employee, EmployeeDto> {
     @Override
-    protected UpdateEmployeeDto convert(Employee employee) {
-        return UpdateEmployeeDto.builder()
+    protected EmployeeDto convert(Employee employee) {
+        return EmployeeDto.builder()
             .id(employee.getId())
             .firstName(employee.getFirstName())
             .lastName(employee.getLastName())

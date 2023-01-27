@@ -112,7 +112,7 @@ public interface UserRemoteClient {
      * @param newEmployeeEmail - new email of employee.
      * @param uuid             - uuid of current employee.
      */
-    @PutMapping("/user/update-employee-email")
+    @PutMapping("/user/employee-email")
     void updateEmployeeEmail(@RequestParam String newEmployeeEmail, @RequestParam String uuid);
 
     /**
@@ -120,6 +120,6 @@ public interface UserRemoteClient {
      *
      * @param dto contains email and list of positions.
      */
-    @PutMapping("/user/update-authorities")
+    @PutMapping("/user/authorities")
     void updateAuthorities(@RequestBody UpdateEmployeeAuthoritiesDto dto);
 }
