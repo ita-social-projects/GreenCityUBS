@@ -58,11 +58,10 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * method, that returns {@link Bag}'s info.
      * 
      * @param orderId order id {@link Long}
-     * @author Nazar Struk
+     * @author José Castellanos
      */
     @Query(value = "SELECT name, b.capacity, b.price, obm.amount, (b.price * obm.amount) AS summ "
-        + "FROM bag_translations "
-        + "JOIN bag b on bag_translations.bag_id = b.id "
+        + "FROM bag b "
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
         + "WHERE obm.ORDER_ID = :orderId", nativeQuery = true)
     List<Map<String, Object>> getBagInfo(Long orderId);
