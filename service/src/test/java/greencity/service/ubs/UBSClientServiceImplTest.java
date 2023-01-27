@@ -329,10 +329,11 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag()));
+            .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag()));
         when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
 
-        assertThrows(BadRequestException.class, () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+        assertThrows(BadRequestException.class,
+            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
 
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
@@ -691,18 +692,18 @@ class UBSClientServiceImplTest {
     @Test
     void updatesUbsUserInfoInOrder2() {
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-                .recipientId(1L)
-                .build();
+            .recipientId(1L)
+            .build();
 
         Optional<UBSuser> user = Optional.of(ModelUtils.getUBSuser());
         when(ubsUserRepository.findById(1L)).thenReturn(user);
         when(ubsUserRepository.save(user.get())).thenReturn(user.get());
 
         UbsCustomersDto expected = UbsCustomersDto.builder()
-                .name("oleh ivanov")
-                .email("mail@mail.ua")
-                .phoneNumber("067894522")
-                .build();
+            .name("oleh ivanov")
+            .email("mail@mail.ua")
+            .phoneNumber("067894522")
+            .build();
 
         UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
         assertEquals(expected, actual);
@@ -711,15 +712,15 @@ class UBSClientServiceImplTest {
     @Test
     void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-                .recipientId(1L)
-                .recipientName("Anatolii Petyrov")
-                .recipientEmail("anatolii.andr@gmail.com")
-                .recipientPhoneNumber("095123456").build();
+            .recipientId(1L)
+            .recipientName("Anatolii Petyrov")
+            .recipientEmail("anatolii.andr@gmail.com")
+            .recipientPhoneNumber("095123456").build();
 
         when(ubsUserRepository.findById(1L))
-                .thenThrow(UBSuserNotFoundException.class);
+            .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
-                () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
+            () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
     }
 
     @Test
@@ -2062,7 +2063,6 @@ class UBSClientServiceImplTest {
         List<Bag> bags = new ArrayList<>();
         List<Order> orderList = new ArrayList<>();
 
-        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
         bag.setCapacity(120);
         bag.setFullPrice(1200);
         bags.add(bag);
@@ -2073,14 +2073,14 @@ class UBSClientServiceImplTest {
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
-                .thenReturn(page);
+            .thenReturn(page);
         when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
-        //when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+
         when(orderStatusTranslationRepository
-                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
                 .thenReturn(Optional.of(orderStatusTranslation));
         when(orderPaymentStatusTranslationRepository.getById(
-                (long) order.getOrderPaymentStatus().getStatusValue()))
+            (long) order.getOrderPaymentStatus().getStatusValue()))
                 .thenReturn(orderPaymentStatusTranslation);
 
         PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
@@ -2088,15 +2088,15 @@ class UBSClientServiceImplTest {
         assertEquals(dto.getTotalElements(), orderList.size());
         assertEquals(dto.getPage().get(0).getId(), order.getId());
 
-        //verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
         verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
-                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
-                .getById(
-                        (long) order.getOrderPaymentStatus().getStatusValue());
+            .getById(
+                (long) order.getOrderPaymentStatus().getStatusValue());
         verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
     }
+
     @Test
     void senderInfoDtoBuilderTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
