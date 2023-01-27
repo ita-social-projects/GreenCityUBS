@@ -3931,8 +3931,14 @@ public class ModelUtils {
 
     public static OrderStatusPageDto getOrderStatusData() {
         return OrderStatusPageDto.builder()
+<<<<<<< HEAD
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
             .build();
+=======
+                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
+                .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
+                .build();
+>>>>>>> 9c637cae50d96116a28fff756f22367a647df856
     }
 }
