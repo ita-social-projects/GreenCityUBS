@@ -223,6 +223,24 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void getFirstPageDataWithOutLocationId() {
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoExpected = ModelUtils.getUserPointsAndAllBagsDto();
+
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setCurrentPoints(600);
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(bagRepository.findAll()).thenReturn(ModelUtils.getBag4list());
+
+        UserPointsAndAllBagsDto userPointsAndAllBagsDtoActual =
+            ubsService.getFirstPageData("35467585763t4sfgchjfuyetf", Optional.empty());
+
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags(), userPointsAndAllBagsDtoActual.getBags());
+        assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
+        assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
+            userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+    }
+
+    @Test
     void testSaveToDB() throws IllegalAccessException {
         User user = ModelUtils.getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
@@ -396,10 +414,57 @@ class UBSClientServiceImplTest {
             .setRecipientEmail("mail@mail.ua")
             .setRecipientPhone("067894522")
             .setAlternateEmail("my@email.com");
-        List<UBSuser> ubsUser = new ArrayList<>();
+        List<UBSuser> ubsUser = Arrays.asList(ModelUtils.getUBSuser());
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
         when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
+        PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getSecondPageDataWithUserNotFound() {
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRepository.findByUuid(uuid)).thenReturn(null);
+
+        assertThrows(EntityNotFoundException.class, () -> ubsService.getSecondPageData("35467585763t4sfgchjfuyetf"));
+    }
+
+    @Test
+    void getSecondPageDataWithUserFounded() {
+        /*
+         * String uuid = "35467585763t4sfgchjfuyetf"; PersonalDataDto expected =
+         * ModelUtils.getOrderResponseDto().getPersonalData(); User user =
+         * ModelUtils.getTestUser() .setUuid(uuid) .setRecipientEmail("mail@mail.ua")
+         * .setRecipientPhone("067894522") .setAlternateEmail("my@email.com");
+         * 
+         * when(userRepository.findByUuid(uuid)).thenReturn(null);
+         * when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable
+         * (getUbsCustomersDto())); when(modelMapper.map(user,
+         * PersonalDataDto.class)).thenReturn(expected);
+         * //assertThrows(EntityNotFoundException.class, ()->
+         * ubsService.getSecondPageData("35467585763t4sfgchjfuyetf")); PersonalDataDto
+         * actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
+         * 
+         * assertEquals(expected, actual);
+         */
+
+        String uuid = "35467585763t4sfgchjfuyetf";
+        PersonalDataDto expected = ModelUtils.getOrderResponseDto().getPersonalData();
+
+        User user = ModelUtils.getTestUser()
+            .setUuid(uuid)
+            .setRecipientEmail("mail@mail.ua")
+            .setRecipientPhone("067894522")
+            .setAlternateEmail("my@email.com");
+        List<UBSuser> ubsUser = Arrays.asList(ModelUtils.getUBSuser());
+        when(userRepository.findByUuid(uuid)).thenReturn(null);
+        when(ubsUserRepository.findUBSuserByUser(user)).thenReturn(ubsUser);
+        when(userRemoteClient.findByUuid(anyString())).thenReturn(Optional.ofNullable(getUbsCustomersDto()));
+        when(modelMapper.map(user, PersonalDataDto.class)).thenReturn(expected);
+        when(userRepository.save(any())).thenReturn(user.setId(1L));
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);

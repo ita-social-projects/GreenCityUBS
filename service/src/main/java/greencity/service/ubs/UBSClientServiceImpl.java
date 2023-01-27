@@ -1243,19 +1243,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return dto;
     }
 
-    @Override
-    public PersonalDataDto convertUserProfileDtoToPersonalDataDto(UserProfileDto userProfileDto) {
-        PersonalDataDto personalDataDto = PersonalDataDto.builder().firstName(userProfileDto.getRecipientName())
-            .lastName(userProfileDto.getRecipientSurname())
-            .email(userProfileDto.getRecipientEmail()).phoneNumber(userProfileDto.getRecipientPhone()).build();
-
-        Long ubsUserId = ubsUserRepository.findByEmail(userProfileDto.getRecipientEmail())
-            .map(UBSuser::getId).orElse(null);
-
-        personalDataDto.setId(ubsUserId);
-        return personalDataDto;
-    }
-
     /**
      * {@inheritDoc}
      *
