@@ -3535,6 +3535,28 @@ public class ModelUtils {
             .build();
     }
 
+    public static TariffsInfo getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag() {
+        return TariffsInfo.builder()
+                .id(1L)
+                .courier(ModelUtils.getCourier())
+                .courierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG)
+                .tariffLocations(Set.of(TariffLocation.builder()
+                        .location(Location.builder().id(1L)
+                                .region(ModelUtils.getRegion())
+                                .nameUk("Київ")
+                                .nameEn("Kyiv")
+                                .coordinates(ModelUtils.getCoordinates())
+                                .build())
+                        .build()))
+                .locationStatus(LocationStatus.ACTIVE)
+                .creator(ModelUtils.getEmployee())
+                .createdAt(LocalDate.of(2022, 10, 20))
+                .max(10L)
+                .min(5L)
+                .orders(List.of(ModelUtils.getOrder()))
+                .build();
+    }
+
     public static AddNewTariffDto getAddNewTariffDto() {
         return AddNewTariffDto.builder()
             .courierId(1L)
@@ -3931,14 +3953,8 @@ public class ModelUtils {
 
     public static OrderStatusPageDto getOrderStatusData() {
         return OrderStatusPageDto.builder()
-<<<<<<< HEAD
             .amountOfBagsOrdered(Collections.singletonMap(1, 2))
             .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
             .build();
-=======
-                .amountOfBagsOrdered(Collections.singletonMap(1, 2))
-                .amountOfBagsExported(Map.ofEntries(Map.entry(1, 1)))
-                .build();
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
     }
 }

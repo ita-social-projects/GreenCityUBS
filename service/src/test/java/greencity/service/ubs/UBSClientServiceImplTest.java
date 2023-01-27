@@ -300,6 +300,46 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testSaveToDBWShouldThrowBadRequestException() throws IllegalAccessException {
+        User user = ModelUtils.getUserWithLastLocation();
+        user.setAlternateEmail("test@mail.com");
+        user.setCurrentPoints(900);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        dto.getBags().get(0).setAmount(15);
+        Order order = getOrder();
+        user.setOrders(new ArrayList<>());
+        user.getOrders().add(order);
+        user.setChangeOfPointsList(new ArrayList<>());
+
+        Bag bag = new Bag();
+        bag.setCapacity(120);
+        bag.setFullPrice(400);
+
+        UBSuser ubSuser = getUBSuser();
+
+        OrderAddress orderAddress = ubSuser.getAddress();
+        orderAddress.setAddressStatus(AddressStatus.NEW);
+
+        Order order1 = getOrder();
+        order1.setPayment(new ArrayList<>());
+        Payment payment1 = getPayment();
+        payment1.setId(1L);
+        order1.getPayment().add(payment1);
+
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(ModelUtils.getTariffInfoWithLimitOfBagsAndMaxLessThanCountOfBigBag()));
+        when(bagRepository.findById(3)).thenReturn(Optional.of(bag));
+
+        assertThrows(BadRequestException.class, () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(tariffsInfoRepository, times(1)).findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong());
+        verify(bagRepository, times(1)).findById(any());
+    }
+
+    @Test
     void testSaveToDBWithoutOrderUnpaid() throws IllegalAccessException {
         User user = ModelUtils.getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
@@ -649,17 +689,37 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void updatesUbsUserInfoInOrder2() {
+        UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
+                .recipientId(1L)
+                .build();
+
+        Optional<UBSuser> user = Optional.of(ModelUtils.getUBSuser());
+        when(ubsUserRepository.findById(1L)).thenReturn(user);
+        when(ubsUserRepository.save(user.get())).thenReturn(user.get());
+
+        UbsCustomersDto expected = UbsCustomersDto.builder()
+                .name("oleh ivanov")
+                .email("mail@mail.ua")
+                .phoneNumber("067894522")
+                .build();
+
+        UbsCustomersDto actual = ubsService.updateUbsUserInfoInOrder(request, "abc");
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void updatesUbsUserInfoInOrderShouldThrowUBSuserNotFoundException() {
         UbsCustomersDtoUpdate request = UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .recipientName("Anatolii Petyrov")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456").build();
+                .recipientId(1L)
+                .recipientName("Anatolii Petyrov")
+                .recipientEmail("anatolii.andr@gmail.com")
+                .recipientPhoneNumber("095123456").build();
 
         when(ubsUserRepository.findById(1L))
-            .thenThrow(UBSuserNotFoundException.class);
+                .thenThrow(UBSuserNotFoundException.class);
         assertThrows(UBSuserNotFoundException.class,
-            () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
+                () -> ubsService.updateUbsUserInfoInOrder(request, "abc"));
     }
 
     @Test
@@ -1991,6 +2051,53 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testOrdersForUserWithQuantity() {
+        OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
+        OrdersDataForUserDto ordersDataForUserDto = ModelUtils.getOrderStatusDto();
+        Order order = ModelUtils.getOrderTest();
+        User user = ModelUtils.getTestUser();
+        Bag bag = ModelUtils.bagDto();
+
+        List<Bag> bags = new ArrayList<>();
+        List<Order> orderList = new ArrayList<>();
+
+        BagForUserDto bagForUserDto = ordersDataForUserDto.getBags().get(0);
+        bag.setCapacity(120);
+        bag.setFullPrice(1200);
+        bags.add(bag);
+        order.setUser(user);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
+        Page<Order> page = new PageImpl<>(orderList, pageable, 1);
+
+        when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
+                .thenReturn(page);
+        when(bagRepository.findBagByOrderId(order.getId())).thenReturn(bags);
+        //when(modelMapper.map(bag, BagForUserDto.class)).thenReturn(bagForUserDto);
+        when(orderStatusTranslationRepository
+                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+                .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.getById(
+                (long) order.getOrderPaymentStatus().getStatusValue()))
+                .thenReturn(orderPaymentStatusTranslation);
+
+        PageableDto<OrdersDataForUserDto> dto = ubsService.getOrdersForUser(user.getUuid(), pageable, null);
+
+        assertEquals(dto.getTotalElements(), orderList.size());
+        assertEquals(dto.getPage().get(0).getId(), order.getId());
+
+        //verify(modelMapper, times(bags.size())).map(bag, BagForUserDto.class);
+        verify(bagRepository).findBagByOrderId(order.getId());
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+                .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+                .getById(
+                        (long) order.getOrderPaymentStatus().getStatusValue());
+        verify(ordersForUserRepository).getAllByUserUuid(pageable, user.getUuid());
+    }
+    @Test
     void senderInfoDtoBuilderTest() {
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = ModelUtils.getOrderPaymentStatusTranslation();
@@ -2259,29 +2366,18 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-<<<<<<< HEAD
     void getAllAuthoritiesService() {
         Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
         when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
         when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail()))
             .thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
-=======
-    void getAllAuthoritiesService(){
-        Optional<Employee> employeeOptional = Optional.ofNullable(getEmployee());
-        when(employeeRepository.findByEmail(anyString())).thenReturn(employeeOptional);
-        when(userRemoteClient.getAllAuthorities(employeeOptional.get().getEmail())).thenReturn(Set.copyOf(ModelUtils.getAllAuthorities()));
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
         Set<String> authoritiesResult = ubsService.getAllAuthorities(employeeOptional.get().getEmail());
         Set<String> authExpected = Set.of("SEE_CLIENTS_PAGE");
         assertEquals(authExpected, authoritiesResult);
     }
 
     @Test
-<<<<<<< HEAD
     void updateEmployeesAuthoritiesService() {
-=======
-    void updateEmployeesAuthoritiesService(){
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
         UserEmployeeAuthorityDto dto = ModelUtils.getUserEmployeeAuthorityDto();
 
         when(employeeRepository.findByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(ModelUtils.getEmployee()));
@@ -2289,10 +2385,6 @@ class UBSClientServiceImplTest {
         ubsService.updateEmployeesAuthorities(dto, dto.getEmployeeEmail());
 
         verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
-<<<<<<< HEAD
             dto, "test@mail.com");
-=======
-                dto, "test@mail.com");
->>>>>>> 9c637cae50d96116a28fff756f22367a647df856
     }
 }
