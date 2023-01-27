@@ -18,8 +18,7 @@ public interface UBSManagementEmployeeService {
      *
      * @param dto   {@link EmployeeDto} that contains new employee.
      * @param image {@link MultipartFile} that contains employee's image.
-     * @return employeeDto {@link EmployeeDto} that contains employee from
-     *         database.
+     * @return employeeDto {@link EmployeeDto} that contains employee from database.
      * @author Mykola Danylko
      */
     EmployeeDto save(EmployeeDto dto, MultipartFile image);
