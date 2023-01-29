@@ -658,20 +658,22 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         for (Map.Entry<Integer, Integer> entry : confirmed.entrySet()) {
             Integer capacity = bagRepository.findCapacityById(entry.getKey());
             Optional<Bag> bagOptional = bagRepository.findById(entry.getKey());
-
             if (bagOptional.isPresent() && checkOrderStatusAboutConfirmWaste(order)) {
                 Optional<Long> confirmWasteWas = Optional.empty();
+                Optional<Long> startAmount = Optional.empty();
                 Bag bag = bagOptional.get();
                 if (Boolean.TRUE.equals(updateOrderRepository.ifRecordExist(orderId, entry.getKey().longValue()) > 0)) {
                     confirmWasteWas =
                         Optional.ofNullable(updateOrderRepository.getConfirmWaste(orderId, entry.getKey().longValue()));
+                    startAmount =
+                        Optional.ofNullable(updateOrderRepository.getAmount(orderId, entry.getKey().longValue()));
                 }
                 if (entry.getValue().longValue() != confirmWasteWas.orElse(0L)) {
                     if (countOfChanges == 0) {
                         values.append(OrderHistory.CHANGE_ORDER_DETAILS + " ");
                     }
                     values.append(bag.getName()).append(" ").append(capacity).append(" л: ")
-                        .append(confirmWasteWas.orElse(0L))
+                        .append(confirmWasteWas.orElse(startAmount.orElse(0L)))
                         .append(" шт на ").append(entry.getValue()).append(" шт.");
                 }
             }

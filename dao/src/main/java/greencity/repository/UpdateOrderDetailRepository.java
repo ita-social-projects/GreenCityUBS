@@ -21,6 +21,18 @@ public interface UpdateOrderDetailRepository extends JpaRepository<Order, Intege
     void updateExporter(Integer valueExported, Long orderId, Long bagId);
 
     /**
+     * Method for get Amount value.
+     *
+     * @param orderId order id {@link Long}
+     * @param bagId   bag id {@link Long}
+     * @author Lilia Mokhnatska
+     */
+
+    @Query(value = "SELECT AMOUNT FROM ORDER_BAG_MAPPING "
+        + "WHERE ORDER_ID = :orderId AND BAG_ID = :bagId", nativeQuery = true)
+    Long getAmount(Long orderId, Long bagId);
+
+    /**
      * Method for update Amount value.
      *
      * @param orderId order id {@link Long}
