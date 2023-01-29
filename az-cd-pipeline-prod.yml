@@ -109,6 +109,6 @@ stages:
                 chartType: 'FilePath'
                 chartPath: '$(System.ArtifactsDirectory)/drop/greencity-ubs-chart'
                 releaseName: 'ubs'
-                overrideValues: 'deployment.image=skyere/greencityubs:$(Build.BuildId)'
+                overrideValues: 'ingress.hostname=greencity-ubs.pick-up.city,deployment.image=skyere/greencityubs:$(Build.BuildId)'
                 arguments: ''
                 
