@@ -1,14 +1,13 @@
 trigger:
+  batch: true
   branches:
     include:
-    - dev, master
+    - dev
   paths:
     exclude:
     - README.md
-    
-pr: none
-    
-    
+
+
 variables:
   agentOS: ubuntu-latest
   
