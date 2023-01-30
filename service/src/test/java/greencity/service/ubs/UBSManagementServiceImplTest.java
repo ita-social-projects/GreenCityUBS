@@ -259,7 +259,7 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doNothing().when(fileService).delete("");
-        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1, "Yuriy" + "  " + "Gerasum",
+        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(), "Yuriy" + "  " + "Gerasum",
             getOrder());
         ubsManagementService.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
@@ -2022,7 +2022,7 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
 
     }
@@ -2044,7 +2044,7 @@ class UBSManagementServiceImplTest {
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
         verify(fileService, times(0)).delete(payment.getImagePath());
-        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + 1L,
+        verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             user.getRecipientName() + "  " + user.getRecipientSurname(), payment.getOrder());
     }
 
