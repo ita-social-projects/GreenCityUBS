@@ -150,7 +150,7 @@ class UBSClientServiceImplTest {
     private UBSClientServiceImpl ubsService;
 
     @Mock
-    EncryptionUtil encryptionUtil;
+    private EncryptionUtil encryptionUtil;
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
@@ -245,6 +245,9 @@ class UBSClientServiceImplTest {
         assertEquals(userPointsAndAllBagsDtoExpected.getPoints(), userPointsAndAllBagsDtoActual.getPoints());
         assertEquals(userPointsAndAllBagsDtoExpected.getBags().get(0).getId(),
             userPointsAndAllBagsDtoActual.getBags().get(0).getId());
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(bagRepository, times(1)).findAll();
     }
 
     @Test
@@ -478,6 +481,8 @@ class UBSClientServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(null);
 
         assertThrows(EntityNotFoundException.class, () -> ubsService.getSecondPageData("35467585763t4sfgchjfuyetf"));
+
+        verify(userRepository, times(1)).findByUuid(anyString());
     }
 
     @Test
@@ -500,6 +505,12 @@ class UBSClientServiceImplTest {
         PersonalDataDto actual = ubsService.getSecondPageData("35467585763t4sfgchjfuyetf");
 
         assertEquals(expected, actual);
+
+        verify(userRepository, times(1)).findByUuid(anyString());
+        verify(ubsUserRepository, times(1)).findUBSuserByUser(any());
+        verify(userRemoteClient, times(1)).findByUuid(anyString());
+        verify(modelMapper, times(1)).map(user, PersonalDataDto.class);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -2328,6 +2339,9 @@ class UBSClientServiceImplTest {
         Set<String> authoritiesResult = ubsService.getAllAuthorities(employeeOptional.get().getEmail());
         Set<String> authExpected = Set.of("SEE_CLIENTS_PAGE");
         assertEquals(authExpected, authoritiesResult);
+
+        verify(employeeRepository, times(1)).findByEmail(anyString());
+        verify(userRemoteClient, times(1)).getAllAuthorities(any());
     }
 
     @Test
@@ -2340,6 +2354,7 @@ class UBSClientServiceImplTest {
 
         verify(userRemoteClient, times(1)).updateEmployeesAuthorities(
             dto, "test@mail.com");
+        verify(employeeRepository, times(1)).findByEmail(anyString());
     }
 
     @Test
