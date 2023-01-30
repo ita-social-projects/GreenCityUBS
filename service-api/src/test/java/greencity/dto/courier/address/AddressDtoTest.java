@@ -35,12 +35,43 @@ class AddressDtoTest {
         assertThat(constraintViolations).isEmpty();
     }
 
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("provideFieldsAndInvalidValues")
+    void invalidHouseNumbersInAddressDtoTest(String houseNumber) {
+        var dto = AddressDto.builder()
+            .id(1L)
+            .houseNumber(houseNumber)
+            .build();
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        final Validator validator = factory.getValidator();
+
+        Set<ConstraintViolation<AddressDto>> constraintViolations =
+            validator.validate(dto);
+
+        assertThat(constraintViolations).hasSize(1);
+    }
+
     private static Stream<Arguments> provideFieldsAndValidValues() {
         return Stream.of(
             Arguments.of("1"),
             Arguments.of("1F"),
             Arguments.of("1B"),
             Arguments.of("1Ї"),
+            Arguments.of("1-А"),
+            Arguments.of("1.Б"),
+            Arguments.of("1 G"),
+            Arguments.of("ЁёІіЇ"),
+            Arguments.of("їҐґЄє"),
             Arguments.of("1/3"));
+    }
+
+    private static Stream<Arguments> provideFieldsAndInvalidValues() {
+        return Stream.of(
+            Arguments.of(""),
+            Arguments.of("@#$"),
+            Arguments.of("Testtt"),
+            Arguments.of("Тесттт"));
     }
 }
