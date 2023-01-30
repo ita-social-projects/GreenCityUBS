@@ -2202,6 +2202,7 @@ public class ModelUtils {
             .descriptionEng("DescriptionEng")
             .name("name")
             .nameEng("nameEng")
+            .location(getLocation())
             .build();
     }
 

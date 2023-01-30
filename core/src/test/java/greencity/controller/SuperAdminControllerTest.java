@@ -139,7 +139,6 @@ class SuperAdminControllerTest {
         verify(userRemoteClient).findUuidByEmail(principal.getName());
         verify(superAdminService).addTariffService(any(AddServiceDto.class), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
-
     }
 
     @Test
