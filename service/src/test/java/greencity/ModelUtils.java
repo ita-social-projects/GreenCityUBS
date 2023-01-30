@@ -18,7 +18,6 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagMappingDto;
-import greencity.dto.bag.BagTransDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagOrderDto;
@@ -103,6 +102,7 @@ import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -2253,6 +2253,17 @@ public class ModelUtils {
     public static ServiceDto getServiceDto() {
         return ServiceDto.builder()
             .id(1L)
+            .name("Name")
+            .nameEng("NameEng")
+            .price(100)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .build();
+
+    }
+
+    public static EditServiceDto getEditServiceDto() {
+        return EditServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
             .price(100)

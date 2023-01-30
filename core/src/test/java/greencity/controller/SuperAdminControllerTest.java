@@ -18,6 +18,7 @@ import greencity.dto.location.LocationCreateDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.EditTariffServiceDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
@@ -364,16 +365,16 @@ class SuperAdminControllerTest {
 
     @Test
     void editService() throws Exception {
-        ServiceDto dto = ModelUtils.getServiceDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String requestedJson = objectMapper.writeValueAsString(dto);
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
+        String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
 
-        mockMvc.perform(put(ubsLink + "/editService")
+        mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .principal(principal)
             .param("uuid", uuid)
+            .param("id", "1")
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -384,18 +385,19 @@ class SuperAdminControllerTest {
 
     @Test
     void editServiceIfServiceNotFoundException() throws Exception {
-        ServiceDto dto = ModelUtils.getServiceDto();
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
-        long id = dto.getId();
+        long id = 1L;
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.editService(any(ServiceDto.class), anyString()))
+        when(superAdminService.editService(any(EditServiceDto.class), anyLong(), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
 
-        mockMvc.perform(put(ubsLink + "/editService")
+        mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .principal(principal)
             .param("uuid", uuid)
+            .param("id", "1")
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
@@ -404,23 +406,24 @@ class SuperAdminControllerTest {
                 result.getResolvedException().getMessage()));
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).editService(any(ServiceDto.class), anyString());
+        verify(superAdminService).editService(any(EditServiceDto.class), anyLong(), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 
     @Test
     void editServiceIfEmployeeNotFoundException() throws Exception {
-        ServiceDto dto = ModelUtils.getServiceDto();
+        EditServiceDto dto = ModelUtils.getEditServiceDto();
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
         when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
-        when(superAdminService.editService(any(ServiceDto.class), anyString()))
+        when(superAdminService.editService(any(EditServiceDto.class), anyLong(), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
-        mockMvc.perform(put(ubsLink + "/editService")
+        mockMvc.perform(put(ubsLink + "/editService/" + 1L)
             .principal(principal)
             .param("uuid", uuid)
+            .param("id", "1")
             .content(requestedJson)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
@@ -429,7 +432,7 @@ class SuperAdminControllerTest {
                 result.getResolvedException().getMessage()));
 
         verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verify(superAdminService).editService(any(ServiceDto.class), anyString());
+        verify(superAdminService).editService(any(EditServiceDto.class), anyLong(), anyString());
         verifyNoMoreInteractions(superAdminService, userRemoteClient);
     }
 

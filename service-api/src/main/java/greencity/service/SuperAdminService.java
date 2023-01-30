@@ -14,6 +14,7 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
@@ -102,7 +103,7 @@ public interface SuperAdminService {
      * @author Vadym Makitra
      * @author Julia Seti
      */
-    ServiceDto editService(ServiceDto dto, String uuid);
+    ServiceDto editService(EditServiceDto dto, Long id, String uuid);
 
     /**
      * Method for get all info about location.

@@ -16,6 +16,7 @@ import greencity.dto.location.LocationInfoDto;
 import greencity.dto.order.EditPriceOfOrder;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.AddNewTariffResponseDto;
 import greencity.dto.tariff.ChangeTariffLocationStatusDto;
@@ -217,8 +218,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ServiceDto editService(ServiceDto dto, String employeeUuid) {
-        Service service = getServiceById(dto.getId());
+    public ServiceDto editService(EditServiceDto dto, Long id, String employeeUuid) {
+        Service service = getServiceById(id);
         Employee employee = getEmployeeByUuid(employeeUuid);
         service.setPrice(dto.getPrice());
         service.setName(dto.getName());

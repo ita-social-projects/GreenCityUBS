@@ -44,6 +44,7 @@ import greencity.dto.payment.PaymentResponseDtoLiqPay;
 import greencity.dto.position.PositionDto;
 import greencity.dto.service.AddServiceDto;
 import greencity.dto.service.CreateServiceDto;
+import greencity.dto.service.EditServiceDto;
 import greencity.dto.service.ServiceDto;
 import greencity.dto.tariff.*;
 import greencity.dto.user.AddBonusesToUserDto;
@@ -441,6 +442,16 @@ public class ModelUtils {
     public static ServiceDto getServiceDto() {
         return ServiceDto.builder()
             .id(1L)
+            .name("Name")
+            .nameEng("NameEng")
+            .price(100)
+            .description("Description")
+            .descriptionEng("DescriptionEng")
+            .build();
+    }
+
+    public static EditServiceDto getEditServiceDto() {
+        return EditServiceDto.builder()
             .name("Name")
             .nameEng("NameEng")
             .price(100)
