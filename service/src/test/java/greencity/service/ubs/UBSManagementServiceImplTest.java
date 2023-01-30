@@ -50,6 +50,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -2112,4 +2113,10 @@ class UBSManagementServiceImplTest {
         assertEquals(true, ubsManagementService.checkEmployeeForOrder(order.getId(), "test@gmail.com"));
     }
 
+    @Test
+    void updateOrderStatusOnTheDayOfExportTest() {
+        ubsManagementService.updateOrderStatusOnTheDayOfExport();
+        verify(orderRepository).updateOrderStatusOnTheDayOfExport(OrderStatus.ON_THE_ROUTE.name(),
+            LocalDate.now());
+    }
 }

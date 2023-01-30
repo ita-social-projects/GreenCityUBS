@@ -294,4 +294,11 @@ public interface UBSManagementService {
      * @author Hlazova Nataliia.
      */
     Boolean checkEmployeeForOrder(Long orderId, String email);
+
+    /**
+     * This is method which is updates orders status at 00:00 everyday where date of export equals current date.
+     *
+     * @author Anatolii Shapiro.
+     */
+    void updateOrderStatusOnTheDayOfExport();
 }

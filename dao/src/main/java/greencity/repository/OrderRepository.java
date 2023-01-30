@@ -1,8 +1,8 @@
 package greencity.repository;
 
-import greencity.enums.OrderPaymentStatus;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
+import greencity.enums.OrderPaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -221,4 +221,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(nativeQuery = true,
         value = "UPDATE orders SET cancellation_reason = :cancellationReason WHERE id = :orderId")
     void updateCancelingReason(Long orderId, String cancellationReason);
+
+    /**
+     * Method sets order status by order's status and order's date of export.
+     *
+     * @param orderStatus  - order status to set
+     * @param currentDate - order date of export
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+        value = "UPDATE orders "
+            + "SET order_status = :order_status "
+            + "WHERE order_status = 'CONFIRMED' "
+            + "AND date_of_export = :currentDate")
+    void updateOrderStatusOnTheDayOfExport(@Param("order_status") String orderStatus,
+        @Param("currentDate") LocalDate currentDate);
 }

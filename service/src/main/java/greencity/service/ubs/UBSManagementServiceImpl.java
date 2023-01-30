@@ -1808,4 +1808,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
                 .build());
         notificationService.notifyBonuses(order, (long) points);
     }
+
+    @Override
+    public void updateOrderStatusOnTheDayOfExport() {
+        orderRepository.updateOrderStatusOnTheDayOfExport(OrderStatus.ON_THE_ROUTE.name(), LocalDate.now());
+    }
 }
