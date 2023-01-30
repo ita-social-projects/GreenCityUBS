@@ -225,7 +225,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Method sets order status by order's status and order's date of export.
      *
-     * @param orderStatus  - order status to set
+     * @param orderStatus - order status to set
      * @param currentDate - order date of export
      */
     @Modifying
