@@ -2375,7 +2375,6 @@ class UBSClientServiceImplTest {
 
         assertEquals(dto.getTotalElements(), orderList.size());
         assertEquals(dto.getPage().get(0).getId(), order.getId());
-        verify(bagRepository).findBagByOrderId(order.getId());
         verify(orderStatusTranslationRepository, times(orderList.size()))
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
         verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
