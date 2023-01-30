@@ -1271,7 +1271,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             fileService.delete(payment.getImagePath());
         }
         paymentRepository.deletePaymentById(paymentId);
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + paymentId,
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
             currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
