@@ -5,6 +5,8 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import static greencity.constant.ValidationConstant.*;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,12 +15,10 @@ import javax.validation.constraints.Pattern;
 @ToString
 public class CreateCourierDto {
     @NotNull
-    @Pattern(regexp = "[A-Za-zА0-9'\\s]{1,30}",
-        message = "use English letters, no longer than 30 symbols")
+    @Pattern(regexp = COURIER_NAME_EN_REGEXP, message = COURIER_NAME_EN_MESSAGE)
     private String nameEn;
 
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA0-9'\\s]{1,30}",
-        message = "use Ukrainian letters, no longer than 30 symbols")
+    @Pattern(regexp = COURIER_NAME_UK_REGEXP, message = COURIER_NAME_UK_MESSAGE)
     private String nameUk;
 }

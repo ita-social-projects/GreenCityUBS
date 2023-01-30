@@ -1,8 +1,6 @@
 package greencity.dto.courier;
 
-import greencity.ModelUtils;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,9 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateCourierDtoTest {
 
-    @Test
-    void createCourierDtoWithValidFieldsTest() {
-        var dto = ModelUtils.getCreateCourierDto();
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("provideFieldsAndValidValues")
+    void createCourierDtoWithValidFieldsTest(String nameEn, String nameUk) {
+        var dto = new CreateCourierDto(nameEn, nameUk);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
@@ -46,12 +46,21 @@ class CreateCourierDtoTest {
         assertThat(constraintViolations).hasSize(2);
     }
 
+    private static Stream<Arguments> provideFieldsAndValidValues() {
+        return Stream.of(
+            Arguments.of("Test", "Тест"),
+            Arguments.of("Test", "ЁёІіЇїҐґЄє"),
+            Arguments.of("T est", "ЁёІіЇїҐ ґЄє"));
+    }
+
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
         return Stream.of(
             Arguments.of(null, null),
             Arguments.of("", ""),
             Arguments.of("@#$", "@#$"),
             Arguments.of("Тест", "Test"),
-            Arguments.of("Test111111111111111111111111111", "Test111111111111111111111111111"));
+            Arguments.of("test", "тест"),
+            Arguments.of("1test", "1тест"),
+            Arguments.of("Test111111111111111111111111111", "Тест111111111111111111111111111"));
     }
 }
