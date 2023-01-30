@@ -1263,8 +1263,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     @Override
     @Transactional
     public void deleteManualPayment(Long paymentId, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
@@ -1272,7 +1272,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         }
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY + payment.getPaymentId(),
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
 
@@ -1283,13 +1283,13 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     public ManualPaymentResponseDto updateManualPayment(Long paymentId,
         ManualPaymentRequestDto paymentRequestDto,
         MultipartFile image, String uuid) {
-        User currentUser = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new UserNotFoundException(USER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Employee employee = employeeRepository.findByUuid(uuid)
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
             () -> new NotFoundException(PAYMENT_NOT_FOUND + paymentId));
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY + paymentRequestDto.getPaymentId(),
-            currentUser.getRecipientName() + "  " + currentUser.getRecipientSurname(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
