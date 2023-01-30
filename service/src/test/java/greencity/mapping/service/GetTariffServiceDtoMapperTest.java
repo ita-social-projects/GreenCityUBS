@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class GetTariffServiceDtoMapperTest {
+class GetTariffServiceDtoMapperTest {
     @InjectMocks
     private GetTariffServiceDtoMapper mapper;
 
