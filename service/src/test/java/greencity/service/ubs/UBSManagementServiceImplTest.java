@@ -259,7 +259,8 @@ class UBSManagementServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doNothing().when(fileService).delete("");
-        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(), "Yuriy" + "  " + "Gerasum",
+        doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY + getManualPayment().getPaymentId(),
+            "Yuriy" + "  " + "Gerasum",
             getOrder());
         ubsManagementService.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
