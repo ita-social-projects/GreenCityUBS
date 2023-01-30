@@ -981,6 +981,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).updateOrderPointsToUse(1L, 0);
     }
 
+    //
     @Test
     void testSetOrderDetailConfirmed() {
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
@@ -998,6 +999,27 @@ class UBSManagementServiceImplTest {
 
         verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
         verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+    }
+
+    @Test
+    void testSetOrderDetailConfirmed2() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
+        when(bagRepository.findCapacityById(1)).thenReturn(1);
+        doNothing().when(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        when(orderRepository.getOrderDetails(anyLong()))
+            .thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusFormedDto()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(bagRepository.findById(1)).thenReturn(Optional.of(ModelUtils.getTariffBag()));
+        when(updateOrderRepository.ifRecordExist(any(), any())).thenReturn(1L);
+        when(updateOrderRepository.getAmount(any(), any())).thenReturn(1L);
+        ubsManagementService.setOrderDetail(1L,
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed(),
+            UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported(),
+            "test@gmail.com");
+        verify(updateOrderRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        verify(updateOrderRepository).getAmount(any(), any());
     }
 
     @Test
@@ -2111,5 +2133,4 @@ class UBSManagementServiceImplTest {
         when(employeeRepository.findTariffsInfoForEmployee(employee.getId())).thenReturn(tariffsInfoIds);
         assertEquals(true, ubsManagementService.checkEmployeeForOrder(order.getId(), "test@gmail.com"));
     }
-
 }
